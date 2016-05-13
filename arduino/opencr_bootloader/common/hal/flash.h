@@ -1,7 +1,14 @@
-#ifndef LED_H
-#define LED_H
+#ifndef FLASH_H
+#define FLASH_H
 
-#include <stdint.h>
+
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
+
+#include "def.h"
+#include "bsp.h"
 
 
 
@@ -16,6 +23,11 @@ void flash_init(void);
 
 uint8_t flash_write(uint32_t addr, uint8_t *p_data, uint32_t length, uint32_t timeout );
 uint8_t flash_read(uint32_t addr, uint8_t *p_data, uint32_t length, uint32_t timeout );
+
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif
