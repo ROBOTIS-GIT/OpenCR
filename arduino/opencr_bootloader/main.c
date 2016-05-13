@@ -12,10 +12,11 @@ int main(void)
   main_init();
 
 
-	while (1)
-	{
-		HAL_Delay(1000);
-	}
+  while(1)
+  {
+    led_toggle(0);
+    delay_ms(1000);
+  }
 }
 
 
