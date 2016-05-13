@@ -21,5 +21,5 @@ int main(void)
 
 void main_init()
 {
-
+  bsp_init();
 }
