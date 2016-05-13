@@ -4,9 +4,7 @@
 #include <stdint.h>
 
 #include "stm32f7xx_hal.h"
-
-#include "delay.h"
-#include "led.h"
+#include "system_clock.h"
 
 
 #define USE_USB_FS

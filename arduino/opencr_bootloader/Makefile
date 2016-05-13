@@ -13,6 +13,7 @@ BIN_DIR  = bin
 INC_DIRS  = src/
 INC_DIRS += common/bsp/opencr/
 INC_DIRS += common/bsp/opencr/Include/
+INC_DIRS += common/hal/
 INC_DIRS += common/lib/STM32F7xx_HAL_Driver/Inc/
 INC_DIRS += common/lib/STM32_USB_Device_Library/Core/Inc/
 INC_DIRS += common/lib/STM32_USB_Device_Library/Class/CDC/Inc/
@@ -21,7 +22,8 @@ INC_DIRS += common/lib/STM32_USB_Device_Library/Class/CDC/Inc/
 
 PRJ_SRC  = src/
 BSP_SRC  = common/bsp/opencr/
-HAL_SRC  = common/lib/STM32F7xx_HAL_Driver/Src/
+HAL_SRC  = common/hal/
+STM_SRC  = common/lib/STM32F7xx_HAL_Driver/Src/
 USB_SRC  = common/lib/STM32_USB_Device_Library/Core/Src/
 LNK_SRC  = common/bsp/opencr/ld/opencr_flash.ld
 
@@ -30,12 +32,14 @@ LNK_SRC  = common/bsp/opencr/ld/opencr_flash.ld
 vpath %.c $(PRJ_SRC)
 vpath %.c $(BSP_SRC)
 vpath %.c $(HAL_SRC)
+vpath %.c $(STM_SRC)
 vpath %.c $(USB_SRC)
 
 
 PRJ_SRCS = $(notdir $(wildcard $(PRJ_SRC)*.c ))
 BSP_SRCS = $(notdir $(wildcard $(BSP_SRC)*.c ))
 HAL_SRCS = $(notdir $(wildcard $(HAL_SRC)*.c ))
+STM_SRCS = $(notdir $(wildcard $(STM_SRC)*.c ))
 USB_SRCS = $(notdir $(wildcard $(USB_SRC)*.c ))
 
 
@@ -54,12 +58,13 @@ CFLAGS += -mthumb
 CFLAGS += -mcpu=cortex-m7 
 CFLAGS += -Wl,--gc-sections
 WFLAGS += -Wall -Wextra -Warray-bounds -Wno-unused-parameter
-LFLAGS  = -T$(LNK_SRC)
+LFLAGS  = -T$(LNK_SRC) -Wl,-Map=$(PRJ_NAME).map
 
 
 TARGET_OBJS	  = $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(basename $(PRJ_SRCS))))
 TARGET_OBJS	 += $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(basename $(BSP_SRCS))))
 TARGET_OBJS	 += $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(basename $(HAL_SRCS))))
+TARGET_OBJS	 += $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(basename $(STM_SRCS))))
 TARGET_OBJS	 += $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(basename $(USB_SRCS))))
 
 
