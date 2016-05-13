@@ -10,3 +10,4 @@ void hal_init()
 
   led_init();
 }
+
