@@ -1,3 +1,10 @@
+/*
+ *  flash.h
+ *
+ *  Created on: 2016. 5. 14.
+ *      Author: Baram, PBPH
+ */
+
 #include "flash.h"
 
 
@@ -33,7 +40,6 @@ uint8_t flash_write(uint32_t addr, uint8_t *p_data, uint32_t length, uint32_t ti
 
   return err_code;
 }
-
 
 uint8_t flash_read(uint32_t addr, uint8_t *p_data, uint32_t length, uint32_t timeout )
 {

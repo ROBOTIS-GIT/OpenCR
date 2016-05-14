@@ -1,3 +1,10 @@
+/*
+ *  delay.h
+ *
+ *  Created on: 2016. 5. 14.
+ *      Author: Baram, PBPH
+ */
+
 #ifndef DELAY_H
 #define DELAY_H
 

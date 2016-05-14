@@ -1,3 +1,10 @@
+/*
+ *  hal.h
+ *
+ *  Created on: 2016. 5. 14.
+ *      Author: Baram, PBPH
+ */
+
 #ifndef HAL_H
 #define HAL_H
 
