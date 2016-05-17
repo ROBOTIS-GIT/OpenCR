@@ -17,51 +17,112 @@ void flash_init()
 }
 
 
-uint8_t flash_write(uint32_t addr, uint8_t *p_data, uint32_t length, uint32_t timeout )
+err_code_t flash_write(uint32_t addr, uint8_t *p_data, uint32_t length)
 {
-  uint8_t err_code = FLASH_OK;
-  uint32_t t_time;
+  err_code_t err_code = OK;
+  HAL_StatusTypeDef HAL_FLASHStatus = HAL_OK;
+  uint32_t StartAddress = addr;
+  uint32_t WriteSize;
+  uint32_t WriteData;
+  uint32_t i;
+  uint32_t DataIndex;
 
-  // TODO : flash 메모리에서 원하는 크기만큼 데이터를 Write한다.(주소 정렬은 1바이트)
-  // addr : write 주소
-  // p_data : 쓸려고하는 데이터를 넘겨줄 데이터 포인터
-  // time_out : 타임아웃 정보이며 해당 시간을 초과하면 에러 발생시킴, 단위는 ms
-  // 아래는 타임아웃을 체크하는 방법
 
-  t_time = millis();
-  while(1)
+  WriteSize = length / 4; // 32Bit
+
+  if( (WriteSize%4) > 0 ) WriteSize++;
+
+  DataIndex = 0;
+  HAL_FLASH_Unlock();
+  for( i=0; i<WriteSize; i++ )
   {
-    if( millis()-t_time > timeout )
+    WriteData  = p_data[ DataIndex++ ] << 0;
+    WriteData |= p_data[ DataIndex++ ] << 8;
+    WriteData |= p_data[ DataIndex++ ] << 16;
+    WriteData |= p_data[ DataIndex++ ] << 24;
+
+    HAL_FLASHStatus = HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, StartAddress+i*4, (uint64_t)WriteData);
+
+    if( HAL_FLASHStatus != HAL_OK )
     {
-      err_code = FLASH_ERR_TIMEOUT;
+        err_code = ERR_FLASH_WRITE;
+      break;
     }
   }
-
+  HAL_FLASH_Lock();
 
   return err_code;
 }
 
-uint8_t flash_read(uint32_t addr, uint8_t *p_data, uint32_t length, uint32_t timeout )
+
+err_code_t flash_read(uint32_t addr, uint8_t *p_data, uint32_t length)
 {
-  uint8_t err_code = FLASH_OK;
-  uint32_t t_time;
+  err_code_t err_code = OK;
+  uint32_t Dataindex;
+  uint32_t addr_cnt;
 
-  // TODO : flash 메모리에서 원하는 크기만큼 데이터를 Read한다.(주소 정렬은 1바이트)
-  // addr : 읽을 주소
-  // p_data : 읽은 데이터를 넘겨줄 데이터 포인터
-  // time_out : 타임아웃 정보이며 해당 시간을 초과하면 에러 발생시킴, 단위는 ms
 
-  t_time = millis();
-  while(1)
+  Dataindex = 0;
+  for (addr_cnt=0;addr_cnt<length;addr_cnt++)
   {
-    if( millis()-t_time > timeout )
-    {
-      err_code = FLASH_ERR_TIMEOUT;
-    }
+    p_data[Dataindex++] = *(volatile uint8_t*)(addr+addr_cnt);
   }
-
 
   return err_code;
 }
 
+
+err_code_t flash_erase_whole_sectors(void)
+{
+
+  err_code_t err_code = OK;
+  HAL_StatusTypeDef HAL_FLASHStatus = HAL_OK;
+  FLASH_EraseInitTypeDef pEraseInit;
+  uint32_t SectorError;
+
+
+  //except user bootloader sectors
+  pEraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
+  pEraseInit.VoltageRange = FLASH_VOLTAGE_RANGE_3;
+  pEraseInit.Sector = FLASH_SECTOR_2;
+  pEraseInit.NbSectors = FLASH_SECTOR_TOTAL - FLASH_SECTOR_2;
+
+  HAL_FLASH_Unlock();
+
+  HAL_FLASHStatus = HAL_FLASHEx_Erase(&pEraseInit, &SectorError);
+  if(HAL_FLASHStatus != HAL_OK)
+  {
+    err_code = ERR_FLASH_ERASE;
+  }
+
+  HAL_FLASH_Lock();
+
+  return err_code;
+}
+
+
+err_code_t flash_erase_sector(uint32_t sector)
+{
+  err_code_t err_code = OK;
+  HAL_StatusTypeDef HAL_FLASHStatus = HAL_OK;
+  FLASH_EraseInitTypeDef pEraseInit;
+  uint32_t SectorError;
+
+  pEraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
+  pEraseInit.VoltageRange = FLASH_VOLTAGE_RANGE_3;
+  pEraseInit.Sector = sector;
+  pEraseInit.NbSectors = 1;
+
+  HAL_FLASH_Unlock();
+
+  HAL_FLASHStatus = HAL_FLASHEx_Erase(&pEraseInit, &SectorError);
+  if(HAL_FLASHStatus != HAL_OK)
+  {
+    err_code = ERR_FLASH_ERASE;
+  }
+
+  HAL_FLASH_Lock();
+
+  return err_code;
+}
 

@@ -19,8 +19,7 @@
 
 
 
-#define FLASH_OK              0
-#define FLASH_ERR_TIMEOUT     1
+
 
 
 
@@ -28,8 +27,10 @@
 
 void flash_init(void);
 
-uint8_t flash_write(uint32_t addr, uint8_t *p_data, uint32_t length, uint32_t timeout );
-uint8_t flash_read(uint32_t addr, uint8_t *p_data, uint32_t length, uint32_t timeout );
+err_code_t flash_write(uint32_t addr, uint8_t *p_data, uint32_t length);
+err_code_t flash_read(uint32_t addr, uint8_t *p_data, uint32_t length);
+err_code_t flash_erase_whole_sectors(void);
+err_code_t flash_erase_sector(uint32_t sector);
 
 
 #ifdef __cplusplus
