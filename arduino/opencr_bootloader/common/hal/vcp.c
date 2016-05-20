@@ -12,7 +12,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
-
+#include "usbd_cdc_interface.h"
 
 
 
@@ -28,6 +28,8 @@ BOOL vcp_is_available(void)
 
   // TODO : 시리얼 버퍼에 데이터가 있으면 TRUE 리턴한다.
 
+  ret = CDC_IsAvailable();
+
   return ret;
 }
 
@@ -35,12 +37,14 @@ BOOL vcp_is_available(void)
 void vcp_putch(uint8_t ch)
 {
   // TODO : 시리얼포트로 1바이트 데이터 전송
+  CDC_Write( &ch, 1 );
 }
 
 
 uint8_t vcp_getch(void)
 {
   // TODO : 시리얼포트로 부터 1바이트 데이터 수신 (Block 방식)
+  return CDC_Getch();
 }
 
 
@@ -48,7 +52,7 @@ int32_t vcp_write(uint8_t *p_data, uint32_t length)
 {
   // TODO : 시리얼 포트로 length 길이만큼의 문자열을 전송함
 
-
+  CDC_Write( p_data, length );
   return length;
 }
 

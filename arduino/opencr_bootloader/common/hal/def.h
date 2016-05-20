@@ -10,10 +10,6 @@
 
 #include <stdint.h>
 
-#include "def_err.h"
-#include "util.h"
-
-
 
 #ifndef BOOL
 #define BOOL uint8_t
@@ -26,6 +22,15 @@
 #ifndef FALSE
 #define FALSE 0
 #endif
+
+
+
+#include "def_err.h"
+#include "util.h"
+
+
+
+
 
 
 
