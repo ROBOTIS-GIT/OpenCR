@@ -13,9 +13,6 @@
 
 void hal_init()
 {
-  bsp_init();
 
-  led_init();
-  button_init();
 }
 
