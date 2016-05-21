@@ -2,7 +2,7 @@
  * OpenCR BootLoader Firmware.
  *
  * by Baram
- * by PBPH
+ * by PBHP
  * by http://oroca.org
  */
 
