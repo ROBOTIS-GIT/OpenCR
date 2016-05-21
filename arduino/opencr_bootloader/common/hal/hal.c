@@ -2,7 +2,7 @@
  *  hal.c
  *
  *  Created on: 2016. 5. 14.
- *      Author: Baram, PBHP
+ *      Author: Baram, PBPH
  */
 
 #include "hal.h"
