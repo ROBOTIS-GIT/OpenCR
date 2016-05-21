@@ -22,7 +22,6 @@ int main(void)
   uint8_t cnt = 0;
   uint8_t ch;
 
-
   main_init();
 
   tTime = millis();
