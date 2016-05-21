@@ -4,7 +4,7 @@
  *  virtual_com_port
  *
  *  Created on: 2016. 5. 14.
- *      Author: Baram, PBHP
+ *      Author: Baram, PBPH
  */
 
 #ifndef VCP_H
