@@ -2,7 +2,7 @@
  *  flash.h
  *
  *  Created on: 2016. 5. 14.
- *      Author: Baram, PBPH
+ *      Author: Baram, PBHP
  */
 
 #include "flash.h"
