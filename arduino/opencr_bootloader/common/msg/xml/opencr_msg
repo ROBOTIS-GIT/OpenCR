@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<mavlink>
+        <!--<include>common.xml</include>-->
+        <!-- NOTE: If the included file already contains a version tag, remove the version tag here, else uncomment to enable. -->
+	<!--<version>3</version>-->
+	<enums>
+	</enums>
+	<messages>
+		<message id="150" name="VERSION">
+			<description></description>
+			<field type="uint8_t" name="type">0:Cmd, 1:Ack</field>
+			<field type="uint8_t" name="ver_length"></field>
+			<field type="uint8_t[16]" name="ver_stirng"></field>
+		</message>
+	</messages>
+</mavlink>

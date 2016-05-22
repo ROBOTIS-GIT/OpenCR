@@ -36,11 +36,7 @@
 #endif
 
 
-
-#include "def_err.h"
-#include "util.h"
-#include "../msg/mavlink/opencr_msg/mavlink.h"
-
+#include "./mavlink/opencr_msg/mavlink.h"
 
 
 
