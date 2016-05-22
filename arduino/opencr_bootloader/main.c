@@ -20,7 +20,8 @@ int main(void)
 {
   uint32_t tTime;
   //uint8_t cnt = 0;
-  uint8_t ch;
+  //uint8_t ch;
+
 
   main_init();
 

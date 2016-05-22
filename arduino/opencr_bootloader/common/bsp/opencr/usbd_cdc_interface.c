@@ -212,6 +212,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       buffsize = UserTxBufPtrIn - UserTxBufPtrOut;
     }
 
+    //if( buffsize > 64 ) buffsize = 64;
+
     buffptr = UserTxBufPtrOut;
 
     USBD_CDC_SetTxBuffer(&USBD_Device, (uint8_t*)&UserTxBuffer[buffptr], buffsize);
