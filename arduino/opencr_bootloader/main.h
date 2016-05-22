@@ -11,7 +11,7 @@
 
 #include "stdio.h"
 #include "hal.h"
-
+#include "cmd.h"
 
 
 

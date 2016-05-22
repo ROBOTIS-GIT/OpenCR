@@ -45,21 +45,21 @@ USBD_CDC_LineCodingTypeDef LineCoding =
   0x08    /* nb. of bits 8*/
 };
 
-uint8_t UserRxBuffer[APP_RX_DATA_SIZE];/* Received Data over USB are stored in this buffer */
-uint8_t UserTxBuffer[APP_TX_DATA_SIZE];/* Received Data over UART (CDC interface) are stored in this buffer */
+volatile uint8_t UserRxBuffer[APP_RX_DATA_SIZE];/* Received Data over USB are stored in this buffer */
+volatile uint8_t UserTxBuffer[APP_TX_DATA_SIZE];/* Received Data over UART (CDC interface) are stored in this buffer */
 uint32_t BuffLength;
-uint32_t UserTxBufPtrIn = 0;/* Increment this pointer or roll it back to
+volatile uint32_t UserTxBufPtrIn = 0;/* Increment this pointer or roll it back to
                                start address when data are received over USART */
-uint32_t UserTxBufPtrOut = 0; /* Increment this pointer or roll it back to
+volatile uint32_t UserTxBufPtrOut = 0; /* Increment this pointer or roll it back to
                                  start address when data are sent over USB */
 
 BOOL is_opened = FALSE;
 
 
-uint8_t  rxd_buffer[APP_RX_DATA_SIZE];
-uint32_t rxd_length = 0;
-uint32_t UserRxBufPtrIn = 0;
-uint32_t UserRxBufPtrOut = 0;
+volatile uint8_t  rxd_buffer[APP_RX_DATA_SIZE];
+volatile uint32_t rxd_length = 0;
+volatile uint32_t UserRxBufPtrIn = 0;
+volatile uint32_t UserRxBufPtrOut = 0;
 
 
 TIM_HandleTypeDef  TimHandle;
@@ -304,11 +304,13 @@ static void Error_Handler(void)
 void CDC_Write( uint8_t *p_buf, uint32_t length )
 {
   uint32_t i;
-  uint32_t tx_count = 0;
+  uint32_t remain_length = 0;
+  uint32_t tx_length = 0;
+  uint32_t tx_index = 0;
 
   if( USBD_Device.dev_config == 0 || is_opened == FALSE ) return;
 
-
+#if 0
   for( i=0; i<length; i++ )
   {
     /* Increment Index for buffer writing */
@@ -327,6 +329,47 @@ void CDC_Write( uint8_t *p_buf, uint32_t length )
     if( UserTxBufPtrIn == UserTxBufPtrOut ) break;
     if( is_opened == FALSE ) break;
   }
+#else
+
+  remain_length = length;
+
+  while(1)
+  {
+    if( remain_length > APP_TX_DATA_SIZE )  tx_length = APP_TX_DATA_SIZE;
+    else                                    tx_length = remain_length;
+
+    __disable_irq();
+    for( i=0; i<tx_length; i++ )
+    {
+      UserTxBuffer[UserTxBufPtrIn] = p_buf[tx_index++];
+
+      /* Increment Index for buffer writing */
+      UserTxBufPtrIn++;
+
+      /* To avoid buffer overflow */
+      if(UserTxBufPtrIn == APP_RX_DATA_SIZE)
+      {
+        UserTxBufPtrIn = 0;
+      }
+
+      if( tx_index == length )
+      {
+	__enable_irq();
+	return;
+      }
+    }
+    __enable_irq();
+
+
+    remain_length -= tx_length;
+
+    while(1)
+    {
+      if( UserTxBufPtrIn == UserTxBufPtrOut ) return;
+      if( is_opened == FALSE ) return;
+    }
+  }
+#endif
 }
 
 

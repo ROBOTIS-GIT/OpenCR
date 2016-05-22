@@ -1,12 +1,14 @@
 /*
- *  hal.h
+ *  cmd.h
+ *
+ *  command process
  *
  *  Created on: 2016. 5. 14.
  *      Author: Baram, PBPH
  */
 
-#ifndef HAL_H
-#define HAL_H
+#ifndef CMD_H
+#define CMD_H
 
 
 #ifdef __cplusplus
@@ -16,18 +18,15 @@
 
 #include "def.h"
 #include "bsp.h"
-
-
-#include "util.h"
-#include "delay.h"
-#include "flash.h"
-#include "vcp.h"
-#include "msg.h"
+#include "hal.h"
 
 
 
-void hal_init();
 
+
+void cmd_init(void);
+
+void cmd_version( msg_t *p_msg );
 
 
 #ifdef __cplusplus
