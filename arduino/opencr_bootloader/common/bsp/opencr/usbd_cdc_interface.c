@@ -45,8 +45,8 @@ USBD_CDC_LineCodingTypeDef LineCoding =
   0x08    /* nb. of bits 8*/
 };
 
-volatile uint8_t UserRxBuffer[APP_RX_DATA_SIZE];/* Received Data over USB are stored in this buffer */
-volatile uint8_t UserTxBuffer[APP_TX_DATA_SIZE];/* Received Data over UART (CDC interface) are stored in this buffer */
+uint8_t UserRxBuffer[APP_RX_DATA_SIZE];/* Received Data over USB are stored in this buffer */
+uint8_t UserTxBuffer[APP_TX_DATA_SIZE];/* Received Data over UART (CDC interface) are stored in this buffer */
 uint32_t BuffLength;
 volatile uint32_t UserTxBufPtrIn = 0;/* Increment this pointer or roll it back to
                                start address when data are received over USART */

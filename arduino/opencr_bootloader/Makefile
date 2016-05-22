@@ -59,9 +59,10 @@ INCLUDE = $(addprefix -I,$(INC_DIRS))
 
 DEFS = -DSTM32F746xx
 
-CFLAGS  = -ggdb -O0 -std=gnu99
+CFLAGS  = -ggdb -O0 -ffunction-sections -fdata-sections -std=gnu99
 CFLAGS += -mthumb 
 CFLAGS += -mcpu=cortex-m7 
+CFLAGS += -mfloat-abi=softfp -mfpu=fpv5-sp-d16
 CFLAGS += -Wl,--gc-sections
 WFLAGS += -Wall -Wextra -Warray-bounds -Wno-unused-parameter
 LFLAGS  = -T$(LNK_SRC) -Wl,-Map=$(PRJ_NAME).map
