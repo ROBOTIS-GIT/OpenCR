@@ -34,11 +34,13 @@ int main(void)
       led_toggle(0);
     }
 
+
 #if 0
     if( vcp_is_available() )
     {
       ch = vcp_getch();
       vcp_printf("pressed : 0x%02X \r\n", ch);
+      //vcp_printf("float test %f\r\n",fvalue);
     }
 #else
     msg_process_vcp();

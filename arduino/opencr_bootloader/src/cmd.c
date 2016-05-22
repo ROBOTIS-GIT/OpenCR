@@ -27,7 +27,7 @@ void cmd_version( msg_t *p_msg )
   uint8_t buf[1024];
 
 
-  mavlink_msg_version_pack(0, 0, &mav_msg, 1, 9, (const uint8_t*) "V160521R1");
+  mavlink_msg_version_pack(0, 0, &mav_msg, 1, 9, (const uint8_t*) "V160522R1");
 
   msg_send(p_msg->ch, &mav_msg);
 }
