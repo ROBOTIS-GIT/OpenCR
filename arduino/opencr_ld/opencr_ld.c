@@ -15,7 +15,7 @@ ser_handler stm32_ser_id = ( ser_handler )-1;
 
 int opencr_ld_init( const char *portname, u32 baud );
 void opencr_ld_msg_process(void);
-
+void cmd_version( msg_t *p_msg );
 
 
 
@@ -57,7 +57,7 @@ void delay_ms( int WaitTime )
      ARG     : void
      RET     : void
 ---------------------------------------------------------------------------*/
-char read_byte( void )
+int read_byte( void )
 {
   return ser_read_byte( stm32_ser_id );
 }
@@ -98,7 +98,8 @@ int opencr_ld_init( const char *portname, u32 baud )
   }
 
   // Setup port
-  ser_setupEx( stm32_ser_id, baud, SER_DATABITS_8, SER_PARITY_NONE, SER_STOPBITS_1, 1 );
+  //ser_setupEx( stm32_ser_id, baud, SER_DATABITS_8, SER_PARITY_NONE, SER_STOPBITS_1, 0 );
+  ser_setup( stm32_ser_id, baud, SER_DATABITS_8, SER_PARITY_NONE, SER_STOPBITS_1 );
 
 
   ser_set_timeout_ms( stm32_ser_id, SER_NO_TIMEOUT );
@@ -129,7 +130,8 @@ int opencr_ld_init( const char *portname, u32 baud )
 void opencr_ld_msg_process(void)
 {
   BOOL ret;
-  char ch;
+  int  ch_ret;
+  uint8_t ch;
   msg_t	msg;
   int index = 0;
   int retry = 50;
@@ -139,9 +141,9 @@ void opencr_ld_msg_process(void)
 
   while(1)
   {
-    ch = read_byte();
+    ch_ret = read_byte();
 
-    if( ch < 0 )
+    if( ch_ret < 0 )
     {
       if( retry-- == 0 )
       {
@@ -155,8 +157,7 @@ void opencr_ld_msg_process(void)
     }
     else
     {
-      //printf("rx %d:%d(%c)\r\n", index++, ch, ch);
-      printf("rx %d:%d\r\n", index++, ch);
+      ch = (uint8_t)(ch_ret);
     }
 
     ret = msg_recv( 0, ch, &msg );
@@ -166,11 +167,24 @@ void opencr_ld_msg_process(void)
       switch( msg.p_msg->msgid )
       {
 	case MAVLINK_MSG_ID_VERSION:
-	  //cmd_version(&msg);
-	  printf("Received \r\n");
+	  cmd_version(&msg);
 	  break;
       }
       break;
     }
   }
+}
+
+
+void cmd_version( msg_t *p_msg )
+{
+  mavlink_message_t mav_msg;
+  uint8_t buf[1024];
+
+
+  mavlink_version_t version_cmd;
+  mavlink_msg_version_decode( p_msg->p_msg, &version_cmd);
+
+  version_cmd.ver_stirng[version_cmd.ver_length] = 0;
+  printf("Version : %s\r\n", version_cmd.ver_stirng);
 }
