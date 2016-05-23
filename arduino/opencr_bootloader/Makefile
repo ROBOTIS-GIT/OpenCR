@@ -18,7 +18,7 @@ INC_DIRS += common/bsp/$(BRD_NAME)/cfg/
 INC_DIRS += common/hal/
 INC_DIRS += common/lib/STM32F7xx_HAL_Driver/Inc/
 INC_DIRS += common/lib/STM32_USB_Device_Library/Core/Inc/
-INC_DIRS += common/lib/STM32_USB_Device_Library/Class/CDC/Inc/
+
 
 
 
@@ -51,7 +51,7 @@ SRT_SRCS = $(notdir $(wildcard $(CFG_SRC)*.s ))
 
 
 SRCS  = main.c
-SRCS += common/lib/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c
+
 
 
 
@@ -59,7 +59,7 @@ INCLUDE = $(addprefix -I,$(INC_DIRS))
 
 DEFS = -DSTM32F746xx
 
-CFLAGS  = -ggdb -O0 -ffunction-sections -fdata-sections -std=gnu99
+CFLAGS  = -ggdb -O2 -ffunction-sections -fdata-sections -std=gnu99
 CFLAGS += -mthumb 
 CFLAGS += -mcpu=cortex-m7 
 CFLAGS += -mfloat-abi=softfp -mfpu=fpv5-sp-d16

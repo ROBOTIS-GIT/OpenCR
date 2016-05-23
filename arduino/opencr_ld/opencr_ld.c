@@ -8,15 +8,31 @@
 #include "serial.h"
 #include "type.h"
 #include "./msg/msg.h"
+#include <sys/time.h>
+#include <stdio.h>
 
 
 ser_handler stm32_ser_id = ( ser_handler )-1;
 
 
 int opencr_ld_init( const char *portname, u32 baud );
-void opencr_ld_msg_process(void);
-void cmd_version( msg_t *p_msg );
 
+int read_byte( void );
+err_code_t cmd_read_version( void );
+err_code_t cmd_flash_fw_write_begin( void );
+err_code_t cmd_flash_fw_write_end( void );
+err_code_t cmd_flash_fw_send_block( void );
+err_code_t cmd_flash_fw_write_block( void );
+err_code_t cmd_flash_fw_send_block_multi( uint8_t block_count );
+
+
+
+static long myclock()
+{
+	struct timeval tv;
+	gettimeofday (&tv, NULL);
+	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
+}
 
 
 //-- opencr_ld_main
@@ -87,7 +103,9 @@ int write_bytes( char *p_data, int len )
 ---------------------------------------------------------------------------*/
 int opencr_ld_init( const char *portname, u32 baud )
 {
-  int  i;
+  int i;
+  int j;
+  err_code_t err_code = OK;
 
 
   // Open port
@@ -98,8 +116,8 @@ int opencr_ld_init( const char *portname, u32 baud )
   }
 
   // Setup port
-  //ser_setupEx( stm32_ser_id, baud, SER_DATABITS_8, SER_PARITY_NONE, SER_STOPBITS_1, 0 );
-  ser_setup( stm32_ser_id, baud, SER_DATABITS_8, SER_PARITY_NONE, SER_STOPBITS_1 );
+  ser_setupEx( stm32_ser_id, baud, SER_DATABITS_8, SER_PARITY_NONE, SER_STOPBITS_1, 1 );
+
 
 
   ser_set_timeout_ms( stm32_ser_id, SER_NO_TIMEOUT );
@@ -107,19 +125,40 @@ int opencr_ld_init( const char *portname, u32 baud )
   ser_set_timeout_ms( stm32_ser_id, 2000000 );
 
 
-  mavlink_message_t mav_msg;
-  uint8_t buf[1024];
 
-  mavlink_msg_version_pack(0, 0, &mav_msg, 1, 9, (const uint8_t*) "V160521R1");
-
-  msg_send(0, &mav_msg);
 
   printf("send cmd\r\n");
-  delay_ms(100);
-  opencr_ld_msg_process();
+
+  cmd_read_version();
+  err_code = cmd_flash_fw_write_begin();
+  if( err_code != OK ) printf("cmd_flash_fw_write_begin ERR : 0x%04X\r\n", err_code);
+
+  long t, dt;
+  float calc_time;
+  t = myclock();
+
+  for( j=0; j<96; j++ )
+  {
+    for( i=0; i<64; i++ )
+    {
+      cmd_flash_fw_send_block();
+    }
+    err_code = cmd_flash_fw_write_block();
+    if( err_code != OK )
+    {
+      printf("ERR : 0x%04X\r\n", err_code);
+      break;
+    }
+  }
+
+  cmd_flash_fw_write_end();
+
+  dt = myclock() - t;
+
 
   ser_close( stm32_ser_id );
-
+  calc_time = (int)(dt / 1000) + ((float)(dt % 1000))/1000;
+  printf("end %f sec, %f KB/s\n", calc_time, (768/calc_time) );
 
 
 
@@ -127,64 +166,194 @@ int opencr_ld_init( const char *portname, u32 baud )
 }
 
 
-void opencr_ld_msg_process(void)
+err_code_t cmd_read_version( void )
 {
-  BOOL ret;
-  int  ch_ret;
-  uint8_t ch;
-  msg_t	msg;
-  int index = 0;
-  int retry = 50;
+  err_code_t err_code = OK;
+  mavlink_message_t tx_msg;
+  mavlink_message_t rx_msg;
+  mavlink_ack_t     ack_msg;
+  uint8_t param[8];
+  uint8_t resp = 1;
 
 
-  ser_set_timeout_ms( stm32_ser_id, 2000000 );
+  mavlink_msg_read_version_pack(0, 0, &tx_msg, resp, param);
+  msg_send(0, &tx_msg);
 
-  while(1)
+  if( resp == 1 )
   {
-    ch_ret = read_byte();
-
-    if( ch_ret < 0 )
+    if( msg_get_resp(0, &rx_msg, 500) == TRUE )
     {
-      if( retry-- == 0 )
-      {
-	printf("no data \r\n");
-	break;
-      }
-      else
-      {
-	continue;
-      }
+      mavlink_msg_ack_decode( &rx_msg, &ack_msg);
+
+      printf("BootVersion : 0x%08X\r\n", ack_msg.param[3]<<24|ack_msg.param[2]<<16|ack_msg.param[1]<<8|ack_msg.param[0]);
+      if( tx_msg.msgid == ack_msg.msg_id ) err_code = ack_msg.err_code;
+      else                                 err_code = ERR_MISMATCH_ID;
     }
     else
     {
-      ch = (uint8_t)(ch_ret);
-    }
-
-    ret = msg_recv( 0, ch, &msg );
-
-    if( ret == TRUE )
-    {
-      switch( msg.p_msg->msgid )
-      {
-	case MAVLINK_MSG_ID_VERSION:
-	  cmd_version(&msg);
-	  break;
-      }
-      break;
+      err_code = ERR_TIMEOUT;
     }
   }
+
+  return OK;
 }
 
 
-void cmd_version( msg_t *p_msg )
+err_code_t cmd_flash_fw_write_begin( void )
 {
-  mavlink_message_t mav_msg;
-  uint8_t buf[1024];
+  err_code_t err_code = OK;
+  mavlink_message_t tx_msg;
+  mavlink_message_t rx_msg;
+  mavlink_ack_t     ack_msg;
+  uint8_t param[8];
+  uint8_t resp = 1;
 
 
-  mavlink_version_t version_cmd;
-  mavlink_msg_version_decode( p_msg->p_msg, &version_cmd);
+  mavlink_msg_flash_fw_write_begin_pack(0, 0, &tx_msg, resp, param);
+  msg_send(0, &tx_msg);
 
-  version_cmd.ver_stirng[version_cmd.ver_length] = 0;
-  printf("Version : %s\r\n", version_cmd.ver_stirng);
+  if( resp == 1 )
+  {
+    if( msg_get_resp(0, &rx_msg, 500) == TRUE )
+    {
+      mavlink_msg_ack_decode( &rx_msg, &ack_msg);
+
+      if( tx_msg.msgid == ack_msg.msg_id ) err_code = ack_msg.err_code;
+      else                                 err_code = ERR_MISMATCH_ID;
+    }
+    else
+    {
+      err_code = ERR_TIMEOUT;
+    }
+  }
+
+  return err_code;
+}
+
+
+err_code_t cmd_flash_fw_write_end( void )
+{
+  err_code_t err_code = OK;
+  mavlink_message_t tx_msg;
+  mavlink_message_t rx_msg;
+  mavlink_ack_t     ack_msg;
+  uint8_t param[8];
+  uint8_t resp = 1;
+
+
+  mavlink_msg_flash_fw_write_end_pack(0, 0, &tx_msg, resp, param);
+  msg_send(0, &tx_msg);
+
+  if( resp == 1 )
+  {
+    if( msg_get_resp(0, &rx_msg, 500) == TRUE )
+    {
+      mavlink_msg_ack_decode( &rx_msg, &ack_msg);
+
+      printf("block_count  : %d\r\n", ack_msg.param[1]<<8|ack_msg.param[0]);
+      printf("block_length : %d\r\n", ack_msg.param[5]<<24|ack_msg.param[4]<<16|ack_msg.param[3]<<8|ack_msg.param[2]);
+
+
+      if( tx_msg.msgid == ack_msg.msg_id ) err_code = ack_msg.err_code;
+      else                                 err_code = ERR_MISMATCH_ID;
+    }
+    else
+    {
+      err_code = ERR_TIMEOUT;
+    }
+  }
+
+  return err_code;
+}
+
+
+err_code_t cmd_flash_fw_send_block( void )
+{
+  err_code_t err_code = OK;
+  mavlink_message_t tx_msg;
+  mavlink_message_t rx_msg;
+  mavlink_ack_t     ack_msg;
+  uint8_t buf[256];
+  uint8_t resp = 0;
+
+
+  mavlink_msg_flash_fw_send_block_pack(0, 0, &tx_msg, resp, 0, 0, 128, buf);
+  msg_send(0, &tx_msg);
+
+
+  if( resp == 1 )
+  {
+    if( msg_get_resp(0, &rx_msg, 500) == TRUE )
+    {
+      mavlink_msg_ack_decode( &rx_msg, &ack_msg);
+
+      if( tx_msg.msgid == ack_msg.msg_id ) err_code = ack_msg.err_code;
+      else                                 err_code = ERR_MISMATCH_ID;
+    }
+    else
+    {
+      err_code = ERR_TIMEOUT;
+    }
+  }
+
+  return err_code;
+}
+
+
+err_code_t cmd_flash_fw_send_block_multi( uint8_t block_count )
+{
+  err_code_t err_code = OK;
+  mavlink_message_t tx_msg;
+  mavlink_message_t rx_msg;
+  mavlink_ack_t     ack_msg;
+  uint8_t buf[256];
+  uint8_t tx_buf[16*1024];
+  uint8_t resp = 0;
+  uint8_t i;
+  uint32_t len;
+
+  //mavlink_msg_flash_fw_send_block_pack(0, 0, &tx_msg, resp, 0, 0, 128, buf);
+  //msg_send(0, &tx_msg);
+
+   len = 0;
+  for( i=0; i<block_count; i++ )
+  {
+    mavlink_msg_flash_fw_send_block_pack(0, 0, &tx_msg, resp, 0, 0, 128, buf);
+    len += mavlink_msg_to_send_buffer(&tx_buf[len], &tx_msg);
+  }
+  write_bytes((char *)tx_buf, len);
+
+  return err_code;
+}
+
+
+err_code_t cmd_flash_fw_write_block( void )
+{
+  err_code_t err_code = OK;
+  mavlink_message_t tx_msg;
+  mavlink_message_t rx_msg;
+  mavlink_ack_t     ack_msg;
+  uint8_t buf[256];
+  uint8_t resp = 1;
+
+  mavlink_msg_flash_fw_write_block_pack(0, 0, &tx_msg, resp, 0, 128);
+  msg_send(0, &tx_msg);
+
+
+  if( resp == 1 )
+  {
+    if( msg_get_resp(0, &rx_msg, 500) == TRUE )
+    {
+      mavlink_msg_ack_decode( &rx_msg, &ack_msg);
+
+      if( tx_msg.msgid == ack_msg.msg_id ) err_code = ack_msg.err_code;
+      else                                 err_code = ERR_MISMATCH_ID;
+    }
+    else
+    {
+      err_code = tx_msg.msgid<<8|ERR_TIMEOUT;
+    }
+  }
+
+  return err_code;
 }

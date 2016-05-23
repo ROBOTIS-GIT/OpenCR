@@ -26,7 +26,12 @@
 
 void cmd_init(void);
 
-void cmd_version( msg_t *p_msg );
+void cmd_read_version( msg_t *p_msg );
+void cmd_flash_fw_send_blcok( msg_t *p_msg );
+void cmd_flash_fw_write_begin( msg_t *p_msg );
+void cmd_flash_fw_write_end( msg_t *p_msg );
+void cmd_flash_fw_write_block( msg_t *p_msg );
+void cmd_flash_fw_erase( msg_t *p_msg );
 
 
 #ifdef __cplusplus

@@ -32,9 +32,9 @@ typedef struct
 
 
 void msg_init(void);
-void msg_send(uint8_t ch, mavlink_message_t *p_msg);
-BOOL msg_recv( uint8_t ch, uint8_t data , msg_t *p_msg );
-
+void msg_send(uint8_t chan, mavlink_message_t *p_msg);
+BOOL msg_recv( uint8_t chan, uint8_t data , mavlink_message_t *p_msg, mavlink_status_t *p_status );
+BOOL msg_get_resp( uint8_t chan, mavlink_message_t *p_msg, uint32_t timeout);
 
 
 #ifdef __cplusplus

@@ -78,15 +78,15 @@
 
 /* Periodically, the state of the buffer "UserTxBuffer" is checked.
    The period depends on CDC_POLLING_INTERVAL */
-#define CDC_POLLING_INTERVAL             5 /* in ms. The max is 65 and the min is 1 */
+#define CDC_POLLING_INTERVAL             2 /* in ms. The max is 65 and the min is 1 */
 
 extern USBD_CDC_ItfTypeDef  USBD_CDC_fops;
 
 
 
-void CDC_Write( uint8_t *p_buf, uint32_t length );
-BOOL CDC_IsAvailable( void );
-uint8_t CDC_Getch( void );
+void CDC_Itf_Write( uint8_t *p_buf, uint32_t length );
+BOOL CDC_Itf_IsAvailable( void );
+uint8_t CDC_Itf_Getch( void );
 
 
 /* Exported macro ------------------------------------------------------------*/

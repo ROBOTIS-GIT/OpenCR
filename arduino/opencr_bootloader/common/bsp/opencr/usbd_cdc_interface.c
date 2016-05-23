@@ -30,7 +30,8 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
-#define APP_RX_DATA_SIZE  2048
+#define APP_RX_BUF_SIZE   (1024*16)
+#define APP_RX_DATA_SIZE  1024
 #define APP_TX_DATA_SIZE  2048
 
 
@@ -56,10 +57,10 @@ volatile uint32_t UserTxBufPtrOut = 0; /* Increment this pointer or roll it back
 BOOL is_opened = FALSE;
 
 
-volatile uint8_t  rxd_buffer[APP_RX_DATA_SIZE];
-volatile uint32_t rxd_length = 0;
-volatile uint32_t UserRxBufPtrIn = 0;
-volatile uint32_t UserRxBufPtrOut = 0;
+volatile uint8_t  rxd_buffer[APP_RX_BUF_SIZE];
+volatile uint32_t rxd_length    = 0;
+volatile uint32_t rxd_BufPtrIn  = 0;
+volatile uint32_t rxd_BufPtrOut = 0;
 
 
 TIM_HandleTypeDef  TimHandle;
@@ -250,16 +251,17 @@ static int8_t CDC_Itf_Receive(uint8_t* Buf, uint32_t *Len)
 
   for( i=0; i<*Len; i++ )
   {
-    rxd_buffer[UserRxBufPtrIn] = Buf[i];
+    rxd_buffer[rxd_BufPtrIn] = Buf[i];
 
-    UserRxBufPtrIn++;
+    rxd_BufPtrIn++;
 
     /* To avoid buffer overflow */
-    if(UserRxBufPtrIn == APP_RX_DATA_SIZE)
+    if(rxd_BufPtrIn == APP_RX_BUF_SIZE)
     {
-      UserRxBufPtrIn = 0;
+      rxd_BufPtrIn = 0;
     }
   }
+
 
   USBD_CDC_ReceivePacket(&USBD_Device);
   return (USBD_OK);
@@ -303,7 +305,7 @@ static void Error_Handler(void)
 }
 
 
-void CDC_Write( uint8_t *p_buf, uint32_t length )
+void CDC_Itf_Write( uint8_t *p_buf, uint32_t length )
 {
   uint32_t i;
   uint32_t remain_length = 0;
@@ -375,43 +377,35 @@ void CDC_Write( uint8_t *p_buf, uint32_t length )
 }
 
 
-BOOL CDC_IsAvailable( void )
+BOOL CDC_Itf_IsAvailable( void )
 {
-  if( UserRxBufPtrIn != UserRxBufPtrOut ) return TRUE;
+  if( rxd_BufPtrIn != rxd_BufPtrOut ) return TRUE;
 
   return FALSE;
 }
 
 
-uint8_t CDC_Getch( void )
+uint8_t CDC_Itf_Getch( void )
 {
   uint8_t ch = 0;
   uint32_t buffptr;
-  uint32_t buffsize;
 
 
   while(1)
   {
-    if( CDC_IsAvailable() ) break;
+    if( CDC_Itf_IsAvailable() ) break;
   }
 
-  if(UserRxBufPtrOut > UserRxBufPtrIn) /* Roll-back */
-  {
-    buffsize = APP_RX_DATA_SIZE - UserRxBufPtrOut;
-  }
-  else
-  {
-    buffsize = UserRxBufPtrIn - UserRxBufPtrOut;
-  }
 
-  buffptr = UserRxBufPtrOut;
+
+  buffptr = rxd_BufPtrOut;
 
   ch = rxd_buffer[buffptr];
 
-  UserRxBufPtrOut += 1;
-  if (UserRxBufPtrOut == APP_RX_DATA_SIZE)
+  rxd_BufPtrOut += 1;
+  if (rxd_BufPtrOut == APP_RX_BUF_SIZE)
   {
-    UserRxBufPtrOut = 0;
+    rxd_BufPtrOut = 0;
   }
 
   return ch;
