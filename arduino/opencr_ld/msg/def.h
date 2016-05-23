@@ -9,7 +9,7 @@
 #define DEF_H
 
 #include <stdint.h>
-
+#include "def_err.h"
 
 #ifndef BOOL
 #define BOOL uint8_t
