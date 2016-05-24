@@ -43,7 +43,6 @@
 		<message id="154" name="FLASH_FW_SEND_BLOCK">
 			<description></description>
 			<field type="uint8_t"  name="resp">0:No Resp, 1:Resp</field>
-			<field type="uint8_t"  name="type">0:start, 1:middle, 2:end</field>
 			<field type="uint16_t" name="addr"></field>
 			<field type="uint8_t"  name="length"></field>
 			<field type="uint8_t[128]" name="data"></field>
@@ -65,5 +64,42 @@
 			<field type="uint8_t"    name="resp">0:No Resp, 1:Resp</field>
 			<field type="uint8_t[8]" name="param"></field>
 		</message>
-	</messages>	
+	</messages>
+	
+	<messages>
+		<message id="157" name="FLASH_FW_VERIFY">
+			<description></description>
+			<field type="uint8_t"    name="resp">0:No Resp, 1:Resp</field>
+			<field type="uint32_t"   name="crc"></field>
+			<field type="uint8_t[8]" name="param"></field>
+		</message>
+	</messages>
+
+	<messages>
+		<message id="158" name="FLASH_FW_REQ_BLOCK">
+			<description></description>
+			<field type="uint8_t"  name="resp">0:No Resp, 1:Resp</field>
+			<field type="uint32_t" name="addr"></field>
+			<field type="uint16_t" name="length"></field>
+		</message>
+	</messages>
+
+	<messages>
+		<message id="159" name="FLASH_FW_READ_BLOCK">
+			<description></description>
+			<field type="uint8_t"  name="resp">0:No Resp, 1:Resp</field>
+			<field type="uint16_t" name="addr"></field>
+			<field type="uint8_t"  name="length"></field>
+			<field type="uint8_t[128]" name="data"></field>
+		</message>
+	</messages>
+	
+	<messages>
+		<message id="160" name="JUMP_TO_FW">
+			<description></description>
+			<field type="uint8_t"    name="resp">0:No Resp, 1:Resp</field>
+			<field type="uint8_t[8]" name="param"></field>
+		</message>
+	</messages>
+		
 </mavlink>
