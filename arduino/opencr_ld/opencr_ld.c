@@ -277,7 +277,7 @@ err_code_t cmd_flash_fw_send_block( void )
   uint8_t resp = 0;
 
 
-  mavlink_msg_flash_fw_send_block_pack(0, 0, &tx_msg, resp, 0, 0, 128, buf);
+  mavlink_msg_flash_fw_send_block_pack(0, 0, &tx_msg, resp, 0, 128, buf);
   msg_send(0, &tx_msg);
 
 
@@ -312,13 +312,11 @@ err_code_t cmd_flash_fw_send_block_multi( uint8_t block_count )
   uint8_t i;
   uint32_t len;
 
-  //mavlink_msg_flash_fw_send_block_pack(0, 0, &tx_msg, resp, 0, 0, 128, buf);
-  //msg_send(0, &tx_msg);
 
    len = 0;
   for( i=0; i<block_count; i++ )
   {
-    mavlink_msg_flash_fw_send_block_pack(0, 0, &tx_msg, resp, 0, 0, 128, buf);
+    mavlink_msg_flash_fw_send_block_pack(0, 0, &tx_msg, resp, 0, 128, buf);
     len += mavlink_msg_to_send_buffer(&tx_buf[len], &tx_msg);
   }
   write_bytes((char *)tx_buf, len);

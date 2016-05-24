@@ -78,7 +78,7 @@ void msg_process_vcp(void)
 	  break;
 
 	case MAVLINK_MSG_ID_FLASH_FW_SEND_BLOCK:
-	  cmd_flash_fw_send_blcok(&msg);
+	  cmd_flash_fw_send_block(&msg);
 	  break;
 
 	case MAVLINK_MSG_ID_FLASH_FW_WRITE_BEGIN:
@@ -96,6 +96,23 @@ void msg_process_vcp(void)
 	case MAVLINK_MSG_ID_FLASH_FW_ERASE:
 	  cmd_flash_fw_erase(&msg);
 	  break;
+
+	case MAVLINK_MSG_ID_FLASH_FW_VERIFY:
+	  cmd_flash_fw_verify(&msg);
+	  break;
+
+	case MAVLINK_MSG_ID_FLASH_FW_REQ_BLOCK:
+	  cmd_flash_fw_req_block(&msg);
+	  break;
+
+	case MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK:
+	  cmd_flash_fw_read_block(&msg);
+	  break;
+
+	case MAVLINK_MSG_ID_JUMP_TO_FW:
+	  cmd_jump_to_fw(&msg);
+	  break;
+
       }
     }
   }

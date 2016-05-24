@@ -101,9 +101,9 @@ void cmd_read_version( msg_t *p_msg )
 }
 
 
-//-- cmd_flash_fw_send_blcok
+//-- cmd_flash_fw_send_block
 //
-void cmd_flash_fw_send_blcok( msg_t *p_msg )
+void cmd_flash_fw_send_block( msg_t *p_msg )
 {
   err_code_t err_code = OK;
   mavlink_ack_t     mav_ack;
@@ -241,6 +241,91 @@ void cmd_flash_fw_erase( msg_t *p_msg )
 
   flash_block.count = 0;
   flash_block.length_received = 0;
+
+  if( mav_data.resp == 1 )
+  {
+    mav_ack.msg_id   = p_msg->p_msg->msgid;
+    mav_ack.err_code = err_code;
+    resp_ack(p_msg->ch, &mav_ack);
+  }
+}
+
+
+//-- cmd_flash_fw_verify
+//
+void cmd_flash_fw_verify( msg_t *p_msg )
+{
+  err_code_t err_code = OK;
+  mavlink_ack_t     mav_ack;
+  mavlink_flash_fw_verify_t mav_data;
+
+
+  mavlink_msg_flash_fw_verify_decode(p_msg->p_msg, &mav_data);
+
+
+  if( mav_data.resp == 1 )
+  {
+    mav_ack.msg_id   = p_msg->p_msg->msgid;
+    mav_ack.err_code = err_code;
+    resp_ack(p_msg->ch, &mav_ack);
+  }
+}
+
+//-- cmd_flash_fw_req_block
+//
+void cmd_flash_fw_req_block( msg_t *p_msg )
+{
+  err_code_t err_code = OK;
+  mavlink_ack_t     mav_ack;
+  mavlink_flash_fw_req_block_t mav_data;
+
+
+  mavlink_msg_flash_fw_req_block_decode(p_msg->p_msg, &mav_data);
+
+
+  if( mav_data.resp == 1 )
+  {
+    mav_ack.msg_id   = p_msg->p_msg->msgid;
+    mav_ack.err_code = err_code;
+    resp_ack(p_msg->ch, &mav_ack);
+  }
+}
+
+
+//-- cmd_flash_fw_read_block
+//
+void cmd_flash_fw_read_block( msg_t *p_msg )
+{
+  err_code_t err_code = OK;
+  mavlink_ack_t     mav_ack;
+  mavlink_flash_fw_read_block_t mav_data;
+
+
+  mavlink_msg_flash_fw_read_block_decode(p_msg->p_msg, &mav_data);
+
+
+
+  if( mav_data.resp == 1 )
+  {
+    mav_ack.msg_id   = p_msg->p_msg->msgid;
+    mav_ack.err_code = err_code;
+    resp_ack(p_msg->ch, &mav_ack);
+  }
+}
+
+
+//-- cmd_jump_to_fw
+//
+void cmd_jump_to_fw( msg_t *p_msg )
+{
+  err_code_t err_code = OK;
+  mavlink_ack_t     mav_ack;
+  mavlink_jump_to_fw_t mav_data;
+
+
+  mavlink_msg_jump_to_fw_decode(p_msg->p_msg, &mav_data);
+
+
 
   if( mav_data.resp == 1 )
   {
