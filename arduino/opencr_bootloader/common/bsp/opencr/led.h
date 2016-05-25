@@ -2,7 +2,7 @@
  *  led.h
  *
  *  Created on: 2016. 5. 14.
- *      Author: Baram, PBPH
+ *      Author: Baram, PBHP
  */
 
 #ifndef LED_H

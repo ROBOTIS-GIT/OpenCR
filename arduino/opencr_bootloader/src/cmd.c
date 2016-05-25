@@ -4,7 +4,7 @@
  *  message process
  *
  *  Created on: 2016. 5. 14.
- *      Author: Baram, PBPH
+ *      Author: Baram, PBHP
  */
 
 #include "cmd.h"
@@ -203,7 +203,7 @@ void cmd_flash_fw_write_block( msg_t *p_msg )
   // flash_block.data[] : 저장할 데이터 버퍼
   //
 
-
+	flash_write(mav_data.addr,flash_block.data, mav_data.length);
 
   //------------------------------------------------------
 
@@ -235,6 +235,7 @@ void cmd_flash_fw_erase( msg_t *p_msg )
   // 플래시에 펌웨어 영역 768KB의 영역을 지운다.
 
 
+	flash_erase_fw_block();
 
 
   //------------------------------------------------------

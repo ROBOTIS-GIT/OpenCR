@@ -2,14 +2,14 @@
  *  flash.h
  *
  *  Created on: 2016. 5. 14.
- *      Author: Baram, PBPH
+ *      Author: Baram, PBHP
  */
 
 #include "flash.h"
 
 
 
-
+//static void               FLASH_MassErase(uint8_t VoltageRange);
 
 void flash_init()
 {
@@ -77,6 +77,25 @@ err_code_t flash_erase_whole_sectors(void)
 
   err_code_t err_code = OK;
   HAL_StatusTypeDef HAL_FLASHStatus = HAL_OK;
+
+  HAL_FLASH_Unlock();
+
+  //HAL_FLASHStatus = FLASH_MassErase(FLASH_VOLTAGE_RANGE_3);
+  if(HAL_FLASHStatus != HAL_OK)
+  {
+    err_code = ERR_FLASH_ERASE;
+  }
+
+  HAL_FLASH_Lock();
+
+  return err_code;
+}
+
+err_code_t flash_erase_fw_block(void)
+{
+
+  err_code_t err_code = OK;
+  HAL_StatusTypeDef HAL_FLASHStatus = HAL_OK;
   FLASH_EraseInitTypeDef pEraseInit;
   uint32_t SectorError;
 
@@ -84,8 +103,8 @@ err_code_t flash_erase_whole_sectors(void)
   //except user bootloader sectors
   pEraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
   pEraseInit.VoltageRange = FLASH_VOLTAGE_RANGE_3;
-  pEraseInit.Sector = FLASH_SECTOR_2;
-  pEraseInit.NbSectors = FLASH_SECTOR_TOTAL - FLASH_SECTOR_2;
+  pEraseInit.Sector = FLASH_SECTOR_4;
+  pEraseInit.NbSectors = FLASH_SECTOR_TOTAL - FLASH_SECTOR_4;
 
   HAL_FLASH_Unlock();
 
