@@ -2,7 +2,7 @@
  *  def_err.h
  *
  *  Created on: 2016. 5. 14.
- *      Author: Baram, PBPH
+ *      Author: Baram, PBHP
  */
 
 #ifndef DEF_ERR_H
