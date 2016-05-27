@@ -9,7 +9,7 @@
   *          This file contains:
   *           - Data structures and the address mapping for all peripherals
   *           - Peripheral's registers declarations and bits definition
-  *           - Macros to access peripheralï¿½s registers hardware
+  *           - Macros to access peripheral’s registers hardware
   *
   ******************************************************************************
   * @attention
@@ -189,7 +189,7 @@ typedef enum
 #define __FPU_PRESENT             1       /*!< FPU present                                   */
 #define __ICACHE_PRESENT          1       /*!< CM7 instruction cache present                 */
 #define __DCACHE_PRESENT          1       /*!< CM7 data cache present                        */
-#include "../include/core_cm7.h"                     /*!< Cortex-M7 processor and core peripherals      */
+#include "core_cm7.h"                     /*!< Cortex-M7 processor and core peripherals      */
   
   
 #include "system_stm32f7xx.h"

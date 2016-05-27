@@ -299,16 +299,16 @@
 #define __CMSIS_GENERIC         /* disable NVIC and Systick functions */
 
 #if defined(ARM_MATH_CM7)
-  #include "../include/core_cm7.h"
+  #include "core_cm7.h"
 #elif defined (ARM_MATH_CM4)
-  #include "../include/core_cm4.h"
+  #include "core_cm4.h"
 #elif defined (ARM_MATH_CM3)
-  #include "../include/core_cm3.h"
+  #include "core_cm3.h"
 #elif defined (ARM_MATH_CM0)
-  #include "../include/core_cm0.h"
+  #include "core_cm0.h"
   #define ARM_MATH_CM0_FAMILY
 #elif defined (ARM_MATH_CM0PLUS)
-  #include "../include/core_cm0plus.h"
+  #include "core_cm0plus.h"
   #define ARM_MATH_CM0_FAMILY
 #else
   #error "Define according the used Cortex core ARM_MATH_CM7, ARM_MATH_CM4, ARM_MATH_CM3, ARM_MATH_CM0PLUS or ARM_MATH_CM0"
