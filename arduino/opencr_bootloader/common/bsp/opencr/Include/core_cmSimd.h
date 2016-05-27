@@ -54,15 +54,15 @@
 
 /*------------------ RealView Compiler -----------------*/
 #if   defined ( __CC_ARM )
-  #include "../include/cmsis_armcc.h"
+  #include "cmsis_armcc.h"
 
 /*------------------ ARM Compiler V6 -------------------*/
 #elif defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
-  #include "../include/cmsis_armcc_V6.h"
+  #include "cmsis_armcc_V6.h"
 
 /*------------------ GNU Compiler ----------------------*/
 #elif defined ( __GNUC__ )
-  #include "../include/cmsis_gcc.h"
+  #include "cmsis_gcc.h"
 
 /*------------------ ICC Compiler ----------------------*/
 #elif defined ( __ICCARM__ )
