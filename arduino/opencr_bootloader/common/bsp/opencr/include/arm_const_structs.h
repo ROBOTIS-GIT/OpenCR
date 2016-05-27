@@ -43,8 +43,8 @@
 #ifndef _ARM_CONST_STRUCTS_H
 #define _ARM_CONST_STRUCTS_H
 
-#include "arm_math.h"
-#include "arm_common_tables.h"
+#include "../include/arm_common_tables.h"
+#include "../include/arm_math.h"
 
    extern const arm_cfft_instance_f32 arm_cfft_sR_f32_len16;
    extern const arm_cfft_instance_f32 arm_cfft_sR_f32_len32;

@@ -160,8 +160,8 @@
 
 #endif
 
-#include "core_cmInstr.h"                /* Core Instruction Access */
-#include "core_cmFunc.h"                 /* Core Function Access */
+#include "../include/core_cmInstr.h"                /* Core Instruction Access */
+#include "../include/core_cmFunc.h"                 /* Core Function Access */
 
 #ifdef __cplusplus
 }
