@@ -36,6 +36,12 @@ int main(void)
 
 
 #if 0
+    uint8_t ch;
+    static uint32_t cnt = 0;
+
+    vcp_printf("cnd : %d \r\n", cnt++);
+
+
     if( vcp_is_available() )
     {
       ch = vcp_getch();
@@ -77,8 +83,8 @@ void msg_process_vcp(void)
 	  cmd_read_version(&msg);
 	  break;
 
-	case MAVLINK_MSG_ID_FLASH_FW_SEND_BLOCK:
-	  cmd_flash_fw_send_block(&msg);
+	case MAVLINK_MSG_ID_FLASH_FW_WRITE_PACKET:
+	  cmd_flash_fw_write_packet(&msg);
 	  break;
 
 	case MAVLINK_MSG_ID_FLASH_FW_WRITE_BEGIN:
@@ -99,10 +105,6 @@ void msg_process_vcp(void)
 
 	case MAVLINK_MSG_ID_FLASH_FW_VERIFY:
 	  cmd_flash_fw_verify(&msg);
-	  break;
-
-	case MAVLINK_MSG_ID_FLASH_FW_REQ_BLOCK:
-	  cmd_flash_fw_req_block(&msg);
 	  break;
 
 	case MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK:

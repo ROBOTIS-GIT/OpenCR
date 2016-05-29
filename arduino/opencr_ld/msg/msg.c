@@ -79,9 +79,11 @@ BOOL msg_get_resp( uint8_t chan, mavlink_message_t *p_msg, uint32_t timeout)
   uint8_t ch;
   static mavlink_message_t msg[MSG_CH_MAX];
   static mavlink_status_t status[MSG_CH_MAX];
+  uint32_t retry = timeout;
 
 
-  ser_set_timeout_ms( stm32_ser_id, timeout );
+
+  ser_set_timeout_ms( stm32_ser_id, 1 );
 
   while(1)
   {
@@ -89,12 +91,20 @@ BOOL msg_get_resp( uint8_t chan, mavlink_message_t *p_msg, uint32_t timeout)
 
     if( ch_ret < 0 )
     {
-      ret = FALSE;
-      break;
+      if( retry-- <= 0 )
+      {
+	ret = FALSE;
+	break;
+      }
+      else
+      {
+	continue;
+      }
     }
     else
     {
       ch = (uint8_t)(ch_ret);
+      retry = timeout;
     }
 
     ret = msg_recv( chan, ch, &msg[chan], &status[chan] );

@@ -196,7 +196,7 @@ void USARTx_IRQHandler(void)
   */
 void TIMx_IRQHandler(void)
 {
-  HAL_TIM_IRQHandler(&TimHandle);
+  //HAL_TIM_IRQHandler(&TimHandle);
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -4,41 +4,38 @@
 
 typedef struct MAVLINK_PACKED __mavlink_flash_fw_read_block_t
 {
- uint16_t addr; /*< */
+ uint32_t addr; /*< */
+ uint16_t length; /*< */
  uint8_t resp; /*< 0:No Resp, 1:Resp*/
- uint8_t length; /*< */
- uint8_t data[128]; /*< */
 } mavlink_flash_fw_read_block_t;
 
-#define MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_LEN 132
-#define MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_MIN_LEN 132
-#define MAVLINK_MSG_ID_159_LEN 132
-#define MAVLINK_MSG_ID_159_MIN_LEN 132
+#define MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_LEN 7
+#define MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_MIN_LEN 7
+#define MAVLINK_MSG_ID_159_LEN 7
+#define MAVLINK_MSG_ID_159_MIN_LEN 7
 
-#define MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_CRC 178
-#define MAVLINK_MSG_ID_159_CRC 178
+#define MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_CRC 131
+#define MAVLINK_MSG_ID_159_CRC 131
 
-#define MAVLINK_MSG_FLASH_FW_READ_BLOCK_FIELD_DATA_LEN 128
+
 
 #if MAVLINK_COMMAND_24BIT
 #define MAVLINK_MESSAGE_INFO_FLASH_FW_READ_BLOCK { \
 	159, \
 	"FLASH_FW_READ_BLOCK", \
-	4, \
-	{  { "addr", NULL, MAVLINK_TYPE_UINT16_T, 0, 0, offsetof(mavlink_flash_fw_read_block_t, addr) }, \
-         { "resp", NULL, MAVLINK_TYPE_UINT8_T, 0, 2, offsetof(mavlink_flash_fw_read_block_t, resp) }, \
-         { "length", NULL, MAVLINK_TYPE_UINT8_T, 0, 3, offsetof(mavlink_flash_fw_read_block_t, length) }, \
-         { "data", NULL, MAVLINK_TYPE_UINT8_T, 128, 4, offsetof(mavlink_flash_fw_read_block_t, data) }, \
+	3, \
+	{  { "addr", NULL, MAVLINK_TYPE_UINT32_T, 0, 0, offsetof(mavlink_flash_fw_read_block_t, addr) }, \
+         { "length", NULL, MAVLINK_TYPE_UINT16_T, 0, 4, offsetof(mavlink_flash_fw_read_block_t, length) }, \
+         { "resp", NULL, MAVLINK_TYPE_UINT8_T, 0, 6, offsetof(mavlink_flash_fw_read_block_t, resp) }, \
          } \
 }
 #else
 #define MAVLINK_MESSAGE_INFO_FLASH_FW_READ_BLOCK { \
 	"FLASH_FW_READ_BLOCK", \
-	4, \
-	{  { "addr", NULL, MAVLINK_TYPE_UINT16_T, 0, 0, offsetof(mavlink_flash_fw_read_block_t, addr) }, \
-         { "resp", NULL, MAVLINK_TYPE_UINT8_T, 0, 2, offsetof(mavlink_flash_fw_read_block_t, resp) }, \
-         { "length", NULL, MAVLINK_TYPE_UINT8_T, 0, 3, offsetof(mavlink_flash_fw_read_block_t, length) }, \
-         { "data", NULL, MAVLINK_TYPE_UINT8_T, 128, 4, offsetof(mavlink_flash_fw_read_block_t, data) }, \
+	3, \
+	{  { "addr", NULL, MAVLINK_TYPE_UINT32_T, 0, 0, offsetof(mavlink_flash_fw_read_block_t, addr) }, \
+         { "length", NULL, MAVLINK_TYPE_UINT16_T, 0, 4, offsetof(mavlink_flash_fw_read_block_t, length) }, \
+         { "resp", NULL, MAVLINK_TYPE_UINT8_T, 0, 6, offsetof(mavlink_flash_fw_read_block_t, resp) }, \
          } \
 }
 #endif
@@ -52,25 +49,24 @@ typedef struct MAVLINK_PACKED __mavlink_flash_fw_read_block_t
  * @param resp 0:No Resp, 1:Resp
  * @param addr 
  * @param length 
- * @param data 
  * @return length of the message in bytes (excluding serial stream start sign)
  */
 static inline uint16_t mavlink_msg_flash_fw_read_block_pack(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg,
-						       uint8_t resp, uint16_t addr, uint8_t length, const uint8_t *data)
+						       uint8_t resp, uint32_t addr, uint16_t length)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
 	char buf[MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_LEN];
-	_mav_put_uint16_t(buf, 0, addr);
-	_mav_put_uint8_t(buf, 2, resp);
-	_mav_put_uint8_t(buf, 3, length);
-	_mav_put_uint8_t_array(buf, 4, data, 128);
+	_mav_put_uint32_t(buf, 0, addr);
+	_mav_put_uint16_t(buf, 4, length);
+	_mav_put_uint8_t(buf, 6, resp);
+
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), buf, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_LEN);
 #else
 	mavlink_flash_fw_read_block_t packet;
 	packet.addr = addr;
-	packet.resp = resp;
 	packet.length = length;
-	mav_array_memcpy(packet.data, data, sizeof(uint8_t)*128);
+	packet.resp = resp;
+
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), &packet, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_LEN);
 #endif
 
@@ -87,26 +83,25 @@ static inline uint16_t mavlink_msg_flash_fw_read_block_pack(uint8_t system_id, u
  * @param resp 0:No Resp, 1:Resp
  * @param addr 
  * @param length 
- * @param data 
  * @return length of the message in bytes (excluding serial stream start sign)
  */
 static inline uint16_t mavlink_msg_flash_fw_read_block_pack_chan(uint8_t system_id, uint8_t component_id, uint8_t chan,
 							   mavlink_message_t* msg,
-						           uint8_t resp,uint16_t addr,uint8_t length,const uint8_t *data)
+						           uint8_t resp,uint32_t addr,uint16_t length)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
 	char buf[MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_LEN];
-	_mav_put_uint16_t(buf, 0, addr);
-	_mav_put_uint8_t(buf, 2, resp);
-	_mav_put_uint8_t(buf, 3, length);
-	_mav_put_uint8_t_array(buf, 4, data, 128);
+	_mav_put_uint32_t(buf, 0, addr);
+	_mav_put_uint16_t(buf, 4, length);
+	_mav_put_uint8_t(buf, 6, resp);
+
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), buf, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_LEN);
 #else
 	mavlink_flash_fw_read_block_t packet;
 	packet.addr = addr;
-	packet.resp = resp;
 	packet.length = length;
-	mav_array_memcpy(packet.data, data, sizeof(uint8_t)*128);
+	packet.resp = resp;
+
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), &packet, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_LEN);
 #endif
 
@@ -124,7 +119,7 @@ static inline uint16_t mavlink_msg_flash_fw_read_block_pack_chan(uint8_t system_
  */
 static inline uint16_t mavlink_msg_flash_fw_read_block_encode(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, const mavlink_flash_fw_read_block_t* flash_fw_read_block)
 {
-	return mavlink_msg_flash_fw_read_block_pack(system_id, component_id, msg, flash_fw_read_block->resp, flash_fw_read_block->addr, flash_fw_read_block->length, flash_fw_read_block->data);
+	return mavlink_msg_flash_fw_read_block_pack(system_id, component_id, msg, flash_fw_read_block->resp, flash_fw_read_block->addr, flash_fw_read_block->length);
 }
 
 /**
@@ -138,7 +133,7 @@ static inline uint16_t mavlink_msg_flash_fw_read_block_encode(uint8_t system_id,
  */
 static inline uint16_t mavlink_msg_flash_fw_read_block_encode_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, const mavlink_flash_fw_read_block_t* flash_fw_read_block)
 {
-	return mavlink_msg_flash_fw_read_block_pack_chan(system_id, component_id, chan, msg, flash_fw_read_block->resp, flash_fw_read_block->addr, flash_fw_read_block->length, flash_fw_read_block->data);
+	return mavlink_msg_flash_fw_read_block_pack_chan(system_id, component_id, chan, msg, flash_fw_read_block->resp, flash_fw_read_block->addr, flash_fw_read_block->length);
 }
 
 /**
@@ -148,25 +143,24 @@ static inline uint16_t mavlink_msg_flash_fw_read_block_encode_chan(uint8_t syste
  * @param resp 0:No Resp, 1:Resp
  * @param addr 
  * @param length 
- * @param data 
  */
 #ifdef MAVLINK_USE_CONVENIENCE_FUNCTIONS
 
-static inline void mavlink_msg_flash_fw_read_block_send(mavlink_channel_t chan, uint8_t resp, uint16_t addr, uint8_t length, const uint8_t *data)
+static inline void mavlink_msg_flash_fw_read_block_send(mavlink_channel_t chan, uint8_t resp, uint32_t addr, uint16_t length)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
 	char buf[MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_LEN];
-	_mav_put_uint16_t(buf, 0, addr);
-	_mav_put_uint8_t(buf, 2, resp);
-	_mav_put_uint8_t(buf, 3, length);
-	_mav_put_uint8_t_array(buf, 4, data, 128);
+	_mav_put_uint32_t(buf, 0, addr);
+	_mav_put_uint16_t(buf, 4, length);
+	_mav_put_uint8_t(buf, 6, resp);
+
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK, buf, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_MIN_LEN, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_LEN, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_CRC);
 #else
 	mavlink_flash_fw_read_block_t packet;
 	packet.addr = addr;
-	packet.resp = resp;
 	packet.length = length;
-	mav_array_memcpy(packet.data, data, sizeof(uint8_t)*128);
+	packet.resp = resp;
+
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK, (const char *)&packet, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_MIN_LEN, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_LEN, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_CRC);
 #endif
 }
@@ -179,7 +173,7 @@ static inline void mavlink_msg_flash_fw_read_block_send(mavlink_channel_t chan, 
 static inline void mavlink_msg_flash_fw_read_block_send_struct(mavlink_channel_t chan, const mavlink_flash_fw_read_block_t* flash_fw_read_block)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
-    mavlink_msg_flash_fw_read_block_send(chan, flash_fw_read_block->resp, flash_fw_read_block->addr, flash_fw_read_block->length, flash_fw_read_block->data);
+    mavlink_msg_flash_fw_read_block_send(chan, flash_fw_read_block->resp, flash_fw_read_block->addr, flash_fw_read_block->length);
 #else
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK, (const char *)flash_fw_read_block, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_MIN_LEN, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_LEN, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_CRC);
 #endif
@@ -193,21 +187,21 @@ static inline void mavlink_msg_flash_fw_read_block_send_struct(mavlink_channel_t
   is usually the receive buffer for the channel, and allows a reply to an
   incoming message with minimum stack space usage.
  */
-static inline void mavlink_msg_flash_fw_read_block_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  uint8_t resp, uint16_t addr, uint8_t length, const uint8_t *data)
+static inline void mavlink_msg_flash_fw_read_block_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  uint8_t resp, uint32_t addr, uint16_t length)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
 	char *buf = (char *)msgbuf;
-	_mav_put_uint16_t(buf, 0, addr);
-	_mav_put_uint8_t(buf, 2, resp);
-	_mav_put_uint8_t(buf, 3, length);
-	_mav_put_uint8_t_array(buf, 4, data, 128);
+	_mav_put_uint32_t(buf, 0, addr);
+	_mav_put_uint16_t(buf, 4, length);
+	_mav_put_uint8_t(buf, 6, resp);
+
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK, buf, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_MIN_LEN, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_LEN, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_CRC);
 #else
 	mavlink_flash_fw_read_block_t *packet = (mavlink_flash_fw_read_block_t *)msgbuf;
 	packet->addr = addr;
-	packet->resp = resp;
 	packet->length = length;
-	mav_array_memcpy(packet->data, data, sizeof(uint8_t)*128);
+	packet->resp = resp;
+
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK, (const char *)packet, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_MIN_LEN, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_LEN, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_CRC);
 #endif
 }
@@ -225,7 +219,7 @@ static inline void mavlink_msg_flash_fw_read_block_send_buf(mavlink_message_t *m
  */
 static inline uint8_t mavlink_msg_flash_fw_read_block_get_resp(const mavlink_message_t* msg)
 {
-	return _MAV_RETURN_uint8_t(msg,  2);
+	return _MAV_RETURN_uint8_t(msg,  6);
 }
 
 /**
@@ -233,9 +227,9 @@ static inline uint8_t mavlink_msg_flash_fw_read_block_get_resp(const mavlink_mes
  *
  * @return 
  */
-static inline uint16_t mavlink_msg_flash_fw_read_block_get_addr(const mavlink_message_t* msg)
+static inline uint32_t mavlink_msg_flash_fw_read_block_get_addr(const mavlink_message_t* msg)
 {
-	return _MAV_RETURN_uint16_t(msg,  0);
+	return _MAV_RETURN_uint32_t(msg,  0);
 }
 
 /**
@@ -243,19 +237,9 @@ static inline uint16_t mavlink_msg_flash_fw_read_block_get_addr(const mavlink_me
  *
  * @return 
  */
-static inline uint8_t mavlink_msg_flash_fw_read_block_get_length(const mavlink_message_t* msg)
+static inline uint16_t mavlink_msg_flash_fw_read_block_get_length(const mavlink_message_t* msg)
 {
-	return _MAV_RETURN_uint8_t(msg,  3);
-}
-
-/**
- * @brief Get field data from flash_fw_read_block message
- *
- * @return 
- */
-static inline uint16_t mavlink_msg_flash_fw_read_block_get_data(const mavlink_message_t* msg, uint8_t *data)
-{
-	return _MAV_RETURN_uint8_t_array(msg, data, 128,  4);
+	return _MAV_RETURN_uint16_t(msg,  4);
 }
 
 /**
@@ -268,9 +252,8 @@ static inline void mavlink_msg_flash_fw_read_block_decode(const mavlink_message_
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
 	flash_fw_read_block->addr = mavlink_msg_flash_fw_read_block_get_addr(msg);
-	flash_fw_read_block->resp = mavlink_msg_flash_fw_read_block_get_resp(msg);
 	flash_fw_read_block->length = mavlink_msg_flash_fw_read_block_get_length(msg);
-	mavlink_msg_flash_fw_read_block_get_data(msg, flash_fw_read_block->data);
+	flash_fw_read_block->resp = mavlink_msg_flash_fw_read_block_get_resp(msg);
 #else
         uint8_t len = msg->len < MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_LEN? msg->len : MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_LEN;
         memset(flash_fw_read_block, 0, MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_LEN);
