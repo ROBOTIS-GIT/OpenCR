@@ -25,6 +25,9 @@ typedef uint16_t err_code_t;
 #define ERR_FLASH_WRITE                     0x0014
 #define ERR_FLASH_READ                      0x0015
 #define ERR_FLASH_ERASE                     0x0016
+#define ERR_FLASH_PACKET_SIZE               0x0017
+#define ERR_FLASH_SIZE         		    0x0018
+
 
 
 #endif

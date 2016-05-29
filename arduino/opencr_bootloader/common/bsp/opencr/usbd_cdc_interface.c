@@ -31,8 +31,8 @@
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 #define APP_RX_BUF_SIZE   (1024*16)
-#define APP_RX_DATA_SIZE  1024
-#define APP_TX_DATA_SIZE  2048
+#define APP_RX_DATA_SIZE  (1024)
+#define APP_TX_DATA_SIZE  (1024)
 
 
 
@@ -63,7 +63,6 @@ volatile uint32_t rxd_BufPtrIn  = 0;
 volatile uint32_t rxd_BufPtrOut = 0;
 
 
-TIM_HandleTypeDef  TimHandle;
 /* USB handler declaration */
 extern USBD_HandleTypeDef  USBD_Device;
 
@@ -73,9 +72,8 @@ static int8_t CDC_Itf_DeInit(void);
 static int8_t CDC_Itf_Control(uint8_t cmd, uint8_t* pbuf, uint16_t length);
 static int8_t CDC_Itf_Receive(uint8_t* pbuf, uint32_t *Len);
 
-static void Error_Handler(void);
-static void ComPort_Config(void);
-static void TIM_Config(void);
+
+
 
 USBD_CDC_ItfTypeDef USBD_CDC_fops = 
 {
@@ -95,18 +93,6 @@ USBD_CDC_ItfTypeDef USBD_CDC_fops =
   */
 static int8_t CDC_Itf_Init(void)
 {
-  /*##-3- Configure the TIM Base generation  #################################*/
-  TIM_Config();
-
-  /*##-4- Start the TIM Base generation in interrupt mode ####################*/
-  /* Start Channel1 */
-  if(HAL_TIM_Base_Start_IT(&TimHandle) != HAL_OK)
-  {
-    /* Starting Error */
-    Error_Handler();
-  }
-
-  /*##-5- Set Application Buffers ############################################*/
   USBD_CDC_SetTxBuffer(&USBD_Device, UserTxBuffer, 0);
   USBD_CDC_SetRxBuffer(&USBD_Device, UserRxBuffer);
   
@@ -193,50 +179,6 @@ static int8_t CDC_Itf_Control (uint8_t cmd, uint8_t* pbuf, uint16_t length)
 
 
 /**
-  * @brief  TIM period elapsed callback
-  * @param  htim: TIM handle
-  * @retval None
-  */
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-  uint32_t buffptr;
-  uint32_t buffsize;
-
-  if(UserTxBufPtrOut != UserTxBufPtrIn)
-  {
-    if(UserTxBufPtrOut > UserTxBufPtrIn) /* Roll-back */
-    {
-      buffsize = APP_RX_DATA_SIZE - UserTxBufPtrOut;
-    }
-    else
-    {
-      buffsize = UserTxBufPtrIn - UserTxBufPtrOut;
-    }
-
-    //if( buffsize > 64 ) buffsize = 64;
-
-    buffptr = UserTxBufPtrOut;
-
-    USBD_CDC_SetTxBuffer(&USBD_Device, (uint8_t*)&UserTxBuffer[buffptr], buffsize);
-
-    if(USBD_CDC_TransmitPacket(&USBD_Device) == USBD_OK)
-    {
-      UserTxBufPtrOut += buffsize;
-      if (UserTxBufPtrOut == APP_RX_DATA_SIZE)
-      {
-        UserTxBufPtrOut = 0;
-      }
-      is_opened = TRUE;
-    }
-    else
-    {
-      is_opened = FALSE;
-    }
-  }
-}
-
-
-/**
   * @brief  CDC_Itf_DataRx
   *         Data received over USB OUT endpoint are sent over CDC interface 
   *         through this function.
@@ -267,116 +209,70 @@ static int8_t CDC_Itf_Receive(uint8_t* Buf, uint32_t *Len)
   return (USBD_OK);
 }
 
-/**
-  * @brief  TIM_Config: Configure TIMx timer
-  * @param  None.
-  * @retval None
-  */
-static void TIM_Config(void)
-{
-  /* Set TIMx instance */
-  TimHandle.Instance = TIMx;
 
-  /* Initialize TIM3 peripheral as follow:
-       + Period = 10000 - 1
-       + Prescaler = ((SystemCoreClock/2)/10000) - 1
-       + ClockDivision = 0
-       + Counter direction = Up
-  */
-  TimHandle.Init.Period = (CDC_POLLING_INTERVAL*1000) - 1;
-  TimHandle.Init.Prescaler = 84-1;
-  TimHandle.Init.ClockDivision = 0;
-  TimHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
-  if(HAL_TIM_Base_Init(&TimHandle) != HAL_OK)
-  {
-    /* Initialization Error */
-    Error_Handler();
-  }
-}
-
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @param  None
-  * @retval None
-  */
-static void Error_Handler(void)
-{
-  /* Add your own code here */
-}
-
-
+/*---------------------------------------------------------------------------
+     TITLE   : CDC_Itf_Write
+     WORK    :
+---------------------------------------------------------------------------*/
 void CDC_Itf_Write( uint8_t *p_buf, uint32_t length )
 {
   uint32_t i;
   uint32_t remain_length = 0;
   uint32_t tx_length = 0;
-  uint32_t tx_index = 0;
+  uint32_t write_length;
+  uint32_t written_length;
+  uint32_t tTime;
+  uint32_t time_out = 1000;
+
 
   if( USBD_Device.dev_config == 0 || is_opened == FALSE ) return;
 
-#if 0
-  for( i=0; i<length; i++ )
-  {
-    /* Increment Index for buffer writing */
-    UserTxBufPtrIn++;
 
-    /* To avoid buffer overflow */
-    if(UserTxBufPtrIn == APP_RX_DATA_SIZE)
-    {
-      UserTxBufPtrIn = 0;
-    }
-    UserTxBuffer[UserTxBufPtrIn] = p_buf[i];
-  }
+  tTime = millis();
 
+  written_length = 0;
   while(1)
   {
-    if( UserTxBufPtrIn == UserTxBufPtrOut ) break;
-    if( is_opened == FALSE ) break;
-  }
-#else
+    write_length = length - written_length;
 
-  remain_length = length;
-
-  while(1)
-  {
-    if( remain_length > APP_TX_DATA_SIZE )  tx_length = APP_TX_DATA_SIZE;
-    else                                    tx_length = remain_length;
-
-    __disable_irq();
-    for( i=0; i<tx_length; i++ )
-    {
-      UserTxBuffer[UserTxBufPtrIn] = p_buf[tx_index++];
-
-      /* Increment Index for buffer writing */
-      UserTxBufPtrIn++;
-
-      /* To avoid buffer overflow */
-      if(UserTxBufPtrIn == APP_RX_DATA_SIZE)
-      {
-        UserTxBufPtrIn = 0;
-      }
-
-      if( tx_index == length )
-      {
-	__enable_irq();
-	return;
-      }
-    }
-    __enable_irq();
+    if( write_length > APP_TX_DATA_SIZE )  write_length = APP_TX_DATA_SIZE;
 
 
-    remain_length -= tx_length;
+    memcpy( UserTxBuffer, &p_buf[written_length], write_length );
+
+
+
+    USBD_CDC_SetTxBuffer(&USBD_Device, UserTxBuffer, write_length);
+
 
     while(1)
     {
-      if( UserTxBufPtrIn == UserTxBufPtrOut ) return;
-      if( is_opened == FALSE ) return;
+      if(USBD_CDC_TransmitPacket(&USBD_Device) == USBD_OK)
+      {
+	written_length += write_length;
+	is_opened = TRUE;
+	break;
+      }
+      else
+      {
+	if( (millis()-tTime) > time_out )
+	{
+	  is_opened = FALSE;
+	  break;
+	}
+      }
     }
+
+    if( (millis()-tTime) > time_out ) break;
+    if( written_length >= length ) break;
   }
-#endif
 }
 
 
+/*---------------------------------------------------------------------------
+     TITLE   : CDC_Itf_IsAvailable
+     WORK    :
+---------------------------------------------------------------------------*/
 BOOL CDC_Itf_IsAvailable( void )
 {
   if( rxd_BufPtrIn != rxd_BufPtrOut ) return TRUE;
@@ -385,6 +281,10 @@ BOOL CDC_Itf_IsAvailable( void )
 }
 
 
+/*---------------------------------------------------------------------------
+     TITLE   : CDC_Itf_Getch
+     WORK    :
+---------------------------------------------------------------------------*/
 uint8_t CDC_Itf_Getch( void )
 {
   uint8_t ch = 0;
@@ -402,11 +302,13 @@ uint8_t CDC_Itf_Getch( void )
 
   ch = rxd_buffer[buffptr];
 
+  __disable_irq();
   rxd_BufPtrOut += 1;
   if (rxd_BufPtrOut == APP_RX_BUF_SIZE)
   {
     rxd_BufPtrOut = 0;
   }
+  __enable_irq();
 
   return ch;
 }

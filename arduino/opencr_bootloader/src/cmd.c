@@ -22,7 +22,7 @@
 #define FLASH_CONFIG_ADDR_START		0x08010000
 #define FLASH_CONFIG_ADDR_END		(FLASH_CONFIG_ADDR_START + FLASH_CONFIG_SIZE)
 
-
+#define FLASH_BLOCK_PACKET_LENGTH	128
 #define FLASH_BLOCK_MAX_LENGTH		(16*1024)
 
 
@@ -64,7 +64,7 @@ void resp_ack( uint8_t ch, mavlink_ack_t *p_ack )
   mavlink_message_t mav_msg;
 
 
-  mavlink_msg_ack_pack_chan(0, 0, ch, &mav_msg, p_ack->msg_id, p_ack->err_code, p_ack->param);
+  mavlink_msg_ack_pack_chan(0, 0, ch, &mav_msg, p_ack->msg_id, p_ack->err_code, p_ack->length, p_ack->data);
 
   msg_send( ch, &mav_msg);
 }
@@ -87,37 +87,42 @@ void cmd_read_version( msg_t *p_msg )
   {
     mav_ack.msg_id   = p_msg->p_msg->msgid;
     mav_ack.err_code = err_code;
-    mav_ack.param[0] = boot_version;
-    mav_ack.param[1] = boot_version>>8;
-    mav_ack.param[2] = boot_version>>16;
-    mav_ack.param[3] = boot_version>>24;
-    mav_ack.param[4] = app_version;
-    mav_ack.param[5] = app_version>>8;
-    mav_ack.param[6] = app_version>>16;
-    mav_ack.param[7] = app_version>>24;
-
+    mav_ack.data[0] = boot_version;
+    mav_ack.data[1] = boot_version>>8;
+    mav_ack.data[2] = boot_version>>16;
+    mav_ack.data[3] = boot_version>>24;
+    mav_ack.data[4] = app_version;
+    mav_ack.data[5] = app_version>>8;
+    mav_ack.data[6] = app_version>>16;
+    mav_ack.data[7] = app_version>>24;
+    mav_ack.length  = 8;
     resp_ack(p_msg->ch, &mav_ack);
   }
 }
 
 
-//-- cmd_flash_fw_send_block
+//-- cmd_flash_fw_write_packet
 //
-void cmd_flash_fw_send_block( msg_t *p_msg )
+void cmd_flash_fw_write_packet( msg_t *p_msg )
 {
   err_code_t err_code = OK;
   mavlink_ack_t     mav_ack;
-  mavlink_flash_fw_send_block_t mav_data;
+  mavlink_flash_fw_write_packet_t mav_data;
 
+  mavlink_msg_flash_fw_write_packet_decode(p_msg->p_msg, &mav_data);
 
-  mavlink_msg_flash_fw_send_block_decode(p_msg->p_msg, &mav_data);
-
+  if((flash_block.length_received + mav_data.length) <= FLASH_BLOCK_MAX_LENGTH)
+  {
+    memcpy(&flash_block.data[flash_block.length_received], &mav_data.data[0], mav_data.length);
+  }
 
   flash_block.count += 1;
   flash_block.length_received  += mav_data.length;
 
   flash_block.count_total += 1;
   flash_block.length_total  += mav_data.length;
+
+
 
   if( mav_data.resp == 1 )
   {
@@ -172,12 +177,13 @@ void cmd_flash_fw_write_end( msg_t *p_msg )
   {
     mav_ack.msg_id   = p_msg->p_msg->msgid;
     mav_ack.err_code = err_code;
-    mav_ack.param[0] = flash_block.count_total;
-    mav_ack.param[1] = flash_block.count_total>>8;
-    mav_ack.param[2] = flash_block.length_total;
-    mav_ack.param[3] = flash_block.length_total>>8;
-    mav_ack.param[4] = flash_block.length_total>>16;
-    mav_ack.param[5] = flash_block.length_total>>24;
+    mav_ack.data[0] = flash_block.count_total;
+    mav_ack.data[1] = flash_block.count_total>>8;
+    mav_ack.data[2] = flash_block.length_total;
+    mav_ack.data[3] = flash_block.length_total>>8;
+    mav_ack.data[4] = flash_block.length_total>>16;
+    mav_ack.data[5] = flash_block.length_total>>24;
+    mav_ack.length  = 6;
 
     resp_ack(p_msg->ch, &mav_ack);
   }
@@ -203,7 +209,7 @@ void cmd_flash_fw_write_block( msg_t *p_msg )
   // flash_block.data[] : 저장할 데이터 버퍼
   //
 
-	flash_write(mav_data.addr,flash_block.data, mav_data.length);
+  err_code = flash_write( FLASH_FW_ADDR_START + mav_data.addr,flash_block.data, mav_data.length);
 
   //------------------------------------------------------
 
@@ -234,8 +240,14 @@ void cmd_flash_fw_erase( msg_t *p_msg )
   // TODO ------------------------------------------------
   // 플래시에 펌웨어 영역 768KB의 영역을 지운다.
 
-
-	flash_erase_fw_block();
+  if( mav_data.length > FLASH_FW_SIZE )
+  {
+    err_code = ERR_FLASH_SIZE;
+  }
+  else
+  {
+    err_code = flash_erase_fw_block( mav_data.length );
+  }
 
 
   //------------------------------------------------------
@@ -272,47 +284,100 @@ void cmd_flash_fw_verify( msg_t *p_msg )
   }
 }
 
-//-- cmd_flash_fw_req_block
+
+//-- cmd_flash_fw_read_packet
 //
-void cmd_flash_fw_req_block( msg_t *p_msg )
+void cmd_flash_fw_read_packet( uint8_t ch, mavlink_flash_fw_read_packet_t *p_msg )
 {
-  err_code_t err_code = OK;
-  mavlink_ack_t     mav_ack;
-  mavlink_flash_fw_req_block_t mav_data;
+  mavlink_message_t mav_msg;
 
 
-  mavlink_msg_flash_fw_req_block_decode(p_msg->p_msg, &mav_data);
-
-
-  if( mav_data.resp == 1 )
-  {
-    mav_ack.msg_id   = p_msg->p_msg->msgid;
-    mav_ack.err_code = err_code;
-    resp_ack(p_msg->ch, &mav_ack);
-  }
+  mavlink_msg_flash_fw_read_packet_pack_chan(0, 0, ch, &mav_msg, p_msg->resp, p_msg->addr, p_msg->length, p_msg->data);
+  msg_send( ch, &mav_msg);
 }
 
 
 //-- cmd_flash_fw_read_block
 //
+#if 0
 void cmd_flash_fw_read_block( msg_t *p_msg )
 {
   err_code_t err_code = OK;
-  mavlink_ack_t     mav_ack;
+  mavlink_flash_fw_read_t       mav_resp;
   mavlink_flash_fw_read_block_t mav_data;
+  uint16_t block_cnt = 0;
+  uint16_t i;
+  uint8_t *p_fw = (uint8_t *)FLASH_FW_ADDR_START;
 
 
   mavlink_msg_flash_fw_read_block_decode(p_msg->p_msg, &mav_data);
 
 
+  flash_block.length_received = 0;
+  flash_block.length_total    = mav_data.length;
 
   if( mav_data.resp == 1 )
   {
-    mav_ack.msg_id   = p_msg->p_msg->msgid;
-    mav_ack.err_code = err_code;
-    resp_ack(p_msg->ch, &mav_ack);
+    if( mav_data.length > FLASH_BLOCK_MAX_LENGTH )
+    {
+      mav_data.length = FLASH_BLOCK_MAX_LENGTH;
+    }
+
+    memcpy(flash_block.data, &p_fw[mav_data.addr], mav_data.length );
+
+
+    block_cnt = mav_data.length/FLASH_BLOCK_PACKET_LENGTH;
+
+    if( (block_cnt%FLASH_BLOCK_PACKET_LENGTH) > 0 )
+    {
+      block_cnt += 1;
+    }
+
+    for(i=0; i<block_cnt; i++)
+    {
+      flash_block.length = flash_block.length_total - flash_block.length_received;
+      if( flash_block.length > FLASH_BLOCK_PACKET_LENGTH )
+      {
+	flash_block.length = FLASH_BLOCK_PACKET_LENGTH;
+      }
+
+      mav_resp.addr   = flash_block.length_received;
+      mav_resp.length = flash_block.length;
+
+      memcpy(&mav_resp.data[0], &flash_block.data[0], flash_block.length);
+
+      cmd_flash_fw_read(p_msg->ch, &mav_resp);
+    }
   }
 }
+#else
+void cmd_flash_fw_read_block( msg_t *p_msg )
+{
+  err_code_t err_code = OK;
+  mavlink_flash_fw_read_packet_t  mav_resp;
+  mavlink_flash_fw_read_block_t   mav_data;
+  uint16_t block_cnt = 0;
+  uint16_t i;
+  uint8_t *p_fw = (uint8_t *)FLASH_FW_ADDR_START;
+
+
+  mavlink_msg_flash_fw_read_block_decode(p_msg->p_msg, &mav_data);
+
+
+  flash_block.length_received = 0;
+  flash_block.length_total    = mav_data.length;
+
+  if( mav_data.resp == 1 )
+  {
+    mav_resp.addr   = mav_data.addr;
+    mav_resp.length = mav_data.length;
+
+    memcpy(mav_resp.data, &p_fw[mav_data.addr], mav_data.length );
+
+    cmd_flash_fw_read_packet(p_msg->ch, &mav_resp);
+  }
+}
+#endif
 
 
 //-- cmd_jump_to_fw

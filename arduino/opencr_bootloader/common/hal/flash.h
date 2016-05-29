@@ -31,7 +31,7 @@ err_code_t flash_write(uint32_t addr, uint8_t *p_data, uint32_t length);
 err_code_t flash_read(uint32_t addr, uint8_t *p_data, uint32_t length);
 err_code_t flash_erase_whole_sectors(void);
 err_code_t flash_erase_sector(uint32_t sector);
-err_code_t flash_erase_fw_block(void);
+err_code_t flash_erase_fw_block(uint32_t length);
 
 
 #ifdef __cplusplus

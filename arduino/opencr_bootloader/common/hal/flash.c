@@ -91,20 +91,31 @@ err_code_t flash_erase_whole_sectors(void)
   return err_code;
 }
 
-err_code_t flash_erase_fw_block(void)
+err_code_t flash_erase_fw_block( uint32_t length )
 {
 
   err_code_t err_code = OK;
   HAL_StatusTypeDef HAL_FLASHStatus = HAL_OK;
   FLASH_EraseInitTypeDef pEraseInit;
   uint32_t SectorError;
+  uint32_t sector_cnt;
 
+
+  sector_cnt = length/(256*1024);
+  if( length%(256*1024) > 0 )
+  {
+    sector_cnt++;
+  }
+  if( sector_cnt > (FLASH_SECTOR_TOTAL-FLASH_SECTOR_5) )
+  {
+    sector_cnt = (FLASH_SECTOR_TOTAL-FLASH_SECTOR_5);
+  }
 
   //except user bootloader sectors
   pEraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
   pEraseInit.VoltageRange = FLASH_VOLTAGE_RANGE_3;
-  pEraseInit.Sector = FLASH_SECTOR_4;
-  pEraseInit.NbSectors = FLASH_SECTOR_TOTAL - FLASH_SECTOR_4;
+  pEraseInit.Sector = FLASH_SECTOR_5;
+  pEraseInit.NbSectors = sector_cnt;
 
   HAL_FLASH_Unlock();
 

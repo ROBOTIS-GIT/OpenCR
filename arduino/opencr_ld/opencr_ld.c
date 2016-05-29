@@ -15,28 +15,46 @@
 ser_handler stm32_ser_id = ( ser_handler )-1;
 
 
-int opencr_ld_init( const char *portname, u32 baud );
+#define GET_CALC_TIME(x)	( (int)(x / 1000) + ((float)(x % 1000))/1000 )
 
+#define FLASH_TX_BLOCK_LENGTH	(8*1024)
+#define FLASH_RX_BLOCK_LENGTH	(128)
+#define FLASH_PACKET_LENGTH   	128
+
+
+uint32_t tx_buf[768*1024/4];
+uint32_t rx_buf[768*1024/4];
+
+
+
+int opencr_ld_init( const char *portname, u32 baud );
+int opencr_ld_flash_write( uint32_t addr, uint8_t *p_data, uint32_t length  );
+int opencr_ld_flash_read( uint32_t addr, uint8_t *p_data, uint32_t length  );
+int opencr_ld_flash_erase( uint32_t length  );
+
+
+static long iclock();
 int read_byte( void );
+void delay_ms( int WaitTime );
+
 err_code_t cmd_read_version( void );
+err_code_t cmd_flash_fw_erase( uint32_t length );
 err_code_t cmd_flash_fw_write_begin( void );
 err_code_t cmd_flash_fw_write_end( void );
-err_code_t cmd_flash_fw_send_block( void );
-err_code_t cmd_flash_fw_write_block( void );
+err_code_t cmd_flash_fw_write_packet( uint16_t addr, uint8_t *p_data, uint8_t length );
+err_code_t cmd_flash_fw_write_block( uint32_t addr, uint32_t length  );
 err_code_t cmd_flash_fw_send_block_multi( uint8_t block_count );
+err_code_t cmd_flash_fw_read_block( uint32_t addr, uint8_t *p_data, uint16_t length );
 
 
 
-static long myclock()
-{
-	struct timeval tv;
-	gettimeofday (&tv, NULL);
-	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
-}
 
 
-//-- opencr_ld_main
-//
+
+/*---------------------------------------------------------------------------
+     TITLE   : opencr_ld_main
+     WORK    :
+---------------------------------------------------------------------------*/
 int opencr_ld_main( int argc, const char **argv )
 {
   long baud;
@@ -50,62 +68,20 @@ int opencr_ld_main( int argc, const char **argv )
 }
 
 
-//-- delay_ms
-//
-void delay_ms( int WaitTime )
-{
-  int i;
-
-  #ifdef WIN32_BUILD
-  Sleep(WaitTime);
-  #else
-  for( i=0; i<WaitTime; i++ )
-  {
-    usleep(1000);
-  }
-  #endif
-}
-
-
 /*---------------------------------------------------------------------------
-     TITLE   : read_byte
+     TITLE   : opencr_ld_init
      WORK    :
-     ARG     : void
-     RET     : void
----------------------------------------------------------------------------*/
-int read_byte( void )
-{
-  return ser_read_byte( stm32_ser_id );
-}
-
-
-/*---------------------------------------------------------------------------
-     TITLE   : write_bytes
-     WORK    :
-     ARG     : void
-     RET     : void
----------------------------------------------------------------------------*/
-int write_bytes( char *p_data, int len )
-{
-  int written_len;
-
-  written_len = ser_write( stm32_ser_id, (const u8 *)p_data, len );
-
-  return written_len;
-}
-
-
-/*---------------------------------------------------------------------------
-     TITLE   : OpenCM_Cmd_Init
-     WORK    :
-     ARG     : void
-     RET     : void
 ---------------------------------------------------------------------------*/
 int opencr_ld_init( const char *portname, u32 baud )
 {
   int i;
   int j;
+  int ret;
   err_code_t err_code = OK;
+  long t, dt;
+  float calc_time;
+  uint32_t fw_size = 256*1024*1;
+
 
 
   // Open port
@@ -127,45 +103,292 @@ int opencr_ld_init( const char *portname, u32 baud )
 
 
 
-  printf("send cmd\r\n");
 
-  cmd_read_version();
-  err_code = cmd_flash_fw_write_begin();
-  if( err_code != OK ) printf("cmd_flash_fw_write_begin ERR : 0x%04X\r\n", err_code);
+  err_code = cmd_read_version();
 
-  long t, dt;
-  float calc_time;
-  t = myclock();
+  t = iclock();
+  ret = opencr_ld_flash_erase(fw_size);
+  dt = iclock() - t;
+  printf("cmd_flash_fw_erase : %d : %f sec\r\n", ret, GET_CALC_TIME(dt));
 
-  for( j=0; j<96; j++ )
+
+
+  for( i=0; i<FLASH_TX_BLOCK_LENGTH/4; i++ )
   {
-    for( i=0; i<64; i++ )
+    tx_buf[i] = i;
+  }
+
+  t = iclock();
+  ret = opencr_ld_flash_write( 0, (uint8_t *)tx_buf, fw_size );
+  dt = iclock() - t;
+
+
+  calc_time = GET_CALC_TIME(dt);
+  printf("opencr_ld_flash_write : %d : %f sec, %f KB/s\n", ret, calc_time, (fw_size/1024/calc_time) );
+
+  memset(rx_buf, 0, 768*1024);
+  t = iclock();
+  ret = opencr_ld_flash_read( 0, (uint8_t *)rx_buf, fw_size );
+  dt = iclock() - t;
+
+  ret = 0;
+  for( i=0; i<fw_size/4; i++ )
+  {
+    if( tx_buf[i] != rx_buf[i] )
     {
-      cmd_flash_fw_send_block();
-    }
-    err_code = cmd_flash_fw_write_block();
-    if( err_code != OK )
-    {
-      printf("ERR : 0x%04X\r\n", err_code);
+      printf("Compare Error : 0x%X \r\n", i*4);
+      ret = -1;
       break;
     }
   }
+  if( ret == 0 )
+  {
+    printf("Compare OK \r\n");
+  }
 
-  cmd_flash_fw_write_end();
 
-  dt = myclock() - t;
+  printf("opencr_ld_flash_read : %d : %f sec \r\n", ret,  GET_CALC_TIME(dt));
 
 
   ser_close( stm32_ser_id );
-  calc_time = (int)(dt / 1000) + ((float)(dt % 1000))/1000;
-  printf("end %f sec, %f KB/s\n", calc_time, (768/calc_time) );
-
-
 
   return TRUE;
 }
 
 
+/*---------------------------------------------------------------------------
+     TITLE   : opencr_ld_flash_write
+     WORK    :
+---------------------------------------------------------------------------*/
+int opencr_ld_flash_write( uint32_t addr, uint8_t *p_data, uint32_t length  )
+{
+  int ret = 0;
+  err_code_t err_code = OK;
+  uint32_t block_length;
+  uint16_t block_cnt;
+  uint32_t written_packet_length;
+  uint32_t written_total_length;
+  uint32_t packet_length = 128;
+  uint32_t i;
+
+
+  err_code = cmd_flash_fw_write_begin();
+  if( err_code != OK )
+  {
+    printf("cmd_flash_fw_write_begin ERR : 0x%04X\r\n", err_code);
+    return -1;
+  }
+
+  written_total_length = 0;
+
+  while(1)
+  {
+    block_length = length - written_total_length;
+
+    if( block_length > FLASH_TX_BLOCK_LENGTH )
+    {
+      block_length = FLASH_TX_BLOCK_LENGTH;
+    }
+
+    block_cnt = block_length/FLASH_PACKET_LENGTH;
+    if( block_length%FLASH_PACKET_LENGTH > 0 )
+    {
+      block_cnt += 1;
+    }
+
+
+    written_packet_length = 0;
+    for( i=0; i<block_cnt; i++ )
+    {
+      packet_length = block_length - written_packet_length;
+      if( packet_length > FLASH_PACKET_LENGTH )
+      {
+	packet_length = FLASH_PACKET_LENGTH;
+      }
+
+      err_code = cmd_flash_fw_write_packet(written_packet_length, &p_data[written_total_length+written_packet_length], packet_length);
+      if( err_code != OK )
+      {
+	printf("cmd_flash_fw_send_block ERR : 0x%04X\r\n", err_code);
+	return -2;
+      }
+
+      written_packet_length += packet_length;
+    }
+
+    //printf("%d : %d, %d, %d \r\n", written_packet_length, block_length, block_cnt, packet_length);
+
+    if( written_packet_length == block_length )
+    {
+      err_code = cmd_flash_fw_write_block(addr+written_total_length, block_length);
+      if( err_code != OK )
+      {
+	printf("cmd_flash_fw_write_block ERR : 0x%04X\r\n", err_code);
+	return -3;
+      }
+    }
+    else
+    {
+      printf("written_packet_length : %d, %d 0x%04X\r\n", written_packet_length, block_length, err_code);
+      return -4;
+    }
+
+    written_total_length += block_length;
+
+    if( written_total_length == length )
+    {
+      break;
+    }
+    else if( written_total_length > length )
+    {
+      printf("written_total_length over \r\n");
+      return -5;
+    }
+  }
+
+
+  cmd_flash_fw_write_end();
+
+  return ret;
+}
+
+
+/*---------------------------------------------------------------------------
+     TITLE   : opencr_ld_flash_read
+     WORK    :
+---------------------------------------------------------------------------*/
+int opencr_ld_flash_read( uint32_t addr, uint8_t *p_data, uint32_t length  )
+{
+  int ret = 0;
+  err_code_t err_code = OK;
+  uint32_t block_length;
+  uint32_t read_packet_length;
+  uint32_t read_total_length;
+  int i;
+  int err_count = 0;
+
+  read_total_length = 0;
+
+  while(1)
+  {
+    block_length = length - read_total_length;
+
+    if( block_length > FLASH_PACKET_LENGTH )
+    {
+      block_length = FLASH_PACKET_LENGTH;
+    }
+
+
+    for( i=0; i<3; i++ )
+    {
+      err_code = cmd_flash_fw_read_block( addr+read_total_length, &p_data[read_total_length], block_length );
+      if( err_code == OK ) break;
+      err_count++;
+    }
+
+
+    if( err_code != OK )
+    {
+      printf("cmd_flash_fw_read_block : addr:%X, 0x%04X \r\n", addr+read_total_length, err_code);
+      return -1;
+    }
+
+    read_total_length += block_length;
+
+    if( read_total_length == length )
+    {
+      break;
+    }
+    else if( read_total_length > length )
+    {
+      printf("read_total_length over \r\n");
+      return -2;
+    }
+  }
+
+  return ret;
+}
+
+
+/*---------------------------------------------------------------------------
+     TITLE   : opencr_ld_flash_erase
+     WORK    :
+---------------------------------------------------------------------------*/
+int opencr_ld_flash_erase( uint32_t length  )
+{
+  int ret = 0;
+  err_code_t err_code = OK;
+
+  err_code = cmd_flash_fw_erase( length );
+
+  if( err_code != OK )
+  {
+    printf("cmd_flash_fw_erase_block : 0x%04X %d\r\n", err_code, length );
+    return -1;
+  }
+
+  return ret;
+}
+
+
+
+static long iclock()
+{
+	struct timeval tv;
+	gettimeofday (&tv, NULL);
+	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
+}
+
+
+/*---------------------------------------------------------------------------
+     TITLE   : delay_ms
+     WORK    :
+---------------------------------------------------------------------------*/
+void delay_ms( int WaitTime )
+{
+  int i;
+
+  #ifdef WIN32_BUILD
+  Sleep(WaitTime);
+  #else
+  for( i=0; i<WaitTime; i++ )
+  {
+    usleep(1000);
+  }
+  #endif
+}
+
+
+/*---------------------------------------------------------------------------
+     TITLE   : read_byte
+     WORK    :
+---------------------------------------------------------------------------*/
+int read_byte( void )
+{
+  return ser_read_byte( stm32_ser_id );
+}
+
+
+/*---------------------------------------------------------------------------
+     TITLE   : write_bytes
+     WORK    :
+---------------------------------------------------------------------------*/
+int write_bytes( char *p_data, int len )
+{
+  int written_len;
+
+  written_len = ser_write( stm32_ser_id, (const u8 *)p_data, len );
+
+  return written_len;
+}
+
+
+
+
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_read_version
+     WORK    :
+---------------------------------------------------------------------------*/
 err_code_t cmd_read_version( void )
 {
   err_code_t err_code = OK;
@@ -185,7 +408,7 @@ err_code_t cmd_read_version( void )
     {
       mavlink_msg_ack_decode( &rx_msg, &ack_msg);
 
-      printf("BootVersion : 0x%08X\r\n", ack_msg.param[3]<<24|ack_msg.param[2]<<16|ack_msg.param[1]<<8|ack_msg.param[0]);
+      printf("BootVersion : 0x%08X\r\n", ack_msg.data[3]<<24|ack_msg.data[2]<<16|ack_msg.data[1]<<8|ack_msg.data[0]);
       if( tx_msg.msgid == ack_msg.msg_id ) err_code = ack_msg.err_code;
       else                                 err_code = ERR_MISMATCH_ID;
     }
@@ -199,6 +422,45 @@ err_code_t cmd_read_version( void )
 }
 
 
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_flash_fw_erase
+     WORK    :
+---------------------------------------------------------------------------*/
+err_code_t cmd_flash_fw_erase( uint32_t length )
+{
+  err_code_t err_code = OK;
+  mavlink_message_t tx_msg;
+  mavlink_message_t rx_msg;
+  mavlink_ack_t     ack_msg;
+  uint8_t param[8];
+  uint8_t resp = 1;
+
+
+  mavlink_msg_flash_fw_erase_pack(0, 0, &tx_msg, resp, length, param);
+  msg_send(0, &tx_msg);
+
+  if( resp == 1 )
+  {
+    if( msg_get_resp(0, &rx_msg, 3000) == TRUE )
+    {
+      mavlink_msg_ack_decode( &rx_msg, &ack_msg);
+
+      if( tx_msg.msgid == ack_msg.msg_id ) err_code = ack_msg.err_code;
+      else                                 err_code = ERR_MISMATCH_ID;
+    }
+    else
+    {
+      err_code = ERR_TIMEOUT;
+    }
+  }
+
+  return err_code;
+}
+
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_flash_fw_write_begin
+     WORK    :
+---------------------------------------------------------------------------*/
 err_code_t cmd_flash_fw_write_begin( void )
 {
   err_code_t err_code = OK;
@@ -231,6 +493,10 @@ err_code_t cmd_flash_fw_write_begin( void )
 }
 
 
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_flash_fw_write_end
+     WORK    :
+---------------------------------------------------------------------------*/
 err_code_t cmd_flash_fw_write_end( void )
 {
   err_code_t err_code = OK;
@@ -250,8 +516,8 @@ err_code_t cmd_flash_fw_write_end( void )
     {
       mavlink_msg_ack_decode( &rx_msg, &ack_msg);
 
-      printf("block_count  : %d\r\n", ack_msg.param[1]<<8|ack_msg.param[0]);
-      printf("block_length : %d\r\n", ack_msg.param[5]<<24|ack_msg.param[4]<<16|ack_msg.param[3]<<8|ack_msg.param[2]);
+      //printf("block_count  : %d\r\n", ack_msg.data[1]<<8|ack_msg.data[0]);
+      //printf("block_length : %d\r\n", ack_msg.data[5]<<24|ack_msg.data[4]<<16|ack_msg.data[3]<<8|ack_msg.data[2]);
 
 
       if( tx_msg.msgid == ack_msg.msg_id ) err_code = ack_msg.err_code;
@@ -267,17 +533,21 @@ err_code_t cmd_flash_fw_write_end( void )
 }
 
 
-err_code_t cmd_flash_fw_send_block( void )
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_flash_fw_write_packet
+     WORK    :
+---------------------------------------------------------------------------*/
+err_code_t cmd_flash_fw_write_packet( uint16_t addr, uint8_t *p_data, uint8_t length )
 {
   err_code_t err_code = OK;
   mavlink_message_t tx_msg;
   mavlink_message_t rx_msg;
   mavlink_ack_t     ack_msg;
-  uint8_t buf[256];
   uint8_t resp = 0;
 
 
-  mavlink_msg_flash_fw_send_block_pack(0, 0, &tx_msg, resp, 0, 128, buf);
+
+  mavlink_msg_flash_fw_write_packet_pack(0, 0, &tx_msg, resp, addr, length, p_data);
   msg_send(0, &tx_msg);
 
 
@@ -300,6 +570,10 @@ err_code_t cmd_flash_fw_send_block( void )
 }
 
 
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_flash_fw_send_block_multi
+     WORK    :
+---------------------------------------------------------------------------*/
 err_code_t cmd_flash_fw_send_block_multi( uint8_t block_count )
 {
   err_code_t err_code = OK;
@@ -316,7 +590,7 @@ err_code_t cmd_flash_fw_send_block_multi( uint8_t block_count )
    len = 0;
   for( i=0; i<block_count; i++ )
   {
-    mavlink_msg_flash_fw_send_block_pack(0, 0, &tx_msg, resp, 0, 128, buf);
+    mavlink_msg_flash_fw_write_packet_pack(0, 0, &tx_msg, resp, 0, 128, buf);
     len += mavlink_msg_to_send_buffer(&tx_buf[len], &tx_msg);
   }
   write_bytes((char *)tx_buf, len);
@@ -325,7 +599,11 @@ err_code_t cmd_flash_fw_send_block_multi( uint8_t block_count )
 }
 
 
-err_code_t cmd_flash_fw_write_block( void )
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_flash_fw_write_block
+     WORK    :
+---------------------------------------------------------------------------*/
+err_code_t cmd_flash_fw_write_block( uint32_t addr, uint32_t length  )
 {
   err_code_t err_code = OK;
   mavlink_message_t tx_msg;
@@ -334,7 +612,8 @@ err_code_t cmd_flash_fw_write_block( void )
   uint8_t buf[256];
   uint8_t resp = 1;
 
-  mavlink_msg_flash_fw_write_block_pack(0, 0, &tx_msg, resp, 0, 128);
+
+  mavlink_msg_flash_fw_write_block_pack(0, 0, &tx_msg, resp, addr, length);
   msg_send(0, &tx_msg);
 
 
@@ -349,9 +628,103 @@ err_code_t cmd_flash_fw_write_block( void )
     }
     else
     {
-      err_code = tx_msg.msgid<<8|ERR_TIMEOUT;
+      err_code = ERR_TIMEOUT;
     }
   }
 
   return err_code;
 }
+
+
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_flash_fw_read_block
+     WORK    :
+---------------------------------------------------------------------------*/
+#if 0
+err_code_t cmd_flash_fw_read_block( uint32_t addr, uint8_t *p_data, uint16_t length )
+{
+  err_code_t err_code = OK;
+  mavlink_message_t tx_msg;
+  mavlink_message_t rx_msg;
+  mavlink_flash_fw_read_t  resp_msg;
+  uint8_t resp = 1;
+  uint16_t received_length;
+
+
+  mavlink_msg_flash_fw_read_block_pack(0, 0, &tx_msg, resp, addr, length);
+  msg_send(0, &tx_msg);
+
+
+
+  if( resp == 1 )
+  {
+    received_length = 0;
+
+    while(1)
+    {
+      if( msg_get_resp(0, &rx_msg, 3000) == TRUE )
+      {
+	mavlink_msg_flash_fw_read_decode( &rx_msg, &resp_msg);
+
+	memcpy(&p_data[received_length], resp_msg.data, resp_msg.length);
+	received_length += resp_msg.length;
+
+	//printf("recv %d \r\n", received_length);
+
+	if( received_length == length )
+	{
+	  break;
+	}
+	else if( received_length > length )
+	{
+	  err_code = ERR_SIZE_OVER;
+	  break;
+	}
+      }
+      else
+      {
+	err_code = ERR_TIMEOUT;
+	break;
+      }
+    }
+  }
+
+  return err_code;
+}
+#else
+err_code_t cmd_flash_fw_read_block( uint32_t addr, uint8_t *p_data, uint16_t length )
+{
+  err_code_t err_code = OK;
+  mavlink_message_t tx_msg;
+  mavlink_message_t rx_msg;
+  mavlink_flash_fw_read_packet_t  resp_msg;
+  uint8_t resp = 1;
+
+
+  mavlink_msg_flash_fw_read_block_pack(0, 0, &tx_msg, resp, addr, length);
+  msg_send(0, &tx_msg);
+
+
+
+  if( resp == 1 )
+  {
+    if( msg_get_resp(0, &rx_msg, 100) == TRUE )
+    {
+      mavlink_msg_flash_fw_read_packet_decode( &rx_msg, &resp_msg);
+
+      memcpy(p_data, resp_msg.data, resp_msg.length);
+
+      if( resp_msg.length > length )
+      {
+	err_code = ERR_SIZE_OVER;
+      }
+    }
+    else
+    {
+      err_code = ERR_TIMEOUT;
+    }
+  }
+
+  return err_code;
+}
+#endif

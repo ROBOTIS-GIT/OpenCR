@@ -22,9 +22,9 @@ void bsp_init()
 
 
   /*##-6- Enable TIM peripherals Clock #######################################*/
-  TIMx_CLK_ENABLE();
-  HAL_NVIC_SetPriority(TIMx_IRQn, 6, 0);
-  HAL_NVIC_EnableIRQ(TIMx_IRQn);
+  //TIMx_CLK_ENABLE();
+  //HAL_NVIC_SetPriority(TIMx_IRQn, 6, 0);
+  //HAL_NVIC_EnableIRQ(TIMx_IRQn);
 
 
   /* Init Device Library */

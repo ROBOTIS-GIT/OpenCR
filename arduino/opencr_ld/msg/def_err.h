@@ -18,16 +18,17 @@ typedef uint16_t err_code_t;
 
 
 #define OK                                  0x0000
-#define ERR_FLASH_ERROR                     0x0010
-#define ERR_FLASH_BUSY                      0x0011
-#define ERR_FLASH_ERR_TIMEOUT               0x0012
-#define ERR_FLASH_NOT_EMPTY                 0x0013
-#define ERR_FLASH_WRITE                     0x0014
-#define ERR_FLASH_READ                      0x0015
-#define ERR_FLASH_ERASE                     0x0016
+#define ERR_FLASH_ERROR                     0xF010
+#define ERR_FLASH_BUSY                      0xF011
+#define ERR_FLASH_ERR_TIMEOUT               0xF012
+#define ERR_FLASH_NOT_EMPTY                 0xF013
+#define ERR_FLASH_WRITE                     0xF014
+#define ERR_FLASH_READ                      0xF015
+#define ERR_FLASH_ERASE                     0xF016
 
-#define ERR_TIMEOUT          		    0x0020
-#define ERR_MISMATCH_ID			    0x0021
+#define ERR_TIMEOUT          		    0xF020
+#define ERR_MISMATCH_ID			    0xF021
+#define ERR_SIZE_OVER			    0xF022
 
 
 
