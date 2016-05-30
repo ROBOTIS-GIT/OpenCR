@@ -13,6 +13,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "crc.h"
+
 
 #define FLASH_FW_SIZE			(768*1024)	// 768KB
 #define FLASH_FW_ADDR_START		0x08040000
@@ -27,9 +29,10 @@
 
 
 
+const uint8_t  *board_name   = "OpenCR R1.0";
+uint32_t boot_version        = 0x16052300;
+uint32_t boot_revision       = 0x00000000;
 
-uint32_t boot_version = 0x16052300;
-uint32_t app_version  = 0x00000000;
 
 
 typedef struct
@@ -51,14 +54,20 @@ flash_block_t flash_block;
 
 
 
-
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_init
+     WORK    :
+---------------------------------------------------------------------------*/
 void cmd_init(void)
 {
 
 }
 
-//-- resp_ack
-//
+
+/*---------------------------------------------------------------------------
+     TITLE   : resp_ack
+     WORK    :
+---------------------------------------------------------------------------*/
 void resp_ack( uint8_t ch, mavlink_ack_t *p_ack )
 {
   mavlink_message_t mav_msg;
@@ -70,8 +79,10 @@ void resp_ack( uint8_t ch, mavlink_ack_t *p_ack )
 }
 
 
-//-- cmd_read_version
-//
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_read_version
+     WORK    :
+---------------------------------------------------------------------------*/
 void cmd_read_version( msg_t *p_msg )
 {
   err_code_t err_code = OK;
@@ -91,18 +102,77 @@ void cmd_read_version( msg_t *p_msg )
     mav_ack.data[1] = boot_version>>8;
     mav_ack.data[2] = boot_version>>16;
     mav_ack.data[3] = boot_version>>24;
-    mav_ack.data[4] = app_version;
-    mav_ack.data[5] = app_version>>8;
-    mav_ack.data[6] = app_version>>16;
-    mav_ack.data[7] = app_version>>24;
+    mav_ack.data[4] = boot_revision;
+    mav_ack.data[5] = boot_revision>>8;
+    mav_ack.data[6] = boot_revision>>16;
+    mav_ack.data[7] = boot_revision>>24;
     mav_ack.length  = 8;
     resp_ack(p_msg->ch, &mav_ack);
   }
 }
 
 
-//-- cmd_flash_fw_write_packet
-//
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_read_board_name
+     WORK    :
+---------------------------------------------------------------------------*/
+void cmd_read_board_name( msg_t *p_msg )
+{
+  err_code_t err_code = OK;
+  mavlink_ack_t     mav_ack;
+  mavlink_read_board_name_t mav_data;
+  uint8_t i;
+
+  mavlink_msg_read_board_name_decode(p_msg->p_msg, &mav_data);
+
+
+
+  if( mav_data.resp == 1 )
+  {
+    mav_ack.msg_id   = p_msg->p_msg->msgid;
+    mav_ack.err_code = err_code;
+
+
+    for( i=0; i<strlen(board_name); i++ )
+    {
+      mav_ack.data[i] = board_name[i];
+    }
+    mav_ack.data[i] = 0;
+    mav_ack.length  = i;
+    resp_ack(p_msg->ch, &mav_ack);
+  }
+}
+
+
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_read_tag
+     WORK    :
+---------------------------------------------------------------------------*/
+void cmd_read_tag( msg_t *p_msg )
+{
+  err_code_t err_code = OK;
+  mavlink_ack_t     mav_ack;
+  mavlink_read_tag_t mav_data;
+
+  mavlink_msg_read_tag_decode(p_msg->p_msg, &mav_data);
+
+
+
+  if( mav_data.resp == 1 )
+  {
+    mav_ack.msg_id   = p_msg->p_msg->msgid;
+    mav_ack.err_code = err_code;
+
+    mav_ack.length  = 0;
+    resp_ack(p_msg->ch, &mav_ack);
+  }
+}
+
+
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_flash_fw_write_packet
+     WORK    :
+---------------------------------------------------------------------------*/
 void cmd_flash_fw_write_packet( msg_t *p_msg )
 {
   err_code_t err_code = OK;
@@ -133,8 +203,10 @@ void cmd_flash_fw_write_packet( msg_t *p_msg )
 }
 
 
-//-- cmd_flash_fw_write_begin
-//
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_flash_fw_write_begin
+     WORK    :
+---------------------------------------------------------------------------*/
 void cmd_flash_fw_write_begin( msg_t *p_msg )
 {
   err_code_t err_code = OK;
@@ -160,8 +232,10 @@ void cmd_flash_fw_write_begin( msg_t *p_msg )
 }
 
 
-//-- cmd_flash_fw_write_end
-//
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_flash_fw_write_end
+     WORK    :
+---------------------------------------------------------------------------*/
 void cmd_flash_fw_write_end( msg_t *p_msg )
 {
   err_code_t err_code = OK;
@@ -190,8 +264,10 @@ void cmd_flash_fw_write_end( msg_t *p_msg )
 }
 
 
-//-- cmd_flash_fw_write_block
-//
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_flash_fw_write_block
+     WORK    :
+---------------------------------------------------------------------------*/
 void cmd_flash_fw_write_block( msg_t *p_msg )
 {
   err_code_t err_code = OK;
@@ -225,8 +301,10 @@ void cmd_flash_fw_write_block( msg_t *p_msg )
 }
 
 
-//-- cmd_flash_fw_erase
-//
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_flash_fw_erase
+     WORK    :
+---------------------------------------------------------------------------*/
 void cmd_flash_fw_erase( msg_t *p_msg )
 {
   err_code_t err_code = OK;
@@ -264,29 +342,54 @@ void cmd_flash_fw_erase( msg_t *p_msg )
 }
 
 
-//-- cmd_flash_fw_verify
-//
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_flash_fw_verify
+     WORK    :
+---------------------------------------------------------------------------*/
 void cmd_flash_fw_verify( msg_t *p_msg )
 {
   err_code_t err_code = OK;
   mavlink_ack_t     mav_ack;
   mavlink_flash_fw_verify_t mav_data;
+  uint32_t crc = 0;
+  uint32_t i;
+  uint8_t *p_fw = (uint8_t *)FLASH_FW_ADDR_START;
 
 
   mavlink_msg_flash_fw_verify_decode(p_msg->p_msg, &mav_data);
+
+  crc = 0;
+  for( i=0; i<mav_data.length; i++ )
+  {
+    crc = crc_calc( crc, p_fw[i] );
+  }
 
 
   if( mav_data.resp == 1 )
   {
     mav_ack.msg_id   = p_msg->p_msg->msgid;
+
+    if( crc != mav_data.crc )
+    {
+      err_code = ERR_FLASH_CRC;
+    }
+
+    mav_ack.data[0] = crc >> 0;
+    mav_ack.data[1] = crc >> 8;
+    mav_ack.data[2] = crc >> 16;
+    mav_ack.data[3] = crc >> 24;
+    mav_ack.length = 4;
+
     mav_ack.err_code = err_code;
     resp_ack(p_msg->ch, &mav_ack);
   }
 }
 
 
-//-- cmd_flash_fw_read_packet
-//
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_flash_fw_read_packet
+     WORK    :
+---------------------------------------------------------------------------*/
 void cmd_flash_fw_read_packet( uint8_t ch, mavlink_flash_fw_read_packet_t *p_msg )
 {
   mavlink_message_t mav_msg;
@@ -297,8 +400,10 @@ void cmd_flash_fw_read_packet( uint8_t ch, mavlink_flash_fw_read_packet_t *p_msg
 }
 
 
-//-- cmd_flash_fw_read_block
-//
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_flash_fw_read_block
+     WORK    :
+---------------------------------------------------------------------------*/
 #if 0
 void cmd_flash_fw_read_block( msg_t *p_msg )
 {
@@ -380,8 +485,10 @@ void cmd_flash_fw_read_block( msg_t *p_msg )
 #endif
 
 
-//-- cmd_jump_to_fw
-//
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_jump_to_fw
+     WORK    :
+---------------------------------------------------------------------------*/
 void cmd_jump_to_fw( msg_t *p_msg )
 {
   err_code_t err_code = OK;
@@ -399,4 +506,23 @@ void cmd_jump_to_fw( msg_t *p_msg )
     mav_ack.err_code = err_code;
     resp_ack(p_msg->ch, &mav_ack);
   }
+}
+
+
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_send_error
+     WORK    :
+---------------------------------------------------------------------------*/
+void cmd_send_error( msg_t *p_msg, err_code_t err_code )
+{
+
+  mavlink_ack_t     mav_ack;
+  mavlink_read_version_t mav_data;
+
+
+  mavlink_msg_read_version_decode(p_msg->p_msg, &mav_data);
+
+  mav_ack.msg_id   = p_msg->p_msg->msgid;
+  mav_ack.err_code = err_code;
+  resp_ack(p_msg->ch, &mav_ack);
 }

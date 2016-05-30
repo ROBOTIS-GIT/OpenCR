@@ -1,6 +1,6 @@
 // MESSAGE FLASH_FW_READ_BLOCK PACKING
 
-#define MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK 159
+#define MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK 161
 
 typedef struct MAVLINK_PACKED __mavlink_flash_fw_read_block_t
 {
@@ -11,17 +11,17 @@ typedef struct MAVLINK_PACKED __mavlink_flash_fw_read_block_t
 
 #define MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_LEN 7
 #define MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_MIN_LEN 7
-#define MAVLINK_MSG_ID_159_LEN 7
-#define MAVLINK_MSG_ID_159_MIN_LEN 7
+#define MAVLINK_MSG_ID_161_LEN 7
+#define MAVLINK_MSG_ID_161_MIN_LEN 7
 
 #define MAVLINK_MSG_ID_FLASH_FW_READ_BLOCK_CRC 131
-#define MAVLINK_MSG_ID_159_CRC 131
+#define MAVLINK_MSG_ID_161_CRC 131
 
 
 
 #if MAVLINK_COMMAND_24BIT
 #define MAVLINK_MESSAGE_INFO_FLASH_FW_READ_BLOCK { \
-	159, \
+	161, \
 	"FLASH_FW_READ_BLOCK", \
 	3, \
 	{  { "addr", NULL, MAVLINK_TYPE_UINT32_T, 0, 0, offsetof(mavlink_flash_fw_read_block_t, addr) }, \
