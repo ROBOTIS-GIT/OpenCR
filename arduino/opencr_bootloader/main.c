@@ -14,13 +14,11 @@ void main_init();
 void msg_process_vcp(void);
 
 
-extern void CDC_Write( uint8_t *p_buf, uint32_t length );
+
 
 int main(void)
 {
   uint32_t tTime;
-  //uint8_t cnt = 0;
-  //uint8_t ch;
 
 
   main_init();
@@ -62,14 +60,13 @@ void main_init()
 }
 
 
-
 void msg_process_vcp(void)
 {
   BOOL ret;
   uint8_t ch;
   msg_t	msg;
 
-  //if( vcp_is_available() )
+
   while(vcp_is_available())
   {
     ch = vcp_getch();
@@ -81,6 +78,14 @@ void msg_process_vcp(void)
       {
 	case MAVLINK_MSG_ID_READ_VERSION:
 	  cmd_read_version(&msg);
+	  break;
+
+	case MAVLINK_MSG_ID_READ_BOARD_NAME:
+	  cmd_read_board_name(&msg);
+	  break;
+
+	case MAVLINK_MSG_ID_READ_TAG:
+	  cmd_read_tag(&msg);
 	  break;
 
 	case MAVLINK_MSG_ID_FLASH_FW_WRITE_PACKET:
@@ -115,6 +120,9 @@ void msg_process_vcp(void)
 	  cmd_jump_to_fw(&msg);
 	  break;
 
+	default:
+	  cmd_send_error(&msg, ERR_INVALID_CMD);
+	  break;
       }
     }
   }

@@ -18,6 +18,7 @@ typedef uint16_t err_code_t;
 
 
 #define OK                                  0x0000
+#define ERR_INVALID_CMD                     0x0001
 #define ERR_FLASH_ERROR                     0x0010
 #define ERR_FLASH_BUSY                      0x0011
 #define ERR_FLASH_ERR_TIMEOUT               0x0012
@@ -27,6 +28,7 @@ typedef uint16_t err_code_t;
 #define ERR_FLASH_ERASE                     0x0016
 #define ERR_FLASH_PACKET_SIZE               0x0017
 #define ERR_FLASH_SIZE         		    0x0018
+#define ERR_FLASH_CRC         		    0x0019
 
 
 

@@ -1,6 +1,6 @@
 // MESSAGE FLASH_FW_ERASE PACKING
 
-#define MAVLINK_MSG_ID_FLASH_FW_ERASE 156
+#define MAVLINK_MSG_ID_FLASH_FW_ERASE 158
 
 typedef struct MAVLINK_PACKED __mavlink_flash_fw_erase_t
 {
@@ -11,17 +11,17 @@ typedef struct MAVLINK_PACKED __mavlink_flash_fw_erase_t
 
 #define MAVLINK_MSG_ID_FLASH_FW_ERASE_LEN 13
 #define MAVLINK_MSG_ID_FLASH_FW_ERASE_MIN_LEN 13
-#define MAVLINK_MSG_ID_156_LEN 13
-#define MAVLINK_MSG_ID_156_MIN_LEN 13
+#define MAVLINK_MSG_ID_158_LEN 13
+#define MAVLINK_MSG_ID_158_MIN_LEN 13
 
 #define MAVLINK_MSG_ID_FLASH_FW_ERASE_CRC 13
-#define MAVLINK_MSG_ID_156_CRC 13
+#define MAVLINK_MSG_ID_158_CRC 13
 
 #define MAVLINK_MSG_FLASH_FW_ERASE_FIELD_PARAM_LEN 8
 
 #if MAVLINK_COMMAND_24BIT
 #define MAVLINK_MESSAGE_INFO_FLASH_FW_ERASE { \
-	156, \
+	158, \
 	"FLASH_FW_ERASE", \
 	3, \
 	{  { "length", NULL, MAVLINK_TYPE_UINT32_T, 0, 0, offsetof(mavlink_flash_fw_erase_t, length) }, \

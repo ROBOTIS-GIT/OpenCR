@@ -1,6 +1,6 @@
 // MESSAGE JUMP_TO_FW PACKING
 
-#define MAVLINK_MSG_ID_JUMP_TO_FW 160
+#define MAVLINK_MSG_ID_JUMP_TO_FW 162
 
 typedef struct MAVLINK_PACKED __mavlink_jump_to_fw_t
 {
@@ -10,17 +10,17 @@ typedef struct MAVLINK_PACKED __mavlink_jump_to_fw_t
 
 #define MAVLINK_MSG_ID_JUMP_TO_FW_LEN 9
 #define MAVLINK_MSG_ID_JUMP_TO_FW_MIN_LEN 9
-#define MAVLINK_MSG_ID_160_LEN 9
-#define MAVLINK_MSG_ID_160_MIN_LEN 9
+#define MAVLINK_MSG_ID_162_LEN 9
+#define MAVLINK_MSG_ID_162_MIN_LEN 9
 
 #define MAVLINK_MSG_ID_JUMP_TO_FW_CRC 37
-#define MAVLINK_MSG_ID_160_CRC 37
+#define MAVLINK_MSG_ID_162_CRC 37
 
 #define MAVLINK_MSG_JUMP_TO_FW_FIELD_PARAM_LEN 8
 
 #if MAVLINK_COMMAND_24BIT
 #define MAVLINK_MESSAGE_INFO_JUMP_TO_FW { \
-	160, \
+	162, \
 	"JUMP_TO_FW", \
 	2, \
 	{  { "resp", NULL, MAVLINK_TYPE_UINT8_T, 0, 0, offsetof(mavlink_jump_to_fw_t, resp) }, \
