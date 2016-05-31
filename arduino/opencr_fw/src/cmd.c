@@ -533,17 +533,7 @@ void cmd_send_error( msg_t *p_msg, err_code_t err_code )
   resp_ack(p_msg->ch, &mav_ack);
 }
 
-static void
-do_jump(uint32_t stacktop, uint32_t entrypoint)
-{
-	asm volatile(
-		"msr msp, %0	\n"
-		"bx	%1	\n"
-		: : "r"(stacktop), "r"(entrypoint) :);
 
-	// just to keep noreturn happy
-	for (;;) ;
-}
 
 /*---------------------------------------------------------------------------
      TITLE   : jump_to_fw
