@@ -26,7 +26,6 @@ int main(void)
   main_init();
 
 
-
   tTime = millis();
   while(1)
   {
@@ -37,16 +36,15 @@ int main(void)
     }
 
 
-#if 0
+#if 1
     uint8_t ch;
     static uint32_t cnt = 0;
 
 
-    //if( vcp_is_available() )
+    if( vcp_is_available() )
     {
-      //ch = vcp_getch();
-      //vcp_printf("pressed : 0x%02X \r\n", ch);
-      //vcp_printf("float test %f\r\n",fvalue);
+      ch = vcp_getch();
+      vcp_printf("pressed : 0x%02X \r\n", ch);
     }
 #else
     msg_process_vcp();

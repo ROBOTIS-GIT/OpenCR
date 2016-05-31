@@ -146,7 +146,6 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   HAL_IncTick();
-  led_on(0);
 }
 
 /******************************************************************************/
