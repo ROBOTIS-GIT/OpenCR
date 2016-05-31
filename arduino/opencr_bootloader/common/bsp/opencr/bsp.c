@@ -16,15 +16,18 @@ void bsp_init()
   // HSE(Hz)       = 25000000
   SystemClock_Config();
 
+  //SCB_InvalidateDCache();
+  //SCB_InvalidateICache();
+  //SCB_DisableDCache();
+  //SCB_DisableICache();
+
+  SCB_EnableDCache();
+  SCB_EnableICache();
+
 
   led_init();
   button_init();
 
-
-  /*##-6- Enable TIM peripherals Clock #######################################*/
-  //TIMx_CLK_ENABLE();
-  //HAL_NVIC_SetPriority(TIMx_IRQn, 6, 0);
-  //HAL_NVIC_EnableIRQ(TIMx_IRQn);
 
 
   /* Init Device Library */
@@ -38,4 +41,25 @@ void bsp_init()
 
   /* Start Device Process */
   USBD_Start(&USBD_Device);
+}
+
+
+void bsp_deinit()
+{
+  USBD_DeInit(&USBD_Device);
+
+  HAL_RCC_DeInit();
+  HAL_DeInit();
+
+  //SCB_InvalidateDCache();
+  //SCB_InvalidateICache();
+  SCB_DisableICache();
+  SCB_DisableDCache();
+
+
+  //SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_ENABLE_Msk;
+  //SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk;
+
+
+  //__disable_irq();
 }

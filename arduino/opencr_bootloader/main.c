@@ -26,7 +26,7 @@ int main(void)
   tTime = millis();
   while(1)
   {
-    if( millis()-tTime > 500 )
+    if( millis()-tTime > 100 )
     {
       tTime = millis();
       led_toggle(0);
