@@ -35,9 +35,9 @@ int main( int argc, const char **argv )
 
   printf("opencr_ld ver 1.0.0\n");
 
-  if( argc < 3 )
+  if( argc < 4 )
   {
-    fprintf( stderr, "Usage: opencl_ld <port> <baud> <binary image name> \n" );
+    fprintf( stderr, "Usage: opencl_ld <port> <baud> <binary image name> [<0|1 to send Go command to new flashed app>]\n" );
     exit( 1 );
   }
 

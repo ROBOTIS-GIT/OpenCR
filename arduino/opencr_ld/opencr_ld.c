@@ -12,6 +12,11 @@
 #include <stdio.h>
 
 
+
+static FILE      *opencr_fp;
+static uint32_t   opencr_fpsize;
+
+
 ser_handler stm32_ser_id = ( ser_handler )-1;
 
 
@@ -27,10 +32,12 @@ uint32_t rx_buf[768*1024/4];
 
 
 
-int opencr_ld_init( const char *portname, u32 baud );
+int opencr_ld_down( int argc, const char **argv );
 int opencr_ld_flash_write( uint32_t addr, uint8_t *p_data, uint32_t length  );
 int opencr_ld_flash_read( uint32_t addr, uint8_t *p_data, uint32_t length  );
 int opencr_ld_flash_erase( uint32_t length  );
+
+uint32_t opencr_ld_file_read_data( uint8_t *dst, uint32_t len );
 
 
 static long iclock();
@@ -49,7 +56,7 @@ err_code_t cmd_flash_fw_write_block( uint32_t addr, uint32_t length  );
 err_code_t cmd_flash_fw_send_block_multi( uint8_t block_count );
 err_code_t cmd_flash_fw_read_block( uint32_t addr, uint8_t *p_data, uint16_t length );
 err_code_t cmd_flash_fw_verify( uint32_t length, uint32_t crc, uint32_t *p_crc_ret );
-
+err_code_t cmd_jump_to_fw(void);
 
 
 
@@ -65,25 +72,25 @@ int opencr_ld_main( int argc, const char **argv )
 
   printf("opencr_ld_main \r\n");
 
-  opencr_ld_init( argv[ 1 ], baud );
+  opencr_ld_down( argc, argv );
 
   return 0;
 }
 
 
 /*---------------------------------------------------------------------------
-     TITLE   : opencr_ld_init
+     TITLE   : opencr_ld_down
      WORK    :
 ---------------------------------------------------------------------------*/
-int opencr_ld_init( const char *portname, u32 baud )
+int opencr_ld_down( int argc, const char **argv )
 {
   int i;
   int j;
-  int ret;
+  int ret = 0;
   err_code_t err_code = OK;
   long t, dt;
   float calc_time;
-  uint32_t fw_size = 256*1024*1;
+  uint32_t fw_size = 256*1024*3;
   uint8_t  board_str[16];
   uint8_t  board_str_len;
   uint32_t board_version;
@@ -91,6 +98,33 @@ int opencr_ld_init( const char *portname, u32 baud )
   uint32_t crc;
   uint32_t crc_ret = 0;
   uint8_t  *p_buf_crc;
+  char *portname;
+  uint32_t baud;
+  uint8_t  block_buf[FLASH_TX_BLOCK_LENGTH];
+  uint32_t addr;
+  uint32_t len;
+
+  baud     = strtol( argv[ 2 ], NULL, 10 );
+  portname = (char *)argv[ 1 ];
+
+
+  if( ( opencr_fp = fopen( argv[ 3 ], "rb" ) ) == NULL )
+  {
+    fprintf( stderr, "Unable to open %s\n", argv[ 3 ] );
+    exit( 1 );
+  }
+  else
+  {
+    fseek( opencr_fp, 0, SEEK_END );
+    opencr_fpsize = ftell( opencr_fp );
+    fseek( opencr_fp, 0, SEEK_SET );
+    printf(">>\r\n");
+    printf("file name : %s \r\n", argv[3]);
+    printf("file size : %d KB\r\n", opencr_fpsize/1024);
+  }
+
+  fw_size = opencr_fpsize;
+
 
 
   // Open port
@@ -128,11 +162,45 @@ int opencr_ld_init( const char *portname, u32 baud )
   t = iclock();
   ret = opencr_ld_flash_erase(fw_size);
   dt = iclock() - t;
-  printf("cmd_flash_fw_erase : %d : %f sec\r\n", ret, GET_CALC_TIME(dt));
+  printf("flash_erase : %d : %f sec\r\n", ret, GET_CALC_TIME(dt));
+  if( ret < 0 )
+  {
+    ser_close( stm32_ser_id );
+    fclose( opencr_fp );
+    exit(1);
+  }
+
+#if 1
+  t = iclock();
+  crc  = 0;
+  addr = 0;
+  while(1)
+  {
+    len = opencr_ld_file_read_data( block_buf, FLASH_TX_BLOCK_LENGTH);
+    if( len == 0 ) break;
+
+    for( i=0; i<len; i++ )
+    {
+      crc = crc_calc( crc,  block_buf[i] );
+    }
+
+    ret = opencr_ld_flash_write( addr, block_buf, len );
+    if( ret < 0 ) break;
+    addr += len;
+  }
+  dt = iclock() - t;
+
+  printf("flash_write : %d : %f sec \r\n", ret,  GET_CALC_TIME(dt));
+  if( ret < 0 )
+  {
+    ser_close( stm32_ser_id );
+    fclose( opencr_fp );
+    return -1;
+  }
 
 
-
-  for( i=0; i<FLASH_TX_BLOCK_LENGTH/4; i++ )
+#else
+  for( i=0; i<fw_size/4; i++ )
   {
     tx_buf[i] = i;
   }
@@ -140,7 +208,7 @@ int opencr_ld_init( const char *portname, u32 baud )
   t = iclock();
   crc = 0;
   p_buf_crc = (uint8_t *)tx_buf;
-  for( i=0; i<FLASH_TX_BLOCK_LENGTH; i++ )
+  for( i=0; i<fw_size; i++ )
   {
     crc = crc_calc( crc,  p_buf_crc[i] );
   }
@@ -176,6 +244,8 @@ int opencr_ld_init( const char *portname, u32 baud )
   {
     printf("Compare OK \r\n");
   }
+#endif
+
 
   t = iclock();
   err_code = cmd_flash_fw_verify( fw_size, crc, &crc_ret );
@@ -189,10 +259,29 @@ int opencr_ld_init( const char *portname, u32 baud )
     printf("CRC Fail : 0x%X : %X, %X %f sec\r\n", err_code, crc, crc_ret, GET_CALC_TIME(dt));
   }
 
+  printf("jump_to_fw \r\n");
+  cmd_jump_to_fw();
 
   ser_close( stm32_ser_id );
+  fclose( opencr_fp );
 
-  return TRUE;
+  return ret;
+}
+
+
+/*---------------------------------------------------------------------------
+     TITLE   : opencr_ld_file_read_data
+     WORK    :
+---------------------------------------------------------------------------*/
+uint32_t opencr_ld_file_read_data( uint8_t *dst, uint32_t len )
+{
+  size_t readbytes = 0;
+
+  if( !feof( opencr_fp ) )
+  {
+    readbytes = fread( dst, 1, len, opencr_fp );
+  }
+  return ( uint32_t )readbytes;
 }
 
 
@@ -849,6 +938,41 @@ err_code_t cmd_flash_fw_verify( uint32_t length, uint32_t crc, uint32_t *p_crc_r
   return err_code;
 }
 
+
+/*---------------------------------------------------------------------------
+     TITLE   : cmd_jump_to_fw
+     WORK    :
+---------------------------------------------------------------------------*/
+err_code_t cmd_jump_to_fw(void)
+{
+  err_code_t err_code = OK;
+  mavlink_message_t tx_msg;
+  mavlink_message_t rx_msg;
+  mavlink_ack_t     ack_msg;
+  uint8_t param[8];
+  uint8_t resp = 0;
+
+
+  mavlink_msg_jump_to_fw_pack(0, 0, &tx_msg, resp, param);
+  msg_send(0, &tx_msg);
+
+
+  if( resp == 1 )
+  {
+    if( msg_get_resp(0, &rx_msg, 500) == TRUE )
+    {
+      mavlink_msg_ack_decode( &rx_msg, &ack_msg);
+
+      if( tx_msg.msgid == ack_msg.msg_id ) err_code = ack_msg.err_code;
+      else                                 err_code = ERR_MISMATCH_ID;
+    }
+    else
+    {
+      err_code = ERR_TIMEOUT;
+    }
+  }
+  return err_code;
+}
 
 
 /*---------------------------------------------------------------------------

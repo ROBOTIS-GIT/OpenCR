@@ -53,6 +53,9 @@ flash_block_t flash_block;
 
 
 
+void jump_to_fw(void);
+
+
 
 /*---------------------------------------------------------------------------
      TITLE   : cmd_init
@@ -500,6 +503,9 @@ void cmd_jump_to_fw( msg_t *p_msg )
 
 
 
+  jump_to_fw();
+
+
   if( mav_data.resp == 1 )
   {
     mav_ack.msg_id   = p_msg->p_msg->msgid;
@@ -526,3 +532,23 @@ void cmd_send_error( msg_t *p_msg, err_code_t err_code )
   mav_ack.err_code = err_code;
   resp_ack(p_msg->ch, &mav_ack);
 }
+
+
+/*---------------------------------------------------------------------------
+     TITLE   : jump_to_fw
+     WORK    :
+---------------------------------------------------------------------------*/
+void jump_to_fw(void)
+{
+
+
+  bsp_deinit();
+
+
+  SCB->VTOR = FLASH_FW_ADDR_START;
+
+  __asm volatile("ldr r0, =0x08040000 \n"
+                 "ldr sp, [r0]        \n"
+                 "ldr pc, [r0, #4]    \n");
+}
+
