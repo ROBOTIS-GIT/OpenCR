@@ -39,6 +39,8 @@ void cmd_flash_fw_erase( msg_t *p_msg );
 void cmd_flash_fw_verify( msg_t *p_msg );
 void cmd_flash_fw_read_block( msg_t *p_msg );
 
+void jump_to_fw(void);
+
 
 #ifdef __cplusplus
 }

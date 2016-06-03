@@ -535,15 +535,32 @@ void cmd_send_error( msg_t *p_msg, err_code_t err_code )
 
 
 /*---------------------------------------------------------------------------
+     TITLE   : check_fw
+     WORK    :
+---------------------------------------------------------------------------*/
+BOOL check_fw(void)
+{
+  BOOL ret = TRUE;
+  uint32_t *p_addr = (uint32_t *)FLASH_FW_ADDR_START;
+
+
+  if( p_addr[0] == 0xFFFFFFFF ) ret = FALSE;
+
+
+  return ret;
+}
+
+
+/*---------------------------------------------------------------------------
      TITLE   : jump_to_fw
      WORK    :
 ---------------------------------------------------------------------------*/
 void jump_to_fw(void)
 {
 
+  if( check_fw() == FALSE ) return;
 
   bsp_deinit();
-
 
   SCB->VTOR = FLASH_FW_ADDR_START;
 

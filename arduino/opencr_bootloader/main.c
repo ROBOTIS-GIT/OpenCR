@@ -55,8 +55,25 @@ int main(void)
 
 void main_init()
 {
+  uint8_t i;
+
+
   bsp_init();
   hal_init();
+
+  if( button_read(0) == FALSE )
+  {
+    delay_ms(100);
+    if( button_read(0) == FALSE )
+    {
+      for( i=0; i<5; i++ )
+      {
+	led_toggle(0);
+	delay_ms(50);
+      }
+      jump_to_fw();
+    }
+  }
 }
 
 
