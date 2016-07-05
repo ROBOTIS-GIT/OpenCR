@@ -18,7 +18,7 @@ ser_handler ser_open( const char* sername )
 {
   int fd;
 
-  if( ( fd = open( sername, O_RDWR | O_NOCTTY | O_NDELAY ) ) == -1 )
+  if( ( fd = open( sername, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK) ) == -1 )
     perror( "ser_open: unable to open port" );
   else
     fcntl( fd, F_SETFL, 0 );
@@ -194,8 +194,8 @@ int ser_setupEx( ser_handler id, u32 baud, int databits, int parity, int stopbit
     termdata.c_iflag |= ( INPCK | ISTRIP );
 
   // Setup timeouts
-  termdata.c_cc[ VMIN ]  = 1;
-  termdata.c_cc[ VTIME ] = 0;
+  termdata.c_cc[ VMIN ]  = 0;
+  termdata.c_cc[ VTIME ] = 1;
 
   // Set the attibutes now
   tcsetattr( hnd, TCSANOW, &termdata );
@@ -204,7 +204,7 @@ int ser_setupEx( ser_handler id, u32 baud, int databits, int parity, int stopbit
   tcflush( hnd, TCIOFLUSH );
 
   // And set blocking mode by default
-  fcntl( id, F_SETFL, 0 );
+  //fcntl( id, F_SETFL, 0 );
 
   return 0;
 }
