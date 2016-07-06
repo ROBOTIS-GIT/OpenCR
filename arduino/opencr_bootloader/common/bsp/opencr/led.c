@@ -10,8 +10,8 @@
 #define LED_MAX   1
 
 
-GPIO_TypeDef *pLedGpio[LED_MAX] = { GPIOI };
-uint16_t      LedGpioPin[LED_MAX] = { GPIO_PIN_1 };
+GPIO_TypeDef *pLedGpio[LED_MAX] = { GPIOG };
+uint16_t      LedGpioPin[LED_MAX] = { GPIO_PIN_9 };
 
 //GPIO_TypeDef *pLedGpio[1] = { GPIOB };
 //uint16_t      LedGpioPin[1] = { GPIO_PIN_7 };
@@ -24,7 +24,7 @@ void led_init()
   GPIO_InitTypeDef GPIO_InitStruct;
 
   // GPIO Ports Clock Enable
-  __HAL_RCC_GPIOI_CLK_ENABLE();
+  __HAL_RCC_GPIOG_CLK_ENABLE();
 
 
   for( i=0; i<LED_MAX; i++ )
