@@ -33,11 +33,6 @@ BOOL wdg_setup(uint32_t reload_time)
 
 BOOL wdg_start(void)
 {
-  if (HAL_IWDG_Start(&IwdgHandle) != HAL_OK)
-  {
-    return FALSE;
-  }
-
   return TRUE;
 }
 
