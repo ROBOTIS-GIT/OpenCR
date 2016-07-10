@@ -15,7 +15,7 @@
 
 #include "led.h"
 #include "button.h"
-
+#include "wdg.h"
 
 
 #define USE_USB_FS
