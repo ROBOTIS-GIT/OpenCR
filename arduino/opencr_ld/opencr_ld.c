@@ -33,6 +33,7 @@ uint32_t rx_buf[768*1024/4];
 
 
 int opencr_ld_down( int argc, const char **argv );
+int opencr_ld_jump_to_boot( char *portname );
 int opencr_ld_flash_write( uint32_t addr, uint8_t *p_data, uint32_t length  );
 int opencr_ld_flash_read( uint32_t addr, uint8_t *p_data, uint32_t length  );
 int opencr_ld_flash_erase( uint32_t length  );
@@ -42,6 +43,7 @@ uint32_t opencr_ld_file_read_data( uint8_t *dst, uint32_t len );
 
 static long iclock();
 int read_byte( void );
+int write_bytes( char *p_data, int len );
 void delay_ms( int WaitTime );
 uint32_t crc_calc( uint32_t crc_in, uint8_t data_in );
 
@@ -132,6 +134,13 @@ int opencr_ld_down( int argc, const char **argv )
   fw_size = opencr_fpsize;
 
 
+  // Jump To Boot
+  if( opencr_ld_jump_to_boot(portname ) < 0 )
+  {
+    printf("Fail to jump to boot\n");
+    return -1;
+  }
+
 
   // Open port
   if( ( stm32_ser_id = ser_open( portname ) ) == ( ser_handler )-1 )
@@ -145,8 +154,7 @@ int opencr_ld_down( int argc, const char **argv )
   }
 
   // Setup port
-  ser_setupEx( stm32_ser_id, baud, SER_DATABITS_8, SER_PARITY_NONE, SER_STOPBITS_1, 1 );
-
+  ser_setupEx( stm32_ser_id, 115200, SER_DATABITS_8, SER_PARITY_NONE, SER_STOPBITS_1, 1 );
 
   printf("Clear Buffer Start\n");
   ser_set_timeout_ms( stm32_ser_id, SER_NO_TIMEOUT );
@@ -286,6 +294,34 @@ int opencr_ld_down( int argc, const char **argv )
   fclose( opencr_fp );
 
   return ret;
+}
+
+
+/*---------------------------------------------------------------------------
+     TITLE   : opencr_ld_file_read_data
+     WORK    :
+---------------------------------------------------------------------------*/
+int opencr_ld_jump_to_boot( char *portname )
+{
+  bool ret;
+
+
+  // Open port
+  if( ( stm32_ser_id = ser_open( portname ) ) == ( ser_handler )-1 )
+  {
+    printf("Fail to open port 1\n");
+    return -1;
+  }
+
+  // Setup port
+  ser_setupEx( stm32_ser_id, 115200, SER_DATABITS_8, SER_PARITY_NONE, SER_STOPBITS_1, 1 );
+
+  write_bytes("OpenCR 5555AAAA", 15);
+  ser_close( stm32_ser_id );
+
+  delay_ms(1000);
+
+  return 0;
 }
 
 

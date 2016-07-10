@@ -35,6 +35,8 @@
 #define APP_TX_DATA_SIZE  (1024)
 
 
+const char *JUMP_BOOT_STR = "OpenCR 5555AAAA";
+
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -45,6 +47,9 @@ USBD_CDC_LineCodingTypeDef LineCoding =
   0x00,   /* parity - none*/
   0x08    /* nb. of bits 8*/
 };
+
+
+uint8_t CDC_Reset_Status = 0;
 
 uint8_t UserRxBuffer[APP_RX_DATA_SIZE];/* Received Data over USB are stored in this buffer */
 uint8_t UserTxBuffer[APP_TX_DATA_SIZE];/* Received Data over UART (CDC interface) are stored in this buffer */
@@ -119,7 +124,9 @@ static int8_t CDC_Itf_DeInit(void)
   * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
   */
 static int8_t CDC_Itf_Control (uint8_t cmd, uint8_t* pbuf, uint16_t length)
-{ 
+{
+  USBD_SetupReqTypedef *req = (USBD_SetupReqTypedef *)pbuf;
+
   switch (cmd)
   {
   case CDC_SEND_ENCAPSULATED_COMMAND:
@@ -164,6 +171,10 @@ static int8_t CDC_Itf_Control (uint8_t cmd, uint8_t* pbuf, uint16_t length)
 
   case CDC_SET_CONTROL_LINE_STATE:
     /* Add your code here */
+    if( req->wValue & 0x02 )
+    {
+      CDC_Reset_Status = 1;
+    }
     break;
 
   case CDC_SEND_BREAK:
@@ -204,6 +215,24 @@ static int8_t CDC_Itf_Receive(uint8_t* Buf, uint32_t *Len)
     }
   }
 
+  if( CDC_Reset_Status == 1 )
+  {
+    CDC_Reset_Status = 0;
+
+    if( *Len >= 15 )
+    {
+      for( i=0; i<15; i++ )
+      {
+	if( JUMP_BOOT_STR[i] != Buf[i] ) break;
+      }
+
+      if( i == 15 )
+      {
+	wdg_setup(10);
+	wdg_start();
+      }
+    }
+  }
 
   USBD_CDC_ReceivePacket(&USBD_Device);
   return (USBD_OK);

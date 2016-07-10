@@ -17,7 +17,7 @@
 */
 
 #include "arduino.h"
-//#include "variant.h"
+
 
 
 /*
@@ -151,15 +151,7 @@ extern "C" {
 
 
 extern const Pin2PortMapArray g_Pin2PortMapArray[]=
-{    
-
-/*
-	The 429I discovery does not really lend itself to
-	Arduino pin shield configuration.  This table is
-	mostly for compatibility so that blink and
-	Serial stream can be tested 
-*/
-	
+{
 	{GPIOD, GPIO_PIN_2	},	/*  PD2		0	I/O	UART5_RX	*/	
 	{GPIOC, GPIO_PIN_12	},	/*  PC12	1	I/O	UART5_TX	*/	
 	{GPIOE, GPIO_PIN_2	},	/*  PE2		2	I/O				*/	
@@ -174,7 +166,7 @@ extern const Pin2PortMapArray g_Pin2PortMapArray[]=
 	{GPIOA, GPIO_PIN_5	},	/*  PA5		10	I/O				*/
 	{GPIOG, GPIO_PIN_2	},	/*  PG2		11	I/O				*/
 	{GPIOG, GPIO_PIN_12	},	/*  PG3		12	I/O				*/
-	{GPIOI, GPIO_PIN_1	},	/*  PG13	13	Output	GPIO_Output	LD3 [Green Led]	*/
+	{GPIOA, GPIO_PIN_9	},	/*  PG13	13	Output	GPIO_Output	LD3 [Green Led]	*/
 
 	{GPIOC, GPIO_PIN_9	},	/*  PC9		14	I/O	I2C3_SDA I2C3_SDA [ACP/RF_SDA]]	*/
 	{GPIOA, GPIO_PIN_8	},	/*  PA8		15	I/O	I2C3_SCL I2C3_SCL [ACP/RF_SCL]]	*/
