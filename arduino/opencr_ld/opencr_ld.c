@@ -33,6 +33,7 @@ uint32_t rx_buf[768*1024/4];
 
 
 int opencr_ld_down( int argc, const char **argv );
+int opencr_ld_jump_to_boot( char *portname );
 int opencr_ld_flash_write( uint32_t addr, uint8_t *p_data, uint32_t length  );
 int opencr_ld_flash_read( uint32_t addr, uint8_t *p_data, uint32_t length  );
 int opencr_ld_flash_erase( uint32_t length  );
@@ -42,6 +43,7 @@ uint32_t opencr_ld_file_read_data( uint8_t *dst, uint32_t len );
 
 static long iclock();
 int read_byte( void );
+int write_bytes( char *p_data, int len );
 void delay_ms( int WaitTime );
 uint32_t crc_calc( uint32_t crc_in, uint8_t data_in );
 
@@ -103,10 +105,16 @@ int opencr_ld_down( int argc, const char **argv )
   uint8_t  block_buf[FLASH_TX_BLOCK_LENGTH];
   uint32_t addr;
   uint32_t len;
+  uint8_t jump_to_fw = 0;
+
 
   baud     = strtol( argv[ 2 ], NULL, 10 );
   portname = (char *)argv[ 1 ];
 
+  if( argc >= 5 && strlen(argv[ 4 ])==1 && strncmp(argv[ 4 ], "1", 1)==0 )
+  {
+    jump_to_fw = 1;
+  }
 
   if( ( opencr_fp = fopen( argv[ 3 ], "rb" ) ) == NULL )
   {
@@ -126,6 +134,13 @@ int opencr_ld_down( int argc, const char **argv )
   fw_size = opencr_fpsize;
 
 
+  // Jump To Boot
+  if( opencr_ld_jump_to_boot(portname ) < 0 )
+  {
+    printf("Fail to jump to boot\n");
+    return -1;
+  }
+
 
   // Open port
   if( ( stm32_ser_id = ser_open( portname ) ) == ( ser_handler )-1 )
@@ -133,16 +148,19 @@ int opencr_ld_down( int argc, const char **argv )
     printf("Fail to open port 1\n");
     return -1;
   }
+  else
+  {
+    printf("Open port OK\n");
+  }
 
   // Setup port
-  ser_setupEx( stm32_ser_id, baud, SER_DATABITS_8, SER_PARITY_NONE, SER_STOPBITS_1, 1 );
+  ser_setupEx( stm32_ser_id, 115200, SER_DATABITS_8, SER_PARITY_NONE, SER_STOPBITS_1, 1 );
 
-
-
+  printf("Clear Buffer Start\n");
   ser_set_timeout_ms( stm32_ser_id, SER_NO_TIMEOUT );
   while( read_byte() != -1 );
-  ser_set_timeout_ms( stm32_ser_id, 2000000 );
-
+  ser_set_timeout_ms( stm32_ser_id, 1000 );
+  printf("Clear Buffer End\n");
 
 
   printf(">>\r\n");
@@ -150,6 +168,13 @@ int opencr_ld_down( int argc, const char **argv )
   if( err_code == OK )
   {
     printf("Board Name : %s\r\n", board_str);
+  }
+  else
+  {
+    printf("cmd_read_board_name fail : 0x%X\n", err_code);
+    ser_close( stm32_ser_id );
+    fclose( opencr_fp );
+    exit(1);
   }
   err_code = cmd_read_version( &board_version, &board_revision );
   if( err_code == OK )
@@ -259,13 +284,44 @@ int opencr_ld_down( int argc, const char **argv )
     printf("CRC Fail : 0x%X : %X, %X %f sec\r\n", err_code, crc, crc_ret, GET_CALC_TIME(dt));
   }
 
-  printf("jump_to_fw \r\n");
-  cmd_jump_to_fw();
+  if( jump_to_fw == 1 )
+  {
+    printf("jump_to_fw \r\n");
+    cmd_jump_to_fw();
+  }
 
   ser_close( stm32_ser_id );
   fclose( opencr_fp );
 
   return ret;
+}
+
+
+/*---------------------------------------------------------------------------
+     TITLE   : opencr_ld_file_read_data
+     WORK    :
+---------------------------------------------------------------------------*/
+int opencr_ld_jump_to_boot( char *portname )
+{
+  bool ret;
+
+
+  // Open port
+  if( ( stm32_ser_id = ser_open( portname ) ) == ( ser_handler )-1 )
+  {
+    printf("Fail to open port 1\n");
+    return -1;
+  }
+
+  // Setup port
+  ser_setupEx( stm32_ser_id, 115200, SER_DATABITS_8, SER_PARITY_NONE, SER_STOPBITS_1, 1 );
+
+  write_bytes("OpenCR 5555AAAA", 15);
+  ser_close( stm32_ser_id );
+
+  delay_ms(1000);
+
+  return 0;
 }
 
 
@@ -498,6 +554,19 @@ int read_byte( void )
 }
 
 
+
+/*---------------------------------------------------------------------------
+     TITLE   : read_bytes
+     WORK    :
+---------------------------------------------------------------------------*/
+int read_bytes( uint8_t *pData, uint32_t size )
+{
+  return read( stm32_ser_id, pData, size ); //ser_read( stm32_ser_id, pData, size );
+  //return ser_read( stm32_ser_id, pData, size );
+}
+
+
+
 /*---------------------------------------------------------------------------
      TITLE   : write_bytes
      WORK    :
@@ -510,8 +579,6 @@ int write_bytes( char *p_data, int len )
 
   return written_len;
 }
-
-
 
 
 /*---------------------------------------------------------------------------
@@ -566,10 +633,8 @@ err_code_t cmd_read_board_name( uint8_t *p_str, uint8_t *p_len )
   uint8_t param[8];
   uint8_t resp = 1;
 
-
   mavlink_msg_read_board_name_pack(0, 0, &tx_msg, resp, param);
   msg_send(0, &tx_msg);
-
   if( resp == 1 )
   {
     if( msg_get_resp(0, &rx_msg, 500) == TRUE )
@@ -589,7 +654,7 @@ err_code_t cmd_read_board_name( uint8_t *p_str, uint8_t *p_len )
     }
   }
 
-  return OK;
+  return err_code;
 }
 
 

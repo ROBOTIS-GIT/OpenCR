@@ -38,4 +38,6 @@ void ser_set_timeout_ms( ser_handler id, u32 timeout );
 
 int ser_setupEx( ser_handler id, u32 baud, int databits, int parity, int stopbits, int Mode );
 
+extern int read_bytes( uint8_t *pData, uint32_t size );
+
 #endif

@@ -3,6 +3,8 @@
 #ifndef __TYPE_H_
 #define __TYPE_H_
 
+#include <stdint.h>
+
 #ifdef WIN32_BUILD
 typedef char s8;
 typedef unsigned char u8;
