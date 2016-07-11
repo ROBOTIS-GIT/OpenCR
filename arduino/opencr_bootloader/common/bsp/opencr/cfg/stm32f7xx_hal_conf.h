@@ -1,14 +1,14 @@
 /**
   ******************************************************************************
-  * @file    USB_Device/DFU_Standalone/Inc/stm32f7xx_hal_conf.h
+  * @file    USB_Device/CDC_Standalone/Inc/stm32f7xx_hal_conf.h
   * @author  MCD Application Team
-  * @version V1.0.2
-  * @date    18-November-2015 
+  * @version V1.0.4
+  * @date    22-April-2016
   * @brief   HAL configuration file.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2016 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -70,7 +70,7 @@
 #define HAL_GPIO_MODULE_ENABLED
 #define HAL_I2C_MODULE_ENABLED
 /* #define HAL_I2S_MODULE_ENABLED */
-/* #define HAL_IWDG_MODULE_ENABLED */
+#define HAL_IWDG_MODULE_ENABLED
 /* #define HAL_LPTIM_MODULE_ENABLED */
 /* #define HAL_LTDC_MODULE_ENABLED */
 #define HAL_PWR_MODULE_ENABLED
@@ -104,7 +104,7 @@
 #endif /* HSE_VALUE */
 
 #if !defined  (HSE_STARTUP_TIMEOUT)
-  #define HSE_STARTUP_TIMEOUT    ((uint32_t)500)   /*!< Time out for HSE start up, in ms */
+  #define HSE_STARTUP_TIMEOUT    ((uint32_t)100U)   /*!< Time out for HSE start up, in ms */
 #endif /* HSE_STARTUP_TIMEOUT */
 
 /**
@@ -130,6 +130,9 @@
 #if !defined  (LSE_VALUE)
  #define LSE_VALUE  ((uint32_t)32768)    /*!< Value of the External Low Speed oscillator in Hz */
 #endif /* LSE_VALUE */
+#if !defined  (LSE_STARTUP_TIMEOUT)
+  #define LSE_STARTUP_TIMEOUT    ((uint32_t)5000U)   /*!< Time out for LSE start up, in ms */
+#endif /* LSE_STARTUP_TIMEOUT */
 
 /**
   * @brief External clock source for I2S peripheral
@@ -174,14 +177,15 @@
 /* Definition of the Ethernet driver buffers size and count */   
 #define ETH_RX_BUF_SIZE                ETH_MAX_PACKET_SIZE /* buffer size for receive               */
 #define ETH_TX_BUF_SIZE                ETH_MAX_PACKET_SIZE /* buffer size for transmit              */
-#define ETH_RXBUFNB                    ((uint32_t)5)       /* 5 Rx buffers of size ETH_RX_BUF_SIZE  */
-#define ETH_TXBUFNB                    ((uint32_t)5)       /* 5 Tx buffers of size ETH_TX_BUF_SIZE  */
+#define ETH_RXBUFNB                    ((uint32_t)4)       /* 4 Rx buffers of size ETH_RX_BUF_SIZE  */
+#define ETH_TXBUFNB                    ((uint32_t)4)       /* 4 Tx buffers of size ETH_TX_BUF_SIZE  */
 
 /* Section 2: PHY configuration section */
-/* LAN8742A PHY Address*/
-#define LAN8742A_PHY_ADDRESS            0x00
+
+/* DP83848 PHY Address*/ 
+#define DP83848_PHY_ADDRESS             0x01
 /* PHY Reset delay these values are based on a 1 ms Systick interrupt*/ 
-#define PHY_RESET_DELAY                 ((uint32_t)0x00000FFF)
+#define PHY_RESET_DELAY                 ((uint32_t)0x000000FF)
 /* PHY Configuration delay */
 #define PHY_CONFIG_DELAY                ((uint32_t)0x00000FFF)
 
@@ -210,14 +214,28 @@
   
 /* Section 4: Extended PHY Registers */
 
-#define PHY_SR                          ((uint16_t)0x1F)    /*!< PHY special control/ status register Offset     */
+#define PHY_SR                          ((uint16_t)0x10)    /*!< PHY status register Offset                      */
+#define PHY_MICR                        ((uint16_t)0x11)    /*!< MII Interrupt Control Register                  */
+#define PHY_MISR                        ((uint16_t)0x12)    /*!< MII Interrupt Status and Misc. Control Register */
+ 
+#define PHY_LINK_STATUS                 ((uint16_t)0x0001)  /*!< PHY Link mask                                   */
+#define PHY_SPEED_STATUS                ((uint16_t)0x0002)  /*!< PHY Speed mask                                  */
+#define PHY_DUPLEX_STATUS               ((uint16_t)0x0004)  /*!< PHY Duplex mask                                 */
 
-#define PHY_SPEED_STATUS                ((uint16_t)0x0004)  /*!< PHY Speed mask                                  */
-#define PHY_DUPLEX_STATUS               ((uint16_t)0x0010)  /*!< PHY Duplex mask                                 */
+#define PHY_MICR_INT_EN                 ((uint16_t)0x0002)  /*!< PHY Enable interrupts                           */
+#define PHY_MICR_INT_OE                 ((uint16_t)0x0001)  /*!< PHY Enable output interrupt events              */
 
+#define PHY_MISR_LINK_INT_EN            ((uint16_t)0x0020)  /*!< Enable Interrupt on change of link status       */
+#define PHY_LINK_INTERRUPT              ((uint16_t)0x2000)  /*!< PHY link status interrupt mask                  */
 
-#define PHY_ISFR                        ((uint16_t)0x1D)    /*!< PHY Interrupt Source Flag register Offset       */
-#define PHY_ISFR_INT4                   ((uint16_t)0x0010)  /*!< PHY Link down inturrupt                         */   
+/* ################## SPI peripheral configuration ########################## */
+
+/* CRC FEATURE: Use to activate CRC feature inside HAL SPI Driver
+* Activated: CRC code is present inside driver
+* Deactivated: CRC code cleaned from driver
+*/
+
+#define USE_SPI_CRC                     1U
 
 /* Includes ------------------------------------------------------------------*/
 /**
