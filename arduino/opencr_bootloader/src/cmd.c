@@ -16,13 +16,13 @@
 #include "crc.h"
 
 
-#define FLASH_FW_SIZE			(768*1024)	// 768KB
-#define FLASH_FW_ADDR_START		0x08040000
-#define FLASH_FW_ADDR_END		(FLASH_FW_ADDR_START + FLASH_FW_SIZE)
+#define FLASH_FW_SIZE             (768*1024)	// 768KB
+#define FLASH_FW_ADDR_START       0x08040000
+#define FLASH_FW_ADDR_END         (FLASH_FW_ADDR_START + FLASH_FW_SIZE)
 
-#define FLASH_CONFIG_SIZE		(32*1024)	// 32KB
-#define FLASH_CONFIG_ADDR_START		0x08010000
-#define FLASH_CONFIG_ADDR_END		(FLASH_CONFIG_ADDR_START + FLASH_CONFIG_SIZE)
+#define FLASH_CONFIG_SIZE         (32*1024)	// 32KB
+#define FLASH_CONFIG_ADDR_START   0x08010000
+#define FLASH_CONFIG_ADDR_END     (FLASH_CONFIG_ADDR_START + FLASH_CONFIG_SIZE)
 
 #define FLASH_BLOCK_PACKET_LENGTH	128
 #define FLASH_BLOCK_MAX_LENGTH		(16*1024)
@@ -30,7 +30,7 @@
 
 
 const uint8_t  *board_name   = "OpenCR R1.0";
-uint32_t boot_version        = 0x16071100;
+uint32_t boot_version        = 0x16071900;
 uint32_t boot_revision       = 0x00000000;
 
 
