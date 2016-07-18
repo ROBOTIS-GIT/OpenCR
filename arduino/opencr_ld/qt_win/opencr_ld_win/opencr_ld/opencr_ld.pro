@@ -3,6 +3,8 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
+DEFINES += WIN32_BUILD
+
 SOURCES += \
     ../../../msg/msg.c \
     ../../../main.c \

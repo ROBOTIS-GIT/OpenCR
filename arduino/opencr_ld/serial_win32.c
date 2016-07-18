@@ -37,13 +37,21 @@ static int ser_win32_set_timeouts( HANDLE hComm, DWORD ri, DWORD rtm, DWORD rtc,
 ser_handler ser_open( const char* sername )
 {
   char portname[ WIN_MAX_PORT_NAME + 1 ];
+  wchar_t pname[ WIN_MAX_PORT_NAME + 1 ];
   HANDLE hComm;
   
   portname[ 0 ] = portname[ WIN_MAX_PORT_NAME ] = '\0';
   _snprintf( portname, WIN_MAX_PORT_NAME, "\\\\.\\%s", sername );
-  hComm = CreateFile( portname, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0 );
+  //swprintf( portname, WIN_MAX_PORT_NAME, "\\\\.\\%s", sername );
+
+  mbstowcs(pname, portname, WIN_MAX_PORT_NAME);
+
+  hComm = CreateFile( pname, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0 );
   if( hComm == INVALID_HANDLE_VALUE )
+  {
+    printf("hComm err : %s\n", pname);
     return WIN_ERROR;
+  }
   if( !SetupComm( hComm, 2048, 2048 ) )
     return WIN_ERROR;
   return hComm;
