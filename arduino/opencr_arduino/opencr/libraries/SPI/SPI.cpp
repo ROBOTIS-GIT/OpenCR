@@ -156,10 +156,16 @@ void SPIClass::setDataMode(uint8_t dataMode){
   switch( dataMode )
   {
     case SPI_MODE0:
+      _hspi->Init.CLKPolarity       = SPI_POLARITY_LOW;
+      //HAL_SPI_Init(_hspi);
       break;
     case SPI_MODE1:
+      _hspi->Init.CLKPolarity       = SPI_POLARITY_LOW;
+      //HAL_SPI_Init(_hspi);
       break;
     case SPI_MODE2:
+      _hspi->Init.CLKPolarity       = SPI_POLARITY_LOW;
+      //HAL_SPI_Init(_hspi);
       break;
   }
   //_hspi->Init.CLKPolarity = SPI_POLARITY_LOW;
