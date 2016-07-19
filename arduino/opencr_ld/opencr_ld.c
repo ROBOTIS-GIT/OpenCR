@@ -309,7 +309,7 @@ int opencr_ld_jump_to_boot( char *portname )
   // Open port
   if( ( stm32_ser_id = ser_open( portname ) ) == ( ser_handler )-1 )
   {
-    printf("Fail to open port 1\n");
+    printf("Fail to open port 1 : %s\n", portname);
     return -1;
   }
 
