@@ -39,7 +39,9 @@ void msg_send(uint8_t chan, mavlink_message_t *p_msg)
   {
     case 0:
       write_len = write_bytes((char *)buf, (uint32_t)len);
+#ifndef WIN32_BUILD
       if( write_len != len ) printf("wlen %d : len %d\r\n", write_len, len);
+#endif
       break;
 
     case 1:
@@ -85,12 +87,13 @@ BOOL msg_get_resp( uint8_t chan, mavlink_message_t *p_msg, uint32_t timeout)
   int retry = timeout;
 
 
-#if 1
+#ifndef WIN32_BUILD
   retry = timeout/100;
   ser_set_timeout_ms( stm32_ser_id, 100 );
   while(1)
   {
     length = read_bytes( ch_buff, 128 );
+
     if( length <= 0 )
     {
       if( retry-- <= 0 )
@@ -117,6 +120,7 @@ BOOL msg_get_resp( uint8_t chan, mavlink_message_t *p_msg, uint32_t timeout)
     }
   }
 #else
+  int  ch_ret;
   ser_set_timeout_ms( stm32_ser_id, 1 );
 
   while(1)
