@@ -19,6 +19,7 @@
 #include "drv_spi.h"
 #include "drv_uart.h"
 #include "drv_i2c.h"
+#include "drv_exti.h"
 
 int drv_init(void);
 
