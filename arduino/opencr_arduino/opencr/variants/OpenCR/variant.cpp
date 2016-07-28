@@ -65,7 +65,13 @@ extern const Pin2PortMapArray g_Pin2PortMapArray[]=
     {GPIOG, GPIO_PIN_2,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 27 TEST_PIN_6
     {GPIOA, GPIO_PIN_4,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 28 MPU CS
     {GPIOC, GPIO_PIN_0,   &hADC3,   ADC_CHANNEL_10, NULL   ,   NO_PWM       , NO_EXTI },  // 29 BAT
-    {GPIOC, GPIO_PIN_15,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 30
+
+    {GPIOB, GPIO_PIN_0,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 30 OLLO_P1_SIG1
+    {GPIOC, GPIO_PIN_8,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 31 OLLO_P1_SIG2
+    {GPIOA, GPIO_PIN_7,   &hADC1,   ADC_CHANNEL_7 , NULL   ,   NO_PWM       , 5       },  // 32 OLLO_P1_ADC           EXTI_5
+    {GPIOC, GPIO_PIN_5,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 33 OLLO_P2_SIG1
+    {GPIOB, GPIO_PIN_1,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 34 OLLO_P2_SIG2
+    {GPIOC, GPIO_PIN_4,   &hADC1,   ADC_CHANNEL_14, NULL   ,   NO_PWM       , 6       },  // 35 OLLO_P2_ADC           EXTI_6
     {NULL , 0          ,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI }
 };
 
@@ -89,14 +95,19 @@ void serialEvent1() { }
 void serialEvent2() __attribute__((weak));
 void serialEvent2() { }
 
+void serialEvent3() __attribute__((weak));
+void serialEvent3() { }
 
 UARTClass Serial1(&huart1, USART6_IRQn, 0, USART6);
 UARTClass Serial2(&huart2, USART2_IRQn, 1, USART2);
+UARTClass Serial3(&huart3, USART3_IRQn, 2, USART3);
 
 void Tx1_Handler(void){ Serial1.TxHandler(); }
 void Rx1_Handler(void){ Serial1.RxHandler(); }
 void Tx2_Handler(void){ Serial2.TxHandler(); }
 void Rx2_Handler(void){ Serial2.RxHandler(); }
+void Tx3_Handler(void){ Serial3.TxHandler(); }
+void Rx3_Handler(void){ Serial3.RxHandler(); }
 
 
 
@@ -106,6 +117,7 @@ void serialEventRun(void)
   if (Serial.available()) serialEvent();
   if (Serial1.available()) serialEvent1();
   if (Serial2.available()) serialEvent2();
+  if (Serial3.available()) serialEvent3();
 }
 
 USBSerial Serial;

@@ -42,7 +42,7 @@ extern "C"{
 
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
-
+extern UART_HandleTypeDef huart3;
 
  
 
@@ -80,6 +80,8 @@ void Rx1_Handler(void);
 void Tx1_Handler(void);
 void Rx2_Handler(void);
 void Tx2_Handler(void);
+void Rx3_Handler(void);
+void Tx3_Handler(void);
 
 #ifdef __cplusplus
 }
@@ -95,6 +97,7 @@ void Tx2_Handler(void);
 extern USBSerial Serial;
 extern UARTClass Serial1;
 extern UARTClass Serial2;
+extern UARTClass Serial3;
 
 
 
@@ -106,7 +109,7 @@ extern UARTClass Serial2;
 
 #define WIRE_INTERFACES_COUNT       1
 #define SPI_INTERFACES_COUNT        2
-#define EXTI_COUNT                  5
+#define EXTI_COUNT                  7
 #define PINS_COUNT                  64
 
 #endif

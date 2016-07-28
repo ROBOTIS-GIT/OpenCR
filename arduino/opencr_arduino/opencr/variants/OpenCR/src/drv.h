@@ -20,6 +20,7 @@
 #include "drv_uart.h"
 #include "drv_i2c.h"
 #include "drv_exti.h"
+#include "drv_dxl.h"
 
 int drv_init(void);
 
