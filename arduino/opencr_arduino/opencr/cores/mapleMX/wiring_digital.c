@@ -109,14 +109,19 @@ extern void pinMode( uint32_t ulPin, uint32_t ulMode )
  			GPIO_InitStruct.Pull = GPIO_NOPULL;
  			break ;
 
+	  case INPUT_ANALOG:
+	    drv_adc_pin_init(ulPin);
+	    break;
+
 	  default:
 	    break ;
 	}
 
-	GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
-  	
-
-	HAL_GPIO_Init(g_Pin2PortMapArray[ulPin].GPIOx_Port, &GPIO_InitStruct);
+	if( ulMode != INPUT_ANALOG )
+	{
+	  GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+	  HAL_GPIO_Init(g_Pin2PortMapArray[ulPin].GPIOx_Port, &GPIO_InitStruct);
+	}
 }
 
 extern void digitalWrite( uint32_t ulPin, uint32_t ulVal )

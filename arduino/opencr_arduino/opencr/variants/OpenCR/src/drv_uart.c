@@ -11,7 +11,7 @@
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
-
+UART_HandleTypeDef huart3;
 
 
 int drv_uart_init()
@@ -22,13 +22,6 @@ int drv_uart_init()
   return 0;
 }
 
-
-void led_out(void)
-{
-  static  int i = 0;
-  HAL_GPIO_WritePin(GPIOA,  GPIO_PIN_9, (GPIO_PinState)i);
-  i ^= 1;
-}
 
 void USART6_IRQHandler(void)
 {
@@ -41,11 +34,17 @@ void USART2_IRQHandler(void)
   HAL_UART_IRQHandler(&huart2);
 }
 
+void USART3_IRQHandler(void)
+{
+  HAL_UART_IRQHandler(&huart3);
+}
+
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
   if( UartHandle->Instance == USART6 ) Tx1_Handler();
   if( UartHandle->Instance == USART2 ) Tx2_Handler();
+  if( UartHandle->Instance == USART3 ) Tx3_Handler();
 }
 
 
@@ -55,6 +54,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 
   if( UartHandle->Instance == USART6 ) Rx1_Handler();
   if( UartHandle->Instance == USART2 ) Rx2_Handler();
+  if( UartHandle->Instance == USART3 ) Rx3_Handler();
 }
 
 
@@ -107,6 +107,28 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     HAL_NVIC_SetPriority(USART6_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ  (USART6_IRQn);
   }
+  else if(huart->Instance==USART3)
+  {
+
+    /* Peripheral clock enable */
+    __HAL_RCC_USART3_CLK_ENABLE();
+
+    GPIO_InitStruct.Pin       = GPIO_PIN_10;
+    GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull      = GPIO_PULLUP;
+    GPIO_InitStruct.Speed     = GPIO_SPEED_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF7_USART3;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+
+    GPIO_InitStruct.Pin       = GPIO_PIN_11;
+    GPIO_InitStruct.Alternate = GPIO_AF7_USART3;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+    /* Peripheral interrupt init */
+    HAL_NVIC_SetPriority(USART3_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ  (USART3_IRQn);
+  }
 }
 
 
@@ -142,5 +164,20 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
 
     /* Peripheral interrupt Deinit*/
     HAL_NVIC_DisableIRQ(USART6_IRQn);
+  }
+  else if(huart->Instance==USART3)
+  {
+    __USART3_FORCE_RESET();
+    __USART3_RELEASE_RESET();
+
+    /* Peripheral clock disable */
+    __HAL_RCC_USART3_CLK_DISABLE();
+
+
+    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_10);
+    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_11);
+
+    /* Peripheral interrupt Deinit*/
+    HAL_NVIC_DisableIRQ(USART3_IRQn);
   }
 }

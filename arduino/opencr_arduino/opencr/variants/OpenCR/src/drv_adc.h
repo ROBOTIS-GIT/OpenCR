@@ -21,13 +21,13 @@
 #include "util.h"
 
 
-
+extern ADC_HandleTypeDef hADC1;
 extern ADC_HandleTypeDef hADC3;
 
 
 
 int drv_adc_init();
-
+void drv_adc_pin_init( uint32_t ulPin );
 
 
 #ifdef __cplusplus

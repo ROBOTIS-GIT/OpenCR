@@ -4,6 +4,8 @@ menu.device_variant=Variant
 menu.bootloader_version=Bootloader version
 menu.upload_method=Upload method
 
+OpenCR.bootloader.tool = dfu_util
+OpenCR.bootloader.file = opencr_boot.bin
 
 OpenCR.name=OpenCR Board
 OpenCR.upload.maximum_size=786432
