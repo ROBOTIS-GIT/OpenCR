@@ -21,7 +21,7 @@
 
 #define NO_ADC 		0xffff
 #define NO_PWM		0xffff
-
+#define NO_EXTI   0xffff
 
 
 /*----------------------------------------------------------------------------
@@ -42,7 +42,7 @@ extern "C"{
 
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
-
+extern UART_HandleTypeDef huart3;
 
  
 
@@ -55,6 +55,7 @@ static const uint8_t A2  = 18;
 static const uint8_t A3  = 19;
 static const uint8_t A4  = 20;
 static const uint8_t A5  = 21;
+static const uint8_t BAT = 29;
 
 
 
@@ -69,6 +70,7 @@ typedef struct _Pin2PortMapArray
 
     TIM_HandleTypeDef *TIMx;
     uint32_t  timerChannel;
+    uint32_t  extiChannel;
 } Pin2PortMapArray ;
 
 
@@ -78,6 +80,8 @@ void Rx1_Handler(void);
 void Tx1_Handler(void);
 void Rx2_Handler(void);
 void Tx2_Handler(void);
+void Rx3_Handler(void);
+void Tx3_Handler(void);
 
 #ifdef __cplusplus
 }
@@ -93,32 +97,19 @@ void Tx2_Handler(void);
 extern USBSerial Serial;
 extern UARTClass Serial1;
 extern UARTClass Serial2;
+extern UARTClass Serial3;
 
 
 
 #endif
 
-#define SERIAL_PORT_MONITOR         Serial
-#define SERIAL_PORT_USBVIRTUAL      SerialUSB
-#define SERIAL_PORT_HARDWARE_OPEN   Serial1
-#define SERIAL_PORT_HARDWARE_OPEN1  Serial2
-#define SERIAL_PORT_HARDWARE_OPEN2  Serial3
-#define SERIAL_PORT_HARDWARE        Serial
-#define SERIAL_PORT_HARDWARE1       Serial1
-#define SERIAL_PORT_HARDWARE2       Serial2
+
+#define digitalPinToInterrupt(P)   ( g_Pin2PortMapArray[P].extiChannel )
+
 
 #define WIRE_INTERFACES_COUNT       1
-#define PIN_WIRE_SDA                (PB7)
-#define PIN_WIRE_SCL                (PB8)
-#define WIRE_INTERFACE              hi2c1
-#define WIRE_INTERFACE_ID           I2C2
-
-#define PIN_WIRE1_SDA               (PB11)
-#define PIN_WIRE1_SCL               (PB10)
-#define WIRE1_INTERFACE             hi2c2
-#define WIRE1_INTERFACE_ID          I2C2
-
-
 #define SPI_INTERFACES_COUNT        2
+#define EXTI_COUNT                  7
+#define PINS_COUNT                  64
 
 #endif
