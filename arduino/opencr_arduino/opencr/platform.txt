@@ -20,7 +20,8 @@ compiler.warning_flags.all=-Wall -Wextra -DDEBUG_LEVEL=DEBUG_ALL
 # compiler variables
 # ----------------------
 #compiler.path={runtime.tools.arm-none-eabi-gcc.path}/bin/
-compiler.path={runtime.hardware.path}/tools/gcc/bin/
+#compiler.path={runtime.hardware.path}/tools/gcc/bin/
+compiler.path={runtime.tools.opencr_gcc.path}/bin/
 compiler.c.cmd=arm-none-eabi-gcc
 compiler.c.flags=-c -g -O2 -std=gnu99 -mfloat-abi=softfp -mfpu=fpv5-sp-d16 {compiler.warning_flags} -MMD -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -DBOARD_{build.variant} 
 compiler.c.elf.cmd=arm-none-eabi-g++
@@ -108,10 +109,23 @@ recipe.size.regex.data=^(?:\.data|\.bss|\.noinit)\s+([0-9]+).*
 # -------------------
 tools.opencr_ld.cmd=opencr_ld
 tools.opencr_ld.cmd.windows=opencr_ld.exe
-tools.opencr_ld.path={runtime.hardware.path}/tools/win
-tools.opencr_ld.path.macosx={runtime.hardware.path}/tools/macosx
-tools.opencr_ld.path.linux={runtime.hardware.path}/tools/linux    
+#tools.opencr_ld.path={runtime.hardware.path}/tools/win
+#tools.opencr_ld.path.macosx={runtime.hardware.path}/tools/macosx
+#tools.opencr_ld.path.linux={runtime.hardware.path}/tools/linux    
+tools.opencr_ld.path={runtime.tools.opencr_tools.path}/win
+tools.opencr_ld.path.macosx={runtime.tools.opencr_tools.path}/macosx
+tools.opencr_ld.path.linux={runtime.tools.opencr_tools.path}/linux    
 
 tools.opencr_ld.upload.params.verbose=-d
 tools.opencr_ld.upload.params.quiet=n
 tools.opencr_ld.upload.pattern="{path}/{cmd}" "{serial.port}" "115200" "{build.path}/{build.project_name}.bin" "1"
+
+tools.dfu_util.cmd=dfu-util
+tools.dfu_util.cmd.windows=dfu-util.exe
+tools.dfu_util.path={runtime.tools.opencr_tools.path}/win/dfu-util
+tools.dfu_util.path.macosx={runtime.tools.opencr_tools.path}/macosx/dfu-util
+tools.dfu_util.path.linux={runtime.tools.opencr_tools.path}/linux/dfu-util
+
+tools.dfu_util.bootloader.params.verbose=-v -v -v -v
+tools.dfu_util.bootloader.params.quiet=-q -q
+tools.dfu_tuil.bootloader.pattern="{path}/{cmd}" -d 0483:df11 -a 0 -s 0x08000000 -D "{runtime.hardware.path}/OpenCR/bootloaders/{bootloader.file}"

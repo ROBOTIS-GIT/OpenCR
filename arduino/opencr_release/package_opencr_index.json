@@ -1,0 +1,117 @@
+{
+  "packages": [
+    {
+      "name": "OpenCR",
+      "maintainer": "ROBOTIS",
+      "websiteURL": "https://github.com/ROBOTIS-GIT/OpenCR",
+      "email": "chcbaram@paran.com",
+      "help": {
+        "online": "http://oroca.org"
+      },
+      "platforms": [
+        {
+          "name": "OpenCR",
+          "architecture": "OpenCR",
+          "version": "1.0.0",
+          "category": "Arduino",
+          "help": {
+            "online": "https://github.com/ROBOTIS-GIT/OpenCR"
+          },
+          "url": "https://github.com/chcbaram/opencr_test/releases/download/opencr_arduino/opencr_core_1.0.tar.bz2",
+          "archiveFileName": "opencr_core_1.0.tar.bz2",
+          "checksum": "SHA-256:e558beada46be30046d060ecacc9a71ad0a7f989d24329e27c76c57e171a553b",
+          "size": "738397",
+          "help": {
+                    "online": "https://github.com/ROBOTIS-GIT/OpenCR"
+          },
+          "boards": [
+            {"name": "OpenCR"}
+          ],
+          "toolsDependencies": [
+            {
+              "packager": "OpenCR",
+              "name": "opencr_gcc",
+              "version": "5.4.0-2016q2"
+            },
+            {
+              "packager": "OpenCR",
+              "name": "opencr_tools",
+              "version": "1.0"
+            }
+
+          ]
+        }
+      ],
+      "tools":[
+        {
+          "name": "opencr_gcc",
+          "version": "5.4.0-2016q2",
+          "systems": [
+            {
+              "host": "i686-linux-gnu",
+              "url": "https://launchpad.net/gcc-arm-embedded/5.0/5-2016-q2-update/+download/gcc-arm-none-eabi-5_4-2016q2-20160622-linux.tar.bz2",
+              "archiveFileName": "gcc-arm-none-eabi-5_4-2016q2-20160622-linux.tar.bz2",
+              "checksum": "SHA-256:9910b6b5df12efe564dbb3856bf1599d4c16178a6f28bd8a23c9e5c3edc219e4",
+              "size": "92600244"
+            },
+            {
+              "host": "x86_64-pc-linux-gnu",
+              "url": "https://launchpad.net/gcc-arm-embedded/5.0/5-2016-q2-update/+download/gcc-arm-none-eabi-5_4-2016q2-20160622-linux.tar.bz2",
+              "archiveFileName": "gcc-arm-none-eabi-5_4-2016q2-20160622-linux.tar.bz2",
+              "checksum": "SHA-256:9910b6b5df12efe564dbb3856bf1599d4c16178a6f28bd8a23c9e5c3edc219e4",
+              "size": "92600244"
+            },
+            {
+              "host": "i686-mingw32",
+              "url": "https://launchpad.net/gcc-arm-embedded/5.0/5-2016-q2-update/+download/gcc-arm-none-eabi-5_4-2016q2-20160622-win32.zip",
+              "archiveFileName": "gcc-arm-none-eabi-5_4-2016q2-20160622-win32.zip",
+              "checksum": "SHA-256:562a1708fbf5dedd87ed44016bceb477e0f050cbd82ddbe2373a1fc9342c0e23",
+              "size": "123123549"
+            },
+            {
+              "host": "i386-apple-darwin11",
+              "url": "https://launchpad.net/gcc-arm-embedded/5.0/5-2016-q2-update/+download/gcc-arm-none-eabi-5_4-2016q2-20160622-mac.tar.bz2",
+              "archiveFileName": "gcc-arm-none-eabi-5_4-2016q2-20160622-mac.tar.bz2",
+              "checksum": "SHA-256:e175a0eb7ee312013d9078a5031a14bf14dff82c7e697549f04b22e6084264c8",
+              "size": "96963810"
+            }
+          ]
+        },
+        {
+          "name": "opencr_tools",
+          "version": "1.0",
+          "systems": [
+            {
+              "host": "i686-linux-gnu",
+              "url": "https://github.com/chcbaram/opencr_test/releases/download/opencr_arduino/opencr_tools_1.0.tar.bz2",
+              "archiveFileName": "opencr_tools_1.0.tar.bz2",
+              "checksum": "SHA-256:3dfef83da9aadf7c9f4397c2307344f5c785ad3ea39ae19f5243adf9fdbc30c0",
+              "size": "1934513"
+            },
+            {
+              "host": "x86_64-pc-linux-gnu",
+              "url": "https://github.com/chcbaram/opencr_test/releases/download/opencr_arduino/opencr_tools_1.0.tar.bz2",
+              "archiveFileName": "opencr_tools_1.0.tar.bz2",
+              "checksum": "SHA-256:3dfef83da9aadf7c9f4397c2307344f5c785ad3ea39ae19f5243adf9fdbc30c0",
+              "size": "1934513"
+            },
+            {
+              "host": "i686-mingw32",
+              "url": "https://github.com/chcbaram/opencr_test/releases/download/opencr_arduino/opencr_tools_1.0.tar.bz2",
+              "archiveFileName": "opencr_tools_1.0.tar.bz2",
+              "checksum": "SHA-256:3dfef83da9aadf7c9f4397c2307344f5c785ad3ea39ae19f5243adf9fdbc30c0",
+              "size": "1934513"
+            },
+            {
+              "host": "i386-apple-darwin11",
+              "url": "https://github.com/chcbaram/opencr_test/releases/download/opencr_arduino/opencr_tools_1.0.tar.bz2",
+              "archiveFileName": "opencr_tools_1.0.tar.bz2",
+              "checksum": "SHA-256:3dfef83da9aadf7c9f4397c2307344f5c785ad3ea39ae19f5243adf9fdbc30c0",
+              "size": "1934513"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
