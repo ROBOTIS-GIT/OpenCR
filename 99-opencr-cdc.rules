@@ -1,0 +1,6 @@
+#http://linux-tips.org/t/prevent-modem-manager-to-capture-usb-serial-devices/284/2.
+
+
+#udevadm control --reload-rules
+
+ATTRS{idVendor}=="0483" ATTRS{idProduct}=="5740", ENV{ID_MM_DEVICE_IGNORE}="1"
