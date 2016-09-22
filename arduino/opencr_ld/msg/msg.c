@@ -98,12 +98,12 @@ BOOL msg_get_resp( uint8_t chan, mavlink_message_t *p_msg, uint32_t timeout)
     {
       if( retry-- <= 0 )
       {
-	ret = FALSE;
-	break;
+        ret = FALSE;
+        break;
       }
       else
       {
-	continue;
+        continue;
       }
     }
 
@@ -114,8 +114,8 @@ BOOL msg_get_resp( uint8_t chan, mavlink_message_t *p_msg, uint32_t timeout)
 
       if( ret == TRUE )
       {
-	*p_msg = msg[chan];
-	return ret;
+        *p_msg = msg[chan];
+        return ret;
       }
     }
   }
@@ -130,12 +130,12 @@ BOOL msg_get_resp( uint8_t chan, mavlink_message_t *p_msg, uint32_t timeout)
     {
       if( retry-- <= 0 )
       {
-	ret = FALSE;
-	break;
+        ret = FALSE;
+        break;
       }
       else
       {
-	continue;
+        continue;
       }
     }
     else

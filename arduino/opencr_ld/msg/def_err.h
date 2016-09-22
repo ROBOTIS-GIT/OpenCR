@@ -26,9 +26,9 @@ typedef uint16_t err_code_t;
 #define ERR_FLASH_READ                      0xF015
 #define ERR_FLASH_ERASE                     0xF016
 
-#define ERR_TIMEOUT          		    0xF020
-#define ERR_MISMATCH_ID			    0xF021
-#define ERR_SIZE_OVER			    0xF022
+#define ERR_TIMEOUT                         0xF020
+#define ERR_MISMATCH_ID                     0xF021
+#define ERR_SIZE_OVER                       0xF022
 
 
 
