@@ -21,6 +21,8 @@
 #include "drv_i2c.h"
 #include "drv_exti.h"
 #include "drv_dxl.h"
+#include "drv_timer.h"
+
 
 int drv_init(void);
 

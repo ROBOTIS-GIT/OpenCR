@@ -36,6 +36,8 @@
 #endif
 
 
+typedef void (*voidFuncPtr)(void);
+
 
 #include "def_err.h"
 #include "util.h"
