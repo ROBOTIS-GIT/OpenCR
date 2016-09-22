@@ -32,6 +32,7 @@
 #ifdef __cplusplus
 #include "UARTClass.h"
 #include "USBSerial.h"
+#include "HardwareTimer.h"
 #endif
 
 
