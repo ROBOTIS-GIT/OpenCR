@@ -18,9 +18,9 @@ TIM_HandleTypeDef         hTIM9;
 TIM_HandleTypeDef         hTIM11;
 TIM_HandleTypeDef         hTIM12;
 
-static volatile TIM_OC_InitTypeDef        hOC1;
+volatile TIM_OC_InitTypeDef        hOC1;
 volatile TIM_OC_InitTypeDef        hOC2;
-static volatile TIM_OC_InitTypeDef        hOC3;
+volatile TIM_OC_InitTypeDef        hOC3;
 volatile TIM_OC_InitTypeDef        hOC9;
 volatile TIM_OC_InitTypeDef        hOC11;
 volatile TIM_OC_InitTypeDef        hOC12;

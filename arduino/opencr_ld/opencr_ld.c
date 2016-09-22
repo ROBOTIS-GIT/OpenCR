@@ -106,6 +106,7 @@ int opencr_ld_down( int argc, const char **argv )
   uint32_t addr;
   uint32_t len;
   uint8_t jump_to_fw = 0;
+  uint8_t retry;
 
 
   baud     = strtol( argv[ 2 ], NULL, 10 );
@@ -209,8 +210,13 @@ int opencr_ld_down( int argc, const char **argv )
       crc = crc_calc( crc,  block_buf[i] );
     }
 
-    ret = opencr_ld_flash_write( addr, block_buf, len );
+    for( retry=0; retry<3; retry++ )
+    {
+      ret = opencr_ld_flash_write( addr, block_buf, len );
+      if( ret >= 0 ) break;
+    }
     if( ret < 0 ) break;
+
     addr += len;
   }
   dt = iclock() - t;
@@ -220,7 +226,8 @@ int opencr_ld_down( int argc, const char **argv )
   {
     ser_close( stm32_ser_id );
     fclose( opencr_fp );
-    return -1;
+    printf("[FAIL] Download \r\n");
+    return -2;
   }
 
 
@@ -282,7 +289,13 @@ int opencr_ld_down( int argc, const char **argv )
   else
   {
     printf("CRC Fail : 0x%X : %X, %X %f sec\r\n", err_code, crc, crc_ret, GET_CALC_TIME(dt));
+    printf("[FAIL] Download \r\n");
+    ser_close( stm32_ser_id );
+    fclose( opencr_fp );
+    return -3;
   }
+
+  printf("[OK] Download \r\n");
 
   if( jump_to_fw == 1 )
   {
@@ -388,14 +401,14 @@ int opencr_ld_flash_write( uint32_t addr, uint8_t *p_data, uint32_t length  )
       packet_length = block_length - written_packet_length;
       if( packet_length > FLASH_PACKET_LENGTH )
       {
-	packet_length = FLASH_PACKET_LENGTH;
+        packet_length = FLASH_PACKET_LENGTH;
       }
 
       err_code = cmd_flash_fw_write_packet(written_packet_length, &p_data[written_total_length+written_packet_length], packet_length);
       if( err_code != OK )
       {
-	printf("cmd_flash_fw_send_block ERR : 0x%04X\r\n", err_code);
-	return -2;
+        printf("cmd_flash_fw_send_block ERR : 0x%04X\r\n", err_code);
+        return -2;
       }
 
       written_packet_length += packet_length;
@@ -408,8 +421,8 @@ int opencr_ld_flash_write( uint32_t addr, uint8_t *p_data, uint32_t length  )
       err_code = cmd_flash_fw_write_block(addr+written_total_length, block_length);
       if( err_code != OK )
       {
-	printf("cmd_flash_fw_write_block ERR : 0x%04X\r\n", err_code);
-	return -3;
+        printf("cmd_flash_fw_write_block ERR : 0x%04X\r\n", err_code);
+        return -3;
       }
     }
     else

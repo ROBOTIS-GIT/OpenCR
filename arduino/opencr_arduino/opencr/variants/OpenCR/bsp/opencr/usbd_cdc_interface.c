@@ -16,8 +16,8 @@
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
@@ -80,7 +80,7 @@ static int8_t CDC_Itf_Receive(uint8_t* pbuf, uint32_t *Len);
 
 
 
-USBD_CDC_ItfTypeDef USBD_CDC_fops = 
+USBD_CDC_ItfTypeDef USBD_CDC_fops =
 {
   CDC_Itf_Init,
   CDC_Itf_DeInit,
@@ -101,7 +101,7 @@ static int8_t CDC_Itf_Init(void)
   USBD_CDC_SetTxBuffer(&USBD_Device, UserTxBuffer, 0);
   USBD_CDC_SetRxBuffer(&USBD_Device, UserRxBuffer);
   is_opened = FALSE;
-  
+
   return (USBD_OK);
 }
 
@@ -120,7 +120,7 @@ static int8_t CDC_Itf_DeInit(void)
 /**
   * @brief  CDC_Itf_Control
   *         Manage the CDC class requests
-  * @param  Cmd: Command code            
+  * @param  Cmd: Command code
   * @param  Buf: Buffer containing command data (request parameters)
   * @param  Len: Number of data to be sent (in bytes)
   * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
@@ -168,7 +168,7 @@ static int8_t CDC_Itf_Control (uint8_t cmd, uint8_t* pbuf, uint16_t length)
     pbuf[3] = (uint8_t)(LineCoding.bitrate >> 24);
     pbuf[4] = LineCoding.format;
     pbuf[5] = LineCoding.paritytype;
-    pbuf[6] = LineCoding.datatype;     
+    pbuf[6] = LineCoding.datatype;
     break;
 
   case CDC_SET_CONTROL_LINE_STATE:
@@ -181,19 +181,19 @@ static int8_t CDC_Itf_Control (uint8_t cmd, uint8_t* pbuf, uint16_t length)
 
   case CDC_SEND_BREAK:
      /* Add your code here */
-    break;    
-    
+    break;
+
   default:
     break;
   }
-  
+
   return (USBD_OK);
 }
 
 
 /**
   * @brief  CDC_Itf_DataRx
-  *         Data received over USB OUT endpoint are sent over CDC interface 
+  *         Data received over USB OUT endpoint are sent over CDC interface
   *         through this function.
   * @param  Buf: Buffer of data to be transmitted
   * @param  Len: Number of data received (in bytes)
@@ -256,7 +256,7 @@ void CDC_Itf_Write( uint8_t *p_buf, uint32_t length )
   uint32_t time_out = 10;
 
 
-  if( USBD_Device.dev_config == 0 || is_opened == FALSE ) return;
+  if( USBD_Device.dev_config == 0 ) return;
 
 
   tTime = millis();
