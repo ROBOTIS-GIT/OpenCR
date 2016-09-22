@@ -27,6 +27,7 @@ int drv_init()
   drv_micros_init();
   drv_uart_init();
   drv_pwm_init();
+  drv_timer_init();
   drv_i2c_init();
   drv_exti_init();
   drv_dxl_init();
