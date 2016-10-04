@@ -1,26 +1,51 @@
 /* Blink(LED)
- 
+
  Turns on the built-in LED(Status LED) on for 0.1 second, then off for 0.1 second,
  repeatedly. BOARD_LED_PIN is defined previously, so just use it without declaration.
- BOARD_LED_PIN was connected to pin 16 in CM-900, but connected to pin 14 in OpenCM9.04.
 
                 Compatibility
-CM900                  O
-OpenCM9.04             O
+OpenCR                O
 
- created 16 Nov 2012
  by ROBOTIS CO,.LTD.
  */
+/*
+#define BDPIN_LED_USER_1        22
+#define BDPIN_LED_USER_2        23
+#define BDPIN_LED_USER_3        24
+#define BDPIN_LED_USER_4        25
+ */
+
+int led_pin = 13;
+int led_pin_user[4] = { BDPIN_LED_USER_1, BDPIN_LED_USER_2, BDPIN_LED_USER_3, BDPIN_LED_USER_4 };
 
 void setup() {
   // Set up the built-in LED pin as an output:
-  pinMode(BOARD_LED_PIN, OUTPUT);
+  pinMode(led_pin, OUTPUT);
+  pinMode(led_pin_user[0], OUTPUT);
+  pinMode(led_pin_user[1], OUTPUT);
+  pinMode(led_pin_user[2], OUTPUT);
+  pinMode(led_pin_user[3], OUTPUT);
+
 }
 
 void loop() {
-  digitalWrite(BOARD_LED_PIN, HIGH); // set to as HIGH LED is turn-off
-  delay(100);          // Wait for 0.1 second
-  digitalWrite(BOARD_LED_PIN, LOW);  // set to as LOW LED is turn-on
-  delay(100);          // Wait for 0.1 second
+  int i;
+
+  digitalWrite(led_pin, HIGH);  // set to as HIGH LED is turn-off
+  delay(100);                   // Wait for 0.1 second
+  digitalWrite(led_pin, LOW);   // set to as LOW LED is turn-on
+  delay(100);                   // Wait for 0.1 second
+
+
+  for( i=0; i<4; i++ )
+  {
+    digitalWrite(led_pin_user[i], HIGH);
+    delay(100);
+  }
+  for( i=0; i<4; i++ )
+  {
+    digitalWrite(led_pin_user[i], LOW);
+    delay(100);
+  }
 }
 

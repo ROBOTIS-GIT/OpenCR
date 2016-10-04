@@ -31,6 +31,9 @@ void Dynamixel::begin(int baud){
   mPacketType = DXL_PACKET_TYPE1; //2014-04-02 default packet type is 1.0 ->  set as 1
 
 
+  pinMode( BDPIN_DXL_PWR_EN, OUTPUT );
+
+  dxlPowerEnable();
 
   //Calculate baudrate, refer to ROBOTIS support page.
   //Baudrate = dxl_get_baudrate(baud);  //Dxl 2.0
@@ -106,6 +109,12 @@ void Dynamixel::clearBuffer(void){
 
     if( millis()-tTime > 1000 ) break;
   }
+}
+void Dynamixel::dxlPowerEnable(void){
+  digitalWrite(BDPIN_DXL_PWR_EN, HIGH);
+}
+void Dynamixel::dxlPowerDisable(void){
+  digitalWrite(BDPIN_DXL_PWR_EN, LOW);
 }
 void Dynamixel::setPacketType(byte type){
 	mPacketType = type;
