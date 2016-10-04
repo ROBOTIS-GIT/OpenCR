@@ -37,7 +37,7 @@ int serial_baud = 115200;// serial port buttons
 
 void setup() 
 {
-  size(VIEW_SIZE_X, VIEW_SIZE_Y, P3D);
+  size(600, 600, P3D);
 
 
 // create the buttons
@@ -385,4 +385,3 @@ void serialEvent(Serial p) {
       println("Caught Exception");
   }
 }
-

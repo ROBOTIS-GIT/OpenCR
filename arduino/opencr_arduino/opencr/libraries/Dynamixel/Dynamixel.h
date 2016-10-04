@@ -34,6 +34,9 @@ public:
 	uint8_t available(void);
 	void writeRaw(uint8_t);
 
+	void dxlPowerEnable(void);
+	void dxlPowerDisable(void);
+
 	byte getResult(void); // use getTxRxStatus() instead of getResult() method
 	byte getTxRxStatus(void);// made by NaN (Robotsource.org)
 	byte getError(byte errbit);
