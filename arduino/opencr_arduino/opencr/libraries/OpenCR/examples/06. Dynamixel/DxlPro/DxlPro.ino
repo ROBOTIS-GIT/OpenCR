@@ -3,6 +3,7 @@
 
 Dynamixel Dxl;
 
+int motor_id = 1;
 
 void setup() {
   // put your setup code here, to run once:
@@ -10,7 +11,7 @@ void setup() {
   pinMode(13, OUTPUT);
   Dxl.begin(3);
 
-  Dxl.writeByte(1, 64, 1 );
+  Dxl.writeByte(motor_id, 64, 1 );
 }
 
 void loop() {
@@ -23,13 +24,13 @@ void loop() {
   {
     tTime = millis();
 
-    Dxl.writeByte(1, 65, led_tog );
+    Dxl.writeByte(motor_id, 65, led_tog );
 
-    Serial.print(Dxl.readByte(1, 65));
+    Serial.print(Dxl.readByte(motor_id, 65));
     Serial.print(" ");
-    Serial.print(Dxl.readByte(1, 11));
+    Serial.print(Dxl.readByte(motor_id, 11));
     Serial.print(" ");
-    Serial.print(Dxl.readWord(1, 132));
+    Serial.print(Dxl.readWord(motor_id, 132));
     Serial.println(" ");
 
     digitalWrite(13, led_tog);
@@ -43,11 +44,11 @@ void loop() {
 
     if( MotorIndex == 0 )
     {
-      Dxl.writeDword(1, 116, get_pos(0) );
+      Dxl.writeDword(motor_id, 116, get_pos(0) );
     }
     else
     {
-      Dxl.writeDword(1, 116, get_pos(90) );
+      Dxl.writeDword(motor_id, 116, get_pos(90) );
     }
 
     MotorIndex ^= 1;
@@ -59,10 +60,10 @@ void loop() {
 
     ch = Serial.read();
 
-    if( ch == '1' ) Dxl.writeByte(1, 64, 1 );
-    if( ch == '2' ) Dxl.writeByte(1, 64, 0 );
-    if( ch == '3' ) Dxl.writeDword(1, 116, get_pos(0) );
-    if( ch == '4' ) Dxl.writeDword(1, 116, get_pos(90) );
+    if( ch == '1' ) Dxl.writeByte(motor_id, 64, 1 );
+    if( ch == '2' ) Dxl.writeByte(motor_id, 64, 0 );
+    if( ch == '3' ) Dxl.writeDword(motor_id, 116, get_pos(0) );
+    if( ch == '4' ) Dxl.writeDword(motor_id, 116, get_pos(90) );
 
   }
 }

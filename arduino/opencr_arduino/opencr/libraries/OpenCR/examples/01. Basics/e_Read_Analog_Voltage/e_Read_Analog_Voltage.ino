@@ -1,28 +1,36 @@
-/* Read_Analog_Voltage
-
- Reads an analog input on pin 1, prints the result to the serial monitor.  
- voltage = Analog_data * (Max_voltage / Max_Analog_data);
- 
-                  Compatibility
- CM900                  O
- OpenCM9.04             O
- 
- created 16 Nov 2012
- by ROBOTIS CO,.LTD.
+/*
+ * ReadAnalogVoltage
  */
 
-volatile float voltage=0;
-
-void setup(){
-  pinMode(1, INPUT_ANALOG);
+void setup() {
+  Serial.begin(115200);
 }
 
-void loop(){
-  int AdcData = analogRead(1);
-  voltage = AdcData * (3.3 / 4095.0);
-  SerialUSB.print("voltage = ");
-  SerialUSB.print(voltage);
-  SerialUSB.println(" [V]");
+void loop() {
+  int adc_value;
+  float vol_value;
+
+  // put your main code here, to run repeatedly:
+
+  adc_value = analogRead(BDPIN_BAT_PWR_ADC);
+
+  Serial.print("BAT_PWR = ");
+  Serial.print(adc_value);
+  Serial.print("\t");
+  vol_value = map(adc_value, 0, 1023, 0, 330*57/10);
+  vol_value = vol_value/100;
+  Serial.print(vol_value);
+  Serial.print("V\t");
+
+  adc_value = analogRead(BDPIN_CHG_PWR_ADC);
+
+  Serial.print("CHG_PWR = ");
+  Serial.print(adc_value);
+  Serial.print("\t");
+  vol_value = map(adc_value, 0, 1023, 0, 330*57/10);
+  vol_value = vol_value/100;
+  Serial.print(vol_value);
+  Serial.println("V");
+
   delay(100);
 }
-
