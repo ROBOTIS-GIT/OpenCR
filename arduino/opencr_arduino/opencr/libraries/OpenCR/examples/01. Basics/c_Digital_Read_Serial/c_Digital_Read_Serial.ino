@@ -1,12 +1,7 @@
-/* DigitalReadSerial
-
- Reads a digital input pins, prints the result to the serial monitor
-
-                Compatibility
-OpenCR               O
- 
- by ROBOTIS CO,.LTD.
+/*
+ * DigitalReadSerial
  */
+
 /*
 #define BDPIN_DIP_SW_1          26
 #define BDPIN_DIP_SW_2          27

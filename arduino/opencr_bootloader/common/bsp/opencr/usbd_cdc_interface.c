@@ -225,7 +225,7 @@ void CDC_Itf_Write( uint8_t *p_buf, uint32_t length )
   uint32_t time_out = 1000;
 
 
-  if( USBD_Device.dev_config == 0 || is_opened == FALSE ) return;
+  if( USBD_Device.dev_config == 0 ) return;
 
 
   tTime = millis();
@@ -249,17 +249,17 @@ void CDC_Itf_Write( uint8_t *p_buf, uint32_t length )
     {
       if(USBD_CDC_TransmitPacket(&USBD_Device) == USBD_OK)
       {
-	written_length += write_length;
-	is_opened = TRUE;
-	break;
+        written_length += write_length;
+        is_opened = TRUE;
+        break;
       }
       else
       {
-	if( (millis()-tTime) > time_out )
-	{
-	  is_opened = FALSE;
-	  break;
-	}
+        if( (millis()-tTime) > time_out )
+        {
+          is_opened = FALSE;
+          break;
+        }
       }
     }
 

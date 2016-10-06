@@ -13,6 +13,7 @@
  TIMER_CH2  TIM10
  TIMER_CH3  TIM13
  TIMER_CH4  TIM14
+ TIMER_TONE TIM8
  */
 
 
@@ -29,7 +30,7 @@ typedef struct
 
 
 
-DRV_TIMER_OBJ hDrvTim[4];
+DRV_TIMER_OBJ hDrvTim[TIMER_CH_MAX];
 
 
 
@@ -78,9 +79,9 @@ int drv_timer_init()
   hDrvTim[tim_ch].hTIM.Init.RepetitionCounter = 0;
 
 
-  //-- TIMER_CH4  TIM14
+  //-- TIMER_TONE  TIM14
   //
-  tim_ch = TIMER_CH4;
+  tim_ch = TIMER_TONE;
   hDrvTim[tim_ch].hTIM.Instance   = TIM14;
   hDrvTim[tim_ch].prescaler_value = (uint32_t)((SystemCoreClock / 2) / 10000) - 1; // 1Mhz
   hDrvTim[tim_ch].prescaler_div   = 100;
@@ -89,6 +90,7 @@ int drv_timer_init()
   hDrvTim[tim_ch].hTIM.Init.ClockDivision = 0;
   hDrvTim[tim_ch].hTIM.Init.CounterMode   = TIM_COUNTERMODE_UP;
   hDrvTim[tim_ch].hTIM.Init.RepetitionCounter = 0;
+
 
 
   for( i=0; i<TIMER_CH_MAX; i++ )
@@ -158,7 +160,7 @@ void TIM8_UP_TIM13_IRQHandler(void)
 }
 void TIM8_TRG_COM_TIM14_IRQHandler(void)
 {
-  HAL_TIM_IRQHandler(&hDrvTim[TIMER_CH4].hTIM);
+  HAL_TIM_IRQHandler(&hDrvTim[TIMER_TONE].hTIM);
 }
 
 

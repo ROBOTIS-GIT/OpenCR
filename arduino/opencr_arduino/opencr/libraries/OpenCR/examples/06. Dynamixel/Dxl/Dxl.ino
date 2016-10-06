@@ -3,13 +3,15 @@
 
 Dynamixel Dxl;
 
+int motor_id = 1;
+
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
   pinMode(13, OUTPUT);
   Dxl.begin(3);
-  Dxl.writeByte(1, 24, 1 );
+  Dxl.writeByte(motor_id, 24, 1 );
 }
 
 void loop() {
@@ -23,7 +25,7 @@ void loop() {
     tTime = millis();
 
 
-    Serial.print(Dxl.readWord(1, 36));
+    Serial.print(Dxl.readWord(motor_id, 36));
     Serial.println(" ");
 
     digitalWrite(13, led_tog);
@@ -37,13 +39,13 @@ void loop() {
 
     if( MotorIndex == 0 )
     {
-      Dxl.writeByte(1, 25, 0 );
-      Dxl.writeWord(1, 30, get_pos(0) );
+      Dxl.writeByte(motor_id, 25, 0 );
+      Dxl.writeWord(motor_id, 30, get_pos(0) );
     }
     else
     {
-      Dxl.writeByte(1, 25, 1 );
-      Dxl.writeWord(1, 30, get_pos(90) );
+      Dxl.writeByte(motor_id, 25, 1 );
+      Dxl.writeWord(motor_id, 30, get_pos(90) );
     }
 
     MotorIndex ^= 1;
@@ -55,8 +57,8 @@ void loop() {
 
     ch = Serial.read();
 
-    if( ch == '1' ) Dxl.writeByte(1, 24, 1 );
-    if( ch == '2' ) Dxl.writeByte(1, 24, 0 );
+    if( ch == '1' ) Dxl.writeByte(motor_id, 24, 1 );
+    if( ch == '2' ) Dxl.writeByte(motor_id, 24, 0 );
   }
 }
 
