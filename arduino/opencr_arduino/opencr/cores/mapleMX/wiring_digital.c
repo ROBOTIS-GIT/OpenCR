@@ -104,6 +104,11 @@ extern void pinMode( uint32_t ulPin, uint32_t ulMode )
 			GPIO_InitStruct.Pull = GPIO_PULLUP;
 			break ;
 
+	  case INPUT_PULLDOWN:
+      GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+      GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+	    break;
+
 	  case OUTPUT:
  			GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
  			GPIO_InitStruct.Pull = GPIO_NOPULL;

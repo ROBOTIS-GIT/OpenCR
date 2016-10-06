@@ -33,7 +33,7 @@ int main( int argc, const char **argv )
   long baud;
  
 
-  printf("opencr_ld ver 1.0.1\n");
+  printf("opencr_ld ver 1.0.2\n");
 
   if( argc < 4 )
   {

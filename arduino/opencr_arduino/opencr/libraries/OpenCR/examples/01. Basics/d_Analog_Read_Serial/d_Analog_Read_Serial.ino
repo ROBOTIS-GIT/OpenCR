@@ -1,28 +1,38 @@
-/* AnalogReadSerial
-
- Reads an analog input on pin 0, prints the result to the serial monitor.
- This example code is in the public domain.
- 
-                  Compatibility
- CM900                  O
- OpenCM9.04             O
- 
- 
- created 16 Nov 2012
- by ROBOTIS CO,.LTD.
+/*
+ * AnalogReadSerial
  */
 
 
 
 void setup(){
-  pinMode(0, INPUT_ANALOG); // set pin 0 as analog input
+  Serial.begin(115200);
 }
 
 void loop(){
-  int AdcData = analogRead(0);
-  SerialUSB.print("AdcData = ");
-  SerialUSB.println(AdcData);
+  int AdcData =
+  Serial.print("A0 = ");
+  Serial.print(analogRead(A0));
+  Serial.print("\t");
+
+  Serial.print("A1 = ");
+  Serial.print(analogRead(A1));
+  Serial.print("\t");
+
+  Serial.print("A2 = ");
+  Serial.print(analogRead(A2));
+  Serial.print("\t");
+
+  Serial.print("A3 = ");
+  Serial.print(analogRead(A3));
+  Serial.print("\t");
+
+  Serial.print("A4 = ");
+  Serial.print(analogRead(A4));
+  Serial.print("\t");
+
+  Serial.print("A5 = ");
+  Serial.print(analogRead(A5));
+  Serial.println(" ");
+
   delay(100);
 }
-
-

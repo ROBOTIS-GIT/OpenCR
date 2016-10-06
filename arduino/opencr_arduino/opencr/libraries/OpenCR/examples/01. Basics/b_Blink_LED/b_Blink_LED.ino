@@ -1,13 +1,7 @@
-/* Blink(LED)
-
- Turns on the built-in LED(Status LED) on for 0.1 second, then off for 0.1 second,
- repeatedly. BOARD_LED_PIN is defined previously, so just use it without declaration.
-
-                Compatibility
-OpenCR                O
-
- by ROBOTIS CO,.LTD.
+/*
+ * Blink(LED)
  */
+
 /*
 #define BDPIN_LED_USER_1        22
 #define BDPIN_LED_USER_2        23
