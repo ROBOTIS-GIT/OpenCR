@@ -5,6 +5,8 @@
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
+#include <stdarg.h>
+
 #include "serial.h"
 #include "type.h"
 #include "./msg/msg.h"
@@ -30,6 +32,7 @@ ser_handler stm32_ser_id = ( ser_handler )-1;
 uint32_t tx_buf[768*1024/4];
 uint32_t rx_buf[768*1024/4];
 
+char err_msg_str[512];
 
 
 int opencr_ld_down( int argc, const char **argv );
@@ -40,6 +43,8 @@ int opencr_ld_flash_erase( uint32_t length  );
 
 uint32_t opencr_ld_file_read_data( uint8_t *dst, uint32_t len );
 
+void opencr_ld_write_err_msg( const char *fmt, ...);
+void opencr_ld_print_err_msg(void);
 
 static long iclock();
 int read_byte( void );
@@ -226,6 +231,7 @@ int opencr_ld_down( int argc, const char **argv )
   {
     ser_close( stm32_ser_id );
     fclose( opencr_fp );
+    opencr_ld_print_err_msg();
     printf("[FAIL] Download \r\n");
     return -2;
   }
@@ -373,7 +379,8 @@ int opencr_ld_flash_write( uint32_t addr, uint8_t *p_data, uint32_t length  )
   err_code = cmd_flash_fw_write_begin();
   if( err_code != OK )
   {
-    printf("cmd_flash_fw_write_begin ERR : 0x%04X\r\n", err_code);
+    opencr_ld_write_err_msg("cmd_flash_fw_write_begin ERR : 0x%04X\r\n", err_code);
+
     return -1;
   }
 
@@ -407,7 +414,7 @@ int opencr_ld_flash_write( uint32_t addr, uint8_t *p_data, uint32_t length  )
       err_code = cmd_flash_fw_write_packet(written_packet_length, &p_data[written_total_length+written_packet_length], packet_length);
       if( err_code != OK )
       {
-        printf("cmd_flash_fw_send_block ERR : 0x%04X\r\n", err_code);
+        opencr_ld_write_err_msg("cmd_flash_fw_send_block ERR : 0x%04X\r\n", err_code);
         return -2;
       }
 
@@ -421,13 +428,13 @@ int opencr_ld_flash_write( uint32_t addr, uint8_t *p_data, uint32_t length  )
       err_code = cmd_flash_fw_write_block(addr+written_total_length, block_length);
       if( err_code != OK )
       {
-        printf("cmd_flash_fw_write_block ERR : 0x%04X\r\n", err_code);
+        opencr_ld_write_err_msg("cmd_flash_fw_write_block ERR : 0x%04X\r\n", err_code);
         return -3;
       }
     }
     else
     {
-      printf("written_packet_length : %d, %d 0x%04X\r\n", written_packet_length, block_length, err_code);
+      opencr_ld_write_err_msg("written_packet_length : %d, %d 0x%04X\r\n", written_packet_length, block_length, err_code);
       return -4;
     }
 
@@ -439,7 +446,7 @@ int opencr_ld_flash_write( uint32_t addr, uint8_t *p_data, uint32_t length  )
     }
     else if( written_total_length > length )
     {
-      printf("written_total_length over \r\n");
+      opencr_ld_write_err_msg("written_total_length over \r\n");
       return -5;
     }
   }
@@ -1065,3 +1072,37 @@ uint32_t crc_calc( uint32_t crc_in, uint8_t data_in )
 
   return crc_in;
 }
+
+
+/*---------------------------------------------------------------------------
+     TITLE   : opencr_ld_write_err_msg
+     WORK    :
+---------------------------------------------------------------------------*/
+void opencr_ld_write_err_msg( const char *fmt, ...)
+{
+  int32_t ret = 0;
+  va_list arg;
+  va_start (arg, fmt);
+  int32_t len;
+
+  len = vsnprintf(err_msg_str, 255, fmt, arg);
+  va_end (arg);
+}
+
+
+/*---------------------------------------------------------------------------
+     TITLE   : opencr_ld_write_err_msg
+     WORK    :
+---------------------------------------------------------------------------*/
+void opencr_ld_print_err_msg(void)
+{
+  uint32_t len;
+
+  len = strlen(err_msg_str);
+
+  if( len > 0 && len < 500 )
+  {
+    printf("%s", err_msg_str);
+  }
+}
+

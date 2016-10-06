@@ -55,6 +55,7 @@ void yield(void);
 extern void setup( void ) ;
 extern void loop( void ) ;
 
+
 //#define NOT_A_PIN 0  // defined in pio.h/EPioType
 #define NOT_A_PORT           0
 
@@ -85,6 +86,9 @@ typedef void (*voidFuncPtr)( void ) ;
 #include "wiring_pulse.h"
 
 #include "variant.h"
+
+void tone(uint8_t _pin, unsigned int frequency, unsigned long duration = 0);
+void noTone(uint8_t _pin);
 
 #endif // __cplusplus
 
