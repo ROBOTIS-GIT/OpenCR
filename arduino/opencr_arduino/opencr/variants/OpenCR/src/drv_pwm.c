@@ -28,8 +28,8 @@ volatile TIM_OC_InitTypeDef        hOC12;
 
 
 
-uint32_t pwm_freq[64];
-bool     pwm_init[64];
+uint32_t pwm_freq[PINS_COUNT];
+bool     pwm_init[PINS_COUNT];
 
 
 
@@ -39,7 +39,7 @@ int drv_pwm_init()
   uint32_t i;
 
 
-  for( i=0; i<64; i++ )
+  for( i=0; i<PINS_COUNT; i++ )
   {
     pwm_freq[i] = 50000; // 50Khz
     pwm_init[i] = false;
@@ -82,7 +82,7 @@ void drv_pwm_setup(uint32_t ulPin)
   uint32_t tim_ch;
   uint32_t uwPeriodValue;
 
-
+  if( ulPin >= PINS_COUNT )     return;
   if( pwm_init[ulPin] == true ) return;
 
 
@@ -157,7 +157,7 @@ void drv_pwm_set_duty(uint32_t ulPin, uint32_t res, uint32_t ulDuty )
   TIM_OC_InitTypeDef *pOC;
   uint32_t tim_ch;
 
-
+  if( ulPin >= PINS_COUNT )     return;
   if( pwm_init[ulPin] == false ) return;
 
 

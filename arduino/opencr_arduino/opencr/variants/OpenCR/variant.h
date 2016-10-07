@@ -111,6 +111,6 @@ extern UARTClass Serial3;
 #define WIRE_INTERFACES_COUNT       1
 #define SPI_INTERFACES_COUNT        2
 #define EXTI_COUNT                  7
-#define PINS_COUNT                  64
+#define PINS_COUNT                  68
 
 #endif
