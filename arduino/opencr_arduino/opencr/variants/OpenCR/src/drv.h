@@ -22,7 +22,7 @@
 #include "drv_exti.h"
 #include "drv_dxl.h"
 #include "drv_timer.h"
-
+#include "drv_eeprom.h"
 
 int drv_init(void);
 
