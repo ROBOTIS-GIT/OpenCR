@@ -153,6 +153,11 @@ size_t UARTClass::write( const uint8_t uc_data )
   return 1;
 }
 
+void UARTClass::ErrHandler (void)
+{
+  HAL_UART_Receive_IT(_pUart, (uint8_t *)&r_byte, 1);
+}
+
 void UARTClass::RxHandler (void){
   
     if(available() < (SERIAL_BUFFER_SIZE - 1)){ //If there is empty space in rx_buffer, read a byte from the Serial port and save it to the buffer.  
