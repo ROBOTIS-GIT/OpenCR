@@ -321,7 +321,14 @@ byte Dynamixel::rxPacket(int bRxLength){
 			mDXLtxrxStatus |= (1<<COMM_RXTIMEOUT);
 			clearBuffer();
 			//TxDStringC("Rx Timeout");
-			Serial.println("Rx Timeout");
+			Serial.print("bCount: ");
+			Serial.print(bCount);
+			Serial.print(" bRxLength: ");
+			Serial.print(bRxLength);
+			Serial.print(" Rx Timeout ");
+			Serial.print(mPacketType);
+			Serial.println(" ");
+
 			return 0;
 		}
 		if(bLength > 3) //checking available length.

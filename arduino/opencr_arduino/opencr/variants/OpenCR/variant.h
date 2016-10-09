@@ -84,6 +84,10 @@ void Tx2_Handler(void);
 void Rx3_Handler(void);
 void Tx3_Handler(void);
 
+void Err1_Handler(void);
+void Err2_Handler(void);
+void Err3_Handler(void);
+
 #ifdef __cplusplus
 }
 #endif

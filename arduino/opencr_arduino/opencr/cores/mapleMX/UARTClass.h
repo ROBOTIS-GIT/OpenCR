@@ -58,6 +58,7 @@ class UARTClass : public HardwareSerial
     void setInterruptPriority(uint32_t priority);
     uint32_t getInterruptPriority();
 
+    void ErrHandler(void);
     void RxHandler(void); /* Vassilis Serasidis */
     void TxHandler(void); /* Vassilis Serasidis */
 
