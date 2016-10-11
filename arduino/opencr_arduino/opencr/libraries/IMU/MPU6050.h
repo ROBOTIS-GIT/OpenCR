@@ -38,9 +38,11 @@ public:
   bool     bConnected;
   
 	int16_t  gyroADC[3];
+	int16_t  gyroRAW[3];
 	int16_t  gyroZero[3];
 
 	int16_t  accADC[3];
+	int16_t  accRAW[3];
 	int16_t  accZero[3];
 	
 	int16_t  gyroData[3];
