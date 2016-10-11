@@ -58,6 +58,14 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 }
 
 
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
+{
+  if( UartHandle->Instance == USART6 ) Err1_Handler();
+  if( UartHandle->Instance == USART2 ) Err2_Handler();
+  if( UartHandle->Instance == USART3 ) Err3_Handler();
+}
+
+
 void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 {
 

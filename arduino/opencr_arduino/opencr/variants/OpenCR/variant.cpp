@@ -144,6 +144,9 @@ void Rx2_Handler(void){ Serial2.RxHandler(); }
 void Tx3_Handler(void){ Serial3.TxHandler(); }
 void Rx3_Handler(void){ Serial3.RxHandler(); }
 
+void Err1_Handler(void){ Serial1.ErrHandler(); }
+void Err2_Handler(void){ Serial2.ErrHandler(); }
+void Err3_Handler(void){ Serial3.ErrHandler(); }
 
 
 
