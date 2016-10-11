@@ -28,12 +28,11 @@
 
 
 #define MPU6050_ADDRESS     0x68 // address pin AD0 low (GND), default for FreeIMU v0.4 and InvenSense evaluation board
-//#define MPU6050_ADDRESS     0x69 // address pin AD0 high (VCC)
+
 
 
 #define ACC_ORIENTATION(X, Y, Z)  {accADC[PITCH]  = -X; accADC[ROLL]  =  Y; accADC[YAW]  =   Z;}
-#define GYRO_ORIENTATION(X, Y, Z) {gyroADC[PITCH] =  Y; gyroADC[ROLL] =  X; gyroADC[YAW] =  -Z;}
-
+#define GYRO_ORIENTATION(X, Y, Z) {gyroADC[PITCH] =  Y; gyroADC[ROLL] =  X; gyroADC[YAW] =   Z;}
 
 
 #define GYRO_DLPF_CFG   0     // GYRO_LPF_256HZ
@@ -143,6 +142,7 @@ void cMPU6050::gyro_init( void )
 	{
 		gyroZero[i] = 0;
 		accZero[i]  = 0;
+		gyroRAW[i]   = 0;
 	}
 
 	write_reg(MPU6050_ADDRESS, 0x6B, 0x80);             //PWR_MGMT_1    -- DEVICE_RESET 1
@@ -181,6 +181,10 @@ void cMPU6050::gyro_get_adc( void )
   	y = (((int16_t)rawADC[2]) << 8) | rawADC[3];
   	z = (((int16_t)rawADC[4]) << 8) | rawADC[5];	
   
+  	gyroRAW[0] = x;
+  	gyroRAW[1] = y;
+  	gyroRAW[2] = z;
+
   		GYRO_ORIENTATION(   x>>2 , // range: +/- 8192; +/- 2000 deg/sec
   							y>>2 ,
   							z>>2 );
@@ -215,6 +219,14 @@ void cMPU6050::gyro_cali_start()
 ---------------------------------------------------------------------------*/
 void cMPU6050::acc_init( void ) 
 {
+  uint8_t i;
+
+
+  for( i=0; i<3; i++ )
+  {
+    accRAW[i]   = 0;
+  }
+
 	write_reg(MPU6050_ADDRESS, 0x1C, 0x10);             //ACCEL_CONFIG  -- AFS_SEL=2 (Full Scale = +/-8G)  ; ACCELL_HPF=0   //note something is wrong in the spec.
 	//note: something seems to be wrong in the spec here. With AFS=2 1G = 4096 but according to my measurement: 1G=2048 (and 2048/8 = 256)
 	//confirmed here: http://www.multiwii.com/forum/viewtopic.php?f=8&t=1080&start=10#p7480
@@ -246,6 +258,10 @@ void cMPU6050::acc_get_adc( void )
 		x = (((int16_t)rawADC[0]) << 8) | rawADC[1];
 		y = (((int16_t)rawADC[2]) << 8) | rawADC[3];
 		z = (((int16_t)rawADC[4]) << 8) | rawADC[5];
+
+		accRAW[0] = x;
+		accRAW[1] = y;
+		accRAW[2] = z;
 
 		ACC_ORIENTATION(    x>>3 ,
 							y>>3 ,
