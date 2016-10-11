@@ -1,3 +1,12 @@
+/*
+  Range   : Roll  : +/- 180 deg/sec
+            Pitch : +/- 180 deg/sec
+            Yaw   : +/- 180 deg/sec
+  Scale   : Roll  : 10 = 1 deg/sec
+            Pitch : 10 = 1 deg/sec
+            Yaw   :  1 = 1 deg/sec
+ */
+
 #include <IMU.h>
 
 
@@ -13,8 +22,9 @@ void setup()
 {
   Serial.begin(115200);
 
+  IMU.begin();
+
   pinMode( led_pin, OUTPUT );
-  err_code = IMU.begin();
 }
 
 
@@ -46,11 +56,11 @@ void loop()
     
     Serial.print(imu_time);
     Serial.print(" ");
-    Serial.print(IMU.angle[0]/10);
+    Serial.print(IMU.angle[0]/10);  // Roll   10 = 1 deg
     Serial.print(" ");
-    Serial.print(IMU.angle[1]/10);
+    Serial.print(IMU.angle[1]/10);  // Pitch  10 = 1 deg
     Serial.print(" ");
-    Serial.println(IMU.angle[2]);
+    Serial.println(IMU.angle[2]);   // Yaw    1  = 1 deg
   }
 
 
