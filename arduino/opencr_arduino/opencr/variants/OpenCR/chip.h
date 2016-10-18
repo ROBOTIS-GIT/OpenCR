@@ -25,6 +25,7 @@
 #define BOARD_NR_ADC_PINS       5
 #define BOARD_NR_PWM_PINS       12
 
+#define LED_BUILTIN             13
 
 #define BDPIN_LED_USER_1        22
 #define BDPIN_LED_USER_2        23
@@ -40,6 +41,7 @@
 #define BDPIN_LED_BATT_CHARGE   33
 #define BDPIN_PUSH_SW_1         34
 #define BDPIN_PUSH_SW_2         35
+#define BDPIN_LED_STATUS        36
 
 #define BDPIN_GPIO_1            50
 #define BDPIN_GPIO_2            51
