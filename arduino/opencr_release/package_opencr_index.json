@@ -17,10 +17,10 @@
           "help": {
             "online": "https://github.com/ROBOTIS-GIT/OpenCR"
           },
-          "url": "https://github.com/ROBOTIS-GIT/OpenCR/releases/download/arduino/opencr_core_1.0.tar.bz2",
-          "archiveFileName": "opencr_core_1.0.tar.bz2",
-          "checksum": "SHA-256:e558beada46be30046d060ecacc9a71ad0a7f989d24329e27c76c57e171a553b",
-          "size": "738397",
+          "url": "https://github.com/ROBOTIS-GIT/OpenCR/releases/download/1.0.0/opencr_core_1.0.0.tar.bz2",
+          "archiveFileName": "opencr_core_1.0.0.tar.bz2",
+          "checksum": "SHA-256:e5a7b6b9d5b5213c4aa9b9b7600dff5d5c979656859c049706edc1c33b12ee20",
+          "size": "829978",
           "help": {
                     "online": "https://github.com/ROBOTIS-GIT/OpenCR"
           },
@@ -36,7 +36,7 @@
             {
               "packager": "OpenCR",
               "name": "opencr_tools",
-              "version": "1.0"
+              "version": "1.0.0"
             }
 
           ]
@@ -79,35 +79,35 @@
         },
         {
           "name": "opencr_tools",
-          "version": "1.0",
+          "version": "1.0.0",
           "systems": [
             {
               "host": "i686-linux-gnu",
-              "url": "https://github.com/ROBOTIS-GIT/OpenCR/releases/download/arduino/opencr_tools_1.0.tar.bz2",
-              "archiveFileName": "opencr_tools_1.0.tar.bz2",
-              "checksum": "SHA-256:3dfef83da9aadf7c9f4397c2307344f5c785ad3ea39ae19f5243adf9fdbc30c0",
-              "size": "1934513"
+              "url": "https://github.com/ROBOTIS-GIT/OpenCR/releases/download/1.0.0/opencr_tools_1.0.0.tar.bz2",
+              "archiveFileName": "opencr_tools_1.0.0.tar.bz2",
+              "checksum": "SHA-256:86b547dc98e07c90f17e0a6c45b207153ee8b4344da841f26956f495295a3a6a",
+              "size": "513792"
             },
             {
               "host": "x86_64-pc-linux-gnu",
-              "url": "https://github.com/ROBOTIS-GIT/OpenCR/releases/download/arduino/opencr_tools_1.0.tar.bz2",
-              "archiveFileName": "opencr_tools_1.0.tar.bz2",
-              "checksum": "SHA-256:3dfef83da9aadf7c9f4397c2307344f5c785ad3ea39ae19f5243adf9fdbc30c0",
-              "size": "1934513"
+              "url": "https://github.com/ROBOTIS-GIT/OpenCR/releases/download/1.0.0/opencr_tools_1.0.0.tar.bz2",
+              "archiveFileName": "opencr_tools_1.0.0.tar.bz2",
+              "checksum": "SHA-256:86b547dc98e07c90f17e0a6c45b207153ee8b4344da841f26956f495295a3a6a",
+              "size": "513792"
             },
             {
               "host": "i686-mingw32",
-              "url": "https://github.com/ROBOTIS-GIT/OpenCR/releases/download/arduino/opencr_tools_1.0.tar.bz2",
-              "archiveFileName": "opencr_tools_1.0.tar.bz2",
-              "checksum": "SHA-256:3dfef83da9aadf7c9f4397c2307344f5c785ad3ea39ae19f5243adf9fdbc30c0",
-              "size": "1934513"
+              "url": "https://github.com/ROBOTIS-GIT/OpenCR/releases/download/1.0.0/opencr_tools_1.0.0.tar.bz2",
+              "archiveFileName": "opencr_tools_1.0.0.tar.bz2",
+              "checksum": "SHA-256:86b547dc98e07c90f17e0a6c45b207153ee8b4344da841f26956f495295a3a6a",
+              "size": "513792"
             },
             {
               "host": "i386-apple-darwin11",
-              "url": "https://github.com/ROBOTIS-GIT/OpenCR/releases/download/arduino/opencr_tools_1.0.tar.bz2",
-              "archiveFileName": "opencr_tools_1.0.tar.bz2",
-              "checksum": "SHA-256:3dfef83da9aadf7c9f4397c2307344f5c785ad3ea39ae19f5243adf9fdbc30c0",
-              "size": "1934513"
+              "url": "https://github.com/ROBOTIS-GIT/OpenCR/releases/download/1.0.0/opencr_tools_1.0.0.tar.bz2",
+              "archiveFileName": "opencr_tools_1.0.0.tar.bz2",
+              "checksum": "SHA-256:86b547dc98e07c90f17e0a6c45b207153ee8b4344da841f26956f495295a3a6a",
+              "size": "513792"
             }
           ]
         }
