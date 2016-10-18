@@ -1,0 +1,13 @@
+dfu_util.name=DFU_UTIL
+dfu_util.communication=serial
+dfu_util.protocol=dfu_util
+dfu_util.program.protocol=dfu_util
+dfu_util.program.tool=dfu_util
+dfu_util.program.extra_params=-P{serial.port}
+
+
+
+
+
+
+

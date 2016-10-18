@@ -126,6 +126,10 @@ tools.dfu_util.path={runtime.tools.opencr_tools.path}/win/dfu-util
 tools.dfu_util.path.macosx={runtime.tools.opencr_tools.path}/macosx/dfu-util
 tools.dfu_util.path.linux={runtime.tools.opencr_tools.path}/linux/dfu-util
 
+tools.dfu_util.erase.params.verbose=-v
+tools.dfu_util.erase.params.quiet=-q -q
+tools.dfu_util.erase.pattern=
+
 tools.dfu_util.bootloader.params.verbose=-v -v -v -v
 tools.dfu_util.bootloader.params.quiet=-q -q
-tools.dfu_tuil.bootloader.pattern="{path}/{cmd}" -d 0483:df11 -a 0 -s 0x08000000 -D "{runtime.hardware.path}/OpenCR/bootloaders/{bootloader.file}"
+tools.dfu_util.bootloader.pattern="{path}/{cmd}" -d 0483:df11 -a 0 -s 0x08000000 -D "{runtime.platform.path}/bootloaders/{bootloader.file}"
