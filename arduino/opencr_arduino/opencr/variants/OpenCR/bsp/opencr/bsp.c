@@ -32,6 +32,7 @@ void bsp_init()
   led_init();
   button_init();
 
+  HAL_Delay(100);
 
   /* Init Device Library */
   USBD_Init(&USBD_Device, &VCP_Desc, 0);
