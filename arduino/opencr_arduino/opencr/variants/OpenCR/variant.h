@@ -110,7 +110,7 @@ extern UARTClass Serial3;
 
 
 #define digitalPinToInterrupt(P)   ( g_Pin2PortMapArray[P].extiChannel )
-
+#define analogPinToChannel(p)      ( (p) < 6 ? (p)+A0 : (p) )
 
 #define WIRE_INTERFACES_COUNT       1
 #define SPI_INTERFACES_COUNT        2
