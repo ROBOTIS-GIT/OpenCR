@@ -1,13 +1,13 @@
 //----------------------------------------------------------------------------
-//    프로그램명 	: 
+//    프로그램명 	:
 //
 //    만든이     	: Made by Baram ( chcbaram@paran.com )
 //
-//    날  짜     : 
-//    
-//    최종 수정  	: 
+//    날  짜     :
 //
-//    MPU_Type	: 
+//    최종 수정  	:
+//
+//    MPU_Type	:
 //
 //    파일명     	: IMU.ino
 //----------------------------------------------------------------------------
@@ -17,7 +17,7 @@
 
 
 
-#include <Arduino.h> 
+#include <Arduino.h>
 //#include <EEPROM.h>
 #include "IMU.h"
 //#include "I2C_CM.h"
@@ -51,12 +51,12 @@
 
 
 
-typedef struct  
+typedef struct
 {
 	int32_t X,Y,Z;
 } t_int32_t_vector_def;
 
-typedef struct  
+typedef struct
 {
 	uint16_t XL; int16_t X;
   	uint16_t YL; int16_t Y;
@@ -64,7 +64,7 @@ typedef struct
 } t_int16_t_vector_def;
 
 // note: we use implicit first 16 MSB bits 32 -> 16 cast. ie V32.X>>16 = V16.X
-typedef union 
+typedef union
 {
 	int32_t A32[3];
 	t_int32_t_vector_def V32;
@@ -88,7 +88,7 @@ int16_t _atan2(int32_t y, int32_t x);
 
 /*---------------------------------------------------------------------------
      TITLE   : BLE
-     WORK    : 
+     WORK    :
      ARG     : void
      RET     : void
 ---------------------------------------------------------------------------*/
@@ -103,7 +103,7 @@ cIMU::cIMU()
 
 /*---------------------------------------------------------------------------
      TITLE   : begin
-     WORK    : 
+     WORK    :
      ARG     : void
      RET     : void
 ---------------------------------------------------------------------------*/
@@ -113,13 +113,13 @@ uint8_t cIMU::begin( void )
 
   bConnected = SEN.begin();
 
-  
+
   if( bConnected == true )
-  { 
+  {
 	  //SEN.gyro_init();
 	  //SEN.acc_init();
   }
-  
+
   /*
 	if( I2C.i2c_errors_count > 0 )
 	{
@@ -139,19 +139,19 @@ uint8_t cIMU::begin( void )
 
 /*---------------------------------------------------------------------------
      TITLE   : update
-     WORK    : 
+     WORK    :
      ARG     : void
      RET     : void
 ---------------------------------------------------------------------------*/
 uint16_t cIMU::update( uint32_t priod_us )
-{	
+{
 	uint16_t ret_time = 0;
 
 	static uint32_t tTime;
-	
+
 
 	if( (micros()-tTime) >= priod_us )
-	{    
+	{
 		ret_time = micros()-tTime;
     tTime = micros();
 
@@ -174,11 +174,11 @@ uint16_t cIMU::update( uint32_t priod_us )
 #if 1
 /*---------------------------------------------------------------------------
      TITLE   : compute
-     WORK    : 
+     WORK    :
      ARG     : void
      RET     : void
 ---------------------------------------------------------------------------*/
-void cIMU::computeIMU( void ) 
+void cIMU::computeIMU( void )
 {
 	uint8_t axis;
 	static int16_t gyroADCprevious[3] = {0,0,0};
@@ -189,7 +189,7 @@ void cIMU::computeIMU( void )
 	SEN.acc_get_adc();
 
   //Serial.println(SEN.gyroADC[0]);
-  
+
   getEstimatedAttitude();
 
 	SEN.gyro_get_adc();
@@ -203,16 +203,15 @@ void cIMU::computeIMU( void )
 	//uint8_t t=0;
 	//while((int16_t)((uint16_t)micros()-timeInterleave)<650) t=1; //empirical, interleaving delay between 2 consecutive reads
 
-	
 	SEN.gyro_get_adc();
 
 
-	for (axis = 0; axis < 3; axis++) 
+	for (axis = 0; axis < 3; axis++)
 	{
     	gyroADCinter[axis] =  SEN.gyroADC[axis]+gyroADCinter[axis];
 		// empirical, we take a weighted value of the current and the previous values
 		SEN.gyroData[axis] = (gyroADCinter[axis]+gyroADCprevious[axis])/3;
-		gyroADCprevious[axis] = gyroADCinter[axis]>>1;		
+		gyroADCprevious[axis] = gyroADCinter[axis]>>1;
 	}
 }
 
@@ -221,7 +220,7 @@ void cIMU::computeIMU( void )
 
 /*---------------------------------------------------------------------------
      TITLE   : getEstimatedAttitude
-     WORK    : 
+     WORK    :
      ARG     : void
      RET     : void
 ---------------------------------------------------------------------------*/
@@ -247,7 +246,7 @@ void cIMU::getEstimatedAttitude( void )
 	previousT = currentT;
 
 	// Initialization
-	for (axis = 0; axis < 3; axis++) 
+	for (axis = 0; axis < 3; axis++)
 	{
 		// valid as long as LPF_FACTOR is less than 15
 		SEN.accSmooth[axis]  = LPFAcc[axis]>>ACC_LPF_FACTOR;
@@ -268,13 +267,13 @@ void cIMU::getEstimatedAttitude( void )
 	// Apply complimentary filter (Gyro drift correction)
 	// If accel magnitude >1.15G or <0.85G and ACC vector outside of the limit range => we neutralize the effect of accelerometers in the angle estimation.
 	// To do that, we just skip filter, as EstV already rotated by Gyro
-	for (axis = 0; axis < 3; axis++) 
+	for (axis = 0; axis < 3; axis++)
 	{
 	    if ( (int16_t)(0.85*ACC_1G*ACC_1G/256) < (int16_t)(accMag>>8) && (int16_t)(accMag>>8) < (int16_t)(1.15*ACC_1G*ACC_1G/256) )
 	      EstG.A32[axis] += (int32_t)(SEN.accSmooth[axis] - EstG.A16[2*axis+1])<<(16-GYR_CMPF_FACTOR);
 	    accZ_tmp += mul(SEN.accSmooth[axis] , EstG.A16[2*axis+1]);
 	}
-  
+
   	/*
 	if (EstG.V16.Z > ACCZ_25deg)
     	f.SMALL_ANGLES_25 = 1;
@@ -286,7 +285,7 @@ void cIMU::getEstimatedAttitude( void )
 	// Attitude of the estimated vector
 	int32_t sqGX_sqGZ = mul(EstG.V16.X,EstG.V16.X) + mul(EstG.V16.Z,EstG.V16.Z);
 	invG = InvSqrt(sqGX_sqGZ + mul(EstG.V16.Y,EstG.V16.Y));
-	
+
 	angle[ROLL]  = _atan2(EstG.V16.X , EstG.V16.Z);
 	angle[PITCH] = _atan2(EstG.V16.Y , InvSqrt(sqGX_sqGZ)*sqGX_sqGZ);
 
@@ -300,11 +299,11 @@ void cIMU::getEstimatedAttitude( void )
 	// projection of ACC vector to global Z, with 1G subtructed
 	// Math: accZ = A * G / |G| - 1G
 	accZ = accZ_tmp *  invG;
-	//if (!f.ARMED) 
+	//if (!f.ARMED)
 	{
     	accZoffset -= accZoffset>>3;
     	accZoffset += accZ;
-	}  
+	}
 	accZ -= accZoffset>>3;
 }
 
@@ -317,7 +316,7 @@ void cIMU::getEstimatedAttitude( void )
 
 /*---------------------------------------------------------------------------
      TITLE   : _atan2
-     WORK    : 
+     WORK    :
      ARG     : void
      RET     : void
 ---------------------------------------------------------------------------*/
@@ -337,13 +336,13 @@ int16_t _atan2(int32_t y, int32_t x)
 
 	if ( c )
 	{
-		if (x<0) 
+		if (x<0)
 		{
 			if (y<0) a -= 1800;
 			else a += 1800;
 		}
-	} 
-	else 
+	}
+	else
 	{
 		a = 900 - a;
 		if (y<0) a -= 1800;
@@ -357,20 +356,20 @@ int16_t _atan2(int32_t y, int32_t x)
 
 /*---------------------------------------------------------------------------
      TITLE   : InvSqrt
-     WORK    : 
+     WORK    :
      ARG     : void
      RET     : void
 ---------------------------------------------------------------------------*/
 float InvSqrt (float x)
-{ 
-  union{  
-    int32_t i;  
-    float   f; 
-  } conv; 
+{
+  union{
+    int32_t i;
+    float   f;
+  } conv;
 
 
-  conv.f = x; 
-  conv.i = 0x5f1ffff9 - (conv.i >> 1); 
+  conv.f = x;
+  conv.i = 0x5f1ffff9 - (conv.i >> 1);
 
   return conv.f * (1.68191409f - 0.703952253f * x * conv.f * conv.f);
 }
@@ -383,15 +382,15 @@ float InvSqrt (float x)
 
 /*---------------------------------------------------------------------------
      TITLE   : mul
-     WORK    : 
+     WORK    :
      ARG     : void
      RET     : void
 ---------------------------------------------------------------------------*/
-int32_t mul(int16_t a, int16_t b) 
+int32_t mul(int16_t a, int16_t b)
 {
   int32_t r;
 
-  r = (int32_t)a * (int32_t)b; 
+  r = (int32_t)a * (int32_t)b;
   return r;
 }
 
@@ -401,12 +400,12 @@ int32_t mul(int16_t a, int16_t b)
 
 /*---------------------------------------------------------------------------
      TITLE   : rotateV32
-     WORK    : 
+     WORK    :
      ARG     : void
      RET     : void
 ---------------------------------------------------------------------------*/
 // Rotate Estimated vector(s) with small angle approximation, according to the gyro data
-void rotateV32( t_int32_t_vector *v,int16_t* delta) 
+void rotateV32( t_int32_t_vector *v,int16_t* delta)
 {
   int16_t X = v->V16.X;
   int16_t Y = v->V16.Y;

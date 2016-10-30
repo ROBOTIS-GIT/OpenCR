@@ -27,10 +27,32 @@ SPIClass SPI_IMU(SPI1);
 
 
 
+void SPISettings::init_AlwaysInline(uint32_t clock, uint8_t bitOrder, uint8_t dataMode)
+{
+  if (clock >= 50000000 / 2) {
+    clockDiv = SPI_CLOCK_DIV2;
+  } else if (clock >= 50000000 / 4) {
+    clockDiv = SPI_CLOCK_DIV4;
+  } else if (clock >= 50000000 / 8) {
+    clockDiv = SPI_CLOCK_DIV8;
+  } else if (clock >= 50000000 / 16) {
+    clockDiv = SPI_CLOCK_DIV16;
+  } else if (clock >= 50000000 / 32) {
+    clockDiv = SPI_CLOCK_DIV32;
+  } else if (clock >= 50000000 / 64) {
+    clockDiv = SPI_CLOCK_DIV64;
+  } else {
+    clockDiv = SPI_CLOCK_DIV64;
+  }
+
+  _bitOrder = bitOrder;
+  _dataMode = dataMode;
+}
+
 
 SPIClass::SPIClass(SPI_TypeDef *spiPort) {
   _spiPort = spiPort;
-  
+
   if(spiPort == SPI1)
     _hspi = &hspi1;
   if(spiPort == SPI2)
@@ -155,21 +177,33 @@ void SPIClass::setDataMode(uint8_t dataMode){
 
   switch( dataMode )
   {
+    // CPOL=0, CPHA=0
     case SPI_MODE0:
-      _hspi->Init.CLKPolarity       = SPI_POLARITY_LOW;
-      //HAL_SPI_Init(_hspi);
+      _hspi->Init.CLKPolarity = SPI_POLARITY_LOW;
+      _hspi->Init.CLKPhase    = SPI_PHASE_1EDGE;
+      HAL_SPI_Init(_hspi);
       break;
+
+    // CPOL=0, CPHA=1
     case SPI_MODE1:
-      _hspi->Init.CLKPolarity       = SPI_POLARITY_LOW;
-      //HAL_SPI_Init(_hspi);
+      _hspi->Init.CLKPolarity = SPI_POLARITY_LOW;
+      _hspi->Init.CLKPhase    = SPI_PHASE_2EDGE;
+      HAL_SPI_Init(_hspi);
       break;
+
+    // CPOL=1, CPHA=0
     case SPI_MODE2:
-      _hspi->Init.CLKPolarity       = SPI_POLARITY_LOW;
-      //HAL_SPI_Init(_hspi);
+      _hspi->Init.CLKPolarity  = SPI_POLARITY_HIGH;
+      _hspi->Init.CLKPhase    = SPI_PHASE_1EDGE;
+      HAL_SPI_Init(_hspi);
+      break;
+
+    // CPOL=1, CPHA=1
+    case SPI_MODE3:
+      _hspi->Init.CLKPolarity  = SPI_POLARITY_HIGH;
+      _hspi->Init.CLKPhase    = SPI_PHASE_2EDGE;
+      HAL_SPI_Init(_hspi);
       break;
   }
-  //_hspi->Init.CLKPolarity = SPI_POLARITY_LOW;
-  //_hspi->Init.CLKPhase = SPI_PHASE_1EDGE;
-  //HAL_SPI_Init(_hspi);
 }
 
