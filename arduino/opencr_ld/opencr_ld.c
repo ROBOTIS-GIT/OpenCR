@@ -169,7 +169,6 @@ int opencr_ld_down( int argc, const char **argv )
   printf("Clear Buffer End\n");
 
 
-  printf(">>\r\n");
   err_code = cmd_read_board_name( board_str, &board_str_len );
   if( err_code == OK )
   {
@@ -333,7 +332,7 @@ int opencr_ld_jump_to_boot( char *portname )
   }
 
   // Setup port
-  ser_setupEx( stm32_ser_id, 115200, SER_DATABITS_8, SER_PARITY_NONE, SER_STOPBITS_1, 1 );
+  ser_setupEx( stm32_ser_id, 1200, SER_DATABITS_8, SER_PARITY_NONE, SER_STOPBITS_1, 1 );
 
   write_bytes("OpenCR 5555AAAA", 15);
   ser_close( stm32_ser_id );

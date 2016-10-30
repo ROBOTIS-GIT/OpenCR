@@ -53,14 +53,17 @@ uint32_t analogRead( uint32_t ulPin ){
   ADC_HandleTypeDef      *hADCx;
 	uint32_t ulValue = 0;
   uint32_t ulChannel;
+  uint32_t adc_pin;
 
 
-  ulChannel = g_Pin2PortMapArray[ulPin].adc_channel;
+  adc_pin = analogPinToChannel(ulPin);
+
+  ulChannel = g_Pin2PortMapArray[adc_pin].adc_channel;
   
   if(ulChannel == NO_ADC)
       return -1;
 
-  hADCx = g_Pin2PortMapArray[ulPin].ADCx;
+  hADCx = g_Pin2PortMapArray[adc_pin].ADCx;
 
   sConfig.Channel      = ulChannel;
   sConfig.Rank         = 1;

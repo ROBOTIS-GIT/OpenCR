@@ -19,7 +19,7 @@ OpenCR.build.mcu=cortex-m7
 OpenCR.build.f_cpu=216000000L
 OpenCR.build.board=OpenCR
 OpenCR.build.core=mapleMX
-OpenCR.build.common_flags=-mthumb  -DSTM32F746xx 
+OpenCR.build.common_flags=-mthumb  -DSTM32F746xx -D__OPENCR__
 
 OpenCR.build.ldscript=bsp/opencr/ld/opencr_flash.ld
 OpenCR.build.variant=OpenCR

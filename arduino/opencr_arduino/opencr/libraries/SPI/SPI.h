@@ -46,12 +46,42 @@ extern SPI_HandleTypeDef hspi2;
 #endif
 
 
+class SPISettings {
+public:
+  SPISettings(uint32_t clock, uint8_t bitOrder, uint8_t dataMode)
+  {
+    init_AlwaysInline(clock, bitOrder, dataMode);
+  }
+  SPISettings()
+  {
+    init_AlwaysInline(4000000, MSBFIRST, SPI_MODE0);
+  }
+private:
+  void init_AlwaysInline(uint32_t clock, uint8_t bitOrder, uint8_t dataMode);
+
+  uint8_t clockDiv;
+  uint8_t _bitOrder;
+  uint8_t _dataMode;
+
+  friend class SPIClass;
+};
+
+
 class SPIClass {
   public:
     SPIClass(SPI_TypeDef *spiPort);
     SPIClass(uint8_t spiPort);
     void begin(void);
     
+    void beginTransaction(SPISettings settings)
+    {
+      setClockDivider(settings.clockDiv);
+      setBitOrder(settings._bitOrder);
+      setDataMode(settings._dataMode);
+    }
+    void endTransaction(void)
+    {
+    }
     uint8_t transfer(uint8_t _data) const;
     uint16_t transfer16(uint16_t data);
     void transfer(uint8_t buf, size_t count);
