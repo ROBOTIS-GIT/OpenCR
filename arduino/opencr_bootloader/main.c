@@ -68,12 +68,12 @@ void main_init()
       delay_ms(100);
       if( button_read(0) == FALSE )
       {
-	for( i=0; i<5; i++ )
-	{
-	  led_toggle(0);
-	  delay_ms(50);
-	}
-	jump_to_fw();
+        for( i=0; i<5; i++ )
+        {
+          led_toggle(0);
+          delay_ms(50);
+        }
+        jump_to_fw();
       }
     }
   }
