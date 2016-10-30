@@ -177,21 +177,33 @@ void SPIClass::setDataMode(uint8_t dataMode){
 
   switch( dataMode )
   {
+    // CPOL=0, CPHA=0
     case SPI_MODE0:
-      _hspi->Init.CLKPolarity       = SPI_POLARITY_LOW;
+      _hspi->Init.CLKPolarity = SPI_POLARITY_LOW;
+      _hspi->Init.CLKPhase    = SPI_PHASE_1EDGE;
       HAL_SPI_Init(_hspi);
       break;
+
+    // CPOL=0, CPHA=1
     case SPI_MODE1:
-      _hspi->Init.CLKPolarity       = SPI_POLARITY_LOW;
+      _hspi->Init.CLKPolarity = SPI_POLARITY_LOW;
+      _hspi->Init.CLKPhase    = SPI_PHASE_2EDGE;
       HAL_SPI_Init(_hspi);
       break;
+
+    // CPOL=1, CPHA=0
     case SPI_MODE2:
-      _hspi->Init.CLKPolarity       = SPI_POLARITY_LOW;
+      _hspi->Init.CLKPolarity  = SPI_POLARITY_HIGH;
+      _hspi->Init.CLKPhase    = SPI_PHASE_1EDGE;
+      HAL_SPI_Init(_hspi);
+      break;
+
+    // CPOL=1, CPHA=1
+    case SPI_MODE3:
+      _hspi->Init.CLKPolarity  = SPI_POLARITY_HIGH;
+      _hspi->Init.CLKPhase    = SPI_PHASE_2EDGE;
       HAL_SPI_Init(_hspi);
       break;
   }
-  //_hspi->Init.CLKPolarity = SPI_POLARITY_LOW;
-  //_hspi->Init.CLKPhase = SPI_PHASE_1EDGE;
-  //HAL_SPI_Init(_hspi);
 }
 
