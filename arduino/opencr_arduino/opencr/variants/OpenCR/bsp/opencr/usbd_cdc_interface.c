@@ -63,8 +63,8 @@ static uint16_t UserTxBufPtrOutShadow = 0; // shadow of above
 static uint8_t  UserTxBufPtrWaitCount = 0; // used to implement a timeout waiting for low-level USB driver
 static uint8_t  UserTxNeedEmptyPacket = 0; // used to flush the USB IN endpoint if the last packet was exactly the endpoint packet size
 
-BOOL is_opened = FALSE;
-
+static BOOL is_opened = FALSE;
+static BOOL is_reopen = FALSE;
 
 static uint8_t  rxd_buffer[APP_RX_BUF_SIZE];
 static uint32_t rxd_length    = 0;
@@ -186,6 +186,7 @@ static int8_t CDC_Itf_Control (uint8_t cmd, uint8_t* pbuf, uint16_t length)
       CDC_Reset_Status = 1;
     }
     is_opened = req->wValue&0x01;
+    is_reopen = TRUE;
     break;
 
   case CDC_SEND_BREAK:
@@ -327,10 +328,12 @@ static int8_t CDC_Itf_Receive(uint8_t* Buf, uint32_t *Len)
 ---------------------------------------------------------------------------*/
 void CDC_Itf_Write( uint8_t *p_buf, uint32_t length )
 {
-  uint32_t timeout = 500;
+  uint32_t timeout = 100;
 
 
   if( is_opened == FALSE ) return;
+
+  is_reopen = FALSE;
 
   for (uint32_t i = 0; i < length; i++) {
       // Wait until the device is connected and the buffer has space, with a given timeout
@@ -339,6 +342,10 @@ void CDC_Itf_Write( uint8_t *p_buf, uint32_t length )
           // Wraparound of tick is taken care of by 2's complement arithmetic.
           if (millis() - start >= timeout) {
               // timeout
+              if( is_reopen == FALSE )
+              {
+                is_opened = FALSE;
+              }
               return;
           }
           __WFI(); // enter sleep mode, waiting for interrupt
