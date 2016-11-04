@@ -70,10 +70,15 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 {
 
   GPIO_InitTypeDef GPIO_InitStruct;
+  RCC_PeriphCLKInitTypeDef  RCC_PeriphCLKInitStruct;
 
 
   if(huart->Instance==USART2)
   {
+    RCC_PeriphCLKInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART2;
+    RCC_PeriphCLKInitStruct.Usart2ClockSelection = RCC_USART2CLKSOURCE_SYSCLK;
+    HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphCLKInitStruct);
+
     /* Peripheral clock enable */
     __HAL_RCC_USART2_CLK_ENABLE();
 
@@ -95,6 +100,9 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
   }
   else if(huart->Instance==USART6)
   {
+    RCC_PeriphCLKInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART6;
+    RCC_PeriphCLKInitStruct.Usart6ClockSelection = RCC_USART6CLKSOURCE_SYSCLK;
+    HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphCLKInitStruct);
 
     /* Peripheral clock enable */
     __HAL_RCC_USART6_CLK_ENABLE();
@@ -117,6 +125,9 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
   }
   else if(huart->Instance==USART3)
   {
+    RCC_PeriphCLKInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART3;
+    RCC_PeriphCLKInitStruct.Usart3ClockSelection = RCC_USART3CLKSOURCE_SYSCLK;
+    HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphCLKInitStruct);
 
     /* Peripheral clock enable */
     __HAL_RCC_USART3_CLK_ENABLE();
