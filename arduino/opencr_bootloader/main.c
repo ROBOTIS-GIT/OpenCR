@@ -55,7 +55,6 @@ int main(void)
 
 void main_init()
 {
-  uint8_t i;
 
 
   bsp_init();
@@ -65,15 +64,11 @@ void main_init()
   {
     if( button_read(0) == FALSE )
     {
-      delay_ms(100);
+      delay_ms(10);
       if( button_read(0) == FALSE )
       {
-	for( i=0; i<5; i++ )
-	{
-	  led_toggle(0);
-	  delay_ms(50);
-	}
-	jump_to_fw();
+        led_on(0);
+        jump_to_fw();
       }
     }
   }
