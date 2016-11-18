@@ -32,40 +32,57 @@
 
 #include "RC100.h"
 
-RC100::RC100() {
+RC100::RC100()
+{
 	// TODO Auto-generated constructor stub
 
 }
 
-RC100::~RC100() {
+RC100::~RC100()
+{
 	// TODO Auto-generated destructor stub
 
 }
 
-void RC100::begin(int num){
+void RC100::begin(int num)
+{
 	if(num == 1) rc100Initialize(57600);
 	else if(num == 2) rc100Initialize(1900);
 	check_mode = num;
 }
-void RC100::end(void){
+
+void RC100::end(void)
+{
 	rc100Terminate();
 }
-int RC100::writeData(int data){
+
+int RC100::writeData(int data)
+{
 	return rc100TxData(data);
 }
-void RC100::writeRaw(byte temp){
+
+void RC100::writeRaw(byte temp)
+{
 	TxDByteSerial2(temp);
 }
-byte RC100::readRaw(void){
+
+byte RC100::readRaw(void)
+{
 	return RxDByteSerial2();
 }
-int RC100::available(void){
+
+int RC100::available(void)
+{
 	return rc100RxCheck();
 }
-int RC100::readData(void){
+
+int RC100::readData(void)
+{
 	return rc100RxData();
 }
-void RC100::setChannel(byte IR_channel){
+
+void RC100::setChannel(byte IR_channel)
+{
 	rc100channel(IR_channel);
 }
 
@@ -96,7 +113,7 @@ byte RC100::RxDByteSerial2(void)
 	// return bTemp;
 }
 
-int RC100::rc100_hal_tx( unsigned char *pPacket, int numPacket )
+int RC100::rc100_hal_tx(unsigned char *pPacket, int numPacket)
 {
 	// Transmiting date
 	// *pPacket: data array pointer
@@ -123,7 +140,7 @@ byte RC100::CheckNewArrive(void)
 	// 	return 0;
 }
 
-int RC100::rc100_hal_rx( unsigned char *pPacket, int numPacket )
+int RC100::rc100_hal_rx(unsigned char *pPacket, int numPacket)
 {
 	// Recieving date
 	// *pPacket: data array pointer
