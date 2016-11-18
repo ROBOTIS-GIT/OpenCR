@@ -54,7 +54,7 @@
 #define PACKET_LENGTH 			  6
 
 class RC100 {
-public:
+ public:
 	RC100();
 	virtual ~RC100();
 
@@ -67,8 +67,8 @@ public:
 	byte readRaw(void);
 	void setChannel(byte IR_channel);
 
-private:
-	volatile byte gbPacketWritePointer;
+ private:
+  volatile byte gbPacketWritePointer;
 	volatile byte gbPacketReadPointer;
 	volatile byte gbpPacketDataBuffer[16+1+16];
 	volatile byte gbpPacket[PACKET_LENGTH+2];
@@ -87,7 +87,7 @@ private:
 	int rc100_hal_rx(unsigned char *pPacket, int numPacket);
 
 	///////////// device control methods ////////////////////////
-	int rc100Initialize(unsigned int baudrate );
+	int rc100Initialize(unsigned int baudrate);
 	void rc100Terminate(void);
 	byte CheckNewArrive(void);
 	////////// communication methods ///////////////////////
