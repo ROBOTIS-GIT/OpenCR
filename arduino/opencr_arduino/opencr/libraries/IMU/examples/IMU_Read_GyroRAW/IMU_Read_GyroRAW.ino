@@ -12,7 +12,7 @@ cIMU    IMU;
 uint8_t   led_tog = 0;
 uint8_t   led_pin = 13;
 
-void setup() 
+void setup()
 {
   Serial.begin(115200);
 
@@ -25,7 +25,7 @@ void setup()
 
 
 
-void loop() 
+void loop()
 {
   static uint32_t tTime[3];
   static uint32_t imu_time = 0;
@@ -41,20 +41,20 @@ void loop()
 
   tTime[2] = micros();
   if( IMU.update() > 0 ) imu_time = micros()-tTime[2];
-  
-  
+
+
 
   if( (millis()-tTime[1]) >= 50 )
   {
     tTime[1] = millis();
-    
+
     Serial.print(imu_time);
     Serial.print(" \t");
-    Serial.print(IMU.SEN.gyroRAW[0]);    // GYRO X
+    Serial.print(IMU.gyroRAW[0]);    // GYRO X
     Serial.print(" \t");
-    Serial.print(IMU.SEN.gyroRAW[1]);    // GYRO Y
+    Serial.print(IMU.gyroRAW[1]);    // GYRO Y
     Serial.print(" \t");
-    Serial.print(IMU.SEN.gyroRAW[2]);    // GYRO Z
+    Serial.print(IMU.gyroRAW[2]);    // GYRO Z
     Serial.println(" ");
   }
 }
