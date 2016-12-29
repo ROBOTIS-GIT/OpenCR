@@ -5,7 +5,7 @@
   * @version V1.0.3
   * @date    18-November-2015
   * @brief   Main Interrupt Service Routines.
-  *          This file provides template for all exceptions handler and 
+  *          This file provides template for all exceptions handler and
   *          peripherals interrupt service routine.
   ******************************************************************************
   * @attention
@@ -107,6 +107,7 @@ void UsageFault_Handler(void)
   }
 }
 
+#if 0
 /**
   * @brief  This function handles SVCall exception.
   * @param  None
@@ -115,6 +116,7 @@ void UsageFault_Handler(void)
 void SVC_Handler(void)
 {
 }
+#endif
 
 /**
   * @brief  This function handles Debug Monitor exception.
@@ -125,12 +127,18 @@ void DebugMon_Handler(void)
 {
 }
 
+#if 0
 /**
   * @brief  This function handles PendSVC exception.
   * @param  None
   * @retval None
   */
 void PendSV_Handler(void)
+{
+}
+#endif
+
+__weak void osSystickHandler(void)
 {
 }
 
@@ -141,6 +149,7 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
+  osSystickHandler();
   HAL_IncTick();
 }
 
