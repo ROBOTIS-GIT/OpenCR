@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include "imu_spi.h"
-#include "mpu9250_regs.h"
+#include "MPU9250_REGS.h"
 
 
 
