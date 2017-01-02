@@ -8,7 +8,7 @@
 
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the GNU Lesser General Public License for more details.
 
   You should have received a copy of the GNU Lesser General Public
@@ -41,8 +41,7 @@ class UARTClass : public HardwareSerial
       Mode_8M1,     // = US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_MARK,
       Mode_8S1      // = US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_SPACE,
     };
-    UARTClass(UART_HandleTypeDef *pUart, IRQn_Type dwIrq, uint32_t dwId);
-    UARTClass(UART_HandleTypeDef *pUart, IRQn_Type dwIrq, uint32_t dwId, USART_TypeDef* usartNumber );
+    UARTClass(uint8_t uart_num, uint8_t uart_mode);
     UARTClass(void);
     void begin(const uint32_t dwBaudRate);
     void begin(const uint32_t dwBaudRate, const UARTModes config);
@@ -55,33 +54,27 @@ class UARTClass : public HardwareSerial
     size_t write(const uint8_t c);
     using Print::write; // pull in write(str) and write(buf, size) from Print
 
-    void setInterruptPriority(uint32_t priority);
-    uint32_t getInterruptPriority();
 
-    void ErrHandler(void);
     void RxHandler(void); /* Vassilis Serasidis */
     void TxHandler(void); /* Vassilis Serasidis */
 
     operator bool() { return true; }; // UART always active
 
   protected:
-    void init(const uint32_t dwBaudRate, const uint32_t config);
-    
+
     struct ring_buffer
     {
       uint8_t buffer[SERIAL_BUFFER_SIZE];
       volatile uint16_t iHead;
       volatile uint16_t iTail;
     };
-    
-    UART_HandleTypeDef *_pUart;
-    IRQn_Type _dwIrq;
-    uint32_t _dwId;
-    USART_TypeDef* _usartNumber;
+
+    uint8_t _uart_num;
+    uint8_t _uart_mode;
+
     uint8_t r_byte;
     ring_buffer tx_buffer = { { 0 }, 0, 0};
     ring_buffer rx_buffer = { { 0 }, 0, 0};
-
 };
 
 #endif // _UART_CLASS_

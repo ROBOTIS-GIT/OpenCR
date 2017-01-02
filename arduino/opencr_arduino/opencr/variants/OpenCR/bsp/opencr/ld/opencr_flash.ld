@@ -42,13 +42,8 @@ _Min_Stack_Size = 0x2800; /* required amount of stack */
 MEMORY
 {
 
-FLASH (rx)      : ORIGIN = 0x08040000, LENGTH = 768K		/* 1024K */
-Memory1 (xrw)   : ORIGIN = 0x20000000, LENGTH = 0xA0
-Memory2 (xrw)   : ORIGIN = 0x200000A0, LENGTH = 0xA0
-Memory3 (xrw)   : ORIGIN = 0x20000140, LENGTH = 0x1dc4
-Memory4 (xrw)   : ORIGIN = 0x20001F04, LENGTH = 0x1dc4
-RAM1 (xrw)      : ORIGIN = 0x20003CC8, LENGTH = 0x6024
-RAM2 (xrw)      : ORIGIN = 0x20009CEC, LENGTH = 0x7800
+FLASH (rx)      : ORIGIN = 0x08040000, LENGTH = 768K
+RAM_DTCM (xrw)  : ORIGIN = 0x20000000, LENGTH = 0x10000
 RAM (xrw)       : ORIGIN = 0x200114EC, LENGTH = 0x3EB14
 QSPI (rx)       : ORIGIN = 0x90000000, LENGTH = 16M
 
@@ -123,7 +118,7 @@ SECTIONS
   _sidata = LOADADDR(.data);
 
   /* Initialized data sections goes into RAM, load LMA copy after code */
-  .data : 
+  .data :
   {
     . = ALIGN(4);
     _sdata = .;        /* create a global symbol at data start */
@@ -134,7 +129,7 @@ SECTIONS
     _edata = .;        /* define a global symbol at data end */
   } >RAM AT> FLASH
 
-  
+
   /* Uninitialized data section */
   . = ALIGN(4);
   .bss :
@@ -162,7 +157,7 @@ SECTIONS
     . = ALIGN(4);
   } >RAM
 
-  
+
 
   /* Remove information from the standard libraries */
   /DISCARD/ :
@@ -173,13 +168,5 @@ SECTIONS
   }
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
-  .RxDecripSection (NOLOAD) : { *(.RxDecripSection) } >Memory1
-  .TxDescripSection (NOLOAD) : { *(.TxDescripSection) } >Memory2
-  .RxBUF (NOLOAD) : { *(.RxBUF) } >Memory3
-  .TxBUF (NOLOAD) : { *(.TxBUF) } >Memory4
-  .ExtQSPIFlashSection : { *(.ExtQSPIFlashSection) } >QSPI
-  .RamData1 (NOLOAD) : { *(.RamData1) } >RAM1
-  .RamData2 (NOLOAD): { *(.RamData2) } >RAM2
+  .NoneCacheableMem (NOLOAD): { *(.NoneCacheableMem) } >RAM_DTCM
 }
-
-

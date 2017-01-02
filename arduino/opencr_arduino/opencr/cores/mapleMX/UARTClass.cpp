@@ -27,20 +27,10 @@ UARTClass::UARTClass(void){
 
 }
 
-UARTClass::UARTClass( UART_HandleTypeDef *pUart, IRQn_Type dwIrq, uint32_t dwId )
+UARTClass::UARTClass(uint8_t uart_num, uint8_t uart_mode)
 {
-  _usartNumber = USART6; //In this case create by default the USART1 serial port.
-  _pUart=pUart;
-  _dwIrq=dwIrq;
-  _dwId =dwId;
-}
-
-UARTClass::UARTClass( UART_HandleTypeDef *pUart, IRQn_Type dwIrq, uint32_t dwId, USART_TypeDef* usartNumber )
-{
-  _pUart       = pUart;
-  _dwIrq       = dwIrq;
-  _dwId        = dwId;
-  _usartNumber = usartNumber;
+  _uart_num  = uart_num;
+  _uart_mode = uart_mode;
 }
 
 void UARTClass::begin(const uint32_t dwBaudRate)
@@ -50,40 +40,10 @@ void UARTClass::begin(const uint32_t dwBaudRate)
 
 void UARTClass::begin(const uint32_t dwBaudRate, const UARTModes config)
 {
-  uint32_t modeReg = 0;//static_cast<uint32_t>(config) & 0x00000E00;
-  init(dwBaudRate, modeReg);  
-} 
-
-void UARTClass::init(const uint32_t dwBaudRate, const uint32_t modeReg)
-{
-  /** Configure baudrate (asynchronous, no oversampling)
-   *  02 March 2016 by Vassilis Serasidis
-   */
-  _pUart->Instance          = _usartNumber;
-  _pUart->Init.BaudRate     = dwBaudRate;
-  _pUart->Init.WordLength   = UART_WORDLENGTH_8B;
-  _pUart->Init.StopBits     = UART_STOPBITS_1;
-  _pUart->Init.Parity       = UART_PARITY_NONE;
-  _pUart->Init.Mode         = UART_MODE_TX_RX;
-  _pUart->Init.HwFlowCtl    = UART_HWCONTROL_NONE;
-  _pUart->Init.OverSampling = UART_OVERSAMPLING_16;
-  _pUart->AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-
-
-  // Configure interrupts
-  // Enable UART interrupt in NVIC  when we have enough info for bridge
-  //NVIC_EnableIRQ(_dwIrq);
-
-  // Make sure both ring buffers are initialized back to empty.
   rx_buffer.iHead = rx_buffer.iTail = 0;
   tx_buffer.iHead = tx_buffer.iTail = 0;
 
-  /** Enable receiver and transmitter
-   *  02 March 2016 by Vassilis Serasidis
-   */
-  HAL_UART_Init(_pUart);
-  
-  HAL_UART_Receive_IT(_pUart, (uint8_t *)&r_byte, 1);
+  drv_uart_begin(_uart_num, _uart_mode, dwBaudRate);
 }
 
 void UARTClass::end( void )
@@ -93,25 +53,18 @@ void UARTClass::end( void )
 
   // Wait for any outstanding data to be sent
   flush();
-
-  // Disable UART interrupt in NVIC
-  NVIC_DisableIRQ( _dwIrq );
-
-}
-
-/* void UARTClass::setInterruptPriority(uint32_t priority)
-{
-//  NVIC_SetPriority(_dwIrq, priority & 0x0F);
-} */
-
-uint32_t UARTClass::getInterruptPriority()
-{
-  return NVIC_GetPriority(_dwIrq);
 }
 
 int UARTClass::available( void )
 {
-  return (uint32_t)(SERIAL_BUFFER_SIZE + rx_buffer.iHead - rx_buffer.iTail) % SERIAL_BUFFER_SIZE;
+  if(drv_uart_get_mode(_uart_num) == DRV_UART_IRQ_MODE )
+  {
+    return (uint32_t)(SERIAL_BUFFER_SIZE + rx_buffer.iHead - rx_buffer.iTail) % SERIAL_BUFFER_SIZE;
+  }
+  else
+  {
+    return drv_uart_available(_uart_num);
+  }
 }
 
 int UARTClass::availableForWrite(void)
@@ -132,13 +85,20 @@ int UARTClass::peek( void )
 
 int UARTClass::read( void )
 {
-  // if the head isn't ahead of the tail, we don't have any characters
-  if ( rx_buffer.iHead == rx_buffer.iTail )
-    return -1;
+  if(drv_uart_get_mode(_uart_num) == DRV_UART_IRQ_MODE )
+  {
+    // if the head isn't ahead of the tail, we don't have any characters
+    if ( rx_buffer.iHead == rx_buffer.iTail )
+      return -1;
 
-  uint8_t uc = rx_buffer.buffer[rx_buffer.iTail];
-  rx_buffer.iTail = (unsigned int)(rx_buffer.iTail + 1) % SERIAL_BUFFER_SIZE;
-  return uc;
+    uint8_t uc = rx_buffer.buffer[rx_buffer.iTail];
+    rx_buffer.iTail = (unsigned int)(rx_buffer.iTail + 1) % SERIAL_BUFFER_SIZE;
+    return uc;
+  }
+  else
+  {
+    return drv_uart_read(_uart_num);
+  }
 }
 
 void UARTClass::flush( void )
@@ -149,29 +109,38 @@ void UARTClass::flush( void )
 
 size_t UARTClass::write( const uint8_t uc_data )
 {
-  HAL_UART_Transmit(_pUart, (uint8_t *)&uc_data, 1, 10);
-  return 1;
+  return drv_uart_write(_uart_num, uc_data);
 }
 
-void UARTClass::ErrHandler (void)
+
+void UARTClass::RxHandler (void)
 {
-  HAL_UART_Receive_IT(_pUart, (uint8_t *)&r_byte, 1);
+
+  
+  if( _uart_mode == DRV_UART_IRQ_MODE )
+  {
+
+    if(available() < (SERIAL_BUFFER_SIZE - 1))
+    {
+      drv_uart_read_buf(_uart_num, &r_byte, 1);
+      rx_buffer.buffer[rx_buffer.iHead] = r_byte;
+  		rx_buffer.iHead = (uint16_t)(rx_buffer.iHead + 1) % SERIAL_BUFFER_SIZE;
+    }
+    drv_uart_start_rx(_uart_num);
+  }
 }
 
-void UARTClass::RxHandler (void){
-  
-    if(available() < (SERIAL_BUFFER_SIZE - 1)){ //If there is empty space in rx_buffer, read a byte from the Serial port and save it to the buffer.  
-    rx_buffer.buffer[rx_buffer.iHead] = r_byte; 
-		rx_buffer.iHead = (uint16_t)(rx_buffer.iHead + 1) % SERIAL_BUFFER_SIZE;
+void UARTClass::TxHandler(void)
+{
+  /*
+  if( _uart_mode == DRV_UART_IRQ_MODE )
+  {
+    if (tx_buffer.iHead != tx_buffer.iTail)
+    {
+  		unsigned char c = tx_buffer.buffer[tx_buffer.iTail];
+  		tx_buffer.iTail = (uint16_t)(tx_buffer.iTail + 1) % SERIAL_BUFFER_SIZE;
+  		HAL_UART_Transmit_IT(_pUart, (uint8_t *)&c, 1);
+    }
   }
-  HAL_UART_Receive_IT(_pUart, (uint8_t *)&r_byte, 1); //Get prepared for the next incoming byte.
-}
-
-void UARTClass::TxHandler(void){
-  
-  if (tx_buffer.iHead != tx_buffer.iTail)	{
-		unsigned char c = tx_buffer.buffer[tx_buffer.iTail];
-		tx_buffer.iTail = (uint16_t)(tx_buffer.iTail + 1) % SERIAL_BUFFER_SIZE;
-		HAL_UART_Transmit_IT(_pUart, (uint8_t *)&c, 1);
-  }
+  */
 }
