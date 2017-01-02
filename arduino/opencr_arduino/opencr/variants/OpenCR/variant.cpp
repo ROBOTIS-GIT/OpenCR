@@ -133,20 +133,17 @@ void serialEvent2() { }
 void serialEvent3() __attribute__((weak));
 void serialEvent3() { }
 
-UARTClass Serial1(&huart1, USART6_IRQn, 0, USART6);
-UARTClass Serial2(&huart2, USART2_IRQn, 1, USART2);
-UARTClass Serial3(&huart3, USART3_IRQn, 2, USART3);
 
-void Tx1_Handler(void){ Serial1.TxHandler(); }
+UARTClass Serial1(DRV_UART_NUM_1, DRV_UART_IRQ_MODE);
+UARTClass Serial2(DRV_UART_NUM_2, DRV_UART_IRQ_MODE);
+UARTClass Serial3(DRV_UART_NUM_3, DRV_UART_DMA_MODE);
+
+//void Tx1_Handler(void){ Serial1.TxHandler(); }
 void Rx1_Handler(void){ Serial1.RxHandler(); }
-void Tx2_Handler(void){ Serial2.TxHandler(); }
+//void Tx2_Handler(void){ Serial2.TxHandler(); }
 void Rx2_Handler(void){ Serial2.RxHandler(); }
-void Tx3_Handler(void){ Serial3.TxHandler(); }
+//void Tx3_Handler(void){ Serial3.TxHandler(); }
 void Rx3_Handler(void){ Serial3.RxHandler(); }
-
-void Err1_Handler(void){ Serial1.ErrHandler(); }
-void Err2_Handler(void){ Serial2.ErrHandler(); }
-void Err3_Handler(void){ Serial3.ErrHandler(); }
 
 
 
@@ -159,4 +156,3 @@ void serialEventRun(void)
 }
 
 USBSerial Serial;
-
