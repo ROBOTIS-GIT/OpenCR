@@ -5,7 +5,7 @@
  * Copyright (c) 2016 by Vassilis Serasidis <info@serasidis.gr>
  * Home: http://www.serasidis.gr
  * email: avrsite@yahoo.gr
- * 
+ *
  * Arduino_STM32 forum: http://www.stm32duino.com
  *
  * This file is free software; you can redistribute it and/or modify
@@ -72,7 +72,7 @@ class SPIClass {
     SPIClass(SPI_TypeDef *spiPort);
     SPIClass(uint8_t spiPort);
     void begin(void);
-    
+
     void beginTransaction(SPISettings settings)
     {
       setClockDivider(settings.clockDiv);
@@ -84,15 +84,15 @@ class SPIClass {
     }
     uint8_t transfer(uint8_t _data) const;
     uint16_t transfer16(uint16_t data);
-    void transfer(uint8_t buf, size_t count);
-    
+    void transfer(void *buf, size_t count);
+
     void setBitOrder(uint8_t bitOrder);
     void setClockDivider(uint8_t clockDiv);
     void setDataMode(uint8_t dataMode);
-    
+
   private:
     uint32_t _Mode;
-    uint32_t _Direction;          
+    uint32_t _Direction;
     uint32_t _DataSize;
     uint32_t _CLKPolarity;
     uint32_t _CLKPhase;
@@ -101,13 +101,13 @@ class SPIClass {
     uint32_t _FirstBit;
     uint32_t _TIMode;
     uint32_t _CRCCalculation;
-    uint32_t _CRCPolynomial; 
-    
+    uint32_t _CRCPolynomial;
+
     SPI_HandleTypeDef *_hspi;
-    SPI_TypeDef *_spiPort;    
+    SPI_TypeDef *_spiPort;
     void init(void);
 
-}; 
+};
 
 extern SPIClass SPI;
 extern SPIClass SPI_IMU;
