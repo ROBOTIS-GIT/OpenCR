@@ -131,7 +131,15 @@ uint16_t SPIClass::transfer16(uint16_t data) {
 }
 
 void SPIClass::transfer(void *buf, size_t count) {
-  HAL_SPI_Transmit(_hspi, (uint8_t *)buf, count, 0xffff);
+  //HAL_SPI_Transmit(_hspi, (uint8_t *)buf, count, 0xffff);
+  //HAL_SPI_TransmitReceive(_hspi, (uint8_t *)buf, (uint8_t *)buf, count, 0xffff);
+  int i;
+  uint8_t *pbuf = (uint8_t *)buf;
+
+  for( i=0; i<count; i++ )
+  {
+    pbuf[i] = transfer(0xFF);
+  }
 }
 
 
