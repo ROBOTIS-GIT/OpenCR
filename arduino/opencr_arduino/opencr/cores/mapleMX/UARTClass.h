@@ -57,8 +57,10 @@ class UARTClass : public HardwareSerial
 
     void RxHandler(void); /* Vassilis Serasidis */
     void TxHandler(void); /* Vassilis Serasidis */
+    uint32_t getBaudRate(void);
 
     operator bool() { return true; }; // UART always active
+
 
   protected:
 
@@ -69,8 +71,9 @@ class UARTClass : public HardwareSerial
       volatile uint16_t iTail;
     };
 
-    uint8_t _uart_num;
-    uint8_t _uart_mode;
+    uint8_t  _uart_num;
+    uint8_t  _uart_mode;
+    uint32_t _uart_baudrate;
 
     uint8_t r_byte;
     ring_buffer tx_buffer = { { 0 }, 0, 0};

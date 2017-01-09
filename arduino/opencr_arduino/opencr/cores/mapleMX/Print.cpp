@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 #include <math.h>
 #include "Arduino.h"
 
@@ -218,7 +219,7 @@ size_t Print::printf(char *fmt, ... )
   }
   buf_out[i_out] = 0;
 
-  return print(buf_out);
+  return write(buf_out, i_out);
 }
 
 

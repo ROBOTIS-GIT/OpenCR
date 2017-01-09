@@ -92,6 +92,8 @@ USBD_CDC_ItfTypeDef USBD_CDC_fops =
   CDC_Itf_Receive
 };
 
+uint32_t usb_cdc_bitrate = 0;
+
 /* Private functions ---------------------------------------------------------*/
 
 /**
@@ -105,6 +107,8 @@ static int8_t CDC_Itf_Init(void)
   USBD_CDC_SetTxBuffer(&USBD_Device, UserTxBuffer, 0);
   USBD_CDC_SetRxBuffer(&USBD_Device, UserRxBuffer);
   is_opened = FALSE;
+  LineCoding.bitrate = 0;
+  usb_cdc_bitrate = 0;
 
   return (USBD_OK);
 }
@@ -162,6 +166,8 @@ static int8_t CDC_Itf_Control (uint8_t cmd, uint8_t* pbuf, uint16_t length)
     LineCoding.format     = pbuf[4];
     LineCoding.paritytype = pbuf[5];
     LineCoding.datatype   = pbuf[6];
+
+    usb_cdc_bitrate = LineCoding.bitrate;
 
     if( LineCoding.bitrate == 1200 )
     {

@@ -5,7 +5,7 @@
  * Copyright (c) 2016 by Vassilis Serasidis <info@serasidis.gr>
  * Home: http://www.serasidis.gr
  * email: avrsite@yahoo.gr
- * 
+ *
  * Arduino_STM32 forum: http://www.stm32duino.com
  *
  * Permission to use, copy, modify, and/or distribute this software for
@@ -34,7 +34,12 @@
 #include "variant.h"
 
 
+extern uint32_t usb_cdc_bitrate;
+
+
+
 USBSerial::USBSerial(){
+  baudrate = 0;
 }
 
 void USBSerial::begin(uint32_t baud_count){
@@ -78,6 +83,10 @@ size_t USBSerial::write(uint8_t c) {
 	return write(&c, 1);
 }
 
+uint32_t USBSerial::getBaudRate(void)
+{
+  return usb_cdc_bitrate;
+}
 
 // This operator is a convenient way for a sketch to check whether the
 // port has actually been configured and opened by the host (as opposed
@@ -91,4 +100,3 @@ USBSerial::operator bool()
   if( vcp_is_connected() == TRUE ) return true;
   else                             return false;
 }
-

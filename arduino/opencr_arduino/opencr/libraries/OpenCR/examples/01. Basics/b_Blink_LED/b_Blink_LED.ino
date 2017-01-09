@@ -20,6 +20,8 @@ void setup() {
   pinMode(led_pin_user[2], OUTPUT);
   pinMode(led_pin_user[3], OUTPUT);
 
+  Serial.begin(115200);
+
 }
 
 void loop() {
@@ -41,5 +43,7 @@ void loop() {
     digitalWrite(led_pin_user[i], LOW);
     delay(100);
   }
+
+  Serial.println( String(10) );
 }
 
