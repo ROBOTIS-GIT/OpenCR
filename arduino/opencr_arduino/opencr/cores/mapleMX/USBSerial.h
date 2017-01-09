@@ -5,10 +5,10 @@
  * Copyright (c) 2016 by Vassilis Serasidis <info@serasidis.gr>
  * Home: http://www.serasidis.gr
  * email: avrsite@yahoo.gr
- * 
+ *
  * Arduino_STM32 forum: http://www.stm32duino.com
  *
- * The USBSerial.h file follows the function prototypes of 
+ * The USBSerial.h file follows the function prototypes of
  * the Arduino CDC.h file that was written by Peter Barrett
  *
  * Permission to use, copy, modify, and/or distribute this software for
@@ -55,6 +55,11 @@ class USBSerial : public Stream {
     virtual size_t write(const uint8_t *buffer, size_t size);
     using Print::write; // pull in write(str) from Print
     operator bool();
+
+    uint32_t getBaudRate(void);
+
+  private:
+    uint32_t baudrate;
 };
 
 #endif

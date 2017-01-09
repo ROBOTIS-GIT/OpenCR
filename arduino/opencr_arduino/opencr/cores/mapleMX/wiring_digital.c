@@ -23,18 +23,18 @@
  extern "C" {
 #endif
 
-	/* 
-	
-		the HAL drivers for STM32 do no access the registers directly 
+	/*
+
+		the HAL drivers for STM32 do no access the registers directly
 		opaque structures are used to abstract the functions needed
-		
-		existing STM examples show this defined locally a static 
+
+		existing STM examples show this defined locally a static
 		'static GPIO_InitTypeDef  GPIO_InitStruct;'
 
 		value which we set here.  This is different than the
 		way maple and sam set the pins as they use a global
 		array that contains device specific register setting values
-	
+
 
 		GPIO_InitTypeDef has the following members defined in stm32f4xx_hal_gpio.h:
 
@@ -42,7 +42,7 @@
 					typically a bitmapped mask that can be stored in a 16 bit value
 
   uint32_t Mode		Specifies the operating mode for the selected pins.
-                    There are a number of modes that can be defined. 
+                    There are a number of modes that can be defined.
 GPIO_MODE_INPUT		        	Input Floating Mode
 GPIO_MODE_OUTPUT_PP        		Output Push Pull Mode
 GPIO_MODE_OUTPUT_OD        		Output Open Drain Mode
@@ -50,11 +50,11 @@ GPIO_MODE_AF_PP            		Alternate Function Push Pull Mode
 GPIO_MODE_AF_OD            		Alternate Function Open Drain Mode
 
 GPIO_MODE_ANALOG           		Analog Mode
-    
+
 GPIO_MODE_IT_RISING        		External Interrupt Mode with Rising edge trigger detection
 GPIO_MODE_IT_FALLING       		External Interrupt Mode with Falling edge trigger detection
 GPIO_MODE_IT_RISING_FALLING		External Interrupt Mode with Rising/Falling edge trigger detection
- 
+
 GPIO_MODE_EVT_RISING       		External Event Mode with Rising edge trigger detection
 GPIO_MODE_EVT_FALLING      		External Event Mode with Falling edge trigger detection
 GPIO_MODE_EVT_RISING_FALLING	External Event Mode with Rising/Falling edge trigger detection
@@ -71,24 +71,24 @@ GPIO_SPEED_MEDIUM				Medium speed
 GPIO_SPEED_FAST					Fast speed
 GPIO_SPEED_HIGH					High speed
 
-  uint32_t Alternate	Peripheral to be connected to the selected pins. 
+  uint32_t Alternate	Peripheral to be connected to the selected pins.
                         these are defined in stm32f4xx_hal_gpio_ex.h
-                        not all calls to HAL_GPIO_Init require this value to 
-                        be set in the existing example code    
-                            
-                            
+                        not all calls to HAL_GPIO_Init require this value to
+                        be set in the existing example code
+
+
 */
 
-		
-		
+
+
 
 extern void pinMode( uint32_t ulPin, uint32_t ulMode )
 {
 	GPIO_InitTypeDef  GPIO_InitStruct;
-	
+
 
 	GPIO_InitStruct.Pin = g_Pin2PortMapArray[ulPin].Pin_abstraction;
-	
+
 	drv_pwm_release(ulPin);
 
 
@@ -114,6 +114,11 @@ extern void pinMode( uint32_t ulPin, uint32_t ulMode )
  			GPIO_InitStruct.Pull = GPIO_NOPULL;
  			break ;
 
+    case OUTPUT_OPEN:
+      GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+ 			GPIO_InitStruct.Pull = GPIO_NOPULL;
+      break;
+
 	  case INPUT_ANALOG:
 	    drv_adc_pin_init(ulPin);
 	    break;
@@ -133,20 +138,20 @@ extern void digitalWrite( uint32_t ulPin, uint32_t ulVal )
 {
 
   switch(ulVal) {
-		
+
     case HIGH:
 			/*
-					AVR allows for the writing of inputs to set the pull up state 
-					we may want to do this here as well to maintain compatibility. 
+					AVR allows for the writing of inputs to set the pull up state
+					we may want to do this here as well to maintain compatibility.
 			*/
       HAL_GPIO_WritePin(g_Pin2PortMapArray[ulPin].GPIOx_Port,g_Pin2PortMapArray[ulPin].Pin_abstraction,GPIO_PIN_SET);
 			break;
-			
+
     case LOW:
       /* simply reset the pin */
       HAL_GPIO_WritePin(g_Pin2PortMapArray[ulPin].GPIOx_Port,g_Pin2PortMapArray[ulPin].Pin_abstraction,GPIO_PIN_RESET);
 			break;
-			
+
     default:
       /* should do an assert here to handle error conditions */
 			break;
@@ -166,4 +171,3 @@ extern int digitalRead( uint32_t ulPin )
 #ifdef __cplusplus
 }
 #endif
-

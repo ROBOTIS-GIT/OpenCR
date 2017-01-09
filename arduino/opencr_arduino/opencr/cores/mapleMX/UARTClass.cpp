@@ -31,6 +31,7 @@ UARTClass::UARTClass(uint8_t uart_num, uint8_t uart_mode)
 {
   _uart_num  = uart_num;
   _uart_mode = uart_mode;
+  _uart_baudrate = 0;
 }
 
 void UARTClass::begin(const uint32_t dwBaudRate)
@@ -42,6 +43,8 @@ void UARTClass::begin(const uint32_t dwBaudRate, const UARTModes config)
 {
   rx_buffer.iHead = rx_buffer.iTail = 0;
   tx_buffer.iHead = tx_buffer.iTail = 0;
+
+  _uart_baudrate = dwBaudRate;
 
   drv_uart_begin(_uart_num, _uart_mode, dwBaudRate);
 }
@@ -112,11 +115,16 @@ size_t UARTClass::write( const uint8_t uc_data )
   return drv_uart_write(_uart_num, uc_data);
 }
 
+uint32_t UARTClass::getBaudRate( void )
+{
+  return _uart_baudrate;
+}
+
 
 void UARTClass::RxHandler (void)
 {
 
-  
+
   if( _uart_mode == DRV_UART_IRQ_MODE )
   {
 
