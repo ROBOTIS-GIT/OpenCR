@@ -1,8 +1,8 @@
-# 
+#
 #	Map of STM32 cube MX CMSIS HAL drivers to underlay maple libs
 #
 #  configured by sheepdoll (Julie S Porter) 2015
-#  modified by Baram 
+#  modified by Baram
 # For more info:
 # https://github.com/arduino/Arduino/wiki/Arduino-IDE-1.5---3rd-party-Hardware-specification
 # http://stm32duino.com/
@@ -23,13 +23,13 @@ compiler.warning_flags.all=-Wall -Wextra -DDEBUG_LEVEL=DEBUG_ALL
 #compiler.path={runtime.hardware.path}/tools/gcc/bin/
 compiler.path={runtime.tools.opencr_gcc.path}/bin/
 compiler.c.cmd=arm-none-eabi-gcc
-compiler.c.flags=-c -g -O2 -std=gnu99 -mfloat-abi=softfp -mfpu=fpv5-sp-d16 {compiler.warning_flags} -MMD -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -DBOARD_{build.variant} 
+compiler.c.flags=-c -g -O2 -std=gnu99 -mfloat-abi=softfp -mfpu=fpv5-sp-d16 {compiler.warning_flags} -MMD -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -DBOARD_{build.variant}
 compiler.c.elf.cmd=arm-none-eabi-g++
 compiler.c.elf.flags=-Os -Wl,--gc-sections
 compiler.S.cmd=arm-none-eabi-gcc
 compiler.S.flags=-c -g -x assembler-with-cpp -MMD
 compiler.cpp.cmd=arm-none-eabi-g++
-compiler.cpp.flags=-c -g -O2 -mfloat-abi=softfp -mfpu=fpv5-sp-d16 {compiler.warning_flags} -MMD -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -fno-rtti -fno-exceptions -DBOARD_{build.variant} 
+compiler.cpp.flags=-c -g -O2 -mfloat-abi=softfp -mfpu=fpv5-sp-d16 {compiler.warning_flags} -MMD -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -fno-rtti -fno-exceptions -DBOARD_{build.variant}
 compiler.ar.cmd=arm-none-eabi-ar
 compiler.ar.flags=rcs
 compiler.objcopy.cmd=arm-none-eabi-objcopy
@@ -38,7 +38,7 @@ compiler.elf2hex.flags=-O binary
 compiler.elf2hex.cmd=arm-none-eabi-objcopy
 compiler.ldflags=
 compiler.size.cmd=arm-none-eabi-size
-compiler.define=-DARDUINO=                            
+compiler.define=-DARDUINO=
 
 
 # this is the static library built by the gun ar tool
@@ -54,13 +54,13 @@ build.upload_flags=
 # These can be overridden in platform.local.txt
 compiler.c.extra_flags=
 compiler.c.elf.extra_flags="-L{build.variant.path}/ld"
-compiler.cpp.extra_flags= 
+compiler.cpp.extra_flags=
 compiler.S.extra_flags=
 compiler.ar.extra_flags=
 compiler.elf2hex.extra_flags=
 
 
-## Compiler include paths  
+## Compiler include paths
 
 
 
@@ -75,7 +75,7 @@ compiler.libs.c.flags= "-I{build.variant.path}/{build.inc1}" "-I{build.variant.p
 
 ## Compile c files
 recipe.c.o.pattern=		"{compiler.path}{compiler.c.cmd}" 	{compiler.c.flags} -mcpu={build.mcu} -DF_CPU={build.f_cpu} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} {compiler.c.extra_flags} {build.extra_flags} {build.cpu_flags} {build.common_flags} {compiler.libs.c.flags} {includes} "{source_file}" -o "{object_file}"
-### 
+###
 
 ## Compile c++ files
 recipe.cpp.o.pattern=	"{compiler.path}{compiler.cpp.cmd}" {compiler.cpp.flags} -mcpu={build.mcu} -DF_CPU={build.f_cpu} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} {compiler.cpp.extra_flags} {build.extra_flags} {build.cpu_flags} {build.hs_flag} {build.common_flags} {compiler.libs.c.flags} {includes} "{source_file}" -o "{object_file}"
@@ -84,7 +84,7 @@ recipe.cpp.o.pattern=	"{compiler.path}{compiler.cpp.cmd}" {compiler.cpp.flags} -
 ## Compile S files
 recipe.S.o.pattern="{compiler.path}{compiler.c.cmd}" {compiler.S.flags} -mcpu={build.mcu} -DF_CPU={build.f_cpu} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} {compiler.S.extra_flags} {build.extra_flags} {build.cpu_flags} {build.hs_flag} {build.common_flags} {compiler.libs.c.flags} {includes} "{source_file}" -o "{object_file}"
 recipe.s.o.pattern="{compiler.path}{compiler.c.cmd}" {compiler.S.flags} -mcpu={build.mcu} -DF_CPU={build.f_cpu} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} {compiler.S.extra_flags} {build.extra_flags} {build.cpu_flags} {build.hs_flag} {build.common_flags} {compiler.libs.c.flags} {includes} "{source_file}" -o "{object_file}"
- 
+
 
 ## Create archives
 recipe.ar.pattern="{compiler.path}{compiler.ar.cmd}" {compiler.ar.flags} {compiler.ar.extra_flags} "{archive_file_path}" "{object_file}"
@@ -111,10 +111,10 @@ tools.opencr_ld.cmd=opencr_ld
 tools.opencr_ld.cmd.windows=opencr_ld.exe
 #tools.opencr_ld.path={runtime.hardware.path}/tools/win
 #tools.opencr_ld.path.macosx={runtime.hardware.path}/tools/macosx
-#tools.opencr_ld.path.linux={runtime.hardware.path}/tools/linux    
+#tools.opencr_ld.path.linux={runtime.hardware.path}/tools/linux
 tools.opencr_ld.path={runtime.tools.opencr_tools.path}/win
 tools.opencr_ld.path.macosx={runtime.tools.opencr_tools.path}/macosx
-tools.opencr_ld.path.linux={runtime.tools.opencr_tools.path}/linux    
+tools.opencr_ld.path.linux={runtime.tools.opencr_tools.path}/linux
 
 tools.opencr_ld.upload.params.verbose=-d
 tools.opencr_ld.upload.params.quiet=n

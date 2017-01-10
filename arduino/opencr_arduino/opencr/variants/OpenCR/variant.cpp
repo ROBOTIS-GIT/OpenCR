@@ -102,9 +102,23 @@ extern const Pin2PortMapArray g_Pin2PortMapArray[]=
     {GPIOF, GPIO_PIN_0,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 62 BDPIN_GPIO_13
     {GPIOF, GPIO_PIN_1,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 63 BDPIN_GPIO_14
     {GPIOF, GPIO_PIN_2,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 64 BDPIN_GPIO_15
-    {GPIOF, GPIO_PIN_3,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 65 BDPIN_GPIO_16
+    {GPIOD, GPIO_PIN_8,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 65 BDPIN_GPIO_16
     {GPIOF, GPIO_PIN_4,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 66 BDPIN_GPIO_17
-    {GPIOF, GPIO_PIN_5,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 67 BDPIN_GPIO_18
+    {GPIOD, GPIO_PIN_9,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 67 BDPIN_GPIO_18
+    {GPIOF, GPIO_PIN_7,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 68
+    {GPIOF, GPIO_PIN_7,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 69
+
+    {GPIOF, GPIO_PIN_11,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 70 OLLO_P3_SIG1
+    {GPIOF, GPIO_PIN_12,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 71 OLLO_P3_SIG2
+    {GPIOF, GPIO_PIN_5,   &hADC3,   ADC_CHANNEL_15, NULL   ,   NO_PWM       , 7       },  // 72 OLLO_P3_ADC           EXTI_7
+    {GPIOE, GPIO_PIN_8,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 73 OLLO_P4_SIG1
+    {GPIOE, GPIO_PIN_9,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 74 OLLO_P5_SIG2
+    {GPIOF, GPIO_PIN_3,   &hADC3,   ADC_CHANNEL_9 , NULL   ,   NO_PWM       , 8       },  // 75 OLLO_P5_ADC           EXTI_8
+    {GPIOF, GPIO_PIN_7,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 76
+    {GPIOF, GPIO_PIN_7,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 77
+    {GPIOF, GPIO_PIN_7,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 78
+    {GPIOF, GPIO_PIN_7,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 79
+
 
 
     {NULL , 0          ,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI }
@@ -133,10 +147,15 @@ void serialEvent2() { }
 void serialEvent3() __attribute__((weak));
 void serialEvent3() { }
 
+void serialEvent4() __attribute__((weak));
+void serialEvent4() { }
+
 
 UARTClass Serial1(DRV_UART_NUM_1, DRV_UART_IRQ_MODE);
 UARTClass Serial2(DRV_UART_NUM_2, DRV_UART_IRQ_MODE);
 UARTClass Serial3(DRV_UART_NUM_3, DRV_UART_DMA_MODE);
+UARTClass Serial4(DRV_UART_NUM_4, DRV_UART_IRQ_MODE);
+
 
 //void Tx1_Handler(void){ Serial1.TxHandler(); }
 void Rx1_Handler(void){ Serial1.RxHandler(); }
@@ -144,6 +163,8 @@ void Rx1_Handler(void){ Serial1.RxHandler(); }
 void Rx2_Handler(void){ Serial2.RxHandler(); }
 //void Tx3_Handler(void){ Serial3.TxHandler(); }
 void Rx3_Handler(void){ Serial3.RxHandler(); }
+//void Tx4_Handler(void){ Serial4.TxHandler(); }
+void Rx4_Handler(void){ Serial4.RxHandler(); }
 
 
 
@@ -153,6 +174,7 @@ void serialEventRun(void)
   if (Serial1.available()) serialEvent1();
   if (Serial2.available()) serialEvent2();
   if (Serial3.available()) serialEvent3();
+  if (Serial4.available()) serialEvent4();
 }
 
 USBSerial Serial;

@@ -17,6 +17,10 @@
   USART3
     - RX : DMA1, Channel 4, Stream 1
     - TX : DMA1, Channel 4, Stream 4
+
+  USART8
+    - RX : DMA1, Channel 5, Stream 6
+    - TX : DMA1, Channel 5, Stream 0
 */
 #include "drv_uart.h"
 #include "variant.h"
@@ -39,7 +43,7 @@ static BOOL is_uart_mode[DRV_UART_NUM_MAX];
 
 UART_HandleTypeDef huart[DRV_UART_NUM_MAX];
 DMA_HandleTypeDef  hdma_rx[DRV_UART_NUM_MAX];
-USART_TypeDef     *huart_inst[DRV_UART_NUM_MAX] = { USART6, USART2, USART3 };
+USART_TypeDef     *huart_inst[DRV_UART_NUM_MAX] = { USART6, USART2, USART3, UART8 };
 
 
 //-- internal functions definition
@@ -89,7 +93,7 @@ void drv_uart_begin(uint8_t uart_num, uint8_t uart_mode, uint32_t baudrate)
 
     drv_uart_rx_buf_head[uart_num] = DRV_UART_RX_BUF_LENGTH - hdma_rx[uart_num].Instance->NDTR;
     drv_uart_rx_buf_tail[uart_num] = drv_uart_rx_buf_head[uart_num];
-    
+
   }
 }
 
@@ -200,6 +204,10 @@ void USART3_IRQHandler(void)
   HAL_UART_IRQHandler(&huart[DRV_UART_NUM_3]);
 }
 
+void UART8_IRQHandler(void)
+{
+  HAL_UART_IRQHandler(&huart[DRV_UART_NUM_4]);
+}
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
@@ -216,6 +224,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
   if( UartHandle->Instance == huart_inst[DRV_UART_NUM_1] ) Rx1_Handler();
   if( UartHandle->Instance == huart_inst[DRV_UART_NUM_2] ) Rx2_Handler();
   if( UartHandle->Instance == huart_inst[DRV_UART_NUM_3] ) Rx3_Handler();
+  if( UartHandle->Instance == huart_inst[DRV_UART_NUM_4] ) Rx4_Handler();
 }
 
 
@@ -224,6 +233,7 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
   if( UartHandle->Instance == huart_inst[DRV_UART_NUM_1] ) drv_uart_err_handler(DRV_UART_NUM_1);
   if( UartHandle->Instance == huart_inst[DRV_UART_NUM_2] ) drv_uart_err_handler(DRV_UART_NUM_2);
   if( UartHandle->Instance == huart_inst[DRV_UART_NUM_3] ) drv_uart_err_handler(DRV_UART_NUM_3);
+  if( UartHandle->Instance == huart_inst[DRV_UART_NUM_4] ) drv_uart_err_handler(DRV_UART_NUM_4);
 }
 
 
@@ -372,6 +382,33 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     HAL_NVIC_SetPriority(USART3_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ  (USART3_IRQn);
   }
+  else if(huart->Instance==UART8) // // UART_NUM_4
+  {
+    RCC_PeriphCLKInitStruct.PeriphClockSelection = RCC_PERIPHCLK_UART8;
+    RCC_PeriphCLKInitStruct.Uart8ClockSelection  = RCC_UART8CLKSOURCE_SYSCLK;
+    HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphCLKInitStruct);
+
+    /* Peripheral clock enable */
+    __HAL_RCC_UART8_CLK_ENABLE();
+
+    GPIO_InitStruct.Pin       = GPIO_PIN_1;
+    GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull      = GPIO_PULLUP;
+    GPIO_InitStruct.Speed     = GPIO_SPEED_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF8_UART8;
+    HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+
+    GPIO_InitStruct.Pin       = GPIO_PIN_0;
+    GPIO_InitStruct.Alternate = GPIO_AF8_UART8;
+    HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+    /* Peripheral interrupt init */
+    HAL_NVIC_SetPriority(UART8_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ  (UART8_IRQn);
+
+  }
+
 }
 
 
@@ -424,4 +461,20 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
     /* Peripheral interrupt Deinit*/
     HAL_NVIC_DisableIRQ(USART3_IRQn);
   }
+  else if(huart->Instance==UART8)
+  {
+    __UART8_FORCE_RESET();
+    __UART8_RELEASE_RESET();
+
+    /* Peripheral clock disable */
+    __HAL_RCC_UART8_CLK_DISABLE();
+
+
+    HAL_GPIO_DeInit(GPIOE, GPIO_PIN_0);
+    HAL_GPIO_DeInit(GPIOE, GPIO_PIN_1);
+
+    /* Peripheral interrupt Deinit*/
+    HAL_NVIC_DisableIRQ(UART8_IRQn);
+  }
+
 }

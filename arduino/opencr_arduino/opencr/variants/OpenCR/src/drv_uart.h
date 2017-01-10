@@ -25,7 +25,8 @@
 #define DRV_UART_NUM_1          0
 #define DRV_UART_NUM_2          1
 #define DRV_UART_NUM_3          2
-#define DRV_UART_NUM_MAX        3
+#define DRV_UART_NUM_4          3
+#define DRV_UART_NUM_MAX        4
 
 #define DRV_UART_IRQ_MODE       0
 #define DRV_UART_DMA_MODE       1

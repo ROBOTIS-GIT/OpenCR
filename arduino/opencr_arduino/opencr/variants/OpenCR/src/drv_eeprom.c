@@ -78,7 +78,7 @@ static uint16_t EE_VerifyPageFullyErased(uint32_t Address);
 #define PAGE_FULL             ((uint8_t)0x80)
 
 /* Variables' number */
-#define NB_OF_VAR             (1024)
+#define NB_OF_VAR             (4*1024) //4KB
 
 
 /* Virtual address defined by the user: 0xFFFF value is prohibited */
@@ -803,4 +803,3 @@ static uint16_t EE_PageTransfer(uint16_t VirtAddress, uint16_t Data)
   /* Return last operation flash status */
   return FlashStatus;
 }
-

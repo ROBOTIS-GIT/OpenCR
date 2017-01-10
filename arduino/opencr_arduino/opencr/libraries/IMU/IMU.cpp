@@ -159,7 +159,7 @@ void cIMU::computeIMU( void )
 
   rpy[0] = filter.getRoll();
   rpy[1] = filter.getPitch();
-  rpy[2] = filter.getYaw();
+  rpy[2] = filter.getYaw()-180.;
 
   quat[0] = filter.q0;
   quat[1] = filter.q1;
