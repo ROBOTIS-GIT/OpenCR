@@ -20,13 +20,9 @@
 #include "imu_spi.h"
 
 
-#define MPU_CS_PIN    BDPIN_SPI_CS_IMU
-
-
-
-
+#define MPU_CS_PIN          BDPIN_SPI_CS_IMU
 #define MPU9250_ADDRESS     0x68
-
+#define MPU_CALI_COUNT      512
 
 
 //#define ACC_ORIENTATION(X, Y, Z)  {accADC[PITCH]  = -X; accADC[ROLL]  =  Y; accADC[YAW]  =   Z;}
@@ -211,7 +207,7 @@ void cMPU9250::gyro_init( void )
 		gyroRAW[i]  = 0;
 	}
 
-	calibratingG = 512;
+	calibratingG = MPU_CALI_COUNT;
 }
 
 
@@ -260,7 +256,7 @@ void cMPU9250::gyro_get_adc( void )
 ---------------------------------------------------------------------------*/
 void cMPU9250::gyro_cali_start()
 {
-	calibratingG = 512;
+	calibratingG = MPU_CALI_COUNT;
 }
 
 
@@ -342,7 +338,7 @@ void cMPU9250::gyro_common()
 	{
 		for (axis = 0; axis < 3; axis++)
 		{
-			if (calibratingG == 512)
+			if (calibratingG == MPU_CALI_COUNT)
 			{ // Reset g[axis] at start of calibration
 				g[axis]=0;
 				previousGyroADC[axis] = gyroADC[axis];
@@ -403,7 +399,7 @@ void cMPU9250::acc_common()
 		calibratingA--;
 		for (uint8_t axis = 0; axis < 3; axis++)
 		{
-			if (calibratingA == 511) a[axis]=0;  // Reset a[axis] at start of calibration
+			if (calibratingA ==(MPU_CALI_COUNT-1)) a[axis]=0;  // Reset a[axis] at start of calibration
 			a[axis] += accADC[axis];             // Sum up 512 readings
 			accZero[axis] = a[axis]>>9;          // Calculate average, only the last itteration where (calibratingA == 0) is relevant
 		}
@@ -513,7 +509,7 @@ void cMPU9250::mag_common()
 ---------------------------------------------------------------------------*/
 void cMPU9250::acc_cali_start()
 {
-	calibratingA = 512;
+	calibratingA = MPU_CALI_COUNT;
 }
 
 
