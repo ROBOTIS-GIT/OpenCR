@@ -51,11 +51,11 @@ void loop()
 
     Serial.print(imu_time);
     Serial.print(" \t");
-    Serial.print(IMU.accRAW[0]);    // ACC X
+    Serial.print(IMU.accRaw[0]);    // ACC X
     Serial.print(" \t");
-    Serial.print(IMU.accRAW[1]);    // ACC Y
+    Serial.print(IMU.accRaw[1]);    // ACC Y
     Serial.print(" \t");
-    Serial.print(IMU.accRAW[2]);    // ACC Z
+    Serial.print(IMU.accRaw[2]);    // ACC Z
     Serial.println(" ");
   }
 }

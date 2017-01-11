@@ -129,8 +129,8 @@ void cIMU::computeIMU( void )
   {
     accRaw[i]   = SEN.accRAW[i];
     accData[i]  = SEN.accADC[i];
-    gyroRaw[i]  = SEN.accRAW[i];
-    gyroData[i] = SEN.accADC[i];
+    gyroRaw[i]  = SEN.gyroRAW[i];
+    gyroData[i] = SEN.gyroADC[i];
     magRaw[i]   = SEN.magRAW[i];
     magData[i]  = SEN.magADC[i];
   }
