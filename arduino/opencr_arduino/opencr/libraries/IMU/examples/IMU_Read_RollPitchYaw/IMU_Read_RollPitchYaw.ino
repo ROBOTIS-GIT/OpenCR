@@ -2,9 +2,9 @@
   Range   : Roll  : +/- 180 deg/sec
             Pitch : +/- 180 deg/sec
             Yaw   : +/- 180 deg/sec
-  Scale   : Roll  : 10 = 1 deg/sec
-            Pitch : 10 = 1 deg/sec
-            Yaw   :  1 = 1 deg/sec
+  Scale   : Roll  : 1 = 1 deg/sec
+            Pitch : 1 = 1 deg/sec
+            Yaw   : 1 = 1 deg/sec
  */
 
 #include <IMU.h>

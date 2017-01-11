@@ -123,7 +123,7 @@ void drv_uart_start_rx(uint8_t uart_num)
 uint32_t drv_uart_read_buf(uint8_t uart_num, uint8_t *p_buf, uint32_t length)
 {
   uint32_t i;
-  uint32_t ret;
+  uint32_t ret = 0;
 
   if(is_uart_mode[uart_num] == DRV_UART_IRQ_MODE)
   {
@@ -225,6 +225,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
   if( UartHandle->Instance == huart_inst[DRV_UART_NUM_2] ) Rx2_Handler();
   if( UartHandle->Instance == huart_inst[DRV_UART_NUM_3] ) Rx3_Handler();
   if( UartHandle->Instance == huart_inst[DRV_UART_NUM_4] ) Rx4_Handler();
+
 }
 
 

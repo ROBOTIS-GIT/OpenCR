@@ -51,10 +51,8 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define BDPIN_DIP_SW_2          27
 #define BDPIN_SPI_CS_IMU        28
 #define BDPIN_BAT_PWR_ADC       29
-#define BDPIN_CHG_PWR_ADC       30
 #define BDPIN_BUZZER            31
 #define BDPIN_DXL_PWR_EN        32
-#define BDPIN_LED_BATT_CHARGE   33
 #define BDPIN_PUSH_SW_1         34
 #define BDPIN_PUSH_SW_2         35
 #define BDPIN_LED_STATUS        36

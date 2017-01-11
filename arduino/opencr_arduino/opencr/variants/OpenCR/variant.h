@@ -41,11 +41,6 @@ extern "C"{
 #endif // __cplusplus
 
 
-extern UART_HandleTypeDef huart1;
-extern UART_HandleTypeDef huart2;
-extern UART_HandleTypeDef huart3;
-
-
 
 /*
  * Analog pins
@@ -102,10 +97,11 @@ void Err4_Handler(void);
 
 #ifdef __cplusplus
 
-extern USBSerial Serial;
-extern UARTClass Serial1;
-extern UARTClass Serial2;
-extern UARTClass Serial3;
+extern USBSerial Serial;    // USB
+extern UARTClass Serial1;   // Arduino Serial
+extern UARTClass Serial2;   // Ext Serial for Bluetooth
+extern UARTClass Serial3;   // Ext Serial for Dynamixel
+extern UARTClass Serial4;   // Ext Serial for Bluetooth
 
 
 
