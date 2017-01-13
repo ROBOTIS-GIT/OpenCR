@@ -23,6 +23,8 @@
 #include "drv_dxl.h"
 #include "drv_timer.h"
 #include "drv_eeprom.h"
+#include "drv_rtc.h"
+
 
 int drv_init(void);
 
@@ -35,4 +37,3 @@ uint32_t drv_micros();
 
 
 #endif
-
