@@ -23,6 +23,7 @@ typedef struct
   uint8_t  enable;
   uint32_t freq;
   uint32_t prescaler_value;
+  uint32_t prescaler_value_1M;
   uint32_t prescaler_div;
   uint32_t period;
   voidFuncPtr handler;
@@ -43,9 +44,10 @@ int drv_timer_init()
   //-- TIMER_CH1  TIM4
   //
   tim_ch = TIMER_CH1;
-  hDrvTim[tim_ch].hTIM.Instance   = TIM4;
-  hDrvTim[tim_ch].prescaler_value = (uint32_t)((SystemCoreClock / 2) / 10000) - 1; // 0.01Mhz
-  hDrvTim[tim_ch].prescaler_div   = 100;
+  hDrvTim[tim_ch].hTIM.Instance      = TIM4;
+  hDrvTim[tim_ch].prescaler_value    = (uint32_t)((SystemCoreClock / 2) / 10000  ) - 1; // 0.01Mhz
+  hDrvTim[tim_ch].prescaler_value_1M = (uint32_t)((SystemCoreClock / 2) / 1000000) - 1; // 1.00Mhz
+  hDrvTim[tim_ch].prescaler_div      = 100;
   hDrvTim[tim_ch].hTIM.Init.Period        = 10000 - 1;
   hDrvTim[tim_ch].hTIM.Init.Prescaler     = hDrvTim[tim_ch].prescaler_value;
   hDrvTim[tim_ch].hTIM.Init.ClockDivision = 0;
@@ -56,9 +58,10 @@ int drv_timer_init()
   //-- TIMER_CH2  TIM10
   //
   tim_ch = TIMER_CH2;
-  hDrvTim[tim_ch].hTIM.Instance   = TIM10;
-  hDrvTim[tim_ch].prescaler_value = (uint32_t)((SystemCoreClock / 1) / 10000) - 1; // 0.01Mhz
-  hDrvTim[tim_ch].prescaler_div   = 100;
+  hDrvTim[tim_ch].hTIM.Instance      = TIM10;
+  hDrvTim[tim_ch].prescaler_value    = (uint32_t)((SystemCoreClock / 1) / 10000  ) - 1; // 0.01Mhz
+  hDrvTim[tim_ch].prescaler_value_1M = (uint32_t)((SystemCoreClock / 1) / 1000000) - 1; // 1.00Mhz
+  hDrvTim[tim_ch].prescaler_div      = 100;
   hDrvTim[tim_ch].hTIM.Init.Period        = 10000 - 1;
   hDrvTim[tim_ch].hTIM.Init.Prescaler     = hDrvTim[tim_ch].prescaler_value;
   hDrvTim[tim_ch].hTIM.Init.ClockDivision = 0;
@@ -69,9 +72,10 @@ int drv_timer_init()
   //-- TIMER_CH3  TIM13
   //
   tim_ch = TIMER_CH3;
-  hDrvTim[tim_ch].hTIM.Instance   = TIM13;
-  hDrvTim[tim_ch].prescaler_value = (uint32_t)((SystemCoreClock / 2) / 10000) - 1; // 0.01Mhz
-  hDrvTim[tim_ch].prescaler_div   = 100;
+  hDrvTim[tim_ch].hTIM.Instance      = TIM13;
+  hDrvTim[tim_ch].prescaler_value    = (uint32_t)((SystemCoreClock / 2) / 10000  ) - 1; // 0.01Mhz
+  hDrvTim[tim_ch].prescaler_value_1M = (uint32_t)((SystemCoreClock / 2) / 1000000) - 1; // 1.00Mhz
+  hDrvTim[tim_ch].prescaler_div      = 100;
   hDrvTim[tim_ch].hTIM.Init.Period        = 10000 - 1;
   hDrvTim[tim_ch].hTIM.Init.Prescaler     = hDrvTim[tim_ch].prescaler_value;
   hDrvTim[tim_ch].hTIM.Init.ClockDivision = 0;
@@ -82,9 +86,10 @@ int drv_timer_init()
   //-- TIMER_TONE  TIM14
   //
   tim_ch = TIMER_TONE;
-  hDrvTim[tim_ch].hTIM.Instance   = TIM14;
-  hDrvTim[tim_ch].prescaler_value = (uint32_t)((SystemCoreClock / 2) / 10000) - 1; // 1Mhz
-  hDrvTim[tim_ch].prescaler_div   = 100;
+  hDrvTim[tim_ch].hTIM.Instance      = TIM14;
+  hDrvTim[tim_ch].prescaler_value    = (uint32_t)((SystemCoreClock / 2) / 10000  ) - 1; // 1Mhz
+  hDrvTim[tim_ch].prescaler_value_1M = (uint32_t)((SystemCoreClock / 2) / 1000000) - 1; // 1.00Mhz
+  hDrvTim[tim_ch].prescaler_div      = 100;
   hDrvTim[tim_ch].hTIM.Init.Period        = 10000 - 1;
   hDrvTim[tim_ch].hTIM.Init.Prescaler     = hDrvTim[tim_ch].prescaler_value;
   hDrvTim[tim_ch].hTIM.Init.ClockDivision = 0;
@@ -215,9 +220,18 @@ void drv_timer_set_period(uint8_t channel, uint32_t period_data)
 {
   if( channel >= TIMER_CH_MAX ) return;
 
-  if( period_data > 0 )
+  if( period_data > 0xFFFF )
   {
-    hDrvTim[channel].hTIM.Init.Period = (period_data/hDrvTim[channel].prescaler_div) - 1;
+    hDrvTim[channel].hTIM.Init.Prescaler = hDrvTim[channel].prescaler_value;
+    hDrvTim[channel].hTIM.Init.Period    = (period_data/hDrvTim[channel].prescaler_div) - 1;
+  }
+  else
+  {
+    if( period_data > 0 )
+    {
+      hDrvTim[channel].hTIM.Init.Prescaler = hDrvTim[channel].prescaler_value_1M;
+      hDrvTim[channel].hTIM.Init.Period    = period_data - 1;
+    }
   }
 }
 
@@ -252,7 +266,3 @@ void drv_timer_resume(uint8_t channel)
 
   hDrvTim[channel].enable = 1;
 }
-
-
-
-
