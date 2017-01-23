@@ -29,7 +29,8 @@ void   rtcSetTime(time_t time_data);
 
 
 int drv_rtc_init();
-
+void     drv_rtc_write_step(uint32_t step_data);
+uint32_t drv_rtc_read_step(void);
 
 #ifdef __cplusplus
 }

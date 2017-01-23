@@ -200,6 +200,19 @@ void drv_rtc_breakTime(time_t timeInput, RTC_DateTypeDef *p_date, RTC_TimeTypeDe
 }
 
 
+void drv_rtc_write_step(uint32_t step_data)
+{
+  HAL_RTCEx_BKUPWrite(&RtcHandle, RTC_BKP_DR2, step_data);
+}
+
+
+uint32_t drv_rtc_read_step(void)
+{
+  return HAL_RTCEx_BKUPRead(&RtcHandle, RTC_BKP_DR2);
+}
+
+
+
 
 
 
