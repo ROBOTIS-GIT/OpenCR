@@ -82,6 +82,10 @@ void SPIClass::begin(void) {
   init();
 }
 
+void SPIClass::beginFast(void) {
+  drv_spi_enable_dma(_hspi);
+  init();
+}
 
 void SPIClass::init(void){
 
@@ -98,15 +102,6 @@ void SPIClass::init(void){
   _hspi->Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE;
   _hspi->Init.CRCPolynomial     = 10;
   HAL_SPI_Init(_hspi);
-
-
-  if(_spiPort == SPI1){
-    __HAL_RCC_SPI1_CLK_ENABLE();
-  }
-
-  if(_spiPort == SPI2){
-    __HAL_RCC_SPI2_CLK_ENABLE();
-  }
 }
 
 uint8_t SPIClass::transfer(uint8_t data) const{
@@ -142,6 +137,26 @@ void SPIClass::transfer(void *buf, size_t count) {
   }
 }
 
+
+void SPIClass::transferFast(void *buf, size_t count) {
+  uint32_t t_time;
+  //HAL_SPI_TransmitReceive(_hspi, (uint8_t *)buf, (uint8_t *)buf, count, 0xffff);
+  drv_spi_start_dma_tx(_hspi, (uint8_t *)buf, count);
+
+  t_time = millis();
+
+  while(1)
+  {
+    if(drv_spi_is_dma_tx_done(_hspi))
+    {
+      break;
+    }
+    if((millis()-t_time) > 1000)
+    {
+      break;
+    }
+  }
+}
 
 void SPIClass::setBitOrder(uint8_t bitOrder) {
     if (bitOrder == 1)

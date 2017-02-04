@@ -72,6 +72,7 @@ class SPIClass {
     SPIClass(SPI_TypeDef *spiPort);
     SPIClass(uint8_t spiPort);
     void begin(void);
+    void beginFast(void);
 
     void beginTransaction(SPISettings settings)
     {
@@ -85,7 +86,7 @@ class SPIClass {
     uint8_t transfer(uint8_t _data) const;
     uint16_t transfer16(uint16_t data);
     void transfer(void *buf, size_t count);
-
+    void transferFast(void *buf, size_t count);
     void setBitOrder(uint8_t bitOrder);
     void setClockDivider(uint8_t clockDiv);
     void setDataMode(uint8_t dataMode);
