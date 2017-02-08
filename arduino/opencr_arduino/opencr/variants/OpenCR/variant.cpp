@@ -23,6 +23,11 @@
 
 
 
+static uint8_t user_led_tbl[] = { BDPIN_LED_USER_1,
+                                  BDPIN_LED_USER_2,
+                                  BDPIN_LED_USER_3,
+                                  BDPIN_LED_USER_4 };
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -119,6 +124,11 @@ extern const Pin2PortMapArray g_Pin2PortMapArray[]=
     {GPIOF, GPIO_PIN_7,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 78
     {GPIOF, GPIO_PIN_7,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 79
 
+    {GPIOD, GPIO_PIN_6,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 80 BDPIN_UART1_RX
+    {GPIOD, GPIO_PIN_5,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 81 BDPIN_UART1_TX
+    {GPIOE, GPIO_PIN_0,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 82 BDPIN_UART2_RX
+    {GPIOE, GPIO_PIN_1,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 83 BDPIN_UART2_TX
+
 
 
     {NULL , 0          ,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI }
@@ -175,4 +185,88 @@ void serialEventRun(void)
   if (Serial2.available()) serialEvent2();
   if (Serial3.available()) serialEvent3();
   if (Serial4.available()) serialEvent4();
+}
+
+
+void var_init(void)
+{
+  pinMode(BDPIN_DIP_SW_1,  INPUT);
+  pinMode(BDPIN_DIP_SW_2,  INPUT);
+  pinMode(BDPIN_PUSH_SW_1, INPUT);
+  pinMode(BDPIN_PUSH_SW_2, INPUT);
+
+  pinMode(BDPIN_LED_USER_1, OUTPUT);
+  pinMode(BDPIN_LED_USER_2, OUTPUT);
+  pinMode(BDPIN_LED_USER_3, OUTPUT);
+  pinMode(BDPIN_LED_USER_4, OUTPUT);
+
+  digitalWrite(BDPIN_LED_USER_1, HIGH);
+  digitalWrite(BDPIN_LED_USER_2, HIGH);
+  digitalWrite(BDPIN_LED_USER_3, HIGH);
+  digitalWrite(BDPIN_LED_USER_4, HIGH);
+
+}
+
+
+float getPowerInVoltage(void)
+{
+  int adc_value;
+  float vol_value;
+
+  adc_value = analogRead(BDPIN_BAT_PWR_ADC);
+  vol_value = map(adc_value, 0, 1023, 0, 330*57/10);
+  vol_value = vol_value / 100.;
+
+  return vol_value;
+}
+
+
+uint8_t getDipSwitch(void)
+{
+  uint8_t dip_state;
+
+
+  dip_state  = digitalRead(BDPIN_DIP_SW_1)<<0;
+  dip_state |= digitalRead(BDPIN_DIP_SW_2)<<1;
+
+  return dip_state;
+}
+
+
+uint8_t getPushButton(void)
+{
+  int push_state;
+
+
+  push_state  = digitalRead(BDPIN_PUSH_SW_1)<<0;
+  push_state |= digitalRead(BDPIN_PUSH_SW_2)<<1;
+
+  return push_state;
+}
+
+
+void setLedOn(uint8_t led_num)
+{
+  if(led_num < 4)
+  {
+    digitalWrite(user_led_tbl[led_num], LOW);
+  }
+}
+
+
+void setLedOff(uint8_t led_num)
+{
+  if(led_num < 4)
+  {
+    digitalWrite(user_led_tbl[led_num], HIGH);
+  }
+}
+
+
+void setLedToggle(uint8_t led_num)
+{
+  if(led_num < 4)
+  {
+    digitalWrite(user_led_tbl[led_num], !digitalRead(user_led_tbl[led_num]));
+  }
 }

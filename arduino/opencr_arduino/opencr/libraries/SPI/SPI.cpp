@@ -140,7 +140,7 @@ void SPIClass::transfer(void *buf, size_t count) {
 
 void SPIClass::transferFast(void *buf, size_t count) {
   uint32_t t_time;
-  //HAL_SPI_TransmitReceive(_hspi, (uint8_t *)buf, (uint8_t *)buf, count, 0xffff);
+  
   drv_spi_start_dma_tx(_hspi, (uint8_t *)buf, count);
 
   t_time = millis();

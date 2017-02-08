@@ -104,6 +104,9 @@ extern UARTClass Serial3;   // Ext Serial for Dynamixel
 extern UARTClass Serial4;   // Ext Serial for Bluetooth
 
 
+#define SerialBT1   Serial2
+#define SerialBT2   Serial4
+
 
 #endif
 
@@ -111,9 +114,19 @@ extern UARTClass Serial4;   // Ext Serial for Bluetooth
 #define digitalPinToInterrupt(P)   ( g_Pin2PortMapArray[P].extiChannel )
 #define analogPinToChannel(p)      ( (p) < 6 ? (p)+A0 : (p) )
 
+void  var_init();
+float getPowerInVoltage(void);
+uint8_t getDipSwitch(void);
+uint8_t getPushButton(void);
+
+void setLedOn(uint8_t led_num);
+void setLedOff(uint8_t led_num);
+void setLedToggle(uint8_t led_num);
+
+
 #define WIRE_INTERFACES_COUNT       1
 #define SPI_INTERFACES_COUNT        2
 #define EXTI_COUNT                  9
-#define PINS_COUNT                  80
+#define PINS_COUNT                  85
 
 #endif

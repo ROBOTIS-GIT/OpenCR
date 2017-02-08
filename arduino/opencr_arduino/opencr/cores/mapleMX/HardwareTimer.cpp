@@ -49,6 +49,14 @@ void HardwareTimer::resume(void) {
   drv_timer_resume(tim_num);
 }
 
+void HardwareTimer::stop(void) {
+  drv_timer_pause(tim_num);
+}
+
+void HardwareTimer::start(void) {
+  drv_timer_resume(tim_num);
+}
+
 uint16_t HardwareTimer::setPeriod(uint32_t microseconds) {
 
   drv_timer_set_period(tim_num, microseconds);

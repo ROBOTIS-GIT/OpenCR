@@ -101,10 +101,14 @@ uint8_t drv_spi_is_dma_tx_done(SPI_HandleTypeDef* hspi)
 {
   if(hspi->Instance==SPI1)
   {
+    if(spi_dma[0].use != true) return true;
+
     return spi_dma[0].tx_done;
   }
   if(hspi->Instance==SPI2)
   {
+    if(spi_dma[1].use != true) return true;
+
     return spi_dma[1].tx_done;
   }
 
@@ -119,6 +123,8 @@ void drv_spi_start_dma_tx(SPI_HandleTypeDef* hspi, uint8_t *p_buf, uint32_t leng
   }
   if(hspi->Instance==SPI2)
   {
+    if(spi_dma[1].use != true) return;
+
     if(length > SPI_TX_DMA_MAX_LENGTH)
     {
       spi_dma[1].tx_done       = false;

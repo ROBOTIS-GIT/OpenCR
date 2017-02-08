@@ -97,9 +97,29 @@ uint16_t cIMU::update( uint32_t option )
 
 		computeIMU();
 
-		gyroData[0] = SEN.gyroData[0];
-		gyroData[1] = SEN.gyroData[1];
-		gyroData[2] = SEN.gyroData[2];
+		gyroData[0] = SEN.gyroADC[0];
+		gyroData[1] = SEN.gyroADC[1];
+		gyroData[2] = SEN.gyroADC[2];
+
+    gyroRaw[0]  = SEN.gyroRAW[0];
+    gyroRaw[1]  = SEN.gyroRAW[1];
+    gyroRaw[2]  = SEN.gyroRAW[2];
+
+    accData[0]  = SEN.accADC[0];
+    accData[1]  = SEN.accADC[1];
+    accData[2]  = SEN.accADC[2];
+
+    accRaw[0]   = SEN.accRAW[0];
+    accRaw[1]   = SEN.accRAW[1];
+    accRaw[2]   = SEN.accRAW[2];
+
+    magData[0]  = SEN.magADC[0];
+    magData[1]  = SEN.magADC[1];
+    magData[2]  = SEN.magADC[2];
+
+    magRaw[0]   = SEN.magRAW[0];
+    magRaw[1]   = SEN.magRAW[1];
+    magRaw[2]   = SEN.magRAW[2];
 	}
 
 	return ret_time;

@@ -1,6 +1,6 @@
 /*
-  Range   : +/- 8 g
-  Scale   : 512 = 1 g
+  Range   : +/- 2 g
+  Scale   : 16384 = 1 g
  */
 
 #include <IMU.h>

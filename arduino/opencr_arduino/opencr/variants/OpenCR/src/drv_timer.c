@@ -215,7 +215,6 @@ void drv_timer_pause(uint8_t channel)
   HAL_TIM_Base_DeInit(&hDrvTim[channel].hTIM);
 }
 
-
 void drv_timer_set_period(uint8_t channel, uint32_t period_data)
 {
   if( channel >= TIMER_CH_MAX ) return;

@@ -76,7 +76,6 @@ void loop()
       while( IMU.SEN.acc_cali_get_done() == false )
       {
         IMU.update();
-        //Serial.println( IMU.SEN.calibratingA );
       }
 
       Serial.print("ACC Cali End ");
