@@ -26,6 +26,7 @@
 #define TIMER_CH1     0
 #define TIMER_CH2     1
 #define TIMER_CH3     2
+#define TIMER_CH4     3
 #define TIMER_TONE    3
 
 
@@ -47,4 +48,3 @@ void drv_timer_resume(uint8_t channel);
 
 
 #endif
-

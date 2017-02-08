@@ -5,7 +5,7 @@
  * Copyright (c) 2016 by Vassilis Serasidis <info@serasidis.gr>
  * Home: http://www.serasidis.gr
  * email: avrsite@yahoo.gr
- * 
+ *
  * Arduino_STM32 forum: http://www.stm32duino.com
  *
  * This file is free software; you can redistribute it and/or modify
@@ -60,7 +60,7 @@ SPIClass::SPIClass(SPI_TypeDef *spiPort) {
 }
 
 /**
- * This constructor is written for backward compatibility with Arduino_STM32 
+ * This constructor is written for backward compatibility with Arduino_STM32
  * @Usage example: SPIClass my_spi(2) for using the SPI2 interface
  */
 SPIClass::SPIClass(uint8_t spiPort){
@@ -69,7 +69,7 @@ SPIClass::SPIClass(uint8_t spiPort){
       _spiPort = SPI1;
       _hspi = &hspi1;
     break;
-    
+
     case 2:
       _spiPort = SPI2;
       _hspi = &hspi2;
@@ -82,9 +82,13 @@ void SPIClass::begin(void) {
   init();
 }
 
+void SPIClass::beginFast(void) {
+  drv_spi_enable_dma(_hspi);
+  init();
+}
 
 void SPIClass::init(void){
-   
+
   _hspi->Instance               = _spiPort;
   _hspi->Init.Mode              = SPI_MODE_MASTER;
   _hspi->Init.Direction         = SPI_DIRECTION_2LINES;
@@ -98,15 +102,6 @@ void SPIClass::init(void){
   _hspi->Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE;
   _hspi->Init.CRCPolynomial     = 10;
   HAL_SPI_Init(_hspi);
-  
-  
-  if(_spiPort == SPI1){
-    __HAL_RCC_SPI1_CLK_ENABLE();
-  }
-  
-  if(_spiPort == SPI2){
-    __HAL_RCC_SPI2_CLK_ENABLE();
-  }
 }
 
 uint8_t SPIClass::transfer(uint8_t data) const{
@@ -122,7 +117,7 @@ uint16_t SPIClass::transfer16(uint16_t data) {
   tBuf[1] = (uint8_t)data;
   tBuf[0] = (uint8_t)(data>>8);
   HAL_SPI_TransmitReceive(_hspi, (uint8_t *)&tBuf, (uint8_t *)&rBuf, 2, 0xffff);
-  
+
   ret = rBuf[0];
   ret <<= 8;
   ret += rBuf[1];
@@ -130,10 +125,38 @@ uint16_t SPIClass::transfer16(uint16_t data) {
   return ret;
 }
 
-void SPIClass::transfer(uint8_t buf, size_t count) {
-  HAL_SPI_Transmit(_hspi, &buf, count, 0xffff);
+void SPIClass::transfer(void *buf, size_t count) {
+  //HAL_SPI_Transmit(_hspi, (uint8_t *)buf, count, 0xffff);
+  //HAL_SPI_TransmitReceive(_hspi, (uint8_t *)buf, (uint8_t *)buf, count, 0xffff);
+  int i;
+  uint8_t *pbuf = (uint8_t *)buf;
+
+  for( i=0; i<count; i++ )
+  {
+    pbuf[i] = transfer(0xFF);
+  }
 }
 
+
+void SPIClass::transferFast(void *buf, size_t count) {
+  uint32_t t_time;
+  
+  drv_spi_start_dma_tx(_hspi, (uint8_t *)buf, count);
+
+  t_time = millis();
+
+  while(1)
+  {
+    if(drv_spi_is_dma_tx_done(_hspi))
+    {
+      break;
+    }
+    if((millis()-t_time) > 1000)
+    {
+      break;
+    }
+  }
+}
 
 void SPIClass::setBitOrder(uint8_t bitOrder) {
     if (bitOrder == 1)
@@ -142,7 +165,7 @@ void SPIClass::setBitOrder(uint8_t bitOrder) {
       _hspi->Init.FirstBit = SPI_FIRSTBIT_LSB;
     HAL_SPI_Init(_hspi);
 }
-  
+
 void SPIClass::setClockDivider(uint8_t clockDiv) {
   switch(clockDiv){
     case SPI_CLOCK_DIV2:
@@ -206,4 +229,3 @@ void SPIClass::setDataMode(uint8_t dataMode){
       break;
   }
 }
-

@@ -20,17 +20,7 @@ void loop() {
   vol_value = map(adc_value, 0, 1023, 0, 330*57/10);
   vol_value = vol_value/100;
   Serial.print(vol_value);
-  Serial.print("V\t");
-
-  adc_value = analogRead(BDPIN_CHG_PWR_ADC);
-
-  Serial.print("CHG_PWR = ");
-  Serial.print(adc_value);
-  Serial.print("\t");
-  vol_value = map(adc_value, 0, 1023, 0, 330*57/10);
-  vol_value = vol_value/100;
-  Serial.print(vol_value);
-  Serial.println("V");
+  Serial.println("V\t");
 
   delay(100);
 }

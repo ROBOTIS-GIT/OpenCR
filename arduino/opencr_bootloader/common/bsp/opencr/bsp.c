@@ -16,10 +16,6 @@ void bsp_init()
   // HSE(Hz)       = 25000000
   SystemClock_Config();
 
-  //SCB_InvalidateDCache();
-  //SCB_InvalidateICache();
-  //SCB_DisableDCache();
-  //SCB_DisableICache();
 
   SCB_EnableDCache();
   SCB_EnableICache();
@@ -28,6 +24,7 @@ void bsp_init()
   led_init();
   button_init();
 
+  HAL_Delay(200);
 
 
   /* Init Device Library */

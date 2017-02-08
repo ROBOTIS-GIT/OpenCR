@@ -81,4 +81,3 @@ int32_t vcp_printf( const char *fmt, ...)
 
   return ret;
 }
-

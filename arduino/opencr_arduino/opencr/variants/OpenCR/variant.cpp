@@ -23,6 +23,11 @@
 
 
 
+static uint8_t user_led_tbl[] = { BDPIN_LED_USER_1,
+                                  BDPIN_LED_USER_2,
+                                  BDPIN_LED_USER_3,
+                                  BDPIN_LED_USER_4 };
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,24 +62,24 @@ extern const Pin2PortMapArray g_Pin2PortMapArray[]=
     {GPIOF, GPIO_PIN_7,   &hADC3,   ADC_CHANNEL_5 , NULL   ,   NO_PWM       , NO_EXTI },  // 20 A4
     {GPIOF, GPIO_PIN_6,   &hADC3,   ADC_CHANNEL_4 , NULL   ,   NO_PWM       , NO_EXTI },  // 21 A5
 
-    {GPIOG, GPIO_PIN_10,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 22 BDPIN_LED_USER_1
-    {GPIOE, GPIO_PIN_4,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 23 BDPIN_LED_USER_2
-    {GPIOE, GPIO_PIN_5,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 24 BDPIN_LED_USER_3
-    {GPIOG, GPIO_PIN_12,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 25 BDPIN_LED_USER_4
+    {GPIOG, GPIO_PIN_12,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 22 BDPIN_LED_USER_1
+    {GPIOE, GPIO_PIN_5,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 23 BDPIN_LED_USER_2
+    {GPIOE, GPIO_PIN_4,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 24 BDPIN_LED_USER_3
+    {GPIOG, GPIO_PIN_10,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 25 BDPIN_LED_USER_4
     {GPIOG, GPIO_PIN_11,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 26 BDPIN_DIP_SW_1
     {GPIOE, GPIO_PIN_6,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 27 BDPIN_DIP_SW_2
     {GPIOA, GPIO_PIN_4,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 28 BDPIN_SPI_CS_IMU
     {GPIOC, GPIO_PIN_0,   &hADC3,   ADC_CHANNEL_10, NULL   ,   NO_PWM       , NO_EXTI },  // 29 BDPIN_BAT_PWR_ADC
-    {GPIOC, GPIO_PIN_3,   &hADC3,   ADC_CHANNEL_13, NULL   ,   NO_PWM       , NO_EXTI },  // 30 BDPIN_CHG_PWR_ADC
+    {GPIOC, GPIO_PIN_3,   &hADC3,   ADC_CHANNEL_13, NULL   ,   NO_PWM       , NO_EXTI },  // 30
     {GPIOF, GPIO_PIN_14,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 31 BDPIN_BUZZER
     {GPIOF, GPIO_PIN_15,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 32 BDPIN_DXL_PWR_EN
-    {GPIOG, GPIO_PIN_14,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 33 BDPIN_LED_BATT_CHARGE
-    {GPIOC, GPIO_PIN_12,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 34 BDPIN_PUSH_SW_1
-    {GPIOG, GPIO_PIN_3,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 35 BDPIN_PUSH_SW_2
+    {GPIOG, GPIO_PIN_14,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 33
+    {GPIOG, GPIO_PIN_3,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 34 BDPIN_PUSH_SW_1
+    {GPIOC, GPIO_PIN_12,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 35 BDPIN_PUSH_SW_2
     {GPIOG, GPIO_PIN_9,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 36 BDPIN_LED_STATUS
-    {GPIOF, GPIO_PIN_7,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 37
-    {GPIOF, GPIO_PIN_7,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 38
-    {GPIOF, GPIO_PIN_7,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 39
+    {GPIOA, GPIO_PIN_5,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 37 BDPIN_SPI_CLK_IMU
+    {GPIOA, GPIO_PIN_6,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 38 BDPIN_SPI_SDO_IMU
+    {GPIOB, GPIO_PIN_5,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 39 BDPIN_SPI_SDI_IMU
 
     {GPIOB, GPIO_PIN_0,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 40 OLLO_P1_SIG1
     {GPIOC, GPIO_PIN_8,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 41 OLLO_P1_SIG2
@@ -102,9 +107,28 @@ extern const Pin2PortMapArray g_Pin2PortMapArray[]=
     {GPIOF, GPIO_PIN_0,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 62 BDPIN_GPIO_13
     {GPIOF, GPIO_PIN_1,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 63 BDPIN_GPIO_14
     {GPIOF, GPIO_PIN_2,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 64 BDPIN_GPIO_15
-    {GPIOF, GPIO_PIN_3,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 65 BDPIN_GPIO_16
+    {GPIOD, GPIO_PIN_8,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 65 BDPIN_GPIO_16
     {GPIOF, GPIO_PIN_4,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 66 BDPIN_GPIO_17
-    {GPIOF, GPIO_PIN_5,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 67 BDPIN_GPIO_18
+    {GPIOD, GPIO_PIN_9,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 67 BDPIN_GPIO_18
+    {GPIOF, GPIO_PIN_7,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 68
+    {GPIOF, GPIO_PIN_7,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 69
+
+    {GPIOF, GPIO_PIN_12,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 70 OLLO_P3_SIG1
+    {GPIOF, GPIO_PIN_11,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 71 OLLO_P3_SIG2
+    {GPIOF, GPIO_PIN_5,   &hADC3,   ADC_CHANNEL_15, NULL   ,   NO_PWM       , 7       },  // 72 OLLO_P3_ADC           EXTI_7
+    {GPIOE, GPIO_PIN_9,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 73 OLLO_P4_SIG1
+    {GPIOE, GPIO_PIN_8,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 74 OLLO_P4_SIG2
+    {GPIOF, GPIO_PIN_3,   &hADC3,   ADC_CHANNEL_9 , NULL   ,   NO_PWM       , 8       },  // 75 OLLO_P4_ADC           EXTI_8
+    {GPIOF, GPIO_PIN_7,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 76
+    {GPIOF, GPIO_PIN_7,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 77
+    {GPIOF, GPIO_PIN_7,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 78
+    {GPIOF, GPIO_PIN_7,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 79
+
+    {GPIOD, GPIO_PIN_6,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 80 BDPIN_UART1_RX
+    {GPIOD, GPIO_PIN_5,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 81 BDPIN_UART1_TX
+    {GPIOE, GPIO_PIN_0,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 82 BDPIN_UART2_RX
+    {GPIOE, GPIO_PIN_1,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 83 BDPIN_UART2_TX
+
 
 
     {NULL , 0          ,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI }
@@ -133,20 +157,24 @@ void serialEvent2() { }
 void serialEvent3() __attribute__((weak));
 void serialEvent3() { }
 
-UARTClass Serial1(&huart1, USART6_IRQn, 0, USART6);
-UARTClass Serial2(&huart2, USART2_IRQn, 1, USART2);
-UARTClass Serial3(&huart3, USART3_IRQn, 2, USART3);
+void serialEvent4() __attribute__((weak));
+void serialEvent4() { }
 
-void Tx1_Handler(void){ Serial1.TxHandler(); }
+USBSerial Serial;
+UARTClass Serial1(DRV_UART_NUM_1, DRV_UART_IRQ_MODE);
+UARTClass Serial2(DRV_UART_NUM_2, DRV_UART_IRQ_MODE);
+UARTClass Serial3(DRV_UART_NUM_3, DRV_UART_DMA_MODE);
+UARTClass Serial4(DRV_UART_NUM_4, DRV_UART_IRQ_MODE);
+
+
+//void Tx1_Handler(void){ Serial1.TxHandler(); }
 void Rx1_Handler(void){ Serial1.RxHandler(); }
-void Tx2_Handler(void){ Serial2.TxHandler(); }
+//void Tx2_Handler(void){ Serial2.TxHandler(); }
 void Rx2_Handler(void){ Serial2.RxHandler(); }
-void Tx3_Handler(void){ Serial3.TxHandler(); }
+//void Tx3_Handler(void){ Serial3.TxHandler(); }
 void Rx3_Handler(void){ Serial3.RxHandler(); }
-
-void Err1_Handler(void){ Serial1.ErrHandler(); }
-void Err2_Handler(void){ Serial2.ErrHandler(); }
-void Err3_Handler(void){ Serial3.ErrHandler(); }
+//void Tx4_Handler(void){ Serial4.TxHandler(); }
+void Rx4_Handler(void){ Serial4.RxHandler(); }
 
 
 
@@ -156,7 +184,89 @@ void serialEventRun(void)
   if (Serial1.available()) serialEvent1();
   if (Serial2.available()) serialEvent2();
   if (Serial3.available()) serialEvent3();
+  if (Serial4.available()) serialEvent4();
 }
 
-USBSerial Serial;
 
+void var_init(void)
+{
+  pinMode(BDPIN_DIP_SW_1,  INPUT);
+  pinMode(BDPIN_DIP_SW_2,  INPUT);
+  pinMode(BDPIN_PUSH_SW_1, INPUT);
+  pinMode(BDPIN_PUSH_SW_2, INPUT);
+
+  pinMode(BDPIN_LED_USER_1, OUTPUT);
+  pinMode(BDPIN_LED_USER_2, OUTPUT);
+  pinMode(BDPIN_LED_USER_3, OUTPUT);
+  pinMode(BDPIN_LED_USER_4, OUTPUT);
+
+  digitalWrite(BDPIN_LED_USER_1, HIGH);
+  digitalWrite(BDPIN_LED_USER_2, HIGH);
+  digitalWrite(BDPIN_LED_USER_3, HIGH);
+  digitalWrite(BDPIN_LED_USER_4, HIGH);
+
+}
+
+
+float getPowerInVoltage(void)
+{
+  int adc_value;
+  float vol_value;
+
+  adc_value = analogRead(BDPIN_BAT_PWR_ADC);
+  vol_value = map(adc_value, 0, 1023, 0, 330*57/10);
+  vol_value = vol_value / 100.;
+
+  return vol_value;
+}
+
+
+uint8_t getDipSwitch(void)
+{
+  uint8_t dip_state;
+
+
+  dip_state  = digitalRead(BDPIN_DIP_SW_1)<<0;
+  dip_state |= digitalRead(BDPIN_DIP_SW_2)<<1;
+
+  return dip_state;
+}
+
+
+uint8_t getPushButton(void)
+{
+  int push_state;
+
+
+  push_state  = digitalRead(BDPIN_PUSH_SW_1)<<0;
+  push_state |= digitalRead(BDPIN_PUSH_SW_2)<<1;
+
+  return push_state;
+}
+
+
+void setLedOn(uint8_t led_num)
+{
+  if(led_num < 4)
+  {
+    digitalWrite(user_led_tbl[led_num], LOW);
+  }
+}
+
+
+void setLedOff(uint8_t led_num)
+{
+  if(led_num < 4)
+  {
+    digitalWrite(user_led_tbl[led_num], HIGH);
+  }
+}
+
+
+void setLedToggle(uint8_t led_num)
+{
+  if(led_num < 4)
+  {
+    digitalWrite(user_led_tbl[led_num], !digitalRead(user_led_tbl[led_num]));
+  }
+}

@@ -30,7 +30,7 @@
 
 
 const uint8_t  *board_name   = "OpenCR R1.0";
-uint32_t boot_version        = 0x16110600;
+uint32_t boot_version        = 0x17020800;
 uint32_t boot_revision       = 0x00000000;
 
 

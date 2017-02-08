@@ -41,11 +41,6 @@ extern "C"{
 #endif // __cplusplus
 
 
-extern UART_HandleTypeDef huart1;
-extern UART_HandleTypeDef huart2;
-extern UART_HandleTypeDef huart3;
-
- 
 
 /*
  * Analog pins
@@ -83,10 +78,13 @@ void Rx2_Handler(void);
 void Tx2_Handler(void);
 void Rx3_Handler(void);
 void Tx3_Handler(void);
+void Rx4_Handler(void);
+void Tx4_Handler(void);
 
 void Err1_Handler(void);
 void Err2_Handler(void);
 void Err3_Handler(void);
+void Err4_Handler(void);
 
 #ifdef __cplusplus
 }
@@ -99,11 +97,15 @@ void Err3_Handler(void);
 
 #ifdef __cplusplus
 
-extern USBSerial Serial;
-extern UARTClass Serial1;
-extern UARTClass Serial2;
-extern UARTClass Serial3;
+extern USBSerial Serial;    // USB
+extern UARTClass Serial1;   // Arduino Serial
+extern UARTClass Serial2;   // Ext Serial for Bluetooth
+extern UARTClass Serial3;   // Ext Serial for Dynamixel
+extern UARTClass Serial4;   // Ext Serial for Bluetooth
 
+
+#define SerialBT1   Serial2
+#define SerialBT2   Serial4
 
 
 #endif
@@ -112,9 +114,19 @@ extern UARTClass Serial3;
 #define digitalPinToInterrupt(P)   ( g_Pin2PortMapArray[P].extiChannel )
 #define analogPinToChannel(p)      ( (p) < 6 ? (p)+A0 : (p) )
 
+void  var_init();
+float getPowerInVoltage(void);
+uint8_t getDipSwitch(void);
+uint8_t getPushButton(void);
+
+void setLedOn(uint8_t led_num);
+void setLedOff(uint8_t led_num);
+void setLedToggle(uint8_t led_num);
+
+
 #define WIRE_INTERFACES_COUNT       1
 #define SPI_INTERFACES_COUNT        2
-#define EXTI_COUNT                  7
-#define PINS_COUNT                  68
+#define EXTI_COUNT                  9
+#define PINS_COUNT                  85
 
 #endif

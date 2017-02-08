@@ -42,6 +42,8 @@ public:
 
     void pause(void);
     void resume(void);
+    void stop(void);
+    void start(void);    
     uint16_t setPeriod(uint32_t microseconds);
     void attachInterrupt(voidFuncPtr handler);
     void detachInterrupt(void);

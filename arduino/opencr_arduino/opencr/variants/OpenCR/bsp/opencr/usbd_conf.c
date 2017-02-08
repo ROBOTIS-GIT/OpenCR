@@ -238,13 +238,11 @@ void HAL_PCD_DataInStageCallback(PCD_HandleTypeDef *hpcd, uint8_t epnum)
   * @param  hpcd: PCD handle
   * @retval None
   */
-/*
-This is now handled by the USB CDC interface.
 void HAL_PCD_SOFCallback(PCD_HandleTypeDef *hpcd)
 {
   USBD_LL_SOF(hpcd->pData);
 }
-*/
+
 
 /**
   * @brief  Reset callback.
@@ -360,7 +358,7 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
   hpcd.Init.dma_enable = 0;
   hpcd.Init.low_power_enable = 0;
   hpcd.Init.phy_itface = PCD_PHY_EMBEDDED;
-  hpcd.Init.Sof_enable = 1;
+  hpcd.Init.Sof_enable = 0;
   hpcd.Init.speed = PCD_SPEED_FULL;
   hpcd.Init.vbus_sensing_enable = 0;
   hpcd.Init.lpm_enable = 0;

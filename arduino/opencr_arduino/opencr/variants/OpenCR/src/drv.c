@@ -32,6 +32,7 @@ int drv_init()
   drv_exti_init();
   drv_dxl_init();
   drv_eeprom_init();
+  drv_rtc_init();
 
 
   return 0;

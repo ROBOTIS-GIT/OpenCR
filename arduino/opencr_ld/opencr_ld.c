@@ -337,7 +337,7 @@ int opencr_ld_jump_to_boot( char *portname )
   write_bytes("OpenCR 5555AAAA", 15);
   ser_close( stm32_ser_id );
 
-  delay_ms(1000);
+  delay_ms(1500);
 
   return 0;
 }
