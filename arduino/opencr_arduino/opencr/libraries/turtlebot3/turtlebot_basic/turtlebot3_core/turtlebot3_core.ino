@@ -159,6 +159,8 @@ void setup()
   joint_states.name     = joint_states_name;
 
   prev_update_time = millis();
+
+  SerialBT2.begin(57600);
 }
 
 /*******************************************************************************
