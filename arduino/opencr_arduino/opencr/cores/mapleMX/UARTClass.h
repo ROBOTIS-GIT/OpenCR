@@ -59,6 +59,9 @@ class UARTClass : public HardwareSerial
     void TxHandler(void); /* Vassilis Serasidis */
     uint32_t getBaudRate(void);
 
+    uint32_t getRxCnt(void);
+    uint32_t getTxCnt(void);
+
     operator bool() { return true; }; // UART always active
 
 
@@ -78,6 +81,9 @@ class UARTClass : public HardwareSerial
     uint8_t r_byte;
     ring_buffer tx_buffer = { { 0 }, 0, 0};
     ring_buffer rx_buffer = { { 0 }, 0, 0};
+
+    uint32_t rx_cnt;
+    uint32_t tx_cnt;
 };
 
 #endif // _UART_CLASS_

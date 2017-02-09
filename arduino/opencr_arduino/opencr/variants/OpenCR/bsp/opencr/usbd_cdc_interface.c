@@ -71,6 +71,8 @@ static uint32_t rxd_length    = 0;
 static uint32_t rxd_BufPtrIn  = 0;
 static uint32_t rxd_BufPtrOut = 0;
 
+uint32_t usb_cdc_debug_cnt[16] = {0,};
+
 
 /* USB handler declaration */
 extern USBD_HandleTypeDef  USBD_Device;
@@ -363,6 +365,7 @@ void CDC_Itf_Write( uint8_t *p_buf, uint32_t length )
               {
                 is_opened = FALSE;
               }
+              usb_cdc_debug_cnt[1]++;
               return;
           }
           __WFI(); // enter sleep mode, waiting for interrupt

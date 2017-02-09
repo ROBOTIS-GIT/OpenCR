@@ -32,6 +32,8 @@ UARTClass::UARTClass(uint8_t uart_num, uint8_t uart_mode)
   _uart_num  = uart_num;
   _uart_mode = uart_mode;
   _uart_baudrate = 0;
+  rx_cnt = 0;
+  tx_cnt = 0;
 }
 
 void UARTClass::begin(const uint32_t dwBaudRate)
@@ -96,10 +98,12 @@ int UARTClass::read( void )
 
     uint8_t uc = rx_buffer.buffer[rx_buffer.iTail];
     rx_buffer.iTail = (unsigned int)(rx_buffer.iTail + 1) % SERIAL_BUFFER_SIZE;
+    rx_cnt++;
     return uc;
   }
   else
   {
+    rx_cnt++;
     return drv_uart_read(_uart_num);
   }
 }
@@ -112,12 +116,23 @@ void UARTClass::flush( void )
 
 size_t UARTClass::write( const uint8_t uc_data )
 {
+  tx_cnt++;
   return drv_uart_write(_uart_num, uc_data);
 }
 
 uint32_t UARTClass::getBaudRate( void )
 {
   return _uart_baudrate;
+}
+
+uint32_t UARTClass::getRxCnt(void)
+{
+  return rx_cnt;
+}
+
+uint32_t UARTClass::getTxCnt(void)
+{
+  return tx_cnt;
 }
 
 
