@@ -59,15 +59,9 @@ geometry_msgs::TransformStamped odom_tf;
 tf::TransformBroadcaster tfbroadcaster;
 
 /*******************************************************************************
-* HardwareTimer for imu, encoder, cmd_vel of Turtlebot3
-*******************************************************************************/
-HardwareTimer timer_sensors_state(TIMER_CH1);
-HardwareTimer timer_imu(TIMER_CH2);
-
-/*******************************************************************************
 * SoftwareTimer for * of Turtlebot3
 *******************************************************************************/
-static uint32_t tTime[3];
+static uint32_t tTime[5];
 
 /*******************************************************************************
 * Declaration for motor
@@ -123,20 +117,8 @@ void setup()
   // Setting for Dynamixel motors
   motor_driver.init();
 
-  timer_sensors_state.pause();
-  timer_sensors_state.setPeriod(1000000/SENSOR_STATE_PUBLISH_PERIOD); // 0.1 sec
-  timer_sensors_state.attachInterrupt(publish_sensor_state_msg);
-  timer_sensors_state.refresh();
-  timer_sensors_state.resume();
-
   // Setting for IMU
   imu.begin();
-
-  timer_imu.pause();
-  timer_imu.setPeriod(1000000/IMU_PUBLISH_PERIOD); // 0.1 sec
-  timer_imu.attachInterrupt(publish_imu_msg);
-  timer_imu.refresh();
-  timer_imu.resume();
 
   // Setting for remocon(ROBOTIS RC100) and cmd_vel
   remote_controller.begin(1);  //57600bps for RC100
@@ -188,7 +170,22 @@ void loop()
     tTime[2] = millis();
   }
 
-  // Call all the callbacks waiting to be called at that point in time.
+  if ((millis()-tTime[3]) >= (1000 / SENSOR_STATE_PUBLISH_PERIOD))
+  {
+    publish_sensor_state_msg();
+    tTime[3] = millis();
+  }
+
+  if ((millis()-tTime[4]) >= (1000 / IMU_PUBLISH_PERIOD))
+  {
+    publish_imu_msg();
+    tTime[4] = millis();
+  }
+
+  // Update the IMU unit
+  imu.update();
+
+  // Call all the callbacks waiting to be called at that point in time
   nh.spinOnce();
 }
 
@@ -206,17 +203,6 @@ void cmd_vel_callback(const geometry_msgs::Twist& cmd_vel_msg)
 *******************************************************************************/
 void publish_imu_msg(void)
 {
-  /*
-    Range   : Roll  : +/- 180 deg/sec
-              Pitch : +/- 180 deg/sec
-              Yaw   : +/- 180 deg/sec
-    Scale   : Roll  : 10 = 1 deg/sec
-              Pitch : 10 = 1 deg/sec
-              Yaw   :  1 = 1 deg/sec
-   */
-
-  imu.update();
-
   imu_msg.header.stamp    = nh.now();
   imu_msg.header.frame_id = "imu_link";
 
@@ -270,6 +256,7 @@ void publish_imu_msg(void)
   tfs_msg.transform.rotation.x = imu.quat[1];
   tfs_msg.transform.rotation.y = imu.quat[2];
   tfs_msg.transform.rotation.z = imu.quat[3];
+  
   tfbroadcaster.sendTransform(tfs_msg);
 }
 
@@ -330,7 +317,7 @@ void publish_drive_information(void)
   ros::Time stamp_now = nh.now();
 
   // odom
-  updateOdometry((double)(step_time * 1000));
+  updateOdometry((double)(step_time * 0.001));
   odom.header.stamp = stamp_now;
   odom_pub.publish(&odom);
 
