@@ -39,11 +39,11 @@
 
 #include "turtlebot3_motor_driver.h"
 
-#define CONTROL_MOTOR_SPEED_PERIOD       10 //hz
-#define IMU_PUBLISH_PERIOD               10 //hz
-#define SENSOR_STATE_PUBLISH_PERIOD      10 //hz
-#define CMD_VEL_PUBLISH_PERIOD           10 //hz
-#define DRIVE_INFORMATION_PUBLISH_PERIOD 10 //hz
+#define CONTROL_MOTOR_SPEED_PERIOD       30 //hz
+#define IMU_PUBLISH_PERIOD               200 //hz
+#define SENSOR_STATE_PUBLISH_PERIOD      30 //hz
+#define CMD_VEL_PUBLISH_PERIOD           30 //hz
+#define DRIVE_INFORMATION_PUBLISH_PERIOD 30 //hz
 
 #define WHEEL_RADIUS                    0.033 // meter
 #define WHEEL_SEPARATION                0.16  // meter (0.16 / 0.287)

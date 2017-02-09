@@ -57,9 +57,18 @@ class USBSerial : public Stream {
     operator bool();
 
     uint32_t getBaudRate(void);
+    uint32_t getRxCnt(void);
+    uint32_t getTxCnt(void);
+    uint32_t getRxErrCnt(void);
+    uint32_t getTxErrCnt(void);
 
   private:
     uint32_t baudrate;
+    uint32_t rx_cnt;
+    uint32_t tx_cnt;
+    uint32_t rx_err_cnt;
+    uint32_t tx_err_cnt;
+
 };
 
 #endif

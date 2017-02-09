@@ -35,11 +35,15 @@
 
 
 extern uint32_t usb_cdc_bitrate;
-
+extern uint32_t usb_cdc_debug_cnt[];
 
 
 USBSerial::USBSerial(){
   baudrate = 0;
+  rx_cnt = 0;
+  tx_cnt = 0;
+  rx_err_cnt = 0;
+  tx_err_cnt = 0;
 }
 
 void USBSerial::begin(uint32_t baud_count){
@@ -66,6 +70,8 @@ int USBSerial::read(void)
   if ( vcp_is_available() == 0 )
     return -1;
 
+  rx_cnt++;
+
   return vcp_getch();
 }
 
@@ -75,6 +81,7 @@ void USBSerial::flush(void){
 
 size_t USBSerial::write(const uint8_t *buffer, size_t size)
 {
+  tx_cnt += size;
   return (size_t)vcp_write((uint8_t *)buffer, (uint32_t)size);
 }
 
@@ -87,6 +94,27 @@ uint32_t USBSerial::getBaudRate(void)
 {
   return usb_cdc_bitrate;
 }
+
+uint32_t USBSerial::getRxCnt(void)
+{
+  return rx_cnt;
+}
+
+uint32_t USBSerial::getTxCnt(void)
+{
+  return tx_cnt;
+}
+
+uint32_t USBSerial::getRxErrCnt(void)
+{
+  return usb_cdc_debug_cnt[0];
+}
+
+uint32_t USBSerial::getTxErrCnt(void)
+{
+  return usb_cdc_debug_cnt[1];
+}
+
 
 // This operator is a convenient way for a sketch to check whether the
 // port has actually been configured and opened by the host (as opposed
