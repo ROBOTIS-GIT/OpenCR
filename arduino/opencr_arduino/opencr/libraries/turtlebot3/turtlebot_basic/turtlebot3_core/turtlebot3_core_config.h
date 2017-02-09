@@ -57,10 +57,11 @@
                                                      //   = 0.033 * 0.229 * Goal RPM * 0.10472
                                                      // Goal RPM = V * 1263.632956882
 
-#define VELOCITY                        10.0
-#define VELOCITY_STEP                   0.02
-#define VELOCITY_LINEAR_X               0.05
-#define VELOCITY_ANGULAR_Z              0.05
+#define MAX_LINEAR_VELOCITY             0.25   // m/s
+#define MAX_ANGULAR_VELOCITY            3.0   // rad/s
+#define VELOCITY_STEP                   0.01  // m/s
+#define VELOCITY_LINEAR_X               0.01  // m/s
+#define VELOCITY_ANGULAR_Z              0.1   // rad/s
 #define SCALE_VELOCITY_LINEAR_X         1
 #define SCALE_VELOCITY_ANGULAR_Z        1
 

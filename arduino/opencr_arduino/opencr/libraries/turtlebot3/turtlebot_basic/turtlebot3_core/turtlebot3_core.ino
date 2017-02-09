@@ -256,7 +256,7 @@ void publish_imu_msg(void)
   tfs_msg.transform.rotation.x = imu.quat[1];
   tfs_msg.transform.rotation.y = imu.quat[2];
   tfs_msg.transform.rotation.z = imu.quat[3];
-  
+
   tfbroadcaster.sendTransform(tfs_msg);
 }
 
@@ -477,6 +477,16 @@ void receive_remocon_data(void)
     {
       cmd_vel_rc100_msg.linear.x  = 0.0;
       cmd_vel_rc100_msg.angular.z = 0.0;
+    }
+
+    if(cmd_vel_rc100_msg.linear.x > MAX_LINEAR_VELOCITY)
+    {
+      cmd_vel_rc100_msg.linear.x = MAX_LINEAR_VELOCITY;
+    }
+
+    if(cmd_vel_rc100_msg.angular.z > MAX_ANGULAR_VELOCITY)
+    {
+      cmd_vel_rc100_msg.angular.z = MAX_ANGULAR_VELOCITY;
     }
 
     goal_linear_velocity  = cmd_vel_rc100_msg.linear.x;
