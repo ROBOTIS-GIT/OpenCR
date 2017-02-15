@@ -19,7 +19,7 @@
 #define DXL_NODE_OP3_ID                   200         // 0xC8
 #define DXL_NODE_OP3_MODLE_NUMBER         0x7400
 #define DXL_NODE_OP3_FW_VER               0x02
-#define DXL_NODE_OP3_BAUD                 3
+#define DXL_NODE_OP3_BAUD                 4
 
 
 
