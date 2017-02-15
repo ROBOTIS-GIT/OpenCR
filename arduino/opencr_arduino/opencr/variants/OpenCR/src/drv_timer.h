@@ -21,13 +21,14 @@
 #include "util.h"
 
 
-#define TIMER_CH_MAX  4
+#define TIMER_CH_MAX  5
 
 #define TIMER_CH1     0
 #define TIMER_CH2     1
 #define TIMER_CH3     2
 #define TIMER_CH4     3
 #define TIMER_TONE    3
+#define TIMER_USB     4
 
 
 

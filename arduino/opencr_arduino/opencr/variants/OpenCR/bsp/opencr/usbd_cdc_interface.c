@@ -27,12 +27,14 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_cdc_interface.h"
+#include "drv_timer.h"
+
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 #define APP_RX_BUF_SIZE   (1024*16)
-#define APP_RX_DATA_SIZE  (1024)
-#define APP_TX_DATA_SIZE  (1024)
+#define APP_RX_DATA_SIZE  (1024*2)
+#define APP_TX_DATA_SIZE  (1024*2)
 
 
 const char *JUMP_BOOT_STR = "OpenCR 5555AAAA";
@@ -81,8 +83,9 @@ extern USBD_HandleTypeDef  USBD_Device;
 static int8_t CDC_Itf_Init(void);
 static int8_t CDC_Itf_DeInit(void);
 static int8_t CDC_Itf_Control(uint8_t cmd, uint8_t* pbuf, uint16_t length);
+static void   CDC_Itf_TxISR(void);
 static int8_t CDC_Itf_Receive(uint8_t* pbuf, uint32_t *Len);
-
+static uint32_t CDC_Itf_TxAvailable( void );
 
 
 
@@ -122,6 +125,11 @@ static int8_t CDC_Itf_Init(void)
   rxd_length            = 0;
   rxd_BufPtrIn          = 0;
   rxd_BufPtrOut         = 0;
+
+
+  drv_timer_set_period(TIMER_USB, 5000);            // 5ms
+  drv_timer_attachInterrupt(TIMER_USB, CDC_Itf_TxISR);
+  drv_timer_resume(TIMER_USB);
 
   return (USBD_OK);
 }
@@ -219,71 +227,36 @@ static int8_t CDC_Itf_Control (uint8_t cmd, uint8_t* pbuf, uint16_t length)
   return (USBD_OK);
 }
 
+void CDC_Itf_TxISR(void)
+{
+  uint32_t buffptr;
+  uint32_t buffsize;
 
-// This function is called to process outgoing data.  We hook directly into the
-// SOF (start of frame) callback so that it is called exactly at the time it is
-// needed (reducing latency), and often enough (increasing bandwidth).
-//
-// this is based on micropyton
-//   : https://github.com/micropython/micropython/blob/master/stmhal/usbd_cdc_interface.c
-void HAL_PCD_SOFCallback(PCD_HandleTypeDef *hpcd) {
-    if (is_opened == FALSE) {
-        // CDC device is not connected to a host, so we are unable to send any data
-        return;
+  if(UserTxBufPtrOut != UserTxBufPtrIn)
+  {
+    if(UserTxBufPtrOut > UserTxBufPtrIn) /* Rollback */
+    {
+      buffsize = APP_TX_DATA_SIZE - UserTxBufPtrOut;
+    }
+    else
+    {
+      buffsize = UserTxBufPtrIn - UserTxBufPtrOut;
     }
 
-    if (UserTxBufPtrOut == UserTxBufPtrIn && !UserTxNeedEmptyPacket) {
-        // No outstanding data to send
-        return;
+    buffptr = UserTxBufPtrOut;
+
+    USBD_CDC_SetTxBuffer(&USBD_Device, (uint8_t*)&UserTxBuffer[buffptr], buffsize);
+
+    if(USBD_CDC_TransmitPacket(&USBD_Device) == USBD_OK)
+    {
+      UserTxBufPtrOut += buffsize;
+      if (UserTxBufPtrOut == APP_TX_DATA_SIZE)
+      {
+        UserTxBufPtrOut = 0;
+      }
     }
-
-    if (UserTxBufPtrOut != UserTxBufPtrOutShadow) {
-        // We have sent data and are waiting for the low-level USB driver to
-        // finish sending it over the USB in-endpoint.
-        // SOF occurs every 1ms, so we have a 150 * 1ms = 150ms timeout
-        if (UserTxBufPtrWaitCount < 150) {
-            USB_OTG_GlobalTypeDef *USBx = hpcd->Instance;
-            if (USBx_INEP(CDC_IN_EP & 0x7f)->DIEPTSIZ & USB_OTG_DIEPTSIZ_XFRSIZ) {
-                // USB in-endpoint is still reading the data
-                UserTxBufPtrWaitCount++;
-                return;
-            }
-        }
-        UserTxBufPtrOut = UserTxBufPtrOutShadow;
-    }
-
-    if (UserTxBufPtrOutShadow != UserTxBufPtrIn || UserTxNeedEmptyPacket) {
-        uint32_t buffptr;
-        uint32_t buffsize;
-
-        if (UserTxBufPtrOutShadow > UserTxBufPtrIn) { // rollback
-            buffsize = APP_TX_DATA_SIZE - UserTxBufPtrOutShadow;
-        } else {
-            buffsize = UserTxBufPtrIn - UserTxBufPtrOutShadow;
-        }
-
-        buffptr = UserTxBufPtrOutShadow;
-
-        USBD_CDC_SetTxBuffer(&USBD_Device, (uint8_t*)&UserTxBuffer[buffptr], buffsize);
-
-        if (USBD_CDC_TransmitPacket(&USBD_Device) == USBD_OK) {
-            UserTxBufPtrOutShadow += buffsize;
-            if (UserTxBufPtrOutShadow == APP_TX_DATA_SIZE) {
-                UserTxBufPtrOutShadow = 0;
-            }
-            UserTxBufPtrWaitCount = 0;
-
-            // According to the USB specification, a packet size of 64 bytes (CDC_DATA_FS_MAX_PACKET_SIZE)
-            // gets held at the USB host until the next packet is sent.  This is because a
-            // packet of maximum size is considered to be part of a longer chunk of data, and
-            // the host waits for all data to arrive (ie, waits for a packet < max packet size).
-            // To flush a packet of exactly max packet size, we need to send a zero-size packet.
-            // See eg http://www.cypress.com/?id=4&rID=92719
-            UserTxNeedEmptyPacket = (buffsize > 0 && buffsize % CDC_DATA_FS_MAX_PACKET_SIZE == 0 && UserTxBufPtrOutShadow == UserTxBufPtrIn);
-        }
-    }
+  }
 }
-
 
 /**
   * @brief  CDC_Itf_DataRx
@@ -340,7 +313,54 @@ static int8_t CDC_Itf_Receive(uint8_t* Buf, uint32_t *Len)
   return (USBD_OK);
 }
 
+#if 1
+int32_t CDC_Itf_Write( uint8_t *p_buf, uint32_t length )
+{
+  uint32_t i;
+  uint32_t ptr_index;
 
+
+  if( USBD_Device.pClassData == NULL )
+  {
+    return -1;
+  }
+  if( is_opened == FALSE && is_reopen == FALSE )
+  {
+    return -1;
+  }
+  if( USBD_Device.dev_state != USBD_STATE_CONFIGURED )
+  {
+    return -1;
+  }
+  if (length > CDC_Itf_TxAvailable())
+  {
+    return 0;
+  }
+
+  __disable_irq();
+
+  ptr_index = UserTxBufPtrIn;
+
+
+  for (i=0; i<length; i++)
+  {
+
+    UserTxBuffer[ptr_index] = p_buf[i];
+
+    ptr_index++;
+
+    /* To avoid buffer overflow */
+    if(ptr_index == APP_TX_DATA_SIZE)
+    {
+      ptr_index = 0;
+    }
+  }
+  UserTxBufPtrIn = ptr_index;
+  __enable_irq();
+
+  return length;
+}
+#else
 /*---------------------------------------------------------------------------
      TITLE   : CDC_Itf_Write
      WORK    :
@@ -376,7 +396,22 @@ void CDC_Itf_Write( uint8_t *p_buf, uint32_t length )
       UserTxBufPtrIn = (UserTxBufPtrIn + 1) & (APP_TX_DATA_SIZE - 1);
   }
 }
+#endif
 
+/*---------------------------------------------------------------------------
+     TITLE   : CDC_Itf_TxAvailable
+     WORK    :
+---------------------------------------------------------------------------*/
+uint32_t CDC_Itf_TxAvailable( void )
+{
+  uint32_t length = 0;
+
+
+  length = (UserTxBufPtrIn - UserTxBufPtrOut) % APP_TX_DATA_SIZE;
+  length = APP_TX_DATA_SIZE - length;
+
+  return length;
+}
 
 /*---------------------------------------------------------------------------
      TITLE   : CDC_Itf_IsAvailable

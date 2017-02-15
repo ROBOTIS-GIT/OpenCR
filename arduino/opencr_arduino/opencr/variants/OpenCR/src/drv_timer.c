@@ -13,7 +13,10 @@
  TIMER_CH2  TIM10
  TIMER_CH3  TIM13
  TIMER_CH4  TIM14
- TIMER_TONE TIM8
+ TIMER_CH5  TIM6    for USB
+
+ TIMER_TONE TIMER_CH4
+
  */
 
 
@@ -97,6 +100,20 @@ int drv_timer_init()
   hDrvTim[tim_ch].hTIM.Init.RepetitionCounter = 0;
 
 
+  //-- TIMER_CH5  TIM6
+  //
+  tim_ch = TIMER_USB;
+  hDrvTim[tim_ch].hTIM.Instance      = TIM6;
+  hDrvTim[tim_ch].prescaler_value    = (uint32_t)((SystemCoreClock / 2) / 10000  ) - 1; // 0.01Mhz
+  hDrvTim[tim_ch].prescaler_value_1M = (uint32_t)((SystemCoreClock / 2) / 1000000) - 1; // 1.00Mhz
+  hDrvTim[tim_ch].prescaler_div      = 100;
+  hDrvTim[tim_ch].hTIM.Init.Period        = 10000 - 1;
+  hDrvTim[tim_ch].hTIM.Init.Prescaler     = hDrvTim[tim_ch].prescaler_value;
+  hDrvTim[tim_ch].hTIM.Init.ClockDivision = 0;
+  hDrvTim[tim_ch].hTIM.Init.CounterMode   = TIM_COUNTERMODE_UP;
+  hDrvTim[tim_ch].hTIM.Init.RepetitionCounter = 0;
+
+
 
   for( i=0; i<TIMER_CH_MAX; i++ )
   {
@@ -114,28 +131,35 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
   {
     __HAL_RCC_TIM4_CLK_ENABLE();
 
-    HAL_NVIC_SetPriority(TIM4_IRQn, 3, 0);
+    HAL_NVIC_SetPriority(TIM4_IRQn, 6, 0);
     HAL_NVIC_EnableIRQ(TIM4_IRQn);
   }
   if( htim->Instance == TIM10 )
   {
     __HAL_RCC_TIM10_CLK_ENABLE();
 
-    HAL_NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 3, 0);
+    HAL_NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 6, 0);
     HAL_NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
   }
   if( htim->Instance == TIM13 )
   {
     __HAL_RCC_TIM13_CLK_ENABLE();
-    HAL_NVIC_SetPriority(TIM8_UP_TIM13_IRQn, 3, 0);
+    HAL_NVIC_SetPriority(TIM8_UP_TIM13_IRQn, 6, 0);
     HAL_NVIC_EnableIRQ(TIM8_UP_TIM13_IRQn);
   }
   if( htim->Instance == TIM14 )
   {
     __HAL_RCC_TIM14_CLK_ENABLE();
-    HAL_NVIC_SetPriority(TIM8_TRG_COM_TIM14_IRQn, 3, 0);
+    HAL_NVIC_SetPriority(TIM8_TRG_COM_TIM14_IRQn, 6, 0);
     HAL_NVIC_EnableIRQ(TIM8_TRG_COM_TIM14_IRQn);
   }
+  if( htim->Instance == TIM6 )
+  {
+    __HAL_RCC_TIM6_CLK_ENABLE();
+    HAL_NVIC_SetPriority(TIM6_DAC_IRQn, 6, 0);
+    HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
+  }
+
 }
 
 
@@ -167,7 +191,10 @@ void TIM8_TRG_COM_TIM14_IRQHandler(void)
 {
   HAL_TIM_IRQHandler(&hDrvTim[TIMER_TONE].hTIM);
 }
-
+void TIM6_DAC_IRQHandler(void)
+{
+  HAL_TIM_IRQHandler(&hDrvTim[TIMER_USB].hTIM);
+}
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -205,6 +232,11 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef *htim)
   {
     HAL_NVIC_DisableIRQ(TIM8_TRG_COM_TIM14_IRQn);
   }
+  if( htim->Instance == TIM6 )
+  {
+    HAL_NVIC_DisableIRQ(TIM6_DAC_IRQn);
+  }
+
 }
 
 void drv_timer_pause(uint8_t channel)
