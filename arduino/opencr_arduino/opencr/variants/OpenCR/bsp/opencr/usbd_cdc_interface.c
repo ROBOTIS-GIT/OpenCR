@@ -407,7 +407,7 @@ uint32_t CDC_Itf_TxAvailable( void )
   uint32_t length = 0;
 
 
-  length = (UserTxBufPtrIn - UserTxBufPtrOut) % APP_TX_DATA_SIZE;
+  length = (APP_TX_DATA_SIZE + UserTxBufPtrIn - UserTxBufPtrOut) % APP_TX_DATA_SIZE;
   length = APP_TX_DATA_SIZE - length;
 
   return length;
@@ -434,7 +434,7 @@ uint32_t CDC_Itf_Available( void )
   uint32_t length;
 
   __disable_irq();
-  length = (rxd_BufPtrIn - rxd_BufPtrOut) % APP_RX_BUF_SIZE;
+  length = (APP_RX_BUF_SIZE + rxd_BufPtrIn - rxd_BufPtrOut) % APP_RX_BUF_SIZE;
   __enable_irq();
 
   return length;
