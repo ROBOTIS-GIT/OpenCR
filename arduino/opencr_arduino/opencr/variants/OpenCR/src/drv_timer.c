@@ -131,32 +131,32 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
   {
     __HAL_RCC_TIM4_CLK_ENABLE();
 
-    HAL_NVIC_SetPriority(TIM4_IRQn, 6, 0);
+    HAL_NVIC_SetPriority(TIM4_IRQn, 10, 0);
     HAL_NVIC_EnableIRQ(TIM4_IRQn);
   }
   if( htim->Instance == TIM10 )
   {
     __HAL_RCC_TIM10_CLK_ENABLE();
 
-    HAL_NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 6, 0);
+    HAL_NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 10, 0);
     HAL_NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
   }
   if( htim->Instance == TIM13 )
   {
     __HAL_RCC_TIM13_CLK_ENABLE();
-    HAL_NVIC_SetPriority(TIM8_UP_TIM13_IRQn, 6, 0);
+    HAL_NVIC_SetPriority(TIM8_UP_TIM13_IRQn, 10, 0);
     HAL_NVIC_EnableIRQ(TIM8_UP_TIM13_IRQn);
   }
   if( htim->Instance == TIM14 )
   {
     __HAL_RCC_TIM14_CLK_ENABLE();
-    HAL_NVIC_SetPriority(TIM8_TRG_COM_TIM14_IRQn, 6, 0);
+    HAL_NVIC_SetPriority(TIM8_TRG_COM_TIM14_IRQn, 10, 0);
     HAL_NVIC_EnableIRQ(TIM8_TRG_COM_TIM14_IRQn);
   }
   if( htim->Instance == TIM6 )
   {
     __HAL_RCC_TIM6_CLK_ENABLE();
-    HAL_NVIC_SetPriority(TIM6_DAC_IRQn, 6, 0);
+    HAL_NVIC_SetPriority(TIM6_DAC_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
   }
 

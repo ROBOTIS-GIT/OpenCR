@@ -56,6 +56,30 @@ int32_t vcp_write(uint8_t *p_data, uint32_t length)
 {
   int32_t  ret;
 
+  #if 1
+  uint32_t t_time;
+
+  t_time = millis();
+  while(1)
+  {
+    ret = CDC_Itf_Write( p_data, length );
+
+    if(ret < 0)
+    {
+      ret = 0;
+      break;
+    }
+    if(ret == length)
+    {
+      break;
+    }
+    if(millis()-t_time > 100)
+    {
+      ret = 0;
+      break;
+    }
+  }
+  #else
   ret = CDC_Itf_Write( p_data, length );
 
 
@@ -63,7 +87,7 @@ int32_t vcp_write(uint8_t *p_data, uint32_t length)
   {
     ret = 0;
   }
-
+  #endif
   return ret;
 }
 

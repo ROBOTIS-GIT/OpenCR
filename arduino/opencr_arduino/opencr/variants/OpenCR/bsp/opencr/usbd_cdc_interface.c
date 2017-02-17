@@ -56,6 +56,8 @@ uint8_t CDC_Reset_Status_Baud = 0;
 
 uint8_t UserRxBuffer[APP_RX_DATA_SIZE];/* Received Data over USB are stored in this buffer */
 uint8_t UserTxBuffer[APP_TX_DATA_SIZE];/* Received Data over UART (CDC interface) are stored in this buffer */
+uint8_t UserTxBufferForUSB[APP_TX_DATA_SIZE];/* Received Data over UART (CDC interface) are stored in this buffer */
+
 uint32_t BuffLength;
 static uint32_t UserTxBufPtrIn = 0;/* Increment this pointer or roll it back to
                                start address when data are received over USART */
@@ -109,7 +111,7 @@ uint32_t usb_cdc_bitrate = 0;
   */
 static int8_t CDC_Itf_Init(void)
 {
-  USBD_CDC_SetTxBuffer(&USBD_Device, UserTxBuffer, 0);
+  USBD_CDC_SetTxBuffer(&USBD_Device, UserTxBufferForUSB, 0);
   USBD_CDC_SetRxBuffer(&USBD_Device, UserRxBuffer);
   is_opened = FALSE;
   LineCoding.bitrate = 0;
@@ -127,7 +129,7 @@ static int8_t CDC_Itf_Init(void)
   rxd_BufPtrOut         = 0;
 
 
-  drv_timer_set_period(TIMER_USB, 5000);            // 5ms
+  drv_timer_set_period(TIMER_USB, 1000);            // 5ms
   drv_timer_attachInterrupt(TIMER_USB, CDC_Itf_TxISR);
   drv_timer_resume(TIMER_USB);
 
@@ -158,6 +160,7 @@ static int8_t CDC_Itf_DeInit(void)
 static int8_t CDC_Itf_Control (uint8_t cmd, uint8_t* pbuf, uint16_t length)
 {
   USBD_SetupReqTypedef *req = (USBD_SetupReqTypedef *)pbuf;
+
 
   switch (cmd)
   {
@@ -245,7 +248,9 @@ void CDC_Itf_TxISR(void)
 
     buffptr = UserTxBufPtrOut;
 
-    USBD_CDC_SetTxBuffer(&USBD_Device, (uint8_t*)&UserTxBuffer[buffptr], buffsize);
+    memcpy(UserTxBufferForUSB, (uint8_t*)&UserTxBuffer[buffptr], buffsize);
+    USBD_CDC_SetTxBuffer(&USBD_Device, UserTxBufferForUSB, buffsize);
+    //USBD_CDC_SetTxBuffer(&USBD_Device, (uint8_t*)&UserTxBuffer[buffptr], buffsize);
 
     if(USBD_CDC_TransmitPacket(&USBD_Device) == USBD_OK)
     {
@@ -332,7 +337,7 @@ int32_t CDC_Itf_Write( uint8_t *p_buf, uint32_t length )
   {
     return -1;
   }
-  if (length > CDC_Itf_TxAvailable())
+  if (length >= CDC_Itf_TxAvailable())
   {
     return 0;
   }

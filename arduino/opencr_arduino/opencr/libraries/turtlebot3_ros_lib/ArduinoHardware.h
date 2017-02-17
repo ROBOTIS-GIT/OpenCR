@@ -101,7 +101,26 @@ class ArduinoHardware {
     {
       //for(int i=0; i<length; i++)
       //  iostream->write(data[i]);
+      #if 1
       iostream->write(data, length);
+      #else
+      uint32_t t_time;
+      uint32_t tx_length;
+
+      t_time = millis();
+      while(1)
+      {
+        tx_length = iostream->write(data, length);
+
+        if(tx_length == length)
+          break;
+
+        if(millis()-t_time > 1000)
+        {
+          break;
+        }
+      }
+      #endif
     }
 
     unsigned long time(){return millis();}

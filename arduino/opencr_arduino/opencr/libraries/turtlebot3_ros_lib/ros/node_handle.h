@@ -423,6 +423,7 @@ namespace ros {
       {
         if(id >= 100 && !configured_)
 	  return 0;
+
         /* serialize message */
         uint16_t l = msg->serialize(message_out+7);
 
