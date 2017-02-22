@@ -234,6 +234,16 @@ void CDC_Itf_TxISR(void)
 {
   uint32_t buffptr;
   uint32_t buffsize;
+  USBD_CDC_HandleTypeDef   *hcdc = USBD_Device.pClassData;
+
+  if(hcdc == NULL)
+  {
+    return;
+  }
+  if(hcdc->TxState != 0)
+  {
+    return;
+  }
 
   if(UserTxBufPtrOut != UserTxBufPtrIn)
   {
@@ -250,7 +260,6 @@ void CDC_Itf_TxISR(void)
 
     memcpy(UserTxBufferForUSB, (uint8_t*)&UserTxBuffer[buffptr], buffsize);
     USBD_CDC_SetTxBuffer(&USBD_Device, UserTxBufferForUSB, buffsize);
-    //USBD_CDC_SetTxBuffer(&USBD_Device, (uint8_t*)&UserTxBuffer[buffptr], buffsize);
 
     if(USBD_CDC_TransmitPacket(&USBD_Device) == USBD_OK)
     {
@@ -349,7 +358,6 @@ int32_t CDC_Itf_Write( uint8_t *p_buf, uint32_t length )
 
   for (i=0; i<length; i++)
   {
-
     UserTxBuffer[ptr_index] = p_buf[i];
 
     ptr_index++;
@@ -411,9 +419,10 @@ uint32_t CDC_Itf_TxAvailable( void )
 {
   uint32_t length = 0;
 
-
+  __disable_irq();
   length = (APP_TX_DATA_SIZE + UserTxBufPtrIn - UserTxBufPtrOut) % APP_TX_DATA_SIZE;
   length = APP_TX_DATA_SIZE - length;
+  __enable_irq();
 
   return length;
 }

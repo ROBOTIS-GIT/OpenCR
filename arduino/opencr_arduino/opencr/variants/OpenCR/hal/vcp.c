@@ -15,6 +15,8 @@
 #include "usbd_cdc_interface.h"
 
 
+extern uint32_t usb_cdc_debug_cnt[];
+
 
 void vcp_init(void)
 {
@@ -75,6 +77,7 @@ int32_t vcp_write(uint8_t *p_data, uint32_t length)
     }
     if(millis()-t_time > 100)
     {
+      usb_cdc_debug_cnt[1]++;
       ret = 0;
       break;
     }
