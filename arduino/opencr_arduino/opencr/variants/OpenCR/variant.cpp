@@ -270,3 +270,9 @@ void setLedToggle(uint8_t led_num)
     digitalWrite(user_led_tbl[led_num], !digitalRead(user_led_tbl[led_num]));
   }
 }
+
+
+uint8_t getUsbConnected(void)
+{
+  return vcp_is_connected();
+}

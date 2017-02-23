@@ -142,6 +142,8 @@ void setup()
 
   prev_update_time = millis();
 
+  pinMode(13, OUTPUT);
+
   SerialBT2.begin(57600);
 }
 
@@ -184,6 +186,9 @@ void loop()
 
   // Update the IMU unit
   imu.update();
+
+  // Show LED Status
+  show_led_status();
 
   // Call all the callbacks waiting to be called at that point in time
   nh.spinOnce();
@@ -539,14 +544,86 @@ void control_motor_speed(void)
 *******************************************************************************/
 float check_voltage(void)
 {
-  int adc_value;
   float vol_value;
 
-  adc_value = analogRead(BDPIN_BAT_PWR_ADC);
-  vol_value = map(adc_value, 0, 1023, 0, 330*57/10);
-  vol_value = vol_value/100;
+  vol_value = getPowerInVoltage();
 
   return vol_value;
+}
+
+/*******************************************************************************
+* show_led_status
+*******************************************************************************/
+void show_led_status(void)
+{
+  static uint32_t t_time = millis();
+
+  if ((millis()-t_time) >= 500 )
+  {
+    t_time = millis();
+    digitalWrite(13, !digitalRead(13));
+  }
+
+  if (getPowerInVoltage() < 11.1)
+  {
+    setLedOn(2);
+  }
+  else
+  {
+    setLedOff(2);
+  }
+
+  if (getUsbConnected() > 0)
+  {
+    setLedOn(3);
+  }
+  else
+  {
+    setLedOff(3);
+  }
+
+  update_rx_tx_led();
+}
+
+void update_rx_tx_led(void)
+{
+  static uint32_t rx_led_update_time;
+  static uint32_t tx_led_update_time;
+  static uint32_t rx_cnt;
+  static uint32_t tx_cnt;
+
+
+  if ((millis()-tx_led_update_time) > 50)
+  {
+    tx_led_update_time = millis();
+
+    if (tx_cnt != Serial.getTxCnt())
+    {
+      setLedToggle(0);
+    }
+    else
+    {
+      setLedOff(0);
+    }
+
+    tx_cnt = Serial.getTxCnt();
+  }
+
+  if( (millis()-rx_led_update_time) > 50 )
+  {
+    rx_led_update_time = millis();
+
+    if (rx_cnt != Serial.getRxCnt())
+    {
+      setLedToggle(1);
+    }
+    else
+    {
+      setLedOff(1);
+    }
+
+    rx_cnt = Serial.getRxCnt();
+  }
 }
 
 // EOF

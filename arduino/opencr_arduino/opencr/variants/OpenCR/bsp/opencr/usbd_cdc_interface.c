@@ -475,7 +475,12 @@ int32_t CDC_Itf_Peek( void )
 ---------------------------------------------------------------------------*/
 BOOL CDC_Itf_IsConnected( void )
 {
-  if( USBD_Device.dev_config == 0 || is_opened == FALSE ) return FALSE;
+  if( USBD_Device.dev_config == 0
+    || is_opened == FALSE
+    || USBD_Device.pClassData == NULL ) 
+  {
+    return FALSE;
+  }
 
   return TRUE;
 }
