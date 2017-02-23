@@ -81,8 +81,13 @@ void USBSerial::flush(void){
 
 size_t USBSerial::write(const uint8_t *buffer, size_t size)
 {
-  tx_cnt += size;
-  return (size_t)vcp_write((uint8_t *)buffer, (uint32_t)size);
+  uint32_t length;
+
+  length = vcp_write((uint8_t *)buffer, (uint32_t)size);
+
+  tx_cnt += length;
+  
+  return (size_t)length;
 }
 
 

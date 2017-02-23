@@ -23,7 +23,7 @@ int main(void)
 	hal_init();
 	drv_init();
   var_init();
-  
+
 	setup();
 
 	while (1)

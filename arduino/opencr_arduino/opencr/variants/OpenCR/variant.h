@@ -118,6 +118,8 @@ void  var_init();
 float getPowerInVoltage(void);
 uint8_t getDipSwitch(void);
 uint8_t getPushButton(void);
+uint8_t getUsbConnected(void);
+
 
 void setLedOn(uint8_t led_num);
 void setLedOff(uint8_t led_num);
