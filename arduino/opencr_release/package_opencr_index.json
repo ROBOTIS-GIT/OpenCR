@@ -204,7 +204,7 @@
           "help": {
             "online": "https://github.com/ROBOTIS-GIT/OpenCR"
           },
-          "url": "https://github.com/ROBOTIS-GIT/OpenCR/releases/download/1.0.5/opencr_core_1.0.5.tar.bz2",
+          "url": "https://github.com/ROBOTIS-GIT/OpenCR/releases/download/1.0.6/opencr_core_1.0.6.tar.bz2",
           "archiveFileName": "opencr_core_1.0.6.tar.bz2",
           "checksum": "SHA-256:202fba529672c85cf9679da722f30b440d784106daed0c9caf4d350f950df6db",
           "size": "2661593",
