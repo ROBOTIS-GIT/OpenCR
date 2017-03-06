@@ -50,13 +50,16 @@ typedef enum COLOR_INDEX {
 #define PORT2_SIG2  44
 #define PORT2_ADC   45
 
-#define PORT3_SIG1  40
-#define PORT3_SIG2  41
-#define PORT3_ADC   42
+#define PORT3_SIG1  70
+#define PORT3_SIG2  71
+#define PORT3_ADC   72
 
-#define PORT4_SIG1  43
-#define PORT4_SIG2  44
-#define PORT4_ADC   45
+#define PORT4_SIG1  73
+#define PORT4_SIG2  74
+#define PORT4_ADC   75
+
+#define OLLO_SLEEP  46
+
 
 class OLLO {
 private:

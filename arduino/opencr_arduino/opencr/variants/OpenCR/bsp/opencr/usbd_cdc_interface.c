@@ -85,7 +85,7 @@ extern USBD_HandleTypeDef  USBD_Device;
 static int8_t CDC_Itf_Init(void);
 static int8_t CDC_Itf_DeInit(void);
 static int8_t CDC_Itf_Control(uint8_t cmd, uint8_t* pbuf, uint16_t length);
-static void   CDC_Itf_TxISR(void);
+       void   CDC_Itf_TxISR(void);
 static int8_t CDC_Itf_Receive(uint8_t* pbuf, uint32_t *Len);
 static uint32_t CDC_Itf_TxAvailable( void );
 
@@ -127,11 +127,6 @@ static int8_t CDC_Itf_Init(void)
   rxd_length            = 0;
   rxd_BufPtrIn          = 0;
   rxd_BufPtrOut         = 0;
-
-
-  drv_timer_set_period(TIMER_USB, 1000);            // 5ms
-  drv_timer_attachInterrupt(TIMER_USB, CDC_Itf_TxISR);
-  drv_timer_resume(TIMER_USB);
 
   return (USBD_OK);
 }
@@ -477,7 +472,7 @@ BOOL CDC_Itf_IsConnected( void )
 {
   if( USBD_Device.dev_config == 0
     || is_opened == FALSE
-    || USBD_Device.pClassData == NULL ) 
+    || USBD_Device.pClassData == NULL )
   {
     return FALSE;
   }

@@ -55,6 +55,11 @@ void OLLO::begin(int devNum){
 	}
 	mMot_plus = 0;
 	mMot_minus = 0;
+
+
+  pinMode(OLLO_SLEEP, OUTPUT);
+  digitalWrite(OLLO_SLEEP, HIGH);
+
 	switch(devNum){
 	case 1:
 		pinMode(PORT1_SIG1, OUTPUT); //RED  (right)
@@ -86,6 +91,10 @@ void OLLO::begin(int devNum, OlloDeviceIndex device_index){ //MAGNETIC SENSOR, B
 	}
 	mMot_plus = 0;
 	mMot_minus = 0;
+
+  pinMode(OLLO_SLEEP, OUTPUT);
+  digitalWrite(OLLO_SLEEP, HIGH);
+    
 	switch(devNum){
 	case 1:
 		if(device_index == TOUCH_SENSOR || device_index == PIR_SENSOR || device_index == MAGNETIC_SENSOR){
@@ -608,8 +617,6 @@ int OLLO::detectColor(uint8_t port){
 		before_color_cnt = 0;
 	}
 
-	before_color_num = bColorResult;	
+	before_color_num = bColorResult;
 	return 0;
 }
-
-
