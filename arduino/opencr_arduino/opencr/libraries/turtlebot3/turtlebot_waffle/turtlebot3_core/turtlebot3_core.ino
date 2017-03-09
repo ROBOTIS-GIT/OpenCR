@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim */
+/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
 
 #include "turtlebot3_core_config.h"
 
@@ -60,7 +60,7 @@ tf::TransformBroadcaster tfbroadcaster;
 /*******************************************************************************
 * SoftwareTimer for * of Turtlebot3
 *******************************************************************************/
-static uint32_t tTime[5];
+static uint32_t tTime[4];
 
 /*******************************************************************************
 * Declaration for motor
@@ -182,16 +182,10 @@ void loop()
     tTime[2] = millis();
   }
 
-  // if ((millis()-tTime[3]) >= (1000 / SENSOR_STATE_PUBLISH_PERIOD))
-  // {
-  //   publishSensorStateMsg();
-  //   tTime[3] = millis();
-  // }
-
-  if ((millis()-tTime[4]) >= (1000 / IMU_PUBLISH_PERIOD))
+  if ((millis()-tTime[3]) >= (1000 / IMU_PUBLISH_PERIOD))
   {
     publishImuMsg();
-    tTime[4] = millis();
+    tTime[3] = millis();
   }
 
   // Update the IMU unit
