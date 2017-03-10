@@ -283,7 +283,7 @@ void publishSensorStateMsg(void)
 
   bool dxl_comm_result = false;
 
-  dxl_comm_result = motor_driver.readEncoder(ADDR_X_PRESENT_POSITION, 4, sensor_state_msg.left_encoder, sensor_state_msg.right_encoder);
+  dxl_comm_result = motor_driver.readEncoder(sensor_state_msg.left_encoder, sensor_state_msg.right_encoder);
 
   if (dxl_comm_result == true)
   {
@@ -291,6 +291,9 @@ void publishSensorStateMsg(void)
   }
   else
   {
+    char log_msg[128];
+    sprintf(log_msg, "foo = %d", (int)dxl_comm_result);
+    nh.loginfo(log_msg);
     return;
   }
 
@@ -542,7 +545,7 @@ void controlMotorSpeed(void)
 
   bool dxl_comm_result = false;
 
-  dxl_comm_result = motor_driver.speedControl(ADDR_X_GOAL_VELOCITY, 4, (int64_t)lin_vel1, (int64_t)lin_vel2);
+  dxl_comm_result = motor_driver.speedControl((int64_t)lin_vel1, (int64_t)lin_vel2);
 
   if (dxl_comm_result == false)
   {
@@ -598,7 +601,7 @@ void testDrive(int32_t left_encoder_tick, int32_t right_encoder_tick)
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
-      cmd_vel_rc100_msg.angular.z = 0.7 * SCALE_VELOCITY_ANGULAR_Z;
+      cmd_vel_rc100_msg.angular.z = -0.7 * SCALE_VELOCITY_ANGULAR_Z;
       goal_angular_velocity = cmd_vel_rc100_msg.angular.z;
     }
     else
@@ -615,7 +618,7 @@ void testDrive(int32_t left_encoder_tick, int32_t right_encoder_tick)
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
-      cmd_vel_rc100_msg.angular.z = -0.7 * SCALE_VELOCITY_ANGULAR_Z;
+      cmd_vel_rc100_msg.angular.z = 0.7 * SCALE_VELOCITY_ANGULAR_Z;
       goal_angular_velocity = cmd_vel_rc100_msg.angular.z;
     }
     else
