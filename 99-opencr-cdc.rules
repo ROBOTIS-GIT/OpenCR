@@ -7,3 +7,4 @@
 ATTRS{idVendor}=="0483" ATTRS{idProduct}=="5740", ENV{ID_MM_DEVICE_IGNORE}="1", MODE:="0666"
 ATTRS{idVendor}=="0483" ATTRS{idProduct}=="df11", MODE:="0666"
 ATTRS{idVendor}=="FFF1" ATTRS{idProduct}=="FF48", ENV{ID_MM_DEVICE_IGNORE}="1", MODE:="0666"
+ATTRS{idVendor}=="10C4" ATTRS{idProduct}=="EA60", ENV{ID_MM_DEVICE_IGNORE}="1", MODE:="0666"

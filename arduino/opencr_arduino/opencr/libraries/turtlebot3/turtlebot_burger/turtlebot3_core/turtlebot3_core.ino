@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim */
+/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
 
 #include "turtlebot3_core_config.h"
 
@@ -26,8 +26,7 @@ ros::NodeHandle nh;
 /*******************************************************************************
 * Subscriber
 *******************************************************************************/
-void cmd_vel_callback(const geometry_msgs::Twist& cmd_vel_msg);
-ros::Subscriber<geometry_msgs::Twist> cmd_vel_sub("cmd_vel", cmd_vel_callback);
+ros::Subscriber<geometry_msgs::Twist> cmd_vel_sub("cmd_vel", commandVelocityCallback);
 
 /*******************************************************************************
 * Publisher
@@ -61,7 +60,7 @@ tf::TransformBroadcaster tfbroadcaster;
 /*******************************************************************************
 * SoftwareTimer for * of Turtlebot3
 *******************************************************************************/
-static uint32_t tTime[5];
+static uint32_t tTime[4];
 
 /*******************************************************************************
 * Declaration for motor
@@ -85,6 +84,16 @@ cIMU imu;
 *******************************************************************************/
 RC100 remote_controller;
 double const_cmd_vel    = 0.2;
+
+/*******************************************************************************
+* Declaration for Test Drive
+*******************************************************************************/
+int32_t last_left_encoder  = 0;
+int32_t last_right_encoder = 0;
+bool move_forward_  = false;
+bool move_backward_ = false;
+bool rotate_cw_     = false;
+bool rotate_ccw_    = false;
 
 /*******************************************************************************
 * Declaration for SLAM and navigation
@@ -152,11 +161,11 @@ void setup()
 *******************************************************************************/
 void loop()
 {
-  receive_remocon_data();
+  receiveRemoteControlData();
 
   if ((millis()-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_PERIOD))
   {
-    control_motor_speed();
+    controlMotorSpeed();
     tTime[0] = millis();
   }
 
@@ -168,27 +177,22 @@ void loop()
 
   if ((millis()-tTime[2]) >= (1000 / DRIVE_INFORMATION_PUBLISH_PERIOD))
   {
-    publish_drive_information();
+    publishSensorStateMsg();
+    publishDriveInformation();
     tTime[2] = millis();
   }
 
-  if ((millis()-tTime[3]) >= (1000 / SENSOR_STATE_PUBLISH_PERIOD))
+  if ((millis()-tTime[3]) >= (1000 / IMU_PUBLISH_PERIOD))
   {
-    publish_sensor_state_msg();
+    publishImuMsg();
     tTime[3] = millis();
-  }
-
-  if ((millis()-tTime[4]) >= (1000 / IMU_PUBLISH_PERIOD))
-  {
-    publish_imu_msg();
-    tTime[4] = millis();
   }
 
   // Update the IMU unit
   imu.update();
 
   // Show LED Status
-  show_led_status();
+  showLedStatus();
 
   // Call all the callbacks waiting to be called at that point in time
   nh.spinOnce();
@@ -197,7 +201,7 @@ void loop()
 /*******************************************************************************
 * Callback function for cmd_vel msg
 *******************************************************************************/
-void cmd_vel_callback(const geometry_msgs::Twist& cmd_vel_msg)
+void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
 {
   goal_linear_velocity  = cmd_vel_msg.linear.x;
   goal_angular_velocity = cmd_vel_msg.angular.z;
@@ -206,7 +210,7 @@ void cmd_vel_callback(const geometry_msgs::Twist& cmd_vel_msg)
 /*******************************************************************************
 * Publish msgs (IMU data: angular velocity, linear acceleration, orientation)
 *******************************************************************************/
-void publish_imu_msg(void)
+void publishImuMsg(void)
 {
   imu_msg.header.stamp    = nh.now();
   imu_msg.header.frame_id = "imu_link";
@@ -255,12 +259,16 @@ void publish_imu_msg(void)
   imu_pub.publish(&imu_msg);
 
   tfs_msg.header.stamp    = nh.now();
-  tfs_msg.header.frame_id = "base_footprint";
+  tfs_msg.header.frame_id = "base_link";
   tfs_msg.child_frame_id  = "imu_link";
   tfs_msg.transform.rotation.w = imu.quat[0];
   tfs_msg.transform.rotation.x = imu.quat[1];
   tfs_msg.transform.rotation.y = imu.quat[2];
   tfs_msg.transform.rotation.z = imu.quat[3];
+
+  tfs_msg.transform.translation.x = 0.0;
+  tfs_msg.transform.translation.y = 0.0;
+  tfs_msg.transform.translation.z = 0.068;
 
   tfbroadcaster.sendTransform(tfs_msg);
 }
@@ -268,14 +276,14 @@ void publish_imu_msg(void)
 /*******************************************************************************
 * Publish msgs (sensor_state: bumpers, cliffs, buttons, encoders, battery)
 *******************************************************************************/
-void publish_sensor_state_msg(void)
+void publishSensorStateMsg(void)
 {
   sensor_state_msg.stamp = nh.now();
-  sensor_state_msg.battery = check_voltage();
+  sensor_state_msg.battery = checkVoltage();
 
   bool dxl_comm_result = false;
 
-  dxl_comm_result = motor_driver.readEncoder(ADDR_X_PRESENT_POSITION, 4, sensor_state_msg.left_encoder, sensor_state_msg.right_encoder);
+  dxl_comm_result = motor_driver.readEncoder(sensor_state_msg.left_encoder, sensor_state_msg.right_encoder);
 
   if (dxl_comm_result == true)
   {
@@ -283,7 +291,10 @@ void publish_sensor_state_msg(void)
   }
   else
   {
-    // ROS_ERROR("syncReadDynamixelRegister failed");
+    char log_msg[128];
+    sprintf(log_msg, "foo = %d", (int)dxl_comm_result);
+    nh.loginfo(log_msg);
+    return;
   }
 
   int32_t current_tick = sensor_state_msg.left_encoder;
@@ -309,12 +320,14 @@ void publish_sensor_state_msg(void)
   last_diff_tick_[RIGHT] = current_tick - last_tick_[RIGHT];
   last_tick_[RIGHT] = current_tick;
   last_rad_[RIGHT] += TICK2RAD * (double)last_diff_tick_[RIGHT];
+
+  testDrive(sensor_state_msg.left_encoder, sensor_state_msg.right_encoder);
 }
 
 /*******************************************************************************
 * Publish msgs (odometry, joint states, tf)
 *******************************************************************************/
-void publish_drive_information(void)
+void publishDriveInformation(void)
 {
   unsigned long time_now = millis();
   unsigned long step_time = time_now - prev_update_time;
@@ -341,12 +354,15 @@ void publish_drive_information(void)
 *******************************************************************************/
 bool updateOdometry(double diff_time)
 {
-  float odom_vel[3];
+  double odom_vel[3];
 
   double wheel_l, wheel_r; // rotation value of wheel [rad]
+  double delta_s, delta_theta;
   double v, w;             // v = translational velocity [m/s], w = rotational velocity [rad/s]
   double step_time;
+
   wheel_l = wheel_r = 0.0;
+  delta_s = delta_theta = 0.0;
   v = w = 0.0;
   step_time = 0.0;
 
@@ -358,9 +374,6 @@ bool updateOdometry(double diff_time)
   wheel_l = TICK2RAD * (double)last_diff_tick_[LEFT];
   wheel_r = TICK2RAD * (double)last_diff_tick_[RIGHT];
 
-  //ROS_INFO_STREAM("wheel_l = " << wheel_l);
-  //ROS_INFO_STREAM("wheel_r = " << wheel_r);
-
   if(isnan(wheel_l))
   {
     wheel_l = 0.0;
@@ -371,26 +384,19 @@ bool updateOdometry(double diff_time)
     wheel_r = 0.0;
   }
 
-  v = WHEEL_RADIUS * (wheel_r + wheel_l) / 2 / step_time;
-  w = WHEEL_RADIUS * (wheel_r - wheel_l) / WHEEL_SEPARATION / step_time;
+  delta_s     = WHEEL_RADIUS * (wheel_r + wheel_l) / 2.0;
+  delta_theta = WHEEL_RADIUS * (wheel_r - wheel_l) / WHEEL_SEPARATION;
 
-  //ROS_INFO_STREAM("step_time = " << ((double)last_diff_realtime_tick_left_ + (double)last_diff_realtime_tick_right_) / 2.0 / 1000.0);
-  //ROS_INFO_STREAM("step_time = " << step_time);
-  //ROS_INFO_STREAM("v = " << v);
-  //ROS_INFO_STREAM("w = " << w);
+  v = delta_s / step_time;
+  w = delta_theta / step_time;
 
   last_velocity_[LEFT]  = wheel_l / step_time;
   last_velocity_[RIGHT] = wheel_r / step_time;
 
-  //ROS_INFO_STREAM("last_velocity_left_ = " << last_velocity_left_);
-  //ROS_INFO_STREAM("last_velocity_right_ = " << last_velocity_right_);
-
   // compute odometric pose
-  odom_pose[0] += v * step_time * cos(odom_pose[2] + (w * step_time / 2));
-  odom_pose[1] += v * step_time * sin(odom_pose[2] + (w * step_time / 2));
-  odom_pose[2] += w * step_time;
-
-  //ROS_INFO_STREAM(" x = " << odom_pose[0] << " y = " << odom_pose[1] << " r = " << odom_pose[2]);
+  odom_pose[0] += delta_s * cos(odom_pose[2] + (delta_theta / 2.0));
+  odom_pose[1] += delta_s * sin(odom_pose[2] + (delta_theta / 2.0));
+  odom_pose[2] += delta_theta;
 
   // compute odometric instantaneouse velocity
   odom_vel[0] = v;
@@ -441,7 +447,7 @@ void updateTF(geometry_msgs::TransformStamped& odom_tf)
 /*******************************************************************************
 * Receive remocon (RC100) data
 *******************************************************************************/
-void receive_remocon_data(void)
+void receiveRemoteControlData(void)
 {
   int received_data = 0;
 
@@ -467,11 +473,27 @@ void receive_remocon_data(void)
     }
     else if(received_data & RC100_BTN_1)
     {
-      const_cmd_vel += VELOCITY_STEP;
+      move_forward_ = true;
+      last_left_encoder = sensor_state_msg.left_encoder;
+      last_right_encoder = sensor_state_msg.right_encoder;
+    }
+    else if (received_data & RC100_BTN_2)
+    {
+      rotate_ccw_ = true;
+      last_left_encoder = sensor_state_msg.left_encoder;
+      last_right_encoder = sensor_state_msg.right_encoder;
     }
     else if(received_data & RC100_BTN_3)
     {
-      const_cmd_vel -= VELOCITY_STEP;
+      move_backward_ = true;
+      last_left_encoder = sensor_state_msg.left_encoder;
+      last_right_encoder = sensor_state_msg.right_encoder;
+    }
+    else if (received_data & RC100_BTN_4)
+    {
+      rotate_cw_ = true;
+      last_left_encoder = sensor_state_msg.left_encoder;
+      last_right_encoder = sensor_state_msg.right_encoder;
     }
     else if(received_data & RC100_BTN_6)
     {
@@ -502,7 +524,7 @@ void receive_remocon_data(void)
 /*******************************************************************************
 * Control motor speed
 *******************************************************************************/
-void control_motor_speed(void)
+void controlMotorSpeed(void)
 {
   double wheel_speed_cmd[2];
   double lin_vel1;
@@ -521,28 +543,98 @@ void control_motor_speed(void)
   if (lin_vel2 > LIMIT_X_MAX_VELOCITY)       lin_vel2 =  LIMIT_X_MAX_VELOCITY;
   else if (lin_vel2 < -LIMIT_X_MAX_VELOCITY) lin_vel2 = -LIMIT_X_MAX_VELOCITY;
 
-  #ifdef DEBUG_MODE
-    char log_msg[30];
-    sprintf(log_msg, "linear_velocity L = %d", (int)lin_vel1);
-    nh.loginfo(log_msg);
-    sprintf(log_msg, "linear_velocity R = %d", (int)lin_vel2);
-    nh.loginfo(log_msg);
-  #endif
-
   bool dxl_comm_result = false;
 
-  dxl_comm_result = motor_driver.speedControl(ADDR_X_GOAL_VELOCITY, 4, (int64_t)lin_vel1, (int64_t)lin_vel2);
+  dxl_comm_result = motor_driver.speedControl((int64_t)lin_vel1, (int64_t)lin_vel2);
 
   if (dxl_comm_result == false)
   {
-    // ROS_ERROR("syncWriteDynamixelRegister failed");
+    return;
+  }
+}
+
+/*******************************************************************************
+* Test drive turtlebot3 using RC100
+*******************************************************************************/
+void testDrive(int32_t left_encoder_tick, int32_t right_encoder_tick)
+{
+  int32_t current_tick = right_encoder_tick;
+  double diff_encoder = 0.0;
+
+  if (move_forward_ == true)
+  {
+    diff_encoder = TEST_DISTANCE/(0.207/4096); // Circumference / The number of TICK for 1 revolute
+
+    if (abs(last_right_encoder - current_tick) <= diff_encoder)
+    {
+      cmd_vel_rc100_msg.linear.x  = 0.05 * SCALE_VELOCITY_LINEAR_X;
+      goal_linear_velocity  = cmd_vel_rc100_msg.linear.x;
+    }
+    else
+    {
+      cmd_vel_rc100_msg.linear.x  = 0.0;
+      goal_linear_velocity  = cmd_vel_rc100_msg.linear.x;
+
+      move_forward_ = false;
+    }
+  }
+  else if (move_backward_ == true)
+  {
+    diff_encoder = TEST_DISTANCE/(0.207/4096);
+
+    if (abs(last_right_encoder - current_tick) <= diff_encoder)
+    {
+      cmd_vel_rc100_msg.linear.x  = -0.05 * SCALE_VELOCITY_LINEAR_X;
+      goal_linear_velocity  = cmd_vel_rc100_msg.linear.x;
+    }
+    else
+    {
+      cmd_vel_rc100_msg.linear.x  = 0.0;
+      goal_linear_velocity  = cmd_vel_rc100_msg.linear.x;
+
+      move_backward_ = false;
+    }
+  }
+  else if (rotate_cw_ == true)
+  {
+    diff_encoder = (TEST_RADIAN * 0.078)/(0.207/4096);
+
+    if (abs(last_right_encoder - current_tick) <= diff_encoder)
+    {
+      cmd_vel_rc100_msg.angular.z = -0.7 * SCALE_VELOCITY_ANGULAR_Z;
+      goal_angular_velocity = cmd_vel_rc100_msg.angular.z;
+    }
+    else
+    {
+      cmd_vel_rc100_msg.angular.z  = 0.0;
+      goal_angular_velocity = cmd_vel_rc100_msg.angular.z;
+
+      rotate_cw_ = false;
+    }
+  }
+  else if (rotate_ccw_ == true)
+  {
+    diff_encoder = (TEST_RADIAN * 0.078)/(0.207/4096);
+
+    if (abs(last_right_encoder - current_tick) <= diff_encoder)
+    {
+      cmd_vel_rc100_msg.angular.z = 0.7 * SCALE_VELOCITY_ANGULAR_Z;
+      goal_angular_velocity = cmd_vel_rc100_msg.angular.z;
+    }
+    else
+    {
+      cmd_vel_rc100_msg.angular.z  = 0.0;
+      goal_angular_velocity = cmd_vel_rc100_msg.angular.z;
+
+      rotate_ccw_ = false;
+    }
   }
 }
 
 /*******************************************************************************
 * Check voltage
 *******************************************************************************/
-float check_voltage(void)
+float checkVoltage(void)
 {
   float vol_value;
 
@@ -552,9 +644,9 @@ float check_voltage(void)
 }
 
 /*******************************************************************************
-* show_led_status
+* show led status
 *******************************************************************************/
-void show_led_status(void)
+void showLedStatus(void)
 {
   static uint32_t t_time = millis();
 
@@ -582,10 +674,10 @@ void show_led_status(void)
     setLedOff(3);
   }
 
-  update_rx_tx_led();
+  updateRxTxLed();
 }
 
-void update_rx_tx_led(void)
+void updateRxTxLed(void)
 {
   static uint32_t rx_led_update_time;
   static uint32_t tx_led_update_time;

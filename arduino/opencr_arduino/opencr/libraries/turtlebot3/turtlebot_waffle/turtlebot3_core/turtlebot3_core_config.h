@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim */
+/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
 
 #ifndef TURTLEBOT3_CORE_CONFIG_H_
 #define TURTLEBOT3_CORE_CONFIG_H_
@@ -39,14 +39,15 @@
 
 #include "turtlebot3_motor_driver.h"
 
-#define CONTROL_MOTOR_SPEED_PERIOD       30 //hz
-#define IMU_PUBLISH_PERIOD               200 //hz
-#define SENSOR_STATE_PUBLISH_PERIOD      30 //hz
-#define CMD_VEL_PUBLISH_PERIOD           30 //hz
-#define DRIVE_INFORMATION_PUBLISH_PERIOD 30 //hz
+#define CONTROL_MOTOR_SPEED_PERIOD       30   //hz
+#define IMU_PUBLISH_PERIOD               200  //hz
+#define SENSOR_STATE_PUBLISH_PERIOD      30   //hz
+#define CMD_VEL_PUBLISH_PERIOD           30   //hz
+#define DRIVE_INFORMATION_PUBLISH_PERIOD 30   //hz
 
-#define WHEEL_RADIUS                    0.033 // meter
+#define WHEEL_RADIUS                    0.033  // meter
 #define WHEEL_SEPARATION                0.287  // meter (0.16 / 0.287)
+#define ROBOT_RADIUS                    0.294  // meter (0.078 / 0.294)
 #define ENCODER_MIN           -2147483648     // raw
 #define ENCODER_MAX            2147483648     // raw
 
@@ -58,39 +59,44 @@
                                                      // Goal RPM = V * 1263.632956882
 
 #define MAX_LINEAR_VELOCITY             0.25   // m/s
-#define MAX_ANGULAR_VELOCITY            3.0   // rad/s
-#define VELOCITY_STEP                   0.01  // m/s
-#define VELOCITY_LINEAR_X               0.01  // m/s
-#define VELOCITY_ANGULAR_Z              0.1   // rad/s
+#define MAX_ANGULAR_VELOCITY            1.82   // rad/s
+#define VELOCITY_STEP                   0.01   // m/s
+#define VELOCITY_LINEAR_X               0.01   // m/s
+#define VELOCITY_ANGULAR_Z              0.1    // rad/s
 #define SCALE_VELOCITY_LINEAR_X         1
 #define SCALE_VELOCITY_ANGULAR_Z        1
 
-#define TICK2RAD                        0.00153589f  // 0.088[deg] * 3.14159265359 / 180 = 0.00153589
+#define TICK2RAD                        0.001533981  // 0.087890625[deg] * 3.14159265359 / 180 = 0.001533981f
 
 #define DEG2RAD(x) (x * 0.01745329252)  // *PI/180
 #define RAD2DEG(x) (x * 57.2957795131)  // *180/PI
 
 // #define DEBUG_MODE
 
-typedef struct
-{
-  uint8_t addr;
-  uint8_t length;
-  uint8_t attr;
-  uint8_t init_data;
-} test;
+/* Example of debugging
+*
+* #ifdef DEBUG_MODE
+*   char log_msg[128];
+*   sprintf(log_msg, "foo = %d", (int)bar);
+*   nh.loginfo(log_msg);
+* #endif
+*/
 
 // Callback function prototypes
-void cmd_vel_callback(const geometry_msgs::Twist& cmd_vel_msg);
+void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
 
 // Function prototypes
-void publish_imu_msg(void);
-void publish_sensor_state_msg(void);
-void publish_drive_information(void);
+void publishImuMsg(void);
+void publishSensorStateMsg(void);
+void publishDriveInformation(void);
 bool updateOdometry(double diff_time);
 void updateJoint(void);
 void updateTF(geometry_msgs::TransformStamped& odom_tf);
-void receive_remocon_data(void);
-void control_motor_speed(void);
+void receiveRemoteControlData(void);
+void controlMotorSpeed(void);
+void testDrive(int32_t left_encoder_tick, int32_t right_encoder_tick);
+float checkVoltage(void);
+void showLedStatus(void);
+void updateRxTxLed(void);
 
 #endif // TURTLEBOT3_CORE_CONFIG_H_
