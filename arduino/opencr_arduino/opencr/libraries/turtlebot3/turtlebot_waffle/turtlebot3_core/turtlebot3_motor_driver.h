@@ -29,8 +29,8 @@
 #define ADDR_X_PRESENT_VELOCITY        128
 #define ADDR_X_PRESENT_POSITION        132
 
-// Limit values (XM430-W350-T)
-#define LIMIT_X_MAX_VELOCITY           480 // 2000(XL430-W?-T), 415(XL430-W350-T), 480(XM430-W210-T), 350(XM430-W350-T)
+// Limit values (XM430-W210-T)
+#define LIMIT_X_MAX_VELOCITY           290
 
 // Data Byte Length
 #define LEN_X_TORQUE_ENABLE            1
@@ -58,17 +58,20 @@ class Turtlebot3MotorDriver
   bool init(void);
   void closeDynamixel(void);
   bool setTorque(uint8_t id, bool onoff);
-  bool readEncoder(uint16_t addr, uint16_t length, int32_t &left_value, int32_t &right_value);
-  bool speedControl(uint16_t addr, uint16_t length, int64_t left_wheel_value, int64_t right_wheel_value);
+  bool readEncoder(int32_t &left_value, int32_t &right_value);
+  bool speedControl(int64_t left_wheel_value, int64_t right_wheel_value);
 
  private:
-  // char device_name_[];
   int8_t baudrate_;
   float  protocol_version_;
   uint8_t left_wheel_id_;
   uint8_t right_wheel_id_;
+
   dynamixel::PortHandler *portHandler_;
   dynamixel::PacketHandler *packetHandler_;
+
+  dynamixel::GroupSyncWrite *groupSyncWriteVelocity_;
+  dynamixel::GroupSyncRead *groupSyncReadEncoder_;
 };
 
-#endif // DYNAMIXEL_CONTROLLER_H_
+#endif // TURTLEBOT3_MOTOR_DRIVER_H_
