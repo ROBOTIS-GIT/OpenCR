@@ -1,0 +1,43 @@
+# OpenCR Boards
+#
+menu.device_variant=Variant
+menu.bootloader_version=Bootloader version
+menu.upload_method=Upload method
+
+OpenCR.bootloader.tool = dfu_util
+OpenCR.bootloader.file = opencr_boot.bin
+
+OpenCR.name=OpenCR Board
+OpenCR.upload.maximum_size=786432
+
+OpenCR.upload.file_type=bin
+OpenCR.upload.ram.maximum_size=256788
+OpenCR.upload.flash.maximum_size=786432
+OpenCR.upload.params.quiet=no
+
+OpenCR.build.mcu=cortex-m7
+OpenCR.build.f_cpu=216000000L
+OpenCR.build.board=OpenCR
+OpenCR.build.core=arduino
+OpenCR.build.common_flags=-mthumb  -DSTM32F746xx -D__OPENCR__
+
+OpenCR.build.ldscript=bsp/opencr/ldscript/opencr_flash.ld
+OpenCR.build.variant=OpenCR
+OpenCR.build.variant_system_lib=lib_f746.a
+OpenCR.build.extra_flags=
+
+
+OpenCR.build.inc1=bsp/opencr
+OpenCR.build.inc2=bsp/opencr/include
+OpenCR.build.inc3=hw
+OpenCR.build.inc4=hw/driver
+OpenCR.build.inc5=hw/usb_cdc
+OpenCR.build.inc6=lib/STM32F7xx_HAL_Driver/Inc/
+OpenCR.build.inc7=
+
+#OpenCR.upload.tool=opencr_ld
+#OpenCR.menu.upload_method.upload.tool=opencr_ld
+
+OpenCR.menu.upload_method.UploadMethod=OpenCR Bootloader
+OpenCR.menu.upload_method.UploadMethod.upload.protocol=opencr_ld
+OpenCR.menu.upload_method.UploadMethod.upload.tool=opencr_ld
