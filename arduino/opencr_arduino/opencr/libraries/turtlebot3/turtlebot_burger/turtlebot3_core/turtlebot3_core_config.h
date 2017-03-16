@@ -44,6 +44,7 @@
 #define SENSOR_STATE_PUBLISH_PERIOD      30   //hz
 #define CMD_VEL_PUBLISH_PERIOD           30   //hz
 #define DRIVE_INFORMATION_PUBLISH_PERIOD 30   //hz
+#define DRIVE_TEST_PERIOD                30   //hz
 
 #define WHEEL_RADIUS                    0.033     // meter
 #define WHEEL_SEPARATION                0.16      // meter (0.16 / 0.287)
@@ -71,8 +72,12 @@
 #define DEG2RAD(x)                      (x * 0.01745329252)  // *PI/180
 #define RAD2DEG(x)                      (x * 57.2957795131)  // *180/PI
 
-#define TEST_DISTANCE                   0.450     // meter
-#define TEST_RADIAN                     1.5780    // 90 degree
+#define TEST_DISTANCE                   0.300     // meter
+#define TEST_RADIAN                     3.14      // 180 degree
+
+#define WAIT_FOR_BUTTON_PRESSED         0
+#define WAIT_SECONDS                    1
+#define CHECK_RISING_EDGE               2
 
 // #define DEBUG_MODE
 
@@ -97,7 +102,9 @@ void updateJoint(void);
 void updateTF(geometry_msgs::TransformStamped& odom_tf);
 void receiveRemoteControlData(void);
 void controlMotorSpeed(void);
-void testDrive(int32_t left_encoder_tick, int32_t right_encoder_tick);
+uint8_t getButtonPressed(void);
+void testDriving(void);
+void checkPushButtonState(void);
 float checkVoltage(void);
 void showLedStatus(void);
 void updateRxTxLed(void);
