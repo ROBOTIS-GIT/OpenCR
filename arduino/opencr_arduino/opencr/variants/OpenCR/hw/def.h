@@ -9,7 +9,7 @@
 #define DEF_H
 
 #include <stdint.h>
-
+#include <stdbool.h>
 
 #ifndef BOOL
 #define BOOL uint8_t
@@ -23,6 +23,7 @@
 #define FALSE 0
 #endif
 
+/*
 #ifndef bool
 #define bool uint8_t
 #endif
@@ -35,6 +36,7 @@
 #define false 0
 #endif
 
+*/
 
 typedef void (*voidFuncPtr)(void);
 

@@ -18,12 +18,12 @@ TIM_HandleTypeDef         hTIM9;
 TIM_HandleTypeDef         hTIM11;
 TIM_HandleTypeDef         hTIM12;
 
-volatile TIM_OC_InitTypeDef        hOC1;
-volatile TIM_OC_InitTypeDef        hOC2;
-volatile TIM_OC_InitTypeDef        hOC3;
-volatile TIM_OC_InitTypeDef        hOC9;
-volatile TIM_OC_InitTypeDef        hOC11;
-volatile TIM_OC_InitTypeDef        hOC12;
+TIM_OC_InitTypeDef        hOC1;
+TIM_OC_InitTypeDef        hOC2;
+TIM_OC_InitTypeDef        hOC3;
+TIM_OC_InitTypeDef        hOC9;
+TIM_OC_InitTypeDef        hOC11;
+TIM_OC_InitTypeDef        hOC12;
 
 
 
@@ -59,7 +59,7 @@ void drv_pwm_set_freq(uint32_t ulPin, uint32_t freq_data)
 }
 
 
-void drv_pwm_get_freq(uint32_t ulPin)
+uint32_t drv_pwm_get_freq(uint32_t ulPin)
 {
   return pwm_freq[ulPin];
 }

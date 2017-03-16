@@ -17,7 +17,7 @@
 */
 
 #include "Arduino.h"
-
+#include "drv_micros.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

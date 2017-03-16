@@ -9,6 +9,9 @@
 
 
 
+extern void delayMicroseconds(uint32_t usec);
+
+
 
 void delay_ns(uint32_t ns)
 {

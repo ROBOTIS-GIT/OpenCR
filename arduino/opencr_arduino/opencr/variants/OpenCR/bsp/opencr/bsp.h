@@ -33,6 +33,7 @@
 void bsp_init();
 void bsp_deinit();
 
+void bsp_mpu_config(void);
 
 #ifdef __cplusplus
 }

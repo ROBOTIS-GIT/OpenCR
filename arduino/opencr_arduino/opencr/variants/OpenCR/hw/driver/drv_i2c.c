@@ -62,8 +62,8 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef *hi2c)
   if( hi2c->Instance == I2C1 )
   {
     /*##-1- Reset peripherals ##################################################*/
-    I2C1_FORCE_RESET();
-    I2C1_RELEASE_RESET();
+    __HAL_RCC_I2C1_FORCE_RESET();
+    __HAL_RCC_I2C1_RELEASE_RESET();
 
     /*##-2- Disable peripherals and GPIO Clocks #################################*/
     /* Configure I2C SCL as alternate function  */

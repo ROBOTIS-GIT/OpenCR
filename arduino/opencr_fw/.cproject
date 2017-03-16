@@ -41,9 +41,9 @@
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.printsize.1866386113" name="Print size" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.printsize" value="true" valueType="boolean"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.abi.935810578" name="Float ABI" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.abi" value="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.abi.softfp" valueType="enumerated"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.unit.273687613" name="FPU Type" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.unit" value="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.unit.fpv5spd16" valueType="enumerated"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.target.other.739613907" name="Other target flags" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.target.other" value="-DSTM32F746xx -D__OPENCR__  -DF_CPU=216000000L" valueType="string"/>
+							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.target.other.739613907" name="Other target flags" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.target.other" value="-DSTM32F746xx -D__OPENCR__  -DF_CPU=216000000L  -DARDUINO=180" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="ilg.gnuarmeclipse.managedbuild.cross.targetPlatform.792158260" isAbstract="false" osList="all" superClass="ilg.gnuarmeclipse.managedbuild.cross.targetPlatform"/>
-							<builder buildPath="${workspace_loc:/opencr_fw}/Debug" id="ilg.gnuarmeclipse.managedbuild.cross.builder.766535111" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.builder"/>
+							<builder buildPath="${workspace_loc:/opencr_fw}/Debug" id="ilg.gnuarmeclipse.managedbuild.cross.builder.766535111" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="ilg.gnuarmeclipse.managedbuild.cross.builder"/>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.1208706191" name="Cross ARM GNU Assembler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler">
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.usepreprocessor.800327037" name="Use preprocessor" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.usepreprocessor" value="true" valueType="boolean"/>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input.649564822" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input"/>
@@ -66,6 +66,11 @@
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.20901186" name="Cross ARM C++ Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler">
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.include.paths.2124255421" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/arduino/cores/arduino}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/arduino/libraries/RC100}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/arduino/libraries/DynamixelSDK/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/arduino/libraries/turtlebot3_ros_lib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/arduino/libraries/SPI}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/arduino/libraries/IMU}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/arduino/variants/OpenCR/bsp}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/arduino/variants/OpenCR}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/arduino/variants/OpenCR/lib/STM32F7xx_HAL_Driver/Inc}&quot;"/>
@@ -111,7 +116,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="arduino/libraries/turtlebot3_ros_lib|arduino/libraries/turtlebot3|arduino/libraries/SPI|arduino/libraries/RTOS|arduino/libraries/RC100|arduino/libraries/OpenCR|arduino/libraries/OP3|arduino/libraries/OLLO|arduino/libraries/IMU|arduino/libraries/I2Cdev|arduino/libraries/Eigen331|arduino/libraries/EEPROM|arduino/libraries/DynamixelSDK|arduino/libraries/Dynamixel" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry excluding="arduino/libraries/DynamixelSDK/examples|sketch/turtlebot3/turtlebot_waffle|sketch/turtlebot3/examples|sketch/blink_led|sketch/imu_read_rpy|arduino/libraries/turtlebot3|arduino/libraries/RTOS|arduino/libraries/OpenCR|arduino/libraries/OP3|arduino/libraries/OLLO|arduino/libraries/I2Cdev|arduino/libraries/Eigen331|arduino/libraries/EEPROM|arduino/libraries/Dynamixel" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -194,7 +199,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="arduino/libraries/turtlebot3_ros_lib|arduino/libraries/turtlebot3|arduino/libraries/SPI|arduino/libraries/RTOS|arduino/libraries/RC100|arduino/libraries/OpenCR|arduino/libraries/OP3|arduino/libraries/OLLO|arduino/libraries/IMU|arduino/libraries/I2Cdev|arduino/libraries/Eigen331|arduino/libraries/EEPROM|arduino/libraries/DynamixelSDK|arduino/libraries/Dynamixel" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry excluding="arduino/libraries/DynamixelSDK/examples|sketch/turtlebot3/turtlebot_waffle|sketch/turtlebot3/examples|sketch/blink_led|sketch/imu_read_rpy|arduino/libraries/turtlebot3|arduino/libraries/RTOS|arduino/libraries/OpenCR|arduino/libraries/OP3|arduino/libraries/OLLO|arduino/libraries/I2Cdev|arduino/libraries/Eigen331|arduino/libraries/EEPROM|arduino/libraries/Dynamixel" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -229,4 +234,5 @@
 			<resource resourceType="PROJECT" workspacePath="/opencr_fw"/>
 		</configuration>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

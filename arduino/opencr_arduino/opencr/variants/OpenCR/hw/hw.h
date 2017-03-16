@@ -28,7 +28,7 @@
 #include "drv_timer.h"
 #include "drv_eeprom.h"
 #include "drv_rtc.h"
-
+#include "drv_micros.h"
 
 #include "delay.h"
 #include "flash.h"
