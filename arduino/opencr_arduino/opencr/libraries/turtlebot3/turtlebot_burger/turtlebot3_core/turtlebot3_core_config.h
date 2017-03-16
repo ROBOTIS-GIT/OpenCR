@@ -46,16 +46,16 @@
 #define DRIVE_INFORMATION_PUBLISH_PERIOD 30   //hz
 #define DRIVE_TEST_PERIOD                30   //hz
 
-#define WHEEL_RADIUS                    0.033     // meter
-#define WHEEL_SEPARATION                0.16      // meter (0.16 / 0.287)
-#define ROBOT_RADIUS                    0.078     // meter (0.078 / 0.294)
+#define WHEEL_RADIUS                    0.033           // meter
+#define WHEEL_SEPARATION                0.16            // meter (BURGER => 0.16, WAFFLE => 0.287)
+#define ROBOT_RADIUS                    0.078           // meter (BURGER => 0.078, WAFFLE => 0.294)
 #define ENCODER_MIN                     -2147483648     // raw
 #define ENCODER_MAX                     2147483648      // raw
 
 #define LEFT                            0
 #define RIGHT                           1
 
-#define VELOCITY_CONSTANT_VAULE         1263.632956882  // V = r * w = r * RPM * 0.10472
+#define VELOCITY_CONSTANT_VALUE         1263.632956882  // V = r * w = r * RPM * 0.10472
                                                         //   = 0.033 * 0.229 * Goal RPM * 0.10472
                                                         // Goal RPM = V * 1263.632956882
 
@@ -75,20 +75,9 @@
 #define TEST_DISTANCE                   0.300     // meter
 #define TEST_RADIAN                     3.14      // 180 degree
 
-#define WAIT_FOR_BUTTON_PRESSED         0
-#define WAIT_SECONDS                    1
-#define CHECK_RISING_EDGE               2
-
-// #define DEBUG_MODE
-
-/* Example of debugging
-*
-* #ifdef DEBUG_MODE
-*   char log_msg[128];
-*   sprintf(log_msg, "foo = %d", (int)bar);
-*   nh.loginfo(log_msg);
-* #endif
-*/
+#define WAIT_FOR_BUTTON_PRESS           0
+#define WAIT_SECOND                     1
+#define CHECK_BUTTON_RELEASED           2
 
 // Callback function prototypes
 void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
@@ -102,8 +91,8 @@ void updateJoint(void);
 void updateTF(geometry_msgs::TransformStamped& odom_tf);
 void receiveRemoteControlData(void);
 void controlMotorSpeed(void);
-uint8_t getButtonPressed(void);
-void testDriving(void);
+uint8_t getButtonPress(void);
+void testDrive(void);
 void checkPushButtonState(void);
 float checkVoltage(void);
 void showLedStatus(void);

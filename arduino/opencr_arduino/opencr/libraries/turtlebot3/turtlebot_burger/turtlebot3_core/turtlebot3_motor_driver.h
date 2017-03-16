@@ -23,22 +23,22 @@
 
 // Control table address (Dynamixel X-series)
 #define ADDR_X_TORQUE_ENABLE            64
-#define ADDR_X_GOAL_VELOCITY           104
-#define ADDR_X_GOAL_POSITION           116
-#define ADDR_X_REALTIME_TICK           120
-#define ADDR_X_PRESENT_VELOCITY        128
-#define ADDR_X_PRESENT_POSITION        132
+#define ADDR_X_GOAL_VELOCITY            104
+#define ADDR_X_GOAL_POSITION            116
+#define ADDR_X_REALTIME_TICK            120
+#define ADDR_X_PRESENT_VELOCITY         128
+#define ADDR_X_PRESENT_POSITION         132
 
 // Limit values (XM430-W210-T)
-#define LIMIT_X_MAX_VELOCITY           240
+#define LIMIT_X_MAX_VELOCITY            240
 
 // Data Byte Length
-#define LEN_X_TORQUE_ENABLE            1
-#define LEN_X_GOAL_VELOCITY            4
-#define LEN_X_GOAL_POSITION            4
-#define LEN_X_REALTIME_TICK            2
-#define LEN_X_PRESENT_VELOCITY         4
-#define LEN_X_PRESENT_POSITION         4
+#define LEN_X_TORQUE_ENABLE             1
+#define LEN_X_GOAL_VELOCITY             4
+#define LEN_X_GOAL_POSITION             4
+#define LEN_X_REALTIME_TICK             2
+#define LEN_X_PRESENT_VELOCITY          4
+#define LEN_X_PRESENT_POSITION          4
 
 #define PROTOCOL_VERSION                2.0     // Dynamixel protocol version 2.0
 
@@ -62,7 +62,7 @@ class Turtlebot3MotorDriver
   bool speedControl(int64_t left_wheel_value, int64_t right_wheel_value);
 
  private:
-  int8_t baudrate_;
+  uint32_t baudrate_;
   float  protocol_version_;
   uint8_t left_wheel_id_;
   uint8_t right_wheel_id_;

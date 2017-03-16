@@ -39,7 +39,7 @@ ros::Publisher sensor_state_pub("sensor_state", &sensor_state_msg);
 sensor_msgs::Imu imu_msg;
 ros::Publisher imu_pub("imu", &imu_msg);
 
-// Command velocity of Turtlebot3 using RC100 remocon
+// Command velocity of Turtlebot3 using RC100 remote controller
 geometry_msgs::Twist cmd_vel_rc100_msg;
 ros::Publisher cmd_vel_rc100_pub("cmd_vel_rc100", &cmd_vel_rc100_msg);
 
@@ -58,7 +58,7 @@ geometry_msgs::TransformStamped odom_tf;
 tf::TransformBroadcaster tfbroadcaster;
 
 /*******************************************************************************
-* SoftwareTimer for * of Turtlebot3
+* SoftwareTimer of Turtlebot3
 *******************************************************************************/
 static uint32_t tTime[4];
 
@@ -80,17 +80,16 @@ double goal_angular_velocity = 0.0;
 cIMU imu;
 
 /*******************************************************************************
-* Declaration for Remocon (RC100)
+* Declaration for RC100 remote controller
 *******************************************************************************/
 RC100 remote_controller;
 double const_cmd_vel    = 0.2;
 
 /*******************************************************************************
-* Declaration for Test Drive
+* Declaration for test drive
 *******************************************************************************/
 bool start_move = false;
 bool start_rotate = false;
-uint8_t get_button_state = 0;
 int32_t last_left_encoder  = 0;
 int32_t last_right_encoder = 0;
 
@@ -111,7 +110,7 @@ void setup()
 {
   // Initialize ROS node handle, advertise and subscribe the topics
   nh.initNode();
-  nh.getHardware()->setBaud(115200); // TODO: Testing
+  nh.getHardware()->setBaud(115200);
   nh.subscribe(cmd_vel_sub);
   nh.advertise(sensor_state_pub);
   nh.advertise(imu_pub);
@@ -128,8 +127,8 @@ void setup()
   // Setting for IMU
   imu.begin();
 
-  // Setting for remocon(ROBOTIS RC100) and cmd_vel
-  remote_controller.begin(1);  //57600bps for RC100
+  // Setting for ROBOTIS RC100 remote controller and cmd_vel
+  remote_controller.begin(1);  // 57600bps baudrate for RC100 control
 
   cmd_vel_rc100_msg.linear.x  = 0.0;
   cmd_vel_rc100_msg.angular.z = 0.0;
@@ -140,13 +139,12 @@ void setup()
   odom_pose[2] = 0.0;
 
   joint_states.header.frame_id = "base_footprint";
+  joint_states.name            = joint_states_name;
 
   joint_states.name_length     = 2;
   joint_states.position_length = 2;
   joint_states.velocity_length = 2;
   joint_states.effort_length   = 2;
-
-  joint_states.name     = joint_states_name;
 
   prev_update_time = millis();
 
@@ -156,7 +154,7 @@ void setup()
 }
 
 /*******************************************************************************
-* loop function
+* Loop function
 *******************************************************************************/
 void loop()
 {
@@ -187,13 +185,13 @@ void loop()
     tTime[3] = millis();
   }
 
-  // check Push Button Pressed for Driving Test
+  // Check push button pressed for simple test drive
   checkPushButtonState();
 
   // Update the IMU unit
   imu.update();
 
-  // Show LED Status
+  // Show LED status
   showLedStatus();
 
   // Call all the callbacks waiting to be called at that point in time
@@ -282,6 +280,8 @@ void publishSensorStateMsg(void)
 {
   bool dxl_comm_result = false;
 
+  int32_t current_tick;
+
   sensor_state_msg.stamp = nh.now();
   sensor_state_msg.battery = checkVoltage();
 
@@ -296,7 +296,7 @@ void publishSensorStateMsg(void)
     return;
   }
 
-  int32_t current_tick = sensor_state_msg.left_encoder;
+  current_tick = sensor_state_msg.left_encoder;
 
   if (!init_encoder_[LEFT])
   {
@@ -353,9 +353,9 @@ bool updateOdometry(double diff_time)
 {
   double odom_vel[3];
 
-  double wheel_l, wheel_r; // rotation value of wheel [rad]
+  double wheel_l, wheel_r;      // rotation value of wheel [rad]
   double delta_s, delta_theta;
-  double v, w;             // v = translational velocity [m/s], w = rotational velocity [rad/s]
+  double v, w;                  // v = translational velocity [m/s], w = rotational velocity [rad/s]
   double step_time;
 
   wheel_l = wheel_r = 0.0;
@@ -365,21 +365,17 @@ bool updateOdometry(double diff_time)
 
   step_time = diff_time;
 
-  if(step_time == 0)
+  if (step_time == 0)
     return false;
 
   wheel_l = TICK2RAD * (double)last_diff_tick_[LEFT];
   wheel_r = TICK2RAD * (double)last_diff_tick_[RIGHT];
 
-  if(isnan(wheel_l))
-  {
+  if (isnan(wheel_l))
     wheel_l = 0.0;
-  }
 
-  if(isnan(wheel_r))
-  {
+  if (isnan(wheel_r))
     wheel_r = 0.0;
-  }
 
   delta_s     = WHEEL_RADIUS * (wheel_r + wheel_l) / 2.0;
   delta_theta = WHEEL_RADIUS * (wheel_r - wheel_l) / WHEEL_SEPARATION;
@@ -452,39 +448,41 @@ void receiveRemoteControlData(void)
   {
     received_data = remote_controller.readData();
 
-    if(received_data & RC100_BTN_U)
+    if (received_data & RC100_BTN_U)
     {
-      cmd_vel_rc100_msg.linear.x  += VELOCITY_LINEAR_X * SCALE_VELOCITY_LINEAR_X;
+      cmd_vel_rc100_msg.linear.x += VELOCITY_LINEAR_X * SCALE_VELOCITY_LINEAR_X;
     }
-    else if(received_data & RC100_BTN_D)
+    else if (received_data & RC100_BTN_D)
     {
-      cmd_vel_rc100_msg.linear.x  -= VELOCITY_LINEAR_X * SCALE_VELOCITY_LINEAR_X;
+      cmd_vel_rc100_msg.linear.x -= VELOCITY_LINEAR_X * SCALE_VELOCITY_LINEAR_X;
     }
-    else if(received_data & RC100_BTN_L)
+
+    if (received_data & RC100_BTN_L)
     {
       cmd_vel_rc100_msg.angular.z += VELOCITY_ANGULAR_Z * SCALE_VELOCITY_ANGULAR_Z;
     }
-    else if(received_data & RC100_BTN_R)
+    else if (received_data & RC100_BTN_R)
     {
       cmd_vel_rc100_msg.angular.z -= VELOCITY_ANGULAR_Z * SCALE_VELOCITY_ANGULAR_Z;
     }
-    else if(received_data & RC100_BTN_6)
+
+    if (received_data & RC100_BTN_6)
     {
       cmd_vel_rc100_msg.linear.x  = const_cmd_vel;
       cmd_vel_rc100_msg.angular.z = 0.0;
     }
-    else if(received_data & RC100_BTN_5)
+    else if (received_data & RC100_BTN_5)
     {
       cmd_vel_rc100_msg.linear.x  = 0.0;
       cmd_vel_rc100_msg.angular.z = 0.0;
     }
 
-    if(cmd_vel_rc100_msg.linear.x > MAX_LINEAR_VELOCITY)
+    if (cmd_vel_rc100_msg.linear.x > MAX_LINEAR_VELOCITY)
     {
       cmd_vel_rc100_msg.linear.x = MAX_LINEAR_VELOCITY;
     }
 
-    if(cmd_vel_rc100_msg.angular.z > MAX_ANGULAR_VELOCITY)
+    if (cmd_vel_rc100_msg.angular.z > MAX_ANGULAR_VELOCITY)
     {
       cmd_vel_rc100_msg.angular.z = MAX_ANGULAR_VELOCITY;
     }
@@ -499,6 +497,8 @@ void receiveRemoteControlData(void)
 *******************************************************************************/
 void controlMotorSpeed(void)
 {
+  bool dxl_comm_result = false;
+
   double wheel_speed_cmd[2];
   double lin_vel1;
   double lin_vel2;
@@ -506,92 +506,92 @@ void controlMotorSpeed(void)
   wheel_speed_cmd[LEFT]  = goal_linear_velocity - (goal_angular_velocity * WHEEL_SEPARATION / 2);
   wheel_speed_cmd[RIGHT] = goal_linear_velocity + (goal_angular_velocity * WHEEL_SEPARATION / 2);
 
-  lin_vel1 = wheel_speed_cmd[LEFT] * VELOCITY_CONSTANT_VAULE;
+  lin_vel1 = wheel_speed_cmd[LEFT] * VELOCITY_CONSTANT_VALUE;
+  if (lin_vel1 > LIMIT_X_MAX_VELOCITY)
+  {
+    lin_vel1 =  LIMIT_X_MAX_VELOCITY;
+  }
+  else if (lin_vel1 < -LIMIT_X_MAX_VELOCITY)
+  {
+    lin_vel1 = -LIMIT_X_MAX_VELOCITY;
+  }
 
-  if (lin_vel1 > LIMIT_X_MAX_VELOCITY)       lin_vel1 =  LIMIT_X_MAX_VELOCITY;
-  else if (lin_vel1 < -LIMIT_X_MAX_VELOCITY) lin_vel1 = -LIMIT_X_MAX_VELOCITY;
-
-  lin_vel2 = wheel_speed_cmd[RIGHT] * VELOCITY_CONSTANT_VAULE;
-
-  if (lin_vel2 > LIMIT_X_MAX_VELOCITY)       lin_vel2 =  LIMIT_X_MAX_VELOCITY;
-  else if (lin_vel2 < -LIMIT_X_MAX_VELOCITY) lin_vel2 = -LIMIT_X_MAX_VELOCITY;
-
-  bool dxl_comm_result = false;
+  lin_vel2 = wheel_speed_cmd[RIGHT] * VELOCITY_CONSTANT_VALUE;
+  if (lin_vel2 > LIMIT_X_MAX_VELOCITY)
+  {
+    lin_vel2 =  LIMIT_X_MAX_VELOCITY;
+  }
+  else if (lin_vel2 < -LIMIT_X_MAX_VELOCITY)
+  {
+    lin_vel2 = -LIMIT_X_MAX_VELOCITY;
+  }
 
   dxl_comm_result = motor_driver.speedControl((int64_t)lin_vel1, (int64_t)lin_vel2);
-
   if (dxl_comm_result == false)
-  {
     return;
-  }
 }
 
 /*******************************************************************************
-* Get Button Pressed
+* Get Button Press (Push button 1, Push button 2)
 *******************************************************************************/
-uint8_t getButtonPressed()
+uint8_t getButtonPress(void)
 {
-  uint32_t i;             // PUSH_BUTTON_1, PUSH_BUTTON_2
-  uint8_t button_state;
+  uint8_t button_state = 0;
   static uint32_t t_time[2];
-  static uint8_t  button_state_num[2] = {0, };
+  static uint8_t button_state_num[2] = {0, };
 
-  button_state = 0;
-
-  for (i=0; i<2; i++)
+  for (int button_num = 0; button_num < 2; button_num++)
   {
-    switch(button_state_num[i])
+    switch (button_state_num[button_num])
     {
-      case WAIT_FOR_BUTTON_PRESSED:
-        if (getPushButton() & (1<<i))
-        {
-          t_time[i] = millis();
-          button_state_num[i] = WAIT_SECONDS;
-        }
-        break;
+     case WAIT_FOR_BUTTON_PRESS:
+       if (getPushButton() & (1 << button_num))
+       {
+         t_time[button_num] = millis();
+         button_state_num[button_num] = WAIT_SECOND;
+       }
+       break;
 
-      case WAIT_SECONDS:
-        if ((millis()-t_time[i]) >= 1000)
-        {
-          get_button_state = getPushButton();
-          if (getPushButton() & (1<<i))
-          {
-            button_state_num[i] = CHECK_RISING_EDGE;
-            button_state |= (1<<i);
-          }
-          else
-          {
-            button_state_num[i] = WAIT_FOR_BUTTON_PRESSED;
-          }
-        }
-        break;
+     case WAIT_SECOND:
+       if ((millis()-t_time[button_num]) >= 1000)
+       {
+         if (getPushButton() & (1 << button_num))
+         {
+           button_state_num[button_num] = CHECK_BUTTON_RELEASED;
+           button_state |= (1 << button_num);
+         }
+         else
+         {
+           button_state_num[button_num] = WAIT_FOR_BUTTON_PRESS;
+         }
+       }
+       break;
 
-      case CHECK_RISING_EDGE:
-        if (!(getPushButton() & (1<<i)))
-        {
-          button_state_num[i] = WAIT_FOR_BUTTON_PRESSED;
-        }
-        break;
+     case CHECK_BUTTON_RELEASED:
+       if (!(getPushButton() & (1 << button_num)))
+         button_state_num[button_num] = WAIT_FOR_BUTTON_PRESS;
+       break;
 
-      default :
-        button_state_num[i] = WAIT_FOR_BUTTON_PRESSED;
-        break;
+     default :
+       button_state_num[button_num] = WAIT_FOR_BUTTON_PRESS;
+       break;
     }
   }
+
   return button_state;
 }
 
 /*******************************************************************************
-* Test drive turtlebot3 using RC100
+* Turtlebot3 test drive using RC100 remote controller
 *******************************************************************************/
-void testDriving()
+void testDrive(void)
 {
   int32_t current_tick = sensor_state_msg.right_encoder;
   double diff_encoder = 0.0;
 
   if (start_move)
   {
-    diff_encoder = TEST_DISTANCE/(0.207/4096); // Circumference / The number of TICK for 1 revolute
+    diff_encoder = TEST_DISTANCE / (0.207 / 4096); // (Circumference) / (The number of tick per revolution)
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
@@ -608,7 +608,7 @@ void testDriving()
   }
   else if (start_rotate)
   {
-    diff_encoder = (TEST_RADIAN * ROBOT_RADIUS)/(0.207/4096);
+    diff_encoder = (TEST_RADIAN * ROBOT_RADIUS) / (0.207 / 4096);
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
@@ -630,7 +630,7 @@ void testDriving()
 *******************************************************************************/
 void checkPushButtonState()
 {
-  uint8_t button_state = getButtonPressed();
+  uint8_t button_state = getButtonPress();
 
   if (button_state & (1<<0))
   {
@@ -638,6 +638,7 @@ void checkPushButtonState()
     last_left_encoder = sensor_state_msg.left_encoder;
     last_right_encoder = sensor_state_msg.right_encoder;
   }
+
   if (button_state & (1<<1))
   {
     start_rotate = true;
@@ -645,7 +646,7 @@ void checkPushButtonState()
     last_right_encoder = sensor_state_msg.right_encoder;
   }
 
-  testDriving();
+  testDrive();
 }
 
 /*******************************************************************************
@@ -661,13 +662,13 @@ float checkVoltage(void)
 }
 
 /*******************************************************************************
-* show led status
+* Show LED status
 *******************************************************************************/
 void showLedStatus(void)
 {
   static uint32_t t_time = millis();
 
-  if ((millis()-t_time) >= 500 )
+  if ((millis()-t_time) >= 500)
   {
     t_time = millis();
     digitalWrite(13, !digitalRead(13));
@@ -701,7 +702,6 @@ void updateRxTxLed(void)
   static uint32_t rx_cnt;
   static uint32_t tx_cnt;
 
-
   if ((millis()-tx_led_update_time) > 50)
   {
     tx_led_update_time = millis();
@@ -718,7 +718,7 @@ void updateRxTxLed(void)
     tx_cnt = Serial.getTxCnt();
   }
 
-  if( (millis()-rx_led_update_time) > 50 )
+  if ((millis()-rx_led_update_time) > 50)
   {
     rx_led_update_time = millis();
 
@@ -734,5 +734,3 @@ void updateRxTxLed(void)
     rx_cnt = Serial.getRxCnt();
   }
 }
-
-// EOF

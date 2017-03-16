@@ -73,23 +73,6 @@ void PortHandlerOpenCR::closePort()
 void PortHandlerOpenCR::clearPort()
 {
   DYNAMIXEL_SERIAL.flush();
-  // double tTime;
-  //
-  // tTime = getCurrentTime();
-  // while(1)
-  // {
-  //   if (DYNAMIXEL_SERIAL.available())
-  //   {
-  //     DYNAMIXEL_SERIAL.read();
-  //   }
-  //   else
-  //   {
-  //     break;
-  //   }
-  //
-  //   if (getCurrentTime() - tTime > 1000)
-  //     break;
-  // }
 }
 
 void PortHandlerOpenCR::setPortName(const char *port_name)
@@ -176,6 +159,7 @@ bool PortHandlerOpenCR::isPacketTimeout()
     packet_timeout_ = 0;
     return true;
   }
+  
   return false;
 }
 
