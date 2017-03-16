@@ -1,4 +1,21 @@
-#include "bsp.h"
+/*
+ *  bsp.c
+ *
+ *  boart support package
+ *
+ *  Created on: 2017. 3. 16.
+ *      Author: Baram
+ */
+ #include "bsp.h"
+
+ #include "hw.h"
+
+ #include "usbd_core.h"
+ #include "usbd_desc.h"
+ #include "usbd_cdc.h"
+ #include "usbd_cdc_interface.h"
+
+
 
 
 USBD_HandleTypeDef USBD_Device;
@@ -34,8 +51,6 @@ void bsp_init()
   __HAL_RCC_GPIOF_CLK_ENABLE();
 
 
-  led_init();
-  button_init();
 
   //HAL_Delay(100);
 

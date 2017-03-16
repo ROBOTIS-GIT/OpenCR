@@ -2,13 +2,12 @@
 #define _CHIP_OPENCR_F7xx_
 
 #include <stdbool.h>
-#include "hal.h"
-#include "drv.h"
+#include "bsp.h"
+#include "hw.h"
 
 
 
-#define millis(a1) 	HAL_GetTick(a1)
-#define delay(a2) 	HAL_Delay(a2)
+
 
 
 
