@@ -13,25 +13,23 @@ int main(void)
   uint32_t t_time;
 
 
-	hwInit();
-	driverInit();
+  hwInit();
+  driverInit();
 
-	t_time = millis();
-	while(1)
-	{
-	  if (millis()-t_time > 100)
-	  {
-	    t_time = millis();
-	    vcpPrintf("test \r\n");
-	  }
+  t_time = millis();
+  while(1)
+  {
+    if (millis()-t_time > 100)
+    {
+      t_time = millis();
+      vcpPrintf("test \r\n");
+    }
 
-	  if (vcpIsAvailable())
-	  {
-	    vcpPrintf("Received : %c\r\n", vcpRead());
-	  }
+    if (vcpIsAvailable())
+    {
+      vcpPrintf("Received : %c\r\n", vcpRead());
+    }
+  }
 
-
-	}
-
-	return 0;
+  return 0;
 }
