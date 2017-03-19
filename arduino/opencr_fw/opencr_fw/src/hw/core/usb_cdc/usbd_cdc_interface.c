@@ -75,7 +75,7 @@ static uint32_t rxd_length    = 0;
 static uint32_t rxd_BufPtrIn  = 0;
 static uint32_t rxd_BufPtrOut = 0;
 
-uint32_t usb_cdc_debug_cnt[16] = {0,};
+
 
 
 /* USB handler declaration */

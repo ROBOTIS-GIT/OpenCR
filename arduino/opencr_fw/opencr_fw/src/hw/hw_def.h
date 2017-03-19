@@ -1,12 +1,12 @@
 /*
- *  millis.h
+ *  hw_def.h
  *
  *  Created on: 2016. 5. 14.
  *      Author: Baram
  */
 
-#ifndef MILLIS_H
-#define MILLIS_H
+#ifndef HW_DEF_H
+#define HW_DEF_H
 
 
 #ifdef __cplusplus
@@ -15,16 +15,10 @@
 
 
 
-#include "def.h"
-#include "bsp.h"
 
 
 
 
-
-void millisInit();
-
-uint32_t millis();
 
 
 

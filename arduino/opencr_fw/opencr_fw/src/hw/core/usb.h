@@ -1,12 +1,14 @@
 /*
- *  millis.h
+ *  usb.h
+ *
+ *
  *
  *  Created on: 2016. 5. 14.
  *      Author: Baram
  */
 
-#ifndef MILLIS_H
-#define MILLIS_H
+#ifndef USB_H
+#define USB_H
 
 
 #ifdef __cplusplus
@@ -14,18 +16,11 @@
 #endif
 
 
-
 #include "def.h"
 #include "bsp.h"
 
 
-
-
-
-void millisInit();
-
-uint32_t millis();
-
+void usbInit(void);
 
 
 #ifdef __cplusplus
@@ -34,3 +29,4 @@ uint32_t millis();
 
 
 #endif
+

@@ -6,7 +6,7 @@
  */
 
 #include "delay.h"
-
+#include "micros.h"
 
 
 extern void delayMicroseconds(uint32_t usec);
@@ -20,7 +20,18 @@ void delay_ns(uint32_t ns)
 
 void delay_us(uint32_t us)
 {
-  delayMicroseconds(us);
+  uint32_t t_time;
+
+
+  t_time = micros();
+
+  while(1)
+  {
+    if ((micros()-t_time) >= us)
+    {
+      break;
+    }
+  }
 }
 
 void delay_ms(uint32_t ms)

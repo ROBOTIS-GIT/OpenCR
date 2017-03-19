@@ -1,12 +1,12 @@
 /*
- *  millis.h
+ *  ap.h
  *
  *  Created on: 2016. 5. 14.
  *      Author: Baram
  */
 
-#ifndef MILLIS_H
-#define MILLIS_H
+#ifndef AP_H
+#define AP_H
 
 
 #ifdef __cplusplus
@@ -14,17 +14,14 @@
 #endif
 
 
-
 #include "def.h"
+
 #include "bsp.h"
+#include "hw.h"
+#include "driver.h"
 
 
-
-
-
-void millisInit();
-
-uint32_t millis();
+void apInit(void);
 
 
 

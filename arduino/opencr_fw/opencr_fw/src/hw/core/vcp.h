@@ -21,7 +21,7 @@
 
 
 void     vcpInit(void);
-uint32_t vcpIsAvailable(void);
+uint32_t vcpAvailable(void);
 int32_t  vcpPeek(void);
 bool     vcpIsConnected(void);
 void     vcpPutch(uint8_t ch);

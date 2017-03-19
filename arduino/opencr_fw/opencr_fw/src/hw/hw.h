@@ -18,11 +18,14 @@
 #include "bsp.h"
 
 
+#include "core/usb.h"
 #include "core/vcp.h"
 #include "core/wdg.h"
 #include "core/micros.h"
 #include "core/millis.h"
 #include "core/delay.h"
+#include "core/led.h"
+
 
 void hwInit(void);
 

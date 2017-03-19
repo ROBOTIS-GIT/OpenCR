@@ -25,6 +25,12 @@
 
 
 
+#include "hw_def.h"
+#include "ap_def.h"
+
+
+
+
 typedef void (*voidFuncPtr)(void);
 
 

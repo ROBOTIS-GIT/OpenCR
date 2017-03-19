@@ -11,6 +11,7 @@
 
 #include "hw.h"
 #include "driver.h"
+#include "ap.h"
 
 
 #endif /* SRC_MAIN_H_ */

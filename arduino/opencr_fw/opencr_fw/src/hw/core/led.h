@@ -1,12 +1,12 @@
 /*
- *  millis.h
+ *  led.h
  *
  *  Created on: 2016. 5. 14.
  *      Author: Baram
  */
 
-#ifndef MILLIS_H
-#define MILLIS_H
+#ifndef LED_H
+#define LED_H
 
 
 #ifdef __cplusplus
@@ -20,12 +20,18 @@
 
 
 
+#define LED_CH_MAX      4
 
 
-void millisInit();
 
-uint32_t millis();
 
+
+void ledInit();
+
+
+void ledOn(uint8_t ch);
+void ledOff(uint8_t ch);
+void ledToggle(uint8_t ch);
 
 
 #ifdef __cplusplus
