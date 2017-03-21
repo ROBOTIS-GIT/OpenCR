@@ -21,7 +21,6 @@
 void setup()
 {
   CMD_SERIAL.begin(57600);
-  while(!CMD_SERIAL);
 }
 
 void loop()
@@ -381,7 +380,6 @@ void dxl_monitor_main(void)
     while(1);
   }
 
-  _printf("Be sure to enable Carriage return\n\n");
 
   char    input[128];
   char    cmd[80];
