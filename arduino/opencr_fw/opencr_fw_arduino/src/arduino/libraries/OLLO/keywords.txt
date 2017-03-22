@@ -1,0 +1,37 @@
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+read	KEYWORD2
+write	KEYWORD2
+writeLED	KEYWORD2
+beginIR	KEYWORD2
+beginButton	KEYWORD2
+readColor	KEYWORD2
+#######################################
+# Class (KEYWORD3)
+#######################################
+OLLO	KEYWORD3
+myOLLO	KEYWORD3
+#######################################
+# Constants (LITERAL1)
+#######################################
+TOUCH_SENSOR	LITERAL1
+GYRO_SENOSR	LITERAL1
+DMS_SENSOR	LITERAL1
+IR_SENSOR	LITERAL1
+PIR_SENSOR		LITERAL1
+MAGNETIC_SENSOR	LITERAL1
+COLOR_SENSOR	LITERAL1
+ULTRASONIC_SENSOR		LITERAL1
+LED_DISPLAY	LITERAL1
+RED	LITERAL1
+GREEN	LITERAL1
+BLUE	LITERAL1
+YELLOW	LITERAL1
+ORANGE	LITERAL1
+BLACK	LITERAL1
+WHITE	LITERAL1
