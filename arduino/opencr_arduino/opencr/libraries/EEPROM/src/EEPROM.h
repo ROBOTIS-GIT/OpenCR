@@ -22,7 +22,7 @@
 #define EEPROM_h
 
 #include <inttypes.h>
-#include "hal/driver/drv_eeprom.h"
+#include "drv_eeprom.h"
 
 /***
     EERef class.
