@@ -268,7 +268,7 @@ void publishImuMsg(void)
   tfs_msg.transform.rotation.y = imu.quat[2];
   tfs_msg.transform.rotation.z = imu.quat[3];
 
-  tfs_msg.transform.translation.x = 0.0;
+  tfs_msg.transform.translation.x = -0.032;
   tfs_msg.transform.translation.y = 0.0;
   tfs_msg.transform.translation.z = 0.068;
 
