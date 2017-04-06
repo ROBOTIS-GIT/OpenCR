@@ -151,6 +151,8 @@ void setup()
   pinMode(13, OUTPUT);
 
   SerialBT2.begin(57600);
+
+  Serial.begin(57600);
 }
 
 /*******************************************************************************
@@ -591,7 +593,7 @@ void testDrive(void)
 
   if (start_move)
   {
-    diff_encoder = TEST_DISTANCE / (0.207 / 4096); // (Circumference) / (The number of tick per revolution)
+    diff_encoder = TEST_DISTANCE / (0.207 / 4096); // (Circumference of Wheel) / (The number of tick per revolution)
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
@@ -608,7 +610,7 @@ void testDrive(void)
   }
   else if (start_rotate)
   {
-    diff_encoder = (TEST_RADIAN * ROBOT_RADIUS) / (0.207 / 4096);
+    diff_encoder = (TEST_RADIAN * TURNING_RADIUS) / (0.207 / 4096);
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
@@ -623,6 +625,12 @@ void testDrive(void)
       start_rotate = false;
     }
   }
+
+  Serial.print(last_right_encoder);
+  Serial.print(" ");
+  Serial.print(current_tick);
+  Serial.print(" ");
+  Serial.println(diff_encoder);
 }
 
 /*******************************************************************************

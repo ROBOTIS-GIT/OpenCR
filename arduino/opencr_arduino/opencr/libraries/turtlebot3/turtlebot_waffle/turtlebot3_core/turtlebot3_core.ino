@@ -139,13 +139,12 @@ void setup()
   odom_pose[2] = 0.0;
 
   joint_states.header.frame_id = "base_footprint";
+  joint_states.name            = joint_states_name;
 
   joint_states.name_length     = 2;
   joint_states.position_length = 2;
   joint_states.velocity_length = 2;
   joint_states.effort_length   = 2;
-
-  joint_states.name     = joint_states_name;
 
   prev_update_time = millis();
 
@@ -185,6 +184,12 @@ void loop()
     publishImuMsg();
     tTime[3] = millis();
   }
+
+  publishSensorStateMsg();
+  publishDriveInformation();
+
+  // Check push button pressed for simple test drive
+  checkPushButtonState();
 
   // Update the IMU unit
   imu.update();
@@ -589,7 +594,7 @@ void testDrive(void)
 
   if (start_move)
   {
-    diff_encoder = TEST_DISTANCE / (0.207 / 4096); // (Circumference) / (The number of tick per revolution)
+    diff_encoder = TEST_DISTANCE / (0.207 / 4096); // (Circumference of Wheel) / (The number of tick per revolution)
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
@@ -606,7 +611,7 @@ void testDrive(void)
   }
   else if (start_rotate)
   {
-    diff_encoder = (TEST_RADIAN * ROBOT_RADIUS) / (0.207 / 4096);
+    diff_encoder = (TEST_RADIAN * TURNING_RADIUS) / (0.207 / 4096);
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
