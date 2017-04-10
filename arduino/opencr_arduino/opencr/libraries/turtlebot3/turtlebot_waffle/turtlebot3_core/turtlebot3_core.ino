@@ -184,7 +184,7 @@ void loop()
     publishImuMsg();
     tTime[3] = millis();
   }
-  
+
   // Check push button pressed for simple test drive
   checkPushButtonState();
 
