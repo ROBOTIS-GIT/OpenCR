@@ -595,14 +595,11 @@ void testDrive(void)
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
-      cmd_vel_rc100_msg.linear.x  = 0.05 * SCALE_VELOCITY_LINEAR_X;
-      goal_linear_velocity  = cmd_vel_rc100_msg.linear.x;
+      goal_linear_velocity  = 0.05 * SCALE_VELOCITY_LINEAR_X;
     }
     else
     {
-      cmd_vel_rc100_msg.linear.x  = 0.0;
-      goal_linear_velocity  = cmd_vel_rc100_msg.linear.x;
-
+      goal_linear_velocity  = 0.0;
       start_move = false;
     }
   }
@@ -612,23 +609,14 @@ void testDrive(void)
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
-      cmd_vel_rc100_msg.angular.z = -0.7 * SCALE_VELOCITY_ANGULAR_Z;
-      goal_angular_velocity = cmd_vel_rc100_msg.angular.z;
+      goal_angular_velocity= -0.7 * SCALE_VELOCITY_ANGULAR_Z;
     }
     else
     {
-      cmd_vel_rc100_msg.angular.z  = 0.0;
-      goal_angular_velocity = cmd_vel_rc100_msg.angular.z;
-
+      goal_angular_velocity  = 0.0;
       start_rotate = false;
     }
   }
-
-  Serial.print(last_right_encoder);
-  Serial.print(" ");
-  Serial.print(current_tick);
-  Serial.print(" ");
-  Serial.println(diff_encoder);
 }
 
 /*******************************************************************************
