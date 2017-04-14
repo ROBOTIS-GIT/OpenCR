@@ -111,8 +111,6 @@ float joint_states_eff[2] = {0.0, 0.0};
 #define LED_LOW_BATTERY 2
 #define LED_ROS_CONNECT 3
 
-
-
 /*******************************************************************************
 * Setup function
 *******************************************************************************/
@@ -168,7 +166,6 @@ void setup()
 *******************************************************************************/
 void loop()
 {
-
   receiveRemoteControlData();
 
   if ((millis()-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_PERIOD))
@@ -202,6 +199,7 @@ void loop()
   // Update the IMU unit
   imu.update();
 
+  // Start Gyro Calibration after ROS connection
   updateGyroCali();
 
   // Show LED status
@@ -368,6 +366,7 @@ bool updateOdometry(double diff_time)
 
   double wheel_l, wheel_r;      // rotation value of wheel [rad]
   double delta_s, delta_theta;
+  static double last_theta = 0.0;
   double v, w;                  // v = translational velocity [m/s], w = rotational velocity [rad/s]
   double step_time;
 
@@ -391,7 +390,8 @@ bool updateOdometry(double diff_time)
     wheel_r = 0.0;
 
   delta_s     = WHEEL_RADIUS * (wheel_r + wheel_l) / 2.0;
-  delta_theta = WHEEL_RADIUS * (wheel_r - wheel_l) / WHEEL_SEPARATION;
+  delta_theta = atan2f(imu.quat[1]*imu.quat[2] + imu.quat[0]*imu.quat[3],
+                       0.5f - imu.quat[2]*imu.quat[2] - imu.quat[3]*imu.quat[3]) - last_theta;
 
   v = delta_s / step_time;
   w = delta_theta / step_time;
@@ -417,6 +417,9 @@ bool updateOdometry(double diff_time)
   // We should update the twist of the odometry
   odom.twist.twist.linear.x  = odom_vel[0];
   odom.twist.twist.angular.z = odom_vel[2];
+
+  last_theta = atan2f(imu.quat[1]*imu.quat[2] + imu.quat[0]*imu.quat[3],
+                      0.5f - imu.quat[2]*imu.quat[2] - imu.quat[3]*imu.quat[3]);
 
   return true;
 }
@@ -608,14 +611,11 @@ void testDrive(void)
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
-      cmd_vel_rc100_msg.linear.x  = 0.05 * SCALE_VELOCITY_LINEAR_X;
-      goal_linear_velocity  = cmd_vel_rc100_msg.linear.x;
+      goal_linear_velocity  = 0.05 * SCALE_VELOCITY_LINEAR_X;
     }
     else
     {
-      cmd_vel_rc100_msg.linear.x  = 0.0;
-      goal_linear_velocity  = cmd_vel_rc100_msg.linear.x;
-
+      goal_linear_velocity  = 0.0;
       start_move = false;
     }
   }
@@ -625,23 +625,14 @@ void testDrive(void)
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
-      cmd_vel_rc100_msg.angular.z = -0.7 * SCALE_VELOCITY_ANGULAR_Z;
-      goal_angular_velocity = cmd_vel_rc100_msg.angular.z;
+      goal_angular_velocity= -0.7 * SCALE_VELOCITY_ANGULAR_Z;
     }
     else
     {
-      cmd_vel_rc100_msg.angular.z  = 0.0;
-      goal_angular_velocity = cmd_vel_rc100_msg.angular.z;
-
+      goal_angular_velocity  = 0.0;
       start_rotate = false;
     }
   }
-
-  Serial.print(last_right_encoder);
-  Serial.print(" ");
-  Serial.print(current_tick);
-  Serial.print(" ");
-  Serial.println(diff_encoder);
 }
 
 /*******************************************************************************
@@ -754,6 +745,9 @@ void updateRxTxLed(void)
   }
 }
 
+/*******************************************************************************
+* Start Gyro Calibration
+*******************************************************************************/
 void updateGyroCali(void)
 {
   static bool gyro_cali = false;
@@ -766,7 +760,7 @@ void updateGyroCali(void)
     if (gyro_cali == false)
     {
       imu.SEN.gyro_cali_start();
-      
+
       t_time   = millis();
       pre_time = millis();
       while(!imu.SEN.gyro_cali_get_done())
