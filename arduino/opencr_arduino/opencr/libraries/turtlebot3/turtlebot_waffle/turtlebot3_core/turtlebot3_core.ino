@@ -104,13 +104,23 @@ float joint_states_vel[2] = {0.0, 0.0};
 float joint_states_eff[2] = {0.0, 0.0};
 
 /*******************************************************************************
+* Declaration for LED
+*******************************************************************************/
+#define LED_TXD         0
+#define LED_RXD         1
+#define LED_LOW_BATTERY 2
+#define LED_ROS_CONNECT 3
+
+
+
+/*******************************************************************************
 * Setup function
 *******************************************************************************/
 void setup()
 {
   // Initialize ROS node handle, advertise and subscribe the topics
   nh.initNode();
-  nh.getHardware()->setBaud(115200); // TODO: Testing
+  nh.getHardware()->setBaud(115200);
   nh.subscribe(cmd_vel_sub);
   nh.advertise(sensor_state_pub);
   nh.advertise(imu_pub);
@@ -127,8 +137,8 @@ void setup()
   // Setting for IMU
   imu.begin();
 
-  // Setting for remocon(ROBOTIS RC100) and cmd_vel
-  remote_controller.begin(1);  //57600bps for RC100
+  // Setting for ROBOTIS RC100 remote controller and cmd_vel
+  remote_controller.begin(1);  // 57600bps baudrate for RC100 control
 
   cmd_vel_rc100_msg.linear.x  = 0.0;
   cmd_vel_rc100_msg.angular.z = 0.0;
@@ -154,10 +164,11 @@ void setup()
 }
 
 /*******************************************************************************
-* loop function
+* Loop function
 *******************************************************************************/
 void loop()
 {
+
   receiveRemoteControlData();
 
   if ((millis()-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_PERIOD))
@@ -191,7 +202,9 @@ void loop()
   // Update the IMU unit
   imu.update();
 
-  // Show LED Status
+  updateGyroCali();
+
+  // Show LED status
   showLedStatus();
 
   // Call all the callbacks waiting to be called at that point in time
@@ -266,7 +279,7 @@ void publishImuMsg(void)
   tfs_msg.transform.rotation.y = imu.quat[2];
   tfs_msg.transform.rotation.z = imu.quat[3];
 
-  tfs_msg.transform.translation.x = 0.0;
+  tfs_msg.transform.translation.x = -0.032;
   tfs_msg.transform.translation.y = 0.0;
   tfs_msg.transform.translation.z = 0.068;
 
@@ -595,11 +608,14 @@ void testDrive(void)
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
-      goal_linear_velocity  = 0.05 * SCALE_VELOCITY_LINEAR_X;
+      cmd_vel_rc100_msg.linear.x  = 0.05 * SCALE_VELOCITY_LINEAR_X;
+      goal_linear_velocity  = cmd_vel_rc100_msg.linear.x;
     }
     else
     {
-      goal_linear_velocity  = 0.0;
+      cmd_vel_rc100_msg.linear.x  = 0.0;
+      goal_linear_velocity  = cmd_vel_rc100_msg.linear.x;
+
       start_move = false;
     }
   }
@@ -609,14 +625,23 @@ void testDrive(void)
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
-      goal_angular_velocity = -0.7 * SCALE_VELOCITY_ANGULAR_Z;
+      cmd_vel_rc100_msg.angular.z = -0.7 * SCALE_VELOCITY_ANGULAR_Z;
+      goal_angular_velocity = cmd_vel_rc100_msg.angular.z;
     }
     else
     {
-      goal_angular_velocity = 0.0;
+      cmd_vel_rc100_msg.angular.z  = 0.0;
+      goal_angular_velocity = cmd_vel_rc100_msg.angular.z;
+
       start_rotate = false;
     }
   }
+
+  Serial.print(last_right_encoder);
+  Serial.print(" ");
+  Serial.print(current_tick);
+  Serial.print(" ");
+  Serial.println(diff_encoder);
 }
 
 /*******************************************************************************
@@ -670,20 +695,20 @@ void showLedStatus(void)
 
   if (getPowerInVoltage() < 11.1)
   {
-    setLedOn(2);
+    setLedOn(LED_LOW_BATTERY);
   }
   else
   {
-    setLedOff(2);
+    setLedOff(LED_LOW_BATTERY);
   }
 
-  if (getUsbConnected() > 0)
+  if (nh.connected())
   {
-    setLedOn(3);
+    setLedOn(LED_ROS_CONNECT);
   }
   else
   {
-    setLedOff(3);
+    setLedOff(LED_ROS_CONNECT);
   }
 
   updateRxTxLed();
@@ -702,11 +727,11 @@ void updateRxTxLed(void)
 
     if (tx_cnt != Serial.getTxCnt())
     {
-      setLedToggle(0);
+      setLedToggle(LED_TXD);
     }
     else
     {
-      setLedOff(0);
+      setLedOff(LED_TXD);
     }
 
     tx_cnt = Serial.getTxCnt();
@@ -718,13 +743,51 @@ void updateRxTxLed(void)
 
     if (rx_cnt != Serial.getRxCnt())
     {
-      setLedToggle(1);
+      setLedToggle(LED_RXD);
     }
     else
     {
-      setLedOff(1);
+      setLedOff(LED_RXD);
     }
 
     rx_cnt = Serial.getRxCnt();
+  }
+}
+
+void updateGyroCali(void)
+{
+  static bool gyro_cali = false;
+  uint32_t pre_time;
+  uint32_t t_time;
+
+
+  if (nh.connected())
+  {
+    if (gyro_cali == false)
+    {
+      imu.SEN.gyro_cali_start();
+
+      t_time   = millis();
+      pre_time = millis();
+      while(!imu.SEN.gyro_cali_get_done())
+      {
+        imu.update();
+
+        if (millis()-pre_time > 5000)
+        {
+          break;
+        }
+        if (millis()-t_time > 100)
+        {
+          t_time = millis();
+          setLedToggle(LED_ROS_CONNECT);
+        }
+      }
+      gyro_cali = true;
+    }
+  }
+  else
+  {
+    gyro_cali = false;
   }
 }
