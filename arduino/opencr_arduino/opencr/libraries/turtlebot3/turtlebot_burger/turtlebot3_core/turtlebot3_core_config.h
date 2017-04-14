@@ -47,8 +47,9 @@
 #define DRIVE_TEST_PERIOD                30   //hz
 
 #define WHEEL_RADIUS                     0.033           // meter
-#define WHEEL_SEPARATION                 0.16            // meter (BURGER => 0.16, WAFFLE => 0.287)
-#define ROBOT_RADIUS                     0.078           // meter (BURGER => 0.078, WAFFLE => 0.294)
+#define WHEEL_SEPARATION                 0.160           // meter (BURGER : 0.160, WAFFLE : 0.287)
+#define TURNING_RADIUS                   0.080           // meter (BURGER : 0.080, WAFFLE : 0.1435)
+#define ROBOT_RADIUS                     0.105           // meter (BURGER : 0.105, WAFFLE : 0.220)
 #define ENCODER_MIN                      -2147483648     // raw
 #define ENCODER_MAX                      2147483648      // raw
 

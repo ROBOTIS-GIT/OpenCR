@@ -28,7 +28,7 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-/* Author: Taehoon Lim (Darby) */
+/* Author: Taehoon Lim (Darby), HanCheol Cho, Ashe Kim */
 
 #ifndef RC100_H_
 #define RC100_H_
@@ -47,55 +47,30 @@
 #define RC100_BTN_5		(256)
 #define RC100_BTN_6		(512)
 
-#define PACKET_DATA0    		  2
-#define INVERSE_PACKET_DATA0 	3
-#define PACKET_DATA1    		  4
-#define INVERSE_PACKET_DATA1 	5
-#define PACKET_LENGTH 			  6
+#define PACKET_LENGTH 		6
 
 class RC100 {
  public:
-	RC100();
-	virtual ~RC100();
+   RC100();
+   virtual ~RC100();
 
-	void begin(int num);
-	void end(void);
-	int writeData(int data);
-	int available(void);
-	int readData(void);
-	void writeRaw(byte temp);
-	byte readRaw(void);
-	void setChannel(byte IR_channel);
+   void begin(int num);
+   int available(void);
+   uint16_t readData(void);
 
  private:
-  volatile byte gbPacketWritePointer;
-	volatile byte gbPacketReadPointer;
-	volatile byte gbpPacketDataBuffer[16+1+16];
-	volatile byte gbpPacket[PACKET_LENGTH+2];
-	volatile byte gbNewPacket;
-	volatile word gwZigbeeRxData;
-	byte gbIRChannel;
 
-	volatile byte check_mode;
+   int8_t number;
+   typedef struct
+   {
+     uint8_t  state;
+     uint8_t  index;
+     bool     received;
+     uint16_t data;
+   } rc100_t;
+     rc100_t rc100_rx;
 
-	unsigned char gbRcvPacket[6];
-	unsigned char gbRcvPacketNum;
-	unsigned short gwRcvData;
-	unsigned char gbRcvFlag;
-
-	int rc100_hal_tx(unsigned char *pPacket, int numPacket);
-	int rc100_hal_rx(unsigned char *pPacket, int numPacket);
-
-	///////////// device control methods ////////////////////////
-	int rc100Initialize(unsigned int baudrate);
-	void rc100Terminate(void);
-	byte CheckNewArrive(void);
-	////////// communication methods ///////////////////////
-	int rc100TxData(int data);
-	int rc100RxCheck(void);
-	int rc100RxData(void);
-	byte RxDByteSerial2(void);
-	void TxDByteSerial2(byte bTxdData);
-	int rc100channel(byte IR_channel);
+  bool rc100Update(uint8_t data);
+  bool rc100Receive(unsigned char *pPacket, int numPacket);
 };
 #endif /* RC100_H_ */

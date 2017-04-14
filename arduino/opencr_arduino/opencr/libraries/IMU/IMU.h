@@ -55,8 +55,11 @@ public:
   float gx, gy, gz;
   float mx, my, mz;
 
-
 	bool bConnected;
+
+  float aRes;
+  float gRes;
+  float mRes;
 
 public:
 	cIMU();
@@ -68,10 +71,6 @@ private:
   Madgwick filter;
   uint32_t update_hz;
   uint32_t update_us;
-
-  float aRes;
-  float gRes;
-  float mRes;
 
 	void computeIMU( void );
 

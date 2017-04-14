@@ -52,7 +52,8 @@ cIMU::cIMU()
 uint8_t cIMU::begin( uint32_t hz )
 {
 	uint8_t err_code = IMU_OK;
-
+  uint32_t i;
+  uint32_t pre_time;
 
   update_hz = hz;
   update_us = 1000000/hz;
@@ -67,6 +68,22 @@ uint8_t cIMU::begin( uint32_t hz )
   if( bConnected == true )
   {
     filter.begin(update_hz);
+
+    for (i=0; i<32; i++)
+    {
+      update();
+    }
+
+    pre_time = millis();
+    while(!SEN.gyro_cali_get_done())
+    {
+      update();
+
+      if (millis()-pre_time > 5000)
+      {
+        break;
+      }
+    }
   }
 
 
@@ -126,6 +143,7 @@ uint16_t cIMU::update( uint32_t option )
 }
 
 
+#define FILTER_NUM    3
 
 /*---------------------------------------------------------------------------
      TITLE   : compute
@@ -139,11 +157,39 @@ void cIMU::computeIMU( void )
   static uint32_t cur_process_time = 0;
   static uint32_t process_time = 0;
   uint32_t i;
+  static int32_t gyroADC[3][FILTER_NUM] = {0,};
+  int32_t gyroAdcSum;
 
+  uint32_t axis;
 
 	SEN.acc_get_adc();
 	SEN.gyro_get_adc();
   SEN.mag_get_adc();
+
+
+
+  for (axis = 0; axis < 3; axis++)
+  {
+    gyroADC[axis][0] = SEN.gyroADC[axis];
+
+
+    gyroAdcSum = 0;
+    for (i=0; i<FILTER_NUM; i++)
+    {
+      gyroAdcSum += gyroADC[axis][i];
+    }
+    SEN.gyroADC[axis] = gyroAdcSum/FILTER_NUM;
+    for (i=FILTER_NUM-1; i>0; i--)
+    {
+      gyroADC[axis][i] = gyroADC[axis][i-1];
+    }
+
+    if (abs(SEN.gyroADC[axis]) <= 3)
+    {
+      SEN.gyroADC[axis] = 0;
+    }
+  }
+
 
   for( i=0; i<3; i++ )
   {
@@ -172,9 +218,12 @@ void cIMU::computeIMU( void )
   process_time      = cur_process_time-prev_process_time;
   prev_process_time = cur_process_time;
 
-  filter.invSampleFreq = (float)process_time/1000000.0f;
-  filter.updateIMU(gx, gy, gz, ax, ay, az);
-  //filter.update(gx, gy, gz, ax, ay, az, mx, my, mz);
+  if (SEN.calibratingG == 0 && SEN.calibratingA == 0)
+  {
+    filter.invSampleFreq = (float)process_time/1000000.0f;
+    filter.updateIMU(gx, gy, gz, ax, ay, az);
+    //filter.update(gx, gy, gz, ax, ay, az, mx, my, mz);
+  }
 
 
   rpy[0] = filter.getRoll();

@@ -104,13 +104,21 @@ float joint_states_vel[2] = {0.0, 0.0};
 float joint_states_eff[2] = {0.0, 0.0};
 
 /*******************************************************************************
+* Declaration for LED
+*******************************************************************************/
+#define LED_TXD         0
+#define LED_RXD         1
+#define LED_LOW_BATTERY 2
+#define LED_ROS_CONNECT 3
+
+/*******************************************************************************
 * Setup function
 *******************************************************************************/
 void setup()
 {
   // Initialize ROS node handle, advertise and subscribe the topics
   nh.initNode();
-  nh.getHardware()->setBaud(115200); // TODO: Testing
+  nh.getHardware()->setBaud(115200);
   nh.subscribe(cmd_vel_sub);
   nh.advertise(sensor_state_pub);
   nh.advertise(imu_pub);
@@ -127,8 +135,8 @@ void setup()
   // Setting for IMU
   imu.begin();
 
-  // Setting for remocon(ROBOTIS RC100) and cmd_vel
-  remote_controller.begin(1);  //57600bps for RC100
+  // Setting for ROBOTIS RC100 remote controller and cmd_vel
+  remote_controller.begin(1);  // 57600bps baudrate for RC100 control
 
   cmd_vel_rc100_msg.linear.x  = 0.0;
   cmd_vel_rc100_msg.angular.z = 0.0;
@@ -139,13 +147,12 @@ void setup()
   odom_pose[2] = 0.0;
 
   joint_states.header.frame_id = "base_footprint";
+  joint_states.name            = joint_states_name;
 
   joint_states.name_length     = 2;
   joint_states.position_length = 2;
   joint_states.velocity_length = 2;
   joint_states.effort_length   = 2;
-
-  joint_states.name     = joint_states_name;
 
   prev_update_time = millis();
 
@@ -155,7 +162,7 @@ void setup()
 }
 
 /*******************************************************************************
-* loop function
+* Loop function
 *******************************************************************************/
 void loop()
 {
@@ -186,10 +193,16 @@ void loop()
     tTime[3] = millis();
   }
 
+  // Check push button pressed for simple test drive
+  checkPushButtonState();
+
   // Update the IMU unit
   imu.update();
 
-  // Show LED Status
+  // Start Gyro Calibration after ROS connection
+  updateGyroCali();
+
+  // Show LED status
   showLedStatus();
 
   // Call all the callbacks waiting to be called at that point in time
@@ -353,6 +366,7 @@ bool updateOdometry(double diff_time)
 
   double wheel_l, wheel_r;      // rotation value of wheel [rad]
   double delta_s, delta_theta;
+  static double last_theta = 0.0;
   double v, w;                  // v = translational velocity [m/s], w = rotational velocity [rad/s]
   double step_time;
 
@@ -376,7 +390,8 @@ bool updateOdometry(double diff_time)
     wheel_r = 0.0;
 
   delta_s     = WHEEL_RADIUS * (wheel_r + wheel_l) / 2.0;
-  delta_theta = WHEEL_RADIUS * (wheel_r - wheel_l) / WHEEL_SEPARATION;
+  delta_theta = atan2f(imu.quat[1]*imu.quat[2] + imu.quat[0]*imu.quat[3],
+                       0.5f - imu.quat[2]*imu.quat[2] - imu.quat[3]*imu.quat[3]) - last_theta;
 
   v = delta_s / step_time;
   w = delta_theta / step_time;
@@ -402,6 +417,9 @@ bool updateOdometry(double diff_time)
   // We should update the twist of the odometry
   odom.twist.twist.linear.x  = odom_vel[0];
   odom.twist.twist.angular.z = odom_vel[2];
+
+  last_theta = atan2f(imu.quat[1]*imu.quat[2] + imu.quat[0]*imu.quat[3],
+                      0.5f - imu.quat[2]*imu.quat[2] - imu.quat[3]*imu.quat[3]);
 
   return true;
 }
@@ -589,35 +607,29 @@ void testDrive(void)
 
   if (start_move)
   {
-    diff_encoder = TEST_DISTANCE / (0.207 / 4096); // (Circumference) / (The number of tick per revolution)
+    diff_encoder = TEST_DISTANCE / (0.207 / 4096); // (Circumference of Wheel) / (The number of tick per revolution)
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
-      cmd_vel_rc100_msg.linear.x  = 0.05 * SCALE_VELOCITY_LINEAR_X;
-      goal_linear_velocity  = cmd_vel_rc100_msg.linear.x;
+      goal_linear_velocity  = 0.05 * SCALE_VELOCITY_LINEAR_X;
     }
     else
     {
-      cmd_vel_rc100_msg.linear.x  = 0.0;
-      goal_linear_velocity  = cmd_vel_rc100_msg.linear.x;
-
+      goal_linear_velocity  = 0.0;
       start_move = false;
     }
   }
   else if (start_rotate)
   {
-    diff_encoder = (TEST_RADIAN * ROBOT_RADIUS) / (0.207 / 4096);
+    diff_encoder = (TEST_RADIAN * TURNING_RADIUS) / (0.207 / 4096);
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
-      cmd_vel_rc100_msg.angular.z = -0.7 * SCALE_VELOCITY_ANGULAR_Z;
-      goal_angular_velocity = cmd_vel_rc100_msg.angular.z;
+      goal_angular_velocity= -0.7 * SCALE_VELOCITY_ANGULAR_Z;
     }
     else
     {
-      cmd_vel_rc100_msg.angular.z  = 0.0;
-      goal_angular_velocity = cmd_vel_rc100_msg.angular.z;
-
+      goal_angular_velocity  = 0.0;
       start_rotate = false;
     }
   }
@@ -674,20 +686,20 @@ void showLedStatus(void)
 
   if (getPowerInVoltage() < 11.1)
   {
-    setLedOn(2);
+    setLedOn(LED_LOW_BATTERY);
   }
   else
   {
-    setLedOff(2);
+    setLedOff(LED_LOW_BATTERY);
   }
 
-  if (getUsbConnected() > 0)
+  if (nh.connected())
   {
-    setLedOn(3);
+    setLedOn(LED_ROS_CONNECT);
   }
   else
   {
-    setLedOff(3);
+    setLedOff(LED_ROS_CONNECT);
   }
 
   updateRxTxLed();
@@ -706,11 +718,11 @@ void updateRxTxLed(void)
 
     if (tx_cnt != Serial.getTxCnt())
     {
-      setLedToggle(0);
+      setLedToggle(LED_TXD);
     }
     else
     {
-      setLedOff(0);
+      setLedOff(LED_TXD);
     }
 
     tx_cnt = Serial.getTxCnt();
@@ -722,13 +734,61 @@ void updateRxTxLed(void)
 
     if (rx_cnt != Serial.getRxCnt())
     {
-      setLedToggle(1);
+      setLedToggle(LED_RXD);
     }
     else
     {
-      setLedOff(1);
+      setLedOff(LED_RXD);
     }
 
     rx_cnt = Serial.getRxCnt();
+  }
+}
+
+/*******************************************************************************
+* Start Gyro Calibration
+*******************************************************************************/
+void updateGyroCali(void)
+{
+  static bool gyro_cali = false;
+  uint32_t pre_time;
+  uint32_t t_time;
+
+  char log_msg[50];
+
+  if (nh.connected())
+  {
+    if (gyro_cali == false)
+    {
+      sprintf(log_msg, "Start Calibration of Gyro");
+      nh.loginfo(log_msg);
+
+      imu.SEN.gyro_cali_start();
+
+      t_time   = millis();
+      pre_time = millis();
+      while(!imu.SEN.gyro_cali_get_done())
+      {
+        imu.update();
+
+        if (millis()-pre_time > 5000)
+        {
+          break;
+        }
+        if (millis()-t_time > 100)
+        {
+          t_time = millis();
+          setLedToggle(LED_ROS_CONNECT);
+        }
+      }
+      gyro_cali = true;
+
+      sprintf(log_msg, "Calibrattion End");
+      nh.loginfo(log_msg);
+    }
+  }
+  else
+  {
+    gyro_cali = false;
   }
 }
