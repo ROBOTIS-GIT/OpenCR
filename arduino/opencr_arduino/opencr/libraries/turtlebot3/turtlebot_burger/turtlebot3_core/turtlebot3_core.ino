@@ -754,11 +754,15 @@ void updateGyroCali(void)
   uint32_t pre_time;
   uint32_t t_time;
 
+  char log_msg[50];
 
   if (nh.connected())
   {
     if (gyro_cali == false)
     {
+      sprintf(log_msg, "Start Calibration of Gyro");
+      nh.loginfo(log_msg);
+
       imu.SEN.gyro_cali_start();
 
       t_time   = millis();
@@ -778,6 +782,9 @@ void updateGyroCali(void)
         }
       }
       gyro_cali = true;
+
+      sprintf(log_msg, "Calibrattion End");
+      nh.loginfo(log_msg);
     }
   }
   else
