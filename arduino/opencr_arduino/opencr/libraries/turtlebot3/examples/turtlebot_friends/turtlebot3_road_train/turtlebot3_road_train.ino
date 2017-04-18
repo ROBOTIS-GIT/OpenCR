@@ -142,7 +142,7 @@ void receiveRemoteControlData(void)
 }
 
 /*******************************************************************************
-* Control bike speed
+* Control road_train speed
 *******************************************************************************/
 void controlRoadTrain()
 {
