@@ -93,11 +93,11 @@ void receiveRemoteControl(void)
 
     if (received_data & RC100_BTN_L)
     {
-      linear_y += VELOCITY_LINEAR_Y * SCALE_VELOCITY_LINEAR_Y;
+      linear_y -= VELOCITY_LINEAR_Y * SCALE_VELOCITY_LINEAR_Y;
     }
     else if (received_data & RC100_BTN_R)
     {
-      linear_y -= VELOCITY_LINEAR_Y * SCALE_VELOCITY_LINEAR_Y;
+      linear_y += VELOCITY_LINEAR_Y * SCALE_VELOCITY_LINEAR_Y;
     }
 
     if (received_data & RC100_BTN_1)
