@@ -28,142 +28,136 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-/* Author: Taehoon Lim (Darby) */
+/* Author: Taehoon Lim (Darby), Ashe Kim */
 
 #include <RC100.h>
-#include <Dynamixel.h>
+#include <DynamixelSDK.h>
 
 #define LEFT_DXL  1
 #define RIGHT_DXL 2
 
+#define BAUDRATE 1000000
+#define DEVICENAME ""
+#define PROTOCOL_VERSION 2.0
+
 #define ADDR_TORQUE_ENABLE 64
 #define ADDR_GOAL_VELOCITY 104
+
+#define LEN_TORQUE_ENABLE 1
+#define LEN_GOAL_VELOCITY 4
 
 #define ON  1
 #define OFF 0
 
 #define VELOCITY 10
 
+dynamixel::PortHandler *portHandler;
+dynamixel::PacketHandler *packetHandler;
+
+dynamixel::GroupSyncWrite *groupSyncWrite;
+
+bool dxl_addparam_result = false;
+int8_t dxl_comm_result = COMM_TX_FAIL;
+uint8_t dxl_error = 0;
+
+int vel[2] = {0, 0};
+int const_vel = 200;
+
 RC100 Controller;
 int RcvData = 0;
 
-Dynamixel Dxl;
-int vel[4] = {LEFT_DXL, 0, RIGHT_DXL, 0};
-int const_vel = 200;
-
-unsigned int cur_time = 0;
-unsigned int pre_time = 0;
-bool experiment = false;
-int dir = 0;
-
-void setup() {
+void setup() 
+{
   Serial.begin(57600);
 
   Controller.begin(1);
 
-  Dxl.begin(3);
-  Dxl.writeByte(LEFT_DXL, ADDR_TORQUE_ENABLE, ON);
-  Dxl.writeByte(RIGHT_DXL, ADDR_TORQUE_ENABLE, ON);
+  portHandler = dynamixel::PortHandler::getPortHandler(DEVICENAME);
+  packetHandler = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
+  groupSyncWrite = new dynamixel::GroupSyncWrite(portHandler, packetHandler, ADDR_GOAL_VELOCITY, LEN_GOAL_VELOCITY);
+
+  portHandler -> openPort();
+  portHandler->setBaudRate(BAUDRATE);
+
+  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, LEFT_DXL, ADDR_TORQUE_ENABLE, ON, &dxl_error);
+  packetHandler->printTxRxResult(dxl_comm_result);
+
+  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, RIGHT_DXL, ADDR_TORQUE_ENABLE, ON, &dxl_error);
+  packetHandler->printTxRxResult(dxl_comm_result);
 }
 
-void loop() {
+void loop() 
+{
   if (Controller.available())
   {
     RcvData = Controller.readData();
     Serial.print("RcvData = ");
     Serial.print(RcvData);
     Serial.print(" LEFT_VEL = ");
-    Serial.print(vel[1]);
+    Serial.print(vel[0]);
     Serial.print(" RIGHT_VEL = ");
-    Serial.println(vel[3]);
+    Serial.println(vel[1]);
 
     if (RcvData & RC100_BTN_U)
     {
-      vel[1] += VELOCITY;
-      vel[3] -= VELOCITY;
-
-      Dxl.syncWrite(ADDR_GOAL_VELOCITY, 1, vel, 4);
+      vel[0] += VELOCITY;
+      vel[1] -= VELOCITY;
     }
     else if (RcvData & RC100_BTN_D)
     {
-      vel[1] -= VELOCITY;
-      vel[3] += VELOCITY;
-
-      Dxl.syncWrite(ADDR_GOAL_VELOCITY, 1, vel, 4);
+      vel[0] -= VELOCITY;
+      vel[1] += VELOCITY;
     }
     else if (RcvData & RC100_BTN_L)
     {
+      vel[0] -= VELOCITY;
       vel[1] -= VELOCITY;
-      vel[3] -= VELOCITY;
-
-      Dxl.syncWrite(ADDR_GOAL_VELOCITY, 1, vel, 4);
     }
     else if (RcvData & RC100_BTN_R)
     {
+      vel[0] += VELOCITY;
       vel[1] += VELOCITY;
-      vel[3] += VELOCITY;
-
-      Dxl.syncWrite(ADDR_GOAL_VELOCITY, 1, vel, 4);
     }
     else if (RcvData & RC100_BTN_1)
     {
-      const_vel += 10;
-
-      Dxl.syncWrite(ADDR_GOAL_VELOCITY, 1, vel, 4);
-    }
-    else if (RcvData & RC100_BTN_3)
-    {
-      const_vel -= 10;
-
-      Dxl.syncWrite(ADDR_GOAL_VELOCITY, 1, vel, 4);
+      vel[0] = (const_vel + 10);
+      vel[1] = (const_vel + 10);
     }
     else if (RcvData & RC100_BTN_2)
     {
-      course();
+      vel[0] = (const_vel - 10);
+      vel[1] = (const_vel - 10);
     }
-    else if (RcvData & RC100_BTN_6)
+    else if (RcvData & RC100_BTN_3)
     {
+      vel[0] = -const_vel;
       vel[1] = const_vel;
-      vel[3] = -const_vel;
-
-      Dxl.syncWrite(ADDR_GOAL_VELOCITY, 1, vel, 4);
+    }
+    else if (RcvData & RC100_BTN_4)
+    {
+      vel[0] = const_vel;
+      vel[1] = -const_vel;
     }
     else if (RcvData & RC100_BTN_5)
     {
+      vel[0] = 0;
       vel[1] = 0;
-      vel[3] = 0;
-
-      Dxl.syncWrite(ADDR_GOAL_VELOCITY, 1, vel, 4);
     }
+
+    controlMotor( vel[0], vel[1]);
+    return;
   }
 }
 
-void course(void)
+void controlMotor( int64_t left_wheel_value, int64_t right_wheel_value)
 {
-  vel[1] = 200;
-  vel[3] = -200;
+  bool dxl_addparam_result;
+  int8_t dxl_comm_result;
 
-  Dxl.syncWrite(ADDR_GOAL_VELOCITY, 1, vel, 4);
+  dxl_addparam_result = groupSyncWrite->addParam(LEFT_DXL, (uint8_t*)&left_wheel_value);
+  dxl_addparam_result = groupSyncWrite->addParam(RIGHT_DXL, (uint8_t*)&right_wheel_value);
 
-  delay(9000);
+  dxl_comm_result = groupSyncWrite->txPacket();
 
-  vel[1] = +100;
-  vel[3] = +100;
-
-  Dxl.syncWrite(ADDR_GOAL_VELOCITY, 1, vel, 4);
-
-  delay(3300);
-
-  vel[1] = 200;
-  vel[3] = -200;
-
-  Dxl.syncWrite(ADDR_GOAL_VELOCITY, 1, vel, 4);
-
-  delay(9000);
-
-  vel[1] = 0;
-  vel[3] = 0;
-
-  Dxl.syncWrite(ADDR_GOAL_VELOCITY, 1, vel, 4);
+  groupSyncWrite->clearParam();
 }
-
