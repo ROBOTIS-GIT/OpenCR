@@ -112,6 +112,24 @@ float joint_states_eff[2] = {0.0, 0.0};
 #define LED_ROS_CONNECT 3
 
 /*******************************************************************************
+* Declaration for Battery
+*******************************************************************************/
+#define BATTERY_POWER_OFF             0
+#define BATTERY_POWER_STARTUP         1
+#define BATTERY_POWER_NORMAL          2
+#define BATTERY_POWER_CHECK           3
+#define BATTERY_POWER_WARNNING        4
+
+static bool    setup_end       = false;
+static uint8_t battery_voltage = 0;
+static float   battery_valtage_raw = 0;
+static uint8_t battery_state   = BATTERY_POWER_OFF;
+
+
+
+
+
+/*******************************************************************************
 * Setup function
 *******************************************************************************/
 void setup()
@@ -159,6 +177,8 @@ void setup()
   pinMode(13, OUTPUT);
 
   SerialBT2.begin(57600);
+
+  setup_end = true;
 }
 
 /*******************************************************************************
@@ -204,6 +224,9 @@ void loop()
 
   // Show LED status
   showLedStatus();
+
+  // Update Voltage
+  updateVoltageCheck();
 
   // Call all the callbacks waiting to be called at that point in time
   nh.spinOnce();
@@ -791,4 +814,185 @@ void updateGyroCali(void)
   {
     gyro_cali = false;
   }
+}
+
+/*******************************************************************************
+* updateVoltageCheck
+*******************************************************************************/
+void updateVoltageCheck(void)
+{
+  static bool startup = false;
+  static int vol_index = 0;
+  static int prev_state = 0;
+  static int alram_state = 0;
+  static int check_index = 0;
+
+  int i;
+  float vol_sum;
+  float vol_value;
+
+  static uint32_t process_time[8] = {0,};
+  static float    vol_value_tbl[10] = {0,};
+
+  float voltage_ref       = 11.0 + 0.0;
+  float voltage_ref_warn  = 11.0 + 0.0;
+
+
+  if (startup == false)
+  {
+    startup = true;
+    for (i=0; i<8; i++)
+    {
+      process_time[i] = millis();
+    }
+  }
+
+  if (millis()-process_time[0] > 100)
+  {
+    process_time[0] = millis();
+
+    vol_value_tbl[vol_index] = getPowerInVoltage();
+
+    vol_index++;
+    vol_index %= 10;
+
+    vol_sum = 0;
+    for(i=0; i<10; i++)
+    {
+        vol_sum += vol_value_tbl[i];
+    }
+    vol_value = vol_sum/10;
+    battery_valtage_raw = vol_value;
+
+    //Serial.println(vol_value);
+
+    battery_voltage = vol_value;
+  }
+
+
+  if(millis()-process_time[1] > 1000)
+  {
+    process_time[1] = millis();
+
+    //Serial.println(battery_state);
+
+    switch(battery_state)
+    {
+      case BATTERY_POWER_OFF:
+        if (setup_end == true)
+        {
+          alram_state = 0;
+          if(battery_valtage_raw > 5.0)
+          {
+            check_index   = 0;
+            prev_state    = battery_state;
+            battery_state = BATTERY_POWER_STARTUP;
+          }
+          else
+          {
+            noTone(BDPIN_BUZZER);
+          }
+        }
+        break;
+
+      case BATTERY_POWER_STARTUP:
+        if(battery_valtage_raw > voltage_ref)
+        {
+          check_index   = 0;
+          prev_state    = battery_state;
+          battery_state = BATTERY_POWER_NORMAL;
+          setPowerOn();
+        }
+
+        if(check_index < 5)
+        {
+          check_index++;
+        }
+        else
+        {
+          if (battery_valtage_raw > 5.0)
+          {
+            prev_state    = battery_state;
+            battery_state = BATTERY_POWER_CHECK;
+          }
+          else
+          {
+            prev_state    = battery_state;
+            battery_state = BATTERY_POWER_OFF;
+          }
+        }
+        break;
+
+      case BATTERY_POWER_NORMAL:
+        alram_state = 0;
+        if(battery_valtage_raw < voltage_ref)
+        {
+          prev_state    = battery_state;
+          battery_state = BATTERY_POWER_CHECK;
+          check_index   = 0;
+        }
+        break;
+
+      case BATTERY_POWER_CHECK:
+        if(check_index < 5)
+        {
+          check_index++;
+        }
+        else
+        {
+          if(battery_valtage_raw < voltage_ref_warn)
+          {
+            setPowerOff();
+            prev_state    = battery_state;
+            battery_state = BATTERY_POWER_WARNNING;
+          }
+        }
+        if(battery_valtage_raw >= voltage_ref)
+        {
+          setPowerOn();
+          prev_state    = battery_state;
+          battery_state = BATTERY_POWER_NORMAL;
+        }
+        break;
+
+      case BATTERY_POWER_WARNNING:
+        alram_state ^= 1;
+        if(alram_state)
+        {
+          tone(BDPIN_BUZZER, 1000, 500);
+        }
+
+        if(battery_valtage_raw > voltage_ref)
+        {
+          setPowerOn();
+          prev_state    = battery_state;
+          battery_state = BATTERY_POWER_NORMAL;
+        }
+        else
+        {
+          setPowerOff();
+        }
+
+        if(battery_valtage_raw < 5.0)
+        {
+          setPowerOff();
+          prev_state    = battery_state;
+          battery_state = BATTERY_POWER_OFF;
+        }
+        break;
+
+      default:
+        break;
+    }
+  }
+}
+
+void setPowerOn()
+{
+  digitalWrite(BDPIN_DXL_PWR_EN, HIGH);
+}
+
+void setPowerOff()
+{
+  digitalWrite(BDPIN_DXL_PWR_EN, LOW);
 }
