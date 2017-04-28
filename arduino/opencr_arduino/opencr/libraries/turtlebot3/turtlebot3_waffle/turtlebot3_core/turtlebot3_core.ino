@@ -874,7 +874,7 @@ void updateVoltageCheck(void)
   {
     process_time[1] = millis();
 
-    Serial.println(battery_state);
+    //Serial.println(battery_state);
 
     switch(battery_state)
     {
