@@ -7,6 +7,7 @@
  *      Author: Baram
  */
 
+#include "dxl.h"
 #include "dxl_hw.h"
 #include "dxl_hw_op3.h"
 #include "dxl_node_op3.h"
@@ -18,10 +19,12 @@
 #define RANGE_CHECK(addr,x)            dxl_node_check_range(addr, (uint32_t)&(x), sizeof(x))
 
 
-static dxl_sp_t  dxl_sp;
+
+static dxl_t dxl_sp;
+
 
 dxl_mem_op3_t *p_dxl_mem;
-
+dxl_mem_t      mem;
 
 
 
@@ -33,18 +36,16 @@ void dxl_node_op3_btn_loop(void);
 
 //-- dxl sp driver function
 //
-static void make_basic_status_packet(uint8_t error, uint32_t send_time);
-static void ping(dxl_inst_packet_t *p_inst_packet);
-static void read(dxl_inst_packet_t *p_inst_packet);
-static void write(dxl_inst_packet_t *p_inst_packet);
-static void reg_write(dxl_inst_packet_t *p_inst_packet);
-static void action(dxl_inst_packet_t *p_inst_packet);
-static void factory_reset(dxl_inst_packet_t *p_inst_packet);
-static void reboot(dxl_inst_packet_t *p_inst_packet);
-static void sync_read(dxl_inst_packet_t *p_inst_packet);
-static void sync_write(dxl_inst_packet_t *p_inst_packet);
-static void bulk_read(dxl_inst_packet_t *p_inst_packet);
-static void bulk_write(dxl_inst_packet_t *p_inst_packet);
+dxl_error_t ping(dxl_t *p_dxl);
+dxl_error_t read(dxl_t *p_dxl);
+dxl_error_t write(dxl_t *p_dxl);
+dxl_error_t sync_read(dxl_t *p_dxl);
+dxl_error_t sync_write(dxl_t *p_dxl);
+dxl_error_t bulk_read(dxl_t *p_dxl);
+dxl_error_t bulk_write(dxl_t *p_dxl);
+
+
+void dxl_process_packet();
 
 
 static uint8_t dxl_node_read_byte(uint16_t addr);
@@ -63,22 +64,16 @@ void dxl_node_op3_init(void)
   uint16_t i;
 
 
-  p_dxl_mem = (dxl_mem_op3_t *)&dxl_sp.mem.data;
+  p_dxl_mem = (dxl_mem_op3_t *)&mem.data;
 
-  dxl_sp.inst_func.ping           = ping;
-  dxl_sp.inst_func.read           = read;
-  dxl_sp.inst_func.write          = write;
-  dxl_sp.inst_func.reg_write      = reg_write;
-  dxl_sp.inst_func.action         = action;
-  dxl_sp.inst_func.factory_reset  = factory_reset;
-  dxl_sp.inst_func.reboot         = reboot;
-  dxl_sp.inst_func.sync_read      = sync_read;
-  dxl_sp.inst_func.sync_write     = sync_write;
-  dxl_sp.inst_func.bulk_read      = bulk_read;
-  dxl_sp.inst_func.bulk_write     = bulk_write;
+
+  dxl_error_t dxl_err;
+
+
+  dxlInit(&dxl_sp, DXL_PACKET_VER_2_0);
+
 
   dxl_hw_op3_init();
-
   dxl_node_op3_reset();
 
   if( p_dxl_mem->Model_Number != DXL_NODE_OP3_MODLE_NUMBER )
@@ -90,20 +85,28 @@ void dxl_node_op3_init(void)
   if( p_dxl_mem->Firmware_Version != DXL_NODE_OP3_FW_VER )
   {
     p_dxl_mem->Firmware_Version = DXL_NODE_OP3_FW_VER;
-    EEPROM[2] = dxl_sp.mem.data[2];
+    EEPROM[2] = mem.data[2];
   }
 
-  dxl_sp.tx_status_packet.run_flag = 0;
-  dxl_sp.tx_status_packet.run_func = NULL;
 
   p_dxl_mem->IMU_Control = 0;
 
   dxl_node_write_byte(26, (0x1F<<0));
   dxl_node_write_byte(27, (0x00<<0));
 
-  dxl_sp_init(&dxl_sp);
-  dxl_sp_begin(p_dxl_mem->Baud);
 
+
+  dxlSetId(&dxl_sp, p_dxl_mem->ID);
+  dxlOpenPort(&dxl_sp, 0, p_dxl_mem->Baud);
+
+
+  dxlAddInstFunc(&dxl_sp, INST_PING,  ping);
+  dxlAddInstFunc(&dxl_sp, INST_READ,  read);
+  dxlAddInstFunc(&dxl_sp, INST_WRITE, write);
+  dxlAddInstFunc(&dxl_sp, INST_SYNC_READ, sync_read);
+  dxlAddInstFunc(&dxl_sp, INST_SYNC_WRITE, sync_write);
+  dxlAddInstFunc(&dxl_sp, INST_BULK_READ, bulk_read);
+  dxlAddInstFunc(&dxl_sp, INST_BULK_WRITE, bulk_write);
 
   dxl_debug_init();
 }
@@ -122,8 +125,11 @@ void dxl_node_op3_loop(void)
   uint8_t ch;
 
 
-  dxl_sp_rx_update(&dxl_sp);
-  dxl_sp_tx_update(&dxl_sp);
+
+
+  dxl_process_packet();
+
+
 
   dxl_hw_op3_update();
 
@@ -159,10 +165,10 @@ void dxl_node_op3_loop(void)
         p_dxl_mem->Yaw_Offset   = dxl_hw_op3_get_offset(2) * 10.;
 
 
-        EEPROM[18] = dxl_sp.mem.data[18];
-        EEPROM[19] = dxl_sp.mem.data[19];
-        EEPROM[20] = dxl_sp.mem.data[20];
-        EEPROM[21] = dxl_sp.mem.data[21];
+        EEPROM[18] = mem.data[18];
+        EEPROM[19] = mem.data[19];
+        EEPROM[20] = mem.data[20];
+        EEPROM[21] = mem.data[21];
       }
     }
   }
@@ -190,6 +196,105 @@ void dxl_node_op3_loop(void)
 
   dxl_debug_loop();
 }
+
+
+void dxl_process_packet()
+{
+  static uint8_t process_state = 0;
+  dxl_error_t dxl_ret;
+  static uint32_t pre_time;
+
+
+  switch (process_state)
+  {
+    //-- INST
+    //
+    case DXL_PROCESS_INST:
+      dxl_ret = dxlRxPacket(&dxl_sp);
+
+      if (dxl_ret == DXL_RET_RX_INST)
+      {
+        dxl_ret = dxlProcessInst(&dxl_sp);
+
+        if (dxl_ret == DXL_RET_PROCESS_BROAD_PING)
+        {
+          dxl_sp.current_id = 1;
+          pre_time = micros();
+          process_state = DXL_PROCESS_BROAD_PING;
+        }
+
+        if (dxl_ret == DXL_RET_PROCESS_BROAD_READ)
+        {
+          pre_time = micros();
+          process_state = DXL_PROCESS_BROAD_READ;
+        }
+      }
+      break;
+
+
+    //-- BROAD_PING
+    //
+    case DXL_PROCESS_BROAD_PING:
+      dxl_ret = dxlRxPacket(&dxl_sp);
+
+      if (dxl_ret == DXL_RET_RX_STATUS)
+      {
+        dxl_sp.current_id = dxl_sp.rx.id + 1;
+      }
+      else
+      {
+        if (micros()-pre_time >= 3000)
+        {
+          pre_time = micros();
+          dxl_sp.current_id++;
+        }
+      }
+
+      if (dxl_sp.current_id == dxl_sp.id)
+      {
+        dxlTxPacket(&dxl_sp);
+        process_state = DXL_PROCESS_INST;
+      }
+      break;
+
+    //-- BROAD_READ
+    //
+    case DXL_PROCESS_BROAD_READ:
+      dxl_ret = dxlRxPacket(&dxl_sp);
+
+      if (dxl_ret == DXL_RET_RX_STATUS)
+      {
+        pre_time = micros();
+        if (dxl_sp.pre_id == dxl_sp.rx.id)
+        {
+          dxlTxPacket(&dxl_sp);
+          process_state = DXL_PROCESS_INST;
+          //Serial.println(" Bulk Read out");
+        }
+        else
+        {
+          //Serial.print(" in ");
+          //Serial.println(dxl_sp.rx.id, HEX);
+        }
+      }
+      else
+      {
+        if (micros()-pre_time >= 50000)
+        {
+          process_state = DXL_PROCESS_INST;
+          //Serial.println(" Bulk Read timeout");
+        }
+      }
+      break;
+
+
+    default:
+      process_state = DXL_PROCESS_INST;
+      break;
+  }
+
+}
+
 
 
 /*---------------------------------------------------------------------------
@@ -241,57 +346,57 @@ void dxl_node_op3_reset(void)
   uint16_t i;
 
 
-  memset(&dxl_sp.mem, 0x00, sizeof(dxl_mem_t));
+  memset(&mem, 0x00, sizeof(dxl_mem_t));
 
-  dxl_sp.mem.attr[0]   = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[1]   = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[2]   = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[3]   = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
-  dxl_sp.mem.attr[4]   = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
-  dxl_sp.mem.attr[5]   = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
-  dxl_sp.mem.attr[16]  = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
-  dxl_sp.mem.attr[18]  = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
-  dxl_sp.mem.attr[19]  = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
-  dxl_sp.mem.attr[20]  = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
-  dxl_sp.mem.attr[21]  = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
-  dxl_sp.mem.attr[22]  = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
-  dxl_sp.mem.attr[23]  = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
+  mem.attr[0]   = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RO;
+  mem.attr[1]   = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RO;
+  mem.attr[2]   = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RO;
+  mem.attr[3]   = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
+  mem.attr[4]   = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
+  mem.attr[5]   = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
+  mem.attr[16]  = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
+  mem.attr[18]  = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
+  mem.attr[19]  = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
+  mem.attr[20]  = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
+  mem.attr[21]  = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
+  mem.attr[22]  = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
+  mem.attr[23]  = DXL_MEM_ATTR_EEPROM | DXL_MEM_ATTR_RW;
 
-  dxl_sp.mem.attr[24]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RW;
-  dxl_sp.mem.attr[25]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RW;
-  dxl_sp.mem.attr[26]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RW;
-  dxl_sp.mem.attr[27]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RW;
-  dxl_sp.mem.attr[28]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RW;
-  dxl_sp.mem.attr[29]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RW;
-  dxl_sp.mem.attr[30]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[31]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[32]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[33]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[34]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[35]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[36]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[37]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[38]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[39]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[40]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[41]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[42]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[43]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[44]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[45]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[46]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[47]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[48]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[49]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
-  dxl_sp.mem.attr[50]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RW;
+  mem.attr[24]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RW;
+  mem.attr[25]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RW;
+  mem.attr[26]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RW;
+  mem.attr[27]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RW;
+  mem.attr[28]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RW;
+  mem.attr[29]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RW;
+  mem.attr[30]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[31]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[32]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[33]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[34]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[35]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[36]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[37]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[38]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[39]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[40]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[41]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[42]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[43]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[44]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[45]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[46]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[47]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[48]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[49]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RO;
+  mem.attr[50]  = DXL_MEM_ATTR_RAM    | DXL_MEM_ATTR_RW;
 
 
   // EEPROM Load
   for( i=0; i<sizeof(dxl_mem_op3_t); i++ )
   {
-    if( dxl_sp.mem.attr[i]&DXL_MEM_ATTR_EEPROM )
+    if( mem.attr[i]&DXL_MEM_ATTR_EEPROM )
     {
-      dxl_sp.mem.data[i] = EEPROM[i];
+      mem.data[i] = EEPROM[i];
     }
   }
 
@@ -323,9 +428,9 @@ void dxl_node_op3_factory_reset(void)
   // EEPROM Save
   for( i=0; i<sizeof(dxl_mem_op3_t); i++ )
   {
-    if( dxl_sp.mem.attr[i]&DXL_MEM_ATTR_EEPROM )
+    if( mem.attr[i]&DXL_MEM_ATTR_EEPROM )
     {
-      EEPROM[i] = dxl_sp.mem.data[i];
+      EEPROM[i] = mem.data[i];
     }
   }
 
@@ -339,8 +444,7 @@ void dxl_node_op3_factory_reset(void)
 ---------------------------------------------------------------------------*/
 void dxl_node_op3_change_baud(void)
 {
-  dxl_sp_init(&dxl_sp);
-  dxl_sp_begin(p_dxl_mem->Baud);
+  dxlOpenPort(&dxl_sp, 0, p_dxl_mem->Baud);
 }
 
 /*---------------------------------------------------------------------------
@@ -366,7 +470,7 @@ uint8_t dxl_node_read_byte(uint16_t addr)
   }
 
 
-  return dxl_sp.mem.data[addr];
+  return mem.data[addr];
 }
 
 
@@ -379,7 +483,7 @@ void dxl_node_write_byte(uint16_t addr, uint8_t data)
   uint8_t pwm_value[3];
 
 
-  dxl_sp.mem.data[addr] = data;
+  mem.data[addr] = data;
 
 
 
@@ -412,8 +516,7 @@ void dxl_node_write_byte(uint16_t addr, uint8_t data)
 
   if( RANGE_CHECK(addr, p_dxl_mem->Baud) )
   {
-    dxl_sp.tx_status_packet.run_flag = 1;
-    dxl_sp.tx_status_packet.run_func = dxl_node_op3_change_baud;
+    dxl_node_op3_change_baud();
   }
 
   if( RANGE_CHECK(addr, p_dxl_mem->Buzzer) )
@@ -449,74 +552,71 @@ BOOL dxl_node_check_range(uint16_t addr, uint32_t addr_ptr, uint8_t length)
 /*---------------------------------------------------------------------------
      dxl sp driver
 ---------------------------------------------------------------------------*/
-
-
-
-/*---------------------------------------------------------------------------
-     TITLE   : make_basic_status_packet
-     WORK    :
----------------------------------------------------------------------------*/
-void make_basic_status_packet(uint8_t error, uint32_t send_time)
+void processRead(uint16_t addr, uint8_t *p_data, uint16_t length)
 {
-  dxl_tx_status_packet_t *p_tx_status_packet;
+  uint32_t i;
 
 
-  p_tx_status_packet = &dxl_sp.tx_status_packet;
-
-
-  p_tx_status_packet->packet.id             = p_dxl_mem->ID;
-  p_tx_status_packet->packet.inst           = DXL_INST_STATUS;
-  p_tx_status_packet->packet.error          = error;
-  p_tx_status_packet->packet.param_length   = 0;
-  p_tx_status_packet->packet.packet_length  = p_tx_status_packet->packet.param_length + 4;
-
-  p_tx_status_packet->state     = TX_STATUS_STATE_SEND;
-  p_tx_status_packet->prev_time = micros();
-  p_tx_status_packet->send_time = send_time;
+  for( i=0; i<length; i++ )
+  {
+    p_data[i] = dxl_node_read_byte(addr);
+    addr++;
+  }
 }
+
+void processWrite(uint16_t addr, uint8_t *p_data, uint16_t length)
+{
+  uint32_t i;
+
+
+  for( i=0; i<length; i++ )
+  {
+    if( mem.attr[addr]&DXL_MEM_ATTR_WO || mem.attr[addr]&DXL_MEM_ATTR_RW )
+    {
+      dxl_node_write_byte(addr, p_data[i]);
+      if( mem.attr[addr]&DXL_MEM_ATTR_EEPROM )
+      {
+        EEPROM[addr] = mem.data[addr];
+      }
+    }
+    addr++;
+  }
+}
+
+
 
 
 /*---------------------------------------------------------------------------
      TITLE   : ping
      WORK    :
 ---------------------------------------------------------------------------*/
-void ping(dxl_inst_packet_t *p_inst_packet)
+dxl_error_t ping(dxl_t *p_dxl)
 {
-  uint8_t  error = 0x00;
-  uint16_t index = 0;
-  uint32_t send_time;
-  dxl_tx_status_packet_t *p_tx_status_packet;
+  dxl_error_t ret = DXL_RET_OK;
+  uint8_t data[3];
 
 
-  #if _USE_DEBUG_LOG_INST_FUNC == 1
-  Serial.print("ping ");
-  Serial.print(p_inst_packet->id, HEX);
-  Serial.print(" ");
-  Serial.println(p_dxl_mem->ID, HEX);
-  #endif
+
+  data[0] = (p_dxl_mem->Model_Number>>0) & 0xFF;
+  data[1] = (p_dxl_mem->Model_Number>>8) & 0xFF;
+  data[2] = p_dxl_mem->Firmware_Version;
+
+  if (p_dxl->rx.id == DXL_GLOBAL_ID)
+  {
+    ret = dxlMakePacketStatus(p_dxl, p_dxl->id, 0, data, 3);
+
+    if (ret == DXL_RET_OK)
+    {
+      ret = DXL_RET_PROCESS_BROAD_PING;
+    }
+  }
+  else
+  {
+    ret = dxlTxPacketStatus(p_dxl, p_dxl->id, 0, data, 3);
+  }
 
 
-  if     ( p_inst_packet->id == DXL_ID_BROADCAST_ID ) send_time = p_dxl_mem->ID*100;
-  else if( p_inst_packet->id == p_dxl_mem->ID       ) send_time = 0;
-  else                                                return;
-
-
-  p_tx_status_packet = &dxl_sp.tx_status_packet;
-
-
-  p_tx_status_packet->packet.id             = p_dxl_mem->ID;
-  p_tx_status_packet->packet.inst           = DXL_INST_STATUS;
-  p_tx_status_packet->packet.error          = error;
-  index = 0;
-  p_tx_status_packet->packet.param[index++] = (p_dxl_mem->Model_Number>>0) & 0xFF;
-  p_tx_status_packet->packet.param[index++] = (p_dxl_mem->Model_Number>>8) & 0xFF;
-  p_tx_status_packet->packet.param[index++] = p_dxl_mem->Firmware_Version;
-  p_tx_status_packet->packet.param_length   = index;
-  p_tx_status_packet->packet.packet_length  = p_tx_status_packet->packet.param_length + 4;
-
-  p_tx_status_packet->state     = TX_STATUS_STATE_SEND;
-  p_tx_status_packet->prev_time = micros();
-  p_tx_status_packet->send_time = send_time;
+  return ret;
 }
 
 
@@ -524,67 +624,44 @@ void ping(dxl_inst_packet_t *p_inst_packet)
      TITLE   : read
      WORK    :
 ---------------------------------------------------------------------------*/
-void read(dxl_inst_packet_t *p_inst_packet)
+dxl_error_t read(dxl_t *p_dxl)
 {
-  uint8_t  error = 0x00;
-  uint16_t index = 0;
-  uint32_t send_time;
-  dxl_tx_status_packet_t *p_tx_status_packet;
-
-  uint16_t i;
+  dxl_error_t ret = DXL_RET_OK;
   uint16_t addr;
-  uint16_t length = 0;
-
-  #if _USE_DEBUG_LOG_INST_FUNC == 1
-  Serial.print("read ");
-  Serial.println(p_inst_packet->id, HEX);
-  #endif
-
-  p_tx_status_packet = &dxl_sp.tx_status_packet;
+  uint16_t length;
+  uint16_t i;
+  uint8_t data[DXL_MAX_BUFFER];
 
 
-  if     ( p_inst_packet->id == DXL_ID_BROADCAST_ID ) send_time = p_dxl_mem->ID*1000;
-  else if( p_inst_packet->id == p_dxl_mem->ID       ) send_time = 0;
-  else                                                return;
-
-
-  addr   = (p_inst_packet->param[1]<<8) | (p_inst_packet->param[0]<<0);
-  length = (p_inst_packet->param[3]<<8) | (p_inst_packet->param[2]<<0);
-
-  if( addr >= sizeof(dxl_mem_op3_t) )
+  if (p_dxl->rx.id == DXL_GLOBAL_ID || p_dxl->rx.param_length != 4)
   {
-    error = DXL_ERR_DATA_LENGTH;
+    return DXL_RET_EMPTY;
   }
-  if( length > DXL_BUF_LENGTH )
+
+
+  addr   = (p_dxl->rx.p_param[1]<<8) | p_dxl->rx.p_param[0];
+  length = (p_dxl->rx.p_param[3]<<8) | p_dxl->rx.p_param[2];
+
+
+  if (addr >= sizeof(dxl_mem_op3_t))
   {
-    error = DXL_ERR_DATA_LENGTH;
+    dxlTxPacketStatus(p_dxl, p_dxl->id, DXL_ERR_DATA_LENGTH, NULL, 0);
+    return DXL_RET_ERROR_LENGTH;
   }
-  dxl_sp_set_step(1, 1);
-
-
-  if( error == 0x00 )
+  if( length > DXL_MAX_BUFFER - 10 )
   {
-    dxl_sp_set_step(1, 2);
-    index = 0;
-    for( i=0; i<length; i++ )
-    {
-      p_tx_status_packet->packet.param[index++] = dxl_node_read_byte(addr);
-      addr++;
-    }
+    dxlTxPacketStatus(p_dxl, p_dxl->id, DXL_ERR_DATA_LENGTH, NULL, 0);
+    return DXL_RET_ERROR_LENGTH;
   }
-  dxl_sp_set_step(1, 3);
-  p_tx_status_packet->packet.param_length  = index;
-  p_tx_status_packet->packet.packet_length = p_tx_status_packet->packet.param_length + 4;
 
-  // make status packet
+  processRead(addr, data, length);
 
-  p_tx_status_packet->packet.id             = p_dxl_mem->ID;
-  p_tx_status_packet->packet.inst           = DXL_INST_STATUS;
-  p_tx_status_packet->packet.error          = error;
 
-  p_tx_status_packet->state     = TX_STATUS_STATE_SEND;
-  p_tx_status_packet->prev_time = micros();
-  p_tx_status_packet->send_time = send_time;
+  ret = dxlTxPacketStatus(p_dxl, p_dxl->id, 0, data, length);
+
+  //Serial.println(" Read");
+
+  return ret;
 }
 
 
@@ -592,502 +669,329 @@ void read(dxl_inst_packet_t *p_inst_packet)
      TITLE   : write
      WORK    :
 ---------------------------------------------------------------------------*/
-void write(dxl_inst_packet_t *p_inst_packet)
+dxl_error_t write(dxl_t *p_dxl)
 {
-  uint8_t  error = 0x00;
-  uint16_t index = 0;
-  uint32_t send_time;
-  dxl_tx_status_packet_t *p_tx_status_packet;
-
-  uint16_t i;
+  dxl_error_t ret = DXL_RET_OK;
   uint16_t addr;
-  uint16_t offset;
-  uint16_t length = 0;
-
-  #if _USE_DEBUG_LOG_INST_FUNC == 1
-  Serial.print("write ");
-  Serial.println(p_inst_packet->id, HEX);
-  #endif
+  uint16_t length;
+  uint8_t  *p_data;
 
 
-  if     ( p_inst_packet->id == DXL_ID_BROADCAST_ID ) send_time = p_dxl_mem->ID*1000;
-  else if( p_inst_packet->id == p_dxl_mem->ID       ) send_time = 0;
-  else                                                return;
-
-
-  addr   = (p_inst_packet->param[1]<<8) | (p_inst_packet->param[0]<<0);
-
-  if( p_inst_packet->param_length > 2 )
+  if (p_dxl->rx.id == DXL_GLOBAL_ID)
   {
-      length = p_inst_packet->param_length-2;
+    return DXL_RET_EMPTY;
+  }
+
+  addr   = (p_dxl->rx.p_param[1]<<8) | p_dxl->rx.p_param[0];
+  p_data = &p_dxl->rx.p_param[2];
+
+  if (p_dxl->rx.param_length > 2 )
+  {
+    length = p_dxl->rx.param_length - 2;
   }
   else
   {
-    error = DXL_ERR_DATA_LENGTH;
+    dxlTxPacketStatus(p_dxl, p_dxl->id, DXL_ERR_DATA_LENGTH, NULL, 0);
+    return DXL_RET_ERROR_LENGTH;
   }
 
-  if( addr >= sizeof(dxl_mem_op3_t) )
+  if (addr >= sizeof(dxl_mem_op3_t))
   {
-    error = DXL_ERR_DATA_LENGTH;
+    dxlTxPacketStatus(p_dxl, p_dxl->id, DXL_ERR_DATA_LENGTH, NULL, 0);
+    return DXL_RET_ERROR_LENGTH;
   }
-  if( length > DXL_BUF_LENGTH )
+  if( length > DXL_MAX_BUFFER - 10 )
   {
-    error = DXL_ERR_DATA_LENGTH;
+    dxlTxPacketStatus(p_dxl, p_dxl->id, DXL_ERR_DATA_LENGTH, NULL, 0);
+    return DXL_RET_ERROR_LENGTH;
   }
 
-  dxl_sp_set_step(1, 1);
-  if( error == 0x00 )
-  {
-    dxl_sp_set_step(1, 2);
-    offset = 2;
-    for( i=0; i<length; i++ )
-    {
-      if( dxl_sp.mem.attr[addr]&DXL_MEM_ATTR_WO || dxl_sp.mem.attr[addr]&DXL_MEM_ATTR_RW )
-      {
-        dxl_node_write_byte(addr, p_inst_packet->param[offset+i]);
-        if( dxl_sp.mem.attr[addr]&DXL_MEM_ATTR_EEPROM )
-        {
-          EEPROM[addr] = dxl_sp.mem.data[addr];
-        }
-      }
-      addr++;
-    }
-    dxl_sp_set_step(1, 3);
-  }
 
-  dxl_sp_set_step(1, 4);
-  make_basic_status_packet(error, send_time);
+  dxlTxPacketStatus(p_dxl, p_dxl->id, DXL_ERR_NONE, NULL, 0);
+
+
+  processWrite(addr, p_data, length);
+
+  //Serial.println(" write");
+  return ret;
 }
 
 
-/*---------------------------------------------------------------------------
-     TITLE   : reg_write
-     WORK    :
----------------------------------------------------------------------------*/
-void reg_write(dxl_inst_packet_t *p_inst_packet)
+dxl_error_t sync_read(dxl_t *p_dxl)
 {
-  #if _USE_DEBUG_LOG_INST_FUNC == 1
-  Serial.print("reg_write ");
-  Serial.println(p_inst_packet->id, HEX);
-  #endif
-
-}
-
-
-/*---------------------------------------------------------------------------
-     TITLE   : action
-     WORK    :
----------------------------------------------------------------------------*/
-void action(dxl_inst_packet_t *p_inst_packet)
-{
-  #if _USE_DEBUG_LOG_INST_FUNC == 1
-  Serial.print("action ");
-  Serial.println(p_inst_packet->id, HEX);
-  #endif
-
-}
-
-
-/*---------------------------------------------------------------------------
-     TITLE   : factory_reset
-     WORK    :
----------------------------------------------------------------------------*/
-void factory_reset(dxl_inst_packet_t *p_inst_packet)
-{
-  #if _USE_DEBUG_LOG_INST_FUNC == 1
-  Serial.print("factory_reset ");
-  Serial.println(p_inst_packet->id, HEX);
-  #endif
-
-}
-
-
-void reboot(dxl_inst_packet_t *p_inst_packet)
-{
-  #if _USE_DEBUG_LOG_INST_FUNC == 1
-  Serial.print("reboot ");
-  Serial.println(p_inst_packet->id, HEX);
-  #endif
-
-}
-
-
-void sync_read(dxl_inst_packet_t *p_inst_packet)
-{
-  uint8_t  error = 0x00;
-  uint16_t index = 0;
-  uint32_t send_time = 0;
-
-  uint16_t i;
+  dxl_error_t ret = DXL_RET_OK;
   uint16_t addr;
-  uint16_t offset;
-  uint16_t length = 0;
-  uint8_t  pre_id = 0;
-  uint8_t  dev_id = 0;
-  uint8_t  dev_cnt = 0;
-
-  dxl_tx_status_packet_t *p_tx_status_packet;
-
-
-  p_tx_status_packet = &dxl_sp.tx_status_packet;
-
-  #if _USE_DEBUG_LOG_INST_FUNC == 1
-  Serial.print("sync_read : ");
-  Serial.println(p_inst_packet->id, HEX);
-  #endif
-
-
-  if( p_inst_packet->id != DXL_ID_BROADCAST_ID )
-    return;
-
-
-  addr   = (p_inst_packet->param[1]<<8) | (p_inst_packet->param[0]<<0);
-  length = (p_inst_packet->param[3]<<8) | (p_inst_packet->param[2]<<0);
-
-  if( addr >= sizeof(dxl_mem_op3_t) )
-  {
-    error = DXL_ERR_DATA_LENGTH;
-  }
-  if( length > DXL_BUF_LENGTH )
-  {
-    error = DXL_ERR_DATA_LENGTH;
-  }
-
-  dxl_sp_set_step(1, 1);
-  if( error == 0x00 )
-  {
-    dev_cnt = 0;
-    offset  = 4;
-    dxl_sp_set_step(1, 2);
-    while(1)
-    {
-      dev_id = p_inst_packet->param[offset++];
-
-      dev_cnt++;
-
-      if( dev_id == p_dxl_mem->ID )
-      {
-        for( i=0; i<length; i++ )
-        {
-          if( addr < sizeof(dxl_mem_op3_t))
-          {
-            if( dxl_sp.mem.attr[addr]&DXL_MEM_ATTR_RO || dxl_sp.mem.attr[addr]&DXL_MEM_ATTR_RW )
-            {
-              p_tx_status_packet->packet.param[i] = dxl_node_read_byte(addr);
-            }
-          }
-          else
-          {
-            p_tx_status_packet->packet.param[i] = 0x00;
-          }
-          addr++;
-        }
-        break;
-      }
-      else
-      {
-        pre_id  = dev_id;
-      }
-
-      if( offset >= p_inst_packet->param_length ) break;
-    }
-
-    dxl_sp_set_step(1, 3);
-    #if _USE_DEBUG_LOG_INST_FUNC == 1
-    Serial.print("    dev_cnt ");
-    Serial.println(dev_cnt);
-    #endif
-
-    if( dev_cnt > 1 )
-    {
-      dxl_sp.rx_status_wait_id      = pre_id;
-      dxl_sp.rx_status_wait_dev_cnt = dev_cnt - 1;
-      dxl_sp.rx_status_state        = RX_STATUS_STATE_SYNC_READ;
-      p_tx_status_packet->state     = TX_STATUS_STATE_SYNC_READ;
-    }
-    else
-    {
-      p_tx_status_packet->state = TX_STATUS_STATE_SEND;
-    }
-
-    p_tx_status_packet->packet.param_length  = length;
-    p_tx_status_packet->packet.packet_length = p_tx_status_packet->packet.param_length + 4;
-
-    // make status packet
-
-    p_tx_status_packet->packet.id             = p_dxl_mem->ID;
-    p_tx_status_packet->packet.inst           = DXL_INST_STATUS;
-    p_tx_status_packet->packet.error          = error;
-
-    p_tx_status_packet->prev_time = micros();
-    p_tx_status_packet->send_time = send_time;
-  }
-}
-
-
-void sync_write(dxl_inst_packet_t *p_inst_packet)
-{
-  uint8_t  error = 0x00;
-  uint16_t index = 0;
-  uint32_t send_time = 0;
-
+  uint16_t length;
+  uint8_t  *p_data;
+  uint16_t index;
   uint16_t i;
-  uint16_t addr;
-  uint16_t offset;
-  uint16_t length = 0;
-  uint8_t  dev_id = 0;
-
-  #if _USE_DEBUG_LOG_INST_FUNC == 1
-  Serial.print("sync_write ");
-  Serial.println(p_inst_packet->id, HEX);
-  #endif
+  uint16_t rx_id_cnt;
+  uint8_t data[DXL_MAX_BUFFER];
 
 
-  if( p_inst_packet->id != DXL_ID_BROADCAST_ID )
-    return;
-
-
-  addr   = (p_inst_packet->param[1]<<8) | (p_inst_packet->param[0]<<0);
-  length = (p_inst_packet->param[3]<<8) | (p_inst_packet->param[2]<<0);
-
-  if( p_inst_packet->param_length < (4+1+length) )
+  if (p_dxl->rx.id != DXL_GLOBAL_ID)
   {
-    error = DXL_ERR_DATA_LENGTH;
-  }
-  if( length > DXL_BUF_LENGTH )
-  {
-    error = DXL_ERR_DATA_LENGTH;
+    return DXL_RET_EMPTY;
   }
 
-  dxl_sp_set_step(1, 1);
-  if( error == 0x00 )
+  addr      = (p_dxl->rx.p_param[1]<<8) | p_dxl->rx.p_param[0];
+  length    = (p_dxl->rx.p_param[3]<<8) | p_dxl->rx.p_param[2];
+  p_data    = &p_dxl->rx.p_param[4];
+  rx_id_cnt = p_dxl->rx.param_length - 4;
+
+
+  if (p_dxl->rx.param_length < (5) || rx_id_cnt > 255)
   {
-    offset = 4;
-    dxl_sp_set_step(1, 2);
-    while(1)
+    //dxlTxPacketStatus(p_dxl, p_dxl->id, DXL_ERR_DATA_LENGTH, NULL, 0);
+    return DXL_RET_ERROR_LENGTH;
+  }
+  if (addr >= sizeof(dxl_mem_op3_t) || (addr+length) > sizeof(dxl_mem_op3_t))
+  {
+    //dxlTxPacketStatus(p_dxl, p_dxl->id, DXL_ERR_DATA_LENGTH, NULL, 0);
+    return DXL_RET_ERROR_LENGTH;
+  }
+
+
+
+
+  p_dxl->pre_id     = 0xFF;
+  p_dxl->current_id = 0xFF;
+
+  for (i=0; i<rx_id_cnt; i++)
+  {
+    if (p_data[i] == p_dxl->id)
     {
-      dev_id = p_inst_packet->param[offset++];
-
-      if( dev_id == p_dxl_mem->ID )
-      {
-        for( i=0; i<length; i++ )
-        {
-          if( addr >= sizeof(dxl_mem_op3_t) )
-          {
-            break;
-          }
-          if( dxl_sp.mem.attr[addr]&DXL_MEM_ATTR_WO || dxl_sp.mem.attr[addr]&DXL_MEM_ATTR_RW )
-          {
-            dxl_node_write_byte(addr, p_inst_packet->param[offset+i]);
-            if( dxl_sp.mem.attr[addr]&DXL_MEM_ATTR_EEPROM )
-            {
-              EEPROM[addr] = dxl_sp.mem.data[addr];
-            }
-          }
-          addr++;
-        }
-        offset += length;
-        break;
-      }
-      else
-      {
-        offset += length;
-      }
-
-      if( offset >= p_inst_packet->param_length ) break;
-    }
-    dxl_sp_set_step(1, 3);
-  }
-}
-
-
-void bulk_read(dxl_inst_packet_t *p_inst_packet)
-{
-  uint8_t  error = 0x00;
-  uint16_t index = 0;
-  uint32_t send_time = 0;
-  dxl_tx_status_packet_t *p_tx_status_packet;
-
-  uint16_t i;
-  uint16_t addr;
-  uint16_t length = 0;
-  uint8_t  pre_id = 0;
-  uint8_t  dev_id = 0;
-  uint16_t dev_cnt = 0;
-
-
-  #if _USE_DEBUG_LOG_INST_FUNC == 1
-  Serial.print("inst bulk_read ");
-  Serial.println(p_inst_packet->id, HEX);
-  #endif
-
-  p_tx_status_packet = &dxl_sp.tx_status_packet;
-
-
-  if( p_inst_packet->id != DXL_ID_BROADCAST_ID )
-    return;
-
-  if( p_inst_packet->param_length > DXL_BUF_LENGTH )
-    return;
-
-  dxl_sp_set_step(1, 1);
-  for( i=0; i<p_inst_packet->param_length; i+=5 )
-  {
-    dev_id = p_inst_packet->param[i];
-    addr   = (p_inst_packet->param[i+2]<<8) | (p_inst_packet->param[i+1]<<0);
-    length = (p_inst_packet->param[i+4]<<8) | (p_inst_packet->param[i+3]<<0);
-
-    dev_cnt++;
-
-    if( dev_id == p_dxl_mem->ID && addr < sizeof(dxl_mem_op3_t) )
-    {
+      p_dxl->current_id = p_dxl->id;
       break;
     }
 
-    pre_id = dev_id;
-
-    #if _USE_DEBUG_LOG_INST_FUNC == 1
-    Serial.print("     bulk_read rxid: ");
-    Serial.println(dev_id, HEX);
-    #endif
+    p_dxl->pre_id = p_data[i];
   }
 
-  dxl_sp_set_step(1, 2);
-  if( dev_id == p_dxl_mem->ID )
+
+  if (p_dxl->current_id == p_dxl->id)
   {
-    #if _USE_DEBUG_LOG_INST_FUNC == 1
-    Serial.print("     bulk_read rxid: ");
-    Serial.print(dev_id, HEX);
-    Serial.print(" devcnt: ");
-    Serial.print(dev_cnt);
-    Serial.println();
-    #endif
+    processRead(addr, data, length);
 
-    dxl_sp_set_step(1, 3);
-    index = 0;
-    for( i=0; i<length; i++ )
-    {
-      p_tx_status_packet->packet.param[index++] = dxl_node_read_byte(addr);
-      addr++;
-    }
 
-    dxl_sp_set_step(1, 4);
-    if( dev_cnt > 1 )
+    if (p_dxl->pre_id == 0xFF)
     {
-      dxl_sp.rx_status_wait_id      = pre_id;
-      dxl_sp.rx_status_wait_dev_cnt = dev_cnt - 1;
-      dxl_sp.rx_status_state        = RX_STATUS_STATE_BULK_READ;
-      p_tx_status_packet->state     = TX_STATUS_STATE_BULK_READ;
+      ret = dxlTxPacketStatus(p_dxl, p_dxl->id, 0, data, length);
     }
     else
     {
-      p_tx_status_packet->state = TX_STATUS_STATE_SEND;
+      ret = dxlMakePacketStatus(p_dxl, p_dxl->id, 0, data, length);
+      if (ret == DXL_RET_OK)
+      {
+        ret = DXL_RET_PROCESS_BROAD_READ;
+      }
     }
-
-    p_tx_status_packet->packet.param_length  = index;
-    p_tx_status_packet->packet.packet_length = p_tx_status_packet->packet.param_length + 4;
-
-    // make status packet
-
-    p_tx_status_packet->packet.id             = p_dxl_mem->ID;
-    p_tx_status_packet->packet.inst           = DXL_INST_STATUS;
-    p_tx_status_packet->packet.error          = error;
-
-    p_tx_status_packet->prev_time = micros();
-    p_tx_status_packet->send_time = send_time;
-    dxl_sp_set_step(1, 5);
   }
 
+  //Serial.println(" Sync Read");
+
+  return ret;
 }
 
 
-void bulk_write(dxl_inst_packet_t *p_inst_packet)
+dxl_error_t sync_write(dxl_t *p_dxl)
 {
-  uint8_t  error = 0x00;
-  uint16_t index = 0;
-  uint32_t send_time = 0;
-
-  uint16_t i;
+  dxl_error_t ret = DXL_RET_OK;
   uint16_t addr;
-  uint16_t offset;
-  uint16_t length = 0;
-  uint8_t  pre_id = 0;
-  uint8_t  dev_id = 0;
+  uint16_t length;
+  uint8_t  *p_data;
+  uint16_t remain_length;
+  uint16_t index;
+
+  if (p_dxl->rx.id != DXL_GLOBAL_ID)
+  {
+    //Serial.println(" Sync Write Err 0");
+    return DXL_RET_EMPTY;
+  }
+
+  addr   = (p_dxl->rx.p_param[1]<<8) | p_dxl->rx.p_param[0];
+  length = (p_dxl->rx.p_param[3]<<8) | p_dxl->rx.p_param[2];
 
 
-  #if _USE_DEBUG_LOG_INST_FUNC == 1
-  Serial.print("bulk_write ");
-  Serial.println(p_inst_packet->id, HEX);
-  #endif
+
+  //Serial.print(" Sync Write in : ");
+  //Serial.print(addr);
+  //Serial.print(" ");
+  //Serial.println(length);
+
+  if (p_dxl->rx.param_length < (4+length+1))
+  {
+    //dxlTxPacketStatus(p_dxl, p_dxl->id, DXL_ERR_DATA_LENGTH, NULL, 0);
+    //Serial.println(" Sync Write Err 1");
+    return DXL_RET_ERROR_LENGTH;
+  }
+  if (addr >= sizeof(dxl_mem_op3_t) || (addr+length) > sizeof(dxl_mem_op3_t))
+  {
+    //dxlTxPacketStatus(p_dxl, p_dxl->id, DXL_ERR_DATA_LENGTH, NULL, 0);
+    //Serial.println(" Sync Write Err 2");
+    return DXL_RET_ERROR_LENGTH;
+  }
 
 
 
-  if( p_inst_packet->id != DXL_ID_BROADCAST_ID )
-    return;
 
-
-  offset = 0;
-
-  dxl_sp_set_step(1, 1);
+  index = 4;
   while(1)
   {
-    dev_id = p_inst_packet->param[offset];
-    addr   = (p_inst_packet->param[offset+2]<<8) | (p_inst_packet->param[offset+1]<<0);
-    length = (p_inst_packet->param[offset+4]<<8) | (p_inst_packet->param[offset+3]<<0);
+    p_data = &p_dxl->rx.p_param[index];
+    remain_length = p_dxl->rx.param_length - index;
 
-    offset += 5;
 
-    #if _USE_DEBUG_LOG_INST_FUNC == 1
-    Serial.print("    dev_id :");
-    Serial.print(dev_id);
-    Serial.print(" ");
-    Serial.print(length);
-    Serial.print(" ");
-    Serial.println(p_inst_packet->param_length);
-
-    #endif
-
-    dxl_sp_set_step(1, 2);
-    if( dev_id == p_dxl_mem->ID )
+    if (remain_length < (length+1))
     {
-      dxl_sp_set_step(1, 3);
-      #if _USE_DEBUG_LOG_INST_FUNC == 1
-      Serial.print("    recv data ");
-      Serial.print(addr);
-      Serial.print(" ");
-      Serial.println(length);
-      #endif
-
-      for( i=0; i<length; i++ )
+      break;
+    }
+    else
+    {
+      if (p_data[0] == p_dxl->id)
       {
-        if( addr >= sizeof(dxl_mem_op3_t))
-        {
-          #if _USE_DEBUG_LOG_INST_FUNC == 1
-          Serial.print("    addr over");
-          Serial.println(p_inst_packet->id, HEX);
-          #endif
-          break;
-        }
-        if( dxl_sp.mem.attr[addr]&DXL_MEM_ATTR_WO || dxl_sp.mem.attr[addr]&DXL_MEM_ATTR_RW )
-        {
-          dxl_node_write_byte(addr, p_inst_packet->param[offset+i]);
-          if( dxl_sp.mem.attr[addr]&DXL_MEM_ATTR_EEPROM )
-          {
-            EEPROM[addr] = dxl_sp.mem.data[addr];
-          }
-        }
-        addr++;
+        processWrite(addr, &p_data[1], length);
+        //Serial.println(" Sync Write out");
+        break;
       }
+
+      index += length + 1;
+    }
+  }
+
+  return ret;
+}
+
+
+dxl_error_t bulk_read(dxl_t *p_dxl)
+{
+  dxl_error_t ret = DXL_RET_OK;
+  uint16_t addr;
+  uint16_t length;
+  uint8_t  *p_data;
+  uint16_t remain_length;
+  uint16_t i;
+  uint16_t rx_id_cnt;
+  uint8_t data[DXL_MAX_BUFFER];
+
+
+
+  if (p_dxl->rx.id != DXL_GLOBAL_ID)
+  {
+    return DXL_RET_EMPTY;
+  }
+
+
+  rx_id_cnt = p_dxl->rx.param_length / 5;
+
+
+  if (p_dxl->rx.param_length < 5 || (p_dxl->rx.param_length%5) != 0)
+  {
+    //Serial.print(" DXL_RET_ERROR_LENGTH ");
+    return DXL_RET_ERROR_LENGTH;
+  }
+
+
+  p_dxl->pre_id     = 0xFF;
+  p_dxl->current_id = 0xFF;
+
+  for (i=0; i<rx_id_cnt; i++)
+  {
+    p_data = &p_dxl->rx.p_param[i*5];
+    addr   = (p_data[2]<<8) | p_data[1];
+    length = (p_data[4]<<8) | p_data[3];
+
+
+    //Serial.print(" bulk in id ");
+    //Serial.println(p_data[0], HEX);
+
+    if (p_data[0] == p_dxl->id)
+    {
+      p_dxl->current_id = p_dxl->id;
+      break;
+    }
+    p_dxl->pre_id = p_data[0];
+  }
+
+
+  if (p_dxl->current_id == p_dxl->id)
+  {
+    if (addr >= sizeof(dxl_mem_op3_t) || (addr+length) > sizeof(dxl_mem_op3_t))
+    {
+      return DXL_RET_ERROR_LENGTH;
+    }
+
+
+    processRead(addr, data, length);
+
+
+    if (p_dxl->pre_id == 0xFF)
+    {
+      ret = dxlTxPacketStatus(p_dxl, p_dxl->id, 0, data, length);
+    }
+    else
+    {
+      ret = dxlMakePacketStatus(p_dxl, p_dxl->id, 0, data, length);
+      if (ret == DXL_RET_OK)
+      {
+        ret = DXL_RET_PROCESS_BROAD_READ;
+      }
+    }
+  }
+
+  return ret;
+}
+
+
+dxl_error_t bulk_write(dxl_t *p_dxl)
+{
+  dxl_error_t ret = DXL_RET_OK;
+  uint16_t addr;
+  uint16_t length;
+  uint8_t  *p_data;
+  uint16_t remain_length;
+  uint16_t index;
+  uint8_t  id;
+
+  if (p_dxl->rx.id != DXL_GLOBAL_ID)
+  {
+    return DXL_RET_EMPTY;
+  }
+
+
+
+  index = 0;
+  while(1)
+  {
+    p_data = &p_dxl->rx.p_param[index];
+    id     = p_data[0];
+    addr   = (p_data[2]<<8) | p_data[1];
+    length = (p_data[4]<<8) | p_data[3];
+
+    index += 5;
+
+    if (p_dxl->rx.param_length < (index + length))
+    {
       break;
     }
 
-    dxl_sp_set_step(1, 4);
-    offset += length;
+    if (p_data[0] == p_dxl->id)
+    {
+      if (addr >= sizeof(dxl_mem_op3_t) || (addr+length) > sizeof(dxl_mem_op3_t))
+      {
+        return DXL_RET_ERROR_LENGTH;
+      }
+      processWrite(addr, &p_dxl->rx.p_param[index], length);
 
-    if( offset >= p_inst_packet->param_length ) break;
+      //Serial.print(addr);
+      //Serial.print(" ");
+      //Serial.print(length);
+      //Serial.print(" ");
+      //Serial.println(" bulk write ");
+      break;
+    }
+    index += length;
   }
 
-  #if _USE_DEBUG_LOG_INST_FUNC == 1
-  Serial.println("bulk_write_end");
-  #endif
+  return ret;
 }

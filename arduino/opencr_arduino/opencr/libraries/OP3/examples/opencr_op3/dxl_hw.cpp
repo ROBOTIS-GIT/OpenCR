@@ -21,7 +21,7 @@
      TITLE   : dxl_hw_begin
      WORK    :
 ---------------------------------------------------------------------------*/
-void dxl_hw_begin(uint8_t baud)
+uint32_t dxl_hw_begin(uint8_t baud)
 {
   uint32_t Baudrate = 0;
 
@@ -71,6 +71,8 @@ void dxl_hw_begin(uint8_t baud)
 
 
   DXL_PORT.begin(Baudrate);
+
+  return Baudrate;
 }
 
 
@@ -131,6 +133,26 @@ uint8_t dxl_hw_read(void)
 void dxl_hw_write(uint8_t value)
 {
 	DXL_PORT.write(value);
+}
+
+
+/*---------------------------------------------------------------------------
+     TITLE   : dxl_hw_write
+     WORK    :
+---------------------------------------------------------------------------*/
+void dxl_hw_write(uint8_t *p_data, uint32_t length)
+{
+  uint32_t i;
+
+
+  dxl_hw_tx_enable();
+
+  for (i=0; i<length; i++)
+  {
+    DXL_PORT.write(p_data[i]);
+  }
+
+  dxl_hw_tx_disable();
 }
 
 

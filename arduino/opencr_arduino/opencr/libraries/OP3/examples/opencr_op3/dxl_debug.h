@@ -11,8 +11,8 @@
 #define DXL_DEBUG_H
 
 
+#include "dxl.h"
 #include "dxl_def.h"
-#include "dxl_sp.h"
 
 
 

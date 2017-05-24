@@ -128,15 +128,6 @@ bool dxl_debug_menu_loop(uint8_t ch)
       break;
 
     case 'd':
-      DEBUG_SERIAL.println(" ");
-      DEBUG_SERIAL.print("Step 0 : 0x");
-      DEBUG_SERIAL.println(dxl_sp_get_step(0), HEX);
-      DEBUG_SERIAL.print("Step 1 : 0x");
-      DEBUG_SERIAL.println(dxl_sp_get_step(1), HEX);
-      DEBUG_SERIAL.print("Step 2 : 0x");
-      DEBUG_SERIAL.println(dxl_sp_get_step(2), HEX);
-      DEBUG_SERIAL.print("Step 3 : 0x");
-      DEBUG_SERIAL.println(dxl_sp_get_step(3), HEX);
       break;
 
     case 'l':

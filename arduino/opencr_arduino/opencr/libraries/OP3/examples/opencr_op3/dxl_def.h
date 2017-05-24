@@ -51,11 +51,11 @@
 
 
 #define _USE_DEBUG_LOG_RX_INST    (0)
-#define _USE_DEBUG_LOG_RX_STATUS  (1)
+#define _USE_DEBUG_LOG_RX_STATUS  (0)
 #define _USE_DEBUG_LOG_RX_RAW     (0)
 #define _USE_DEBUG_LOG_TX_INST    (0)
-#define _USE_DEBUG_LOG_TX_STATUS  (1)
-#define _USE_DEBUG_LOG_INST_FUNC  (1)
+#define _USE_DEBUG_LOG_TX_STATUS  (0)
+#define _USE_DEBUG_LOG_INST_FUNC  (0)
 
 
 
