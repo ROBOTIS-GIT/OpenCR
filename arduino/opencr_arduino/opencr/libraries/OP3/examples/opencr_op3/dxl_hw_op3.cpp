@@ -434,7 +434,7 @@ void dxl_hw_op3_voltage_update(void)
   {
     if(millis()-process_time[2] >= 200)
     {
-      process_time[2] - millis();
+      process_time[2] = millis();
 
       tone(BDPIN_BUZZER, 1000, 100);
     }
