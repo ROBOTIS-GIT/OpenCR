@@ -61,6 +61,7 @@ bool PortHandlerOpenCR::openPort()
   pinMode(BDPIN_DXL_PWR_EN, OUTPUT);
 
   setPowerOn();
+  delay(1000);
 
   return setBaudRate(baudrate_);
 }
@@ -159,7 +160,7 @@ bool PortHandlerOpenCR::isPacketTimeout()
     packet_timeout_ = 0;
     return true;
   }
-  
+
   return false;
 }
 

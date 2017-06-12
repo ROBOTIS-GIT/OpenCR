@@ -26,7 +26,7 @@
 
 
 
-void dxl_hw_begin(uint8_t baud);
+uint32_t dxl_hw_begin(uint8_t baud);
 
 void dxl_hw_tx_enable(void);
 void dxl_hw_tx_disable(void);
@@ -36,6 +36,7 @@ void dxl_hw_power_disable(void);
 
 uint8_t dxl_hw_read(void);
 void    dxl_hw_write(uint8_t value);
+void    dxl_hw_write(uint8_t *p_data, uint32_t length);
 
 uint32_t dxl_hw_available(void);
 

@@ -133,7 +133,7 @@ static uint8_t battery_state   = BATTERY_POWER_OFF;
 * Setup function
 *******************************************************************************/
 void setup()
-{
+{  
   // Initialize ROS node handle, advertise and subscribe the topics
   nh.initNode();
   nh.getHardware()->setBaud(115200);

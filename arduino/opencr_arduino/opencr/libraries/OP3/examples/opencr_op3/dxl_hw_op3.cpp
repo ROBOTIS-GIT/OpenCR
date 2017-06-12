@@ -333,9 +333,11 @@ void dxl_hw_op3_voltage_update(void)
     vol_value = map(adc_value, 0, 1023, 0, 331*57/10);
     battery_valtage_raw = vol_value/100;
 
+    battery_valtage_raw += 0.5;
+
     //Serial.println(vol_value);
 
-    vol_value = (vol_value+5)/10;
+    vol_value = battery_valtage_raw * 10;
     vol_value = constrain(vol_value, 0, 255);
     battery_voltage = vol_value;
   }
@@ -366,6 +368,11 @@ void dxl_hw_op3_voltage_update(void)
         {
           prev_state    = battery_state;
           battery_state = BATTERY_POWER_NORMAL;
+        }
+        else
+        {
+          prev_state    = battery_state;
+          battery_state = BATTERY_POWER_CHECK;
         }
         break;
 
@@ -400,11 +407,11 @@ void dxl_hw_op3_voltage_update(void)
         break;
 
       case BATTERY_POWER_WARNNING:
-        alram_state ^= 1;
-        if(alram_state)
-        {
-          tone(BDPIN_BUZZER, 300, 500);
-        }
+        //alram_state ^= 1;
+        //if(alram_state)
+        //{
+        //  tone(BDPIN_BUZZER, 1000, 500);
+        //}
 
         if(battery_valtage_raw > voltage_ref)
         {
@@ -420,6 +427,16 @@ void dxl_hw_op3_voltage_update(void)
 
       default:
         break;
+    }
+  }
+
+  if (battery_state == BATTERY_POWER_WARNNING)
+  {
+    if(millis()-process_time[2] >= 200)
+    {
+      process_time[2] = millis();
+
+      tone(BDPIN_BUZZER, 1000, 100);
     }
   }
 }
