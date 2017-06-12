@@ -134,9 +134,6 @@ static uint8_t battery_state   = BATTERY_POWER_OFF;
 *******************************************************************************/
 void setup()
 {
-  // Start process after sufficient power supply and device activation
-  delay(1000);
-
   // Initialize ROS node handle, advertise and subscribe the topics
   nh.initNode();
   nh.getHardware()->setBaud(115200);
