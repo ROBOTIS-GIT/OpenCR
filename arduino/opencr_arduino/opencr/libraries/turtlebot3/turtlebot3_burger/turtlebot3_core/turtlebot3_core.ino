@@ -49,6 +49,9 @@ ros::Publisher odom_pub("odom", &odom);
 sensor_msgs::JointState joint_states;
 ros::Publisher joint_states_pub("joint_states", &joint_states);
 
+// BatteryState topic
+sensor_msgs::BatteryState battery_state_msg;
+ros::Publisher battery_state_pub("battery_state", &battery_state_msg);
 /*******************************************************************************
 * Transform Broadcaster
 *******************************************************************************/
@@ -143,6 +146,7 @@ void setup()
   nh.advertise(cmd_vel_rc100_pub);
   nh.advertise(odom_pub);
   nh.advertise(joint_states_pub);
+  nh.advertise(battery_state_pub);
   tfbroadcaster.init(nh);
 
   nh.loginfo("Connected to OpenCR board!");
@@ -171,6 +175,13 @@ void setup()
   joint_states.position_length = 2;
   joint_states.velocity_length = 2;
   joint_states.effort_length   = 2;
+
+  // Initialize Battery States
+  battery_state_msg.current         = NAN;
+  battery_state_msg.charge          = NAN;
+  battery_state_msg.capacity        = NAN;
+  battery_state_msg.design_capacity = NAN;
+  battery_state_msg.percentage      = NAN;
 
   prev_update_time = millis();
 
@@ -319,11 +330,14 @@ void publishSensorStateMsg(void)
   sensor_state_msg.stamp = nh.now();
   sensor_state_msg.battery = checkVoltage();
 
+  battery_state_msg.voltage = sensor_state_msg.battery;
+
   dxl_comm_result = motor_driver.readEncoder(sensor_state_msg.left_encoder, sensor_state_msg.right_encoder);
 
   if (dxl_comm_result == true)
   {
     sensor_state_pub.publish(&sensor_state_msg);
+    battery_state_pub.publish(&battery_state_msg);
   }
   else
   {
