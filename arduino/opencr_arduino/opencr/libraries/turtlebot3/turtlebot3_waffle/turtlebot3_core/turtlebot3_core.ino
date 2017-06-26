@@ -49,6 +49,8 @@ ros::Publisher odom_pub("odom", &odom);
 sensor_msgs::JointState joint_states;
 ros::Publisher joint_states_pub("joint_states", &joint_states);
 
+sensor_msgs::MagneticField mag_msg;
+ros::Publisher mag_pub("magnetic_field", &mag_msg);
 /*******************************************************************************
 * Transform Broadcaster
 *******************************************************************************/
@@ -143,6 +145,7 @@ void setup()
   nh.advertise(cmd_vel_rc100_pub);
   nh.advertise(odom_pub);
   nh.advertise(joint_states_pub);
+  nh.advertise(mag_pub);
   tfbroadcaster.init(nh);
 
   nh.loginfo("Connected to OpenCR board!");
@@ -249,6 +252,8 @@ void publishImuMsg(void)
   imu_msg.header.stamp    = nh.now();
   imu_msg.header.frame_id = "imu_link";
 
+  mag_msg.header = imu_msg.header;
+
   imu_msg.angular_velocity.x = imu.SEN.gyroADC[0];
   imu_msg.angular_velocity.y = imu.SEN.gyroADC[1];
   imu_msg.angular_velocity.z = imu.SEN.gyroADC[2];
@@ -290,6 +295,21 @@ void publishImuMsg(void)
   imu_msg.orientation_covariance[7] = 0;
   imu_msg.orientation_covariance[8] = 0.0025;
 
+  mag_msg.magnetic_field.x = imu.SEN.magADC[0] * MAG_FACTOR;
+  mag_msg.magnetic_field.y = imu.SEN.magADC[1] * MAG_FACTOR;
+  mag_msg.magnetic_field.z = imu.SEN.magADC[2] * MAG_FACTOR;
+
+  mag_msg.magnetic_field_covariance[0] = 0.0048;
+  mag_msg.magnetic_field_covariance[1] = 0;
+  mag_msg.magnetic_field_covariance[2] = 0;
+  mag_msg.magnetic_field_covariance[3] = 0;
+  mag_msg.magnetic_field_covariance[4] = 0.0048;
+  mag_msg.magnetic_field_covariance[5] = 0;
+  mag_msg.magnetic_field_covariance[6] = 0;
+  mag_msg.magnetic_field_covariance[7] = 0;
+  mag_msg.magnetic_field_covariance[8] = 0.0048;
+
+  mag_pub.publish(&mag_msg);
   imu_pub.publish(&imu_msg);
 
   tfs_msg.header.stamp    = nh.now();
