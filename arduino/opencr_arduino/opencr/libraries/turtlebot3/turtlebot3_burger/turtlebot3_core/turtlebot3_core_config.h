@@ -26,6 +26,7 @@
 #include <std_msgs/Int32.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/JointState.h>
+#include <sensor_msgs/MagneticField.h>
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/Twist.h>
 #include <tf/tf.h>
@@ -80,6 +81,7 @@
 #define WAIT_SECOND                      1
 #define CHECK_BUTTON_RELEASED            2
 
+#define MAG_FACTOR                       6e-7
 // Callback function prototypes
 void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
 
