@@ -31,25 +31,44 @@
 /* Author: Ryu Woon Jung (Leon) */
 
 //
-// *********     broadcastPing Example      *********
+// *********     ping Example      *********
 //
 //
-// Available Dynamixel model on this example : All models using Protocol 2.0
-// This example is tested with two Dynamixel PRO 54-200, and an USB2DYNAMIXEL
-// Be sure that Dynamixel PRO properties are already set as %% ID : 1 / Baudnum : 1 (Baudrate : 57600)
+// Available Dynamixel model on this example : All models using Protocol 1.0
+// This example is tested with a Dynamixel MX-28, and an USB2DYNAMIXEL
+// Be sure that Dynamixel MX properties are already set as %% ID : 1 / Baudnum : 34 (Baudrate : 57600)
 //
 
 #include <DynamixelSDK.h>
 
 
 // Protocol version
-#define PROTOCOL_VERSION                2.0                 // See which protocol version is used in the Dynamixel
+#define PROTOCOL_VERSION                1.0                 // See which protocol version is used in the Dynamixel
 
 // Default setting
+#define DXL_ID                          1                   // Dynamixel ID: 1
 #define BAUDRATE                        57600
-#define DEVICENAME                      "1"                 // Check which port is being used on your controller
+#define DEVICENAME                      "1"      // Check which port is being used on your controller
 
+#define CMD_SERIAL                      Serial
 
+int getch()
+{
+  while(1)
+  {
+    if( CMD_SERIAL.available() > 0 )
+    {
+      break;
+    }
+  }
+
+  return CMD_SERIAL.read();
+}
+
+int kbhit(void)
+{
+  return CMD_SERIAL.available();
+}
 
 void setup()
 {
@@ -73,8 +92,6 @@ void setup()
   uint8_t dxl_error = 0;                          // Dynamixel error
   uint16_t dxl_model_number;                      // Dynamixel model number
 
-  std::vector<uint8_t> vec;                       // Dynamixel data storages
-
   // Open port
   if (portHandler->openPort())
   {
@@ -97,16 +114,21 @@ void setup()
     return;
   }
 
-  // Try to broadcast ping the Dynamixel
-  dxl_comm_result = packetHandler->broadcastPing(portHandler, vec);
-  if (dxl_comm_result != COMM_SUCCESS) Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
-
-  Serial.print("Detected Dynamixel : \n");
-  for (int i = 0; i < (int)vec.size(); i++)
+  // Try to ping the Dynamixel
+  // Get Dynamixel model number
+  dxl_comm_result = packetHandler->ping(portHandler, DXL_ID, &dxl_model_number, &dxl_error);
+  if (dxl_comm_result != COMM_SUCCESS)
   {
-    Serial.print("[ID:"); Serial.print(vec.at(i));
-    Serial.println("]");
+    Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
   }
+  else if (dxl_error != 0)
+  {
+    Serial.print(packetHandler->getRxPacketError(dxl_error));
+  }
+
+  Serial.print("[ID:"); Serial.print(DXL_ID);
+  Serial.print("] ping Succeeded. Dynamixel model number : ");
+  Serial.println(dxl_model_number);
 
   // Close port
   portHandler->closePort();

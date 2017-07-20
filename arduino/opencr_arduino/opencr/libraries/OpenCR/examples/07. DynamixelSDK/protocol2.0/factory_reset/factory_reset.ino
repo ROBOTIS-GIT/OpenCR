@@ -31,7 +31,7 @@
 /* Author: Ryu Woon Jung (Leon) */
 
 //
-// *********     Read and Write Example      *********
+// *********     Factory Reset Example      *********
 //
 //
 // Available Dynamixel model on this example : All models using Protocol 2.0
@@ -39,13 +39,14 @@
 // Be sure that Dynamixel PRO properties are already set as %% ID : 1 / Baudnum : 1 (Baudrate : 57600)
 //
 
-#include <DynamixelSDK.h>
+// Be aware that:
+// This example resets all properties of Dynamixel to default values, such as %% ID : 1 / Baudnum : 1 (Baudrate : 57600)
+//
 
+#include <DynamixelSDK.h>                            // Uses Dynamixel SDK library
 
 // Control table address
-#define ADDR_PRO_TORQUE_ENABLE          562                 // Control table address is different in Dynamixel model
-#define ADDR_PRO_GOAL_POSITION          596
-#define ADDR_PRO_PRESENT_POSITION       611
+#define ADDR_PRO_BAUDRATE               8                   // Control table address is different in Dynamixel model
 
 // Protocol version
 #define PROTOCOL_VERSION                2.0                 // See which protocol version is used in the Dynamixel
@@ -54,15 +55,12 @@
 #define DXL_ID                          1                   // Dynamixel ID: 1
 #define BAUDRATE                        57600
 #define DEVICENAME                      "1"                 // Check which port is being used on your controller
-                                                            // ex) Serial1: "1"   Serial2: "2"   Serial3: "3"
 
-#define TORQUE_ENABLE                   1                   // Value for enabling the torque
-#define TORQUE_DISABLE                  0                   // Value for disabling the torque
-#define DXL_MINIMUM_POSITION_VALUE     -150000              // Dynamixel will rotate between this value
-#define DXL_MAXIMUM_POSITION_VALUE      150000              // and this value (note that the Dynamixel would not move when the position value is out of movable range. Check e-manual about the range of the Dynamixel you use.)
-#define DXL_MOVING_STATUS_THRESHOLD     20                  // Dynamixel moving status threshold
-
-#define ESC_ASCII_VALUE                 0x1b
+#define FACTORYRST_DEFAULTBAUDRATE      57600               // Dynamixel baudrate set by factoryreset
+#define NEW_BAUDNUM                     3                   // New baudnum to recover Dynamixel baudrate as it was
+#define OPERATION_MODE                  0x01                // 0xFF : reset all values
+                                                            // 0x01 : reset all values except ID
+                                                            // 0x02 : reset all values except ID and baudrate
 
 #define CMD_SERIAL                      Serial
 
@@ -101,12 +99,10 @@ void setup()
   // Get methods and members of Protocol1PacketHandler or Protocol2PacketHandler
   dynamixel::PacketHandler *packetHandler = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
 
-  int index = 0;
   int dxl_comm_result = COMM_TX_FAIL;             // Communication result
-  int dxl_goal_position[2] = {DXL_MINIMUM_POSITION_VALUE, DXL_MAXIMUM_POSITION_VALUE};         // Goal position
 
   uint8_t dxl_error = 0;                          // Dynamixel error
-  int32_t dxl_present_position = 0;               // Present position
+  uint8_t dxl_baudnum_read;                       // Read baudnum
 
   // Open port
   if (portHandler->openPort())
@@ -130,8 +126,46 @@ void setup()
     return;
   }
 
-  // Enable Dynamixel Torque
-  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_ENABLE, &dxl_error);
+  // Read present baudrate of the controller
+  Serial.print("Now the controller baudrate is :");
+  Serial.print(portHandler->getBaudRate());
+
+  // Try factoryreset
+  Serial.print("[ID:"); Serial.print(DXL_ID);
+  Serial.print("] Try factoryreset : ");
+
+  dxl_comm_result = packetHandler->factoryReset(portHandler, DXL_ID, OPERATION_MODE, &dxl_error);
+  if (dxl_comm_result != COMM_SUCCESS)
+  {
+    Serial.print("Aborted\n");
+    Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
+    return;
+  }
+  else if (dxl_error != 0)
+  {
+    Serial.print(packetHandler->getRxPacketError(dxl_error));
+  }
+
+  // Wait for reset
+  Serial.print("Wait for reset...\n");
+  delay(2000);
+
+  Serial.print("[ID:"); Serial.print(DXL_ID);
+  Serial.print("] factoryReset Success!\n");
+
+  // Set controller baudrate to Dynamixel default baudrate
+  if (portHandler->setBaudRate(FACTORYRST_DEFAULTBAUDRATE))
+  {
+    Serial.print("Succeed to change the controller baudrate to : %d\n", FACTORYRST_DEFAULTBAUDRATE);
+  }
+  else
+  {
+    Serial.print("Failed to change the controller baudrate\n");
+    return;
+  }
+
+  // Read Dynamixel baudnum
+  dxl_comm_result = packetHandler->read1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_BAUDRATE, &dxl_baudnum_read, &dxl_error);
   if (dxl_comm_result != COMM_SUCCESS)
   {
     Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
@@ -142,59 +176,13 @@ void setup()
   }
   else
   {
-    Serial.print("Dynamixel has been successfully connected \n");
+    Serial.print("[ID:"); Serial.print(DXL_ID);
+    Serial.print("] DXL baudnum is now : ");
+    Serial.println(dxl_baudnum_read);
   }
 
-  while(1)
-  {
-    Serial.print("Press any key to continue! (or press q to quit!)\n");
-    if (getch() == 'q')
-      break;
-
-    // Write goal position
-    dxl_comm_result = packetHandler->write4ByteTxRx(portHandler, DXL_ID, ADDR_PRO_GOAL_POSITION, dxl_goal_position[index], &dxl_error);
-    if (dxl_comm_result != COMM_SUCCESS)
-    {
-      Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
-    }
-    else if (dxl_error != 0)
-    {
-      Serial.print(packetHandler->getRxPacketError(dxl_error));
-    }
-
-    do
-    {
-      // Read present position
-      dxl_comm_result = packetHandler->read4ByteTxRx(portHandler, DXL_ID, ADDR_PRO_PRESENT_POSITION, (uint32_t*)&dxl_present_position, &dxl_error);
-      if (dxl_comm_result != COMM_SUCCESS)
-      {
-        Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
-      }
-      else if (dxl_error != 0)
-      {
-        Serial.print(packetHandler->getRxPacketError(dxl_error));
-      }
-
-      Serial.print("[ID:"); Serial.print(DXL_ID);
-      Serial.print("] GoalPos:"); Serial.print(dxl_goal_position[index]);
-      Serial.print("  PresPos:"); Serial.print(dxl_present_position);
-      Serial.println(" ");
-
-    }while((abs(dxl_goal_position[index] - dxl_present_position) > DXL_MOVING_STATUS_THRESHOLD));
-
-    // Change goal position
-    if (index == 0)
-    {
-      index = 1;
-    }
-    else
-    {
-      index = 0;
-    }
-  }
-
-  // Disable Dynamixel Torque
-  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_DISABLE, &dxl_error);
+  // Write new baudnum
+  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_BAUDRATE, NEW_BAUDNUM, &dxl_error);
   if (dxl_comm_result != COMM_SUCCESS)
   {
     Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
@@ -203,11 +191,45 @@ void setup()
   {
     Serial.print(packetHandler->getRxPacketError(dxl_error));
   }
+  else
+  {
+    Serial.print("[ID:"); Serial.print(DXL_ID);
+    Serial.print("] Set Dynamixel baudnum to : ");
+    Serial.println(NEW_BAUDNUM);
+  }
+
+  // Set port baudrate to BAUDRATE
+  if (portHandler->setBaudRate(BAUDRATE))
+  {
+    Serial.print("Succeed to change the controller baudrate to : %d\n", BAUDRATE);
+  }
+  else
+  {
+    Serial.print("Failed to change the controller baudrate\n");
+    return;
+  }
+
+  delay(200);
+
+  // Read Dynamixel baudnum
+  dxl_comm_result = packetHandler->read1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_BAUDRATE, &dxl_baudnum_read, &dxl_error);
+  if (dxl_comm_result != COMM_SUCCESS)
+  {
+    Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
+  }
+  else if (dxl_error != 0)
+  {
+    Serial.print(packetHandler->getRxPacketError(dxl_error));
+  }
+  else
+  {
+    Serial.print("[ID:"); Serial.print(DXL_ID);
+    Serial.print("] Dynamixel Baudnum is now : ");
+    Serial.print(dxl_baudnum_read);
+  }
 
   // Close port
   portHandler->closePort();
-}
 
-void loop()
-{
+  return;
 }

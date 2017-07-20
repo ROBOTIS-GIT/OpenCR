@@ -31,11 +31,11 @@
 /* Author: Ryu Woon Jung (Leon) */
 
 //
-// *********     broadcastPing Example      *********
+// *********     reboot Example      *********
 //
 //
 // Available Dynamixel model on this example : All models using Protocol 2.0
-// This example is tested with two Dynamixel PRO 54-200, and an USB2DYNAMIXEL
+// This example is tested with a Dynamixel PRO 54-200, and USB2DYNAMIXEL
 // Be sure that Dynamixel PRO properties are already set as %% ID : 1 / Baudnum : 1 (Baudrate : 57600)
 //
 
@@ -46,10 +46,29 @@
 #define PROTOCOL_VERSION                2.0                 // See which protocol version is used in the Dynamixel
 
 // Default setting
+#define DXL_ID                          1                   // Dynamixel ID: 1
 #define BAUDRATE                        57600
 #define DEVICENAME                      "1"                 // Check which port is being used on your controller
 
+#define CMD_SERIAL                      Serial
 
+int getch()
+{
+  while(1)
+  {
+    if( CMD_SERIAL.available() > 0 )
+    {
+      break;
+    }
+  }
+
+  return CMD_SERIAL.read();
+}
+
+int kbhit(void)
+{
+  return CMD_SERIAL.available();
+}
 
 void setup()
 {
@@ -71,9 +90,6 @@ void setup()
   int dxl_comm_result = COMM_TX_FAIL;             // Communication result
 
   uint8_t dxl_error = 0;                          // Dynamixel error
-  uint16_t dxl_model_number;                      // Dynamixel model number
-
-  std::vector<uint8_t> vec;                       // Dynamixel data storages
 
   // Open port
   if (portHandler->openPort())
@@ -97,21 +113,28 @@ void setup()
     return;
   }
 
-  // Try to broadcast ping the Dynamixel
-  dxl_comm_result = packetHandler->broadcastPing(portHandler, vec);
-  if (dxl_comm_result != COMM_SUCCESS) Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
+  // Trigger
+  Serial.print("Press any key to reboot\n");
+  getch();
 
-  Serial.print("Detected Dynamixel : \n");
-  for (int i = 0; i < (int)vec.size(); i++)
+  Serial.print("See the Dynamixel LED flickering\n");
+  // Try reboot
+  // Dynamixel LED will flicker while it reboots
+  dxl_comm_result = packetHandler->reboot(portHandler, DXL_ID, &dxl_error);
+  if (dxl_comm_result != COMM_SUCCESS)
   {
-    Serial.print("[ID:"); Serial.print(vec.at(i));
-    Serial.println("]");
+    Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
   }
+  else if (dxl_error != 0)
+  {
+    Serial.print(packetHandler->getRxPacketError(dxl_error));
+  }
+
+  Serial.print("[ID:"); Serial.print(DXL_ID);
+  Serial.print("] reboot Succeeded\n");
 
   // Close port
   portHandler->closePort();
-}
 
-void loop()
-{
+  return;
 }

@@ -259,12 +259,12 @@ void write(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler *packet
 
   if (dxl_comm_result == COMM_SUCCESS)
   {
-    if (dxl_error != 0) packetHandler->printRxPacketError(dxl_error);
+    if (dxl_error != 0) Serial.print(packetHandler->getRxPacketError(dxl_error));
     _fprintf(stderr, "\n Success to write\n\n");
   }
   else
   {
-    packetHandler->printTxRxResult(dxl_comm_result);
+    Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
     _fprintf(stderr, "\n Fail to write! \n\n");
   }
 }
@@ -294,7 +294,7 @@ void read(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler *packetH
 
   if (dxl_comm_result == COMM_SUCCESS)
   {
-    if (dxl_error != 0) packetHandler->printRxPacketError(dxl_error);
+    if (dxl_error != 0) Serial.print(packetHandler->getRxPacketError(dxl_error));
 
     if (length == 1)
     {
@@ -311,7 +311,7 @@ void read(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler *packetH
   }
   else
   {
-    packetHandler->printTxRxResult(dxl_comm_result);
+    Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
     _fprintf(stderr, "\n Fail to read! \n\n");
   }
 }
@@ -326,7 +326,7 @@ void dump(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler *packetH
   if (dxl_comm_result == COMM_SUCCESS)
   {
     if (dxl_error != 0)
-      packetHandler->printRxPacketError(dxl_error);
+      Serial.print(packetHandler->getRxPacketError(dxl_error));
 
     if (id != BROADCAST_ID)
     {
@@ -338,7 +338,7 @@ void dump(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler *packetH
   }
   else
   {
-    packetHandler->printTxRxResult(dxl_comm_result);
+    Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
     _fprintf(stderr, "\n Fail to read! \n\n");
   }
 
@@ -375,11 +375,7 @@ void dxl_monitor_main(void)
   else
   {
     _printf("Failed to open the port! [%s]\n", dev_name);
-    _printf("Press any key to terminate...\n");
-    getch();
-    while(1);
   }
-
 
   char    input[128];
   char    cmd[80];
@@ -387,7 +383,6 @@ void dxl_monitor_main(void)
   int     num_param;
   char    *token;
   uint8_t dxl_error;
-
 
   while(1)
   {
