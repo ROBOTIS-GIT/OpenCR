@@ -224,6 +224,14 @@ void setup()
 void loop()
 {
   receiveRemoteControlData();
+  /*
+   * the update_time() call below
+   * reduces the amount of calls to
+   * nh.now(), and allows the returned
+   * time to be interpolated on an
+   * as-needed basis with the ros_now()
+   * function.
+   */
   uint32_t t = millis();
   update_time();
   if ((millis()-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_PERIOD))
@@ -268,6 +276,8 @@ void loop()
 
   // Call all the callbacks waiting to be called at that point in time
   nh.spinOnce();
+
+  // give the serial link time to process
   delay(10);
 }
 
