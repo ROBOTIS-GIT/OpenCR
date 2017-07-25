@@ -234,29 +234,29 @@ void loop()
    */
   uint32_t t = millis();
   update_time();
-  if ((millis()-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_PERIOD))
+  if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_PERIOD))
   {
     controlMotorSpeed();
-    tTime[0] = millis();
+    tTime[0] = t;
   }
 
-  if ((millis()-tTime[1]) >= (1000 / CMD_VEL_PUBLISH_PERIOD))
+  if ((t-tTime[1]) >= (1000 / CMD_VEL_PUBLISH_PERIOD))
   {
     cmd_vel_rc100_pub.publish(&cmd_vel_rc100_msg);
-    tTime[1] = millis();
+    tTime[1] = t;
   }
 
-  if ((millis()-tTime[2]) >= (1000 / DRIVE_INFORMATION_PUBLISH_PERIOD))
+  if ((t-tTime[2]) >= (1000 / DRIVE_INFORMATION_PUBLISH_PERIOD))
   {
     publishSensorStateMsg();
     publishDriveInformation();
-    tTime[2] = millis();
+    tTime[2] = t;
   }
 
-  if ((millis()-tTime[3]) >= (1000 / IMU_PUBLISH_PERIOD))
+  if ((t-tTime[3]) >= (1000 / IMU_PUBLISH_PERIOD))
   {
     publishImuMsg();
-    tTime[3] = millis();
+    tTime[3] = t;
   }
 
   // Check push button pressed for simple test drive
