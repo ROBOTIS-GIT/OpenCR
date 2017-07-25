@@ -154,18 +154,8 @@ ros::Time add_micros(ros::Time & t, uint32_t _micros)
 *******************************************************************************/
 void update_time()
 {
-  uint32_t n_micros = micros();
-  ros::Time next = nh.now();
-  if (next.sec < current_time.sec) {
-    /*
-     * bad time was received, so we
-     * continue to interpolate the
-     * existing time.
-     */
-    return;
-  }
-  current_time = next;
-  current_offset = n_micros;
+  current_offset = micros();
+  current_time = nh.now();
 }
 
 /*******************************************************************************
