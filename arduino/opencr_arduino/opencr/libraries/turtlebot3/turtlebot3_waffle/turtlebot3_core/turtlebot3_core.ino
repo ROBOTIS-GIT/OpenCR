@@ -22,6 +22,8 @@
 * ROS NodeHandle
 *******************************************************************************/
 ros::NodeHandle nh;
+ros::Time current_time;
+uint32_t current_offset;
 
 /*******************************************************************************
 * Subscriber
@@ -128,6 +130,41 @@ static uint8_t battery_state   = BATTERY_POWER_OFF;
 
 
 
+/*******************************************************************************
+* Time Interpolation function
+*******************************************************************************/
+ros::Time add_micros(ros::Time & t, uint32_t _micros)
+{
+  uint32_t sec, nsec;
+
+  /*
+   * the interpolation floors the current time
+   * stamp for integrity of precision.
+   */
+  sec  = _micros / 1000000 + t.sec;
+  nsec = _micros % 1000000 + 1000 * (t.nsec / 1000);
+  if (nsec >= 1e9) {
+    sec++, nsec--;
+  }
+  return ros::Time(sec, nsec);
+}
+
+/*******************************************************************************
+* Update the base time for interpolation
+*******************************************************************************/
+void update_time()
+{
+  current_offset = micros();
+  current_time = nh.now();
+}
+
+/*******************************************************************************
+* ros::Time::now() implementation
+*******************************************************************************/
+ros::Time ros_now()
+{
+  return add_micros(current_time, micros() - current_offset);
+}
 
 /*******************************************************************************
 * Setup function
@@ -187,30 +224,39 @@ void setup()
 void loop()
 {
   receiveRemoteControlData();
-
-  if ((millis()-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_PERIOD))
+  /*
+   * the update_time() call below
+   * reduces the amount of calls to
+   * nh.now(), and allows the returned
+   * time to be interpolated on an
+   * as-needed basis with the ros_now()
+   * function.
+   */
+  uint32_t t = millis();
+  update_time();
+  if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_PERIOD))
   {
     controlMotorSpeed();
-    tTime[0] = millis();
+    tTime[0] = t;
   }
 
-  if ((millis()-tTime[1]) >= (1000 / CMD_VEL_PUBLISH_PERIOD))
+  if ((t-tTime[1]) >= (1000 / CMD_VEL_PUBLISH_PERIOD))
   {
     cmd_vel_rc100_pub.publish(&cmd_vel_rc100_msg);
-    tTime[1] = millis();
+    tTime[1] = t;
   }
 
-  if ((millis()-tTime[2]) >= (1000 / DRIVE_INFORMATION_PUBLISH_PERIOD))
+  if ((t-tTime[2]) >= (1000 / DRIVE_INFORMATION_PUBLISH_PERIOD))
   {
     publishSensorStateMsg();
     publishDriveInformation();
-    tTime[2] = millis();
+    tTime[2] = t;
   }
 
-  if ((millis()-tTime[3]) >= (1000 / IMU_PUBLISH_PERIOD))
+  if ((t-tTime[3]) >= (1000 / IMU_PUBLISH_PERIOD))
   {
     publishImuMsg();
-    tTime[3] = millis();
+    tTime[3] = t;
   }
 
   // Check push button pressed for simple test drive
@@ -230,6 +276,9 @@ void loop()
 
   // Call all the callbacks waiting to be called at that point in time
   nh.spinOnce();
+
+  // give the serial link time to process
+  delay(10);
 }
 
 /*******************************************************************************
@@ -246,7 +295,7 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
 *******************************************************************************/
 void publishImuMsg(void)
 {
-  imu_msg.header.stamp    = nh.now();
+  imu_msg.header.stamp    = ros_now();
   imu_msg.header.frame_id = "imu_link";
 
   imu_msg.angular_velocity.x = imu.SEN.gyroADC[0];
@@ -292,7 +341,7 @@ void publishImuMsg(void)
 
   imu_pub.publish(&imu_msg);
 
-  tfs_msg.header.stamp    = nh.now();
+  tfs_msg.header.stamp    = ros_now();
   tfs_msg.header.frame_id = "base_link";
   tfs_msg.child_frame_id  = "imu_link";
   tfs_msg.transform.rotation.w = imu.quat[0];
@@ -316,7 +365,7 @@ void publishSensorStateMsg(void)
 
   int32_t current_tick;
 
-  sensor_state_msg.stamp = nh.now();
+  sensor_state_msg.stamp = ros_now();
   sensor_state_msg.battery = checkVoltage();
 
   dxl_comm_result = motor_driver.readEncoder(sensor_state_msg.left_encoder, sensor_state_msg.right_encoder);
@@ -363,7 +412,7 @@ void publishDriveInformation(void)
   unsigned long time_now = millis();
   unsigned long step_time = time_now - prev_update_time;
   prev_update_time = time_now;
-  ros::Time stamp_now = nh.now();
+  ros::Time stamp_now = ros_now();
 
   // odom
   updateOdometry((double)(step_time * 0.001));
@@ -468,6 +517,7 @@ void updateJoint(void)
 void updateTF(geometry_msgs::TransformStamped& odom_tf)
 {
   odom.header.frame_id = "odom";
+  odom.child_frame_id = "base_link";
   odom_tf.header = odom.header;
   odom_tf.child_frame_id = "base_footprint";
   odom_tf.transform.translation.x = odom.pose.pose.position.x;
