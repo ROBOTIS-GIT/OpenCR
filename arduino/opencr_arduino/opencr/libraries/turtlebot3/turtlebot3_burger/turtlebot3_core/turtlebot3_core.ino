@@ -398,7 +398,7 @@ void publishSensorStateMsg(void)
 
   int32_t current_tick;
 
-  sensor_state_msg.stamp = ros_now();
+  sensor_state_msg.header.stamp = ros_now();
   sensor_state_msg.battery = checkVoltage();
 
   battery_state_msg.voltage = sensor_state_msg.battery;
