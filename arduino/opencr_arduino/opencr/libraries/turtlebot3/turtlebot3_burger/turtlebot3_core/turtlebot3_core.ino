@@ -260,9 +260,10 @@ void publishImuMsg(void)
   imu_msg.header.stamp    = nh.now();
   imu_msg.header.frame_id = "imu_link";
 
-  imu_msg.angular_velocity.x = imu.SEN.gyroADC[0];
-  imu_msg.angular_velocity.y = imu.SEN.gyroADC[1];
-  imu_msg.angular_velocity.z = imu.SEN.gyroADC[2];
+  imu_msg.angular_velocity.x = imu.SEN.gyroADC[0] * GYRO_FACTOR;
+  imu_msg.angular_velocity.y = imu.SEN.gyroADC[1] * GYRO_FACTOR;
+  imu_msg.angular_velocity.z = imu.SEN.gyroADC[2] * GYRO_FACTOR;
+
   imu_msg.angular_velocity_covariance[0] = 0.02;
   imu_msg.angular_velocity_covariance[1] = 0;
   imu_msg.angular_velocity_covariance[2] = 0;
@@ -273,9 +274,10 @@ void publishImuMsg(void)
   imu_msg.angular_velocity_covariance[7] = 0;
   imu_msg.angular_velocity_covariance[8] = 0.02;
 
-  imu_msg.linear_acceleration.x = imu.SEN.accADC[0];
-  imu_msg.linear_acceleration.y = imu.SEN.accADC[1];
-  imu_msg.linear_acceleration.z = imu.SEN.accADC[2];
+  imu_msg.linear_acceleration.x = imu.SEN.accADC[0] * ACCEL_FACTOR;
+  imu_msg.linear_acceleration.y = imu.SEN.accADC[1] * ACCEL_FACTOR;
+  imu_msg.linear_acceleration.z = imu.SEN.accADC[2] * ACCEL_FACTOR;
+
   imu_msg.linear_acceleration_covariance[0] = 0.04;
   imu_msg.linear_acceleration_covariance[1] = 0;
   imu_msg.linear_acceleration_covariance[2] = 0;
