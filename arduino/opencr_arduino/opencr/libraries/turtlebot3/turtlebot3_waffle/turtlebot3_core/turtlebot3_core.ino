@@ -806,7 +806,7 @@ void updateGyroCali(void)
       }
       gyro_cali = true;
 
-      sprintf(log_msg, "Calibrattion End");
+      sprintf(log_msg, "Calibration End");
       nh.loginfo(log_msg);
     }
   }
