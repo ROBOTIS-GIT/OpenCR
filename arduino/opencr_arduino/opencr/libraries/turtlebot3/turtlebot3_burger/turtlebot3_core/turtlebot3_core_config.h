@@ -93,17 +93,17 @@
 #define GYRO_FACTOR                       0.000133  // pi / (131 * 180)
 #define MAG_FACTOR                       6e-7
 
-#define LED_TXD         0
-#define LED_RXD         1
-#define LED_LOW_BATTERY 2
-#define LED_ROS_CONNECT 3
-#define LED_WORKING_CHECK 13
+#define LED_TXD                          0
+#define LED_RXD                          1
+#define LED_LOW_BATTERY                  2
+#define LED_ROS_CONNECT                  3
+#define LED_WORKING_CHECK                13
 
-#define BATTERY_POWER_OFF             0
-#define BATTERY_POWER_STARTUP         1
-#define BATTERY_POWER_NORMAL          2
-#define BATTERY_POWER_CHECK           3
-#define BATTERY_POWER_WARNNING        4
+#define BATTERY_POWER_OFF                0
+#define BATTERY_POWER_STARTUP            1
+#define BATTERY_POWER_NORMAL             2
+#define BATTERY_POWER_CHECK              3
+#define BATTERY_POWER_WARNNING           4
 
 // Callback function prototypes
 void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
