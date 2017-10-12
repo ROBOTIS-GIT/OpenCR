@@ -83,6 +83,10 @@
 #define WAIT_SECOND                      1
 #define CHECK_BUTTON_RELEASED            2
 
+#define IMU_POS_X                        -0.032
+#define IMU_POS_Y                        0.0
+#define IMU_POS_Z                        0.058
+
 #define ACCEL_FACTOR                     -0.000598  // 2.0 * -9.8 / 32768
 #define GYRO_FACTOR                       0.000133  // pi / (131 * 180)
 #define MAG_FACTOR                       6e-7
