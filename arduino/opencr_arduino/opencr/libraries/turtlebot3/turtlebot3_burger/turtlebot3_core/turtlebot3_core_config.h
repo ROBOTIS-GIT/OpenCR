@@ -41,6 +41,8 @@
 
 #include "turtlebot3_motor_driver.h"
 
+#define INIT_LOG_DATA "This core is compatible with TurtleBot3 Burger"
+
 #define CONTROL_MOTOR_SPEED_PERIOD       30   //hz
 #define IMU_PUBLISH_PERIOD               200  //hz
 #define SENSOR_STATE_PUBLISH_PERIOD      30   //hz

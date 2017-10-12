@@ -174,8 +174,9 @@ ros::Time ros_now()
 *******************************************************************************/
 void setup()
 {
+  const char* init_log_data = INIT_LOG_DATA;
   nh.loginfo("Connected to OpenCR board!");
-  nh.loginfo("This core is compatible with TurtleBot3 Burger");  
+  nh.loginfo(init_log_data);  
 
   // Initialize ROS node handle, advertise and subscribe the topics
   nh.initNode();
