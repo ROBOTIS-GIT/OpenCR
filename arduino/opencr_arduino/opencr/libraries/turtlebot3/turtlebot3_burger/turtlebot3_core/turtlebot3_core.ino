@@ -57,6 +57,14 @@ void setup()
   odom_pose[1] = 0.0;
   odom_pose[2] = 0.0;
 
+  odom.pose.pose.position.x = odom_pose[0];
+  odom.pose.pose.position.y = odom_pose[1];
+  odom.pose.pose.position.z = 0;
+  odom.pose.pose.orientation = tf::createQuaternionFromYaw(odom_pose[2]);
+
+  odom.twist.twist.linear.x  = 0.0;
+  odom.twist.twist.angular.z = 0.0;
+
   joint_states.header.frame_id = "base_link";
   joint_states.name            = joint_states_name;
 
@@ -241,7 +249,7 @@ void publishSensorStateMsg(void)
 
   int32_t current_tick;
 
-  sensor_state_msg.header.stamp = ros_now();
+  sensor_state_msg.stamp = ros_now();
   sensor_state_msg.battery = checkVoltage();
 
   battery_state_msg.voltage = sensor_state_msg.battery;
