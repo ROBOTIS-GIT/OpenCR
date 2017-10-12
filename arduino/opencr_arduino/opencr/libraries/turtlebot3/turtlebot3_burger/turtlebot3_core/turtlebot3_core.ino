@@ -174,6 +174,9 @@ ros::Time ros_now()
 *******************************************************************************/
 void setup()
 {
+  nh.loginfo("Connected to OpenCR board!");
+  nh.loginfo("This core is compatible with TurtleBot3 Burger");  
+
   // Initialize ROS node handle, advertise and subscribe the topics
   nh.initNode();
   nh.getHardware()->setBaud(115200);
@@ -186,8 +189,6 @@ void setup()
   nh.advertise(battery_state_pub);
   nh.advertise(mag_pub);
   tfbroadcaster.init(nh);
-
-  nh.loginfo("Connected to OpenCR board!");
 
   // Setting for Dynamixel motors
   motor_driver.init();
@@ -374,9 +375,9 @@ void publishImuMsg(void)
   tfs_msg.transform.rotation.y = imu.quat[2];
   tfs_msg.transform.rotation.z = imu.quat[3];
 
-  tfs_msg.transform.translation.x = -0.032;
-  tfs_msg.transform.translation.y = 0.0;
-  tfs_msg.transform.translation.z = 0.058;
+  tfs_msg.transform.translation.x = IMU_POS_X;
+  tfs_msg.transform.translation.y = IMU_POS_Y;
+  tfs_msg.transform.translation.z = IMU_POS_Z;
 
   tfbroadcaster.sendTransform(tfs_msg);
 }
