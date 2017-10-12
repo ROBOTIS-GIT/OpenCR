@@ -45,15 +45,19 @@ ros::Publisher imu_pub("imu", &imu_msg);
 geometry_msgs::Twist cmd_vel_rc100_msg;
 ros::Publisher cmd_vel_rc100_pub("cmd_vel_rc100", &cmd_vel_rc100_msg);
 
+// Odometry of Turtlebot3
 nav_msgs::Odometry odom;
 ros::Publisher odom_pub("odom", &odom);
 
+// Joint(Dynamixel) state of Turtlebot3
 sensor_msgs::JointState joint_states;
 ros::Publisher joint_states_pub("joint_states", &joint_states);
 
+// Battey state of Turtlebot3
 sensor_msgs::BatteryState battery_state_msg;
 ros::Publisher battery_state_pub("battery_state", &battery_state_msg);
 
+// Magnetic field
 sensor_msgs::MagneticField mag_msg;
 ros::Publisher mag_pub("magnetic_field", &mag_msg);
 
@@ -133,9 +137,6 @@ static uint8_t battery_voltage = 0;
 static float   battery_valtage_raw = 0;
 static uint8_t battery_state   = BATTERY_POWER_OFF;
 
-
-
-
 /*******************************************************************************
 * Time Interpolation function
 *******************************************************************************/
@@ -143,10 +144,6 @@ ros::Time add_micros(ros::Time & t, uint32_t _micros)
 {
   uint32_t sec, nsec;
 
-  /*
-   * the interpolation floors the current time
-   * stamp for integrity of precision.
-   */
   sec  = _micros / 1000000 + t.sec;
   nsec = _micros % 1000000 + 1000 * (t.nsec / 1000);
   if (nsec >= 1e9) {
@@ -209,13 +206,13 @@ void setup()
   odom_pose[1] = 0.0;
   odom_pose[2] = 0.0;
 
-  joint_states.header.frame_id = "base_footprint";
+  joint_states.header.frame_id = "base_link";
   joint_states.name            = joint_states_name;
 
-  joint_states.name_length     = 2;
-  joint_states.position_length = 2;
-  joint_states.velocity_length = 2;
-  joint_states.effort_length   = 2;
+  joint_states.name_length     = WHEEL_NUM;
+  joint_states.position_length = WHEEL_NUM;
+  joint_states.velocity_length = WHEEL_NUM;
+  joint_states.effort_length   = WHEEL_NUM;
 
   // Initialize Battery States
   battery_state_msg.current         = NAN;
@@ -238,17 +235,9 @@ void setup()
 *******************************************************************************/
 void loop()
 {
-  receiveRemoteControlData();
-  /*
-   * the update_time() call below
-   * reduces the amount of calls to
-   * nh.now(), and allows the returned
-   * time to be interpolated on an
-   * as-needed basis with the ros_now()
-   * function.
-   */
   uint32_t t = millis();
   update_time();
+
   if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_PERIOD))
   {
     controlMotorSpeed();
@@ -273,6 +262,9 @@ void loop()
     publishImuMsg();
     tTime[3] = t;
   }
+
+  // Receive data from RC100 
+  receiveRemoteControlData();
 
   // Check push button pressed for simple test drive
   checkPushButtonState();
@@ -384,7 +376,7 @@ void publishImuMsg(void)
 
   tfs_msg.transform.translation.x = -0.032;
   tfs_msg.transform.translation.y = 0.0;
-  tfs_msg.transform.translation.z = 0.068;
+  tfs_msg.transform.translation.z = 0.058;
 
   tfbroadcaster.sendTransform(tfs_msg);
 }
@@ -402,13 +394,13 @@ void publishSensorStateMsg(void)
   sensor_state_msg.battery = checkVoltage();
 
   battery_state_msg.voltage = sensor_state_msg.battery;
+  battery_state_pub.publish(&battery_state_msg);
 
   dxl_comm_result = motor_driver.readEncoder(sensor_state_msg.left_encoder, sensor_state_msg.right_encoder);
 
   if (dxl_comm_result == true)
   {
     sensor_state_pub.publish(&sensor_state_msg);
-    battery_state_pub.publish(&battery_state_msg);
   }
   else
   {
@@ -473,7 +465,7 @@ bool updateOdometry(double diff_time)
   double odom_vel[3];
 
   double wheel_l, wheel_r;      // rotation value of wheel [rad]
-  double delta_s, delta_theta;
+  double delta_s, theta, delta_theta;
   static double last_theta = 0.0;
   double v, w;                  // v = translational velocity [m/s], w = rotational velocity [rad/s]
   double step_time;
@@ -498,8 +490,9 @@ bool updateOdometry(double diff_time)
     wheel_r = 0.0;
 
   delta_s     = WHEEL_RADIUS * (wheel_r + wheel_l) / 2.0;
-  delta_theta = atan2f(imu.quat[1]*imu.quat[2] + imu.quat[0]*imu.quat[3],
-                       0.5f - imu.quat[2]*imu.quat[2] - imu.quat[3]*imu.quat[3]) - last_theta;
+  theta       = atan2f(imu.quat[1]*imu.quat[2] + imu.quat[0]*imu.quat[3],
+                       0.5f - imu.quat[2]*imu.quat[2] - imu.quat[3]*imu.quat[3]);
+  delta_theta = theta - last_theta;
 
   v = delta_s / step_time;
   w = delta_theta / step_time;
@@ -526,8 +519,7 @@ bool updateOdometry(double diff_time)
   odom.twist.twist.linear.x  = odom_vel[0];
   odom.twist.twist.angular.z = odom_vel[2];
 
-  last_theta = atan2f(imu.quat[1]*imu.quat[2] + imu.quat[0]*imu.quat[3],
-                      0.5f - imu.quat[2]*imu.quat[2] - imu.quat[3]*imu.quat[3]);
+  last_theta = theta;
 
   return true;
 }
