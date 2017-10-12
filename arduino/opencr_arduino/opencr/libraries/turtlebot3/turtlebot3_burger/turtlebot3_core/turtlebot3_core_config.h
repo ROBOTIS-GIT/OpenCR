@@ -138,6 +138,8 @@ void updateRxTxLed(void);
 void setPowerOn(void);
 void setPowerOff(void);
 
+void sendLogMsg(void);
+
 /*******************************************************************************
 * ROS NodeHandle
 *******************************************************************************/

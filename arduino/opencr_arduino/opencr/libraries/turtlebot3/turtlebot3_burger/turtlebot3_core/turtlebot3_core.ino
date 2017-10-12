@@ -23,10 +23,6 @@
 *******************************************************************************/
 void setup()
 {
-  const char* init_log_data = INIT_LOG_DATA;
-  nh.loginfo("Connected to OpenCR board!");
-  nh.loginfo(init_log_data);  
-
   // Initialize ROS node handle, advertise and subscribe the topics
   nh.initNode();
   nh.getHardware()->setBaud(115200);
@@ -56,14 +52,6 @@ void setup()
   odom_pose[0] = 0.0;
   odom_pose[1] = 0.0;
   odom_pose[2] = 0.0;
-
-  odom.pose.pose.position.x = odom_pose[0];
-  odom.pose.pose.position.y = odom_pose[1];
-  odom.pose.pose.position.z = 0;
-  odom.pose.pose.orientation = tf::createQuaternionFromYaw(odom_pose[2]);
-
-  odom.twist.twist.linear.x  = 0.0;
-  odom.twist.twist.angular.z = 0.0;
 
   joint_states.header.frame_id = "base_link";
   joint_states.name            = joint_states_name;
@@ -100,27 +88,30 @@ void loop()
   if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_PERIOD))
   {
     controlMotorSpeed();
-    tTime[0] = t;
+    tTime[0] = millis();
   }
 
   if ((t-tTime[1]) >= (1000 / CMD_VEL_PUBLISH_PERIOD))
   {
     cmd_vel_rc100_pub.publish(&cmd_vel_rc100_msg);
-    tTime[1] = t;
+    tTime[1] = millis();
   }
 
   if ((t-tTime[2]) >= (1000 / DRIVE_INFORMATION_PUBLISH_PERIOD))
   {
     publishSensorStateMsg();
     publishDriveInformation();
-    tTime[2] = t;
+    tTime[2] = millis();
   }
 
   if ((t-tTime[3]) >= (1000 / IMU_PUBLISH_PERIOD))
   {
     publishImuMsg();
-    tTime[3] = t;
+    tTime[3] = millis();
   }
+
+  // Send log message after ROS connection
+  sendLogMsg();
 
   // Receive data from RC100 
   receiveRemoteControlData();
@@ -353,6 +344,7 @@ void update_time()
 *******************************************************************************/
 bool updateOdometry(double diff_time)
 {
+  static bool odom_pose_init = false;
   double odom_vel[3];
 
   double wheel_l, wheel_r;      // rotation value of wheel [rad]
@@ -367,6 +359,24 @@ bool updateOdometry(double diff_time)
   step_time = 0.0;
 
   step_time = diff_time;
+
+  if (nh.connected())
+  {
+    if (odom_pose_init == false)
+    {
+      odom_pose[0] = 0.0;
+      odom_pose[1] = 0.0;
+      odom_pose[2] = 0.0;
+
+      odom_pose_init = true;
+    }
+    else
+    {
+      odom_pose_init = false;
+    }
+
+    return true;
+  }
 
   if (step_time == 0)
     return false;
@@ -956,12 +966,43 @@ void updateRxTxLed(void)
   }
 }
 
-void setPowerOn()
+void setPowerOn(void)
 {
   digitalWrite(BDPIN_DXL_PWR_EN, HIGH);
 }
 
-void setPowerOff()
+void setPowerOff(void)
 {
   digitalWrite(BDPIN_DXL_PWR_EN, LOW);
+}
+
+void sendLogMsg(void)
+{
+  static bool log_flag = false;
+  char log_msg[50];
+  const char* init_log_data = INIT_LOG_DATA;
+
+  if (nh.connected())
+  {
+    if (log_flag == false)
+    {      
+      sprintf(log_msg, "--------------------------");
+      nh.loginfo(log_msg);
+
+      sprintf(log_msg, "Connected to OpenCR board!");
+      nh.loginfo(log_msg);
+
+      sprintf(log_msg, init_log_data);
+      nh.loginfo(log_msg);
+
+      sprintf(log_msg, "--------------------------");
+      nh.loginfo(log_msg);
+
+      log_flag = true;
+    }
+  }
+  else
+  {
+    log_flag = false;
+  }
 }
