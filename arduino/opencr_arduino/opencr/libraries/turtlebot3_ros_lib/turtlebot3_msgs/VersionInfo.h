@@ -12,9 +12,12 @@ namespace turtlebot3_msgs
   class VersionInfo : public ros::Msg
   {
     public:
-      const char* hardware;
-      const char* firmware;
-      const char* software;
+      typedef const char* _hardware_type;
+      _hardware_type hardware;
+      typedef const char* _firmware_type;
+      _firmware_type firmware;
+      typedef const char* _software_type;
+      _software_type software;
 
     VersionInfo():
       hardware(""),
@@ -27,17 +30,17 @@ namespace turtlebot3_msgs
     {
       int offset = 0;
       uint32_t length_hardware = strlen(this->hardware);
-      memcpy(outbuffer + offset, &length_hardware, sizeof(uint32_t));
+      varToArr(outbuffer + offset, length_hardware);
       offset += 4;
       memcpy(outbuffer + offset, this->hardware, length_hardware);
       offset += length_hardware;
       uint32_t length_firmware = strlen(this->firmware);
-      memcpy(outbuffer + offset, &length_firmware, sizeof(uint32_t));
+      varToArr(outbuffer + offset, length_firmware);
       offset += 4;
       memcpy(outbuffer + offset, this->firmware, length_firmware);
       offset += length_firmware;
       uint32_t length_software = strlen(this->software);
-      memcpy(outbuffer + offset, &length_software, sizeof(uint32_t));
+      varToArr(outbuffer + offset, length_software);
       offset += 4;
       memcpy(outbuffer + offset, this->software, length_software);
       offset += length_software;
@@ -48,7 +51,7 @@ namespace turtlebot3_msgs
     {
       int offset = 0;
       uint32_t length_hardware;
-      memcpy(&length_hardware, (inbuffer + offset), sizeof(uint32_t));
+      arrToVar(length_hardware, (inbuffer + offset));
       offset += 4;
       for(unsigned int k= offset; k< offset+length_hardware; ++k){
           inbuffer[k-1]=inbuffer[k];
@@ -57,7 +60,7 @@ namespace turtlebot3_msgs
       this->hardware = (char *)(inbuffer + offset-1);
       offset += length_hardware;
       uint32_t length_firmware;
-      memcpy(&length_firmware, (inbuffer + offset), sizeof(uint32_t));
+      arrToVar(length_firmware, (inbuffer + offset));
       offset += 4;
       for(unsigned int k= offset; k< offset+length_firmware; ++k){
           inbuffer[k-1]=inbuffer[k];
@@ -66,7 +69,7 @@ namespace turtlebot3_msgs
       this->firmware = (char *)(inbuffer + offset-1);
       offset += length_firmware;
       uint32_t length_software;
-      memcpy(&length_software, (inbuffer + offset), sizeof(uint32_t));
+      arrToVar(length_software, (inbuffer + offset));
       offset += 4;
       for(unsigned int k= offset; k< offset+length_software; ++k){
           inbuffer[k-1]=inbuffer[k];
