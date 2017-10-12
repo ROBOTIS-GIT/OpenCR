@@ -83,31 +83,32 @@ void setup()
 void loop()
 {
   uint32_t t = millis();
-  update_time();
+  updateTime();
+  updateVariable();
 
   if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_PERIOD))
   {
     controlMotorSpeed();
-    tTime[0] = millis();
+    tTime[0] = t;
   }
 
   if ((t-tTime[1]) >= (1000 / CMD_VEL_PUBLISH_PERIOD))
   {
     cmd_vel_rc100_pub.publish(&cmd_vel_rc100_msg);
-    tTime[1] = millis();
+    tTime[1] = t;
   }
 
   if ((t-tTime[2]) >= (1000 / DRIVE_INFORMATION_PUBLISH_PERIOD))
   {
     publishSensorStateMsg();
     publishDriveInformation();
-    tTime[2] = millis();
+    tTime[2] = t;
   }
 
   if ((t-tTime[3]) >= (1000 / IMU_PUBLISH_PERIOD))
   {
     publishImuMsg();
-    tTime[3] = millis();
+    tTime[3] = t;
   }
 
   // Send log message after ROS connection
@@ -152,7 +153,7 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
 *******************************************************************************/
 void publishImuMsg(void)
 {
-  imu_msg.header.stamp    = ros_now();
+  imu_msg.header.stamp    = rosNow();
   imu_msg.header.frame_id = "imu_link";
 
   mag_msg.header = imu_msg.header;
@@ -216,7 +217,7 @@ void publishImuMsg(void)
   mag_pub.publish(&mag_msg);
   imu_pub.publish(&imu_msg);
 
-  tfs_msg.header.stamp    = ros_now();
+  tfs_msg.header.stamp    = rosNow();
   tfs_msg.header.frame_id = "base_link";
   tfs_msg.child_frame_id  = "imu_link";
   tfs_msg.transform.rotation.w = imu.quat[0];
@@ -240,7 +241,7 @@ void publishSensorStateMsg(void)
 
   int32_t current_tick;
 
-  sensor_state_msg.stamp = ros_now();
+  sensor_state_msg.stamp = rosNow();
   sensor_state_msg.battery = checkVoltage();
 
   battery_state_msg.voltage = sensor_state_msg.battery;
@@ -290,7 +291,7 @@ void publishDriveInformation(void)
   unsigned long time_now = millis();
   unsigned long step_time = time_now - prev_update_time;
   prev_update_time = time_now;
-  ros::Time stamp_now = ros_now();
+  ros::Time stamp_now = rosNow();
 
   // odom
   updateOdometry((double)(step_time * 0.001));
@@ -310,30 +311,56 @@ void publishDriveInformation(void)
 /*******************************************************************************
 * ros::Time::now() implementation
 *******************************************************************************/
-ros::Time ros_now()
+ros::Time rosNow()
 {
-  return add_micros(current_time, micros() - current_offset);
+  return addMicros(current_time, micros() - current_offset);
 }
 
 /*******************************************************************************
 * Time Interpolation function
 *******************************************************************************/
-ros::Time add_micros(ros::Time & t, uint32_t _micros)
+ros::Time addMicros(ros::Time & t, uint32_t _micros)
 {
   uint32_t sec, nsec;
 
   sec  = _micros / 1000000 + t.sec;
   nsec = _micros % 1000000 + 1000 * (t.nsec / 1000);
-  if (nsec >= 1e9) {
+  
+  if (nsec >= 1e9) 
+  {
     sec++, nsec--;
   }
   return ros::Time(sec, nsec);
 }
 
 /*******************************************************************************
+* Update variable (initialization)
+*******************************************************************************/
+void updateVariable(void)
+{
+  static bool variable_flag = false;
+
+  if (nh.connected())
+  {
+    if (variable_flag == false)
+    {      
+      odom_pose[0] = 0.0;
+      odom_pose[1] = 0.0;
+      odom_pose[2] = 0.0;
+
+      variable_flag = true;
+    }
+  }
+  else
+  {
+    variable_flag = false;
+  }
+}
+
+/*******************************************************************************
 * Update the base time for interpolation
 *******************************************************************************/
-void update_time()
+void updateTime()
 {
   current_offset = micros();
   current_time = nh.now();
@@ -344,7 +371,6 @@ void update_time()
 *******************************************************************************/
 bool updateOdometry(double diff_time)
 {
-  static bool odom_pose_init = false;
   double odom_vel[3];
 
   double wheel_l, wheel_r;      // rotation value of wheel [rad]
@@ -354,29 +380,11 @@ bool updateOdometry(double diff_time)
   double step_time;
 
   wheel_l = wheel_r = 0.0;
-  delta_s = delta_theta = 0.0;
+  delta_s = delta_theta = theta = 0.0;
   v = w = 0.0;
   step_time = 0.0;
 
   step_time = diff_time;
-
-  if (nh.connected())
-  {
-    if (odom_pose_init == false)
-    {
-      odom_pose[0] = 0.0;
-      odom_pose[1] = 0.0;
-      odom_pose[2] = 0.0;
-
-      odom_pose_init = true;
-    }
-    else
-    {
-      odom_pose_init = false;
-    }
-
-    return true;
-  }
 
   if (step_time == 0)
     return false;

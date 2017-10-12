@@ -113,10 +113,11 @@ void publishImuMsg(void);
 void publishSensorStateMsg(void);
 void publishDriveInformation(void);
 
-ros::Time ros_now(void);
-ros::Time add_micros(ros::Time & t, uint32_t _micros);
+ros::Time rosNow(void);
+ros::Time addMicros(ros::Time & t, uint32_t _micros);
 
-void update_time(void);
+void updateVariable(void);
+void updateTime(void);
 bool updateOdometry(double diff_time);
 void updateJoint(void);
 void updateTF(geometry_msgs::TransformStamped& odom_tf);
@@ -200,11 +201,11 @@ static uint32_t tTime[4];
 * Declaration for motor
 *******************************************************************************/
 Turtlebot3MotorDriver motor_driver;
-bool init_encoder_[2]  = {false, false};
-int32_t last_diff_tick_[2];
-int32_t last_tick_[2];
-double last_rad_[2];
-double last_velocity_[2];
+bool init_encoder_[WHEEL_NUM]  = {false, false};
+int32_t last_diff_tick_[WHEEL_NUM];
+int32_t last_tick_[WHEEL_NUM];
+double last_rad_[WHEEL_NUM];
+double last_velocity_[WHEEL_NUM];
 double goal_linear_velocity  = 0.0;
 double goal_angular_velocity = 0.0;
 
@@ -233,9 +234,9 @@ int32_t last_right_encoder = 0;
 unsigned long prev_update_time;
 float odom_pose[3];
 char *joint_states_name[] = {"wheel_left_joint", "wheel_right_joint"};
-float joint_states_pos[2] = {0.0, 0.0};
-float joint_states_vel[2] = {0.0, 0.0};
-float joint_states_eff[2] = {0.0, 0.0};
+float joint_states_pos[WHEEL_NUM] = {0.0, 0.0};
+float joint_states_vel[WHEEL_NUM] = {0.0, 0.0};
+float joint_states_eff[WHEEL_NUM] = {0.0, 0.0};
 
 /*******************************************************************************
 * Declaration for Battery
