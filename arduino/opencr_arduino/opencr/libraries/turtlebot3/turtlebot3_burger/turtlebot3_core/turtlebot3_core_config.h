@@ -48,6 +48,7 @@
 #define DRIVE_INFORMATION_PUBLISH_PERIOD 30   //hz
 #define DRIVE_TEST_PERIOD                30   //hz
 
+#define WHEEL_NUM                        2
 #define WHEEL_RADIUS                     0.033           // meter
 #define WHEEL_SEPARATION                 0.160           // meter (BURGER : 0.160, WAFFLE : 0.287)
 #define TURNING_RADIUS                   0.080           // meter (BURGER : 0.080, WAFFLE : 0.1435)
