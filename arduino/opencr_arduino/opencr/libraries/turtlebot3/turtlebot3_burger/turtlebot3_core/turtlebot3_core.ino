@@ -122,6 +122,7 @@ float joint_states_eff[2] = {0.0, 0.0};
 #define LED_RXD         1
 #define LED_LOW_BATTERY 2
 #define LED_ROS_CONNECT 3
+#define LED_WORKING_CHECK 13
 
 /*******************************************************************************
 * Declaration for Battery
@@ -225,7 +226,7 @@ void setup()
 
   prev_update_time = millis();
 
-  pinMode(13, OUTPUT);
+  pinMode(LED_WORKING_CHECK, OUTPUT);
 
   SerialBT2.begin(57600);
 
@@ -784,7 +785,7 @@ void showLedStatus(void)
   if ((millis()-t_time) >= 500)
   {
     t_time = millis();
-    digitalWrite(13, !digitalRead(13));
+    digitalWrite(LED_WORKING_CHECK, !digitalRead(LED_WORKING_CHECK));
   }
 
   if (getPowerInVoltage() < 11.1)
