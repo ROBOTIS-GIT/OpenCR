@@ -220,14 +220,11 @@ void publishImuMsg(void)
   tfs_msg.header.stamp    = rosNow();
   tfs_msg.header.frame_id = "base_link";
   tfs_msg.child_frame_id  = "imu_link";
-  tfs_msg.transform.rotation.w = imu.quat[0];
-  tfs_msg.transform.rotation.x = imu.quat[1];
-  tfs_msg.transform.rotation.y = imu.quat[2];
-  tfs_msg.transform.rotation.z = imu.quat[3];
 
   tfs_msg.transform.translation.x = IMU_POS_X;
   tfs_msg.transform.translation.y = IMU_POS_Y;
   tfs_msg.transform.translation.z = IMU_POS_Z;
+  tfs_msg.transform.rotation      = imu_msg.orientation;
 
   tfbroadcaster.sendTransform(tfs_msg);
 }
@@ -344,6 +341,8 @@ void updateVariable(void)
   {
     if (variable_flag == false)
     {      
+      imu.begin();
+
       odom_pose[0] = 0.0;
       odom_pose[1] = 0.0;
       odom_pose[2] = 0.0;
@@ -372,6 +371,7 @@ void updateTime()
 bool updateOdometry(double diff_time)
 {
   double odom_vel[3];
+  float* quat4orientation;
 
   double wheel_l, wheel_r;      // rotation value of wheel [rad]
   double delta_s, theta, delta_theta;
@@ -399,8 +399,9 @@ bool updateOdometry(double diff_time)
     wheel_r = 0.0;
 
   delta_s     = WHEEL_RADIUS * (wheel_r + wheel_l) / 2.0;
-  theta       = atan2f(imu.quat[1]*imu.quat[2] + imu.quat[0]*imu.quat[3],
-                       0.5f - imu.quat[2]*imu.quat[2] - imu.quat[3]*imu.quat[3]);
+  theta       = atan2f(imu.quat[1]*imu.quat[2] + imu.quat[0]*imu.quat[3], 
+                0.5f - imu.quat[2]*imu.quat[2] - imu.quat[3]*imu.quat[3]);
+
   delta_theta = theta - last_theta;
 
   v = delta_s / step_time;
@@ -418,6 +419,9 @@ bool updateOdometry(double diff_time)
   odom_vel[0] = v;
   odom_vel[1] = 0.0;
   odom_vel[2] = w;
+
+  odom.header.frame_id = "odom";
+  odom.child_frame_id  = "base_link";
 
   odom.pose.pose.position.x = odom_pose[0];
   odom.pose.pose.position.y = odom_pose[1];
@@ -453,14 +457,12 @@ void updateJoint(void)
 *******************************************************************************/
 void updateTF(geometry_msgs::TransformStamped& odom_tf)
 {
-  odom.header.frame_id = "odom";
-  odom.child_frame_id = "base_link";
   odom_tf.header = odom.header;
   odom_tf.child_frame_id = "base_footprint";
   odom_tf.transform.translation.x = odom.pose.pose.position.x;
   odom_tf.transform.translation.y = odom.pose.pose.position.y;
   odom_tf.transform.translation.z = odom.pose.pose.position.z;
-  odom_tf.transform.rotation = odom.pose.pose.orientation;
+  odom_tf.transform.rotation      = odom.pose.pose.orientation;
 }
 
 /*******************************************************************************
