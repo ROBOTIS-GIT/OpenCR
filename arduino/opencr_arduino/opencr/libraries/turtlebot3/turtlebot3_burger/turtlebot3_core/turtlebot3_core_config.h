@@ -188,9 +188,9 @@ ros::Publisher mag_pub("magnetic_field", &mag_msg);
 * Transform Broadcaster
 *******************************************************************************/
 // TF of Turtlebot3
-geometry_msgs::TransformStamped tfs_msg;
+geometry_msgs::TransformStamped imu_tf;
 geometry_msgs::TransformStamped odom_tf;
-tf::TransformBroadcaster tfbroadcaster;
+tf::TransformBroadcaster tf_broadcaster;
 
 /*******************************************************************************
 * SoftwareTimer of Turtlebot3

@@ -34,7 +34,7 @@ void setup()
   nh.advertise(joint_states_pub);
   nh.advertise(battery_state_pub);
   nh.advertise(mag_pub);
-  tfbroadcaster.init(nh);
+  tf_broadcaster.init(nh);
 
   // Setting for Dynamixel motors
   motor_driver.init();
@@ -217,16 +217,16 @@ void publishImuMsg(void)
   mag_pub.publish(&mag_msg);
   imu_pub.publish(&imu_msg);
 
-  tfs_msg.header.stamp    = rosNow();
-  tfs_msg.header.frame_id = "base_link";
-  tfs_msg.child_frame_id  = "imu_link";
+  imu_tf.header.stamp    = rosNow();
+  imu_tf.header.frame_id = "base_link";
+  imu_tf.child_frame_id  = "imu_link";
 
-  tfs_msg.transform.translation.x = IMU_POS_X;
-  tfs_msg.transform.translation.y = IMU_POS_Y;
-  tfs_msg.transform.translation.z = IMU_POS_Z;
-  tfs_msg.transform.rotation      = imu_msg.orientation;
+  imu_tf.transform.translation.x = IMU_POS_X;
+  imu_tf.transform.translation.y = IMU_POS_Y;
+  imu_tf.transform.translation.z = IMU_POS_Z;
+  imu_tf.transform.rotation      = imu_msg.orientation;
 
-  tfbroadcaster.sendTransform(tfs_msg);
+  tf_broadcaster.sendTransform(imu_tf);
 }
 
 /*******************************************************************************
@@ -302,7 +302,8 @@ void publishDriveInformation(void)
 
   // tf
   updateTF(odom_tf);
-  tfbroadcaster.sendTransform(odom_tf);
+  odom_tf.header.stamp = stamp_now;
+  tf_broadcaster.sendTransform(odom_tf);
 }
 
 /*******************************************************************************
@@ -371,7 +372,6 @@ void updateTime()
 bool updateOdometry(double diff_time)
 {
   double odom_vel[3];
-  float* quat4orientation;
 
   double wheel_l, wheel_r;      // rotation value of wheel [rad]
   double delta_s, theta, delta_theta;
@@ -399,6 +399,7 @@ bool updateOdometry(double diff_time)
     wheel_r = 0.0;
 
   delta_s     = WHEEL_RADIUS * (wheel_r + wheel_l) / 2.0;
+  // theta = WHEEL_RADIUS * (wheel_r - wheel_l) / WHEEL_SEPARATION;
   theta       = atan2f(imu.quat[1]*imu.quat[2] + imu.quat[0]*imu.quat[3], 
                 0.5f - imu.quat[2]*imu.quat[2] - imu.quat[3]*imu.quat[3]);
 
