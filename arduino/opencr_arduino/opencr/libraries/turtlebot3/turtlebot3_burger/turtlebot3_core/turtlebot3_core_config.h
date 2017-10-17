@@ -65,8 +65,8 @@
                                                          //   = 0.033 * 0.229 * Goal RPM * 0.10472
                                                          // Goal RPM = V * 1263.632956882
 
-#define MAX_LINEAR_VELOCITY              0.22   // m/s
-#define MAX_ANGULAR_VELOCITY             2.84   // rad/s
+#define MAX_LINEAR_VELOCITY              0.22   // m/s   (BURGER : 0.22, WAFFLE : 0.25)
+#define MAX_ANGULAR_VELOCITY             2.84   // rad/s (BURGER : 2.84, WAFFLE : 1.82)
 #define VELOCITY_STEP                    0.01   // m/s
 #define VELOCITY_LINEAR_X                0.01   // m/s
 #define VELOCITY_ANGULAR_Z               0.1    // rad/s
@@ -84,10 +84,6 @@
 #define WAIT_FOR_BUTTON_PRESS            0
 #define WAIT_SECOND                      1
 #define CHECK_BUTTON_RELEASED            2
-
-#define IMU_POS_X                        -0.032
-#define IMU_POS_Y                        0.0
-#define IMU_POS_Z                        0.058
 
 #define ACCEL_FACTOR                     -0.000598  // 2.0 * -9.8 / 32768
 #define GYRO_FACTOR                       0.000133  // pi / (131 * 180)
