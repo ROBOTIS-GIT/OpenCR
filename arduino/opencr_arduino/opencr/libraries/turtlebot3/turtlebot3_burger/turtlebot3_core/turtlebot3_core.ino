@@ -216,17 +216,6 @@ void publishImuMsg(void)
 
   mag_pub.publish(&mag_msg);
   imu_pub.publish(&imu_msg);
-
-  imu_tf.header.stamp    = rosNow();
-  imu_tf.header.frame_id = "base_link";
-  imu_tf.child_frame_id  = "imu_link";
-
-  imu_tf.transform.translation.x = IMU_POS_X;
-  imu_tf.transform.translation.y = IMU_POS_Y;
-  imu_tf.transform.translation.z = IMU_POS_Z;
-  imu_tf.transform.rotation      = imu_msg.orientation;
-
-  tf_broadcaster.sendTransform(imu_tf);
 }
 
 /*******************************************************************************
