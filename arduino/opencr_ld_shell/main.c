@@ -15,6 +15,14 @@
 #include "opencr_ld.h"
 
 
+/*
+  opencr_ld_shell make fw.bin fw_name fw_ver
+  opencr_ld_sheel view fw_name
+*/
+
+
+
+
 
 void make_firmware( int argc, const char **argv );
 void view_firmware( int argc, const char **argv );
@@ -52,6 +60,9 @@ int main( int argc, const char **argv )
   if( argc < 4 )
   {
     fprintf( stderr, "Usage: opencl_ld <port> <baud> <binary image name> [<0|1 to send Go command to new flashed app>]\n" );
+    fprintf( stderr, "       opencr_ld_shell make fw.bin burger V171017R1\n" );
+    fprintf( stderr, "       opencr_ld_sheel view fw_name\n" );
+
     exit( 1 );
   }
 
@@ -100,7 +111,7 @@ void make_firmware( int argc, const char **argv )
   }
 
   fw_input_str = (char *)argv[2];
-  fw_ver_str = (char *)argv[3];
+  fw_ver_str = (char *)argv[4];
   fw_size = fpsize;
 
 
