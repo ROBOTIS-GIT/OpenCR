@@ -30,19 +30,19 @@
 
 /* Author: zerom, Ryu Woon Jung (Leon) */
 
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(__linux__)
+#include "protocol1_packet_handler.h"
+#elif defined(__APPLE__)
+#include "protocol1_packet_handler.h"
+#elif defined(_WIN32) || defined(_WIN64)
 #define WINDLLEXPORT
+#include "protocol1_packet_handler.h"
+#elif defined(ARDUINO) || defined(__OPENCR__) || defined(__OPENCM904__)
+#include "../../include/dynamixel_sdk/protocol1_packet_handler.h"
 #endif
 
 #include <string.h>
 #include <stdlib.h>
-
-#if defined(__OPENCR__)
-#include <Arduino.h>
-#include "../../include/dynamixel_sdk/protocol1_packet_handler.h"
-#else
-#include "dynamixel_sdk/protocol1_packet_handler.h"
-#endif
 
 #define TXPACKET_MAX_LEN    (250)
 #define RXPACKET_MAX_LEN    (250)
@@ -71,73 +71,88 @@ Protocol1PacketHandler *Protocol1PacketHandler::unique_instance_ = new Protocol1
 
 Protocol1PacketHandler::Protocol1PacketHandler() { }
 
-void Protocol1PacketHandler::printTxRxResult(int result)
+const char *Protocol1PacketHandler::getTxRxResult(int result)
 {
   switch(result)
   {
-  case COMM_SUCCESS:
-    ERROR_PRINT("[TxRxResult] Communication success.\n");
-    break;
+    case COMM_SUCCESS:
+      return "[TxRxResult] Communication success.";
 
-  case COMM_PORT_BUSY:
-    ERROR_PRINT("[TxRxResult] Port is in use!\n");
-    break;
+    case COMM_PORT_BUSY:
+      return "[TxRxResult] Port is in use!";
 
-  case COMM_TX_FAIL:
-    ERROR_PRINT("[TxRxResult] Failed transmit instruction packet!\n");
-    break;
+    case COMM_TX_FAIL:
+      return "[TxRxResult] Failed transmit instruction packet!";
 
-  case COMM_RX_FAIL:
-    ERROR_PRINT("[TxRxResult] Failed get status packet from device!\n");
-    break;
+    case COMM_RX_FAIL:
+      return "[TxRxResult] Failed get status packet from device!";
 
-  case COMM_TX_ERROR:
-    ERROR_PRINT("[TxRxResult] Incorrect instruction packet!\n");
-    break;
+    case COMM_TX_ERROR:
+      return "[TxRxResult] Incorrect instruction packet!";
 
-  case COMM_RX_WAITING:
-    ERROR_PRINT("[TxRxResult] Now recieving status packet!\n");
-    break;
+    case COMM_RX_WAITING:
+      return "[TxRxResult] Now recieving status packet!";
 
-  case COMM_RX_TIMEOUT:
-    ERROR_PRINT("[TxRxResult] There is no status packet!\n");
-    break;
+    case COMM_RX_TIMEOUT:
+      return "[TxRxResult] There is no status packet!";
 
-  case COMM_RX_CORRUPT:
-    ERROR_PRINT("[TxRxResult] Incorrect status packet!\n");
-    break;
+    case COMM_RX_CORRUPT:
+      return "[TxRxResult] Incorrect status packet!";
 
-  case COMM_NOT_AVAILABLE:
-    ERROR_PRINT("[TxRxResult] Protocol does not support This function!\n");
-    break;
+    case COMM_NOT_AVAILABLE:
+      return "[TxRxResult] Protocol does not support This function!";
 
-  default:
-    break;
+    default:
+      return "";
   }
+}
+
+void Protocol1PacketHandler::printTxRxResult(int result)
+{
+#if defined(ARDUINO) || defined(__OPENCR__) || defined(__OPENCM904__)
+  Serial.println("This function is deprecated. Use 'Serial.print()' and 'getRxPacketError()' instead");
+  Serial.println(getTxRxResult(result));
+#else
+  printf("This function is deprecated. Use 'printf()' and 'getRxPacketError()' instead\n");
+  printf("%s\n", getTxRxResult(result));
+#endif
+}
+
+const char *Protocol1PacketHandler::getRxPacketError(uint8_t error)
+{
+  if (error & ERRBIT_VOLTAGE)
+    return "[RxPacketError] Input voltage error!";
+
+  if (error & ERRBIT_ANGLE)
+    return "[RxPacketError] Angle limit error!";
+
+  if (error & ERRBIT_OVERHEAT)
+    return "[RxPacketError] Overheat error!";
+
+  if (error & ERRBIT_RANGE)
+    return "[RxPacketError] Out of range error!";
+
+  if (error & ERRBIT_CHECKSUM)
+    return "[RxPacketError] Checksum error!";
+
+  if (error & ERRBIT_OVERLOAD)
+    return "[RxPacketError] Overload error!";
+
+  if (error & ERRBIT_INSTRUCTION)
+    return "[RxPacketError] Instruction code error!";
+
+  return "";
 }
 
 void Protocol1PacketHandler::printRxPacketError(uint8_t error)
 {
-  if (error & ERRBIT_VOLTAGE)
-    ERROR_PRINT("[RxPacketError] Input voltage error!\n");
-
-  if (error & ERRBIT_ANGLE)
-    ERROR_PRINT("[RxPacketError] Angle limit error!\n");
-
-  if (error & ERRBIT_OVERHEAT)
-    ERROR_PRINT("[RxPacketError] Overheat error!\n");
-
-  if (error & ERRBIT_RANGE)
-    ERROR_PRINT("[RxPacketError] Out of range error!\n");
-
-  if (error & ERRBIT_CHECKSUM)
-    ERROR_PRINT("[RxPacketError] Checksum error!\n");
-
-  if (error & ERRBIT_OVERLOAD)
-    ERROR_PRINT("[RxPacketError] Overload error!\n");
-
-  if (error & ERRBIT_INSTRUCTION)
-    ERROR_PRINT("[RxPacketError] Instruction code error!\n");
+#if defined(ARDUINO) || defined(__OPENCR__) || defined(__OPENCM904__)
+  Serial.println("This function is deprecated. Use 'Serial.print()' and 'getRxPacketError()' instead");
+  Serial.println(getRxPacketError(error));
+#else
+  printf("This function is deprecated. Use 'printf()' and 'getRxPacketError()' instead\n");
+  printf("%s\n", getRxPacketError(error));
+#endif
 }
 
 int Protocol1PacketHandler::txPacket(PortHandler *port, uint8_t *txpacket)
@@ -202,7 +217,7 @@ int Protocol1PacketHandler::rxPacket(PortHandler *port, uint8_t *rxpacket)
 
       if (idx == 0)   // found at the beginning of the packet
       {
-        if (rxpacket[PKT_ID] > 0xFD ||                   // unavailable ID
+        if (rxpacket[PKT_ID] > 0xFD ||                  // unavailable ID
            rxpacket[PKT_LENGTH] > RXPACKET_MAX_LEN ||   // unavailable Length
            rxpacket[PKT_ERROR] >= 0x64)                 // unavailable Error
         {

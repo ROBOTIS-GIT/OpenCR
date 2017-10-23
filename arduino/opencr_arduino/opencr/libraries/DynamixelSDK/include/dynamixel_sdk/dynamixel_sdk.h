@@ -28,65 +28,21 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-/* Author: zerom, Ryu Woon Jung (Leon) */
+////////////////////////////////////////////////////////////////////////////////
+/// @file The file that includes whole Dynamixel SDK libraries
+/// @author Zerom, Leon (RyuWoon Jung)
+////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DYNAMIXEL_SDK_INCLUDE_DYNAMIXEL_SDK_LINUX_PORTHANDLERLINUX_H_
-#define DYNAMIXEL_SDK_INCLUDE_DYNAMIXEL_SDK_LINUX_PORTHANDLERLINUX_H_
-
-
-#include "../dynamixel_sdk/port_handler.h"
-
-namespace dynamixel
-{
-
-class PortHandlerOpenCR : public PortHandler
-{
- private:
-  int     socket_fd_;
-  int     baudrate_;
-  char    port_name_[30];
-
-  double  packet_start_time_;
-  double  packet_timeout_;
-  double  tx_time_per_byte;
-
-  bool    setupPort(const int cflag_baud);
-
-  double  getCurrentTime();
-  double  getTimeSinceStart();
-
-  int     checkBaudrateAvailable(int baudrate); 
-
-  void    setPowerOn();
-  void    setPowerOff();
-  void    setTxEnable();
-  void    setTxDisable();
-
- public:
-  PortHandlerOpenCR(const char *port_name);
-  virtual ~PortHandlerOpenCR() { closePort(); }
-
-  bool    openPort();
-  void    closePort();
-  void    clearPort();
-
-  void    setPortName(const char *port_name);
-  char   *getPortName();
-
-  bool    setBaudRate(const int baudrate);
-  int     getBaudRate();
-
-  int     getBytesAvailable();
-
-  int     readPort(uint8_t *packet, int length);
-  int     writePort(uint8_t *packet, int length);
-
-  void    setPacketTimeout(uint16_t packet_length);
-  void    setPacketTimeout(double msec);
-  bool    isPacketTimeout();
-};
-
-}
+#ifndef DYNAMIXEL_SDK_INCLUDE_DYNAMIXEL_SDK_DYNAMIXELSDK_H_
+#define DYNAMIXEL_SDK_INCLUDE_DYNAMIXEL_SDK_DYNAMIXELSDK_H_
 
 
-#endif /* DYNAMIXEL_SDK_INCLUDE_DYNAMIXEL_SDK_LINUX_PORTHANDLERLINUX_H_ */
+#include "group_bulk_read.h"
+#include "group_bulk_write.h"
+#include "group_sync_read.h"
+#include "group_sync_write.h"
+#include "packet_handler.h"
+#include "port_handler.h"
+
+
+#endif /* DYNAMIXEL_SDK_INCLUDE_DYNAMIXEL_SDK_DYNAMIXELSDK_H_ */

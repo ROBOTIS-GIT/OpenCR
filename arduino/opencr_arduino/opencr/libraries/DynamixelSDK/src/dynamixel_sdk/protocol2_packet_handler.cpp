@@ -30,23 +30,29 @@
 
 /* Author: zerom, Ryu Woon Jung (Leon) */
 
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(__linux__)
+#include "protocol2_packet_handler.h"
+#elif defined(__APPLE__)
+#include "protocol2_packet_handler.h"
+#elif defined(_WIN32) || defined(_WIN64)
 #define WINDLLEXPORT
+#include "protocol2_packet_handler.h"
+#elif defined(ARDUINO) || defined(__OPENCR__) || defined(__OPENCM904__)
+#include "../../include/dynamixel_sdk/protocol2_packet_handler.h"
 #endif
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
-#if defined(__OPENCR__)
-#include <Arduino.h>
-#include "../../include/dynamixel_sdk/protocol2_packet_handler.h"
+// Before DynamixelSDK release, it needs to apply because of OpenCM904
+#if defined(__OPENCM904__)
+#define TXPACKET_MAX_LEN    (2*1024)
+#define RXPACKET_MAX_LEN    (2*1024)
 #else
-#include "dynamixel_sdk/protocol2_packet_handler.h"
-#endif
-
 #define TXPACKET_MAX_LEN    (4*1024)
 #define RXPACKET_MAX_LEN    (4*1024)
+#endif
 
 ///////////////// for Protocol 2.0 Packet /////////////////
 #define PKT_HEADER0             0
@@ -77,95 +83,100 @@ Protocol2PacketHandler *Protocol2PacketHandler::unique_instance_ = new Protocol2
 
 Protocol2PacketHandler::Protocol2PacketHandler() { }
 
-void Protocol2PacketHandler::printTxRxResult(int result)
+const char *Protocol2PacketHandler::getTxRxResult(int result)
 {
   switch(result)
   {
     case COMM_SUCCESS:
-      ERROR_PRINT("[TxRxResult] Communication success.\n");
-      break;
+      return "[TxRxResult] Communication success.";
 
     case COMM_PORT_BUSY:
-      ERROR_PRINT("[TxRxResult] Port is in use!\n");
-      break;
+      return "[TxRxResult] Port is in use!";
 
     case COMM_TX_FAIL:
-      ERROR_PRINT("[TxRxResult] Failed transmit instruction packet!\n");
-      break;
+      return "[TxRxResult] Failed transmit instruction packet!";
 
     case COMM_RX_FAIL:
-      ERROR_PRINT("[TxRxResult] Failed get status packet from device!\n");
-      break;
+      return "[TxRxResult] Failed get status packet from device!";
 
     case COMM_TX_ERROR:
-      ERROR_PRINT("[TxRxResult] Incorrect instruction packet!\n");
-      break;
+      return "[TxRxResult] Incorrect instruction packet!";
 
     case COMM_RX_WAITING:
-      ERROR_PRINT("[TxRxResult] Now recieving status packet!\n");
-      break;
+      return "[TxRxResult] Now recieving status packet!";
 
     case COMM_RX_TIMEOUT:
-      ERROR_PRINT("[TxRxResult] There is no status packet!\n");
-      break;
+      return "[TxRxResult] There is no status packet!";
 
     case COMM_RX_CORRUPT:
-      ERROR_PRINT("[TxRxResult] Incorrect status packet!\n");
-      break;
+      return "[TxRxResult] Incorrect status packet!";
 
     case COMM_NOT_AVAILABLE:
-      ERROR_PRINT("[TxRxResult] Protocol does not support This function!\n");
-      break;
+      return "[TxRxResult] Protocol does not support This function!";
 
     default:
-      break;
+      return "";
   }
 }
 
-void Protocol2PacketHandler::printRxPacketError(uint8_t error)
+void Protocol2PacketHandler::printTxRxResult(int result)
+{
+#if defined(ARDUINO) || defined(__OPENCR__) || defined(__OPENCM904__)
+  Serial.println("This function is deprecated. Use 'Serial.print()' and 'getRxPacketError()' instead");
+  Serial.println(getTxRxResult(result));
+#else
+  printf("This function is deprecated. Use 'printf()' and 'getRxPacketError()' instead\n");
+  printf("%s\n", getTxRxResult(result));
+#endif
+}
+
+const char *Protocol2PacketHandler::getRxPacketError(uint8_t error)
 {
   if (error & ERRBIT_ALERT)
-    ERROR_PRINT("[RxPacketError] Hardware error occurred. Check the error at Control Table (Hardware Error Status)!\n");
+    return "[RxPacketError] Hardware error occurred. Check the error at Control Table (Hardware Error Status)!";
 
   int not_alert_error = error & ~ERRBIT_ALERT;
 
   switch(not_alert_error)
   {
     case 0:
-      break;
+      return "";
 
     case ERRNUM_RESULT_FAIL:
-      ERROR_PRINT("[RxPacketError] Failed to process the instruction packet!\n");
-      break;
+      return "[RxPacketError] Failed to process the instruction packet!";
 
     case ERRNUM_INSTRUCTION:
-      ERROR_PRINT("[RxPacketError] Undefined instruction or incorrect instruction!\n");
-      break;
+      return "[RxPacketError] Undefined instruction or incorrect instruction!";
 
     case ERRNUM_CRC:
-      ERROR_PRINT("[RxPacketError] CRC doesn't match!\n");
-      break;
+      return "[RxPacketError] CRC doesn't match!";
 
     case ERRNUM_DATA_RANGE:
-      ERROR_PRINT("[RxPacketError] The data value is out of range!\n");
-      break;
+      return "[RxPacketError] The data value is out of range!";
 
     case ERRNUM_DATA_LENGTH:
-      ERROR_PRINT("[RxPacketError] The data length does not match as expected!\n");
-      break;
+      return "[RxPacketError] The data length does not match as expected!";
 
     case ERRNUM_DATA_LIMIT:
-      ERROR_PRINT("[RxPacketError] The data value exceeds the limit value!\n");
-      break;
+      return "[RxPacketError] The data value exceeds the limit value!";
 
     case ERRNUM_ACCESS:
-      ERROR_PRINT("[RxPacketError] Writing or Reading is not available to target address!\n");
-      break;
+      return "[RxPacketError] Writing or Reading is not available to target address!";
 
     default:
-      ERROR_PRINT("[RxPacketError] Unknown error code!\n");
-      break;
+      return "[RxPacketError] Unknown error code!";
   }
+}
+
+void Protocol2PacketHandler::printRxPacketError(uint8_t error)
+{
+#if defined(ARDUINO) || defined(__OPENCR__) || defined(__OPENCM904__)
+  Serial.println("This function is deprecated. Use 'Serial.print()' and 'getRxPacketError()' instead");
+  Serial.println(getRxPacketError(error));
+#else
+  printf("This function is deprecated. Use 'printf()' and 'getRxPacketError()' instead\n");
+  printf("%s\n", getRxPacketError(error));
+#endif
 }
 
 unsigned short Protocol2PacketHandler::updateCRC(uint16_t crc_accum, uint8_t *data_blk_ptr, uint16_t data_blk_size)
@@ -314,6 +325,7 @@ int Protocol2PacketHandler::txPacket(PortHandler *port, uint8_t *txpacket)
   // tx packet
   port->clearPort();
   written_packet_length = port->writePort(txpacket, total_packet_length);
+
   if (total_packet_length != written_packet_length)
   {
     port->is_using_ = false;
@@ -440,6 +452,7 @@ int Protocol2PacketHandler::txRxPacket(PortHandler *port, uint8_t *txpacket, uin
 
   // tx packet
   result = txPacket(port, txpacket);
+  
   if (result != COMM_SUCCESS)
     return result;
 

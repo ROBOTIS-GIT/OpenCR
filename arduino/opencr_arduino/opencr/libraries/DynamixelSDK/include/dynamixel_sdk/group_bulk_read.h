@@ -28,7 +28,10 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-/* Author: zerom, Ryu Woon Jung (Leon) */
+////////////////////////////////////////////////////////////////////////////////
+/// @file The file for Dynamixel Bulk Read
+/// @author Zerom, Leon (RyuWoon Jung)
+////////////////////////////////////////////////////////////////////////////////
 
 #ifndef DYNAMIXEL_SDK_INCLUDE_DYNAMIXEL_SDK_GROUPBULKREAD_H_
 #define DYNAMIXEL_SDK_INCLUDE_DYNAMIXEL_SDK_GROUPBULKREAD_H_
@@ -42,6 +45,9 @@
 namespace dynamixel
 {
 
+////////////////////////////////////////////////////////////////////////////////
+/// @brief The class for reading multiple Dynamixel data from different addresses with different lengths at once
+////////////////////////////////////////////////////////////////////////////////
 class WINDECLSPEC GroupBulkRead
 {
  private:
@@ -61,21 +67,100 @@ class WINDECLSPEC GroupBulkRead
   void    makeParam();
 
  public:
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief The function that Initializes instance for Bulk Read
+  /// @param port PortHandler instance
+  /// @param ph PacketHandler instance
+  ////////////////////////////////////////////////////////////////////////////////
   GroupBulkRead(PortHandler *port, PacketHandler *ph);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief The function that calls clearParam function to clear the parameter list for Bulk Read
+  ////////////////////////////////////////////////////////////////////////////////
   ~GroupBulkRead() { clearParam(); }
 
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief The function that returns PortHandler instance
+  /// @return PortHandler instance
+  ////////////////////////////////////////////////////////////////////////////////
   PortHandler     *getPortHandler()   { return port_; }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief The function that returns PacketHandler instance
+  /// @return PacketHandler instance
+  ////////////////////////////////////////////////////////////////////////////////
   PacketHandler   *getPacketHandler() { return ph_; }
 
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief The function that adds id, start_address, data_length to the Bulk Read list
+  /// @param id Dynamixel ID
+  /// @param start_address Address of the data for read
+  /// @data_length Length of the data for read
+  /// @return false
+  /// @return   when the ID exists already in the list
+  /// @return or true
+  ////////////////////////////////////////////////////////////////////////////////
   bool    addParam    (uint8_t id, uint16_t start_address, uint16_t data_length);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief The function that removes id from the Bulk Read list
+  /// @param id Dynamixel ID
+  ////////////////////////////////////////////////////////////////////////////////
   void    removeParam (uint8_t id);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief The function that clears the Bulk Read list
+  ////////////////////////////////////////////////////////////////////////////////
   void    clearParam  ();
 
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief The function that transmits the Bulk Read instruction packet which might be constructed by GroupBulkRead::addParam function
+  /// @return COMM_NOT_AVAILABLE
+  /// @return   when the list for Bulk Read is empty
+  /// @return or the other communication results which come from PacketHandler::bulkReadTx
+  ////////////////////////////////////////////////////////////////////////////////
   int     txPacket();
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief The function that receives the packet which might be come from the Dynamixel
+  /// @return COMM_NOT_AVAILABLE
+  /// @return   when the list for Bulk Read is empty
+  /// @return COMM_RX_FAIL
+  /// @return   when there is no packet recieved
+  /// @return COMM_SUCCESS
+  /// @return   when there is packet recieved
+  /// @return or the other communication results
+  ////////////////////////////////////////////////////////////////////////////////
   int     rxPacket();
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief The function that transmits and receives the packet which might be come from the Dynamixel
+  /// @return COMM_RX_FAIL
+  /// @return   when there is no packet recieved
+  /// @return COMM_SUCCESS
+  /// @return   when there is packet recieved
+  /// @return or the other communication results which come from GroupBulkRead::txPacket or GroupBulkRead::rxPacket
+  ////////////////////////////////////////////////////////////////////////////////
   int     txRxPacket();
 
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief The function that checks whether there are available data which might be received by GroupBulkRead::rxPacket or GroupBulkRead::txRxPacket
+  /// @param id Dynamixel ID
+  /// @param address Address of the data for read
+  /// @param data_length Length of the data for read
+  /// @return false
+  /// @return  when there are no data available
+  /// @return or true
+  ////////////////////////////////////////////////////////////////////////////////
   bool        isAvailable (uint8_t id, uint16_t address, uint16_t data_length);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief The function that gets the data which might be received by GroupBulkRead::rxPacket or GroupBulkRead::txRxPacket
+  /// @param id Dynamixel ID
+  /// @param address Address of the data for read
+  /// @data_length Length of the data for read
+  /// @return data value
+  ////////////////////////////////////////////////////////////////////////////////
   uint32_t    getData     (uint8_t id, uint16_t address, uint16_t data_length);
 };
 
