@@ -34,6 +34,8 @@
 #define WORD  2
 #define DWORD 4
 
+#define DEBUG false
+
 typedef struct 
 {
   ControlTableItem *cti; 
@@ -82,7 +84,7 @@ class DynamixelDriver
   float getProtocolVersion();
   char* getModelName(uint8_t id);
 
-  uint8_t  scan(uint8_t *get_id, uint8_t num = 252, float protocol_version = 0.0);
+  uint8_t  scan(uint8_t *get_id, uint8_t num = 200, float protocol_version = 0.0);
   uint16_t ping(uint8_t id, float protocol_version = 0.0);
 
   bool reboot(uint8_t id);

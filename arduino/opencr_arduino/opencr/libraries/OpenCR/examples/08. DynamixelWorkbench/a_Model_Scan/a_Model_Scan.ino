@@ -32,10 +32,15 @@ void setup()
   Serial.begin(57600);
   while(!Serial);
 
-  uint8_t get_id[5];
+  uint8_t scanned_id[16];
+  uint8_t dxl_cnt = 0;
 
   dxl_wb.begin(DXL_BUS_SERIAL4, BAUDRATE);
-  dxl_wb.scan(get_id);
+  dxl_cnt = dxl_wb.scan(scanned_id);
+
+  for (int index = 0; index < dxl_cnt; index++)
+    Serial.println("id : " + String(scanned_id[index]) + "   Model Name : " + String(dxl_wb.getModelName(scanned_id[index])));
+  
 }
 
 void loop() 

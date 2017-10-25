@@ -24,6 +24,7 @@
 #define DXL_BUS_SERIAL4 "/dev/ttyUSB0" //Dynamixel on Serial3(USART3)  <-OpenCR
 
 #define BAUDRATE  57600
+#define DXL_ID 2
 #define NEW_DXL_ID 1
 
 DynamixelWorkbench dxl_wb;
@@ -33,26 +34,22 @@ void setup()
   Serial.begin(57600);
   while(!Serial);
 
-  uint8_t get_id;
-
   dxl_wb.begin(DXL_BUS_SERIAL4, BAUDRATE);
-  dxl_wb.scan(&get_id);
+  dxl_wb.ping(DXL_ID);
 
-  Serial.println("");
-  Serial.print("Dynamixel ID : ");
-  Serial.println(get_id);
-  Serial.println("");
+  if (dxl_wb.setID(DXL_ID, NEW_DXL_ID))
+  {
+    dxl_wb.ping(NEW_DXL_ID);
 
-  dxl_wb.setID(get_id, NEW_DXL_ID);
+    Serial.println("Succeed to change ID");
+    Serial.print("Dynamixel NEW ID : " + String(NEW_DXL_ID));
 
-  dxl_wb.ping(NEW_DXL_ID);
-
-  Serial.println("");
-  Serial.print("Dynamixel NEW ID : ");
-  Serial.println(NEW_DXL_ID);
-  Serial.println("");
-
-  dxl_wb.jointMode(NEW_DXL_ID);
+    dxl_wb.jointMode(NEW_DXL_ID);
+  }
+  else
+  {
+    Serial.println("Failed to change ID");
+  }
 }
 
 void loop() 

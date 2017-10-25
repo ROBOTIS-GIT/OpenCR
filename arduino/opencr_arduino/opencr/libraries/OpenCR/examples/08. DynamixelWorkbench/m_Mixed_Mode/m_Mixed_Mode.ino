@@ -23,7 +23,7 @@
 #define DXL_BUS_SERIAL3 "3"            //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
 #define DXL_BUS_SERIAL4 "/dev/ttyUSB0" //Dynamixel on Serial3(USART3)  <-OpenCR
 
-#define BAUDRATE  57600
+#define BAUDRATE  1000000
 #define DXL_JOINT_ID    1
 #define DXL_WHEEL_ID    2
 

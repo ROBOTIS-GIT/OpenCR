@@ -106,6 +106,10 @@ bool DynamixelWorkbench::setBaud(uint8_t id, uint32_t new_baud)
       check = driver_.writeRegister(id, "Baud Rate", 16);
     else if (new_baud == 1000000)
       check = driver_.writeRegister(id, "Baud Rate", 1);
+    else if (new_baud == 2000000)
+      check = driver_.writeRegister(id, "Baud Rate", 9);
+    else
+      check = driver_.writeRegister(id, "Baud Rate", 1);
   }
   else if (driver_.getProtocolVersion() == 2.0)
   {    
@@ -116,6 +120,10 @@ bool DynamixelWorkbench::setBaud(uint8_t id, uint32_t new_baud)
     else if (new_baud == 115200)
       check = driver_.writeRegister(id, "Baud Rate", 2);
     else if (new_baud == 1000000)
+      check = driver_.writeRegister(id, "Baud Rate", 3);
+    else if (new_baud == 2000000)
+      check = driver_.writeRegister(id, "Baud Rate", 4);
+    else
       check = driver_.writeRegister(id, "Baud Rate", 3);
   }
 #if defined(__OPENCR__) || defined(__OPENCM904__)
@@ -130,6 +138,11 @@ bool DynamixelWorkbench::setBaud(uint8_t id, uint32_t new_baud)
 bool DynamixelWorkbench::setPacketHandler(float protocol_version)
 {
   driver_.setPacketHandler(protocol_version);
+}
+
+char* DynamixelWorkbench::getModelName(uint8_t id)
+{
+  driver_.getModelName(id);
 }
 
 bool DynamixelWorkbench::ledOn(uint8_t id, int32_t data)

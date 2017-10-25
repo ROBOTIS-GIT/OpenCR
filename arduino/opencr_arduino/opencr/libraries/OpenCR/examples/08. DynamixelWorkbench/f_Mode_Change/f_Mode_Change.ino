@@ -23,7 +23,7 @@
 #define DXL_BUS_SERIAL3 "3"            //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
 #define DXL_BUS_SERIAL4 "/dev/ttyUSB0" //Dynamixel on Serial3(USART3)  <-OpenCR
 
-#define BAUDRATE  57600
+#define BAUDRATE  1000000
 #define DXL_ID    1
 
 DynamixelWorkbench dxl_wb;
@@ -45,8 +45,7 @@ void loop()
   for(count = 1; count <= 3; count++)
   {
     Serial.println("Joint Mode Success");
-    Serial.print("Count : ");
-    Serial.println(count);
+    Serial.println("Count : " + String(count));
 
     dxl_wb.goalPosition(DXL_ID, 1);     
     delay(2000);
@@ -57,9 +56,8 @@ void loop()
   dxl_wb.wheelMode(DXL_ID);
   for(count = 1;count <= 3; count++)
   {
-    Serial.println("Wheel Mode Success");
-    Serial.print("Count : ");
-    Serial.println(count);
+    Serial.println("Wheel Mode Success\n");
+    Serial.println("Count : " + String(count));
 
     dxl_wb.goalSpeed(DXL_ID, -500);
     delay(2000);

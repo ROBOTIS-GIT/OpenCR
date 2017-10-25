@@ -23,9 +23,9 @@
 #define DXL_BUS_SERIAL3 "3"            //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
 #define DXL_BUS_SERIAL4 "/dev/ttyUSB0" //Dynamixel on Serial3(USART3)  <-OpenCR
 
-#define BAUDRATE  1000000
-#define NEW_BAUDRATE 57600
-#define DXL_ID 2
+#define BAUDRATE  57600
+#define NEW_BAUDRATE 1000000
+#define DXL_ID 1
 
 DynamixelWorkbench dxl_wb;
 
@@ -37,22 +37,20 @@ void setup()
   dxl_wb.begin(DXL_BUS_SERIAL4, BAUDRATE);
   dxl_wb.ping(DXL_ID);
 
-  Serial.println("");
-  Serial.print("Baud Rate: ");
-  Serial.println(BAUDRATE);
-  Serial.println("");
+  if (dxl_wb.setBaud(DXL_ID, NEW_BAUDRATE))
+  {
+    Serial.println("Succeed to change Baudrate");
+    dxl_wb.begin(DXL_BUS_SERIAL4, NEW_BAUDRATE);
+    
+    Serial.print("Baud Rate: " + String(NEW_BAUDRATE));
 
-  dxl_wb.setBaud(DXL_ID, NEW_BAUDRATE);
-
-  dxl_wb.begin(DXL_BUS_SERIAL3, NEW_BAUDRATE);
-  
-  Serial.println("");
-  Serial.print("Baud Rate: ");
-  Serial.println(NEW_BAUDRATE);
-  Serial.println("");
-
-  dxl_wb.ping(DXL_ID);
-  dxl_wb.jointMode(DXL_ID);
+    dxl_wb.ping(DXL_ID);
+    dxl_wb.jointMode(DXL_ID);
+  }
+  else
+  {
+    Serial.println("Failed to change Baudrate");
+  }
 }
 
 void loop() 

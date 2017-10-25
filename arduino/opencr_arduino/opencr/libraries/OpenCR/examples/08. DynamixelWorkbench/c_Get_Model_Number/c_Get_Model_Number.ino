@@ -23,23 +23,22 @@
 #define DXL_BUS_SERIAL3 "3"            //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
 #define DXL_BUS_SERIAL4 "/dev/ttyUSB0" //Dynamixel on Serial3(USART3)  <-OpenCR
 
-#define BAUDRATE  1000000
+#define BAUDRATE  57600
 #define DXL_ID 1
 
 DynamixelWorkbench dxl_wb;
+uint16_t dxl_model_num = 0;
 
 void setup() 
 {
   Serial.begin(57600);
   while(!Serial);
 
-  uint16_t model_num = 0;
-
   dxl_wb.begin(DXL_BUS_SERIAL4, BAUDRATE);
-  model_num = dxl_wb.ping(DXL_ID);
+  dxl_model_num = dxl_wb.ping(DXL_ID);
 
-  Serial.print("DXL Model Number : ");
-  Serial.println(model_num);
+  if (dxl_model_num)
+    Serial.println("id : " + String(DXL_ID) + "   Model Number : " + String(dxl_model_num));
 }
 
 void loop() 

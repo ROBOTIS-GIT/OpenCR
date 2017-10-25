@@ -23,7 +23,7 @@
 #define DXL_BUS_SERIAL3 "3"            //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
 #define DXL_BUS_SERIAL4 "/dev/ttyUSB0" //Dynamixel on Serial3(USART3)  <-OpenCR
 
-#define BAUDRATE  57600
+#define BAUDRATE  1000000
 #define DXL_ID    1
 
 DynamixelWorkbench dxl_wb;
@@ -38,7 +38,10 @@ void setup()
 
   // Reboot is only able to support dynamixel using protocol version 2.0.
   // NOT SUPPORT PROTOCOL VERSION 1.0
-  dxl_wb.reboot(DXL_ID);
+  if (dxl_wb.reboot(DXL_ID))
+    Serial.println("Succeed to reboot");
+  else
+    Serial.println("Failed to reboot");
 }
 
 void loop() 

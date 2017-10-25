@@ -23,7 +23,7 @@
 #define DXL_BUS_SERIAL3 "3"            //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
 #define DXL_BUS_SERIAL4 "/dev/ttyUSB0" //Dynamixel on Serial3(USART3)  <-OpenCR
 
-#define BAUDRATE  57600
+#define BAUDRATE  1000000
 
 DynamixelWorkbench dxl_wb;
 uint8_t get_id[5];
@@ -73,14 +73,13 @@ void loop()
 void log()
 {
   Serial.print("[ DXL 1:");
-  Serial.print(" GoalPos:");  Serial.print(goal_position[0]);
-  Serial.print(" PresPos:");  Serial.print(present_position[0]);
-  Serial.print(" PresVel:");  Serial.print(present_velocity[0]);
-  Serial.print(" ,");
-  Serial.print(" DXL 2: ");
-  Serial.print(" GoalPos:");  Serial.print(goal_position[1]);
-  Serial.print(" PresPos:");  Serial.print(present_position[1]);
-  Serial.print(" PresVel:");  Serial.print(present_velocity[1]);
+  Serial.print(" GoalPos:" + String(goal_position[0]));
+  Serial.print(" PresPos:" + String(present_position[0]));
+  Serial.print(" PresVel:" + String(present_velocity[0]));
+  Serial.print("  , DXL 2: ");
+  Serial.print(" GoalPos:" + String(goal_position[1]));
+  Serial.print(" PresPos:" + String(present_position[1]));
+  Serial.print(" PresVel:" + String(present_velocity[1]));
   Serial.println(" ]");
 }
 

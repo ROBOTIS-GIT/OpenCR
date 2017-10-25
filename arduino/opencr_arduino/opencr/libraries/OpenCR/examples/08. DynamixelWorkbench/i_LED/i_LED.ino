@@ -23,7 +23,7 @@
 #define DXL_BUS_SERIAL3 "3"            //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
 #define DXL_BUS_SERIAL4 "/dev/ttyUSB0" //Dynamixel on Serial3(USART3)  <-OpenCR
 
-#define BAUDRATE  57600
+#define BAUDRATE  1000000
 #define DXL_ID    1
 
 DynamixelWorkbench dxl_wb;
@@ -39,7 +39,7 @@ void setup()
 
 void loop() 
 {
-  dxl_wb.ledOn(DXL_ID, 1);
+  dxl_wb.ledOn(DXL_ID, 0x01);
   delay(500);
   dxl_wb.ledOff(DXL_ID);
   delay(500);
