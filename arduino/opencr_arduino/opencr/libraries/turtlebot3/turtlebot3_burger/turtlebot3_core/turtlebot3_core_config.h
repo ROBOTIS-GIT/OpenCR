@@ -24,10 +24,10 @@
 #include <ros.h>
 #include <ros/time.h>
 #include <std_msgs/Int32.h>
-#include <sensor_msgs/Imu.h>
+// #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/BatteryState.h>
-#include <sensor_msgs/MagneticField.h>
+// #include <sensor_msgs/MagneticField.h>
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/Twist.h>
 #include <tf/tf.h>
@@ -36,10 +36,12 @@
 
 #include <turtlebot3_msgs/SensorState.h>
 
-#include <IMU.h>
+// #include <IMU.h>
 #include <RC100.h>
 
 #include "turtlebot3_motor_driver.h"
+#include "turtlebot3_sensor.h"
+#include "turtlebot3_controller.h"
 
 #define INIT_LOG_DATA "This core is compatible with TurtleBot3 Burger"
 
@@ -85,9 +87,9 @@
 #define WAIT_SECOND                      1
 #define CHECK_BUTTON_RELEASED            2
 
-#define ACCEL_FACTOR                     -0.000598  // 2.0 * -9.8 / 32768
-#define GYRO_FACTOR                       0.000133  // pi / (131 * 180)
-#define MAG_FACTOR                       6e-7
+// #define ACCEL_FACTOR                     -0.000598  // 2.0 * -9.8 / 32768
+// #define GYRO_FACTOR                       0.000133  // pi / (131 * 180)
+// #define MAG_FACTOR                       6e-7
 
 #define LED_TXD                          0
 #define LED_RXD                          1
@@ -106,6 +108,7 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
 
 // Function prototypes
 void publishImuMsg(void);
+void publishMagMsg(void);
 void publishSensorStateMsg(void);
 void publishDriveInformation(void);
 
@@ -120,14 +123,14 @@ void updateTF(geometry_msgs::TransformStamped& odom_tf);
 void updateGyroCali(void);
 void updateVoltageCheck(void);
 
-void receiveRemoteControlData(void);
+// void receiveRemoteControlData(void);
 void controlMotorSpeed(void);
 
 uint8_t getButtonPress(void);
 void checkPushButtonState(void);
 void testDrive(void);
 
-float checkVoltage(void);
+// float checkVoltage(void);
 
 void showLedStatus(void);
 void updateRxTxLed(void);
@@ -208,13 +211,15 @@ double goal_angular_velocity = 0.0;
 /*******************************************************************************
 * Declaration for IMU
 *******************************************************************************/
-cIMU imu;
+// cIMU imu;
+Turtlebot3Sensor sensors;
 
 /*******************************************************************************
 * Declaration for RC100 remote controller
 *******************************************************************************/
 RC100 remote_controller;
 double const_cmd_vel    = 0.2;
+Turtlebot3Controller controllers;
 
 /*******************************************************************************
 * Declaration for test drive

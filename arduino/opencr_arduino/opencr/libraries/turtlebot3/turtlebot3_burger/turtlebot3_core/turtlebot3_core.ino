@@ -40,10 +40,12 @@ void setup()
   motor_driver.init();
 
   // Setting for IMU
-  imu.begin();
+  // imu.begin();
+  sensors.init();
 
   // Setting for ROBOTIS RC100 remote controller and cmd_vel
   remote_controller.begin(1);  // 57600bps baudrate for RC100 control
+  // controllers.init(MAX_LINEAR_VELOCITY, MAX_ANGULAR_VELOCITY);
 
   cmd_vel_rc100_msg.linear.x  = 0.0;
   cmd_vel_rc100_msg.angular.z = 0.0;
@@ -62,11 +64,11 @@ void setup()
   joint_states.effort_length   = WHEEL_NUM;
 
   // Initialize Battery States
-  battery_state_msg.current         = NAN;
-  battery_state_msg.charge          = NAN;
-  battery_state_msg.capacity        = NAN;
-  battery_state_msg.design_capacity = NAN;
-  battery_state_msg.percentage      = NAN;
+  // battery_state_msg.current         = NAN;
+  // battery_state_msg.charge          = NAN;
+  // battery_state_msg.capacity        = NAN;
+  // battery_state_msg.design_capacity = NAN;
+  // battery_state_msg.percentage      = NAN;
 
   prev_update_time = millis();
 
@@ -108,6 +110,7 @@ void loop()
   if ((t-tTime[3]) >= (1000 / IMU_PUBLISH_PERIOD))
   {
     publishImuMsg();
+    publishMagMsg();
     tTime[3] = t;
   }
 
@@ -116,12 +119,17 @@ void loop()
 
   // Receive data from RC100 
   receiveRemoteControlData();
+  // controllers.getRCdata(&cmd_vel_rc100_msg);
+
+  // goal_linear_velocity  = cmd_vel_rc100_msg.linear.x;
+  // goal_angular_velocity = cmd_vel_rc100_msg.angular.z;
 
   // Check push button pressed for simple test drive
   checkPushButtonState();
 
   // Update the IMU unit
-  imu.update();
+  // imu.update();
+  sensors.updateIMU();
 
   // Start Gyro Calibration after ROS connection
   updateGyroCali();
@@ -153,69 +161,22 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
 *******************************************************************************/
 void publishImuMsg(void)
 {
+  imu_msg = sensors.getIMU();
+
   imu_msg.header.stamp    = rosNow();
   imu_msg.header.frame_id = "imu_link";
 
-  mag_msg.header = imu_msg.header;
+  imu_pub.publish(&imu_msg);
+}
 
-  imu_msg.angular_velocity.x = imu.SEN.gyroADC[0] * GYRO_FACTOR;
-  imu_msg.angular_velocity.y = imu.SEN.gyroADC[1] * GYRO_FACTOR;
-  imu_msg.angular_velocity.z = imu.SEN.gyroADC[2] * GYRO_FACTOR;
-  imu_msg.angular_velocity_covariance[0] = 0.02;
-  imu_msg.angular_velocity_covariance[1] = 0;
-  imu_msg.angular_velocity_covariance[2] = 0;
-  imu_msg.angular_velocity_covariance[3] = 0;
-  imu_msg.angular_velocity_covariance[4] = 0.02;
-  imu_msg.angular_velocity_covariance[5] = 0;
-  imu_msg.angular_velocity_covariance[6] = 0;
-  imu_msg.angular_velocity_covariance[7] = 0;
-  imu_msg.angular_velocity_covariance[8] = 0.02;
+void publishMagMsg(void)
+{
+  mag_msg = sensors.getMag();
 
-  imu_msg.linear_acceleration.x = imu.SEN.accADC[0] * ACCEL_FACTOR;
-  imu_msg.linear_acceleration.y = imu.SEN.accADC[1] * ACCEL_FACTOR;
-  imu_msg.linear_acceleration.z = imu.SEN.accADC[2] * ACCEL_FACTOR;
-
-  imu_msg.linear_acceleration_covariance[0] = 0.04;
-  imu_msg.linear_acceleration_covariance[1] = 0;
-  imu_msg.linear_acceleration_covariance[2] = 0;
-  imu_msg.linear_acceleration_covariance[3] = 0;
-  imu_msg.linear_acceleration_covariance[4] = 0.04;
-  imu_msg.linear_acceleration_covariance[5] = 0;
-  imu_msg.linear_acceleration_covariance[6] = 0;
-  imu_msg.linear_acceleration_covariance[7] = 0;
-  imu_msg.linear_acceleration_covariance[8] = 0.04;
-
-  imu_msg.orientation.w = imu.quat[0];
-  imu_msg.orientation.x = imu.quat[1];
-  imu_msg.orientation.y = imu.quat[2];
-  imu_msg.orientation.z = imu.quat[3];
-
-  imu_msg.orientation_covariance[0] = 0.0025;
-  imu_msg.orientation_covariance[1] = 0;
-  imu_msg.orientation_covariance[2] = 0;
-  imu_msg.orientation_covariance[3] = 0;
-  imu_msg.orientation_covariance[4] = 0.0025;
-  imu_msg.orientation_covariance[5] = 0;
-  imu_msg.orientation_covariance[6] = 0;
-  imu_msg.orientation_covariance[7] = 0;
-  imu_msg.orientation_covariance[8] = 0.0025;
-
-  mag_msg.magnetic_field.x = imu.SEN.magADC[0] * MAG_FACTOR;
-  mag_msg.magnetic_field.y = imu.SEN.magADC[1] * MAG_FACTOR;
-  mag_msg.magnetic_field.z = imu.SEN.magADC[2] * MAG_FACTOR;
-
-  mag_msg.magnetic_field_covariance[0] = 0.0048;
-  mag_msg.magnetic_field_covariance[1] = 0;
-  mag_msg.magnetic_field_covariance[2] = 0;
-  mag_msg.magnetic_field_covariance[3] = 0;
-  mag_msg.magnetic_field_covariance[4] = 0.0048;
-  mag_msg.magnetic_field_covariance[5] = 0;
-  mag_msg.magnetic_field_covariance[6] = 0;
-  mag_msg.magnetic_field_covariance[7] = 0;
-  mag_msg.magnetic_field_covariance[8] = 0.0048;
+  imu_msg.header.stamp    = rosNow();
+  imu_msg.header.frame_id = "mag_link";
 
   mag_pub.publish(&mag_msg);
-  imu_pub.publish(&imu_msg);
 }
 
 /*******************************************************************************
@@ -228,7 +189,7 @@ void publishSensorStateMsg(void)
   int32_t current_tick;
 
   sensor_state_msg.stamp = rosNow();
-  sensor_state_msg.battery = checkVoltage();
+  sensor_state_msg.battery = sensors.checkVoltage();
 
   battery_state_msg.voltage = sensor_state_msg.battery;
   battery_state_pub.publish(&battery_state_msg);
@@ -331,7 +292,7 @@ void updateVariable(void)
   {
     if (variable_flag == false)
     {      
-      imu.begin();
+      sensors.initIMU();
 
       odom_pose[0] = 0.0;
       odom_pose[1] = 0.0;
@@ -360,6 +321,8 @@ void updateTime()
 *******************************************************************************/
 bool updateOdometry(double diff_time)
 {
+  float* orientation;
+
   double odom_vel[3];
 
   double wheel_l, wheel_r;      // rotation value of wheel [rad]
@@ -388,9 +351,12 @@ bool updateOdometry(double diff_time)
     wheel_r = 0.0;
 
   delta_s     = WHEEL_RADIUS * (wheel_r + wheel_l) / 2.0;
-  // theta = WHEEL_RADIUS * (wheel_r - wheel_l) / WHEEL_SEPARATION;
-  theta       = atan2f(imu.quat[1]*imu.quat[2] + imu.quat[0]*imu.quat[3], 
-                0.5f - imu.quat[2]*imu.quat[2] - imu.quat[3]*imu.quat[3]);
+  // theta = WHEEL_RADIUS * (wheel_r - wheel_l) / WHEEL_SEPARATION;  
+  // theta       = atan2f(imu.quat[1]*imu.quat[2] + imu.quat[0]*imu.quat[3], 
+  //               0.5f - imu.quat[2]*imu.quat[2] - imu.quat[3]*imu.quat[3]);
+  orientation = sensors.getOrientation();
+  theta       = atan2f(orientation[1]*orientation[2] + orientation[0]*orientation[3], 
+                0.5f - orientation[2]*orientation[2] - orientation[3]*orientation[3]);
 
   delta_theta = theta - last_theta;
 
@@ -460,46 +426,27 @@ void updateTF(geometry_msgs::TransformStamped& odom_tf)
 *******************************************************************************/
 void updateGyroCali(void)
 {
-  static bool gyro_cali = false;
-  uint32_t pre_time;
-  uint32_t t_time;
-
+  static bool isEnded = false;
   char log_msg[50];
 
   if (nh.connected())
   {
-    if (gyro_cali == false)
+    if (isEnded == false)
     {
       sprintf(log_msg, "Start Calibration of Gyro");
       nh.loginfo(log_msg);
 
-      imu.SEN.gyro_cali_start();
-
-      t_time   = millis();
-      pre_time = millis();
-      while(!imu.SEN.gyro_cali_get_done())
-      {
-        imu.update();
-
-        if (millis()-pre_time > 5000)
-        {
-          break;
-        }
-        if (millis()-t_time > 100)
-        {
-          t_time = millis();
-          setLedToggle(LED_ROS_CONNECT);
-        }
-      }
-      gyro_cali = true;
+      sensors.calibrationGyro();
 
       sprintf(log_msg, "Calibration End");
       nh.loginfo(log_msg);
+
+      isEnded = true;
     }
   }
   else
   {
-    gyro_cali = false;
+    isEnded = false;
   }
 }
 
@@ -845,14 +792,14 @@ void checkPushButtonState()
 /*******************************************************************************
 * Check voltage
 *******************************************************************************/
-float checkVoltage(void)
-{
-  float vol_value;
+// float checkVoltage(void)
+// {
+//   float vol_value;
 
-  vol_value = getPowerInVoltage();
+//   vol_value = getPowerInVoltage();
 
-  return vol_value;
-}
+//   return vol_value;
+// }
 
 /*******************************************************************************
 * Turtlebot3 test drive using RC100 remote controller
@@ -868,7 +815,7 @@ void testDrive(void)
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
-      goal_linear_velocity  = 0.05 * SCALE_VELOCITY_LINEAR_X;
+      goal_linear_velocity  = 0.05;
     }
     else
     {
@@ -882,7 +829,7 @@ void testDrive(void)
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
-      goal_angular_velocity= -0.7 * SCALE_VELOCITY_ANGULAR_Z;
+      goal_angular_velocity= -0.7;
     }
     else
     {
