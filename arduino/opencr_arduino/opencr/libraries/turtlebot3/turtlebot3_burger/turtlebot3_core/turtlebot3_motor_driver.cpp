@@ -80,11 +80,11 @@ bool Turtlebot3MotorDriver::setTorque(uint8_t id, bool onoff)
   dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, id, ADDR_X_TORQUE_ENABLE, onoff, &dxl_error);
   if(dxl_comm_result != COMM_SUCCESS)
   {
-    packetHandler_->printTxRxResult(dxl_comm_result);
+    Serial.println(packetHandler_->getTxRxResult(dxl_comm_result));
   }
   else if(dxl_error != 0)
   {
-    packetHandler_->printRxPacketError(dxl_error);
+    Serial.println(packetHandler_->getRxPacketError(dxl_error));
   }
 }
 
@@ -116,7 +116,7 @@ bool Turtlebot3MotorDriver::readEncoder(int32_t &left_value, int32_t &right_valu
   // Syncread present position
   dxl_comm_result = groupSyncReadEncoder_->txRxPacket();
   if (dxl_comm_result != COMM_SUCCESS)
-    packetHandler_->printTxRxResult(dxl_comm_result);
+    Serial.println(packetHandler_->getTxRxResult(dxl_comm_result));
 
   // Check if groupSyncRead data of Dynamixels are available
   dxl_getdata_result = groupSyncReadEncoder_->isAvailable(left_wheel_id_, ADDR_X_PRESENT_POSITION, LEN_X_PRESENT_POSITION);
@@ -137,21 +137,21 @@ bool Turtlebot3MotorDriver::readEncoder(int32_t &left_value, int32_t &right_valu
 
 bool Turtlebot3MotorDriver::speedControl(int64_t left_wheel_value, int64_t right_wheel_value)
 {
-  bool dxl_addparam_result_;
-  int8_t dxl_comm_result_;
+  bool dxl_addparam_result;
+  int8_t dxl_comm_result;
 
-  dxl_addparam_result_ = groupSyncWriteVelocity_->addParam(left_wheel_id_, (uint8_t*)&left_wheel_value);
-  if (dxl_addparam_result_ != true)
+  dxl_addparam_result = groupSyncWriteVelocity_->addParam(left_wheel_id_, (uint8_t*)&left_wheel_value);
+  if (dxl_addparam_result != true)
     return false;
 
-  dxl_addparam_result_ = groupSyncWriteVelocity_->addParam(right_wheel_id_, (uint8_t*)&right_wheel_value);
-  if (dxl_addparam_result_ != true)
+  dxl_addparam_result = groupSyncWriteVelocity_->addParam(right_wheel_id_, (uint8_t*)&right_wheel_value);
+  if (dxl_addparam_result != true)
     return false;
 
-  dxl_comm_result_ = groupSyncWriteVelocity_->txPacket();
-  if (dxl_comm_result_ != COMM_SUCCESS)
+  dxl_comm_result = groupSyncWriteVelocity_->txPacket();
+  if (dxl_comm_result != COMM_SUCCESS)
   {
-    packetHandler_->printTxRxResult(dxl_comm_result_);
+    Serial.println(packetHandler_->getTxRxResult(dxl_comm_result));
     return false;
   }
 
