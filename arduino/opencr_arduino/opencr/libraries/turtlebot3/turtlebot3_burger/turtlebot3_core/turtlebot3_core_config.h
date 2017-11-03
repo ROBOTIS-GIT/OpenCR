@@ -63,17 +63,20 @@
 #define LEFT                             0
 #define RIGHT                            1
 
+#define LINEAR 0
+#define ANGULAR 1
+
 #define VELOCITY_CONSTANT_VALUE          1263.632956882  // V = r * w = r * RPM * 0.10472
                                                          //   = 0.033 * 0.229 * Goal RPM * 0.10472
                                                          // Goal RPM = V * 1263.632956882
 
 #define MAX_LINEAR_VELOCITY              0.22   // m/s   (BURGER : 0.22, WAFFLE : 0.25)
 #define MAX_ANGULAR_VELOCITY             2.84   // rad/s (BURGER : 2.84, WAFFLE : 1.82)
-#define VELOCITY_STEP                    0.01   // m/s
-#define VELOCITY_LINEAR_X                0.01   // m/s
-#define VELOCITY_ANGULAR_Z               0.1    // rad/s
-#define SCALE_VELOCITY_LINEAR_X          1
-#define SCALE_VELOCITY_ANGULAR_Z         1
+// #define VELOCITY_STEP                    0.01   // m/s
+// #define VELOCITY_LINEAR_X                0.01   // m/s
+// #define VELOCITY_ANGULAR_Z               0.1    // rad/s
+// #define SCALE_VELOCITY_LINEAR_X          1
+// #define SCALE_VELOCITY_ANGULAR_Z         1
 
 #define TICK2RAD                         0.001533981  // 0.087890625[deg] * 3.14159265359 / 180 = 0.001533981f
 
@@ -124,7 +127,7 @@ void updateGyroCali(void);
 void updateVoltageCheck(void);
 
 // void receiveRemoteControlData(void);
-void controlMotorSpeed(void);
+// void controlMotorSpeed(void);
 
 uint8_t getButtonPress(void);
 void checkPushButtonState(void);
@@ -205,8 +208,7 @@ int32_t last_diff_tick_[WHEEL_NUM];
 int32_t last_tick_[WHEEL_NUM];
 double last_rad_[WHEEL_NUM];
 double last_velocity_[WHEEL_NUM];
-double goal_linear_velocity  = 0.0;
-double goal_angular_velocity = 0.0;
+float goal_velocity[2] = {0.0, 0.0};
 
 /*******************************************************************************
 * Declaration for IMU
@@ -217,8 +219,8 @@ Turtlebot3Sensor sensors;
 /*******************************************************************************
 * Declaration for RC100 remote controller
 *******************************************************************************/
-RC100 remote_controller;
-double const_cmd_vel    = 0.2;
+// RC100 remote_controller;
+// double const_cmd_vel    = 0.2;
 Turtlebot3Controller controllers;
 
 /*******************************************************************************

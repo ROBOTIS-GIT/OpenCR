@@ -44,8 +44,8 @@ void setup()
   sensors.init();
 
   // Setting for ROBOTIS RC100 remote controller and cmd_vel
-  remote_controller.begin(1);  // 57600bps baudrate for RC100 control
-  // controllers.init(MAX_LINEAR_VELOCITY, MAX_ANGULAR_VELOCITY);
+  // remote_controller.begin(1);  // 57600bps baudrate for RC100 control
+  controllers.init(MAX_LINEAR_VELOCITY, MAX_ANGULAR_VELOCITY);
 
   cmd_vel_rc100_msg.linear.x  = 0.0;
   cmd_vel_rc100_msg.angular.z = 0.0;
@@ -90,7 +90,7 @@ void loop()
 
   if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_PERIOD))
   {
-    controlMotorSpeed();
+    motor_driver.controlMotor(WHEEL_SEPARATION, goal_velocity);
     tTime[0] = t;
   }
 
@@ -118,11 +118,8 @@ void loop()
   sendLogMsg();
 
   // Receive data from RC100 
-  receiveRemoteControlData();
-  // controllers.getRCdata(&cmd_vel_rc100_msg);
-
-  // goal_linear_velocity  = cmd_vel_rc100_msg.linear.x;
-  // goal_angular_velocity = cmd_vel_rc100_msg.angular.z;
+  // receiveRemoteControlData();
+  controllers.getRCdata(goal_velocity);
 
   // Check push button pressed for simple test drive
   checkPushButtonState();
@@ -152,8 +149,8 @@ void loop()
 *******************************************************************************/
 void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
 {
-  goal_linear_velocity  = cmd_vel_msg.linear.x;
-  goal_angular_velocity = cmd_vel_msg.angular.z;
+  goal_velocity[LINEAR]  = cmd_vel_msg.linear.x;
+  goal_velocity[ANGULAR] = cmd_vel_msg.angular.z;
 }
 
 /*******************************************************************************
@@ -624,96 +621,96 @@ void updateVoltageCheck(void)
 /*******************************************************************************
 * Receive remocon (RC100) data
 *******************************************************************************/
-void receiveRemoteControlData(void)
-{
-  int received_data = 0;
+// void receiveRemoteControlData(void)
+// {
+//   int received_data = 0;
 
-  if (remote_controller.available())
-  {
-    received_data = remote_controller.readData();
+//   if (remote_controller.available())
+//   {
+//     received_data = remote_controller.readData();
 
-    if (received_data & RC100_BTN_U)
-    {
-      cmd_vel_rc100_msg.linear.x += VELOCITY_LINEAR_X * SCALE_VELOCITY_LINEAR_X;
-    }
-    else if (received_data & RC100_BTN_D)
-    {
-      cmd_vel_rc100_msg.linear.x -= VELOCITY_LINEAR_X * SCALE_VELOCITY_LINEAR_X;
-    }
+//     if (received_data & RC100_BTN_U)
+//     {
+//       cmd_vel_rc100_msg.linear.x += VELOCITY_LINEAR_X * SCALE_VELOCITY_LINEAR_X;
+//     }
+//     else if (received_data & RC100_BTN_D)
+//     {
+//       cmd_vel_rc100_msg.linear.x -= VELOCITY_LINEAR_X * SCALE_VELOCITY_LINEAR_X;
+//     }
 
-    if (received_data & RC100_BTN_L)
-    {
-      cmd_vel_rc100_msg.angular.z += VELOCITY_ANGULAR_Z * SCALE_VELOCITY_ANGULAR_Z;
-    }
-    else if (received_data & RC100_BTN_R)
-    {
-      cmd_vel_rc100_msg.angular.z -= VELOCITY_ANGULAR_Z * SCALE_VELOCITY_ANGULAR_Z;
-    }
+//     if (received_data & RC100_BTN_L)
+//     {
+//       cmd_vel_rc100_msg.angular.z += VELOCITY_ANGULAR_Z * SCALE_VELOCITY_ANGULAR_Z;
+//     }
+//     else if (received_data & RC100_BTN_R)
+//     {
+//       cmd_vel_rc100_msg.angular.z -= VELOCITY_ANGULAR_Z * SCALE_VELOCITY_ANGULAR_Z;
+//     }
 
-    if (received_data & RC100_BTN_6)
-    {
-      cmd_vel_rc100_msg.linear.x  = const_cmd_vel;
-      cmd_vel_rc100_msg.angular.z = 0.0;
-    }
-    else if (received_data & RC100_BTN_5)
-    {
-      cmd_vel_rc100_msg.linear.x  = 0.0;
-      cmd_vel_rc100_msg.angular.z = 0.0;
-    }
+//     if (received_data & RC100_BTN_6)
+//     {
+//       cmd_vel_rc100_msg.linear.x  = const_cmd_vel;
+//       cmd_vel_rc100_msg.angular.z = 0.0;
+//     }
+//     else if (received_data & RC100_BTN_5)
+//     {
+//       cmd_vel_rc100_msg.linear.x  = 0.0;
+//       cmd_vel_rc100_msg.angular.z = 0.0;
+//     }
 
-    if (cmd_vel_rc100_msg.linear.x > MAX_LINEAR_VELOCITY)
-    {
-      cmd_vel_rc100_msg.linear.x = MAX_LINEAR_VELOCITY;
-    }
+//     if (cmd_vel_rc100_msg.linear.x > MAX_LINEAR_VELOCITY)
+//     {
+//       cmd_vel_rc100_msg.linear.x = MAX_LINEAR_VELOCITY;
+//     }
 
-    if (cmd_vel_rc100_msg.angular.z > MAX_ANGULAR_VELOCITY)
-    {
-      cmd_vel_rc100_msg.angular.z = MAX_ANGULAR_VELOCITY;
-    }
+//     if (cmd_vel_rc100_msg.angular.z > MAX_ANGULAR_VELOCITY)
+//     {
+//       cmd_vel_rc100_msg.angular.z = MAX_ANGULAR_VELOCITY;
+//     }
 
-    goal_linear_velocity  = cmd_vel_rc100_msg.linear.x;
-    goal_angular_velocity = cmd_vel_rc100_msg.angular.z;
-  }
-}
+//     goal_linear_velocity  = cmd_vel_rc100_msg.linear.x;
+//     goal_angular_velocity = cmd_vel_rc100_msg.angular.z;
+//   }
+// }
 
 /*******************************************************************************
 * Control motor speed
 *******************************************************************************/
-void controlMotorSpeed(void)
-{
-  bool dxl_comm_result = false;
+// void controlMotorSpeed(void)
+// {
+//   bool dxl_comm_result = false;
 
-  double wheel_speed_cmd[2];
-  double lin_vel1;
-  double lin_vel2;
+//   double wheel_speed_cmd[2];
+//   double lin_vel1;
+//   double lin_vel2;
 
-  wheel_speed_cmd[LEFT]  = goal_linear_velocity - (goal_angular_velocity * WHEEL_SEPARATION / 2);
-  wheel_speed_cmd[RIGHT] = goal_linear_velocity + (goal_angular_velocity * WHEEL_SEPARATION / 2);
+//   wheel_speed_cmd[LEFT]  = goal_linear_velocity - (goal_angular_velocity * WHEEL_SEPARATION / 2);
+//   wheel_speed_cmd[RIGHT] = goal_linear_velocity + (goal_angular_velocity * WHEEL_SEPARATION / 2);
 
-  lin_vel1 = wheel_speed_cmd[LEFT] * VELOCITY_CONSTANT_VALUE;
-  if (lin_vel1 > LIMIT_X_MAX_VELOCITY)
-  {
-    lin_vel1 =  LIMIT_X_MAX_VELOCITY;
-  }
-  else if (lin_vel1 < -LIMIT_X_MAX_VELOCITY)
-  {
-    lin_vel1 = -LIMIT_X_MAX_VELOCITY;
-  }
+//   lin_vel1 = wheel_speed_cmd[LEFT] * VELOCITY_CONSTANT_VALUE;
+//   if (lin_vel1 > LIMIT_X_MAX_VELOCITY)
+//   {
+//     lin_vel1 =  LIMIT_X_MAX_VELOCITY;
+//   }
+//   else if (lin_vel1 < -LIMIT_X_MAX_VELOCITY)
+//   {
+//     lin_vel1 = -LIMIT_X_MAX_VELOCITY;
+//   }
 
-  lin_vel2 = wheel_speed_cmd[RIGHT] * VELOCITY_CONSTANT_VALUE;
-  if (lin_vel2 > LIMIT_X_MAX_VELOCITY)
-  {
-    lin_vel2 =  LIMIT_X_MAX_VELOCITY;
-  }
-  else if (lin_vel2 < -LIMIT_X_MAX_VELOCITY)
-  {
-    lin_vel2 = -LIMIT_X_MAX_VELOCITY;
-  }
+//   lin_vel2 = wheel_speed_cmd[RIGHT] * VELOCITY_CONSTANT_VALUE;
+//   if (lin_vel2 > LIMIT_X_MAX_VELOCITY)
+//   {
+//     lin_vel2 =  LIMIT_X_MAX_VELOCITY;
+//   }
+//   else if (lin_vel2 < -LIMIT_X_MAX_VELOCITY)
+//   {
+//     lin_vel2 = -LIMIT_X_MAX_VELOCITY;
+//   }
 
-  dxl_comm_result = motor_driver.speedControl((int64_t)lin_vel1, (int64_t)lin_vel2);
-  if (dxl_comm_result == false)
-    return;
-}
+//   dxl_comm_result = motor_driver.writeVelocity((int64_t)lin_vel1, (int64_t)lin_vel2);
+//   if (dxl_comm_result == false)
+//     return;
+// }
 
 /*******************************************************************************
 * Get Button Press (Push button 1, Push button 2)
@@ -815,11 +812,11 @@ void testDrive(void)
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
-      goal_linear_velocity  = 0.05;
+      goal_velocity[LINEAR]  = 0.05;
     }
     else
     {
-      goal_linear_velocity  = 0.0;
+      goal_velocity[ANGULAR]  = 0.0;
       start_move = false;
     }
   }
@@ -829,11 +826,11 @@ void testDrive(void)
 
     if (abs(last_right_encoder - current_tick) <= diff_encoder)
     {
-      goal_angular_velocity= -0.7;
+      goal_velocity[LINEAR]= -0.7;
     }
     else
     {
-      goal_angular_velocity  = 0.0;
+      goal_velocity[ANGULAR]  = 0.0;
       start_rotate = false;
     }
   }
