@@ -38,9 +38,11 @@ bool Turtlebot3Controller::init(float max_lin_vel, float max_ang_vel, uint8_t sc
   scale_ang_vel_ = scale_ang_vel;
 }
 
-void Turtlebot3Controller::getRCdata(geometry_msgs::Twist *cmd_vel)
+void Turtlebot3Controller::getRCdata(float *cmd_vel)
 {
-  uint8_t received_data = 0;
+  uint16_t received_data = 0;
+
+  static float lin_x = 0.0, ang_z = 0.0;
   
   if (rc100_.available())
   {
@@ -48,44 +50,47 @@ void Turtlebot3Controller::getRCdata(geometry_msgs::Twist *cmd_vel)
 
     if (received_data & RC100_BTN_U)
     {
-      cmd_vel->linear.x += VELOCITY_LINEAR_X * scale_lin_vel_;
+      lin_x += VELOCITY_LINEAR_X * scale_lin_vel_;
     }
     else if (received_data & RC100_BTN_D)
     {
-      cmd_vel->linear.x -= VELOCITY_LINEAR_X * scale_lin_vel_;
+      lin_x -= VELOCITY_LINEAR_X * scale_lin_vel_;
     }
     else if (received_data & RC100_BTN_L)
     {
-      cmd_vel->angular.z += VELOCITY_ANGULAR_Z * scale_ang_vel_;
+      ang_z += VELOCITY_ANGULAR_Z * scale_ang_vel_;
     }
     else if (received_data & RC100_BTN_R)
     {
-      cmd_vel->angular.z -= VELOCITY_ANGULAR_Z * scale_ang_vel_;
+      ang_z -= VELOCITY_ANGULAR_Z * scale_ang_vel_;
     }
     else if (received_data & RC100_BTN_6)
     {
-      cmd_vel->linear.x  = const_cmd_vel_;
-      cmd_vel->angular.z = 0.0;
+      lin_x  = const_cmd_vel_;
+      ang_z = 0.0;
     }
     else if (received_data & RC100_BTN_5)
     {
-      cmd_vel->linear.x  = 0.0;
-      cmd_vel->angular.z = 0.0;
+      lin_x  = 0.0;
+      ang_z = 0.0;
     }
     else
     {
-      cmd_vel->linear.x  = cmd_vel->linear.x;
-      cmd_vel->angular.z = cmd_vel->angular.z;
+      lin_x  = lin_x;
+      ang_z = ang_z;
     }
 
-    if (cmd_vel->linear.x > max_lin_vel_)
+    if (lin_x > max_lin_vel_)
     {
-      cmd_vel->linear.x = max_lin_vel_;
+      lin_x = max_lin_vel_;
     }
 
-    if (cmd_vel->angular.z > max_ang_vel_)
+    if (ang_z > max_ang_vel_)
     {
-      cmd_vel->angular.z = max_ang_vel_;
+      ang_z = max_ang_vel_;
     }
+
+    cmd_vel[0] = lin_x;
+    cmd_vel[1] = ang_z;
   }
 }

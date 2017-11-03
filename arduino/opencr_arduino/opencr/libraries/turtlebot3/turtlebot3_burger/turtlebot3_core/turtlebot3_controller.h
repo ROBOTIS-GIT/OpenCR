@@ -37,7 +37,7 @@ class Turtlebot3Controller
 
   bool init(float max_lin_vel, float max_ang_vel, uint8_t scale_lin_vel = 1, uint8_t scale_ang_vel = 1);
 
-  void getRCdata(geometry_msgs::Twist *cmd_vel);
+  void getRCdata(float *cmd_vel);
 
  private:
   geometry_msgs::Twist cmd_vel_;
