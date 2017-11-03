@@ -61,8 +61,8 @@
 #define LEFT                             0
 #define RIGHT                            1
 
-#define LINEAR 0
-#define ANGULAR 1
+#define LINEAR                           0
+#define ANGULAR                          1
 
 #define MAX_LINEAR_VELOCITY              0.22   // m/s   (BURGER : 0.22, WAFFLE : 0.25)
 #define MAX_ANGULAR_VELOCITY             2.84   // rad/s (BURGER : 2.84, WAFFLE : 1.82)
@@ -74,10 +74,6 @@
 
 #define TEST_DISTANCE                    0.300     // meter
 #define TEST_RADIAN                      3.14      // 180 degree
-
-// #define WAIT_FOR_BUTTON_PRESS            0
-// #define WAIT_SECOND                      1
-// #define CHECK_BUTTON_RELEASED            2
 
 // Callback function prototypes
 void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
@@ -95,11 +91,16 @@ ros::Time addMicros(ros::Time & t, uint32_t _micros);
 void updateVariable(void);
 void updateMotorInfo(int32_t left_tick, int32_t right_tick);
 void updateTime(void);
-bool updateOdometry(double diff_time);
+void updateOdometry(void);
 void updateJoint(void);
 void updateTF(geometry_msgs::TransformStamped& odom_tf);
 void updateGyroCali(void);
 void updateVoltageCheck(void);
+
+void initOdom(void);
+void initJointStates(void);
+
+bool calcOdometry(double diff_time);
 
 void sendLogMsg(void);
 
@@ -170,15 +171,18 @@ double last_velocity_[WHEEL_NUM];
 float goal_velocity[2] = {0.0, 0.0};
 
 /*******************************************************************************
-* Declaration for IMU
+* Declaration for sensors
 *******************************************************************************/
 Turtlebot3Sensor sensors;
 
 /*******************************************************************************
-* Declaration for RC100 remote controller
+* Declaration for controllers
 *******************************************************************************/
 Turtlebot3Controller controllers;
 
+/*******************************************************************************
+* Declaration for diagnosis
+*******************************************************************************/
 Turtlebot3Diagnosis diagnosis;
 
 /*******************************************************************************
@@ -186,15 +190,12 @@ Turtlebot3Diagnosis diagnosis;
 *******************************************************************************/
 unsigned long prev_update_time;
 float odom_pose[3];
-char *joint_states_name[] = {"wheel_left_joint", "wheel_right_joint"};
-float joint_states_pos[WHEEL_NUM] = {0.0, 0.0};
-float joint_states_vel[WHEEL_NUM] = {0.0, 0.0};
-float joint_states_eff[WHEEL_NUM] = {0.0, 0.0};
+double odom_vel[3];
 
 /*******************************************************************************
 * Declaration for Battery
 *******************************************************************************/
-bool setup_end       = false;
+bool setup_end        = false;
 uint8_t battery_state = 0;
 
 #endif // TURTLEBOT3_CORE_CONFIG_H_

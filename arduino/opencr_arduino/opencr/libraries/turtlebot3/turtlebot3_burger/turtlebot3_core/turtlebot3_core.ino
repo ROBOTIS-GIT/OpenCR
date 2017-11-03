@@ -47,21 +47,10 @@ void setup()
   // Setting for ROBOTIS RC100 remote controller and cmd_vel
   controllers.init(MAX_LINEAR_VELOCITY, MAX_ANGULAR_VELOCITY);
 
-  cmd_vel_rc100_msg.linear.x  = 0.0;
-  cmd_vel_rc100_msg.angular.z = 0.0;
-
   // Setting for SLAM and navigation (odometry, joint states, TF)
-  odom_pose[0] = 0.0;
-  odom_pose[1] = 0.0;
-  odom_pose[2] = 0.0;
+  initOdom();
 
-  joint_states.header.frame_id = "base_link";
-  joint_states.name            = joint_states_name;
-
-  joint_states.name_length     = WHEEL_NUM;
-  joint_states.position_length = WHEEL_NUM;
-  joint_states.velocity_length = WHEEL_NUM;
-  joint_states.effort_length   = WHEEL_NUM;
+  initJointStates();
 
   prev_update_time = millis();
 
@@ -184,9 +173,7 @@ void publishSensorStateMsg(void)
 
   dxl_comm_result = motor_driver.readEncoder(sensor_state_msg.left_encoder, sensor_state_msg.right_encoder);
 
-  if (dxl_comm_result == true)
-    updateMotorInfo(sensor_state_msg.left_encoder, sensor_state_msg.right_encoder);
-  else
+  if (dxl_comm_result == false)
     return;
 
   sensor_state_msg.button = sensors.checkPushButton();
@@ -222,8 +209,14 @@ void publishDriveInformation(void)
   prev_update_time = time_now;
   ros::Time stamp_now = rosNow();
 
+  // update motor's infomation
+  updateMotorInfo(sensor_state_msg.left_encoder, sensor_state_msg.right_encoder);
+
+  // calculate odometry
+  calcOdometry((double)(step_time * 0.001));
+
   // odometry
-  updateOdometry((double)(step_time * 0.001));
+  updateOdometry();
   odom.header.stamp = stamp_now;
   odom_pub.publish(&odom);
 
@@ -233,16 +226,38 @@ void publishDriveInformation(void)
   tf_broadcaster.sendTransform(odom_tf);
 
   // joint states
-  updateJoint();
+  updateJointStates();
   joint_states.header.stamp = stamp_now;
   joint_states_pub.publish(&joint_states);
 }
 
 /*******************************************************************************
-* Calculate the joint states
+* Update the odometry
 *******************************************************************************/
-void updateJoint(void)
+void updateOdometry(void)
 {
+  odom.header.frame_id = "odom";
+  odom.child_frame_id  = "base_link";
+
+  odom.pose.pose.position.x = odom_pose[0];
+  odom.pose.pose.position.y = odom_pose[1];
+  odom.pose.pose.position.z = 0;
+  odom.pose.pose.orientation = tf::createQuaternionFromYaw(odom_pose[2]);
+
+  // We should update the twist of the odometry
+  odom.twist.twist.linear.x  = odom_vel[0];
+  odom.twist.twist.angular.z = odom_vel[2];
+}
+
+/*******************************************************************************
+* Update the joint states 
+*******************************************************************************/
+void updateJointStates(void)
+{
+  float joint_states_pos[WHEEL_NUM] = {0.0, 0.0};
+  float joint_states_vel[WHEEL_NUM] = {0.0, 0.0};
+  float joint_states_eff[WHEEL_NUM] = {0.0, 0.0};
+
   joint_states_pos[LEFT]  = last_rad_[LEFT];
   joint_states_pos[RIGHT] = last_rad_[RIGHT];
 
@@ -254,7 +269,7 @@ void updateJoint(void)
 }
 
 /*******************************************************************************
-* Calculate the TF
+* CalcUpdateulate the TF
 *******************************************************************************/
 void updateTF(geometry_msgs::TransformStamped& odom_tf)
 {
@@ -302,12 +317,9 @@ void updateMotorInfo(int32_t left_tick, int32_t right_tick)
 /*******************************************************************************
 * Calculate the odometry
 *******************************************************************************/
-bool updateOdometry(double diff_time)
+bool calcOdometry(double diff_time)
 {
   float* orientation;
-
-  double odom_vel[3];
-
   double wheel_l, wheel_r;      // rotation value of wheel [rad]
   double delta_s, theta, delta_theta;
   static double last_theta = 0.0;
@@ -335,8 +347,6 @@ bool updateOdometry(double diff_time)
 
   delta_s     = WHEEL_RADIUS * (wheel_r + wheel_l) / 2.0;
   // theta = WHEEL_RADIUS * (wheel_r - wheel_l) / WHEEL_SEPARATION;  
-  // theta       = atan2f(imu.quat[1]*imu.quat[2] + imu.quat[0]*imu.quat[3], 
-  //               0.5f - imu.quat[2]*imu.quat[2] - imu.quat[3]*imu.quat[3]);
   orientation = sensors.getOrientation();
   theta       = atan2f(orientation[1]*orientation[2] + orientation[0]*orientation[3], 
                 0.5f - orientation[2]*orientation[2] - orientation[3]*orientation[3]);
@@ -358,18 +368,6 @@ bool updateOdometry(double diff_time)
   odom_vel[0] = v;
   odom_vel[1] = 0.0;
   odom_vel[2] = w;
-
-  odom.header.frame_id = "odom";
-  odom.child_frame_id  = "base_link";
-
-  odom.pose.pose.position.x = odom_pose[0];
-  odom.pose.pose.position.y = odom_pose[1];
-  odom.pose.pose.position.z = 0;
-  odom.pose.pose.orientation = tf::createQuaternionFromYaw(odom_pose[2]);
-
-  // We should update the twist of the odometry
-  odom.twist.twist.linear.x  = odom_vel[0];
-  odom.twist.twist.angular.z = odom_vel[2];
 
   last_theta = theta;
 
@@ -442,10 +440,7 @@ void updateVariable(void)
     if (variable_flag == false)
     {      
       sensors.initIMU();
-
-      odom_pose[0] = 0.0;
-      odom_pose[1] = 0.0;
-      odom_pose[2] = 0.0;
+      initOdom();
 
       variable_flag = true;
     }
@@ -551,4 +546,24 @@ void sendLogMsg(void)
   {
     log_flag = false;
   }
+}
+
+void initOdom(void)
+{
+  odom_pose[0] = 0.0;
+  odom_pose[1] = 0.0;
+  odom_pose[2] = 0.0;
+}
+
+void initJointStates(void)
+{
+  char *joint_states_name[] = {"wheel_left_joint", "wheel_right_joint"};
+
+  joint_states.header.frame_id = "base_link";
+  joint_states.name            = joint_states_name;
+
+  joint_states.name_length     = WHEEL_NUM;
+  joint_states.position_length = WHEEL_NUM;
+  joint_states.velocity_length = WHEEL_NUM;
+  joint_states.effort_length   = WHEEL_NUM;
 }
