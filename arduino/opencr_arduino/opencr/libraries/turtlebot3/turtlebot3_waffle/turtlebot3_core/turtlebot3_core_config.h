@@ -19,8 +19,6 @@
 #ifndef TURTLEBOT3_CORE_CONFIG_H_
 #define TURTLEBOT3_CORE_CONFIG_H_
 
-#include <math.h>
-
 #include <ros.h>
 #include <ros/time.h>
 #include <std_msgs/Int32.h>
@@ -36,42 +34,33 @@
 
 #include <turtlebot3_msgs/SensorState.h>
 
-#include <IMU.h>
-#include <RC100.h>
+#include <turtlebot3.h>
 
-#include "turtlebot3_motor_driver.h"
+#include <math.h>
 
-#define INIT_LOG_DATA "This core is compatible with TurtleBot3 Waffle"
+#define INIT_LOG_DATA "This core is compatible with TurtleBot3 Burger"
 
 #define CONTROL_MOTOR_SPEED_PERIOD       30   //hz
 #define IMU_PUBLISH_PERIOD               200  //hz
-#define SENSOR_STATE_PUBLISH_PERIOD      30   //hz
 #define CMD_VEL_PUBLISH_PERIOD           30   //hz
 #define DRIVE_INFORMATION_PUBLISH_PERIOD 30   //hz
-#define DRIVE_TEST_PERIOD                30   //hz
 
 #define WHEEL_NUM                        2
 #define WHEEL_RADIUS                     0.033           // meter
 #define WHEEL_SEPARATION                 0.287           // meter (BURGER : 0.160, WAFFLE : 0.287)
 #define TURNING_RADIUS                   0.1435          // meter (BURGER : 0.080, WAFFLE : 0.1435)
-#define ROBOT_RADIUS                     0.105           // meter (BURGER : 0.105, WAFFLE : 0.220)
+#define ROBOT_RADIUS                     0.220           // meter (BURGER : 0.105, WAFFLE : 0.220)
 #define ENCODER_MIN                      -2147483648     // raw
 #define ENCODER_MAX                      2147483648      // raw
 
 #define LEFT                             0
 #define RIGHT                            1
 
-#define VELOCITY_CONSTANT_VALUE          1263.632956882  // V = r * w = r * RPM * 0.10472
-                                                         //   = 0.033 * 0.229 * Goal RPM * 0.10472
-                                                         // Goal RPM = V * 1263.632956882
+#define LINEAR                           0
+#define ANGULAR                          1
 
 #define MAX_LINEAR_VELOCITY              0.25   // m/s   (BURGER : 0.22, WAFFLE : 0.25)
 #define MAX_ANGULAR_VELOCITY             1.82   // rad/s (BURGER : 2.84, WAFFLE : 1.82)
-#define VELOCITY_STEP                    0.01   // m/s
-#define VELOCITY_LINEAR_X                0.01   // m/s
-#define VELOCITY_ANGULAR_Z               0.1    // rad/s
-#define SCALE_VELOCITY_LINEAR_X          1
-#define SCALE_VELOCITY_ANGULAR_Z         1
 
 #define TICK2RAD                         0.001533981  // 0.087890625[deg] * 3.14159265359 / 180 = 0.001533981f
 
@@ -81,59 +70,32 @@
 #define TEST_DISTANCE                    0.300     // meter
 #define TEST_RADIAN                      3.14      // 180 degree
 
-#define WAIT_FOR_BUTTON_PRESS            0
-#define WAIT_SECOND                      1
-#define CHECK_BUTTON_RELEASED            2
-
-#define ACCEL_FACTOR                     -0.000598  // 2.0 * -9.8 / 32768
-#define GYRO_FACTOR                       0.000133  // pi / (131 * 180)
-#define MAG_FACTOR                       6e-7
-
-#define LED_TXD                          0
-#define LED_RXD                          1
-#define LED_LOW_BATTERY                  2
-#define LED_ROS_CONNECT                  3
-#define LED_WORKING_CHECK                13
-
-#define BATTERY_POWER_OFF                0
-#define BATTERY_POWER_STARTUP            1
-#define BATTERY_POWER_NORMAL             2
-#define BATTERY_POWER_CHECK              3
-#define BATTERY_POWER_WARNNING           4
-
 // Callback function prototypes
 void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
 
 // Function prototypes
 void publishImuMsg(void);
+void publishMagMsg(void);
 void publishSensorStateMsg(void);
+void publishBatteryStateMsg(void);
 void publishDriveInformation(void);
 
 ros::Time rosNow(void);
 ros::Time addMicros(ros::Time & t, uint32_t _micros);
 
 void updateVariable(void);
+void updateMotorInfo(int32_t left_tick, int32_t right_tick);
 void updateTime(void);
-bool updateOdometry(double diff_time);
+void updateOdometry(void);
 void updateJoint(void);
 void updateTF(geometry_msgs::TransformStamped& odom_tf);
 void updateGyroCali(void);
 void updateVoltageCheck(void);
 
-void receiveRemoteControlData(void);
-void controlMotorSpeed(void);
+void initOdom(void);
+void initJointStates(void);
 
-uint8_t getButtonPress(void);
-void checkPushButtonState(void);
-void testDrive(void);
-
-float checkVoltage(void);
-
-void showLedStatus(void);
-void updateRxTxLed(void);
-
-void setPowerOn(void);
-void setPowerOff(void);
+bool calcOdometry(double diff_time);
 
 void sendLogMsg(void);
 
@@ -184,7 +146,6 @@ ros::Publisher mag_pub("magnetic_field", &mag_msg);
 * Transform Broadcaster
 *******************************************************************************/
 // TF of Turtlebot3
-geometry_msgs::TransformStamped imu_tf;
 geometry_msgs::TransformStamped odom_tf;
 tf::TransformBroadcaster tf_broadcaster;
 
@@ -197,49 +158,46 @@ static uint32_t tTime[4];
 * Declaration for motor
 *******************************************************************************/
 Turtlebot3MotorDriver motor_driver;
-bool init_encoder_[WHEEL_NUM]  = {false, false};
-int32_t last_diff_tick_[WHEEL_NUM];
-int32_t last_tick_[WHEEL_NUM];
-double last_rad_[WHEEL_NUM];
-double last_velocity_[WHEEL_NUM];
-double goal_linear_velocity  = 0.0;
-double goal_angular_velocity = 0.0;
 
 /*******************************************************************************
-* Declaration for IMU
+* Calculation for odometry
 *******************************************************************************/
-cIMU imu;
+int32_t last_diff_tick_[WHEEL_NUM] = {0.0, 0.0};
+int32_t last_tick_[WHEEL_NUM]      = {0.0, 0.0};
+double  last_rad_[WHEEL_NUM]       = {0.0, 0.0};
 
 /*******************************************************************************
-* Declaration for RC100 remote controller
+* Update Joint State
 *******************************************************************************/
-RC100 remote_controller;
-double const_cmd_vel    = 0.2;
+double  last_velocity_[WHEEL_NUM]  = {0.0, 0.0};
 
 /*******************************************************************************
-* Declaration for test drive
+* Declaration for sensors
 *******************************************************************************/
-bool start_move = false;
-bool start_rotate = false;
-int32_t last_left_encoder  = 0;
-int32_t last_right_encoder = 0;
+Turtlebot3Sensor sensors;
+
+/*******************************************************************************
+* Declaration for controllers
+*******************************************************************************/
+Turtlebot3Controller controllers;
+float goal_velocity[WHEEL_NUM] = {0.0, 0.0};
+
+/*******************************************************************************
+* Declaration for diagnosis
+*******************************************************************************/
+Turtlebot3Diagnosis diagnosis;
 
 /*******************************************************************************
 * Declaration for SLAM and navigation
 *******************************************************************************/
 unsigned long prev_update_time;
 float odom_pose[3];
-char *joint_states_name[] = {"wheel_left_joint", "wheel_right_joint"};
-float joint_states_pos[WHEEL_NUM] = {0.0, 0.0};
-float joint_states_vel[WHEEL_NUM] = {0.0, 0.0};
-float joint_states_eff[WHEEL_NUM] = {0.0, 0.0};
+double odom_vel[3];
 
 /*******************************************************************************
 * Declaration for Battery
 *******************************************************************************/
-static bool    setup_end       = false;
-static uint8_t battery_voltage = 0;
-static float   battery_valtage_raw = 0;
-static uint8_t battery_state   = BATTERY_POWER_OFF;
+bool setup_end        = false;
+uint8_t battery_state = 0;
 
 #endif // TURTLEBOT3_CORE_CONFIG_H_
