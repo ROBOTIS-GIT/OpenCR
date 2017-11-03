@@ -124,7 +124,7 @@ sensor_msgs::Imu Turtlebot3Sensor::getIMU(void)
 
 float* Turtlebot3Sensor::getOrientation(void)
 {
-  float orientation[4];
+  static float orientation[4];
 
   orientation[0] = imu_.quat[0];
   orientation[1] = imu_.quat[1];
