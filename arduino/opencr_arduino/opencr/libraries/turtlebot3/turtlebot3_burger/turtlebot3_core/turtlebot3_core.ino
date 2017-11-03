@@ -168,7 +168,7 @@ void publishSensorStateMsg(void)
 {
   bool dxl_comm_result = false;
 
-  sensor_state_msg.stamp = rosNow();
+  sensor_state_msg.header.stamp = rosNow();
   sensor_state_msg.battery = sensors.checkVoltage();
 
   dxl_comm_result = motor_driver.readEncoder(sensor_state_msg.left_encoder, sensor_state_msg.right_encoder);
