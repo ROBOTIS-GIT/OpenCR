@@ -173,7 +173,9 @@ void publishSensorStateMsg(void)
 
   dxl_comm_result = motor_driver.readEncoder(sensor_state_msg.left_encoder, sensor_state_msg.right_encoder);
 
-  if (dxl_comm_result == false)
+  if (dxl_comm_result == true)
+    updateMotorInfo(sensor_state_msg.left_encoder, sensor_state_msg.right_encoder);
+  else
     return;
 
   sensor_state_msg.button = sensors.checkPushButton();
@@ -206,11 +208,9 @@ void publishDriveInformation(void)
 {
   unsigned long time_now = millis();
   unsigned long step_time = time_now - prev_update_time;
+
   prev_update_time = time_now;
   ros::Time stamp_now = rosNow();
-
-  // update motor's infomation
-  updateMotorInfo(sensor_state_msg.left_encoder, sensor_state_msg.right_encoder);
 
   // calculate odometry
   calcOdometry((double)(step_time * 0.001));
@@ -254,9 +254,9 @@ void updateOdometry(void)
 *******************************************************************************/
 void updateJointStates(void)
 {
-  float joint_states_pos[WHEEL_NUM] = {0.0, 0.0};
-  float joint_states_vel[WHEEL_NUM] = {0.0, 0.0};
-  float joint_states_eff[WHEEL_NUM] = {0.0, 0.0};
+  static float joint_states_pos[WHEEL_NUM] = {0.0, 0.0};
+  static float joint_states_vel[WHEEL_NUM] = {0.0, 0.0};
+  static float joint_states_eff[WHEEL_NUM] = {0.0, 0.0};
 
   joint_states_pos[LEFT]  = last_rad_[LEFT];
   joint_states_pos[RIGHT] = last_rad_[RIGHT];
@@ -557,7 +557,7 @@ void initOdom(void)
 
 void initJointStates(void)
 {
-  char *joint_states_name[] = {"wheel_left_joint", "wheel_right_joint"};
+  static char *joint_states_name[] = {"wheel_left_joint", "wheel_right_joint"};
 
   joint_states.header.frame_id = "base_link";
   joint_states.name            = joint_states_name;

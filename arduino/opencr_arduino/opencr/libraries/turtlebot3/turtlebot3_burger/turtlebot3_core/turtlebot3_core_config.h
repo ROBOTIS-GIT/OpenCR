@@ -19,8 +19,6 @@
 #ifndef TURTLEBOT3_CORE_CONFIG_H_
 #define TURTLEBOT3_CORE_CONFIG_H_
 
-#include <math.h>
-
 #include <ros.h>
 #include <ros/time.h>
 #include <std_msgs/Int32.h>
@@ -41,14 +39,14 @@
 #include "turtlebot3_controller.h"
 #include "turtlebot3_diagnosis.h"
 
+#include <math.h>
+
 #define INIT_LOG_DATA "This core is compatible with TurtleBot3 Burger"
 
 #define CONTROL_MOTOR_SPEED_PERIOD       30   //hz
 #define IMU_PUBLISH_PERIOD               200  //hz
-#define SENSOR_STATE_PUBLISH_PERIOD      30   //hz
 #define CMD_VEL_PUBLISH_PERIOD           30   //hz
 #define DRIVE_INFORMATION_PUBLISH_PERIOD 30   //hz
-#define DRIVE_TEST_PERIOD                30   //hz
 
 #define WHEEL_NUM                        2
 #define WHEEL_RADIUS                     0.033           // meter
@@ -151,7 +149,6 @@ ros::Publisher mag_pub("magnetic_field", &mag_msg);
 * Transform Broadcaster
 *******************************************************************************/
 // TF of Turtlebot3
-geometry_msgs::TransformStamped imu_tf;
 geometry_msgs::TransformStamped odom_tf;
 tf::TransformBroadcaster tf_broadcaster;
 
@@ -164,11 +161,18 @@ static uint32_t tTime[4];
 * Declaration for motor
 *******************************************************************************/
 Turtlebot3MotorDriver motor_driver;
-int32_t last_diff_tick_[WHEEL_NUM];
-int32_t last_tick_[WHEEL_NUM];
-double last_rad_[WHEEL_NUM];
-double last_velocity_[WHEEL_NUM];
-float goal_velocity[2] = {0.0, 0.0};
+
+/*******************************************************************************
+* Calculation for odometry
+*******************************************************************************/
+int32_t last_diff_tick_[WHEEL_NUM] = {0.0, 0.0};
+int32_t last_tick_[WHEEL_NUM]      = {0.0, 0.0};
+double  last_rad_[WHEEL_NUM]       = {0.0, 0.0};
+
+/*******************************************************************************
+* Update Joint State
+*******************************************************************************/
+double  last_velocity_[WHEEL_NUM]  = {0.0, 0.0};
 
 /*******************************************************************************
 * Declaration for sensors
@@ -179,6 +183,7 @@ Turtlebot3Sensor sensors;
 * Declaration for controllers
 *******************************************************************************/
 Turtlebot3Controller controllers;
+float goal_velocity[WHEEL_NUM] = {0.0, 0.0};
 
 /*******************************************************************************
 * Declaration for diagnosis
