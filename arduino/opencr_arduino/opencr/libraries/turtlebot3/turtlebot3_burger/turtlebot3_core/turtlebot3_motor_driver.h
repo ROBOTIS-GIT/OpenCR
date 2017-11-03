@@ -50,6 +50,13 @@
 #define TORQUE_ENABLE                   1       // Value for enabling the torque
 #define TORQUE_DISABLE                  0       // Value for disabling the torque
 
+#define LEFT                            0
+#define RIGHT                           1
+
+#define VELOCITY_CONSTANT_VALUE         1263.632956882  // V = r * w = r * RPM * 0.10472
+                                                        //   = 0.033 * 0.229 * Goal RPM * 0.10472
+                                                        // Goal RPM = V * 1263.632956882
+
 class Turtlebot3MotorDriver
 {
  public:
@@ -59,7 +66,8 @@ class Turtlebot3MotorDriver
   void closeDynamixel(void);
   bool setTorque(uint8_t id, bool onoff);
   bool readEncoder(int32_t &left_value, int32_t &right_value);
-  bool speedControl(int64_t left_wheel_value, int64_t right_wheel_value);
+  bool writeVelocity(int64_t left_value, int64_t right_value);
+  bool controlMotor(const float wheel_separation, float* value);
 
  private:
   uint32_t baudrate_;
