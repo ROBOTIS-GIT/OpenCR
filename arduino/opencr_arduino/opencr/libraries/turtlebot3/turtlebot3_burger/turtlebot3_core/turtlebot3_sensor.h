@@ -50,6 +50,8 @@ class Turtlebot3Sensor
 
   float checkVoltage(void);
 
+  uint8_t checkPushButton(void);  
+
  private:
   sensor_msgs::Imu           imu_msg_;
   sensor_msgs::BatteryState  battery_state_msg_;

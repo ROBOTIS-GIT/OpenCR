@@ -161,3 +161,8 @@ float Turtlebot3Sensor::checkVoltage(void)
 
   return vol_value;
 }
+
+uint8_t Turtlebot3Sensor::checkPushButton(void)
+{
+  return getPushButton();
+}
