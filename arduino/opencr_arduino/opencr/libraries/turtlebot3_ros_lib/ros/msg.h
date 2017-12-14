@@ -36,6 +36,7 @@
 #define _ROS_MSG_H_
 
 #include <stdint.h>
+#include <stddef.h>
 
 namespace ros {
 
@@ -122,6 +123,22 @@ public:
     return 8;
   }
 
+  // Copy data from variable into a byte array
+  template<typename A, typename V>
+  static void varToArr(A arr, const V var)
+  {
+    for(size_t i = 0; i < sizeof(V); i++)
+      arr[i] = (var >> (8 * i));
+  }
+
+  // Copy data from a byte array into variable
+  template<typename V, typename A>
+  static void arrToVar(V& var, const A arr)
+  {
+    var = 0;
+    for(size_t i = 0; i < sizeof(V); i++)
+      var |= (arr[i] << (8 * i));
+  }
 };
 
 }  // namespace ros
