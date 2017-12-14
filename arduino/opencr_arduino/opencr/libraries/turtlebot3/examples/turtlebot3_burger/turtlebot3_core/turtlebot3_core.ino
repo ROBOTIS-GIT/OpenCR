@@ -143,7 +143,7 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
 }
 
 /*******************************************************************************
-* Callback function for cmd_vel msg
+* Callback function for sound msg
 *******************************************************************************/
 void soundCallback(const turtlebot3_msgs::Sound& sound_msg)
 {
