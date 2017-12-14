@@ -27,7 +27,9 @@ void setup()
   nh.initNode();
   nh.getHardware()->setBaud(115200);
   nh.subscribe(cmd_vel_sub);
-  nh.advertise(sensor_state_pub);
+  nh.subscribe(sound_sub);
+  nh.advertise(sensor_state_pub);  
+  nh.advertise(version_info_pub);
   nh.advertise(imu_pub);
   nh.advertise(cmd_vel_rc100_pub);
   nh.advertise(odom_pub);
@@ -97,6 +99,12 @@ void loop()
     tTime[3] = t;
   }
 
+  if ((t-tTime[4]) >= (1000 / VERSION_INFORMATION_PUBLISH_PERIOD))
+  {
+    publishVersionInfoMsg();
+    tTime[4] = t;
+  }
+
   // Send log message after ROS connection
   sendLogMsg();
 
@@ -134,6 +142,28 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
   goal_velocity[ANGULAR] = cmd_vel_msg.angular.z;
 }
 
+/*******************************************************************************
+* Callback function for cmd_vel msg
+*******************************************************************************/
+void soundCallback(const turtlebot3_msgs::Sound& sound_msg)
+{
+  const uint16_t note_c4 = 262;
+  const uint16_t note_g3 = 196;
+  const uint16_t noteDurations = 10;
+
+  if (sound_msg.value == 1)
+  {
+    tone(BDPIN_BUZZER, note_c4, noteDurations);
+  }
+  else if (sound_msg.value == 2)
+  {
+    tone(BDPIN_BUZZER, note_g3, noteDurations);
+  }
+
+  int pauseBetweenNotes = noteDurations * 1.30;
+  delay(pauseBetweenNotes);
+  noTone(BDPIN_BUZZER);
+}
 
 /*******************************************************************************
 * Publish msgs (IMU data: angular velocity, linear acceleration, orientation)
@@ -181,6 +211,18 @@ void publishSensorStateMsg(void)
   sensor_state_msg.button = sensors.checkPushButton();
 
   sensor_state_pub.publish(&sensor_state_msg);
+}
+
+/*******************************************************************************
+* Publish msgs (version info)
+*******************************************************************************/
+void publishVersionInfoMsg(void)
+{
+  version_info_msg.hardware = HARDWARE_VER;
+  version_info_msg.software = SOFTWARE_VER;
+  version_info_msg.firmware = FIRMWARE_VER;
+
+  version_info_pub.publish(&version_info_msg);
 }
 
 /*******************************************************************************
