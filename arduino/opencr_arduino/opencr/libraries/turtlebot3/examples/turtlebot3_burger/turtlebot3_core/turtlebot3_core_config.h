@@ -162,14 +162,14 @@ Turtlebot3MotorDriver motor_driver;
 /*******************************************************************************
 * Calculation for odometry
 *******************************************************************************/
-int32_t last_diff_tick_[WHEEL_NUM] = {0.0, 0.0};
-int32_t last_tick_[WHEEL_NUM]      = {0.0, 0.0};
-double  last_rad_[WHEEL_NUM]       = {0.0, 0.0};
+int32_t last_diff_tick[WHEEL_NUM] = {0.0, 0.0};
+int32_t last_tick[WHEEL_NUM]      = {0.0, 0.0};
+double  last_rad[WHEEL_NUM]       = {0.0, 0.0};
 
 /*******************************************************************************
 * Update Joint State
 *******************************************************************************/
-double  last_velocity_[WHEEL_NUM]  = {0.0, 0.0};
+double  last_velocity[WHEEL_NUM]  = {0.0, 0.0};
 
 /*******************************************************************************
 * Declaration for sensors

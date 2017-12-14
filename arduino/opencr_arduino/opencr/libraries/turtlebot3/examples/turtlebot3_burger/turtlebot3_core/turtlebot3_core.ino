@@ -258,11 +258,11 @@ void updateJointStates(void)
   static float joint_states_vel[WHEEL_NUM] = {0.0, 0.0};
   static float joint_states_eff[WHEEL_NUM] = {0.0, 0.0};
 
-  joint_states_pos[LEFT]  = last_rad_[LEFT];
-  joint_states_pos[RIGHT] = last_rad_[RIGHT];
+  joint_states_pos[LEFT]  = last_rad[LEFT];
+  joint_states_pos[RIGHT] = last_rad[RIGHT];
 
-  joint_states_vel[LEFT]  = last_velocity_[LEFT];
-  joint_states_vel[RIGHT] = last_velocity_[RIGHT];
+  joint_states_vel[LEFT]  = last_velocity[LEFT];
+  joint_states_vel[RIGHT] = last_velocity[RIGHT];
 
   joint_states.position = joint_states_pos;
   joint_states.velocity = joint_states_vel;
@@ -287,31 +287,31 @@ void updateTF(geometry_msgs::TransformStamped& odom_tf)
 void updateMotorInfo(int32_t left_tick, int32_t right_tick)
 {
   int32_t current_tick = 0;
-  static bool init_encoder_[WHEEL_NUM]  = {false, false};
+  static bool init_encoder[WHEEL_NUM]  = {false, false};
 
   current_tick = left_tick;
   
-  if (init_encoder_[LEFT] == false)
+  if (init_encoder[LEFT] == false)
   {
-    last_tick_[LEFT] = current_tick;
-    init_encoder_[LEFT] = true;
+    last_tick[LEFT] = current_tick;
+    init_encoder[LEFT] = true;
   }
 
-  last_diff_tick_[LEFT] = current_tick - last_tick_[LEFT];
-  last_tick_[LEFT] = current_tick;
-  last_rad_[LEFT] += TICK2RAD * (double)last_diff_tick_[LEFT];
+  last_diff_tick[LEFT] = current_tick - last_tick[LEFT];
+  last_tick[LEFT] = current_tick;
+  last_rad[LEFT] += TICK2RAD * (double)last_diff_tick[LEFT];
 
   current_tick = right_tick;
 
-  if (init_encoder_[RIGHT] == false)
+  if (init_encoder[RIGHT] == false)
   {
-    last_tick_[RIGHT] = current_tick;
-    init_encoder_[RIGHT] = true;
+    last_tick[RIGHT] = current_tick;
+    init_encoder[RIGHT] = true;
   }
 
-  last_diff_tick_[RIGHT] = current_tick - last_tick_[RIGHT];
-  last_tick_[RIGHT] = current_tick;
-  last_rad_[RIGHT] += TICK2RAD * (double)last_diff_tick_[RIGHT];
+  last_diff_tick[RIGHT] = current_tick - last_tick[RIGHT];
+  last_tick[RIGHT] = current_tick;
+  last_rad[RIGHT] += TICK2RAD * (double)last_diff_tick[RIGHT];
 }
 
 /*******************************************************************************
@@ -336,8 +336,8 @@ bool calcOdometry(double diff_time)
   if (step_time == 0)
     return false;
 
-  wheel_l = TICK2RAD * (double)last_diff_tick_[LEFT];
-  wheel_r = TICK2RAD * (double)last_diff_tick_[RIGHT];
+  wheel_l = TICK2RAD * (double)last_diff_tick[LEFT];
+  wheel_r = TICK2RAD * (double)last_diff_tick[RIGHT];
 
   if (isnan(wheel_l))
     wheel_l = 0.0;
@@ -356,8 +356,8 @@ bool calcOdometry(double diff_time)
   v = delta_s / step_time;
   w = delta_theta / step_time;
 
-  last_velocity_[LEFT]  = wheel_l / step_time;
-  last_velocity_[RIGHT] = wheel_r / step_time;
+  last_velocity[LEFT]  = wheel_l / step_time;
+  last_velocity[RIGHT] = wheel_r / step_time;
 
   // compute odometric pose
   odom_pose[0] += delta_s * cos(odom_pose[2] + (delta_theta / 2.0));
