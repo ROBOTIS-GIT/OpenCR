@@ -27,7 +27,9 @@ void setup()
   nh.initNode();
   nh.getHardware()->setBaud(115200);
   nh.subscribe(cmd_vel_sub);
-  nh.advertise(sensor_state_pub);
+  nh.subscribe(sound_sub);
+  nh.advertise(sensor_state_pub);  
+  nh.advertise(version_info_pub);
   nh.advertise(imu_pub);
   nh.advertise(cmd_vel_rc100_pub);
   nh.advertise(odom_pub);
@@ -97,6 +99,12 @@ void loop()
     tTime[3] = t;
   }
 
+  if ((t-tTime[4]) >= (1000 / VERSION_INFORMATION_PUBLISH_PERIOD))
+  {
+    publishVersionInfoMsg();
+    tTime[4] = t;
+  }
+
   // Send log message after ROS connection
   sendLogMsg();
 
@@ -134,6 +142,28 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
   goal_velocity[ANGULAR] = cmd_vel_msg.angular.z;
 }
 
+/*******************************************************************************
+* Callback function for sound msg
+*******************************************************************************/
+void soundCallback(const turtlebot3_msgs::Sound& sound_msg)
+{
+  const uint16_t note_c4 = 262;
+  const uint16_t note_g3 = 196;
+  const uint16_t noteDurations = 10;
+
+  if (sound_msg.value == 1)
+  {
+    tone(BDPIN_BUZZER, note_c4, noteDurations);
+  }
+  else if (sound_msg.value == 2)
+  {
+    tone(BDPIN_BUZZER, note_g3, noteDurations);
+  }
+
+  int pauseBetweenNotes = noteDurations * 1.30;
+  delay(pauseBetweenNotes);
+  noTone(BDPIN_BUZZER);
+}
 
 /*******************************************************************************
 * Publish msgs (IMU data: angular velocity, linear acceleration, orientation)
@@ -181,6 +211,18 @@ void publishSensorStateMsg(void)
   sensor_state_msg.button = sensors.checkPushButton();
 
   sensor_state_pub.publish(&sensor_state_msg);
+}
+
+/*******************************************************************************
+* Publish msgs (version info)
+*******************************************************************************/
+void publishVersionInfoMsg(void)
+{
+  version_info_msg.hardware = HARDWARE_VER;
+  version_info_msg.software = SOFTWARE_VER;
+  version_info_msg.firmware = FIRMWARE_VER;
+
+  version_info_pub.publish(&version_info_msg);
 }
 
 /*******************************************************************************
@@ -258,11 +300,11 @@ void updateJointStates(void)
   static float joint_states_vel[WHEEL_NUM] = {0.0, 0.0};
   static float joint_states_eff[WHEEL_NUM] = {0.0, 0.0};
 
-  joint_states_pos[LEFT]  = last_rad_[LEFT];
-  joint_states_pos[RIGHT] = last_rad_[RIGHT];
+  joint_states_pos[LEFT]  = last_rad[LEFT];
+  joint_states_pos[RIGHT] = last_rad[RIGHT];
 
-  joint_states_vel[LEFT]  = last_velocity_[LEFT];
-  joint_states_vel[RIGHT] = last_velocity_[RIGHT];
+  joint_states_vel[LEFT]  = last_velocity[LEFT];
+  joint_states_vel[RIGHT] = last_velocity[RIGHT];
 
   joint_states.position = joint_states_pos;
   joint_states.velocity = joint_states_vel;
@@ -287,31 +329,31 @@ void updateTF(geometry_msgs::TransformStamped& odom_tf)
 void updateMotorInfo(int32_t left_tick, int32_t right_tick)
 {
   int32_t current_tick = 0;
-  static bool init_encoder_[WHEEL_NUM]  = {false, false};
+  static bool init_encoder[WHEEL_NUM]  = {false, false};
 
   current_tick = left_tick;
   
-  if (init_encoder_[LEFT] == false)
+  if (init_encoder[LEFT] == false)
   {
-    last_tick_[LEFT] = current_tick;
-    init_encoder_[LEFT] = true;
+    last_tick[LEFT] = current_tick;
+    init_encoder[LEFT] = true;
   }
 
-  last_diff_tick_[LEFT] = current_tick - last_tick_[LEFT];
-  last_tick_[LEFT] = current_tick;
-  last_rad_[LEFT] += TICK2RAD * (double)last_diff_tick_[LEFT];
+  last_diff_tick[LEFT] = current_tick - last_tick[LEFT];
+  last_tick[LEFT] = current_tick;
+  last_rad[LEFT] += TICK2RAD * (double)last_diff_tick[LEFT];
 
   current_tick = right_tick;
 
-  if (init_encoder_[RIGHT] == false)
+  if (init_encoder[RIGHT] == false)
   {
-    last_tick_[RIGHT] = current_tick;
-    init_encoder_[RIGHT] = true;
+    last_tick[RIGHT] = current_tick;
+    init_encoder[RIGHT] = true;
   }
 
-  last_diff_tick_[RIGHT] = current_tick - last_tick_[RIGHT];
-  last_tick_[RIGHT] = current_tick;
-  last_rad_[RIGHT] += TICK2RAD * (double)last_diff_tick_[RIGHT];
+  last_diff_tick[RIGHT] = current_tick - last_tick[RIGHT];
+  last_tick[RIGHT] = current_tick;
+  last_rad[RIGHT] += TICK2RAD * (double)last_diff_tick[RIGHT];
 }
 
 /*******************************************************************************
@@ -336,8 +378,8 @@ bool calcOdometry(double diff_time)
   if (step_time == 0)
     return false;
 
-  wheel_l = TICK2RAD * (double)last_diff_tick_[LEFT];
-  wheel_r = TICK2RAD * (double)last_diff_tick_[RIGHT];
+  wheel_l = TICK2RAD * (double)last_diff_tick[LEFT];
+  wheel_r = TICK2RAD * (double)last_diff_tick[RIGHT];
 
   if (isnan(wheel_l))
     wheel_l = 0.0;
@@ -356,8 +398,8 @@ bool calcOdometry(double diff_time)
   v = delta_s / step_time;
   w = delta_theta / step_time;
 
-  last_velocity_[LEFT]  = wheel_l / step_time;
-  last_velocity_[RIGHT] = wheel_r / step_time;
+  last_velocity[LEFT]  = wheel_l / step_time;
+  last_velocity[RIGHT] = wheel_r / step_time;
 
   // compute odometric pose
   odom_pose[0] += delta_s * cos(odom_pose[2] + (delta_theta / 2.0));
