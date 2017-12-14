@@ -16,7 +16,7 @@
 
 /* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
 
-#include "turtlebot3_diagnosis.h"
+#include "../../include/turtlebot3/turtlebot3_diagnosis.h"
 
 Turtlebot3Diagnosis::Turtlebot3Diagnosis()
 {
