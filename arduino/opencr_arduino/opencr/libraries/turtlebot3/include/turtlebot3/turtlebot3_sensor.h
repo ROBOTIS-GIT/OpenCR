@@ -25,8 +25,6 @@
 #include <sensor_msgs/BatteryState.h>
 #include <sensor_msgs/MagneticField.h>
 
-#include <turtlebot3_msgs/SensorState.h>
-
 #define ACCEL_FACTOR                     -0.000598  // 2.0 * -9.8 / 32768
 #define GYRO_FACTOR                       0.000133  // pi / (131 * 180)
 #define MAG_FACTOR                       6e-7
