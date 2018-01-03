@@ -238,14 +238,14 @@ void HAL_PCD_DataInStageCallback(PCD_HandleTypeDef *hpcd, uint8_t epnum)
   * @param  hpcd: PCD handle
   * @retval None
   */
-extern void CDC_Itf_TxISR(void);
+extern void CDC_Itf_SofISR(void);
 
 void HAL_PCD_SOFCallback(PCD_HandleTypeDef *hpcd)
 {
   USBD_LL_SOF(hpcd->pData);
 
   // for USB CDC
-  CDC_Itf_TxISR();
+  CDC_Itf_SofISR();
 }
 
 /**

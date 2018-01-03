@@ -69,6 +69,8 @@ static uint8_t  UserTxNeedEmptyPacket = 0; // used to flush the USB IN endpoint 
 
 static BOOL is_opened = FALSE;
 static BOOL is_reopen = FALSE;
+volatile bool usb_rx_full = false;
+
 
 static uint8_t  rxd_buffer[APP_RX_BUF_SIZE];
 static uint32_t rxd_length    = 0;
@@ -225,6 +227,25 @@ static int8_t CDC_Itf_Control (uint8_t cmd, uint8_t* pbuf, uint16_t length)
   return (USBD_OK);
 }
 
+void CDC_Itf_SofISR(void)
+{
+  uint32_t rx_buf_length;
+
+
+  rx_buf_length = APP_RX_DATA_SIZE - CDC_Itf_Available() - 1;
+
+  // 수신버퍼가 USB 전송 패킷 이상 남았을때만 수신하도록 함.
+  if (usb_rx_full == true)
+  {
+    if (rx_buf_length > CDC_DATA_FS_MAX_PACKET_SIZE)
+    {
+      USBD_CDC_ReceivePacket(&USBD_Device);
+      usb_rx_full = false;
+    }
+  }
+  CDC_Itf_TxISR();
+}
+
 void CDC_Itf_TxISR(void)
 {
   uint32_t buffptr;
@@ -249,6 +270,12 @@ void CDC_Itf_TxISR(void)
     else
     {
       buffsize = UserTxBufPtrIn - UserTxBufPtrOut;
+    }
+
+    // TODO: 보낼데이터가 64의 배수이면 제로패킷을 보내야 해서, 64의 배수가 되지 않도록 임식 변경
+    if (buffsize%CDC_DATA_FS_MAX_PACKET_SIZE == 0 && buffsize > 0)
+    {
+      buffsize -= 1;
     }
 
     buffptr = UserTxBufPtrOut;
@@ -278,6 +305,7 @@ void CDC_Itf_TxISR(void)
 static int8_t CDC_Itf_Receive(uint8_t* Buf, uint32_t *Len)
 {
   uint32_t i;
+  uint32_t rx_buf_length;
 
 
   for( i=0; i<*Len; i++ )
@@ -318,7 +346,18 @@ static int8_t CDC_Itf_Receive(uint8_t* Buf, uint32_t *Len)
     wdg_start();
   }
 
-  USBD_CDC_ReceivePacket(&USBD_Device);
+
+  rx_buf_length = APP_RX_DATA_SIZE - CDC_Itf_Available() - 1;
+
+  // 수신버퍼가 USB 전송 패킷 이상 남았을때만 수신하도록 함.
+  if (rx_buf_length > CDC_DATA_FS_MAX_PACKET_SIZE)
+  {
+    USBD_CDC_ReceivePacket(&USBD_Device);
+  }
+  else
+  {
+    usb_rx_full = true;
+  }
   return (USBD_OK);
 }
 
