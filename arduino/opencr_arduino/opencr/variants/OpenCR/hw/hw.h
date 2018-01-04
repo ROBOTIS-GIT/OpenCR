@@ -29,11 +29,13 @@
 #include "drv_eeprom.h"
 #include "drv_rtc.h"
 #include "drv_micros.h"
+#include "drv_can.h"
 
 #include "delay.h"
 #include "flash.h"
 #include "vcp.h"
 #include "wdg.h"
+#include "can.h"
 
 
 

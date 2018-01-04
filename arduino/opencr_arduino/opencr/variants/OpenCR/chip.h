@@ -83,4 +83,8 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define BDPIN_UART2_RX          82
 #define BDPIN_UART2_TX          83
 
+
+
+
+
 #endif
