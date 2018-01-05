@@ -21,6 +21,8 @@
 
 #include <ros.h>
 #include <ros/time.h>
+#include <std_msgs/Bool.h>
+#include <std_msgs/Empty.h>
 #include <std_msgs/Int32.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/JointState.h>
@@ -80,6 +82,8 @@
 // Callback function prototypes
 void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
 void soundCallback(const turtlebot3_msgs::Sound& sound_msg);
+void motorPowerCallback(const std_msgs::Bool& power_msg);
+void resetCallback(const std_msgs::Empty& reset_msg);
 
 // Function prototypes
 void publishImuMsg(void);
@@ -121,6 +125,10 @@ uint32_t current_offset;
 ros::Subscriber<geometry_msgs::Twist> cmd_vel_sub("cmd_vel", commandVelocityCallback);
 
 ros::Subscriber<turtlebot3_msgs::Sound> sound_sub("sound", soundCallback);
+
+ros::Subscriber<std_msgs::Bool> motor_power_sub("motor_power", motorPowerCallback);
+
+ros::Subscriber<std_msgs::Empty> reset_sub("reset", resetCallback);
 
 /*******************************************************************************
 * Publisher
