@@ -32,9 +32,9 @@ bool canConfigFilter(uint32_t id, uint32_t mask)
   return drvCanConfigFilter(14, id, mask);
 }
 
-uint32_t canWrite(uint32_t id, uint8_t *data, uint32_t length)
+uint32_t canWrite(uint32_t id, uint8_t *p_data, uint32_t length)
 {
-  return drvCanWrite(_DEF_CAN2, id, data, length);
+  return drvCanWrite(_DEF_CAN2, id, p_data, length);
 }
 
 uint8_t canRead(void)

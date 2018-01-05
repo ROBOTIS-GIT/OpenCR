@@ -29,6 +29,7 @@
 *******************************************************************************/
 
 /* Author: OpusK */
+/* For API doc, please refer to https://github.com/ROBOTIS-GIT/OpenCR/wiki/arduino_examples_can */
 
 uint32_t id;
 uint8_t data;

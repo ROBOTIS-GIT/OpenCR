@@ -28,7 +28,7 @@ void canInit(void);
 bool canOpen(uint32_t baudrate, uint8_t format);
 void canClose(void);
 bool canConfigFilter(uint32_t id, uint32_t mask);
-uint32_t canWrite(uint32_t id, uint8_t *data, uint32_t length);
+uint32_t canWrite(uint32_t id, uint8_t *p_data, uint32_t length);
 uint8_t canRead(void);
 uint32_t canAvailable(void);
 uint32_t canWriteMsg(can_msg_t *p_msg);

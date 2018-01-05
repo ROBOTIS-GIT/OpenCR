@@ -31,7 +31,8 @@
 
 
 
-typedef struct {
+typedef struct 
+{
   CAN_HandleTypeDef *p_hCANx;
   void (*handler)(void *arg);
 } drv_can_t;
@@ -268,7 +269,7 @@ bool drvCanConfigIdListFilter(uint8_t filter_num, uint32_t id, uint32_t id2)
   return true;
 }
 
-uint32_t drvCanWrite(uint8_t channel, uint32_t id, uint8_t *data, uint32_t length)
+uint32_t drvCanWrite(uint8_t channel, uint32_t id, uint8_t *p_data, uint32_t length)
 {
   if((channel > DRV_CAN_MAX_CH)||(id > 0x1FFFFFFF))
     return 0;
@@ -303,7 +304,7 @@ uint32_t drvCanWrite(uint8_t channel, uint32_t id, uint8_t *data, uint32_t lengt
 
     for(i = 0; i < tx_len; i++)
     {
-      p_hCANx->pTxMsg->Data[i] = data[sent_len + i];
+      p_hCANx->pTxMsg->Data[i] = p_data[sent_len + i];
     }
 
     p_hCANx->pTxMsg->DLC = tx_len;

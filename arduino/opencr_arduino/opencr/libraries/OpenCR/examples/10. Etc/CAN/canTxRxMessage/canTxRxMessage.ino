@@ -29,7 +29,7 @@
 *******************************************************************************/
 
 /* Author: OpusK */
-
+/* For API doc, please refer to https://github.com/ROBOTIS-GIT/OpenCR/wiki/arduino_examples_can */
 
 #define SEND_INTERVAL_MS 1000
 
