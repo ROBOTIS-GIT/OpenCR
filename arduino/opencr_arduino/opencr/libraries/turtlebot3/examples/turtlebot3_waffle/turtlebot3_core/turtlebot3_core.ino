@@ -28,6 +28,8 @@ void setup()
   nh.getHardware()->setBaud(115200);
   nh.subscribe(cmd_vel_sub);
   nh.subscribe(sound_sub);
+  nh.subscribe(motor_power_sub);
+  nh.subscribe(reset_sub);
   nh.advertise(sensor_state_pub);  
   nh.advertise(version_info_pub);
   nh.advertise(imu_pub);
@@ -163,6 +165,32 @@ void soundCallback(const turtlebot3_msgs::Sound& sound_msg)
   int pauseBetweenNotes = noteDurations * 1.30;
   delay(pauseBetweenNotes);
   noTone(BDPIN_BUZZER);
+}
+
+void motorPowerCallback(const std_msgs::Bool& power_msg)
+{
+  bool dxl_power = power_msg.data;
+
+  motor_driver.setTorque(DXL_LEFT_ID, dxl_power);
+  motor_driver.setTorque(DXL_RIGHT_ID, dxl_power);
+}
+
+void resetCallback(const std_msgs::Empty& reset_msg)
+{
+  char log_msg[50];
+
+  sprintf(log_msg, "Start Calibration of Gyro");
+  nh.loginfo(log_msg);
+
+  sensors.calibrationGyro();
+
+  sprintf(log_msg, "Calibration End");
+  nh.loginfo(log_msg);
+
+  initOdom();
+
+  sprintf(log_msg, "Reset Odometry");
+  nh.loginfo(log_msg);
 }
 
 /*******************************************************************************
