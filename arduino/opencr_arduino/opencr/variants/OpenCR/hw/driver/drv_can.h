@@ -17,7 +17,7 @@
 
 
 
-#define DRV_CAN_MAX_CH           1
+#define DRV_CAN_MAX_CH           2
 #define DRV_CAN_MAX_BYTE_IN_MSG  8
 #define DRV_CAN_MSG_RX_BUF_MAX   8
 #define DRV_CAN_DATA_RX_BUF_MAX  128

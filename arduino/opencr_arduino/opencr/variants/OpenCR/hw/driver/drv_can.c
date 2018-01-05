@@ -36,7 +36,7 @@ typedef struct {
   void (*handler)(void *arg);
 } drv_can_t;
 
-static CAN_HandleTypeDef  hCAN1;
+static CAN_HandleTypeDef  hCAN1, hCAN2;
 static CanTxMsgTypeDef    TxMessage[DRV_CAN_MAX_CH];
 static CanRxMsgTypeDef    RxMessage[DRV_CAN_MAX_CH];
 
@@ -49,6 +49,7 @@ static uint8_t can_data[DRV_CAN_MAX_CH][DRV_CAN_DATA_RX_BUF_MAX];
 static drv_can_t drv_can_tbl[DRV_CAN_MAX_CH] =
 {
   {&hCAN1, NULL},
+  {&hCAN2, NULL}
 };
 
 static uint8_t msg_format = _DEF_CAN_EXT;
@@ -62,8 +63,6 @@ void drvCanInit(void)
   {
     ringCreate(&ring_msg[i], DRV_CAN_MSG_RX_BUF_MAX);
     ringCreate(&ring_data[i], DRV_CAN_DATA_RX_BUF_MAX);
-
-    //drvCanOpen(i, _DEF_CAN_BAUD_125K, _DEF_CAN_EXT);
   }
 }
 
@@ -120,6 +119,21 @@ bool drvCanOpen(uint8_t channel, uint32_t baudrate, uint8_t format)
   {
     case _DEF_CAN1 :
       p_hCANx->Instance  = CAN1;
+      p_hCANx->Init.Prescaler = prescale;
+      p_hCANx->Init.Mode = CAN_MODE_NORMAL;
+      p_hCANx->Init.SJW  = CAN_SJW_1TQ;
+      p_hCANx->Init.BS1  = bs1;
+      p_hCANx->Init.BS2  = bs2;
+      p_hCANx->Init.TTCM = DISABLE;
+      p_hCANx->Init.ABOM = DISABLE;
+      p_hCANx->Init.AWUM = DISABLE;
+      p_hCANx->Init.NART = ENABLE;
+      p_hCANx->Init.RFLM = DISABLE;
+      p_hCANx->Init.TXFP = DISABLE;
+      break;
+
+    case _DEF_CAN2 :
+      p_hCANx->Instance  = CAN2;
       p_hCANx->Init.Prescaler = prescale;
       p_hCANx->Init.Mode = CAN_MODE_NORMAL;
       p_hCANx->Init.SJW  = CAN_SJW_1TQ;
@@ -464,6 +478,10 @@ void CAN1_RX0_IRQHandler(void)
   HAL_CAN_IRQHandler(drv_can_tbl[_DEF_CAN1].p_hCANx);
 }
 
+void CAN2_RX0_IRQHandler(void)
+{
+  HAL_CAN_IRQHandler(drv_can_tbl[_DEF_CAN2].p_hCANx);
+}
 
 void HAL_CAN_MspInit(CAN_HandleTypeDef* hcan)
 {
@@ -485,6 +503,24 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* hcan)
     HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 4, 0);
     HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
   }
+
+  if(hcan->Instance==CAN2)
+  {
+    /* Peripheral clock enable */
+    __HAL_RCC_CAN2_CLK_ENABLE();
+    __HAL_RCC_CAN1_CLK_ENABLE();
+
+    GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF9_CAN2;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    /* CAN1 interrupt Init */
+    HAL_NVIC_SetPriority(CAN2_RX0_IRQn, 4, 0);
+    HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
+  }
 }
 
 void HAL_CAN_MspDeInit(CAN_HandleTypeDef* hcan)
@@ -498,5 +534,16 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* hcan)
 
     /* CAN1 interrupt DeInit */
     HAL_NVIC_DisableIRQ(CAN1_RX0_IRQn);
+  }
+
+  if(hcan->Instance==CAN2)
+  {
+    __HAL_RCC_CAN1_CLK_DISABLE();
+    __HAL_RCC_CAN2_CLK_DISABLE();
+
+    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_12|GPIO_PIN_13);
+
+    /* CAN1 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(CAN2_RX0_IRQn);
   }
 }

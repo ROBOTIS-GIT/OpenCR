@@ -17,52 +17,52 @@ void canInit(void)
 }
 
 
-bool canOpen(uint8_t channel, uint32_t baudrate, uint8_t format)
+bool canOpen(uint32_t baudrate, uint8_t format)
 {
-  return drvCanOpen(channel, baudrate, format);
+  return drvCanOpen(_DEF_CAN2, baudrate, format);
 }
 
-void canClose(uint8_t channel)
+void canClose(void)
 {
-  drvCanClose(channel);
+  drvCanClose(_DEF_CAN2);
 }
 
-bool canConfigFilter(uint8_t filter_num, uint32_t id, uint32_t mask)
+bool canConfigFilter(uint32_t id, uint32_t mask)
 {
-  return drvCanConfigFilter(filter_num, id, mask);
+  return drvCanConfigFilter(14, id, mask);
 }
 
-uint32_t canWrite(uint8_t channel, uint32_t id, uint8_t *data, uint32_t length)
+uint32_t canWrite(uint32_t id, uint8_t *data, uint32_t length)
 {
-  return drvCanWrite(channel, id, data, length);
+  return drvCanWrite(_DEF_CAN2, id, data, length);
 }
 
-uint8_t canRead(uint8_t channel)
+uint8_t canRead(void)
 {
-  return drvCanRead(channel);
+  return drvCanRead(_DEF_CAN2);
 }
 
-uint32_t canAvailable(uint8_t channel)
+uint32_t canAvailable(void)
 {
-  return drvCanAvailable(channel);
+  return drvCanAvailable(_DEF_CAN2);
 }
 
-uint32_t canWriteMsg(uint8_t channel, can_msg_t *p_msg)
+uint32_t canWriteMsg(can_msg_t *p_msg)
 {
   drv_can_msg_t msg;
   msg.id = p_msg->id;
   msg.length = p_msg->length;
   memcpy(msg.data, p_msg->data, 8);
 
-  return drvCanWriteMsg(channel, &msg);
+  return drvCanWriteMsg(_DEF_CAN2, &msg);
 }
 
-bool canReadMsg(uint8_t channel, can_msg_t *p_msg)
+bool canReadMsg(can_msg_t *p_msg)
 {
   bool ret = false;
   drv_can_msg_t *rx_msg;
 
-  rx_msg = drvCanReadMsg(channel);
+  rx_msg = drvCanReadMsg(_DEF_CAN2);
 
   if(rx_msg != NULL)
   {
@@ -77,34 +77,34 @@ bool canReadMsg(uint8_t channel, can_msg_t *p_msg)
   return ret;
 }
 
-uint32_t canAvailableMsg(uint8_t channel)
+uint32_t canAvailableMsg(void)
 {
-  return drvCanAvailableMsg(channel);
+  return drvCanAvailableMsg(_DEF_CAN2);
 }
 
-uint8_t canGetErrCount(uint8_t channel)
+uint8_t canGetErrCount(void)
 {
-  return drvCanGetErrCount(channel);
+  return drvCanGetErrCount(_DEF_CAN2);
 }
 
-uint32_t canGetError(uint8_t channel)
+uint32_t canGetError(void)
 {
-  return drvCanGetError(channel);
+  return drvCanGetError(_DEF_CAN2);
 }
 
-uint32_t canGetState(uint8_t channel)
+uint32_t canGetState(void)
 {
-  return drvCanGetState(channel);
+  return drvCanGetState(_DEF_CAN2);
 }
 
-void canAttachRxInterrupt(uint8_t channel, void (*handler)(can_msg_t *arg))
+void canAttachRxInterrupt(void (*handler)(can_msg_t *arg))
 {
-  drvCanAttachRxInterrupt(channel, (void(*)(void *arg)) handler);
+  drvCanAttachRxInterrupt(_DEF_CAN2, (void(*)(void *arg)) handler);
 }
 
-void canDetachRxInterrupt(uint8_t channel)
+void canDetachRxInterrupt(void)
 {
-  drvCanDetachRxInterrupt(channel);
+  drvCanDetachRxInterrupt(_DEF_CAN2);
 }
 
 
