@@ -177,8 +177,20 @@ void motorPowerCallback(const std_msgs::Bool& power_msg)
 
 void resetCallback(const std_msgs::Empty& reset_msg)
 {
+  char log_msg[50];
+
+  sprintf(log_msg, "Start Calibration of Gyro");
+  nh.loginfo(log_msg);
+
   sensors.calibrationGyro();
+
+  sprintf(log_msg, "Calibration End");
+  nh.loginfo(log_msg);
+
   initOdom();
+
+  sprintf(log_msg, "Reset Odometry");
+  nh.loginfo(log_msg);
 }
 
 /*******************************************************************************
