@@ -383,7 +383,6 @@ void updateOdometry(void)
   odom.pose.pose.position.z = 0;
   odom.pose.pose.orientation = tf::createQuaternionFromYaw(odom_pose[2]);
 
-  // We should update the twist of the odometry
   odom.twist.twist.linear.x  = odom_vel[0];
   odom.twist.twist.angular.z = odom_vel[2];
 }
@@ -426,31 +425,33 @@ void updateTF(geometry_msgs::TransformStamped& odom_tf)
 void updateMotorInfo(int32_t left_tick, int32_t right_tick)
 {
   int32_t current_tick = 0;
-  static bool init_encoder[WHEEL_NUM]  = {false, false};
-
-  current_tick = left_tick;
+  static int32_t last_tick[WHEEL_NUM] = {0.0, 0.0};
   
-  if (init_encoder[LEFT] == false)
+  if (init_encoder)
   {
-    last_tick[LEFT] = current_tick;
-    init_encoder[LEFT] = true;
+    for (int index = 0; index < WHEEL_NUM; index++)
+    {
+      last_diff_tick[index] = 0.0;
+      last_tick[index]      = 0.0;
+      last_rad[index]       = 0.0;
+    }  
+
+    last_tick[LEFT] = left_tick;
+    last_tick[RIGHT] = right_tick;
+    init_encoder = false;
   }
 
+  current_tick = left_tick;
+
   last_diff_tick[LEFT] = current_tick - last_tick[LEFT];
-  last_tick[LEFT] = current_tick;
-  last_rad[LEFT] += TICK2RAD * (double)last_diff_tick[LEFT];
+  last_tick[LEFT]      = current_tick;
+  last_rad[LEFT]       += TICK2RAD * (double)last_diff_tick[LEFT];
 
   current_tick = right_tick;
 
-  if (init_encoder[RIGHT] == false)
-  {
-    last_tick[RIGHT] = current_tick;
-    init_encoder[RIGHT] = true;
-  }
-
   last_diff_tick[RIGHT] = current_tick - last_tick[RIGHT];
-  last_tick[RIGHT] = current_tick;
-  last_rad[RIGHT] += TICK2RAD * (double)last_diff_tick[RIGHT];
+  last_tick[RIGHT]      = current_tick;
+  last_rad[RIGHT]       += TICK2RAD * (double)last_diff_tick[RIGHT];
 }
 
 /*******************************************************************************
@@ -689,20 +690,13 @@ void sendLogMsg(void)
 
 void initOdom(void)
 {
+  init_encoder = true;
+
   for (int index = 0; index < 3; index++)
   {
     odom_pose[index] = 0.0;
     odom_vel[index]  = 0.0;
   }
-
-  for (int index = 0; index < WHEEL_NUM; index++)
-  {
-    last_diff_tick[index] = 0.0;
-    last_tick[index]      = 0.0;
-    last_rad[index]       = 0.0;
-
-    last_velocity[index]  = 0.0;
-  }  
 }
 
 void initJointStates(void)
