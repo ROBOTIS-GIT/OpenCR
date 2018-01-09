@@ -111,6 +111,7 @@ void initJointStates(void);
 bool calcOdometry(double diff_time);
 
 void sendLogMsg(void);
+void melody(uint16_t* note, uint8_t note_num, uint8_t* durations);
 
 /*******************************************************************************
 * ROS NodeHandle
