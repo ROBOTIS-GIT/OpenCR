@@ -149,22 +149,91 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
 *******************************************************************************/
 void soundCallback(const turtlebot3_msgs::Sound& sound_msg)
 {
-  const uint16_t note_c4 = 262;
-  const uint16_t note_g3 = 196;
-  const uint16_t noteDurations = 10;
+  const uint16_t NOTE_C4 = 262;
+  const uint16_t NOTE_D4 = 294;
+  const uint16_t NOTE_E4 = 330;
+  const uint16_t NOTE_F4 = 349;
+  const uint16_t NOTE_G4 = 392;
+  const uint16_t NOTE_A4 = 440;
+  const uint16_t NOTE_B4 = 494;
+  const uint16_t NOTE_C5 = 523;
+  const uint16_t NOTE_C6 = 1047;
 
-  if (sound_msg.value == 1)
+  const uint8_t OFF         = 0;
+  const uint8_t ON          = 1;
+  const uint8_t LOW_BATTERY = 2;
+  const uint8_t ERROR       = 3;
+  const uint8_t BUTTON1     = 4;
+  const uint8_t BUTTON2     = 5;
+
+  uint16_t note[8]     = {0, 0};
+  uint8_t  duration[8] = {0, 0};
+
+  switch (sound_msg.value)
   {
-    tone(BDPIN_BUZZER, note_c4, noteDurations);
-  }
-  else if (sound_msg.value == 2)
-  {
-    tone(BDPIN_BUZZER, note_g3, noteDurations);
+    case ON:
+      note[0] = NOTE_C4;   duration[0] = 4;
+      note[1] = NOTE_D4;   duration[1] = 4;
+      note[2] = NOTE_E4;   duration[2] = 4;
+      note[3] = NOTE_F4;   duration[3] = 4;
+      note[4] = NOTE_G4;   duration[4] = 4;
+      note[5] = NOTE_A4;   duration[5] = 4;
+      note[6] = NOTE_B4;   duration[6] = 4;
+      note[7] = NOTE_C5;   duration[7] = 4;   
+     break;
+
+    case OFF:
+      note[0] = NOTE_C5;   duration[0] = 4;
+      note[1] = NOTE_B4;   duration[1] = 4;
+      note[2] = NOTE_A4;   duration[2] = 4;
+      note[3] = NOTE_G4;   duration[3] = 4;
+      note[4] = NOTE_F4;   duration[4] = 4;
+      note[5] = NOTE_E4;   duration[5] = 4;
+      note[6] = NOTE_D4;   duration[6] = 4;
+      note[7] = NOTE_C4;   duration[7] = 4;  
+     break;
+
+    case LOW_BATTERY:
+      note[0] = 1000;      duration[0] = 1;
+      note[1] = 1000;      duration[1] = 1;
+      note[2] = 1000;      duration[2] = 1;
+      note[3] = 1000;      duration[3] = 1;
+      note[4] = 0;         duration[4] = 8;
+      note[5] = 0;         duration[5] = 8;
+      note[6] = 0;         duration[6] = 8;
+      note[7] = 0;         duration[7] = 8;
+     break;
+
+    case ERROR:
+      note[0] = 1000;      duration[0] = 3;
+      note[1] = 500;       duration[1] = 3;
+      note[2] = 1000;      duration[2] = 3;
+      note[3] = 500;       duration[3] = 3;
+      note[4] = 1000;      duration[4] = 3;
+      note[5] = 500;       duration[5] = 3;
+      note[6] = 1000;      duration[6] = 3;
+      note[7] = 500;       duration[7] = 3;
+     break;
+
+    case BUTTON1:
+     break;
+
+    case BUTTON2:
+     break;
+
+    default:
+      note[0] = NOTE_C4;   duration[0] = 4;
+      note[1] = NOTE_D4;   duration[1] = 4;
+      note[2] = NOTE_E4;   duration[2] = 4;
+      note[3] = NOTE_F4;   duration[3] = 4;
+      note[4] = NOTE_G4;   duration[4] = 4;
+      note[5] = NOTE_A4;   duration[5] = 4;
+      note[6] = NOTE_B4;   duration[6] = 4;
+      note[7] = NOTE_C4;   duration[7] = 4; 
+     break;
   }
 
-  int pauseBetweenNotes = noteDurations * 1.30;
-  delay(pauseBetweenNotes);
-  noTone(BDPIN_BUZZER);
+  melody(note, 8, duration);
 }
 
 void motorPowerCallback(const std_msgs::Bool& power_msg)
@@ -620,9 +689,20 @@ void sendLogMsg(void)
 
 void initOdom(void)
 {
-  odom_pose[0] = 0.0;
-  odom_pose[1] = 0.0;
-  odom_pose[2] = 0.0;
+  for (int index = 0; index < 3; index++)
+  {
+    odom_pose[index] = 0.0;
+    odom_vel[index]  = 0.0;
+  }
+
+  for (int index = 0; index < WHEEL_NUM; index++)
+  {
+    last_diff_tick[index] = 0.0;
+    last_tick[index]      = 0.0;
+    last_rad[index]       = 0.0;
+
+    last_velocity[index]  = 0.0;
+  }  
 }
 
 void initJointStates(void)
@@ -636,4 +716,23 @@ void initJointStates(void)
   joint_states.position_length = WHEEL_NUM;
   joint_states.velocity_length = WHEEL_NUM;
   joint_states.effort_length   = WHEEL_NUM;
+}
+
+void melody(uint16_t* note, uint8_t note_num, uint8_t* durations)
+{
+  for (int thisNote = 0; thisNote < note_num; thisNote++) 
+  {
+    // to calculate the note duration, take one second
+    // divided by the note type.
+    //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+    int noteDuration = 1000 / durations[thisNote];
+    tone(BDPIN_BUZZER, note[thisNote], noteDuration);
+
+    // to distinguish the notes, set a minimum time between them.
+    // the note's duration + 30% seems to work well:
+    int pauseBetweenNotes = noteDuration * 1.30;
+    delay(pauseBetweenNotes);
+    // stop the tone playing:
+    noTone(BDPIN_BUZZER);
+  }
 }
