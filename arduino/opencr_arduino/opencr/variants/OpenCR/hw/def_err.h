@@ -17,7 +17,7 @@ typedef uint16_t err_code_t;
 
 
 
-#define OK                                  0x0000
+#define ERR_NONE                            0x0000
 #define ERR_INVALID_CMD                     0x0001
 #define ERR_FLASH_ERROR                     0x0010
 #define ERR_FLASH_BUSY                      0x0011
