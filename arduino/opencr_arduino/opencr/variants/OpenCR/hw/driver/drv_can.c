@@ -35,6 +35,7 @@ typedef struct
 {
   CAN_HandleTypeDef *p_hCANx;
   void (*handler)(void *arg);
+  uint8_t rx_fifo;
 } drv_can_t;
 
 static CAN_HandleTypeDef  hCAN1, hCAN2;
@@ -49,8 +50,8 @@ static uint8_t can_data[DRV_CAN_MAX_CH][DRV_CAN_DATA_RX_BUF_MAX];
 
 static drv_can_t drv_can_tbl[DRV_CAN_MAX_CH] =
 {
-  {&hCAN1, NULL},
-  {&hCAN2, NULL}
+  {&hCAN1, NULL, CAN_FIFO0},
+  {&hCAN2, NULL, CAN_FIFO1}
 };
 
 static uint8_t msg_format = _DEF_CAN_EXT;
@@ -167,8 +168,12 @@ bool drvCanOpen(uint8_t channel, uint32_t baudrate, uint8_t format)
   {
     drvCanConfigFilter(0, 0x0, 0x0);
   }
+  else
+  {
+    drvCanConfigFilter(CAN2_FILTER_BANK_START_NUM, 0x0, 0x0);
+  }
 
-  HAL_CAN_Receive_IT(p_hCANx, CAN_FIFO0);
+  HAL_CAN_Receive_IT(p_hCANx, drv_can_tbl[channel].rx_fifo);
 
   return true;
 }
@@ -217,51 +222,17 @@ bool drvCanConfigFilter(uint8_t filter_num, uint32_t id, uint32_t mask)
   sFilterConfig.FilterIdLow  = reg_id;
   sFilterConfig.FilterMaskIdHigh = reg_mask >> 16;
   sFilterConfig.FilterMaskIdLow  = reg_mask;
-  sFilterConfig.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+  if(filter_num < CAN2_FILTER_BANK_START_NUM)
+  {
+    sFilterConfig.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+  }
+  else
+  {
+    sFilterConfig.FilterFIFOAssignment = CAN_FILTER_FIFO1;
+  }
   sFilterConfig.BankNumber   = CAN2_FILTER_BANK_START_NUM;
 
   sFilterConfig.FilterActivation = ENABLE;
-
-  if(HAL_CAN_ConfigFilter(&hCAN1, &sFilterConfig) != HAL_OK)
-    return false;
-
-  return true;
-}
-
-bool drvCanConfigIdListFilter(uint8_t filter_num, uint32_t id, uint32_t id2)
-{
-  CAN_FilterConfTypeDef  sFilterConfig;
-
-  uint32_t reserved;
-  uint32_t reg_id;
-  uint32_t reg_id2;
-
-  switch(msg_format)
-  {
-    case _DEF_CAN_STD :
-      reserved = CAN_ID_STD | CAN_RTR_DATA;
-      reg_id   = (id << 21) | reserved;
-      reg_id2  = (id2 << 21) | reserved;
-      break;
-
-    case _DEF_CAN_EXT :
-    default :
-      reserved = CAN_ID_EXT | CAN_RTR_DATA;
-      reg_id   = ((id << 3) | reserved) & 0x1FFFFF;
-      reg_id2  = ((id2 << 3) | reserved) & 0x1FFFFF;
-      break;
-  }
-
-  sFilterConfig.FilterNumber = filter_num;
-  sFilterConfig.FilterMode = CAN_FILTERMODE_IDLIST;
-  sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-  sFilterConfig.FilterIdHigh = reg_id >> 16;
-  sFilterConfig.FilterIdLow  = reg_id;
-  sFilterConfig.FilterMaskIdHigh = reg_id2 >> 16;
-  sFilterConfig.FilterMaskIdLow  = reg_id2;
-  sFilterConfig.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-  sFilterConfig.FilterActivation = ENABLE;
-  sFilterConfig.BankNumber = CAN2_FILTER_BANK_START_NUM;
 
   if(HAL_CAN_ConfigFilter(&hCAN1, &sFilterConfig) != HAL_OK)
     return false;
@@ -422,7 +393,7 @@ void drvCanAttachRxInterrupt(uint8_t channel, void (*handler)(void *arg))
 
   drv_can_tbl[channel].handler = handler;
 
-  HAL_CAN_Receive_IT(p_hCANx, CAN_FIFO0);
+  HAL_CAN_Receive_IT(p_hCANx, drv_can_tbl[channel].rx_fifo);
 }
 
 void drvCanDetachRxInterrupt(uint8_t channel)
@@ -469,7 +440,7 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
         }
       }
 
-      HAL_CAN_Receive_IT(hcan, CAN_FIFO0);
+      HAL_CAN_Receive_IT(hcan, drv_can_tbl[channel].rx_fifo);
     }
   }
 }
@@ -479,7 +450,7 @@ void CAN1_RX0_IRQHandler(void)
   HAL_CAN_IRQHandler(drv_can_tbl[_DEF_CAN1].p_hCANx);
 }
 
-void CAN2_RX0_IRQHandler(void)
+void CAN2_RX1_IRQHandler(void)
 {
   HAL_CAN_IRQHandler(drv_can_tbl[_DEF_CAN2].p_hCANx);
 }
@@ -519,8 +490,8 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* hcan)
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     /* CAN1 interrupt Init */
-    HAL_NVIC_SetPriority(CAN2_RX0_IRQn, 4, 0);
-    HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
+    HAL_NVIC_SetPriority(CAN2_RX1_IRQn, 4, 1);
+    HAL_NVIC_EnableIRQ(CAN2_RX1_IRQn);
   }
 }
 
@@ -545,6 +516,6 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* hcan)
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_12|GPIO_PIN_13);
 
     /* CAN1 interrupt DeInit */
-    HAL_NVIC_DisableIRQ(CAN2_RX0_IRQn);
+    HAL_NVIC_DisableIRQ(CAN2_RX1_IRQn);
   }
 }
