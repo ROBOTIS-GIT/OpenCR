@@ -38,7 +38,7 @@ bool Turtlebot3Controller::init(float max_lin_vel, float max_ang_vel, uint8_t sc
   scale_ang_vel_ = scale_ang_vel;
 }
 
-void Turtlebot3Controller::getRCdata(float *cmd_vel)
+void Turtlebot3Controller::getRCdata(float *get_cmd_vel)
 {
   uint16_t received_data = 0;
 
