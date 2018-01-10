@@ -259,7 +259,7 @@ void resetCallback(const std_msgs::Empty& reset_msg)
   initOdom();
 
   sprintf(log_msg, "Reset Odometry");
-  nh.loginfo(log_msg);
+  nh.loginfo(log_msg);  
 }
 
 /*******************************************************************************
@@ -434,11 +434,15 @@ void updateMotorInfo(int32_t left_tick, int32_t right_tick)
       last_diff_tick[index] = 0.0;
       last_tick[index]      = 0.0;
       last_rad[index]       = 0.0;
+
+      last_velocity[index]  = 0.0;
     }  
 
     last_tick[LEFT] = left_tick;
     last_tick[RIGHT] = right_tick;
+
     init_encoder = false;
+    return;
   }
 
   current_tick = left_tick;
@@ -697,6 +701,18 @@ void initOdom(void)
     odom_pose[index] = 0.0;
     odom_vel[index]  = 0.0;
   }
+
+  odom.pose.pose.position.x = 0.0;
+  odom.pose.pose.position.y = 0.0;
+  odom.pose.pose.position.z = 0.0;
+
+  odom.pose.pose.orientation.x = 0.0;
+  odom.pose.pose.orientation.y = 0.0;
+  odom.pose.pose.orientation.z = 0.0;
+  odom.pose.pose.orientation.w = 0.0;
+
+  odom.twist.twist.linear.x  = 0.0;
+  odom.twist.twist.angular.z = 0.0;
 }
 
 void initJointStates(void)
