@@ -21,9 +21,6 @@
 
 #include "dynamixel_driver.h"
 
-#define XL320_POSITION_CONTROL_MODE 0
-#define XL320_VELOCITY_CONTROL_MODE 1
-
 #define X_SERIES_CURRENT_CONTROL_MODE                  0
 #define X_SERIES_VELOCITY_CONTROL_MODE                 1
 #define X_SERIES_POSITION_CONTROL_MODE                 3
