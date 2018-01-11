@@ -301,8 +301,9 @@ bool DynamixelDriver::reset(uint8_t id)
           tools_[factor].dxl_info_[i].id = new_id;
       }
 
-      if (!strncmp(getModelName(new_id), "AX", strlen("AX")) ||
-          !strncmp(getModelName(new_id), "MX-12W", strlen("MX-12W")))
+      char* model_name = getModelName(new_id);
+      if (!strncmp(model_name, "AX", strlen("AX")) ||
+          !strncmp(model_name, "MX-12W", strlen("MX-12W")))
         baud = 1000000;
       else
         baud = 57600;
@@ -315,6 +316,18 @@ bool DynamixelDriver::reset(uint8_t id)
       else
       {
         millis(2000);
+
+        if (!strncmp(model_name, "MX-28-2", strlen("MX-28-2")) ||
+            !strncmp(model_name, "MX-64-2", strlen("MX-64-2")) ||
+            !strncmp(model_name, "MX-106-2", strlen("MX-106-2")))
+          isOK = setPacketHandler(2.0);
+        else
+          isOK = setPacketHandler(1.0);
+
+        if (isOK)
+          return true;
+        else
+          return false;
       }
     }
     else
@@ -359,6 +372,12 @@ bool DynamixelDriver::reset(uint8_t id)
       else
       {
         millis(2000);
+
+        isOK = setPacketHandler(2.0);
+        if (isOK)
+          return true;
+        else
+          return false;
       }
     }
     else
@@ -366,27 +385,6 @@ bool DynamixelDriver::reset(uint8_t id)
       return false;
     }
   }
-
-  if (!strncmp(getModelName(new_id), "AX", 2) || !strncmp(getModelName(new_id), "RX", 2) || !strncmp(getModelName(new_id), "EX", 2))
-  {
-    isOK = setPacketHandler(1.0);
-  }
-  else if (!strncmp(getModelName(new_id), "MX", 2))
-  {
-    if (!strncmp(getModelName(new_id), "MX-28-2", strlen("MX-28-2")) || !strncmp(getModelName(new_id), "MX-64-2", strlen("MX-64-2")) || !strncmp(getModelName(new_id), "MX-106-2", strlen("MX-106-2")))
-      isOK = setPacketHandler(2.0);
-    else
-      isOK = setPacketHandler(1.0);
-  }
-  else
-  {
-    isOK = setPacketHandler(2.0);
-  }
-
-  if (isOK = false)
-    return false;
-
-  return true;
 }
 
 bool DynamixelDriver::writeRegister(uint8_t id, const char *item_name, int32_t data)
