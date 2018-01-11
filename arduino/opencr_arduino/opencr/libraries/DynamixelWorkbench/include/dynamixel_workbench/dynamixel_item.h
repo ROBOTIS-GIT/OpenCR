@@ -25,6 +25,7 @@
 #define AX_12W     300
 #define AX_18A     18
 
+#define RX_10      10
 #define RX_24F     24
 #define RX_28      28
 #define RX_64      64
@@ -33,14 +34,19 @@
 
 #define MX_12W     360
 #define MX_28      29
+#define MX_28_2    30
 #define MX_64      310
+#define MX_64_2    311
 #define MX_106     320
+#define MX_106_2   321
 
 #define XL_320     350
 #define XL430_W250 1060
 
 #define XM430_W210 1030
 #define XM430_W350 1020
+#define XM540_W150 1130
+#define XM540_W270 1120
 
 #define XH430_V210 1050
 #define XH430_V350 1040
@@ -65,47 +71,56 @@ typedef struct
 {
   float velocity_to_value_ratio;
   float torque_to_current_value_ratio;
-  
+
   int32_t value_of_min_radian_position;
   int32_t value_of_0_radian_position;
-  int32_t value_of_max_radian_position; 
-  
+  int32_t value_of_max_radian_position;
+
   float  min_radian;
   float  max_radian;
 } ModelInfo;
 
-static void setAXItem();
-static void setAXInfo();
+void setAXItem(void);
+void setAXInfo(void);
 
-static void setRXItem();
-static void setRXInfo();
+void setRXItem(void);
+void setRXInfo(void);
 
-static void setEXItem();
-static void setEXInfo();
+void setEXItem(void);
+void setEXInfo(void);
 
-static void setMXItem();
-static void setMXInfo();
+void setMXItem(void);
+void setMXInfo(void);
 
-static void setExtMXItem();
-static void setExtMXInfo();
+void setMX2Item(void);
+void setMX2Info(void);
 
-static void setXL320Item();
-static void setXL320Info();
+void setExtMXItem(void);
+void setExtMXInfo(void);
 
-static void setXLItem();
-static void setXLInfo();
+void setExtMX2Item(void);
+void setExtMX2Info(void);
 
-static void setXMItem();
-static void setXMInfo();
+void setXL320Item(void);
+void setXL320Info(void);
 
-static void setXHItem();
-static void setXHInfo();
+void setXLItem(void);
+void setXLInfo(void);
 
-static void setPROItem();
-static void setPROInfo();
+void setXMItem(void);
+void setXMInfo(void);
 
-ControlTableItem* getItem(uint16_t num);
-uint8_t getSize();
-ModelInfo* getInfo(uint16_t num);
+void setExtXMItem(void);
+void setExtXMInfo(void);
+
+void setXHItem(void);
+void setXHInfo(void);
+
+void setPROItem(void);
+void setPROInfo(void);
+
+uint8_t getTheNumberOfControlItem();
+ControlTableItem* getConrolTableItem(uint16_t model_number);
+ModelInfo* getModelInfo(uint16_t model_number);
 
 #endif //DYNAMIXEL_H
