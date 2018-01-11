@@ -26,7 +26,7 @@ static ControlTableItem item[15]  = {0, };
 static ControlTableItem item[60]  = {0, };
 #endif
 
-static ModelInfo model_info         = {0.0, };
+static ModelInfo model_info = {0.0, };
 
 void setAXItem(void)
 {
