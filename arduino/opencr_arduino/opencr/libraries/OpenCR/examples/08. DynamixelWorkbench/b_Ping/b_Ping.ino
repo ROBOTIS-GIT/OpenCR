@@ -24,21 +24,28 @@
 #define DXL_BUS_SERIAL4 "/dev/ttyUSB0" //Dynamixel on Serial3(USART3)  <-OpenCR
 
 #define BAUDRATE  57600
-#define DXL_ID 1
+#define DXL_ID_1  1
+#define DXL_ID_2  2
 
 DynamixelWorkbench dxl_wb;
-uint16_t dxl_model_num = 0;
 
 void setup() 
 {
   Serial.begin(57600);
-  while(!Serial);
+  while(!Serial); // Open a Serial Monitor
+
+  uint16_t dxl_model_num = 0;
 
   dxl_wb.begin(DXL_BUS_SERIAL4, BAUDRATE);
-  dxl_model_num = dxl_wb.ping(DXL_ID);
+  dxl_wb.ping(DXL_ID_1, &dxl_model_num);
 
   if (dxl_model_num)
-    Serial.println("id : " + String(DXL_ID) + "   Model Number : " + String(dxl_model_num));
+    Serial.println("id : " + String(DXL_ID_1) + "   Model Number : " + String(dxl_model_num));
+
+  dxl_wb.ping(DXL_ID_2, &dxl_model_num);
+
+  if (dxl_model_num)
+    Serial.println("id : " + String(DXL_ID_2) + "   Model Number : " + String(dxl_model_num));
 }
 
 void loop() 

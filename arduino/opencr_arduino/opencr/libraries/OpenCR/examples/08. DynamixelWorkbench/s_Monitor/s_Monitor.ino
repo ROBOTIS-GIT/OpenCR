@@ -23,7 +23,7 @@
 #define DXL_BUS_SERIAL3 "3"            //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
 #define DXL_BUS_SERIAL4 "/dev/ttyUSB0" //Dynamixel on Serial3(USART3)  <-OpenCR
 
-#define STRING_BUF_NUM 10
+#define STRING_BUF_NUM 64
 String cmd[STRING_BUF_NUM];
 
 DynamixelWorkbench dxl_wb;
@@ -33,20 +33,20 @@ uint8_t dxl_cnt = 0;
 void setup() 
 {
   Serial.begin(57600);
-  while(!Serial);
+  while(!Serial); // Open a Serial Monitor  
 
   Serial.println("-------------------------------------");
   Serial.println("Set portHandler Before scan or ping");
   Serial.println("-------------------------------------");
-  Serial.println("port (BAUD)");
-  Serial.println("scan");
+  Serial.println("begin  (BAUD)");
+  Serial.println("scan   (RANGE)");
   Serial.println("ping   (ID)");
   Serial.println("id     (ID) (NEW_ID)");
   Serial.println("baud   (ID) (NEW_BAUD)");
   Serial.println("joint  (ID) (GOAL_POSITION)");
   Serial.println("wheel  (ID) (GOAL_VELOCITY)");
-  Serial.println("write  (ID) (""ADDRESS_NAME"") (VALUE)");
-  Serial.println("read   (ID) (""ADDRESS_NAME"")");
+  Serial.println("write  (ID) (ADDRESS_NAME) (VALUE)");
+  Serial.println("read   (ID) (ADDRESS_NAME)");
   Serial.println("reboot (ID) ");
   Serial.println("reset  (ID) ");
   Serial.println("-------------------------------------");
@@ -57,25 +57,43 @@ void loop()
   if (Serial.available())
   {
     String read_string = Serial.readStringUntil('\n');
+    Serial.println("[CMD] : " + String(read_string));
 
     read_string.trim();
 
     split(read_string, ' ', cmd);
 
-    if (cmd[0] == "port")
+    if (cmd[0] == "begin")
     {
       uint32_t baud = cmd[1].toInt();
-      dxl_wb.begin(DXL_BUS_SERIAL4, baud);
+      if (dxl_wb.begin(DXL_BUS_SERIAL4, baud))
+        Serial.println("Succeed to begin");
+      else
+        Serial.println("Failed to begin");
     }
     else if (cmd[0] == "scan")
-    {      
-      dxl_cnt = dxl_wb.scan(get_id, 200);
+    { 
+      uint8_t range = cmd[1].toInt();
+      dxl_wb.scan(get_id, &dxl_cnt, range);
+
+      if (dxl_cnt == 0)
+        Serial.println("Can't find Dynamixel");
+      else
+      {
+        Serial.println("Find " + String(dxl_cnt) + " Dynamixels");
+        for (int cnt = 0; cnt < dxl_cnt; cnt++)
+          Serial.println("ID : " + String(get_id[cnt]));
+      }
     }
     else if (cmd[0] == "ping")
     {
       uint8_t id = cmd[1].toInt();
+      uint16_t model_number = 0;
 
-      dxl_wb.ping(id);
+      if (dxl_wb.ping(id, &model_number))
+        Serial.println("id : " + String(id) + " model_number : " + String(model_number));
+      else
+        Serial.println("Failed to ping");
     }
     else if (cmd[0] == "id")
     {
@@ -105,7 +123,7 @@ void loop()
 
       dxl_wb.jointMode(id);
       if (dxl_wb.goalPosition(id, goal))
-       Serial.println("Succeed!!");
+       Serial.println("Succeed to joint command!!");
       else
         Serial.println("Failed");
     }
@@ -116,61 +134,18 @@ void loop()
 
       dxl_wb.wheelMode(id);
       if (dxl_wb.goalSpeed(id, goal))
-        Serial.println("Succeed!!");
+        Serial.println("Succeed to wheel command!!");
       else
         Serial.println("Failed");
     }
     else if (cmd[0] == "write")
     {
-      uint8_t id = cmd[1].toInt();
-      String address_name;
-      String space = " ";
-      int cnt = 0;
-      int index = 2;
+      uint8_t id = cmd[1].toInt();      
+      int32_t value = cmd[3].toInt(); 
 
-      for (index = 2; index < STRING_BUF_NUM; index++)
-      {
-        int get_index = 0;
-        get_index = cmd[index].indexOf('"');
-
-        if (get_index != -1)
-        {
-          if (cnt == 0)
-          {
-            address_name = cmd[index].substring(1, cmd[index].length());
-          }
-          else if (cnt == 1)
-          {
-            address_name.concat(space);
-            address_name.concat(cmd[index].substring(0, get_index));
-          }
-
-          cnt++; 
-        }
-        else
-        {
-          if (cnt == 1)
-          {
-            address_name.concat(space);
-            address_name.concat(cmd[index]);
-          }
-        }         
-        
-        if (cnt == 2)
-          break;
-      }
-      char buf[address_name.length() + 1];
-      address_name.toCharArray(buf, address_name.length()+1);
-
-      int32_t value = cmd[++index].toInt(); 
-           
-      if (dxl_wb.regWrite(id, buf, value))
-      {
-        Serial.print(buf);
-        Serial.print(" : ");
-        Serial.println(value);
-        
-        Serial.println("Succeed!!");
+      if (dxl_wb.itemWrite(id, cmd[2].c_str(), value))
+      {        
+        Serial.println("Succeed to write command!!");
       }
       else
         Serial.println("Failed");
@@ -178,62 +153,28 @@ void loop()
     else if (cmd[0] == "read")
     {
       uint8_t id = cmd[1].toInt();
-      String address_name;
-      String space = " ";
-      int cnt = 0;
-      int index = 2;
+            
+      int32_t value = dxl_wb.itemRead(id, cmd[2].c_str());
 
-      for (index = 2; index < STRING_BUF_NUM; index++)
-      {
-        int get_index = 0;
-        get_index = cmd[index].indexOf('"');
-
-        if (get_index != -1)
-        {
-          if (cnt == 0)
-          {
-            address_name = cmd[index].substring(1, cmd[index].length());
-          }
-          else if (cnt == 1)
-          {
-            address_name.concat(space);
-            address_name.concat(cmd[index].substring(0, get_index));
-          }
-
-          cnt++; 
-        }
-        else
-        {
-          if (cnt == 1)
-          {
-            address_name.concat(space);
-            address_name.concat(cmd[index]);
-          }
-        }         
-        
-        if (cnt == 2)
-          break;
-      }
-      char buf[address_name.length() + 1];
-      address_name.toCharArray(buf, address_name.length()+1);
-      
-      int32_t value = dxl_wb.regRead(id, buf);
-
-      Serial.print(buf);
-      Serial.print(" : ");
-      Serial.println(value);
+      Serial.println("read data : " + String(value));
     }
     else if (cmd[0] == "reboot")
     {
       uint8_t id = cmd[1].toInt();
 
-      dxl_wb.reboot(id);
+      if (dxl_wb.reboot(id))
+        Serial.println("Succeed to reboot");
+      else
+        Serial.println("Failed to reboot");
     }
     else if (cmd[0] == "reset")
     {
       uint8_t id = cmd[1].toInt();
 
-      dxl_wb.reset(id);
+      if (dxl_wb.reset(id))
+        Serial.println("Succeed to reset");
+      else
+        Serial.println("Failed to reset");
     }
     else 
     {

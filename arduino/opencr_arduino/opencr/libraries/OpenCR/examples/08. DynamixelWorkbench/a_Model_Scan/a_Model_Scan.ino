@@ -23,20 +23,24 @@
 #define DXL_BUS_SERIAL3 "3"            //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
 #define DXL_BUS_SERIAL4 "/dev/ttyUSB0" //Dynamixel on Serial3(USART3)  <-OpenCR
 
-#define BAUDRATE  1000000
+#define BAUDRATE  57600
 
 DynamixelWorkbench dxl_wb;
 
 void setup() 
 {
   Serial.begin(57600);
-  while(!Serial);
+  while(!Serial); // Open a Serial Monitor
 
   uint8_t scanned_id[16];
   uint8_t dxl_cnt = 0;
+  uint8_t range = 100;
 
   dxl_wb.begin(DXL_BUS_SERIAL4, BAUDRATE);
-  dxl_cnt = dxl_wb.scan(scanned_id);
+  dxl_wb.scan(scanned_id, &dxl_cnt, range);
+
+  if (dxl_cnt == 0)
+    Serial.println("Can't find Dynamixels");
 
   for (int index = 0; index < dxl_cnt; index++)
     Serial.println("id : " + String(scanned_id[index]) + "   Model Name : " + String(dxl_wb.getModelName(scanned_id[index])));

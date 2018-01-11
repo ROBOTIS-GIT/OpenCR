@@ -27,15 +27,16 @@
 #define DXL_ID 1
 
 DynamixelWorkbench dxl_wb;
-uint16_t dxl_model_num = 0;
 
 void setup() 
 {
   Serial.begin(57600);
-  while(!Serial);
+  while(!Serial); // Open a Serial Monitor
 
+  uint16_t dxl_model_num = 0;
+  
   dxl_wb.begin(DXL_BUS_SERIAL4, BAUDRATE);
-  dxl_model_num = dxl_wb.ping(DXL_ID);
+  dxl_wb.ping(DXL_ID, &dxl_model_num);
 
   if (dxl_model_num)
     Serial.println("id : " + String(DXL_ID) + "   Model Number : " + String(dxl_model_num));

@@ -23,31 +23,33 @@
 #define DXL_BUS_SERIAL3 "3"            //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
 #define DXL_BUS_SERIAL4 "/dev/ttyUSB0" //Dynamixel on Serial3(USART3)  <-OpenCR
 
-#define BAUDRATE  1000000
+#define BAUDRATE  57600
 
 DynamixelWorkbench dxl_wb;
-uint8_t get_id[5];
-
 int32_t goal_position[2] = {1000, 3000};
-int32_t *present_position;
 
 void setup() 
 {
   Serial.begin(57600);
-  while(!Serial);
+  while(!Serial); // Open a Serial Monitor
+
+  uint8_t dxl_id[2] = {1, 2};
+  uint8_t dxl_cnt = 2;
 
   dxl_wb.begin(DXL_BUS_SERIAL4, BAUDRATE);
-  dxl_wb.scan(get_id);
 
-  dxl_wb.jointMode(get_id[0]);
-  dxl_wb.jointMode(get_id[1]);
+  for (int cnt = 0; cnt < dxl_cnt; cnt++)
+  {
+    dxl_wb.ping(dxl_id[cnt]);
+    dxl_wb.jointMode(dxl_id[cnt]);
+  }
 
-  dxl_wb.addSyncWrite("Goal Position");
+  dxl_wb.addSyncWrite("Goal_Position");
 }
 
 void loop() 
 {  
-  dxl_wb.syncWrite("Goal Position", goal_position);
+  dxl_wb.syncWrite("Goal_Position", goal_position);
 
   delay(2000);
 
