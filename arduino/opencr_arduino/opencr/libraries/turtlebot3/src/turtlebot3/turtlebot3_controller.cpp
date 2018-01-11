@@ -90,7 +90,7 @@ void Turtlebot3Controller::getRCdata(float *get_cmd_vel)
       ang_z = max_ang_vel_;
     }
 
-    cmd_vel[0] = lin_x;
-    cmd_vel[1] = ang_z;
+    get_cmd_vel[0] = lin_x;
+    get_cmd_vel[1] = ang_z;
   }
 }
