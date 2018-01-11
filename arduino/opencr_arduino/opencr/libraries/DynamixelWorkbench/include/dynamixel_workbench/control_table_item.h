@@ -19,30 +19,13 @@
 #ifndef CONTROL_TABLE_ITEM_H
 #define CONTROL_TABLE_ITEM_H
 
-#if defined(__OPENCR__) || defined(__OPENCM904__)
-#include <Arduino.h>
-#elif defined(__linux__)
-#include <stdio.h>
-#endif
-
-
-enum ACCESS_TYPE {
-  READ,
-  READ_WRITE
-};
-
-enum MEMORY_TYPE {
-  EEPROM,
-  RAM
-};
+#include <stdint.h>
 
 typedef struct 
 {
   uint16_t    address;
-  char*       item_name;  
+  const char* item_name;
   uint8_t     data_length;
-  ACCESS_TYPE access_type;
-  MEMORY_TYPE memory_type;  
 } ControlTableItem;
 
 #endif //CONTROL_TABLE_ITEM_H
