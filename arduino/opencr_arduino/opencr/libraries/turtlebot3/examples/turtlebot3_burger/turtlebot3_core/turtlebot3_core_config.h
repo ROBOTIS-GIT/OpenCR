@@ -45,7 +45,7 @@
 #define INIT_LOG_DATA "This core is compatible with TurtleBot3 Burger"
 
 #define HARDWARE_VER "1.0.0"
-#define SOFTWARE_VER "1.1.0"
+#define SOFTWARE_VER "1.0.0"
 #define FIRMWARE_VER "1.0.14"
 
 #define CONTROL_MOTOR_SPEED_PERIOD          30   //hz
