@@ -40,7 +40,7 @@ bool ringInit(void)
 
 err_code_t ringCreate(ring_node_t *p_node, uint32_t length)
 {
-  err_code_t err_code = OK;
+  err_code_t err_code = ERR_NONE;
 
 
   p_node->ptr_in  = 0;
@@ -79,7 +79,7 @@ uint32_t ringGetWriteIndex(ring_node_t *p_node)
 
 err_code_t ringWriteUpdate(ring_node_t *p_node)
 {
-  err_code_t err_code = OK;
+  err_code_t err_code = ERR_NONE;
   uint32_t next_index;
 
 
@@ -106,7 +106,7 @@ err_code_t ringWriteUpdate(ring_node_t *p_node)
 
 err_code_t ringReadUpdate(ring_node_t *p_node)
 {
-  err_code_t err_code = OK;
+  err_code_t err_code = ERR_NONE;
   uint32_t index;
   uint32_t next_index;
 
@@ -148,7 +148,7 @@ uint32_t ringGetReadOffsetIndex(ring_node_t *p_node, uint32_t offset)
 
 err_code_t ringFlush(ring_node_t *p_node)
 {
-  err_code_t err_code = OK;
+  err_code_t err_code = ERR_NONE;
 
   p_node->ptr_in  = 0;
   p_node->ptr_out = 0;
