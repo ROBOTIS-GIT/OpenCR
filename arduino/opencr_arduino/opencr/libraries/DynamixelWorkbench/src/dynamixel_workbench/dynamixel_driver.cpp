@@ -599,6 +599,7 @@ bool DynamixelDriver::syncWrite(const char *item_name, int32_t *data)
   int dxl_comm_result = COMM_TX_FAIL;
 
   uint8_t data_byte[4] = {0, };
+  uint8_t index = 0;
 
   SyncWriteHandler swh;
 
@@ -615,16 +616,18 @@ bool DynamixelDriver::syncWrite(const char *item_name, int32_t *data)
   {
     for (int j = 0; j < tools_[i].dxl_info_cnt_; j++)
     {
-      data_byte[0] = DXL_LOBYTE(DXL_LOWORD(data[i]));
-      data_byte[1] = DXL_HIBYTE(DXL_LOWORD(data[i]));
-      data_byte[2] = DXL_LOBYTE(DXL_HIWORD(data[i]));
-      data_byte[3] = DXL_HIBYTE(DXL_HIWORD(data[i]));
+      data_byte[0] = DXL_LOBYTE(DXL_LOWORD(data[index]));
+      data_byte[1] = DXL_HIBYTE(DXL_LOWORD(data[index]));
+      data_byte[2] = DXL_LOBYTE(DXL_HIWORD(data[index]));
+      data_byte[3] = DXL_HIBYTE(DXL_HIWORD(data[index]));
 
       dxl_addparam_result = swh.groupSyncWrite->addParam(tools_[i].dxl_info_[j].id, (uint8_t *)&data_byte);
       if (dxl_addparam_result != true)
       {
         return false;
       }
+
+      index++;
     }
   }
 
@@ -658,7 +661,7 @@ bool DynamixelDriver::syncRead(const char *item_name, int32_t *data)
   bool dxl_addparam_result = false;
   bool dxl_getdata_result = false;
 
-  int data_num = 0;
+  int index = 0;
 
   SyncReadHandler srh;
   
@@ -696,7 +699,7 @@ bool DynamixelDriver::syncRead(const char *item_name, int32_t *data)
       dxl_getdata_result = srh.groupSyncRead->isAvailable(id, srh.cti->address, srh.cti->data_length);
       if (dxl_getdata_result)
       {
-        data[data_num++] = srh.groupSyncRead->getData(id, srh.cti->address, srh.cti->data_length);
+        data[index++] = srh.groupSyncRead->getData(id, srh.cti->address, srh.cti->data_length);
       }
       else
       {
@@ -803,7 +806,7 @@ bool DynamixelDriver::bulkRead(uint8_t id, const char *item_name, int32_t *data)
   return true;
 }
 
-int32_t DynamixelDriver::convertRadian2Value(int8_t id, float radian)
+int32_t DynamixelDriver::convertRadian2Value(uint8_t id, float radian)
 {
   int32_t value = 0;
   int8_t factor = getToolsFactor(id);
@@ -834,7 +837,7 @@ int32_t DynamixelDriver::convertRadian2Value(int8_t id, float radian)
   return value;
 }
 
-float DynamixelDriver::convertValue2Radian(int8_t id, int32_t value)
+float DynamixelDriver::convertValue2Radian(uint8_t id, int32_t value)
 {
   float radian = 0.0;
   int8_t factor = getToolsFactor(id);
@@ -859,6 +862,46 @@ float DynamixelDriver::convertValue2Radian(int8_t id, int32_t value)
   //    radian[id-1] =  tools_[num].min_radian_;
 
   return radian;
+}
+
+int32_t DynamixelDriver::convertVelocity2Value(uint8_t id, float velocity)
+{
+  int32_t value = 0;
+  int8_t factor = getToolsFactor(id);
+
+  value = velocity * tools_[factor].getVelocityToValueRatio();
+
+  return value;
+}
+
+float DynamixelDriver::convertValue2Velocity(uint8_t id, int32_t value)
+{
+  int32_t velocity = 0;
+  int8_t factor = getToolsFactor(id);
+
+  velocity = value / tools_[factor].getVelocityToValueRatio();
+
+  return velocity;
+}
+
+int16_t DynamixelDriver::convertTorque2Value(uint8_t id, float torque)
+{
+  int16_t value = 0;
+  int8_t factor = getToolsFactor(id);
+
+  value = torque * tools_[factor].getTorqueToCurrentValueRatio();
+
+  return value;
+}
+
+float DynamixelDriver::convertValue2Torque(uint8_t id, int16_t value)
+{
+  float torque = 0.0;
+  int8_t factor = getToolsFactor(id);
+
+  torque = value / tools_[factor].getTorqueToCurrentValueRatio();
+
+  return torque;
 }
 
 void DynamixelDriver::millis(uint16_t msec)

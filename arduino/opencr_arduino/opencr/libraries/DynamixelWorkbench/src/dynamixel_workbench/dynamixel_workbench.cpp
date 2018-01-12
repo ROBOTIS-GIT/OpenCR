@@ -388,6 +388,36 @@ bool DynamixelWorkbench::setBulkRead()
   return isOK;
 }
 
+int32_t DynamixelWorkbench::convertRadian2Value(uint8_t id, float radian)
+{
+  return driver_.convertRadian2Value(id, radian);
+}
+
+float DynamixelWorkbench::convertValue2Radian(uint8_t id, int32_t value)
+{
+  return driver_.convertValue2Radian(id, value);
+}
+
+int32_t DynamixelWorkbench::convertVelocity2Value(uint8_t id, float velocity)
+{
+  return driver_.convertVelocity2Value(id, velocity);
+}
+
+float DynamixelWorkbench::convertValue2Velocity(uint8_t id, int32_t value)
+{
+  return driver_.convertValue2Velocity(id, value);
+}
+
+int16_t DynamixelWorkbench::convertTorque2Value(uint8_t id, float torque)
+{
+  return driver_.convertTorque2Value(id, torque);
+}
+
+float DynamixelWorkbench::convertValue2Torque(uint8_t id, int16_t value)
+{
+  return driver_.convertValue2Torque(id, value);
+}
+
 
 /*/////////////////////////////////////////////////////////////////////////////
 // Private Function
