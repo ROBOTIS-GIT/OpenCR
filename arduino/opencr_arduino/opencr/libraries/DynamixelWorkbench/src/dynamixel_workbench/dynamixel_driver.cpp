@@ -599,7 +599,7 @@ bool DynamixelDriver::syncWrite(const char *item_name, int32_t *data)
   int dxl_comm_result = COMM_TX_FAIL;
 
   uint8_t data_byte[4] = {0, };
-  uint8_t index = 0;
+  uint8_t cnt = 0;
 
   SyncWriteHandler swh;
 
@@ -616,10 +616,10 @@ bool DynamixelDriver::syncWrite(const char *item_name, int32_t *data)
   {
     for (int j = 0; j < tools_[i].dxl_info_cnt_; j++)
     {
-      data_byte[0] = DXL_LOBYTE(DXL_LOWORD(data[index]));
-      data_byte[1] = DXL_HIBYTE(DXL_LOWORD(data[index]));
-      data_byte[2] = DXL_LOBYTE(DXL_HIWORD(data[index]));
-      data_byte[3] = DXL_HIBYTE(DXL_HIWORD(data[index]));
+      data_byte[0] = DXL_LOBYTE(DXL_LOWORD(data[cnt]));
+      data_byte[1] = DXL_HIBYTE(DXL_LOWORD(data[cnt]));
+      data_byte[2] = DXL_LOBYTE(DXL_HIWORD(data[cnt]));
+      data_byte[3] = DXL_HIBYTE(DXL_HIWORD(data[cnt]));
 
       dxl_addparam_result = swh.groupSyncWrite->addParam(tools_[i].dxl_info_[j].id, (uint8_t *)&data_byte);
       if (dxl_addparam_result != true)
@@ -627,7 +627,7 @@ bool DynamixelDriver::syncWrite(const char *item_name, int32_t *data)
         return false;
       }
 
-      index++;
+      cnt++;
     }
   }
 
