@@ -46,7 +46,7 @@
 
 #define HARDWARE_VER "1.0.0"
 #define SOFTWARE_VER "1.0.0"
-#define FIRMWARE_VER "1.0.14"
+#define FIRMWARE_VER "1.0.15"
 
 #define CONTROL_MOTOR_SPEED_PERIOD          30   //hz
 #define IMU_PUBLISH_PERIOD                  200  //hz
