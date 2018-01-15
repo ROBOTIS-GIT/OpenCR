@@ -307,6 +307,8 @@ void publishSensorStateMsg(void)
 
   sensor_state_msg.button = sensors.checkPushButton();
 
+  sensor_state_msg.torque = motor_driver.getTorque();
+
   sensor_state_pub.publish(&sensor_state_msg);
 }
 

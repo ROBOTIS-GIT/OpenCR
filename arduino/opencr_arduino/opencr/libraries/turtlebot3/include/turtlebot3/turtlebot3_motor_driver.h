@@ -65,6 +65,7 @@ class Turtlebot3MotorDriver
   bool init(void);
   void closeDynamixel(void);
   bool setTorque(uint8_t id, bool onoff);
+  bool getTorque();
   bool readEncoder(int32_t &left_value, int32_t &right_value);
   bool writeVelocity(int64_t left_value, int64_t right_value);
   bool controlMotor(const float wheel_separation, float* value);
@@ -74,6 +75,7 @@ class Turtlebot3MotorDriver
   float  protocol_version_;
   uint8_t left_wheel_id_;
   uint8_t right_wheel_id_;
+  bool torque_;
 
   dynamixel::PortHandler *portHandler_;
   dynamixel::PacketHandler *packetHandler_;

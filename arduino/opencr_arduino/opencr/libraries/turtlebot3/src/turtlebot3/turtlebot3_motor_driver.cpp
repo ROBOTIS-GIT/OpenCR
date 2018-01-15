@@ -22,7 +22,8 @@ Turtlebot3MotorDriver::Turtlebot3MotorDriver()
 : baudrate_(BAUDRATE),
   protocol_version_(PROTOCOL_VERSION),
   left_wheel_id_(DXL_LEFT_ID),
-  right_wheel_id_(DXL_RIGHT_ID)
+  right_wheel_id_(DXL_RIGHT_ID),
+  torque_(false)
 {
 }
 
@@ -67,11 +68,21 @@ bool Turtlebot3MotorDriver::setTorque(uint8_t id, bool onoff)
   if(dxl_comm_result != COMM_SUCCESS)
   {
     Serial.println(packetHandler_->getTxRxResult(dxl_comm_result));
+    return false;
   }
   else if(dxl_error != 0)
   {
     Serial.println(packetHandler_->getRxPacketError(dxl_error));
+    return false;
   }
+
+  torque_ = onoff;
+  return true;
+}
+
+bool Turtlebot3MotorDriver::getTorque()
+{
+  return torque_;
 }
 
 void Turtlebot3MotorDriver::closeDynamixel(void)
