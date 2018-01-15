@@ -7,23 +7,26 @@
 #include <LcdTouchPanel.h>
 
 uint16_t lcd_list[2];
-uint16_t* convCoordinateTouch2LCD(uint16_t* touch_list){
-   
+uint16_t* convCoordinateTouch2LCD(uint16_t* touch_list)
+{
    lcd_list[XPOS] = LCD_MAX_X*(TOUCH_MAX-touch_list[XPOS])/TOUCH_RANGE;
    lcd_list[YPOS] = LCD_MAX_Y*(TOUCH_MAX-touch_list[YPOS])/TOUCH_RANGE;
    return lcd_list;
 }
 
 
-void drawText(uint16_t x_pos, uint16_t y_pos, const uint8_t *string, uint8_t ch_size, uint16_t color){
+void drawText(uint16_t x_pos, uint16_t y_pos, const uint8_t *string, uint8_t ch_size, uint16_t color)
+{
   Tft.lcd_display_string(x_pos, y_pos, string, ch_size, color) ;
 }
 
-void drawTouch(uint16_t x_pos, uint16_t y_pos, uint16_t color){
-  Tft.lcd_draw_point(x_pos,y_pos,color);
+void drawTouch(uint16_t x_pos, uint16_t y_pos, uint16_t color)
+{
+  Tft.lcd_draw_circle(x_pos, y_pos, 5, color);
 }
 
-void drawPrint(){
+void drawFrame()
+{
   Tft.drawFrame();
 }
 
@@ -31,13 +34,15 @@ void drawPrint(){
 uint16_t touch_pos[2];
 
 
-void setup() {
+void setup()
+{
   // put your setup code here, to run once:
   Serial.begin(115200);
   tftInit();    
 }
 
-void loop() {
+void loop()
+{
   // put your main code here, to run repeatedly:
   static uint32_t pre_time;
   uint16_t *lcd_pos;
@@ -60,6 +65,6 @@ void loop() {
 
     drawText(40,40, (const uint8_t *)"Touch The Screen !!",16, RED);
     drawTouch(lcd_pos[XPOS], lcd_pos[YPOS], RED);
-    Tft.drawFrame();
+    drawFrame();
   }
 }

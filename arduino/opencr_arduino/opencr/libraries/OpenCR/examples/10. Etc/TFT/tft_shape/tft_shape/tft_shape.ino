@@ -13,7 +13,7 @@ void drawShape(shape_list shape, uint16_t x_pos, uint16_t y_pos, uint16_t radius
   }
 }
 
-void drawPrint(){
+void drawFrame(){
   Tft.drawFrame();
 }
 
@@ -33,6 +33,6 @@ void loop() {
   {
     drawShape(CIRCLE, 120, 80, 50, RED);
     drawShape(SQUARE, 120, 160, 50, RED);
-    drawPrint();
+    drawFrame();
   }
 }

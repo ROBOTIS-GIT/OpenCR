@@ -1,9 +1,3 @@
-//Before, running this project. you have to know that the coordinate of LCD and Touch is different. 
-//The relationship between LCD and touch is,
-//LCD   x : 0 ~ 240,    y : 0 ~ 320   (origin : when you set the OpenCR direction with the usb port facing downside, left-upper point is (0,0))
-//Touch x : 1950 ~ 127, y : 1950 ~ 127
-//So, I'am gonna support you by using convCoordinateTouch2LCD function
-
 #include <SPI.h>
 #include "Adafruit_GFX.h"
 #include "LCD.h"

@@ -1,6 +1,7 @@
 #include <LcdTouchPanel.h>
 
-void tftInit(){
+void tftInit()
+{
 
     __SD_CS_DISABLE();
     SPI.beginFast();
@@ -12,7 +13,8 @@ void tftInit(){
     Tp.tp_init();
 }
 
-void getSingleTouchPoint(uint16_t* touch_list){
+void getSingleTouchPoint(uint16_t* touch_list)
+{
 
     //Make sure, that before reading the touch info, you must decrease the SPI speed under 2MHz. After finish this process, return to SPI_CLOCK_DIV4.
     SPI.setClockDivider(SPI_CLOCK_DIV32);
