@@ -21,6 +21,8 @@ namespace turtlebot3_msgs
       _cliff_type cliff;
       typedef uint8_t _button_type;
       _button_type button;
+      typedef bool _torque_type;
+      _torque_type torque;
       typedef int32_t _left_encoder_type;
       _left_encoder_type left_encoder;
       typedef int32_t _right_encoder_type;
@@ -38,12 +40,15 @@ namespace turtlebot3_msgs
       enum { BUTTON2 =  4 };
       enum { ERROR_LEFT_MOTOR =  1 };
       enum { ERROR_RIGHT_MOTOR =  2 };
+      enum { TORQUE_ON =  1 };
+      enum { TORQUE_OFF =  2 };
 
     SensorState():
       header(),
       bumper(0),
       cliff(0),
       button(0),
+      torque(0),
       left_encoder(0),
       right_encoder(0),
       battery(0)
@@ -60,6 +65,13 @@ namespace turtlebot3_msgs
       offset += sizeof(this->cliff);
       *(outbuffer + offset + 0) = (this->button >> (8 * 0)) & 0xFF;
       offset += sizeof(this->button);
+      union {
+        bool real;
+        uint8_t base;
+      } u_torque;
+      u_torque.real = this->torque;
+      *(outbuffer + offset + 0) = (u_torque.base >> (8 * 0)) & 0xFF;
+      offset += sizeof(this->torque);
       union {
         int32_t real;
         uint32_t base;
@@ -104,6 +116,14 @@ namespace turtlebot3_msgs
       this->button =  ((uint8_t) (*(inbuffer + offset)));
       offset += sizeof(this->button);
       union {
+        bool real;
+        uint8_t base;
+      } u_torque;
+      u_torque.base = 0;
+      u_torque.base |= ((uint8_t) (*(inbuffer + offset + 0))) << (8 * 0);
+      this->torque = u_torque.real;
+      offset += sizeof(this->torque);
+      union {
         int32_t real;
         uint32_t base;
       } u_left_encoder;
@@ -140,7 +160,7 @@ namespace turtlebot3_msgs
     }
 
     const char * getType(){ return "turtlebot3_msgs/SensorState"; };
-    const char * getMD5(){ return "2a26da320bea13f7d804cfc738165b52"; };
+    const char * getMD5(){ return "d537ed7b8d95065b6c83830430b93911"; };
 
   };
 
