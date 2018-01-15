@@ -19,7 +19,7 @@ void flash_init()
 
 err_code_t flash_write(uint32_t addr, uint8_t *p_data, uint32_t length)
 {
-  err_code_t err_code = OK;
+  err_code_t err_code = ERR_NONE;
   HAL_StatusTypeDef HAL_FLASHStatus = HAL_OK;
   uint32_t StartAddress = addr;
   uint32_t WriteSize;
@@ -57,7 +57,7 @@ err_code_t flash_write(uint32_t addr, uint8_t *p_data, uint32_t length)
 
 err_code_t flash_read(uint32_t addr, uint8_t *p_data, uint32_t length)
 {
-  err_code_t err_code = OK;
+  err_code_t err_code = ERR_NONE;
   uint32_t Dataindex;
   uint32_t addr_cnt;
 
@@ -75,7 +75,7 @@ err_code_t flash_read(uint32_t addr, uint8_t *p_data, uint32_t length)
 err_code_t flash_erase_whole_sectors(void)
 {
 
-  err_code_t err_code = OK;
+  err_code_t err_code = ERR_NONE;
   HAL_StatusTypeDef HAL_FLASHStatus = HAL_OK;
 
   HAL_FLASH_Unlock();
@@ -94,7 +94,7 @@ err_code_t flash_erase_whole_sectors(void)
 err_code_t flash_erase_fw_block( uint32_t length )
 {
 
-  err_code_t err_code = OK;
+  err_code_t err_code = ERR_NONE;
   HAL_StatusTypeDef HAL_FLASHStatus = HAL_OK;
   FLASH_EraseInitTypeDef pEraseInit;
   uint32_t SectorError;
@@ -133,7 +133,7 @@ err_code_t flash_erase_fw_block( uint32_t length )
 
 err_code_t flash_erase_sector(uint32_t sector)
 {
-  err_code_t err_code = OK;
+  err_code_t err_code = ERR_NONE;
   HAL_StatusTypeDef HAL_FLASHStatus = HAL_OK;
   FLASH_EraseInitTypeDef pEraseInit;
   uint32_t SectorError;

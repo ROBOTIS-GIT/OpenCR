@@ -25,7 +25,8 @@ void hw_init(void)
   drv_dxl_init();
   drv_eeprom_init();
   drv_rtc_init();
-
+  
+  drvCanInit();
 
   flash_init();
   vcp_init();

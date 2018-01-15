@@ -30,16 +30,18 @@
 
 /* Author: zerom, Ryu Woon Jung (Leon) */
 
-#if defined(_WIN32) || defined(_WIN64)
-#define WINDLLEXPORT
-#endif
-
 #include <stdio.h>
 #include <algorithm>
-#if defined(__OPENCR__)
+
+#if defined(__linux__)
+#include "group_bulk_read.h"
+#elif defined(__APPLE__)
+#include "group_bulk_read.h"
+#elif defined(_WIN32) || defined(_WIN64)
+#define WINDLLEXPORT
+#include "group_bulk_read.h"
+#elif defined(ARDUINO) || defined(__OPENCR__) || defined(__OPENCM904__)
 #include "../../include/dynamixel_sdk/group_bulk_read.h"
-#else
-#include "dynamixel_sdk/group_bulk_read.h"
 #endif
 
 using namespace dynamixel;
@@ -144,7 +146,7 @@ int GroupBulkRead::txPacket()
   if (id_list_.size() == 0)
     return COMM_NOT_AVAILABLE;
 
-  if (is_param_changed_ == true)
+  if (is_param_changed_ == true || param_ == 0)
     makeParam();
 
   if (ph_->getProtocolVersion() == 1.0)
@@ -173,10 +175,7 @@ int GroupBulkRead::rxPacket()
 
     result = ph_->readRx(port_, length_list_[id], data_list_[id]);
     if (result != COMM_SUCCESS)
-    {
-      fprintf(stderr, "[GroupBulkRead::rxPacket] ID %d result : %d !!!!!!!!!!\n", id, result);
       return result;
-    }
   }
 
   if (result == COMM_SUCCESS)

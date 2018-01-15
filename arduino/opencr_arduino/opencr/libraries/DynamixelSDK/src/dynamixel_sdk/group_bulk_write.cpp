@@ -30,15 +30,17 @@
 
 /* Author: zerom, Ryu Woon Jung (Leon) */
 
-#if defined(_WIN32) || defined(_WIN64)
-#define WINDLLEXPORT
-#endif
-
 #include <algorithm>
-#if defined(__OPENCR__)
+
+#if defined(__linux__)
+#include "group_bulk_write.h"
+#elif defined(__APPLE__)
+#include "group_bulk_write.h"
+#elif defined(_WIN32) || defined(_WIN64)
+#define WINDLLEXPORT
+#include "group_bulk_write.h"
+#elif defined(ARDUINO) || defined(__OPENCR__) || defined(__OPENCM904__)
 #include "../../include/dynamixel_sdk/group_bulk_write.h"
-#else
-#include "dynamixel_sdk/group_bulk_write.h"
 #endif
 
 using namespace dynamixel;
@@ -160,7 +162,7 @@ int GroupBulkWrite::txPacket()
   if (ph_->getProtocolVersion() == 1.0 || id_list_.size() == 0)
     return COMM_NOT_AVAILABLE;
 
-  if (is_param_changed_ == true)
+  if (is_param_changed_ == true || param_ == 0)
     makeParam();
 
   return ph_->bulkWriteTxOnly(port_, param_, param_length_);
