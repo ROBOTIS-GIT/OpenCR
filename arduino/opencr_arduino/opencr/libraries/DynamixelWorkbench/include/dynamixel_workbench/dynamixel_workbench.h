@@ -85,6 +85,15 @@ class DynamixelWorkbench
   bool addBulkReadParam(uint8_t id, const char *item_name);
   bool setBulkRead();
 
+  int32_t convertRadian2Value(uint8_t id, float radian);
+  float convertValue2Radian(uint8_t id, int32_t value);
+
+  int32_t convertVelocity2Value(uint8_t id, float velocity);
+  float convertValue2Velocity(uint8_t id, int32_t value);
+
+  int16_t convertTorque2Value(uint8_t id, float torque);
+  float convertValue2Torque(uint8_t id, int16_t value);
+
  private:
   void millis(uint16_t msec);
 

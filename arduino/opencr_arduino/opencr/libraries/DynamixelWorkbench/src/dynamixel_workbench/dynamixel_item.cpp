@@ -28,7 +28,7 @@ static ControlTableItem item[60]  = {0, };
 
 static ModelInfo model_info = {0.0, };
 
-void setAXItem(void)
+static void setAXItem(void)
 {
 #if defined(__OPENCR__) || defined(__OPENCM904__)
   item[0]  = {3  , "ID"                            , 1};
@@ -86,7 +86,7 @@ void setAXItem(void)
 #endif  
 }
 
-void setAXInfo()
+static void setAXInfo()
 {
   model_info.velocity_to_value_ratio         = 86.03; // AX series don't support exact speed in wheel mode.
   
@@ -98,7 +98,7 @@ void setAXInfo()
   model_info.max_radian                      =  2.61799;
 }
 
-void setRXItem()
+static void setRXItem()
 {
   #if defined(__OPENCR__) || defined(__OPENCM904__)
   item[0]  = {3  , "ID"                            , 1};
@@ -156,7 +156,7 @@ void setRXItem()
 #endif  
 }
 
-void setRXInfo(void)
+static void setRXInfo(void)
 {
   model_info.velocity_to_value_ratio         = 86.03; // RX series don't support exact speed in wheel mode.
   
@@ -168,7 +168,7 @@ void setRXInfo(void)
   model_info.max_radian                      =  2.61799;
 }
 
-void setEXItem()
+static void setEXItem()
 {
 #if defined(__OPENCR__) || defined(__OPENCM904__)
   item[0]  = {3  , "ID"                            , 1};
@@ -229,7 +229,7 @@ void setEXItem()
 #endif  
 }
 
-void setEXInfo()
+static void setEXInfo()
 {
   model_info.velocity_to_value_ratio         = 86.03; // EX series don't support exact speed in wheel mode.
   
@@ -241,7 +241,7 @@ void setEXInfo()
   model_info.max_radian                      =  2.18969008;
 }
 
-void setMXItem()
+static void setMXItem()
 {
 #if defined(__OPENCR__) || defined(__OPENCM904__)
   item[0]  = {3  , "ID"                            , 1};
@@ -302,7 +302,7 @@ void setMXItem()
 #endif  
 }
 
-void setMXInfo()
+static void setMXInfo()
 {
   model_info.velocity_to_value_ratio         = 86.81;
   
@@ -314,7 +314,7 @@ void setMXInfo()
   model_info.max_radian                      =  3.14159265;
 }
 
-void setMX2Item(void)
+static void setMX2Item(void)
 {
 #if defined(__OPENCR__) || defined(__OPENCM904__)
   item[0]  = {7  , "ID"                    , 1};
@@ -390,7 +390,7 @@ void setMX2Item(void)
 #endif  
 }
 
-void setMX2Info(void)
+static void setMX2Info(void)
 {
   model_info.velocity_to_value_ratio         = 41.70;
   
@@ -402,7 +402,7 @@ void setMX2Info(void)
   model_info.max_radian                      =  3.14159265;
 }
 
-void setExtMXItem()
+static void setExtMXItem()
 {
 #if defined(__OPENCR__) || defined(__OPENCM904__)
   item[0]  = {3  , "ID"                            , 1};
@@ -469,7 +469,7 @@ void setExtMXItem()
 #endif  
 }
 
-void setExtMXInfo()
+static void setExtMXInfo()
 {
   model_info.velocity_to_value_ratio         = 86.81;
   
@@ -481,7 +481,7 @@ void setExtMXInfo()
   model_info.max_radian                      =  3.14159265;
 }
 
-void setExtMX2Item(void)
+static void setExtMX2Item(void)
 {
 #if defined(__OPENCR__) || defined(__OPENCM904__)
   item[0]  = {7  , "ID"                    , 1};
@@ -559,7 +559,7 @@ void setExtMX2Item(void)
 #endif  
 }
 
-void setExtMX2Info(void)
+static void setExtMX2Info(void)
 {
   model_info.velocity_to_value_ratio         = 41.70;
   
@@ -571,7 +571,7 @@ void setExtMX2Info(void)
   model_info.max_radian                      =  3.14159265;
 }
 
-void setXL320Item()
+static void setXL320Item()
 {
 #if defined(__OPENCR__) || defined(__OPENCM904__)
   item[0]  = {3  , "ID"                            , 1};
@@ -629,7 +629,7 @@ void setXL320Item()
 #endif  
 }
 
-void setXL320Info()
+static void setXL320Info()
 {
   model_info.velocity_to_value_ratio         = 86.03; // XL320 don't support exact speed in wheel mode.
   
@@ -641,7 +641,7 @@ void setXL320Info()
   model_info.max_radian                      =  2.61799;
 }
 
-void setXLItem()
+static void setXLItem()
 {
 #if defined(__OPENCR__) || defined(__OPENCM904__)
   item[0]  = {7  , "ID"                    , 1};
@@ -717,7 +717,7 @@ void setXLItem()
 #endif  
 }
 
-void setXLInfo()
+static void setXLInfo()
 {
   model_info.velocity_to_value_ratio         = 41.70;
 
@@ -729,7 +729,7 @@ void setXLInfo()
   model_info.max_radian                      =  3.14159265;
 }
 
-void setXMItem()
+static void setXMItem()
 {
 #if defined(__OPENCR__) || defined(__OPENCM904__)
   item[0]  = {7  , "ID"                    , 1};
@@ -807,7 +807,7 @@ void setXMItem()
 #endif  
 }
 
-void setXMInfo()
+static void setXMInfo()
 {
   model_info.velocity_to_value_ratio       = 41.70;
   model_info.torque_to_current_value_ratio = 149.795386991;
@@ -820,7 +820,7 @@ void setXMInfo()
   model_info.max_radian =  3.14159265;
 }
 
-void setExtXMItem(void)
+static void setExtXMItem(void)
 {
 #if defined(__OPENCR__) || defined(__OPENCM904__)
   item[0]  = {7  , "ID"                    , 1};
@@ -901,7 +901,7 @@ void setExtXMItem(void)
 #endif  
 }
 
-void setExtXMInfo(void)
+static void setExtXMInfo(void)
 {
   model_info.velocity_to_value_ratio       = 41.70;
 
@@ -913,7 +913,7 @@ void setExtXMInfo(void)
   model_info.max_radian =  3.14159265;
 }
 
-void setXHItem()
+static void setXHItem()
 {
 #if defined(__OPENCR__) || defined(__OPENCM904__)
   item[0]  = {7  , "ID"                    , 1};
@@ -991,7 +991,7 @@ void setXHItem()
 #endif  
 }
 
-void setXHInfo()
+static void setXHInfo()
 {
   model_info.velocity_to_value_ratio       = 41.71;
 
@@ -1003,7 +1003,7 @@ void setXHInfo()
   model_info.max_radian = 3.14159265;
 }
 
-void setPROItem()
+static void setPROItem()
 {
 #if defined(__OPENCR__) || defined(__OPENCM904__)
   item[0]  = {7  , "ID"                    , 1};
@@ -1074,7 +1074,7 @@ void setPROItem()
 #endif  
 }
 
-void setPROInfo()
+static void setPROInfo()
 {
   model_info.velocity_to_value_ratio         = 4792.8;
   

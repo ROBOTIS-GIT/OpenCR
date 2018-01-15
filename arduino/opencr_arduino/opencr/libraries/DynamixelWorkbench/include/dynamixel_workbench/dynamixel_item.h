@@ -80,45 +80,6 @@ typedef struct
   float  max_radian;
 } ModelInfo;
 
-void setAXItem(void);
-void setAXInfo(void);
-
-void setRXItem(void);
-void setRXInfo(void);
-
-void setEXItem(void);
-void setEXInfo(void);
-
-void setMXItem(void);
-void setMXInfo(void);
-
-void setMX2Item(void);
-void setMX2Info(void);
-
-void setExtMXItem(void);
-void setExtMXInfo(void);
-
-void setExtMX2Item(void);
-void setExtMX2Info(void);
-
-void setXL320Item(void);
-void setXL320Info(void);
-
-void setXLItem(void);
-void setXLInfo(void);
-
-void setXMItem(void);
-void setXMInfo(void);
-
-void setExtXMItem(void);
-void setExtXMInfo(void);
-
-void setXHItem(void);
-void setXHInfo(void);
-
-void setPROItem(void);
-void setPROInfo(void);
-
 uint8_t getTheNumberOfControlItem();
 ControlTableItem* getConrolTableItem(uint16_t model_number);
 ModelInfo* getModelInfo(uint16_t model_number);
