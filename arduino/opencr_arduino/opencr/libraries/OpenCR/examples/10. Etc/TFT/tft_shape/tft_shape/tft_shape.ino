@@ -1,4 +1,5 @@
-#include <opencr_tft.h>
+#include <LcdTouchPanel.h>
+
 
 void drawShape(shape_list shape, uint16_t x_pos, uint16_t y_pos, uint16_t radius, uint16_t color){
   switch(shape)
@@ -21,7 +22,7 @@ void drawFrame(){
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
-  openCRTftInit();
+  tftInit();
 
 }
 
