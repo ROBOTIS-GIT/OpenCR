@@ -32,8 +32,6 @@ uint32_t pwm_freq[PINS_COUNT];
 bool     pwm_init[PINS_COUNT];
 
 
-
-
 int drv_pwm_init()
 {
   uint32_t i;
@@ -50,11 +48,12 @@ int drv_pwm_init()
 
 static long map(long x, long in_min, long in_max, long out_min, long out_max)
 {
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+  return (int64_t)(x - in_min) * (int64_t)(out_max - out_min) / (in_max - in_min) + out_min;
 }
 
 void drv_pwm_set_freq(uint32_t ulPin, uint32_t freq_data)
 {
+  freq_data = constrain(freq_data, 1, 1000000);
   pwm_freq[ulPin] = freq_data;
 }
 
@@ -81,45 +80,49 @@ void drv_pwm_setup(uint32_t ulPin)
   TIM_OC_InitTypeDef *pOC;
   uint32_t tim_ch;
   uint32_t uwPeriodValue;
+  uint32_t uwPrescalerValue = 1;
+  uint32_t tim_clk;
+  bool is_timer_16bit = true;
+  
 
   if( ulPin >= PINS_COUNT )     return;
   if( pwm_init[ulPin] == true ) return;
 
-
   pTIM   = g_Pin2PortMapArray[ulPin].TIMx;
   tim_ch = g_Pin2PortMapArray[ulPin].timerChannel;
-  uwPeriodValue = (uint32_t) (((SystemCoreClock/2)  / pwm_freq[ulPin]) - 1);
+  tim_clk = SystemCoreClock;
 
   if( pTIM == &hTIM3 )
   {
+    tim_clk /= 2;
     pOC = &hOC3;
     pTIM->Instance = TIM3;
   }
   else if( pTIM == &hTIM1 )
   {
-    uwPeriodValue = (uint32_t) (((SystemCoreClock)  / pwm_freq[ulPin]) - 1);
     pOC = &hOC1;
     pTIM->Instance = TIM1;
   }
   else if( pTIM == &hTIM2 )
   {
+    is_timer_16bit = false;
+    tim_clk /= 2;
     pOC = &hOC2;
     pTIM->Instance = TIM2;
   }
   else if( pTIM == &hTIM9 )
   {
-    uwPeriodValue = (uint32_t) (((SystemCoreClock)  / pwm_freq[ulPin]) - 1);
     pOC = &hOC9;
     pTIM->Instance = TIM9;
   }
   else if( pTIM == &hTIM11 )
   {
-    uwPeriodValue = (uint32_t) (((SystemCoreClock)  / pwm_freq[ulPin]) - 1);
     pOC = &hOC11;
     pTIM->Instance = TIM11;
   }
   else if( pTIM == &hTIM12 )
   {
+    tim_clk /= 2;
     pOC = &hOC12;
     pTIM->Instance = TIM12;
   }
@@ -128,8 +131,16 @@ void drv_pwm_setup(uint32_t ulPin)
     return;
   }
 
-  pTIM->Init.Prescaler         = 0;
-  pTIM->Init.Period            = uwPeriodValue;
+  uwPeriodValue = (uint32_t) (tim_clk / pwm_freq[ulPin]);
+
+  if(is_timer_16bit == true)
+  {
+    uwPrescalerValue = (uwPeriodValue/0xFFFF) + 1;
+    uwPeriodValue /= uwPrescalerValue;
+  }
+
+  pTIM->Init.Prescaler         = uwPrescalerValue - 1;
+  pTIM->Init.Period            = uwPeriodValue - 1;
   pTIM->Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;
   pTIM->Init.CounterMode       = TIM_COUNTERMODE_UP;
   pTIM->Init.RepetitionCounter = 0;
@@ -256,4 +267,3 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim)
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
   }
 }
-
