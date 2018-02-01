@@ -191,10 +191,23 @@ bool DynamixelWorkbench::jointMode(uint8_t id, uint16_t vel, uint16_t acc)
 
   if (driver_.getProtocolVersion() == 1.0)
   {
-    comm_result = driver_.writeRegister(id, "Moving_Speed", vel);
+    if (!strncmp(dxl_, "MX-28-2", strlen("MX-28-2"))   ||
+        !strncmp(dxl_, "MX-64-2", strlen("MX-64-2"))   ||
+        !strncmp(dxl_, "MX-106-2", strlen("MX-106-2")) ||
+        !strncmp(dxl_, "XL430", strlen("XL430"))       ||
+        !strncmp(dxl_, "XM", strlen("XM"))             ||
+        !strncmp(dxl_, "XH", strlen("XH")))
+    {
+      comm_result = driver_.writeRegister(id, "Profile_Acceleration", acc);
+      comm_result = driver_.writeRegister(id, "Profile_Velocity", vel);
+    }
+    else
+    {
+      comm_result = driver_.writeRegister(id, "Moving_Speed", vel);
+    }
   }
   else if (driver_.getProtocolVersion() == 2.0)
-  {    
+  {
     if (!strncmp(dxl_, "XL-320", 6) || !strncmp(dxl_, "PRO", 3))
     {
       comm_result = driver_.writeRegister(id, "Moving_Speed", vel);
@@ -221,7 +234,20 @@ bool DynamixelWorkbench::wheelMode(uint8_t id, uint16_t vel, uint16_t acc)
 
   comm_result = torque(id, true);
 
-  if (driver_.getProtocolVersion() == 2.0 && (strncmp(dxl_, "PRO", 3) != 0))
+  if (driver_.getProtocolVersion() == 1.0)
+  {
+    if (!strncmp(dxl_, "MX-28-2", strlen("MX-28-2"))   ||
+        !strncmp(dxl_, "MX-64-2", strlen("MX-64-2"))   ||
+        !strncmp(dxl_, "MX-106-2", strlen("MX-106-2")) ||
+        !strncmp(dxl_, "XL430", strlen("XL430"))       ||
+        !strncmp(dxl_, "XM", strlen("XM"))             ||
+        !strncmp(dxl_, "XH", strlen("XH")))
+    {
+      comm_result = driver_.writeRegister(id, "Profile_Acceleration", acc);
+      comm_result = driver_.writeRegister(id, "Profile_Velocity", vel);
+    }
+  }
+  else if (driver_.getProtocolVersion() == 2.0 && (strncmp(dxl_, "PRO", 3) != 0))
   {   
     comm_result = driver_.writeRegister(id, "Profile_Acceleration", acc);
     comm_result = driver_.writeRegister(id, "Profile_Velocity", vel);
@@ -242,7 +268,9 @@ bool DynamixelWorkbench::currentMode(uint8_t id, uint8_t cur)
 
   comm_result = torque(id, true);
 
-  if (!strncmp(dxl_, "X", 1))
+  if (!strncmp(dxl_, "X", 1)                         ||
+      !strncmp(dxl_, "MX-64-2", strlen("MX-64-2"))   ||
+      !strncmp(dxl_, "MX-106-2", strlen("MX-106-2")) )
   {   
     comm_result = driver_.writeRegister(id, "Goal_Current", cur);
   }
@@ -267,12 +295,24 @@ bool DynamixelWorkbench::goalSpeed(uint8_t id, int32_t goal)
 
   if (driver_.getProtocolVersion() == 1.0)
   {
-    if (goal < 0)
+    if (!strncmp(dxl_, "MX-28-2", strlen("MX-28-2"))   ||
+        !strncmp(dxl_, "MX-64-2", strlen("MX-64-2"))   ||
+        !strncmp(dxl_, "MX-106-2", strlen("MX-106-2")) ||
+        !strncmp(dxl_, "XL430", strlen("XL430"))       ||
+        !strncmp(dxl_, "XM", strlen("XM"))             ||
+        !strncmp(dxl_, "XH", strlen("XH")))
     {
-      goal = (-1) * goal;
-      goal |= 1024;
+      comm_result = driver_.writeRegister(id, "Goal_Velocity", goal);
     }
-    comm_result = driver_.writeRegister(id, "Moving_Speed", goal);
+    else
+    {
+      if (goal < 0)
+      {
+        goal = (-1) * goal;
+        goal |= 1024;
+      }
+      comm_result = driver_.writeRegister(id, "Moving_Speed", goal);
+    }
   }
   else if (driver_.getProtocolVersion() == 2.0)
   {
@@ -440,7 +480,17 @@ bool DynamixelWorkbench::setPositionControlMode(uint8_t id)
 
   if (driver_.getProtocolVersion() == 1.0)
   {
-    if (!strncmp(dxl_, "AX", 2) || !strncmp(dxl_, "RX", 2))
+    if (!strncmp(dxl_, "MX-28-2", strlen("MX-28-2"))   ||
+        !strncmp(dxl_, "MX-64-2", strlen("MX-64-2"))   ||
+        !strncmp(dxl_, "MX-106-2", strlen("MX-106-2")) ||
+        !strncmp(dxl_, "XL430", strlen("XL430"))       ||
+        !strncmp(dxl_, "XM", strlen("XM"))             ||
+        !strncmp(dxl_, "XH", strlen("XH"))             ||
+        !strncmp(dxl_, "PRO", strlen("PRO")))
+    {
+      comm_result = driver_.writeRegister(id, "Operating_Mode", X_SERIES_POSITION_CONTROL_MODE);
+    }
+    else if (!strncmp(dxl_, "AX", 2) || !strncmp(dxl_, "RX", 2))
     {
       comm_result = driver_.writeRegister(id, "CW_Angle_Limit", 0);
       comm_result = driver_.writeRegister(id, "CCW_Angle_Limit", 1023);
@@ -474,8 +524,21 @@ bool DynamixelWorkbench::setVelocityControlMode(uint8_t id)
 
   if (driver_.getProtocolVersion() == 1.0)
   {
-    comm_result = driver_.writeRegister(id, "CW_Angle_Limit", 0);
-    comm_result = driver_.writeRegister(id, "CCW_Angle_Limit", 0);
+    if (!strncmp(dxl_, "MX-28-2", strlen("MX-28-2"))   ||
+        !strncmp(dxl_, "MX-64-2", strlen("MX-64-2"))   ||
+        !strncmp(dxl_, "MX-106-2", strlen("MX-106-2")) ||
+        !strncmp(dxl_, "XL430", strlen("XL430"))       ||
+        !strncmp(dxl_, "XM", strlen("XM"))             ||
+        !strncmp(dxl_, "XH", strlen("XH"))             ||
+        !strncmp(dxl_, "PRO", strlen("PRO")))
+    {
+      comm_result = driver_.writeRegister(id, "Operating_Mode", X_SERIES_VELOCITY_CONTROL_MODE);
+    }
+    else
+    {
+      comm_result = driver_.writeRegister(id, "CW_Angle_Limit", 0);
+      comm_result = driver_.writeRegister(id, "CCW_Angle_Limit", 0);
+    }
   }
   else if (driver_.getProtocolVersion() == 2.0)
   {
@@ -498,7 +561,9 @@ bool DynamixelWorkbench::setCurrentControlMode(uint8_t id)
 
   strcpy(dxl_, driver_.getModelName(id));
   
-  if (!strncmp(dxl_, "X", 1))
+  if (!strncmp(dxl_, "X", 1)                         ||
+      !strncmp(dxl_, "MX-64-2", strlen("MX-64-2"))   ||
+      !strncmp(dxl_, "MX-106-2", strlen("MX-106-2")) )
   {
     comm_result = driver_.writeRegister(id, "Operating_Mode", X_SERIES_CURRENT_BASED_POSITION_CONTROL_MODE);
   }   

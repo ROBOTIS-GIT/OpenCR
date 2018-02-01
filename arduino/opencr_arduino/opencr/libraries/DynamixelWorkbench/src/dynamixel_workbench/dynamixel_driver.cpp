@@ -317,9 +317,13 @@ bool DynamixelDriver::reset(uint8_t id)
       {
         millis(2000);
 
-        if (!strncmp(model_name, "MX-28-2", strlen("MX-28-2")) ||
-            !strncmp(model_name, "MX-64-2", strlen("MX-64-2")) ||
-            !strncmp(model_name, "MX-106-2", strlen("MX-106-2")))
+        if (!strncmp(model_name, "MX-28-2", strlen("MX-28-2"))   ||
+            !strncmp(model_name, "MX-64-2", strlen("MX-64-2"))   ||
+            !strncmp(model_name, "MX-106-2", strlen("MX-106-2")) ||
+            !strncmp(model_name, "XL", strlen("XL")) ||
+            !strncmp(model_name, "XM", strlen("XM")) ||
+            !strncmp(model_name, "XH", strlen("XH")) ||
+            !strncmp(model_name, "PRO", strlen("PRO")))
           isOK = setPacketHandler(2.0);
         else
           isOK = setPacketHandler(1.0);
