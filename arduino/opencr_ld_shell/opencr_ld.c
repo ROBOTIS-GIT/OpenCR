@@ -252,9 +252,23 @@ int opencr_ld_down( int argc, const char **argv )
 
 
 
-  t = iclock();
-  err_code = cmd_flash_fw_verify( fw_size, crc, &crc_ret );
-  dt = iclock() - t;
+  for(i = 0; i < 3; i++)
+  {
+    if( i > 0)
+    {
+      printf("CRC Retry : %d\r\n", i);
+    }
+
+    t = iclock();
+    err_code = cmd_flash_fw_verify( fw_size, crc, &crc_ret );
+    dt = iclock() - t;
+    
+    if(err_code == OK)
+    {
+      break;
+    }
+  }
+
   if( err_code == OK )
   {
     printf("[OK] CRC Check   \t: %X %X , %f sec\r\n", crc, crc_ret, GET_CALC_TIME(dt));

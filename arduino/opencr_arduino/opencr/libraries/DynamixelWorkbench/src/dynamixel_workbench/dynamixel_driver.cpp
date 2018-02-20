@@ -33,10 +33,19 @@ DynamixelDriver::~DynamixelDriver()
   portHandler_->closePort();
 }
 
+void DynamixelDriver::initDXLinfo(void)
+{
+  for (int i = 0; i <= tools_cnt_; i++)
+  {
+    tools_[i].dxl_info_cnt_ = 0;
+  }
+}
+
 void DynamixelDriver::setTools(uint16_t model_number, uint8_t id)
 {
   if (tools_cnt_ == 0)
   {
+    initDXLinfo();
     tools_[tools_cnt_].addTool(model_number, id);
   }
   else
@@ -317,9 +326,13 @@ bool DynamixelDriver::reset(uint8_t id)
       {
         millis(2000);
 
-        if (!strncmp(model_name, "MX-28-2", strlen("MX-28-2")) ||
-            !strncmp(model_name, "MX-64-2", strlen("MX-64-2")) ||
-            !strncmp(model_name, "MX-106-2", strlen("MX-106-2")))
+        if (!strncmp(model_name, "MX-28-2", strlen("MX-28-2"))   ||
+            !strncmp(model_name, "MX-64-2", strlen("MX-64-2"))   ||
+            !strncmp(model_name, "MX-106-2", strlen("MX-106-2")) ||
+            !strncmp(model_name, "XL", strlen("XL")) ||
+            !strncmp(model_name, "XM", strlen("XM")) ||
+            !strncmp(model_name, "XH", strlen("XH")) ||
+            !strncmp(model_name, "PRO", strlen("PRO")))
           isOK = setPacketHandler(2.0);
         else
           isOK = setPacketHandler(1.0);

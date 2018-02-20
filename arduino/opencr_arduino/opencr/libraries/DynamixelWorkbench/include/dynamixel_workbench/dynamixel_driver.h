@@ -121,6 +121,7 @@ class DynamixelDriver
   float convertValue2Torque(uint8_t id, int16_t value);
 
  private:
+  void initDXLinfo(void);
   void setTools(uint16_t model_number, uint8_t id);
   const char *findModelName(uint16_t model_num);
   uint8_t getToolsFactor(uint8_t id);
