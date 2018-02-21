@@ -80,15 +80,8 @@ void Turtlebot3Controller::getRCdata(float *get_cmd_vel)
       ang_z = ang_z;
     }
 
-    if (lin_x > max_lin_vel_)
-    {
-      lin_x = max_lin_vel_;
-    }
-
-    if (ang_z > max_ang_vel_)
-    {
-      ang_z = max_ang_vel_;
-    }
+    lin_x = constrain(lin_x, (-1)*max_lin_vel_, max_lin_vel_);
+    ang_z = constrain(ang_z, (-1)*max_ang_vel_, max_ang_vel_);
 
     get_cmd_vel[0] = lin_x;
     get_cmd_vel[1] = ang_z;
