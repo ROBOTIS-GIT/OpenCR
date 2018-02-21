@@ -76,13 +76,14 @@ void loop()
 
   if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_PERIOD))
   {
+    updateGoalVelocity();
     motor_driver.controlMotor(WHEEL_SEPARATION, goal_velocity);
     tTime[0] = t;
   }
 
   if ((t-tTime[1]) >= (1000 / CMD_VEL_PUBLISH_PERIOD))
   {
-    cmd_vel_rc100_pub.publish(&cmd_vel_rc100_msg);
+    publishCmdVelFromRC100Msg();
     tTime[1] = t;
   }
 
@@ -111,7 +112,7 @@ void loop()
   sendLogMsg();
 
   // Receive data from RC100 
-  controllers.getRCdata(goal_velocity);
+  controllers.getRCdata(goal_velocity_from_rc100);
 
   // Check push button pressed for simple test drive
   driveTest(diagnosis.getButtonPress());
@@ -140,8 +141,11 @@ void loop()
 *******************************************************************************/
 void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
 {
-  goal_velocity[LINEAR]  = cmd_vel_msg.linear.x;
-  goal_velocity[ANGULAR] = cmd_vel_msg.angular.z;
+  goal_velocity_from_cmd[LINEAR]  = cmd_vel_msg.linear.x;
+  goal_velocity_from_cmd[ANGULAR] = cmd_vel_msg.angular.z;
+
+  goal_velocity_from_cmd[LINEAR]  = constrain(goal_velocity_from_cmd[LINEAR],  (-1)*MAX_LINEAR_VELOCITY, MAX_LINEAR_VELOCITY);
+  goal_velocity_from_cmd[ANGULAR] = constrain(goal_velocity_from_cmd[ANGULAR], (-1)*MAX_ANGULAR_VELOCITY, MAX_ANGULAR_VELOCITY);
 }
 
 /*******************************************************************************
@@ -236,6 +240,9 @@ void soundCallback(const turtlebot3_msgs::Sound& sound_msg)
   melody(note, 8, duration);
 }
 
+/*******************************************************************************
+* Callback function for motor_power msg
+*******************************************************************************/
 void motorPowerCallback(const std_msgs::Bool& power_msg)
 {
   bool dxl_power = power_msg.data;
@@ -244,6 +251,9 @@ void motorPowerCallback(const std_msgs::Bool& power_msg)
   motor_driver.setTorque(DXL_RIGHT_ID, dxl_power);
 }
 
+/*******************************************************************************
+* Callback function for reset msg
+*******************************************************************************/
 void resetCallback(const std_msgs::Empty& reset_msg)
 {
   char log_msg[50];
@@ -260,6 +270,17 @@ void resetCallback(const std_msgs::Empty& reset_msg)
 
   sprintf(log_msg, "Reset Odometry");
   nh.loginfo(log_msg);  
+}
+
+/*******************************************************************************
+* Publish msgs (CMD Velocity data from RC100 : angular velocity, linear velocity)
+*******************************************************************************/
+void publishCmdVelFromRC100Msg(void)
+{
+  cmd_vel_rc100_msg.linear.x  = goal_velocity_from_rc100[LINEAR];
+  cmd_vel_rc100_msg.angular.z = goal_velocity_from_rc100[ANGULAR];
+
+  cmd_vel_rc100_pub.publish(&cmd_vel_rc100_msg);
 }
 
 /*******************************************************************************
@@ -747,4 +768,13 @@ void melody(uint16_t* note, uint8_t note_num, uint8_t* durations)
     // stop the tone playing:
     noTone(BDPIN_BUZZER);
   }
+}
+
+/*******************************************************************************
+* Update Goal Velocity
+*******************************************************************************/
+void updateGoalVelocity(void)
+{
+  goal_velocity[LINEAR]  = goal_velocity_from_cmd[LINEAR] + goal_velocity_from_rc100[LINEAR];
+  goal_velocity[ANGULAR] = goal_velocity_from_cmd[ANGULAR] + goal_velocity_from_rc100[ANGULAR];
 }
