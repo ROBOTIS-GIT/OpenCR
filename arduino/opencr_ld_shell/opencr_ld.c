@@ -75,11 +75,20 @@ err_code_t cmd_jump_to_fw(void);
 int opencr_ld_main( int argc, const char **argv )
 {
   long baud;
+  int ret;
   baud = strtol( argv[ 2 ], NULL, 10 );
 
   printf("opencr_ld_main \r\n");
 
-  opencr_ld_down( argc, argv );
+  int retry = 3;
+  while(retry--)
+  {
+  	ret = opencr_ld_down( argc, argv );
+    if (ret == 0)
+	{
+      break;
+	}
+  }
 
   return 0;
 }
@@ -193,7 +202,7 @@ int opencr_ld_down( int argc, const char **argv )
     printf("[NG] cmd_read_board_name fail : 0x%X\n", err_code);
     ser_close( stm32_ser_id );
     fclose( opencr_fp );
-    exit(1);
+    return -1;
   }
   err_code = cmd_read_version( &board_version, &board_revision );
   if( err_code == OK )
@@ -210,7 +219,7 @@ int opencr_ld_down( int argc, const char **argv )
     printf("[NG] flash_erase \t: %d(%1.2f sec)\r\n", ret, GET_CALC_TIME(dt));
     ser_close( stm32_ser_id );
     fclose( opencr_fp );
-    exit(1);
+    return -1;
   }
   printf("[OK] flash_erase \t: %1.2fs\r\n", GET_CALC_TIME(dt));
 
@@ -252,18 +261,12 @@ int opencr_ld_down( int argc, const char **argv )
 
 
 
-  for(i = 0; i < 3; i++)
+  for (int i=0; i<3; i++)
   {
-    if( i > 0)
-    {
-      printf("CRC Retry : %d\r\n", i);
-    }
-
     t = iclock();
     err_code = cmd_flash_fw_verify( fw_size, crc, &crc_ret );
     dt = iclock() - t;
-    
-    if(err_code == OK)
+    if( err_code == OK )
     {
       break;
     }
@@ -281,7 +284,7 @@ int opencr_ld_down( int argc, const char **argv )
     fclose( opencr_fp );
     return -3;
   }
-
+  
   printf("[OK] Download \r\n");
 
   if( jump_to_fw == 1 )
@@ -293,7 +296,7 @@ int opencr_ld_down( int argc, const char **argv )
   ser_close( stm32_ser_id );
   fclose( opencr_fp );
 
-  return ret;
+  return 0;
 }
 
 
@@ -319,7 +322,7 @@ int opencr_ld_jump_to_boot( char *portname )
   write_bytes("OpenCR 5555AAAA", 15);
   ser_close( stm32_ser_id );
 
-  delay_ms(1500);
+  delay_ms(3000);
 
   return 0;
 }

@@ -1,24 +1,17 @@
-opencr_ld
+Burger
 =======
 
-OpenCR DownLoader for arduino and normal firmware
+export OPENCR_PORT=/dev/ttyACM0
+export OPENCR_MODEL=burger
+wget https://github.com/ROBOTIS-GIT/OpenCR/raw/develop/arduino/opencr_release/shell_update/opencr_update.tar.bz2 && tar -xvf opencr_update.tar.bz2 && cd ./opencr_update && ./update.sh $OPENCR_PORT $OPENCR_MODEL.opencr && cd ..
 
 
+Waffle
 =======
-Compile - Mac/Linux
 
-make
-
-=======
-Compile - Windows
-
-comming soon.
-
-
-=======
-Execute 
-
-opencr_ld /dev/tty 115200 main.bin 1 
+export OPENCR_PORT=/dev/ttyACM0
+export OPENCR_MODEL=waffle
+wget https://github.com/ROBOTIS-GIT/OpenCR/raw/develop/arduino/opencr_release/shell_update/opencr_update.tar.bz2 && tar -xvf opencr_update.tar.bz2 && cd ./opencr_update && ./update.sh $OPENCR_PORT $OPENCR_MODEL.opencr && cd ..
 
 
 

@@ -1,7 +1,7 @@
 #! /bin/bash
 
 
-echo "OpenCR Update V171016"
+echo "OpenCR Update Start.."
 if (($#==2))
 then
   ./opencr_ld_shell $1 115200 $2 1
