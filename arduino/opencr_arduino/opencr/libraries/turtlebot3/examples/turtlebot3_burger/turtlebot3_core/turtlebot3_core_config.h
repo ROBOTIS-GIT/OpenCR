@@ -42,7 +42,7 @@
 
 #include <math.h>
 
-#define INIT_LOG_DATA "This core is compatible with TurtleBot3 Burger"
+#define INIT_LOG_DATA "This core(v1.0.18) is compatible with TurtleBot3 Burger"
 
 #define HARDWARE_VER "1.0.0"
 #define SOFTWARE_VER "1.0.0"
