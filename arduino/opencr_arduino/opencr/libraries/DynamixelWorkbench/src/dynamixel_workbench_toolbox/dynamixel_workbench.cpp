@@ -16,7 +16,7 @@
 
 /* Authors: Taehun Lim (Darby) */
 
-#include "../../include/dynamixel_workbench/dynamixel_workbench.h"
+#include "../../include/dynamixel_workbench_toolbox/dynamixel_workbench.h"
 
 DynamixelWorkbench::DynamixelWorkbench()
 {
@@ -278,7 +278,7 @@ bool DynamixelWorkbench::currentMode(uint8_t id, uint8_t cur)
   return comm_result;
 }
 
-bool DynamixelWorkbench::goalPosition(uint8_t id, uint16_t goal)
+bool DynamixelWorkbench::goalPosition(uint8_t id, int32_t goal)
 {
   bool comm_result = false;
   
@@ -436,6 +436,16 @@ int32_t DynamixelWorkbench::convertRadian2Value(uint8_t id, float radian)
 float DynamixelWorkbench::convertValue2Radian(uint8_t id, int32_t value)
 {
   return driver_.convertValue2Radian(id, value);
+}
+
+int32_t DynamixelWorkbench::convertRadian2Value(float radian, int32_t max_position, int32_t min_position, float max_radian, float min_radian)
+{
+  return driver_.convertRadian2Value(radian, max_position, min_position, max_radian, min_radian);
+}
+
+float DynamixelWorkbench::convertValue2Radian(int32_t value, int32_t max_position, int32_t min_position, float max_radian, float min_radian)
+{
+  return driver_.convertValue2Radian(value, max_position, min_position, max_radian, min_radian);
 }
 
 int32_t DynamixelWorkbench::convertVelocity2Value(uint8_t id, float velocity)

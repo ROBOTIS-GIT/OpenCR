@@ -64,7 +64,7 @@ class DynamixelWorkbench
   bool wheelMode(uint8_t id, uint16_t vel = 0, uint16_t acc = 0);
   bool currentMode(uint8_t id, uint8_t cur = 50);
 
-  bool goalPosition(uint8_t id, uint16_t goal);
+  bool goalPosition(uint8_t id, int32_t goal);
   bool goalSpeed(uint8_t id, int32_t goal);
 
   bool itemWrite(uint8_t id, const char* item_name, int32_t value);  // write value to item
@@ -87,6 +87,10 @@ class DynamixelWorkbench
 
   int32_t convertRadian2Value(uint8_t id, float radian);
   float convertValue2Radian(uint8_t id, int32_t value);
+
+  int32_t convertRadian2Value(float radian, int32_t max_position, int32_t min_position, float max_radian = 3.14, float min_radian = -3.14);
+  float convertValue2Radian(int32_t value, int32_t max_position, int32_t min_position, float max_radian = 3.14, float min_radian = -3.14);
+
 
   int32_t convertVelocity2Value(uint8_t id, float velocity);
   float convertValue2Velocity(uint8_t id, int32_t value);

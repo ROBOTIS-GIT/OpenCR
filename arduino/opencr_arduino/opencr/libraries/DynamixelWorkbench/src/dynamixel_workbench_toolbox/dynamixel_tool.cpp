@@ -16,7 +16,7 @@
 
 /* Authors: Taehun Lim (Darby) */
 
-#include "../../include/dynamixel_workbench/dynamixel_tool.h"
+#include "../../include/dynamixel_workbench_toolbox/dynamixel_tool.h"
 
 DynamixelTool::DynamixelTool() : dxl_info_cnt_(0), the_number_of_item_(0){}
 

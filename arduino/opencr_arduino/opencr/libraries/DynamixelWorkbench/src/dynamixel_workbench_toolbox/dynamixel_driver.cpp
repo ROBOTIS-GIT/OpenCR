@@ -16,7 +16,7 @@
 
 /* Authors: Taehun Lim (Darby) */
 
-#include "../../include/dynamixel_workbench/dynamixel_driver.h"
+#include "../../include/dynamixel_workbench_toolbox/dynamixel_driver.h"
 
 DynamixelDriver::DynamixelDriver() : tools_cnt_(0), sync_write_handler_cnt_(0), sync_read_handler_cnt_(0) {}
 
@@ -820,26 +820,16 @@ int32_t DynamixelDriver::convertRadian2Value(uint8_t id, float radian)
 
   if (radian > 0)
   {
-    if (tools_[factor].getValueOfMaxRadianPosition() <= tools_[factor].getValueOfZeroRadianPosition())
-      return tools_[factor].getValueOfMaxRadianPosition();
-
     value = (radian * (tools_[factor].getValueOfMaxRadianPosition() - tools_[factor].getValueOfZeroRadianPosition()) / tools_[factor].getMaxRadian()) + tools_[factor].getValueOfZeroRadianPosition();
   }
   else if (radian < 0)
   {
-    if (tools_[factor].getValueOfMinRadianPosition() >= tools_[factor].getValueOfZeroRadianPosition())
-      return tools_[factor].getValueOfMinRadianPosition();
-
     value = (radian * (tools_[factor].getValueOfMinRadianPosition() - tools_[factor].getValueOfZeroRadianPosition()) / tools_[factor].getMinRadian()) + tools_[factor].getValueOfZeroRadianPosition();
   }
   else
   {
     value = tools_[factor].getValueOfZeroRadianPosition();
   }
-  // if (value[id-1] > tools_[num].getValueOfMaxRadianPosition())
-  //   value[id-1] =  tools_[num].getValueOfMaxRadianPosition();
-  // else if (value[id-1] < tools_[num].getValueOfMinRadianPosition())
-  //   value[id-1] =  tools_[num].getValueOfMinRadianPosition();
 
   return value;
 }
@@ -851,22 +841,50 @@ float DynamixelDriver::convertValue2Radian(uint8_t id, int32_t value)
 
   if (value > tools_[factor].getValueOfZeroRadianPosition())
   {
-    if (tools_[factor].getMaxRadian() <= 0)
-      return tools_[factor].getMaxRadian();
-
     radian = (float)(value - tools_[factor].getValueOfZeroRadianPosition()) * tools_[factor].getMaxRadian() / (float)(tools_[factor].getValueOfMaxRadianPosition() - tools_[factor].getValueOfZeroRadianPosition());
   }
   else if (value < tools_[factor].getValueOfZeroRadianPosition())
   {
-    if (tools_[factor].getMinRadian() >= 0)
-      return tools_[factor].getMinRadian();
-
     radian = (float)(value - tools_[factor].getValueOfZeroRadianPosition()) * tools_[factor].getMinRadian() / (float)(tools_[factor].getValueOfMinRadianPosition() - tools_[factor].getValueOfZeroRadianPosition());
   }
-  //  if (radian[id-1] > tools_[num].getMaxRadian())
-  //    radian[id-1] =  tools_[num].getMaxRadian();
-  //  else if (radian[id-1] < tools_[num].min_radian_)
-  //    radian[id-1] =  tools_[num].min_radian_;
+
+  return radian;
+}
+
+int32_t DynamixelDriver::convertRadian2Value(float radian, int32_t max_position, int32_t min_position, float max_radian, float min_radian)
+{
+  int32_t value = 0;
+  int32_t zero_position = (max_position + min_position)/2;
+
+  if (radian > 0)
+  {
+    value = (radian * (max_position - zero_position) / max_radian) + zero_position;
+  }
+  else if (radian < 0)
+  {
+    value = (radian * (min_position - zero_position) / min_radian) + zero_position;
+  }
+  else
+  {
+    value = zero_position;
+  }
+
+  return value;
+}
+
+float DynamixelDriver::convertValue2Radian(int32_t value, int32_t max_position, int32_t min_position, float max_radian, float min_radian)
+{
+  float radian = 0.0;
+  int32_t zero_position = (max_position + min_position)/2;
+
+  if (value > zero_position)
+  {
+    radian = (float)(value - zero_position) * max_radian / (float)(max_position - zero_position);
+  }
+  else if (value < zero_position)
+  {
+    radian = (float)(value - zero_position) * min_radian / (float)(min_position - zero_position);
+  }
 
   return radian;
 }

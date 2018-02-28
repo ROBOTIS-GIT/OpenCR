@@ -16,7 +16,7 @@
 
 /* Authors: Taehun Lim (Darby) */
 
-#include "../../include/dynamixel_workbench/dynamixel_item.h"
+#include "../../include/dynamixel_workbench_toolbox/dynamixel_item.h"
 
 static uint8_t the_number_of_item = 0;
 
@@ -90,8 +90,8 @@ static void setAXInfo()
 {
   model_info.velocity_to_value_ratio         = 86.03; // AX series don't support exact speed in wheel mode.
   
-  model_info.value_of_0_radian_position      = 512;
   model_info.value_of_min_radian_position    = 0;
+  model_info.value_of_0_radian_position      = 512;
   model_info.value_of_max_radian_position    = 1023;
 
   model_info.min_radian                      = -2.61799;
@@ -160,8 +160,8 @@ static void setRXInfo(void)
 {
   model_info.velocity_to_value_ratio         = 86.03; // RX series don't support exact speed in wheel mode.
   
-  model_info.value_of_0_radian_position      = 512;
   model_info.value_of_min_radian_position    = 0;
+  model_info.value_of_0_radian_position      = 512;
   model_info.value_of_max_radian_position    = 1023;
 
   model_info.min_radian                      = -2.61799;
@@ -233,8 +233,8 @@ static void setEXInfo()
 {
   model_info.velocity_to_value_ratio         = 86.03; // EX series don't support exact speed in wheel mode.
   
-  model_info.value_of_0_radian_position      = 2048;
   model_info.value_of_min_radian_position    = 0;
+  model_info.value_of_0_radian_position      = 2048; 
   model_info.value_of_max_radian_position    = 4095;
 
   model_info.min_radian                      = -2.18969008;
@@ -306,8 +306,8 @@ static void setMXInfo()
 {
   model_info.velocity_to_value_ratio         = 86.81;
   
-  model_info.value_of_0_radian_position      = 2048;
   model_info.value_of_min_radian_position    = 0;
+  model_info.value_of_0_radian_position      = 2048;  
   model_info.value_of_max_radian_position    = 4095;
 
   model_info.min_radian                      = -3.14159265;
@@ -394,8 +394,8 @@ static void setMX2Info(void)
 {
   model_info.velocity_to_value_ratio         = 41.70;
   
-  model_info.value_of_0_radian_position      = 2048;
   model_info.value_of_min_radian_position    = 0;
+  model_info.value_of_0_radian_position      = 2048;  
   model_info.value_of_max_radian_position    = 4095;
 
   model_info.min_radian                      = -3.14159265;
@@ -473,8 +473,8 @@ static void setExtMXInfo()
 {
   model_info.velocity_to_value_ratio         = 86.81;
   
-  model_info.value_of_0_radian_position      = 2048;
   model_info.value_of_min_radian_position    = 0;
+  model_info.value_of_0_radian_position      = 2048;  
   model_info.value_of_max_radian_position    = 4095;
 
   model_info.min_radian                      = -3.14159265;
@@ -563,8 +563,8 @@ static void setExtMX2Info(void)
 {
   model_info.velocity_to_value_ratio         = 41.70;
   
-  model_info.value_of_0_radian_position      = 2048;
   model_info.value_of_min_radian_position    = 0;
+  model_info.value_of_0_radian_position      = 2048;  
   model_info.value_of_max_radian_position    = 4095;
 
   model_info.min_radian                      = -3.14159265;
@@ -633,8 +633,8 @@ static void setXL320Info()
 {
   model_info.velocity_to_value_ratio         = 86.03; // XL320 don't support exact speed in wheel mode.
   
-  model_info.value_of_0_radian_position      = 512;
   model_info.value_of_min_radian_position    = 0;
+  model_info.value_of_0_radian_position      = 512;  
   model_info.value_of_max_radian_position    = 1023;
 
   model_info.min_radian                      = -2.61799;
@@ -721,8 +721,8 @@ static void setXLInfo()
 {
   model_info.velocity_to_value_ratio         = 41.70;
 
-  model_info.value_of_0_radian_position      = 2048;
   model_info.value_of_min_radian_position    = 0;
+  model_info.value_of_0_radian_position      = 2048;  
   model_info.value_of_max_radian_position    = 4095;
 
   model_info.min_radian                      = -3.14159265;
@@ -1078,9 +1078,9 @@ static void setPROInfo()
 {
   model_info.velocity_to_value_ratio         = 4792.8;
   
-  model_info.value_of_0_radian_position      = 0;
   model_info.value_of_min_radian_position    = -250961;
-  model_info.value_of_max_radian_position    =  250961;
+  model_info.value_of_0_radian_position      = 0;
+  model_info.value_of_max_radian_position    = 250961;
 
   model_info.min_radian                      = -3.14159265;
   model_info.max_radian                      =  3.14159265;
