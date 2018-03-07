@@ -1,0 +1,6 @@
+Wirish soft (bit-banged) implementation of the Wire I2C library.
+
+This implementation is synchronous, and thus supports only a subset of
+the full Wire interface.  
+
+Be sure to tie SDA and SCL high with ~2k resistors
