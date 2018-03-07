@@ -29,29 +29,19 @@ String cmd[STRING_BUF_NUM];
 
 DynamixelWorkbench dxl_wb;
 uint8_t get_id[16];
-uint8_t dxl_cnt = 0;
+uint8_t scan_cnt = 0;
+uint8_t ping_cnt = 0;
+
+bool isAvailableID(uint8_t id);
+void split(String data, char separator, String* temp);
+void printInst();
 
 void setup() 
 {
   Serial.begin(57600);
   while(!Serial); // Open a Serial Monitor  
 
-  Serial.println("-------------------------------------");
-  Serial.println("Set portHandler Before scan or ping");
-  Serial.println("-------------------------------------");
-  Serial.println("begin  (BAUD)");
-  Serial.println("scan   (RANGE)");
-  Serial.println("ping   (ID)");
-  Serial.println("id     (ID) (NEW_ID)");
-  Serial.println("baud   (ID) (NEW_BAUD)");
-  Serial.println("torque (ID) (VALUE)");
-  Serial.println("joint  (ID) (GOAL_POSITION)");
-  Serial.println("wheel  (ID) (GOAL_VELOCITY)");
-  Serial.println("write  (ID) (ADDRESS_NAME) (VALUE)");
-  Serial.println("read   (ID) (ADDRESS_NAME)");
-  Serial.println("reboot (ID) ");
-  Serial.println("reset  (ID) ");
-  Serial.println("-------------------------------------");
+  printInst();
 }
 
 void loop() 
@@ -65,132 +55,158 @@ void loop()
 
     split(read_string, ' ', cmd);
 
-    if (cmd[0] == "begin")
+    if (cmd[0] == "help")
     {
+      printInst();
+    }
+    else if (cmd[0] == "begin")
+    {
+      if (cmd[1] == '\0')
+        cmd[1] = String("57600");
+
       uint32_t baud = cmd[1].toInt();
       if (dxl_wb.begin(DEVICE_NAME, baud))
-        Serial.println("Succeed to begin");
+        Serial.println("Succeed to begin(" + String(baud) + ")");
       else
         Serial.println("Failed to begin");
     }
     else if (cmd[0] == "scan")
     { 
-      uint8_t range = cmd[1].toInt();
-      dxl_wb.scan(get_id, &dxl_cnt, range);
+      if (cmd[1] == '\0')
+        cmd[1] = String("100");
 
-      if (dxl_cnt == 0)
+      uint8_t range = cmd[1].toInt();
+      dxl_wb.scan(get_id, &scan_cnt, range);
+
+      if (scan_cnt == 0)
         Serial.println("Can't find Dynamixel");
       else
       {
-        Serial.println("Find " + String(dxl_cnt) + " Dynamixels");
-        for (int cnt = 0; cnt < dxl_cnt; cnt++)
+        Serial.println("Find " + String(scan_cnt) + " Dynamixels");
+        for (int cnt = 0; cnt < scan_cnt; cnt++)
           Serial.println("ID : " + String(get_id[cnt]));
       }
     }
     else if (cmd[0] == "ping")
     {
-      uint8_t id = cmd[1].toInt();
+      if (cmd[1] == '\0')
+        cmd[1] = String("1");
+
+      get_id[ping_cnt] = cmd[1].toInt();
       uint16_t model_number = 0;
 
-      if (dxl_wb.ping(id, &model_number))
-        Serial.println("id : " + String(id) + " model_number : " + String(model_number));
+      if (dxl_wb.ping(get_id[ping_cnt], &model_number))
+      {
+        Serial.println("id : " + String(get_id[ping_cnt]) + " model_number : " + String(model_number));
+        ping_cnt++;
+      }
       else
         Serial.println("Failed to ping");
     }
-    else if (cmd[0] == "id")
+    else if (isAvailableID(cmd[1].toInt()))
     {
-      uint8_t id     = cmd[1].toInt();
-      uint8_t new_id = cmd[2].toInt();
+      if (cmd[0] == "id")
+      {
+        uint8_t id     = cmd[1].toInt();
+        uint8_t new_id = cmd[2].toInt();
 
-      if (dxl_wb.setID(id, new_id))
-        Serial.println("Succeed to change ID");
-      else
-        Serial.println("Failed");
+        if (dxl_wb.setID(id, new_id))
+          Serial.println("Succeed to change ID");
+        else
+          Serial.println("Failed");
 
-    }
-    else if (cmd[0] == "baud")
-    {
-      uint8_t  id       = cmd[1].toInt();
-      uint32_t  new_baud  = cmd[2].toInt();
-
-      if (dxl_wb.setBaud(id, new_baud))
-        Serial.println("Succeed to change BaudRate");
-      else
-        Serial.println("Failed");
-    }
-    else if (cmd[0] == "torque")
-    {
-      uint8_t id       = cmd[1].toInt();
-      uint8_t onoff    = cmd[2].toInt();
-
-      if (dxl_wb.itemWrite(id, "Torque_Enable", onoff))
-        Serial.println("Succeed to torque command!!");
-      else
-        Serial.println("Failed");
-    }
-    else if (cmd[0] == "joint")
-    {
-      uint8_t id    = cmd[1].toInt();
-      uint16_t goal = cmd[2].toInt();
-
-      dxl_wb.jointMode(id);
-      if (dxl_wb.goalPosition(id, goal))
-       Serial.println("Succeed to joint command!!");
-      else
-        Serial.println("Failed");
-    }
-    else if (cmd[0] == "wheel")
-    {
-      uint8_t id    = cmd[1].toInt();
-      int32_t goal  = cmd[2].toInt();
-
-      dxl_wb.wheelMode(id);
-      if (dxl_wb.goalSpeed(id, goal))
-        Serial.println("Succeed to wheel command!!");
-      else
-        Serial.println("Failed");
-    }
-    else if (cmd[0] == "write")
-    {
-      uint8_t id = cmd[1].toInt();      
-      int32_t value = cmd[3].toInt(); 
-
-      if (dxl_wb.itemWrite(id, cmd[2].c_str(), value))
-      {        
-        Serial.println("Succeed to write command!!");
       }
-      else
-        Serial.println("Failed");
-    }
-    else if (cmd[0] == "read")
-    {
-      uint8_t id = cmd[1].toInt();
-            
-      int32_t value = dxl_wb.itemRead(id, cmd[2].c_str());
+      else if (cmd[0] == "baud")
+      {
+        uint8_t  id       = cmd[1].toInt();
+        uint32_t  new_baud  = cmd[2].toInt();
 
-      Serial.println("read data : " + String(value));
-    }
-    else if (cmd[0] == "reboot")
-    {
-      uint8_t id = cmd[1].toInt();
+        if (dxl_wb.setBaud(id, new_baud))
+          Serial.println("Succeed to change BaudRate");
+        else
+          Serial.println("Failed");
 
-      if (dxl_wb.reboot(id))
-        Serial.println("Succeed to reboot");
-      else
-        Serial.println("Failed to reboot");
-    }
-    else if (cmd[0] == "reset")
-    {
-      uint8_t id = cmd[1].toInt();
+      }
+      else if (cmd[0] == "torque")
+      {
+        uint8_t id       = cmd[1].toInt();
+        uint8_t onoff    = cmd[2].toInt();
 
-      if (dxl_wb.reset(id))
-        Serial.println("Succeed to reset");
-      else
-        Serial.println("Failed to reset");
+        if (dxl_wb.itemWrite(id, "Torque_Enable", onoff))
+          Serial.println("Succeed to torque command!!");
+        else
+          Serial.println("Failed");
+
+      }
+      else if (cmd[0] == "joint")
+      {
+        uint8_t id    = cmd[1].toInt();
+        uint16_t goal = cmd[2].toInt();
+
+        dxl_wb.jointMode(id);
+        if (dxl_wb.goalPosition(id, goal))
+        Serial.println("Succeed to joint command!!");
+        else
+          Serial.println("Failed");
+
+      }
+      else if (cmd[0] == "wheel")
+      {
+        uint8_t id    = cmd[1].toInt();
+        int32_t goal  = cmd[2].toInt();
+
+        dxl_wb.wheelMode(id);
+        if (dxl_wb.goalSpeed(id, goal))
+          Serial.println("Succeed to wheel command!!");
+        else
+          Serial.println("Failed");
+      }
+      else if (cmd[0] == "write")
+      {
+        uint8_t id = cmd[1].toInt();      
+        int32_t value = cmd[3].toInt(); 
+
+        if (dxl_wb.itemWrite(id, cmd[2].c_str(), value))
+        {        
+          Serial.println("Succeed to write command!!");
+        }
+        else
+          Serial.println("Failed");
+      }
+      else if (cmd[0] == "read")
+      {
+        uint8_t id = cmd[1].toInt();
+              
+        int32_t value = dxl_wb.itemRead(id, cmd[2].c_str());
+
+        Serial.println("read data : " + String(value));
+      }
+      else if (cmd[0] == "reboot")
+      {
+        uint8_t id = cmd[1].toInt();
+
+        if (dxl_wb.reboot(id))
+          Serial.println("Succeed to reboot");
+        else
+          Serial.println("Failed to reboot");
+      }
+      else if (cmd[0] == "reset")
+      {
+        uint8_t id = cmd[1].toInt();
+
+        if (dxl_wb.reset(id))
+          Serial.println("Succeed to reset");
+        else
+          Serial.println("Failed to reset");
+      }
+      else 
+      {
+        Serial.println("Wrong command");
+      }
     }
     else 
     {
-      Serial.println("Wrong command");
+      Serial.println("Please check ID");
     }
   }
 }
@@ -219,4 +235,36 @@ void split(String data, char separator, String* temp)
 		}
 		++cnt;
 	}
+}
+
+bool isAvailableID(uint8_t id)
+{
+  for (int dxl_cnt = 0; dxl_cnt < (scan_cnt + ping_cnt); dxl_cnt++)
+  {
+    if (get_id[dxl_cnt] == id)
+      return true;
+  }
+
+  return false;
+}
+
+void printInst(void)
+{
+  Serial.println("-------------------------------------");
+  Serial.println("Set portHandler Before scan or ping");
+  Serial.println("-------------------------------------");
+  Serial.println("help");
+  Serial.println("begin  (BAUD)");
+  Serial.println("scan   (RANGE)");
+  Serial.println("ping   (ID)");
+  Serial.println("id     (ID) (NEW_ID)");
+  Serial.println("baud   (ID) (NEW_BAUD)");
+  Serial.println("torque (ID) (VALUE)");
+  Serial.println("joint  (ID) (GOAL_POSITION)");
+  Serial.println("wheel  (ID) (GOAL_VELOCITY)");
+  Serial.println("write  (ID) (ADDRESS_NAME) (VALUE)");
+  Serial.println("read   (ID) (ADDRESS_NAME)");
+  Serial.println("reboot (ID) ");
+  Serial.println("reset  (ID) ");
+  Serial.println("-------------------------------------");
 }

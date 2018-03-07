@@ -219,7 +219,7 @@ bool findMotor(void)
     int dxl_comm_result = packetHandler2->broadcastPing(portHandler, vec);
     if (dxl_comm_result != COMM_SUCCESS)
     {
-      packetHandler2->printTxRxResult(dxl_comm_result);
+      CMD_SERIAL.println(packetHandler2->getTxRxResult(dxl_comm_result));
       continue;
     }
 
@@ -363,11 +363,11 @@ void write(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler *packet
 
   if (dxl_comm_result == COMM_SUCCESS)
   {
-    if (dxl_error != 0) packetHandler->printRxPacketError(dxl_error);
+    if (dxl_error != 0) CMD_SERIAL.println(packetHandler->getRxPacketError(dxl_error));
   }
   else
   {
-    packetHandler->printTxRxResult(dxl_comm_result);
+    CMD_SERIAL.println(packetHandler->getTxRxResult(dxl_error));
     CMD_SERIAL.println("Fail to write!");
   }
 }
@@ -398,7 +398,7 @@ dxl_ret_t read(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler *pa
 
   if (dxl_comm_result == COMM_SUCCESS)
   {
-    if (dxl_error != 0) packetHandler->printRxPacketError(dxl_error);
+    if (dxl_error != 0) CMD_SERIAL.println(packetHandler->getRxPacketError(dxl_error));
 
     if (length == 1)
     {
@@ -415,7 +415,7 @@ dxl_ret_t read(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler *pa
   }
   else
   {
-    packetHandler->printTxRxResult(dxl_comm_result);
+    CMD_SERIAL.println(packetHandler->getTxRxResult(dxl_error));
     CMD_SERIAL.println("Fail to read! ");
   }
 

@@ -42,11 +42,11 @@
 
 #include <math.h>
 
-#define INIT_LOG_DATA "This core is compatible with TurtleBot3 Burger"
+#define INIT_LOG_DATA "This core(v1.1.0) is compatible with TurtleBot3 Burger"
 
 #define HARDWARE_VER "1.0.0"
 #define SOFTWARE_VER "1.0.0"
-#define FIRMWARE_VER "1.0.16"
+#define FIRMWARE_VER "1.1.0"
 
 #define CONTROL_MOTOR_SPEED_PERIOD          30   //hz
 #define IMU_PUBLISH_PERIOD                  200  //hz
@@ -79,6 +79,8 @@
 #define TEST_DISTANCE                    0.300     // meter
 #define TEST_RADIAN                      3.14      // 180 degree
 
+#define VELOCITY_UNIT                    2
+
 // Callback function prototypes
 void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
 void soundCallback(const turtlebot3_msgs::Sound& sound_msg);
@@ -86,6 +88,7 @@ void motorPowerCallback(const std_msgs::Bool& power_msg);
 void resetCallback(const std_msgs::Empty& reset_msg);
 
 // Function prototypes
+void publishCmdVelFromRC100Msg(void);
 void publishImuMsg(void);
 void publishMagMsg(void);
 void publishSensorStateMsg(void);
@@ -103,7 +106,7 @@ void updateOdometry(void);
 void updateJoint(void);
 void updateTF(geometry_msgs::TransformStamped& odom_tf);
 void updateGyroCali(void);
-void updateVoltageCheck(void);
+void updateGoalVelocity(void);
 
 void initOdom(void);
 void initJointStates(void);
@@ -204,7 +207,9 @@ Turtlebot3Sensor sensors;
 * Declaration for controllers
 *******************************************************************************/
 Turtlebot3Controller controllers;
-float goal_velocity[WHEEL_NUM] = {0.0, 0.0};
+float goal_velocity[VELOCITY_UNIT] = {0.0, 0.0};
+float goal_velocity_from_cmd[VELOCITY_UNIT] = {0.0, 0.0};
+float goal_velocity_from_rc100[VELOCITY_UNIT] = {0.0, 0.0};
 
 /*******************************************************************************
 * Declaration for diagnosis

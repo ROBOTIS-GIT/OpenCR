@@ -1,0 +1,46 @@
+#######################################
+# Syntax Coloring Map for Wire(i2c)
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+writeOneByte	KEYWORD2
+readOneByte	KEYWORD2
+beginTransmission	KEYWORD2
+endTransmission	KEYWORD2
+requestFrom	KEYWORD2
+send	KEYWORD2
+receive	KEYWORD2
+i2c_start	KEYWORD2
+i2c_get_ack	KEYWORD2
+i2c_send_ack	KEYWORD2
+i2c_send_nack	KEYWORD2
+i2c_shift_in	KEYWORD2
+i2c_shift_out	KEYWORD2
+
+
+#######################################
+# Class (KEYWORD3)
+#######################################
+Wire	KEYWORD3	Wire_i2c
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+WIRE_BUFSIZ		LITERAL1
+SUCCESS	LITERAL1
+ENACKADDR	LITERAL1
+ENACKTRNS	LITERAL1
+EOTHER	LITERAL1
+SDA	LITERAL1
+SCL	LITERAL1
+I2C_WRITE	LITERAL1
+I2C_READ	LITERAL1
+I2C_DELAY	LITERAL1
+

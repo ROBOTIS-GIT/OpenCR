@@ -177,25 +177,8 @@ bool Turtlebot3MotorDriver::controlMotor(const float wheel_separation, float* va
   wheel_velocity_cmd[LEFT]  = lin_vel - (ang_vel * wheel_separation / 2);
   wheel_velocity_cmd[RIGHT]  = lin_vel + (ang_vel * wheel_separation / 2);
 
-  goal_velocity[LEFT] = wheel_velocity_cmd[LEFT] * VELOCITY_CONSTANT_VALUE;
-  if (goal_velocity[LEFT] > LIMIT_X_MAX_VELOCITY)
-  {
-    goal_velocity[LEFT] =  LIMIT_X_MAX_VELOCITY;
-  }
-  else if (goal_velocity[LEFT] < -LIMIT_X_MAX_VELOCITY)
-  {
-    goal_velocity[LEFT] = -LIMIT_X_MAX_VELOCITY;
-  }
-
-  goal_velocity[RIGHT] = wheel_velocity_cmd[RIGHT] * VELOCITY_CONSTANT_VALUE;
-  if (goal_velocity[RIGHT] > LIMIT_X_MAX_VELOCITY)
-  {
-    goal_velocity[RIGHT] =  LIMIT_X_MAX_VELOCITY;
-  }
-  else if (goal_velocity[RIGHT] < -LIMIT_X_MAX_VELOCITY)
-  {
-    goal_velocity[RIGHT] = -LIMIT_X_MAX_VELOCITY;
-  }
+  goal_velocity[LEFT]  = constrain(goal_velocity[LEFT] * VELOCITY_CONSTANT_VALUE, -LIMIT_X_MAX_VELOCITY, LIMIT_X_MAX_VELOCITY);
+  goal_velocity[RIGHT] = constrain(goal_velocity[RIGHT] * VELOCITY_CONSTANT_VALUE, -LIMIT_X_MAX_VELOCITY, LIMIT_X_MAX_VELOCITY);
 
   dxl_comm_result = writeVelocity((int64_t)goal_velocity[LEFT], (int64_t)goal_velocity[RIGHT]);
   if (dxl_comm_result == false)
