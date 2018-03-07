@@ -42,11 +42,11 @@
 
 #include <math.h>
 
-#define INIT_LOG_DATA "This core(v1.0.18) is compatible with TurtleBot3 Waffle or Waffle Pi"
+#define INIT_LOG_DATA "This core(v1.1.0) is compatible with TurtleBot3 Waffle or Waffle Pi"
 
 #define HARDWARE_VER "1.0.0"
 #define SOFTWARE_VER "1.0.0"
-#define FIRMWARE_VER "1.0.18"
+#define FIRMWARE_VER "1.1.0"
 
 #define CONTROL_MOTOR_SPEED_PERIOD          30   //hz
 #define IMU_PUBLISH_PERIOD                  200  //hz
