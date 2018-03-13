@@ -206,6 +206,7 @@ Turtlebot3Sensor sensors;
 /*******************************************************************************
 * Declaration for controllers
 *******************************************************************************/
+Turtlebot3Controller controllers;
 float goal_velocity[VELOCITY_UNIT] = {0.0, 0.0};
 float goal_velocity_from_button[VELOCITY_UNIT] = {0.0, 0.0};
 float goal_velocity_from_cmd[VELOCITY_UNIT] = {0.0, 0.0};
@@ -230,3 +231,5 @@ bool setup_end        = false;
 uint8_t battery_state = 0;
 
 #endif // TURTLEBOT3_CORE_CONFIG_H_
+
+
