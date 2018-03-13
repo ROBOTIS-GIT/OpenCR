@@ -172,15 +172,13 @@ bool Turtlebot3MotorDriver::controlMotor(const float wheel_separation, float* va
   float lin_vel = value[LEFT];
   float ang_vel = value[RIGHT];
 
-  float goal_velocity[2];
-
-  wheel_velocity_cmd[LEFT]  = lin_vel - (ang_vel * wheel_separation / 2);
+  wheel_velocity_cmd[LEFT]   = lin_vel - (ang_vel * wheel_separation / 2);
   wheel_velocity_cmd[RIGHT]  = lin_vel + (ang_vel * wheel_separation / 2);
 
-  goal_velocity[LEFT]  = constrain(goal_velocity[LEFT] * VELOCITY_CONSTANT_VALUE, -LIMIT_X_MAX_VELOCITY, LIMIT_X_MAX_VELOCITY);
-  goal_velocity[RIGHT] = constrain(goal_velocity[RIGHT] * VELOCITY_CONSTANT_VALUE, -LIMIT_X_MAX_VELOCITY, LIMIT_X_MAX_VELOCITY);
+  wheel_velocity_cmd[LEFT]  = constrain(wheel_velocity_cmd[LEFT]  * VELOCITY_CONSTANT_VALUE, -LIMIT_X_MAX_VELOCITY, LIMIT_X_MAX_VELOCITY);
+  wheel_velocity_cmd[RIGHT] = constrain(wheel_velocity_cmd[RIGHT] * VELOCITY_CONSTANT_VALUE, -LIMIT_X_MAX_VELOCITY, LIMIT_X_MAX_VELOCITY);
 
-  dxl_comm_result = writeVelocity((int64_t)goal_velocity[LEFT], (int64_t)goal_velocity[RIGHT]);
+  dxl_comm_result = writeVelocity((int64_t)wheel_velocity_cmd[LEFT], (int64_t)wheel_velocity_cmd[RIGHT]);
   if (dxl_comm_result == false)
     return false;
 

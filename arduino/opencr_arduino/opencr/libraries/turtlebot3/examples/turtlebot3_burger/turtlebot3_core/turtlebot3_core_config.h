@@ -208,6 +208,7 @@ Turtlebot3Sensor sensors;
 *******************************************************************************/
 Turtlebot3Controller controllers;
 float goal_velocity[VELOCITY_UNIT] = {0.0, 0.0};
+float goal_velocity_from_button[VELOCITY_UNIT] = {0.0, 0.0};
 float goal_velocity_from_cmd[VELOCITY_UNIT] = {0.0, 0.0};
 float goal_velocity_from_rc100[VELOCITY_UNIT] = {0.0, 0.0};
 
