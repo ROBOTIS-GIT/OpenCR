@@ -42,11 +42,11 @@
 
 #include <math.h>
 
-#define INIT_LOG_DATA "This core(v1.1.0) is compatible with TurtleBot3 Waffle or Waffle Pi"
+#define INIT_LOG_DATA "This core(v1.1.1) is compatible with TurtleBot3 Waffle or Waffle Pi"
 
 #define HARDWARE_VER "1.0.0"
 #define SOFTWARE_VER "1.0.0"
-#define FIRMWARE_VER "1.1.0"
+#define FIRMWARE_VER "1.1.1"
 
 #define CONTROL_MOTOR_SPEED_PERIOD          30   //hz
 #define IMU_PUBLISH_PERIOD                  200  //hz
@@ -208,6 +208,7 @@ Turtlebot3Sensor sensors;
 *******************************************************************************/
 Turtlebot3Controller controllers;
 float goal_velocity[VELOCITY_UNIT] = {0.0, 0.0};
+float goal_velocity_from_button[VELOCITY_UNIT] = {0.0, 0.0};
 float goal_velocity_from_cmd[VELOCITY_UNIT] = {0.0, 0.0};
 float goal_velocity_from_rc100[VELOCITY_UNIT] = {0.0, 0.0};
 
@@ -230,3 +231,5 @@ bool setup_end        = false;
 uint8_t battery_state = 0;
 
 #endif // TURTLEBOT3_CORE_CONFIG_H_
+
+

@@ -573,11 +573,11 @@ void driveTest(uint8_t buttons)
   {    
     if (abs(saved_tick[RIGHT] - current_tick[RIGHT]) <= diff_encoder)
     {
-      goal_velocity[LINEAR]  = 0.05;
+      goal_velocity_from_button[LINEAR]  = 0.05;
     }
     else
     {
-      goal_velocity[LINEAR]  = 0.0;
+      goal_velocity_from_button[LINEAR]  = 0.0;
       move[LINEAR] = false;
     }
   }
@@ -585,11 +585,11 @@ void driveTest(uint8_t buttons)
   {   
     if (abs(saved_tick[RIGHT] - current_tick[RIGHT]) <= diff_encoder)
     {
-      goal_velocity[ANGULAR]= -0.7;
+      goal_velocity_from_button[ANGULAR]= -0.7;
     }
     else
     {
-      goal_velocity[ANGULAR]  = 0.0;
+      goal_velocity_from_button[ANGULAR]  = 0.0;
       move[ANGULAR] = false;
     }
   }
@@ -601,7 +601,7 @@ void driveTest(uint8_t buttons)
 void updateVariable(void)
 {
   static bool variable_flag = false;
-
+  
   if (nh.connected())
   {
     if (variable_flag == false)
@@ -775,6 +775,6 @@ void melody(uint16_t* note, uint8_t note_num, uint8_t* durations)
 *******************************************************************************/
 void updateGoalVelocity(void)
 {
-  goal_velocity[LINEAR]  = goal_velocity_from_cmd[LINEAR] + goal_velocity_from_rc100[LINEAR];
-  goal_velocity[ANGULAR] = goal_velocity_from_cmd[ANGULAR] + goal_velocity_from_rc100[ANGULAR];
+  goal_velocity[LINEAR]  = goal_velocity_from_button[LINEAR]  + goal_velocity_from_cmd[LINEAR]  + goal_velocity_from_rc100[LINEAR];
+  goal_velocity[ANGULAR] = goal_velocity_from_button[ANGULAR] + goal_velocity_from_cmd[ANGULAR] + goal_velocity_from_rc100[ANGULAR];
 }
