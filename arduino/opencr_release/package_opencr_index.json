@@ -598,6 +598,37 @@
               "version": "1.0.0"
             }
           ]
+        },
+        {
+          "name": "OpenCR",
+          "architecture": "OpenCR",
+          "version": "1.1.1",
+          "category": "Arduino",
+          "help": {
+            "online": "https://github.com/ROBOTIS-GIT/OpenCR"
+          },
+          "url": "https://github.com/ROBOTIS-GIT/OpenCR/releases/download/1.1.1/opencr_core_1.1.1.tar.bz2",
+          "archiveFileName": "opencr_core_1.1.1.tar.bz2",
+          "checksum": "SHA-256:6051ed0fe2183777113e115fb3b5c54c575553fa0265de830a0e69002a0681b3",
+          "size": "2212510",
+          "help": {
+                    "online": "http://emanual.robotis.com/docs/en/parts/controller/opencr10/"
+          },
+          "boards": [
+            {"name": "OpenCR"}
+          ],
+          "toolsDependencies": [
+            {
+              "packager": "OpenCR",
+              "name": "opencr_gcc",
+              "version": "5.4.0-2016q2"
+            },
+            {
+              "packager": "OpenCR",
+              "name": "opencr_tools",
+              "version": "1.0.0"
+            }
+          ]
         }
 
 
