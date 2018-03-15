@@ -42,11 +42,11 @@
 
 #include <math.h>
 
-#define INIT_LOG_DATA "This core(v1.1.1) is compatible with TurtleBot3 Waffle or Waffle Pi"
+#define INIT_LOG_DATA "This core(v1.1.2) is compatible with TB3 Waffle or Waffle Pi"
 
 #define HARDWARE_VER "1.0.0"
 #define SOFTWARE_VER "1.0.0"
-#define FIRMWARE_VER "1.1.1"
+#define FIRMWARE_VER "1.1.2"
 
 #define CONTROL_MOTOR_SPEED_PERIOD          30   //hz
 #define IMU_PUBLISH_PERIOD                  200  //hz
@@ -231,5 +231,3 @@ bool setup_end        = false;
 uint8_t battery_state = 0;
 
 #endif // TURTLEBOT3_CORE_CONFIG_H_
-
-

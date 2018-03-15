@@ -687,7 +687,7 @@ void updateGyroCali(void)
 void sendLogMsg(void)
 {
   static bool log_flag = false;
-  char log_msg[50];
+  char log_msg[100];
   const char* init_log_data = INIT_LOG_DATA;
 
   if (nh.connected())
