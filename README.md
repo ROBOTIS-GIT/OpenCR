@@ -14,7 +14,7 @@
 - [open_manipulator](https://github.com/ROBOTIS-GIT/open_manipulator)
 - [robotis_op3](https://github.com/ROBOTIS-GIT/ROBOTIS-OP3)
 
-## Documents and Videos related OpenCR
+## Documents and Videos related to OpenCR
 - [ROBOTIS e-Manual for OpenCR](http://emanual.robotis.com/docs/en/parts/controller/opencr10/)
 - [ROBOTIS e-Manual for OpenCM 9.04](http://emanual.robotis.com/docs/en/parts/controller/opencm904/)
 - [ROBOTIS e-Manual for OpenCM 485 Expansion Board](http://emanual.robotis.com/docs/en/parts/controller/opencm485exp/)
