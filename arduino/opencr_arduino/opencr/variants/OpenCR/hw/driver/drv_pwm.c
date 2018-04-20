@@ -73,6 +73,19 @@ void drv_pwm_release(uint32_t ulPin)
   pwm_init[ulPin] = false;
 }
 
+uint32_t drv_pwm_get_period(uint32_t ulPin)
+{
+  TIM_HandleTypeDef  *pTIM;
+  uint32_t tim_ch;
+
+  if( ulPin >= PINS_COUNT )     return 0;
+  if( pwm_init[ulPin] == false ) return 0;
+
+  pTIM = g_Pin2PortMapArray[ulPin].TIMx;
+
+  return (pTIM->Init.Period + 1);
+}
+
 
 void drv_pwm_setup(uint32_t ulPin)
 {
@@ -199,6 +212,44 @@ void drv_pwm_set_duty(uint32_t ulPin, uint32_t res, uint32_t ulDuty )
     default:
       break; 
   }  
+}
+
+
+uint32_t drv_pwm_get_pulse(uint32_t ulPin)
+{
+  TIM_HandleTypeDef  *pTIM;
+  uint32_t tim_ch;
+  uint32_t pulse = 0;
+
+  if( ulPin >= PINS_COUNT )      return;
+  if( pwm_init[ulPin] == false ) return;
+
+  pTIM   = g_Pin2PortMapArray[ulPin].TIMx;
+  tim_ch = g_Pin2PortMapArray[ulPin].timerChannel;
+
+  switch (tim_ch)
+  {
+    case TIM_CHANNEL_1:
+      pulse = pTIM->Instance->CCR1;
+      break;
+
+    case TIM_CHANNEL_2:
+      pulse = pTIM->Instance->CCR2;
+      break;
+
+    case TIM_CHANNEL_3:
+      pulse = pTIM->Instance->CCR3;
+      break;
+
+    case TIM_CHANNEL_4:
+      pulse = pTIM->Instance->CCR4;
+      break;
+
+    default:
+      break; 
+  }  
+
+  return pulse;
 }
 
 

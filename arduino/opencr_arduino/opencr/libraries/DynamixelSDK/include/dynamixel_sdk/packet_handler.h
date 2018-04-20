@@ -38,6 +38,9 @@
 
 #if defined(ARDUINO) || defined(__OPENCR__) || defined(__OPENCM904__)
 #include <Arduino.h>
+#define ERROR_PRINT  SerialBT2.print
+#else
+#define ERROR_PRINT  printf
 #endif
 
 #include <stdio.h>

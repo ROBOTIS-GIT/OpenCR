@@ -34,9 +34,13 @@ int drv_pwm_init();
 
 void drv_pwm_set_freq(uint32_t ulPin, uint32_t freq_data);
 uint32_t drv_pwm_get_freq(uint32_t ulPin);
+uint32_t drv_pwm_get_period(uint32_t ulPin);
+
 void drv_pwm_setup(uint32_t ulPin);
 void drv_pwm_release(uint32_t ulPin);
+
 void drv_pwm_set_duty(uint32_t ulPin, uint32_t res, uint32_t ulDuty );
+uint32_t drv_pwm_get_pulse(uint32_t ulPin);
 uint8_t drv_pwm_get_init(uint32_t ulPin);
 
 
