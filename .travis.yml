@@ -17,6 +17,4 @@ notifications:
 
 branches:
   only:
-    - master
     - develop
-    - feature-ros2-micrortps
