@@ -53,7 +53,7 @@ if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
 # install 3rd party libraries
 git clone https://github.com/JonHub/Filters.git
 echo -n "INSTALL Filters Library: "
-DEPENDENCY_OUTPUT=$(mv $HOME/Arduino/libraries/Filters 2>&1)
+DEPENDENCY_OUTPUT=$(mv Filters $HOME/Arduino/libraries/Filters 2>&1)
 if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
 
 # install random lib so the arduino IDE grabs a new library index
