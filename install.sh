@@ -8,7 +8,7 @@ fi
 
 # associative array for the platforms that will be verified in build_main_platforms()
 # this will be eval'd in the functions below because arrays can't be exported
-export MAIN_PLATFORMS='declare -A main_platforms=([uno]="arduino:avr:uno" [mega2560]="arduino:avr:mega:cpu=atmega2560" [leonardo]="arduino:avr:leonardo" [due]="arduino:sam:arduino_due_x" [zero]="arduino:samd:arduino_zero_native" [mzero]="arduino:samd:mzero_bl" [mzeropro]="arduino:samd:mzero_pro_bl" [opencr]="OpenCR:OpenCR:OpenCR")'
+export MAIN_PLATFORMS='declare -A main_platforms=([opencr]="OpenCR:OpenCR:OpenCR")'
 
 # make display available for arduino CLI
 /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16
@@ -42,12 +42,18 @@ DEPENDENCY_OUTPUT=$(arduino --install-boards OpenCR:OpenCR 2>&1)
 if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
 
 # Update OpenCR package manually
-echo -n "UPDATE OpenCR: "
 git clone --recursive https://github.com/ROBOTIS-GIT/OpenCR.git --branch develop --single-branch 
 rm -rf $HOME/.arduino15/packages/OpenCR/hardware
 mkdir $HOME/Arduino/hardware
 mkdir $HOME/Arduino/hardware/OpenCR
+echo -n "UPDATE OpenCR: "
 DEPENDENCY_OUTPUT=$(mv $PWD/OpenCR/arduino/opencr_arduino/opencr $HOME/Arduino/hardware/OpenCR/OpenCR 2>&1)
+if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
+
+# install 3rd party libraries
+git clone https://github.com/JonHub/Filters.git
+echo -n "INSTALL Filters Library: "
+DEPENDENCY_OUTPUT=$(mv $HOME/Arduino/libraries/Filters 2>&1)
 if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
 
 # install random lib so the arduino IDE grabs a new library index
