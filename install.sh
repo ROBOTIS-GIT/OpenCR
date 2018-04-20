@@ -40,13 +40,15 @@ if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
 echo -n "INSTALL OpenCR: "
 DEPENDENCY_OUTPUT=$(arduino --install-boards OpenCR:OpenCR 2>&1)
 if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
+
 # Update OpenCR package manually
+echo -n "UPDATE OpenCR: "
 git clone --recursive https://github.com/ROBOTIS-GIT/OpenCR.git --branch develop --single-branch 
 rm -rf $HOME/.arduino15/packages/OpenCR/hardware
-mkdir $HOME/Arduino/
 mkdir $HOME/Arduino/hardware
 mkdir $HOME/Arduino/hardware/OpenCR
-mv $PWD/OpenCR/arduino/opencr_arduino/opencr $HOME/Arduino/hardware/OpenCR/OpenCR
+DEPENDENCY_OUTPUT=$(mv $PWD/OpenCR/arduino/opencr_arduino/opencr $HOME/Arduino/hardware/OpenCR/OpenCR 2>&1)
+if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
 
 # install random lib so the arduino IDE grabs a new library index
 # see: https://github.com/arduino/Arduino/issues/3535
