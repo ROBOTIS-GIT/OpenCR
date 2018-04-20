@@ -43,6 +43,7 @@ if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
 # Update OpenCR package manually
 git clone --recursive https://github.com/ROBOTIS-GIT/OpenCR.git --branch develop --single-branch 
 rm -rf $HOME/.arduino15/packages/OpenCR/hardware
+mkdir $HOME/Arduino/hardware/OpenCR
 mv $PWD/OpenCR/arduino/opencr_arduino/opencr $HOME/Arduino/hardware/OpenCR/OpenCR
 
 # install random lib so the arduino IDE grabs a new library index
