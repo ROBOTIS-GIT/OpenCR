@@ -28,7 +28,6 @@ void setup() {
 
 void loop() {
   static uint32_t pre_time;
-  uint16_t *lcd_pos;
 
   if(millis() - pre_time >= 50)
   {

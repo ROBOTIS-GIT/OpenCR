@@ -61,10 +61,6 @@ void setup()
 
 void loop()
 {
-  int length;
-  int i;
-
-
   update_dxl();
   update_led();
 

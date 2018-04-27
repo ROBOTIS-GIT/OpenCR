@@ -187,11 +187,8 @@ void drv_pwm_set_duty(uint32_t ulPin, uint32_t res, uint32_t ulDuty )
   tim_ch = g_Pin2PortMapArray[ulPin].timerChannel;
 
 
-  ulDuty = constrain(ulDuty, (uint32_t) 1, (uint32_t) (1<<res));
-  pulse = map( ulDuty, (uint32_t) 1, (uint32_t) (1<<res), (uint32_t) 1, pTIM->Init.Period+1 );
-
-  ulDuty -= 1;
-  pulse -= 1;
+  ulDuty = constrain(ulDuty, (uint32_t) 0, (uint32_t) (1<<res)-1);
+  pulse = map( ulDuty, (uint32_t) 0, (uint32_t) (1<<res)-1, (uint32_t) 0, pTIM->Init.Period+1 );
 
   switch (tim_ch)
   {

@@ -29,10 +29,7 @@ void loop() {
 
 void sendSPI()
 {
-  uint8_t data;
-
-
   digitalWrite(SPI_NSS_PIN, LOW);
-  data = SPI.transfer(0x55);
+  SPI.transfer(0x55);
   digitalWrite(SPI_NSS_PIN, HIGH);
 }
