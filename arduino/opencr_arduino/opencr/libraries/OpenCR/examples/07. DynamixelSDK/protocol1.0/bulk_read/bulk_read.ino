@@ -114,7 +114,7 @@ void setup()
   int index = 0;
   int dxl_comm_result = COMM_TX_FAIL;             // Communication result
   bool dxl_addparam_result = false;               // addParam result
-  bool dxl_getdata_result = false;                // GetParam result
+  //bool dxl_getdata_result = false;                // GetParam result
   int dxl_goal_position[2] = {DXL_MINIMUM_POSITION_VALUE, DXL_MAXIMUM_POSITION_VALUE};  // Goal position
 
   uint8_t dxl_error = 0;                          // Dynamixel error
@@ -223,14 +223,14 @@ void setup()
       dxl_comm_result = groupBulkRead.txRxPacket();
       if (dxl_comm_result != COMM_SUCCESS) printf("%s\n", packetHandler->getTxRxResult(dxl_comm_result));
 
-      dxl_getdata_result = groupBulkRead.isAvailable(DXL1_ID, ADDR_MX_PRESENT_POSITION, LEN_MX_PRESENT_POSITION);
+      groupBulkRead.isAvailable(DXL1_ID, ADDR_MX_PRESENT_POSITION, LEN_MX_PRESENT_POSITION);
       if (dxl_addparam_result != true)
       {
         Serial.print("[ID:"); Serial.print(DXL1_ID); Serial.println("groupBulkRead getdata failed");
         return;
       }
 
-      dxl_getdata_result = groupBulkRead.isAvailable(DXL2_ID, ADDR_MX_MOVING, LEN_MX_MOVING);
+      groupBulkRead.isAvailable(DXL2_ID, ADDR_MX_MOVING, LEN_MX_MOVING);
       if (dxl_addparam_result != true)
       {
         Serial.print("[ID:"); Serial.print(DXL2_ID); Serial.println("groupBulkRead getdata failed");

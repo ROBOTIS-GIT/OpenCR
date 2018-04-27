@@ -84,10 +84,10 @@ int kbhit(void)
 
 void setup()
 {
-  Serial.begin(115200);
-  while(!Serial);
+  CMD_SERIAL.begin(115200);
+  while(!CMD_SERIAL);
 
-  Serial.println("Start..");
+  CMD_SERIAL.println("Start..");
 
   // Initialize PortHandler instance
   // Set the port path
@@ -107,60 +107,61 @@ void setup()
   // Open port
   if (portHandler->openPort())
   {
-    Serial.print("Succeeded to open the port!\n");
+    CMD_SERIAL.print("Succeeded to open the port!\n");
   }
   else
   {
-    Serial.print("Failed to open the port!\n");
+    CMD_SERIAL.print("Failed to open the port!\n");
     return;
   }
 
   // Set port baudrate
   if (portHandler->setBaudRate(BAUDRATE))
   {
-    Serial.print("Succeeded to change the baudrate!\n");
+    CMD_SERIAL.print("Succeeded to change the baudrate!\n");
   }
   else
   {
-    Serial.print("Failed to change the baudrate!\n");
+    CMD_SERIAL.print("Failed to change the baudrate!\n");
     return;
   }
 
   // Read present baudrate of the controller
-  Serial.print("Now the controller baudrate is :");
-  Serial.print(portHandler->getBaudRate());
+  CMD_SERIAL.print("Now the controller baudrate is :");
+  CMD_SERIAL.print(portHandler->getBaudRate());
 
   // Try factoryreset
-  Serial.print("[ID:"); Serial.print(DXL_ID);
-  Serial.print("] Try factoryreset : ");
+  CMD_SERIAL.print("[ID:"); CMD_SERIAL.print(DXL_ID);
+  CMD_SERIAL.print("] Try factoryreset : ");
 
   dxl_comm_result = packetHandler->factoryReset(portHandler, DXL_ID, OPERATION_MODE, &dxl_error);
   if (dxl_comm_result != COMM_SUCCESS)
   {
-    Serial.print("Aborted\n");
-    Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
+    CMD_SERIAL.print("Aborted\n");
+    CMD_SERIAL.print(packetHandler->getTxRxResult(dxl_comm_result));
     return;
   }
   else if (dxl_error != 0)
   {
-    Serial.print(packetHandler->getRxPacketError(dxl_error));
+    CMD_SERIAL.print(packetHandler->getRxPacketError(dxl_error));
   }
 
   // Wait for reset
-  Serial.print("Wait for reset...\n");
+  CMD_SERIAL.print("Wait for reset...\n");
   delay(2000);
 
-  Serial.print("[ID:"); Serial.print(DXL_ID);
-  Serial.print("] factoryReset Success!\n");
+  CMD_SERIAL.print("[ID:"); CMD_SERIAL.print(DXL_ID);
+  CMD_SERIAL.print("] factoryReset Success!\n");
 
   // Set controller baudrate to Dynamixel default baudrate
   if (portHandler->setBaudRate(FACTORYRST_DEFAULTBAUDRATE))
   {
-    Serial.print("Succeed to change the controller baudrate to : %d\n", FACTORYRST_DEFAULTBAUDRATE);
+    CMD_SERIAL.print("Succeed to change the controller baudrate to : ");
+    CMD_SERIAL.println(FACTORYRST_DEFAULTBAUDRATE);
   }
   else
   {
-    Serial.print("Failed to change the controller baudrate\n");
+    CMD_SERIAL.print("Failed to change the controller baudrate\n");
     return;
   }
 
@@ -168,44 +169,45 @@ void setup()
   dxl_comm_result = packetHandler->read1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_BAUDRATE, &dxl_baudnum_read, &dxl_error);
   if (dxl_comm_result != COMM_SUCCESS)
   {
-    Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
+    CMD_SERIAL.print(packetHandler->getTxRxResult(dxl_comm_result));
   }
   else if (dxl_error != 0)
   {
-    Serial.print(packetHandler->getRxPacketError(dxl_error));
+    CMD_SERIAL.print(packetHandler->getRxPacketError(dxl_error));
   }
   else
   {
-    Serial.print("[ID:"); Serial.print(DXL_ID);
-    Serial.print("] DXL baudnum is now : ");
-    Serial.println(dxl_baudnum_read);
+    CMD_SERIAL.print("[ID:"); CMD_SERIAL.print(DXL_ID);
+    CMD_SERIAL.print("] DXL baudnum is now : ");
+    CMD_SERIAL.println(dxl_baudnum_read);
   }
 
   // Write new baudnum
   dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_BAUDRATE, NEW_BAUDNUM, &dxl_error);
   if (dxl_comm_result != COMM_SUCCESS)
   {
-    Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
+    CMD_SERIAL.print(packetHandler->getTxRxResult(dxl_comm_result));
   }
   else if (dxl_error != 0)
   {
-    Serial.print(packetHandler->getRxPacketError(dxl_error));
+    CMD_SERIAL.print(packetHandler->getRxPacketError(dxl_error));
   }
   else
   {
-    Serial.print("[ID:"); Serial.print(DXL_ID);
-    Serial.print("] Set Dynamixel baudnum to : ");
-    Serial.println(NEW_BAUDNUM);
+    CMD_SERIAL.print("[ID:"); CMD_SERIAL.print(DXL_ID);
+    CMD_SERIAL.print("] Set Dynamixel baudnum to : ");
+    CMD_SERIAL.println(NEW_BAUDNUM);
   }
 
   // Set port baudrate to BAUDRATE
   if (portHandler->setBaudRate(BAUDRATE))
   {
-    Serial.print("Succeed to change the controller baudrate to : %d\n", BAUDRATE);
+    CMD_SERIAL.print("Succeed to change the controller baudrate to : ");
+    CMD_SERIAL.println(BAUDRATE);
   }
   else
   {
-    Serial.print("Failed to change the controller baudrate\n");
+    CMD_SERIAL.print("Failed to change the controller baudrate\n");
     return;
   }
 
@@ -215,21 +217,26 @@ void setup()
   dxl_comm_result = packetHandler->read1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_BAUDRATE, &dxl_baudnum_read, &dxl_error);
   if (dxl_comm_result != COMM_SUCCESS)
   {
-    Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
+    CMD_SERIAL.print(packetHandler->getTxRxResult(dxl_comm_result));
   }
   else if (dxl_error != 0)
   {
-    Serial.print(packetHandler->getRxPacketError(dxl_error));
+    CMD_SERIAL.print(packetHandler->getRxPacketError(dxl_error));
   }
   else
   {
-    Serial.print("[ID:"); Serial.print(DXL_ID);
-    Serial.print("] Dynamixel Baudnum is now : ");
-    Serial.print(dxl_baudnum_read);
+    CMD_SERIAL.print("[ID:"); CMD_SERIAL.print(DXL_ID);
+    CMD_SERIAL.print("] Dynamixel Baudnum is now : ");
+    CMD_SERIAL.print(dxl_baudnum_read);
   }
 
   // Close port
   portHandler->closePort();
 
   return;
+}
+
+void loop()
+{
+  
 }
