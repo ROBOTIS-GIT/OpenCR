@@ -9,7 +9,6 @@ void setup(){
 }
 
 void loop(){
-  int AdcData =
   Serial.print("A0 = ");
   Serial.print(analogRead(A0));
   Serial.print("\t");
