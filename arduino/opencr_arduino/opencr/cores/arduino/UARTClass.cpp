@@ -43,6 +43,8 @@ void UARTClass::begin(const uint32_t dwBaudRate)
 
 void UARTClass::begin(const uint32_t dwBaudRate, const UARTModes config)
 {
+  UNUSED(config);
+
   rx_buffer.iHead = rx_buffer.iTail = 0;
   tx_buffer.iHead = tx_buffer.iTail = 0;
 

@@ -29,6 +29,8 @@ BOOL wdg_setup(uint32_t reload_time)
   {
     return FALSE;
   }
+
+  return TRUE;
 }
 
 BOOL wdg_start(void)

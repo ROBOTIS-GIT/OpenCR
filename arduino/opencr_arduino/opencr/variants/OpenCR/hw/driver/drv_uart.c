@@ -105,7 +105,7 @@ uint32_t drv_uart_write(uint8_t uart_num, const uint8_t wr_data)
 
 void drv_uart_flush(uint8_t uart_num)
 {
-
+  UNUSED(uart_num);
 }
 
 void drv_uart_start_rx(uint8_t uart_num)
@@ -211,6 +211,8 @@ void UART8_IRQHandler(void)
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
+  UNUSED(UartHandle);
+
   //if( UartHandle->Instance == USART6 ) Tx1_Handler();
   //if( UartHandle->Instance == USART2 ) Tx2_Handler();
   //if( UartHandle->Instance == USART3 ) Tx3_Handler();

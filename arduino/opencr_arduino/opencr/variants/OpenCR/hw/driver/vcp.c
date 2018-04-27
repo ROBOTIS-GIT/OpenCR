@@ -73,7 +73,7 @@ int32_t vcp_write(uint8_t *p_data, uint32_t length)
       ret = 0;
       break;
     }
-    if(ret == length)
+    if(ret == (int32_t) length)
     {
       break;
     }
@@ -109,7 +109,7 @@ int32_t vcp_printf( const char *fmt, ...)
   va_end (arg);
 
 
-  ret = vcp_write( print_buffer, len);
+  ret = vcp_write( (uint8_t *) print_buffer, len);
 
   return ret;
 }

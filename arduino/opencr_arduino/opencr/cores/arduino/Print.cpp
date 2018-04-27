@@ -196,7 +196,7 @@ size_t Print::printf(char *fmt, ... )
   char buf[256]; // resulting string limited to 128 chars
   char buf_out[256];
   va_list args;
-  int i;
+  size_t i;
   int i_out;
 
 

@@ -76,7 +76,6 @@ void drv_pwm_release(uint32_t ulPin)
 uint32_t drv_pwm_get_period(uint32_t ulPin)
 {
   TIM_HandleTypeDef  *pTIM;
-  uint32_t tim_ch;
 
   if( ulPin >= PINS_COUNT )     return 0;
   if( pwm_init[ulPin] == false ) return 0;
@@ -188,8 +187,11 @@ void drv_pwm_set_duty(uint32_t ulPin, uint32_t res, uint32_t ulDuty )
   tim_ch = g_Pin2PortMapArray[ulPin].timerChannel;
 
 
-  ulDuty = constrain(ulDuty, 0, (1<<res)-1);
-  pulse = map( ulDuty, 0, (1<<res)-1, 0, pTIM->Init.Period+1 );
+  ulDuty = constrain(ulDuty, (uint32_t) 1, (uint32_t) (1<<res));
+  pulse = map( ulDuty, (uint32_t) 1, (uint32_t) (1<<res), (uint32_t) 1, pTIM->Init.Period+1 );
+
+  ulDuty -= 1;
+  pulse -= 1;
 
   switch (tim_ch)
   {
@@ -221,8 +223,8 @@ uint32_t drv_pwm_get_pulse(uint32_t ulPin)
   uint32_t tim_ch;
   uint32_t pulse = 0;
 
-  if( ulPin >= PINS_COUNT )      return;
-  if( pwm_init[ulPin] == false ) return;
+  if( ulPin >= PINS_COUNT )      return 0;
+  if( pwm_init[ulPin] == false ) return 0;
 
   pTIM   = g_Pin2PortMapArray[ulPin].TIMx;
   tim_ch = g_Pin2PortMapArray[ulPin].timerChannel;

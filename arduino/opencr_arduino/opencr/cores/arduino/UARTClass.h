@@ -79,8 +79,8 @@ class UARTClass : public HardwareSerial
     uint32_t _uart_baudrate;
 
     uint8_t r_byte;
-    ring_buffer tx_buffer = { { 0 }, 0, 0};
-    ring_buffer rx_buffer = { { 0 }, 0, 0};
+    ring_buffer tx_buffer;
+    ring_buffer rx_buffer;
 
     uint32_t rx_cnt;
     uint32_t tx_cnt;
