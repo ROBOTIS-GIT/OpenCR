@@ -149,7 +149,6 @@ void drv_exti_detach( uint32_t int_num )
 {
   uint32_t i;
   uint32_t ulPin;
-  GPIO_InitTypeDef   GPIO_InitStructure;
 
 
   if( int_num >= EXTI_COUNT ) return;

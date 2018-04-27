@@ -101,8 +101,8 @@ void drawPoint(void)
   int16_t y;
   int32_t d;
 
-  double fx;
-  double fy;
+  // double fx;
+  // double fy;
   double r;
   double offset_r = 90. * M_PI / 180.;
   static uint8_t mode = 0;
@@ -110,7 +110,7 @@ void drawPoint(void)
   uint16_t color;
   uint8_t rgb[3];
 
-  uint32_t pre_time = millis();
+  //uint32_t pre_time = millis();
 
   Tft.lcd_fill_rect(0, 0, LCD_WIDTH, LCD_HEIGHT, BLACK);
 

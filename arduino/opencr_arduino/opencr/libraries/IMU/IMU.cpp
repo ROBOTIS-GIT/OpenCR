@@ -102,6 +102,8 @@ uint8_t cIMU::begin( uint32_t hz )
 ---------------------------------------------------------------------------*/
 uint16_t cIMU::update( uint32_t option )
 {
+  UNUSED(option);
+
 	uint16_t ret_time = 0;
 
 	static uint32_t tTime;

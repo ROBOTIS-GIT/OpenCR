@@ -47,9 +47,12 @@ USBSerial::USBSerial(){
 }
 
 void USBSerial::begin(uint32_t baud_count){
+  UNUSED(baud_count);
 }
 
 void USBSerial::begin(uint32_t baud_count, uint8_t config){
+  UNUSED(baud_count);
+  UNUSED(config);
 }
 
 void USBSerial::end(void){

@@ -25,12 +25,12 @@
 // using a ring buffer (I think), in which head is the index of the location
 // to which to write the next incoming character and tail is the index of the
 // location from which to read.
-#define SERIAL_BUFFER_SIZE 128
+#define RING_BUFFER_SIZE 128
 
 class RingBuffer
 {
   public:
-    volatile uint8_t _aucBuffer[SERIAL_BUFFER_SIZE] ;
+    volatile uint8_t _aucBuffer[RING_BUFFER_SIZE] ;
     volatile int _iHead ;
     volatile int _iTail ;
 

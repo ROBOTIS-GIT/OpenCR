@@ -57,7 +57,7 @@ dynamixel::PacketHandler *packetHandler;
 dynamixel::GroupSyncWrite *groupSyncWrite;
 
 bool dxl_addparam_result = false;
-int8_t dxl_comm_result = COMM_TX_FAIL;
+int dxl_comm_result = COMM_TX_FAIL;
 uint8_t dxl_error = 0;
 
 int vel[2] = {0, 0};
@@ -151,13 +151,13 @@ void loop()
 
 void controlMotor( int64_t left_wheel_value, int64_t right_wheel_value)
 {
-  bool dxl_addparam_result;
-  int8_t dxl_comm_result;
+  //bool dxl_addparam_result;
+  //int dxl_comm_result;
 
-  dxl_addparam_result = groupSyncWrite->addParam(LEFT_DXL, (uint8_t*)&left_wheel_value);
-  dxl_addparam_result = groupSyncWrite->addParam(RIGHT_DXL, (uint8_t*)&right_wheel_value);
+  groupSyncWrite->addParam(LEFT_DXL, (uint8_t*)&left_wheel_value);
+  groupSyncWrite->addParam(RIGHT_DXL, (uint8_t*)&right_wheel_value);
 
-  dxl_comm_result = groupSyncWrite->txPacket();
+  groupSyncWrite->txPacket();
 
   groupSyncWrite->clearParam();
 }

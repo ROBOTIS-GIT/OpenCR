@@ -21,14 +21,14 @@
 
 RingBuffer::RingBuffer( void )
 {
-    memset( (void *)_aucBuffer, 0, SERIAL_BUFFER_SIZE ) ;
+    memset( (void *)_aucBuffer, 0, RING_BUFFER_SIZE ) ;
     _iHead=0 ;
     _iTail=0 ;
 }
 
 void RingBuffer::store_char( uint8_t c )
 {
-  int i = (uint32_t)(_iHead + 1) % SERIAL_BUFFER_SIZE ;
+  int i = (uint32_t)(_iHead + 1) % RING_BUFFER_SIZE ;
 
   // if we should be storing the received character into the location
   // just before the tail (meaning that the head would advance to the

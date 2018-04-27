@@ -70,8 +70,8 @@ void setup()
 
   int dxl_comm_result = COMM_TX_FAIL;             // Communication result
 
-  uint8_t dxl_error = 0;                          // Dynamixel error
-  uint16_t dxl_model_number;                      // Dynamixel model number
+  //uint8_t dxl_error = 0;                          // Dynamixel error
+  //uint16_t dxl_model_number;                      // Dynamixel model number
 
   std::vector<uint8_t> vec;                       // Dynamixel data storages
 
