@@ -45,9 +45,9 @@ bool OpenManipulatorMotorDriver::init(void)
 
   gripper_controller_.ping(GRIPPER, &get_model_number);
 
-  protocol_version_ = joint_controller.getProtocolVersion();  
+  protocol_version_ = joint_controller_.getProtocolVersion();  
 
-  if (protocol_version == 2.0)
+  if (protocol_version_ == 2.0)
     gripper_controller_.currentMode(GRIPPER, 30);
   else
     gripper_controller_.jointMode(GRIPPER);
@@ -59,6 +59,10 @@ bool OpenManipulatorMotorDriver::init(void)
     joint_controller_.addSyncRead("Present_Position");
     joint_controller_.addSyncRead("Present_Velocity");
   }
+
+  double init_joint_position[4] = {0.0, -1.5707, 1.37, 0.2258};
+  writeJointPosition(init_joint_position);
+  writeGripperPosition(0.0);
 
   return true;
 }
