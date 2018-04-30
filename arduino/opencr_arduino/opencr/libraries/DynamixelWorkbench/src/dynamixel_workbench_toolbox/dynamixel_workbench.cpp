@@ -148,6 +148,11 @@ bool DynamixelWorkbench::setPacketHandler(float protocol_version)
   return driver_.setPacketHandler(protocol_version);
 }
 
+float DynamixelWorkbench::getProtocolVersion()
+{
+  return driver_.getProtocolVersion();
+}
+
 char* DynamixelWorkbench::getModelName(uint8_t id)
 {
   return driver_.getModelName(id);
