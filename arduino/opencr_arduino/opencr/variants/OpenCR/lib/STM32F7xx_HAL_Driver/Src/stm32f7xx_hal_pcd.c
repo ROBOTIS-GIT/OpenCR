@@ -632,6 +632,7 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd)
 {
   /* Prevent unused argument(s) compilation warning */
   UNUSED(hpcd);
+  UNUSED(epnum);
   
   /* NOTE : This function Should not be modified, when the callback is needed,
             the HAL_PCD_DataOutStageCallback could be implemented in the user file
@@ -648,6 +649,7 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd)
 {
   /* Prevent unused argument(s) compilation warning */
   UNUSED(hpcd);
+  UNUSED(epnum);
   
   /* NOTE : This function Should not be modified, when the callback is needed,
             the HAL_PCD_DataInStageCallback could be implemented in the user file
@@ -738,6 +740,7 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd)
 {
   /* Prevent unused argument(s) compilation warning */
   UNUSED(hpcd);
+  UNUSED(epnum);
   
   /* NOTE : This function Should not be modified, when the callback is needed,
             the HAL_PCD_ISOOUTIncompleteCallback could be implemented in the user file
@@ -754,6 +757,7 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd)
 {
   /* Prevent unused argument(s) compilation warning */
   UNUSED(hpcd);
+  UNUSED(epnum);
   
   /* NOTE : This function Should not be modified, when the callback is needed,
             the HAL_PCD_ISOINIncompleteCallback could be implemented in the user file
@@ -1184,7 +1188,7 @@ static HAL_StatusTypeDef PCD_WriteEmptyTxFifo(PCD_HandleTypeDef *hpcd, uint32_t 
 {
   USB_OTG_GlobalTypeDef *USBx = hpcd->Instance;  
   USB_OTG_EPTypeDef *ep;
-  int32_t len = 0;
+  uint32_t len = 0;
   uint32_t len32b;
   uint32_t fifoemptymsk = 0;
 

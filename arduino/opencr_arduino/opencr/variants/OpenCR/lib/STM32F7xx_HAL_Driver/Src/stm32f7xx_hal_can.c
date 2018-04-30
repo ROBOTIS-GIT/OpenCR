@@ -366,6 +366,8 @@ HAL_StatusTypeDef HAL_CAN_ConfigFilter(CAN_HandleTypeDef* hcan, CAN_FilterConfTy
   assert_param(IS_FUNCTIONAL_STATE(sFilterConfig->FilterActivation));
   assert_param(IS_CAN_BANKNUMBER(sFilterConfig->BankNumber));
   
+  UNUSED(hcan);
+
   filternbrbitpos = ((uint32_t)1) << sFilterConfig->FilterNumber;
 
   /* Initialisation mode for the filter */

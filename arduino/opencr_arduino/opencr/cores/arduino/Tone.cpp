@@ -76,10 +76,10 @@ static void toneEnd(void)
 
 void tone(uint8_t _pin, unsigned int frequency, unsigned long duration)
 {
-  uint8_t prescalarbits = 0b001;
+  //uint8_t prescalarbits = 0b001;
   long toggle_count = 0;
   uint32_t ocr = 0;
-  int8_t _timer;
+  //int8_t _timer;
 
 
   // Set the pinMode as OUTPUT

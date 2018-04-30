@@ -33,6 +33,8 @@ int  imu_spi_writes(uint8_t slave_addr, uint8_t reg_addr, uint8_t length, uint8_
 {
   uint32_t i;
 
+	UNUSED(slave_addr);
+
   digitalWrite( BDPIN_SPI_CS_IMU, LOW);
   SPI_IMU.transfer( reg_addr );
 
@@ -48,7 +50,9 @@ int  imu_spi_writes(uint8_t slave_addr, uint8_t reg_addr, uint8_t length, uint8_
 int imu_spi_reads(uint8_t slave_addr, uint8_t reg_addr, uint8_t length, uint8_t *data)
 {
   uint32_t i;
-  uint8_t read_value;
+  //uint8_t read_value;
+
+	UNUSED(slave_addr);
 
   digitalWrite( BDPIN_SPI_CS_IMU, LOW);
   SPI_IMU.transfer( reg_addr | 0x80 );  // reg | 0x80 to denote read
@@ -128,6 +132,8 @@ int imu_spi_ak8963_writes(uint8_t akm_addr, uint8_t reg_addr, uint8_t len, uint8
 
 int imu_spi_write(uint8_t addr, uint8_t reg_addr, uint8_t data)
 {
+	UNUSED(addr);
+
 	digitalWrite( BDPIN_SPI_CS_IMU, LOW);
 	SPI_IMU.transfer(reg_addr);
 	SPI_IMU.transfer(data);
@@ -137,6 +143,8 @@ int imu_spi_write(uint8_t addr, uint8_t reg_addr, uint8_t data)
 
 uint8_t imu_spi_read(uint8_t addr, uint8_t reg_addr)
 {
+	UNUSED(addr);
+
 	uint8_t dummy = 0;
 	uint8_t data = 0;
 

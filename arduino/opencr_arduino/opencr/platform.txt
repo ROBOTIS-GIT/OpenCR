@@ -62,7 +62,6 @@ compiler.elf2hex.extra_flags=
 compiler.libs.c.flags= "-I{build.variant.path}/{build.inc1}" "-I{build.variant.path}/{build.inc2}" "-I{build.variant.path}/{build.inc3}" "-I{build.variant.path}/{build.inc4}" "-I{build.variant.path}/{build.inc5}" "-I{build.variant.path}/{build.inc6}" "-I{build.variant.path}/{build.inc7}"
 
 
-
 # build patterns
 # ---------------------
 
@@ -89,6 +88,9 @@ recipe.objcopy.eep.pattern=
 ## Create hex or binary
 recipe.objcopy.hex.pattern="{compiler.path}{compiler.elf2hex.cmd}" {compiler.elf2hex.flags} {compiler.elf2hex.extra_flags} "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.bin"
 
+## Save binary
+recipe.output.tmp_file={build.project_name}.bin
+recipe.output.save_file={build.project_name}.{build.variant}.bin
 
 
 ## Compute size

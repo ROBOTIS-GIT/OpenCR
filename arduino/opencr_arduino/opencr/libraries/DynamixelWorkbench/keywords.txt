@@ -1,0 +1,61 @@
+#######################################
+# Syntax Coloring Map DynamixelWorkbench
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+DynamixelWorkbench			KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+begin			            KEYWORD2
+scan			            KEYWORD2
+ping			            KEYWORD2
+reboot	              KEYWORD2
+reset                 KEYWORD2
+setID			            KEYWORD2
+setBaud 	            KEYWORD2
+setPacketHandler		  KEYWORD2
+getModelName          KEYWORD2
+ledOn                 KEYWORD2
+ledOff                KEYWORD2
+jointMode             KEYWORD2
+wheelMode             KEYWORD2
+currentMode           KEYWORD2
+goalPosition          KEYWORD2
+goalSpeed             KEYWORD2
+itemWrite             KEYWORD2
+syncWrite             KEYWORD2
+bulkWrite             KEYWORD2
+itemRead              KEYWORD2
+syncRead              KEYWORD2
+bulkRead              KEYWORD2
+addSyncWrite          KEYWORD2
+addSyncRead           KEYWORD2
+initBulkWrite         KEYWORD2
+initBulkRead          KEYWORD2
+addBulkWriteParam     KEYWORD2
+addBulkReadParam      KEYWORD2
+setBulkRead           KEYWORD2
+convertRadian2Value   KEYWORD2
+convertValue2Radian   KEYWORD2
+convertVelocity2Value KEYWORD2
+convertValue2Velocity KEYWORD2
+convertTorque2Value   KEYWORD2
+convertValue2Torque   KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+X_SERIES_CURRENT_CONTROL_MODE                 LITERAL1
+X_SERIES_VELOCITY_CONTROL_MODE		            LITERAL1
+X_SERIES_POSITION_CONTROL_MODE		            LITERAL1
+X_SERIES_EXTENDED_POSITION_CONTROL_MODE		    LITERAL1
+X_SERIES_CURRENT_BASED_POSITION_CONTROL_MODE	LITERAL1
+X_SERIES_VOLTAGE_CONTROL_MODE	                LITERAL1
+PRO_SERIES_TORQUE_CONTROL_MODE                LITERAL1
+PRO_SERIES_VELOCITY_CONTROL_MODE              LITERAL1
+PRO_SERIES_POSITION_CONTROL_MODE              LITERAL1
+PRO_SERIES_EXTENDED_POSITION_CONTROL_MODE     LITERAL1

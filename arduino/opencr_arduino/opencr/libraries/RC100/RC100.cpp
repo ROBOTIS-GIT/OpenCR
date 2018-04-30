@@ -78,6 +78,8 @@ int RC100::available(void)
       return rc100Update(Serial4.read());
     }
   }
+
+  return false;
 }
 
 uint16_t RC100::readData(void)

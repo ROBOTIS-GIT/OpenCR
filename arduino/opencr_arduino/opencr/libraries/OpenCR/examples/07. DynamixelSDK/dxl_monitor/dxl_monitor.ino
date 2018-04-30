@@ -34,7 +34,7 @@ static void _printf(char *fmt, ... )
   char buf[128]; // resulting string limited to 128 chars
   char buf_out[128];
   va_list args;
-  int i;
+  size_t i;
   int i_out;
 
 
@@ -62,10 +62,12 @@ static void _printf(char *fmt, ... )
 
 static void _fprintf(FILE * stream, char *fmt, ... )
 {
+  UNUSED(stream);
+
   char buf[128]; // resulting string limited to 128 chars
   char buf_out[128];
   va_list args;
-  int i;
+  size_t i;
   int i_out;
 
   va_start (args, fmt );
@@ -110,6 +112,8 @@ int kbhit(void)
 
 char * fgets ( char * str, int num, FILE * stream )
 {
+  UNUSED(stream);
+
   char ch;
   int  index;
 
@@ -140,55 +144,55 @@ char * fgets ( char * str, int num, FILE * stream )
 
 void usage(char *progname)
 {
-  _printf("-----------------------------------------------------------------------\n");
-  _printf("Usage: %s\n");
-  _printf(" [-h | --help]........: display this help\n");
-  _printf("[-d | --device]......: port to open\n", progname);
-  _printf("-----------------------------------------------------------------------\n");
+  _printf((char*) "-----------------------------------------------------------------------\n");
+  _printf((char*) "Usage: %s\n");
+  _printf((char*) " [-h | --help]........: display this help\n");
+  _printf((char*) "[-d | --device]......: port to open\n", progname);
+  _printf((char*) "-----------------------------------------------------------------------\n");
 }
 
 void help()
 {
-  _printf("\n");
-  _printf("                    .----------------------------.\n");
-  _printf("                    |  DXL Monitor Command List  |\n");
-  _printf("                    '----------------------------'\n");
-  _printf(" =========================== Common Commands ===========================\n");
-  _printf(" \n");
-  _printf(" help|h|?                    :Displays help information\n");
-  _printf(" baud [BAUD_RATE]            :Changes baudrate to [BAUD_RATE] \n");
-  _printf("                               ex) baud 2400 (2400 bps) \n");
-  _printf("                               ex) baud 1000000 (1 Mbps)  \n");
-  _printf(" exit                        :Exit this program\n");
-  _printf(" scan                        :Outputs the current status of all Dynamixels\n");
-  _printf(" ping [ID] [ID] ...          :Outputs the current status of [ID]s \n");
-  _printf(" bp                          :Broadcast ping (Dynamixel Protocol 2.0 only)\n");
-  _printf(" \n");
-  _printf(" ==================== Commands for Dynamixel Protocol 1.0 ====================\n");
-  _printf(" \n");
-  _printf(" wrb1|w1 [ID] [ADDR] [VALUE] :Write byte [VALUE] to [ADDR] of [ID]\n");
-  _printf(" wrw1 [ID] [ADDR] [VALUE]    :Write word [VALUE] to [ADDR] of [ID]\n");
-  _printf(" rdb1 [ID] [ADDR]            :Read byte value from [ADDR] of [ID]\n");
-  _printf(" rdw1 [ID] [ADDR]            :Read word value from [ADDR] of [ID]\n");
-  _printf(" r1 [ID] [ADDR] [LENGTH]     :Dumps the control table of [ID]\n");
-  _printf("                               ([LENGTH] bytes from [ADDR])\n");
-  _printf(" reset1|rst1 [ID]            :Factory reset the Dynamixel of [ID]\n");
-  _printf(" \n");
-  _printf(" ==================== Commands for Dynamixel Protocol 2.0 ====================\n");
-  _printf(" \n");
-  _printf(" wrb2|w2 [ID] [ADDR] [VALUE] :Write byte [VALUE] to [ADDR] of [ID]\n");
-  _printf(" wrw2 [ID] [ADDR] [VALUE]    :Write word [VALUE] to [ADDR] of [ID]\n");
-  _printf(" wrd2 [ID] [ADDR] [VALUE]    :Write dword [VALUE] to [ADDR] of [ID]\n");
-  _printf(" rdb2 [ID] [ADDR]            :Read byte value from [ADDR] of [ID]\n");
-  _printf(" rdw2 [ID] [ADDR]            :Read word value from [ADDR] of [ID]\n");
-  _printf(" rdd2 [ID] [ADDR]            :Read dword value from [ADDR] of [ID]\n");
-  _printf(" r2 [ID] [ADDR] [LENGTH]     :Dumps the control table of [ID]\n");
-  _printf("                               ([LENGTH] bytes from [ADDR])\n");
-  _printf(" reboot2|rbt2 [ID]           :reboot the Dynamixel of [ID]\n");
-  _printf(" reset2|rst2 [ID] [OPTION]   :Factory reset the Dynamixel of [ID]\n");
-  _printf("                               OPTION: 255(All), 1(Except ID), 2(Except ID&Baud)\n");
+  _printf((char*) "\n");
+  _printf((char*) "                    .----------------------------.\n");
+  _printf((char*) "                    |  DXL Monitor Command List  |\n");
+  _printf((char*) "                    '----------------------------'\n");
+  _printf((char*) " =========================== Common Commands ===========================\n");
+  _printf((char*) " \n");
+  _printf((char*) " help|h|?                    :Displays help information\n");
+  _printf((char*) " baud [BAUD_RATE]            :Changes baudrate to [BAUD_RATE] \n");
+  _printf((char*) "                               ex) baud 2400 (2400 bps) \n");
+  _printf((char*) "                               ex) baud 1000000 (1 Mbps)  \n");
+  _printf((char*) " exit                        :Exit this program\n");
+  _printf((char*) " scan                        :Outputs the current status of all Dynamixels\n");
+  _printf((char*) " ping [ID] [ID] ...          :Outputs the current status of [ID]s \n");
+  _printf((char*) " bp                          :Broadcast ping (Dynamixel Protocol 2.0 only)\n");
+  _printf((char*) " \n");
+  _printf((char*) " ==================== Commands for Dynamixel Protocol 1.0 ====================\n");
+  _printf((char*) " \n");
+  _printf((char*) " wrb1|w1 [ID] [ADDR] [VALUE] :Write byte [VALUE] to [ADDR] of [ID]\n");
+  _printf((char*) " wrw1 [ID] [ADDR] [VALUE]    :Write word [VALUE] to [ADDR] of [ID]\n");
+  _printf((char*) " rdb1 [ID] [ADDR]            :Read byte value from [ADDR] of [ID]\n");
+  _printf((char*) " rdw1 [ID] [ADDR]            :Read word value from [ADDR] of [ID]\n");
+  _printf((char*) " r1 [ID] [ADDR] [LENGTH]     :Dumps the control table of [ID]\n");
+  _printf((char*) "                               ([LENGTH] bytes from [ADDR])\n");
+  _printf((char*) " reset1|rst1 [ID]            :Factory reset the Dynamixel of [ID]\n");
+  _printf((char*) " \n");
+  _printf((char*) " ==================== Commands for Dynamixel Protocol 2.0 ====================\n");
+  _printf((char*) " \n");
+  _printf((char*) " wrb2|w2 [ID] [ADDR] [VALUE] :Write byte [VALUE] to [ADDR] of [ID]\n");
+  _printf((char*) " wrw2 [ID] [ADDR] [VALUE]    :Write word [VALUE] to [ADDR] of [ID]\n");
+  _printf((char*) " wrd2 [ID] [ADDR] [VALUE]    :Write dword [VALUE] to [ADDR] of [ID]\n");
+  _printf((char*) " rdb2 [ID] [ADDR]            :Read byte value from [ADDR] of [ID]\n");
+  _printf((char*) " rdw2 [ID] [ADDR]            :Read word value from [ADDR] of [ID]\n");
+  _printf((char*) " rdd2 [ID] [ADDR]            :Read dword value from [ADDR] of [ID]\n");
+  _printf((char*) " r2 [ID] [ADDR] [LENGTH]     :Dumps the control table of [ID]\n");
+  _printf((char*) "                               ([LENGTH] bytes from [ADDR])\n");
+  _printf((char*) " reboot2|rbt2 [ID]           :reboot the Dynamixel of [ID]\n");
+  _printf((char*) " reset2|rst2 [ID] [OPTION]   :Factory reset the Dynamixel of [ID]\n");
+  _printf((char*) "                               OPTION: 255(All), 1(Except ID), 2(Except ID&Baud)\n");
 
-  _printf("\n");
+  _printf((char*) "\n");
 }
 
 void scan(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler *packetHandler1, dynamixel::PacketHandler *packetHandler2)
@@ -196,17 +200,17 @@ void scan(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler *packetH
   uint8_t dxl_error;
   uint16_t dxl_model_num;
 
-  _fprintf(stderr, "\n");
-  _fprintf(stderr, "Scan Dynamixel Using Protocol 1.0\n");
+  _fprintf(stderr, (char*) "\n");
+  _fprintf(stderr, (char*) "Scan Dynamixel Using Protocol 1.0\n");
   for (int id = 1; id < 253; id++)
   {
     if (packetHandler1-> ping(portHandler, id, &dxl_model_num, &dxl_error)== COMM_SUCCESS)
     {
-      _fprintf(stderr, "\n                                          ... SUCCESS \r");
-      _fprintf(stderr, " [ID:%.3d] Model No : %.5d \n", id, dxl_model_num);
+      _fprintf(stderr, (char*) "\n                                          ... SUCCESS \r");
+      _fprintf(stderr, (char*) " [ID:%.3d] Model No : %.5d \n", id, dxl_model_num);
     }
     else
-        _fprintf(stderr, ".");
+        _fprintf(stderr, (char*) ".");
 
     if (kbhit())
     {
@@ -215,19 +219,19 @@ void scan(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler *packetH
         break;
     }
   }
-  _fprintf(stderr, "\n\n");
+  _fprintf(stderr, (char*) "\n\n");
 
-  _fprintf(stderr, "Scan Dynamixel Using Protocol 2.0\n");
+  _fprintf(stderr, (char*) "Scan Dynamixel Using Protocol 2.0\n");
   for (int id = 1; id < 253; id++)
   {
     if (packetHandler2-> ping(portHandler, id, &dxl_model_num, &dxl_error)== COMM_SUCCESS)
     {
-      _fprintf(stderr, "\n                                          ... SUCCESS \r");
-      _fprintf(stderr, " [ID:%.3d] Model No : %.5d \n", id, dxl_model_num);
+      _fprintf(stderr, (char*) "\n                                          ... SUCCESS \r");
+      _fprintf(stderr, (char*) " [ID:%.3d] Model No : %.5d \n", id, dxl_model_num);
     }
     else
     {
-      _fprintf(stderr, ".");
+      _fprintf(stderr, (char*) ".");
     }
 
     if (kbhit())
@@ -236,7 +240,7 @@ void scan(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler *packetH
       if (c == 0x1b) break;
     }
   }
-  _fprintf(stderr, "\n\n");
+  _fprintf(stderr, (char*) "\n\n");
 }
 
 void write(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler *packetHandler, uint8_t id, uint16_t addr, uint16_t length, uint32_t value)
@@ -260,12 +264,12 @@ void write(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler *packet
   if (dxl_comm_result == COMM_SUCCESS)
   {
     if (dxl_error != 0) Serial.print(packetHandler->getRxPacketError(dxl_error));
-    _fprintf(stderr, "\n Success to write\n\n");
+    _fprintf(stderr, (char*) "\n Success to write\n\n");
   }
   else
   {
     Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
-    _fprintf(stderr, "\n Fail to write! \n\n");
+    _fprintf(stderr, (char*) "\n Fail to write! \n\n");
   }
 }
 
@@ -298,21 +302,21 @@ void read(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler *packetH
 
     if (length == 1)
     {
-      _fprintf(stderr, "\n READ VALUE : (UNSIGNED) %u , (SIGNED) %d \n\n", (uint8_t)value8, value8);
+      _fprintf(stderr, (char*) "\n READ VALUE : (UNSIGNED) %u , (SIGNED) %d \n\n", (uint8_t)value8, value8);
     }
     else if (length == 2)
     {
-      _fprintf(stderr, "\n READ VALUE : (UNSIGNED) %u , (SIGNED) %d \n\n", (uint16_t)value16, value16);
+      _fprintf(stderr, (char*) "\n READ VALUE : (UNSIGNED) %u , (SIGNED) %d \n\n", (uint16_t)value16, value16);
     }
     else if (length == 4)
     {
-      _fprintf(stderr, "\n READ VALUE : (UNSIGNED) %u , (SIGNED) %d \n\n", (uint32_t)value32, value32);
+      _fprintf(stderr, (char*) "\n READ VALUE : (UNSIGNED) %u , (SIGNED) %d \n\n", (uint32_t)value32, value32);
     }
   }
   else
   {
     Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
-    _fprintf(stderr, "\n Fail to read! \n\n");
+    _fprintf(stderr, (char*) "\n Fail to read! \n\n");
   }
 }
 
@@ -330,16 +334,16 @@ void dump(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler *packetH
 
     if (id != BROADCAST_ID)
     {
-      _fprintf(stderr, "\n");
+      _fprintf(stderr, (char*) "\n");
       for (int i = addr; i < addr+len; i++)
-      _fprintf(stderr, "ADDR %.3d [0x%.4X] :     %.3d [0x%.2X] \n", i, i, data[i-addr], data[i-addr]);
-      _fprintf(stderr, "\n");
+      _fprintf(stderr, (char*) "ADDR %.3d [0x%.4X] :     %.3d [0x%.2X] \n", i, i, data[i-addr], data[i-addr]);
+      _fprintf(stderr, (char*) "\n");
     }
   }
   else
   {
     Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
-    _fprintf(stderr, "\n Fail to read! \n\n");
+    _fprintf(stderr, (char*) "\n Fail to read! \n\n");
   }
 
   free(data);
@@ -353,9 +357,9 @@ void dxl_monitor_main(void)
   // Initialize Packethandler2 instance
   dynamixel::PacketHandler *packetHandler2 = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION2);
 
-  _fprintf(stderr, "\n***********************************************************************\n");
-  _fprintf(stderr,   "*                            DXL Monitor                              *\n");
-  _fprintf(stderr,   "***********************************************************************\n\n");
+  _fprintf(stderr, (char*) "\n***********************************************************************\n");
+  _fprintf(stderr, (char*)   "*                            DXL Monitor                              *\n");
+  _fprintf(stderr, (char*)   "***********************************************************************\n\n");
 
   char *dev_name = (char*)DEVICENAME;
 
@@ -368,13 +372,13 @@ void dxl_monitor_main(void)
   // Open port
   if (portHandler->openPort())
   {
-    _printf("Succeeded to open the port!\r\n");
-    _printf(" - Device Name : %s\r\n", dev_name);
-    _printf(" - Baudrate    : %d\r\n", portHandler->getBaudRate());
+    _printf((char*) "Succeeded to open the port!\r\n");
+    _printf((char*) " - Device Name : %s\r\n", dev_name);
+    _printf((char*) " - Baudrate    : %d\r\n", portHandler->getBaudRate());
   }
   else
   {
-    _printf("Failed to open the port! [%s]\n", dev_name);
+    _printf((char*) "Failed to open the port! [%s]\n", dev_name);
   }
 
   char    input[128];
@@ -386,7 +390,7 @@ void dxl_monitor_main(void)
 
   while(1)
   {
-    _printf("[CMD] ");
+    _printf((char*) "[CMD] ");
     fgets(input, sizeof(input), stdin);
     char *p;
     if ((p = strchr(input, '\n'))!= NULL) *p = '\0';
@@ -415,13 +419,13 @@ void dxl_monitor_main(void)
       if (num_param == 1)
       {
         if (portHandler->setBaudRate(atoi(param[0])) == false)
-          _fprintf(stderr, " Failed to change baudrate! \n");
+          _fprintf(stderr, (char*) " Failed to change baudrate! \n");
         else
-          _fprintf(stderr, " Success to change baudrate! [ BAUD RATE: %d ]\n", atoi(param[0]));
+          _fprintf(stderr, (char*) " Success to change baudrate! [ BAUD RATE: %d ]\n", atoi(param[0]));
       }
       else
       {
-        _fprintf(stderr, " Invalid parameters! \n");
+        _fprintf(stderr, (char*) " Invalid parameters! \n");
         continue;
       }
     }
@@ -440,43 +444,43 @@ void dxl_monitor_main(void)
 
       if (num_param == 0)
       {
-        _fprintf(stderr, " Invalid parameters! \n");
+        _fprintf(stderr, (char*) " Invalid parameters! \n");
         continue;
       }
 
-      _fprintf(stderr, "\n");
-      _fprintf(stderr, "ping Using Protocol 1.0\n");
+      _fprintf(stderr, (char*) "\n");
+      _fprintf(stderr, (char*) "ping Using Protocol 1.0\n");
       for (int i = 0; i < num_param; i++)
       {
         if (packetHandler1->ping(portHandler, atoi(param[i]), &dxl_model_num, &dxl_error) == COMM_SUCCESS)
         {
-          _fprintf(stderr, "\n                                          ... SUCCESS \r");
-          _fprintf(stderr, " [ID:%.3d] Model No : %.5d \n", atoi(param[i]), dxl_model_num);
+          _fprintf(stderr, (char*) "\n                                          ... SUCCESS \r");
+          _fprintf(stderr, (char*) " [ID:%.3d] Model No : %.5d \n", atoi(param[i]), dxl_model_num);
         }
         else
         {
-          _fprintf(stderr, "\n                                          ... FAIL \r");
-          _fprintf(stderr, " [ID:%.3d] \n", atoi(param[i]));
+          _fprintf(stderr, (char*) "\n                                          ... FAIL \r");
+          _fprintf(stderr, (char*) " [ID:%.3d] \n", atoi(param[i]));
         }
       }
-      _fprintf(stderr, "\n");
+      _fprintf(stderr, (char*) "\n");
 
-      _fprintf(stderr, "\n");
-      _fprintf(stderr, "ping Using Protocol 2.0\n");
+      _fprintf(stderr, (char*) "\n");
+      _fprintf(stderr, (char*) "ping Using Protocol 2.0\n");
       for (int i = 0; i < num_param; i++)
       {
         if (packetHandler2->ping(portHandler, atoi(param[i]), &dxl_model_num, &dxl_error) == COMM_SUCCESS)
         {
-          _fprintf(stderr, "\n                                          ... SUCCESS \r");
-          _fprintf(stderr, " [ID:%.3d] Model No : %.5d \n", atoi(param[i]), dxl_model_num);
+          _fprintf(stderr, (char*) "\n                                          ... SUCCESS \r");
+          _fprintf(stderr, (char*) " [ID:%.3d] Model No : %.5d \n", atoi(param[i]), dxl_model_num);
         }
         else
         {
-          _fprintf(stderr, "\n                                          ... FAIL \r");
-          _fprintf(stderr, " [ID:%.3d] \n", atoi(param[i]));
+          _fprintf(stderr, (char*) "\n                                          ... FAIL \r");
+          _fprintf(stderr, (char*) " [ID:%.3d] \n", atoi(param[i]));
         }
       }
-      _fprintf(stderr, "\n");
+      _fprintf(stderr, (char*) "\n");
     }
     else if (strcmp(cmd, "bp") == 0)
     {
@@ -489,14 +493,14 @@ void dxl_monitor_main(void)
 
         for (unsigned int i = 0; i < vec.size(); i++)
         {
-          _fprintf(stderr, "\n                                          ... SUCCESS \r");
-          _fprintf(stderr, " [ID:%.3d] \n", vec.at(i));
+          _fprintf(stderr, (char*) "\n                                          ... SUCCESS \r");
+          _fprintf(stderr, (char*) " [ID:%.3d] \n", vec.at(i));
         }
-        _printf("\n");
+        _printf((char*) "\n");
       }
       else
       {
-        _fprintf(stderr, " Invalid parameters! \n");
+        _fprintf(stderr, (char*) " Invalid parameters! \n");
       }
     }
     else if (strcmp(cmd, "wrb1") == 0 || strcmp(cmd, "w1") == 0)
@@ -507,7 +511,7 @@ void dxl_monitor_main(void)
       }
       else
       {
-        _fprintf(stderr, " Invalid parameters! \n");
+        _fprintf(stderr, (char*) " Invalid parameters! \n");
       }
     }
     else if (strcmp(cmd, "wrb2") == 0 || strcmp(cmd, "w2") == 0)
@@ -518,7 +522,7 @@ void dxl_monitor_main(void)
       }
       else
       {
-        _fprintf(stderr, " Invalid parameters! \n");
+        _fprintf(stderr, (char*) " Invalid parameters! \n");
       }
     }
     else if (strcmp(cmd, "wrw1") == 0)
@@ -529,7 +533,7 @@ void dxl_monitor_main(void)
       }
       else
       {
-        _fprintf(stderr, " Invalid parameters! \n");
+        _fprintf(stderr, (char*) " Invalid parameters! \n");
       }
     }
     else if (strcmp(cmd, "wrw2") == 0)
@@ -540,7 +544,7 @@ void dxl_monitor_main(void)
       }
       else
       {
-        _fprintf(stderr, " Invalid parameters! \n");
+        _fprintf(stderr, (char*) " Invalid parameters! \n");
       }
     }
     else if (strcmp(cmd, "wrd2") == 0)
@@ -551,7 +555,7 @@ void dxl_monitor_main(void)
       }
       else
       {
-        _fprintf(stderr, " Invalid parameters! \n");
+        _fprintf(stderr, (char*) " Invalid parameters! \n");
       }
     }
     else if (strcmp(cmd, "rdb1") == 0)
@@ -562,7 +566,7 @@ void dxl_monitor_main(void)
       }
       else
       {
-        _fprintf(stderr, " Invalid parameters! \n");
+        _fprintf(stderr, (char*) " Invalid parameters! \n");
       }
     }
     else if (strcmp(cmd, "rdb2") == 0)
@@ -573,7 +577,7 @@ void dxl_monitor_main(void)
       }
       else
       {
-        _fprintf(stderr, " Invalid parameters! \n");
+        _fprintf(stderr, (char*) " Invalid parameters! \n");
       }
     }
     else if (strcmp(cmd, "rdw1") == 0)
@@ -584,7 +588,7 @@ void dxl_monitor_main(void)
       }
       else
       {
-        _fprintf(stderr, " Invalid parameters! \n");
+        _fprintf(stderr, (char*) " Invalid parameters! \n");
       }
     }
     else if (strcmp(cmd, "rdw2") == 0)
@@ -595,7 +599,7 @@ void dxl_monitor_main(void)
       }
       else
       {
-        _fprintf(stderr, " Invalid parameters! \n");
+        _fprintf(stderr, (char*) " Invalid parameters! \n");
       }
     }
     else if (strcmp(cmd, "rdd2") == 0)
@@ -606,7 +610,7 @@ void dxl_monitor_main(void)
       }
       else
       {
-        _fprintf(stderr, " Invalid parameters! \n");
+        _fprintf(stderr, (char*) " Invalid parameters! \n");
       }
     }
     else if (strcmp(cmd, "r1") == 0)
@@ -616,7 +620,7 @@ void dxl_monitor_main(void)
         dump(portHandler, packetHandler1, atoi(param[0]), atoi(param[1]), atoi(param[2]));
       }
       else{
-        _fprintf(stderr, " Invalid parameters! \n");}
+        _fprintf(stderr, (char*) " Invalid parameters! \n");}
     }
     else if (strcmp(cmd, "r2") == 0)
     {
@@ -626,7 +630,7 @@ void dxl_monitor_main(void)
       }
       else
       {
-        _fprintf(stderr, " Invalid parameters! \n");
+        _fprintf(stderr, (char*) " Invalid parameters! \n");
       }
     }
     else if (strcmp(cmd, "reboot2") == 0 || strcmp(cmd, "rbt2") == 0)
@@ -637,17 +641,17 @@ void dxl_monitor_main(void)
         if (dxl_comm_result == COMM_SUCCESS)
         {
           if (dxl_error != 0) packetHandler2->printRxPacketError(dxl_error);
-          _fprintf(stderr, "\n Success to reboot! \n\n");
+          _fprintf(stderr, (char*) "\n Success to reboot! \n\n");
         }
         else
         {
           packetHandler2->printTxRxResult(dxl_comm_result);
-          _fprintf(stderr, "\n Fail to reboot! \n\n");
+          _fprintf(stderr, (char*) "\n Fail to reboot! \n\n");
         }
       }
       else
       {
-          _fprintf(stderr, " Invalid parameters! \n");
+          _fprintf(stderr, (char*) " Invalid parameters! \n");
       }
     }
     else if (strcmp(cmd, "reset1") == 0 || strcmp(cmd, "rst1") == 0)
@@ -659,17 +663,17 @@ void dxl_monitor_main(void)
         {
           if (dxl_error != 0)
             packetHandler1->printRxPacketError(dxl_error);
-          _fprintf(stderr, "\n Success to reset! \n\n");
+          _fprintf(stderr, (char*) "\n Success to reset! \n\n");
         }
         else
         {
           packetHandler1->printTxRxResult(dxl_comm_result);
-          _fprintf(stderr, "\n Fail to reset! \n\n");
+          _fprintf(stderr, (char*) "\n Fail to reset! \n\n");
         }
       }
       else
       {
-        _fprintf(stderr, " Invalid parameters! \n");
+        _fprintf(stderr, (char*) " Invalid parameters! \n");
       }
     }
     else if (strcmp(cmd, "reset2") == 0 || strcmp(cmd, "rst2") == 0)
@@ -680,22 +684,22 @@ void dxl_monitor_main(void)
         if (dxl_comm_result == COMM_SUCCESS)
         {
           if (dxl_error != 0) packetHandler2->printRxPacketError(dxl_error);
-          _fprintf(stderr, "\n Success to reset! \n\n");
+          _fprintf(stderr, (char*) "\n Success to reset! \n\n");
         }
         else
         {
           packetHandler2->printTxRxResult(dxl_comm_result);
-          _fprintf(stderr, "\n Fail to reset! \n\n");
+          _fprintf(stderr, (char*) "\n Fail to reset! \n\n");
         }
       }
       else
       {
-        _fprintf(stderr, " Invalid parameters! \n");
+        _fprintf(stderr, (char*) " Invalid parameters! \n");
       }
     }
     else
     {
-      _printf(" Bad command! Please input 'help'.\n");
+      _printf((char*) " Bad command! Please input 'help'.\n");
     }
   }
 }

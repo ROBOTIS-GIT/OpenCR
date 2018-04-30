@@ -21,6 +21,7 @@
 void wdg_init(void);
 BOOL wdg_setup(uint32_t reload_time);
 BOOL wdg_start(void);
+BOOL wdg_refresh(void);
 BOOL wdg_get_reset(void);
 
 #ifdef __cplusplus

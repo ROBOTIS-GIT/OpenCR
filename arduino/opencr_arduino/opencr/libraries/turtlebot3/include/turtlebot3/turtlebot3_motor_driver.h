@@ -30,7 +30,7 @@
 #define ADDR_X_PRESENT_POSITION         132
 
 // Limit values (XM430-W210-T)
-#define LIMIT_X_MAX_VELOCITY            240
+#define LIMIT_X_MAX_VELOCITY            400
 
 // Data Byte Length
 #define LEN_X_TORQUE_ENABLE             1

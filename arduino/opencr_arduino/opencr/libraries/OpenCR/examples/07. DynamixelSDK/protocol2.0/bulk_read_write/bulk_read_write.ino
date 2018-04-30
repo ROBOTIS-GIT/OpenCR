@@ -92,10 +92,10 @@ int kbhit(void)
 
 void setup()
 {
-  Serial.begin(115200);
-  while(!Serial);
+  CMD_SERIAL.begin(115200);
+  while(!CMD_SERIAL);
 
-  Serial.println("Start..");
+  CMD_SERIAL.println("Start..");
 
   // Initialize PortHandler instance
   // Set the port path
@@ -116,7 +116,7 @@ void setup()
   int index = 0;
   int dxl_comm_result = COMM_TX_FAIL;             // Communication result
   bool dxl_addparam_result = false;                // addParam result
-  bool dxl_getdata_result = false;                 // GetParam result
+  //bool dxl_getdata_result = false;                 // GetParam result
   int dxl_goal_position[2] = {DXL_MINIMUM_POSITION_VALUE, DXL_MAXIMUM_POSITION_VALUE};         // Goal position
 
   uint8_t dxl_error = 0;                          // Dynamixel error
@@ -128,22 +128,22 @@ void setup()
   // Open port
   if (portHandler->openPort())
   {
-    Serial.print("Succeeded to open the port!\n");
+    CMD_SERIAL.print("Succeeded to open the port!\n");
   }
   else
   {
-    Serial.print("Failed to open the port!\n");
+    CMD_SERIAL.print("Failed to open the port!\n");
     return;
   }
 
   // Set port baudrate
   if (portHandler->setBaudRate(BAUDRATE))
   {
-    Serial.print("Succeeded to change the baudrate!\n");
+    CMD_SERIAL.print("Succeeded to change the baudrate!\n");
   }
   else
   {
-    Serial.print("Failed to change the baudrate!\n");
+    CMD_SERIAL.print("Failed to change the baudrate!\n");
     return;
   }
 
@@ -151,37 +151,37 @@ void setup()
   dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL1_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_ENABLE, &dxl_error);
   if (dxl_comm_result != COMM_SUCCESS)
   {
-    Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
+    CMD_SERIAL.print(packetHandler->getTxRxResult(dxl_comm_result));
   }
   else if (dxl_error != 0)
   {
-    Serial.print(packetHandler->getRxPacketError(dxl_error));
+    CMD_SERIAL.print(packetHandler->getRxPacketError(dxl_error));
   }
   else
   {
-    Serial.print("Dynamixel#1 has been successfully connected \n");
+    CMD_SERIAL.print("Dynamixel#1 has been successfully connected \n");
   }
 
   // Enable Dynamixel#2 Torque
   dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL2_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_ENABLE, &dxl_error);
   if (dxl_comm_result != COMM_SUCCESS)
   {
-    Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
+    CMD_SERIAL.print(packetHandler->getTxRxResult(dxl_comm_result));
   }
   else if (dxl_error != 0)
   {
-    Serial.print(packetHandler->getRxPacketError(dxl_error));
+    CMD_SERIAL.print(packetHandler->getRxPacketError(dxl_error));
   }
   else
   {
-    Serial.print("Dynamixel#2 has been successfully connected \n");
+    CMD_SERIAL.print("Dynamixel#2 has been successfully connected \n");
   }
 
   // Add parameter storage for Dynamixel#1 present position
   dxl_addparam_result = groupBulkRead.addParam(DXL1_ID, ADDR_PRO_PRESENT_POSITION, LEN_PRO_PRESENT_POSITION);
   if (dxl_addparam_result != true)
   {
-    Serial.print("[ID:"); Serial.print(DXL1_ID); Serial.println("groupBulkRead addparam failed");
+    CMD_SERIAL.print("[ID:"); CMD_SERIAL.print(DXL1_ID); CMD_SERIAL.println("groupBulkRead addparam failed");
     return;
   }
 
@@ -189,13 +189,13 @@ void setup()
   dxl_addparam_result = groupBulkRead.addParam(DXL2_ID, ADDR_PRO_LED_RED, LEN_PRO_LED_RED);
   if (dxl_addparam_result != true)
   {
-    Serial.print("[ID:"); Serial.print(DXL2_ID); Serial.println("groupBulkRead addparam failed");
+    CMD_SERIAL.print("[ID:"); CMD_SERIAL.print(DXL2_ID); CMD_SERIAL.println("groupBulkRead addparam failed");
     return;
   }
 
   while(1)
   {
-    Serial.print("Press any key to continue! (or press q to quit!)\n");
+    CMD_SERIAL.print("Press any key to continue! (or press q to quit!)\n");
     if (getch() == 'q')
       break;
 
@@ -209,7 +209,7 @@ void setup()
     dxl_addparam_result = groupBulkWrite.addParam(DXL1_ID, ADDR_PRO_GOAL_POSITION, LEN_PRO_GOAL_POSITION, param_goal_position);
     if (dxl_addparam_result != true)
     {
-      Serial.print("[ID:"); Serial.print(DXL1_ID); Serial.println("groupBulkWrite addparam failed");
+      CMD_SERIAL.print("[ID:"); CMD_SERIAL.print(DXL1_ID); CMD_SERIAL.println("groupBulkWrite addparam failed");
       return;
     }
 
@@ -217,13 +217,13 @@ void setup()
     dxl_addparam_result = groupBulkWrite.addParam(DXL2_ID, ADDR_PRO_LED_RED, LEN_PRO_LED_RED, &dxl_led_value[index]);
     if (dxl_addparam_result != true)
     {
-      Serial.print("[ID:"); Serial.print(DXL2_ID); Serial.println("groupBulkWrite addparam failed");
+      CMD_SERIAL.print("[ID:"); CMD_SERIAL.print(DXL2_ID); CMD_SERIAL.println("groupBulkWrite addparam failed");
       return;
     }
 
     // Bulkwrite goal position and LED value
     dxl_comm_result = groupBulkWrite.txPacket();
-    if (dxl_comm_result != COMM_SUCCESS) Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
+    if (dxl_comm_result != COMM_SUCCESS) CMD_SERIAL.print(packetHandler->getTxRxResult(dxl_comm_result));
 
     // Clear bulkwrite parameter storage
     groupBulkWrite.clearParam();
@@ -232,21 +232,21 @@ void setup()
     {
       // Bulkread present position and LED status
       dxl_comm_result = groupBulkRead.txRxPacket();
-      if (dxl_comm_result != COMM_SUCCESS) Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
+      if (dxl_comm_result != COMM_SUCCESS) CMD_SERIAL.print(packetHandler->getTxRxResult(dxl_comm_result));
 
       // Check if groupbulkread data of Dynamixel#1 is available
-      dxl_getdata_result = groupBulkRead.isAvailable(DXL1_ID, ADDR_PRO_PRESENT_POSITION, LEN_PRO_PRESENT_POSITION);
+      groupBulkRead.isAvailable(DXL1_ID, ADDR_PRO_PRESENT_POSITION, LEN_PRO_PRESENT_POSITION);
       if (dxl_addparam_result != true)
       {
-        Serial.print("[ID:"); Serial.print(DXL1_ID); Serial.println("groupBulkRead getdata failed");
+        CMD_SERIAL.print("[ID:"); CMD_SERIAL.print(DXL1_ID); CMD_SERIAL.println("groupBulkRead getdata failed");
         return;
       }
 
       // Check if groupbulkread data of Dynamixel#2 is available
-      dxl_getdata_result = groupBulkRead.isAvailable(DXL2_ID, ADDR_PRO_LED_RED, LEN_PRO_LED_RED);
+      groupBulkRead.isAvailable(DXL2_ID, ADDR_PRO_LED_RED, LEN_PRO_LED_RED);
       if (dxl_addparam_result != true)
       {
-        Serial.print("[ID:"); Serial.print(DXL2_ID); Serial.println("groupBulkRead getdata failed");
+        CMD_SERIAL.print("[ID:"); CMD_SERIAL.print(DXL2_ID); CMD_SERIAL.println("groupBulkRead getdata failed");
         return;
       }
 
@@ -256,11 +256,11 @@ void setup()
       // Get LED value
       dxl2_led_value_read = groupBulkRead.getData(DXL2_ID, ADDR_PRO_LED_RED, LEN_PRO_LED_RED);
 
-      Serial.print("[ID:"); Serial.print(DXL1_ID);
-      Serial.print("] Present Position : "); Serial.print(dxl1_present_position);
-      Serial.print("  [ID:"); Serial.print(DXL2_ID);
-      Serial.print("] LED Value:"); Serial.print(dxl2_led_value_read);
-      Serial.println(" ");
+      CMD_SERIAL.print("[ID:"); CMD_SERIAL.print(DXL1_ID);
+      CMD_SERIAL.print("] Present Position : "); CMD_SERIAL.print(dxl1_present_position);
+      CMD_SERIAL.print("  [ID:"); CMD_SERIAL.print(DXL2_ID);
+      CMD_SERIAL.print("] LED Value:"); CMD_SERIAL.print(dxl2_led_value_read);
+      CMD_SERIAL.println(" ");
 
     }while(abs(dxl_goal_position[index] - dxl1_present_position) > DXL_MOVING_STATUS_THRESHOLD);
 
@@ -279,22 +279,22 @@ void setup()
   dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL1_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_DISABLE, &dxl_error);
   if (dxl_comm_result != COMM_SUCCESS)
   {
-    Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
+    CMD_SERIAL.print(packetHandler->getTxRxResult(dxl_comm_result));
   }
   else if (dxl_error != 0)
   {
-    Serial.print(packetHandler->getRxPacketError(dxl_error));
+    CMD_SERIAL.print(packetHandler->getRxPacketError(dxl_error));
   }
 
   // Disable Dynamixel#2 Torque
   dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL2_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_DISABLE, &dxl_error);
   if (dxl_comm_result != COMM_SUCCESS)
   {
-    Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
+    CMD_SERIAL.print(packetHandler->getTxRxResult(dxl_comm_result));
   }
   else if (dxl_error != 0)
   {
-    Serial.print(packetHandler->getRxPacketError(dxl_error));
+    CMD_SERIAL.print(packetHandler->getRxPacketError(dxl_error));
   }
 
   // Close port

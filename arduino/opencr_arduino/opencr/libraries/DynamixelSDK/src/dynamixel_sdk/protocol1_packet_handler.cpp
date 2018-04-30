@@ -349,6 +349,10 @@ int Protocol1PacketHandler::txRxPacket(PortHandler *port, uint8_t *txpacket, uin
 
 int Protocol1PacketHandler::ping(PortHandler *port, uint8_t id, uint8_t *error)
 {
+  UNUSED(port);
+  UNUSED(id);
+  UNUSED(error);
+
   return ping(port, id, 0, error);
 }
 
@@ -379,6 +383,9 @@ int Protocol1PacketHandler::ping(PortHandler *port, uint8_t id, uint16_t *model_
 
 int Protocol1PacketHandler::broadcastPing(PortHandler *port, std::vector<uint8_t> &id_list)
 {
+  UNUSED(port);
+  UNUSED(id_list);
+
   return COMM_NOT_AVAILABLE;
 }
 
@@ -395,11 +402,17 @@ int Protocol1PacketHandler::action(PortHandler *port, uint8_t id)
 
 int Protocol1PacketHandler::reboot(PortHandler *port, uint8_t id, uint8_t *error)
 {
+  UNUSED(port);
+  UNUSED(id);
+  UNUSED(error);
+
   return COMM_NOT_AVAILABLE;
 }
 
 int Protocol1PacketHandler::factoryReset(PortHandler *port, uint8_t id, uint8_t option, uint8_t *error)
 {
+  UNUSED(option);
+
   uint8_t txpacket[6]         = {0};
   uint8_t rxpacket[6]         = {0};
 
@@ -688,6 +701,12 @@ int Protocol1PacketHandler::regWriteTxRx(PortHandler *port, uint8_t id, uint16_t
 
 int Protocol1PacketHandler::syncReadTx(PortHandler *port, uint16_t start_address, uint16_t data_length, uint8_t *param, uint16_t param_length)
 {
+  UNUSED(port);
+  UNUSED(start_address);
+  UNUSED(data_length);
+  UNUSED(param);
+  UNUSED(param_length);
+
   return COMM_NOT_AVAILABLE;
 }
 
@@ -749,5 +768,9 @@ int Protocol1PacketHandler::bulkReadTx(PortHandler *port, uint8_t *param, uint16
 
 int Protocol1PacketHandler::bulkWriteTxOnly(PortHandler *port, uint8_t *param, uint16_t param_length)
 {
+  UNUSED(port);
+  UNUSED(param);
+  UNUSED(param_length);
+
   return COMM_NOT_AVAILABLE;
 }

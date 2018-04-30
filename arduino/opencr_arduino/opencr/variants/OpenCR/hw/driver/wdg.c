@@ -10,7 +10,7 @@
 
 
 static IWDG_HandleTypeDef IwdgHandle;
-
+static BOOL is_setup = FALSE;
 
 
 void wdg_init()
@@ -29,11 +29,30 @@ BOOL wdg_setup(uint32_t reload_time)
   {
     return FALSE;
   }
+
+  is_setup = TRUE;
+
+  return TRUE;
 }
 
 BOOL wdg_start(void)
 {
   if (HAL_IWDG_Start(&IwdgHandle) != HAL_OK)
+  {
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+BOOL wdg_refresh(void)
+{
+  if(is_setup == FALSE)
+  {
+    return FALSE;
+  }
+
+  if(HAL_IWDG_Refresh(&IwdgHandle) != HAL_OK)
   {
     return FALSE;
   }

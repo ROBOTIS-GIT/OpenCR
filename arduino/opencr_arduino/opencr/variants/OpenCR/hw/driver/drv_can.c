@@ -5,6 +5,7 @@
  *      Author: opus
  */
 
+#include <string.h>
 #include "drv_can.h"
 #include "hw.h"
 #include "ring.h"

@@ -223,8 +223,8 @@ int OLLO::read(int devNum, OlloDeviceIndex device_index){ // IR SENSOR, Button, 
 	int adcValue = 0;
 
 	signed int scount;
-	word  vvalue = 0;
-	word analogValue;
+	word long vvalue = 0;
+	uint32_t analogValue;
 	int distance_value = 0;
 	int dis_value = 0;
 
@@ -524,16 +524,17 @@ void OLLO::setColor(ColorIndex colorIndex){
 
 int OLLO::detectColor(uint8_t port){
 
-	int temp_red,temp_green,temp_blue;
+	// int temp_red,temp_green,temp_blue;
 
-	temp_red = 0;
-	temp_green = 0;
-	temp_blue= 0;
+	// temp_red = 0;
+	// temp_green = 0;
+	// temp_blue= 0;
 	int lColor[3]= {0,0,0};
 	int lRed,lGreen,lBlue;
-	int bMaxColor, bMinColor, bColorResult;
-	bMaxColor=0;
-	bMinColor=0;
+	//int bMaxColor, bMinColor;
+	//bMaxColor=0;
+	//bMinColor=0;
+	int bColorResult;
 	bColorResult=0;
 
 	lRed = this->read(port, COLOR_SENSOR, RED);
@@ -546,34 +547,34 @@ int OLLO::detectColor(uint8_t port){
 
 	if(lRed >= lGreen && lRed >= lBlue)
 	{
-	       bMaxColor = 1;
+	       //bMaxColor = 1;
 	       lColor[0] = lRed;
 	}
 	else if(lGreen >= lRed && lGreen >= lBlue)
 	{
-	       bMaxColor = 2;
+	       //bMaxColor = 2;
 	       lColor[0] = lGreen;
 	}
 
 	else if(lBlue >= lRed && lBlue >= lGreen)
 	{
-	       bMaxColor = 3;
+	       //bMaxColor = 3;
 	       lColor[0] = lBlue;
 	}
 	if(lRed <= lGreen && lRed <= lBlue)
 	{
-	       bMinColor = 1;
+	       //bMinColor = 1;
 	       lColor[2] = lRed;
 	}
 	else if(lGreen <= lRed && lGreen <= lBlue)
 	{
-	       bMinColor = 2;
+	       //bMinColor = 2;
 	       lColor[2] = lGreen;
 	}
 
 	else if(lBlue <= lRed && lBlue <= lGreen)
 	{
-	       bMinColor = 3;
+	       //bMinColor = 3;
 	       lColor[2] = lBlue;
 	}
 

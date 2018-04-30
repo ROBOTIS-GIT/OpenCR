@@ -330,9 +330,11 @@ void cMPU9250::acc_get_adc( void )
 ---------------------------------------------------------------------------*/
 void cMPU9250::gyro_common()
 {
-	static int16_t previousGyroADC[3] = {0,0,0};
+	static int16_t previousGyroADC[3];
 	static int32_t g[3];
 	uint8_t axis, tilt=0;
+
+	memset(previousGyroADC, 0, 3);
 
 	if (calibratingG>0)
 	{
@@ -448,9 +450,9 @@ void cMPU9250::mag_init( void )
 ---------------------------------------------------------------------------*/
 void cMPU9250::mag_get_adc( void )
 {
-	int16_t x = 0;
-	int16_t y = 0;
-	int16_t z = 0;
+	// int16_t x = 0;
+	// int16_t y = 0;
+	// int16_t z = 0;
 
   uint8_t data[8];
 

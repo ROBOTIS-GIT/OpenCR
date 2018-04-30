@@ -165,13 +165,13 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
 
 void HAL_TIMEx_CommutationCallback(TIM_HandleTypeDef* htim)
 {
-
+  UNUSED(htim);
 }
 
 
 void HAL_TIMEx_BreakCallback(TIM_HandleTypeDef* htim)
 {
-
+  UNUSED(htim);
 }
 
 
@@ -284,7 +284,7 @@ void drv_timer_detachInterrupt(uint8_t channel)
 
 void drv_timer_refresh(uint8_t channel)
 {
-
+  UNUSED(channel);
 }
 
 

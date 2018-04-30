@@ -17,7 +17,7 @@ extern "C"
 
 int __io_putchar(int ch)
 {
-  Serial.write(ch);
+  return Serial.write(ch);
 }
 
 
