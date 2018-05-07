@@ -18,10 +18,16 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
+/* Only want to process this if pin count has been defined which inplies that the full variant.h has been read */
+
+#ifdef PINS_COUNT 
 #ifndef _DIGITAL_WRITE_FAST_
 #define _DIGITAL_WRITE_FAST_
 
-#include "wiring_digital.h"
+
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
 static inline void digitalWriteFast(uint8_t, uint8_t) __attribute__((always_inline, unused));
 static inline void digitalWriteFast(uint8_t pin, uint8_t val)
@@ -569,9 +575,15 @@ static inline int digitalReadFast(uint8_t pin)
     } else if (pin == 83) {
       return (g_Pin2PortMapArray[83].GPIOx_Port->IDR & g_Pin2PortMapArray[83].Pin_abstraction)? HIGH : LOW;
     }
-  } else {
-    return digitalRead(pin);
-  }
+  } 
+  return digitalRead(pin);
 }
 
+
+#ifdef __cplusplus
+} // extern "C"
+#endif // __cplusplus
+
+
 #endif /* _DIGITAL_WRITE_FAST_ */
+#endif /* PINS_COUNT */

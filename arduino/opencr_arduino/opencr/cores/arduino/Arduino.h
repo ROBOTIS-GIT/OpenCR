@@ -97,5 +97,5 @@ void noTone(uint8_t _pin);
 #include "wiring_analog.h"
 #include "wiring_shift.h"
 #include "WInterrupts.h"
-
+#include "digitalWriteFast.h"
 #endif // Arduino_h
