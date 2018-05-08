@@ -37,7 +37,7 @@ void TP::tp_show_single_info(uint16_t* pos)
 {
 	
 	tp_scan(1);
-	if((s_tTouch.chStatus & 0xC0) == TP_PRESS_DOWN)
+	if((s_tTouch.chStatus & 0xC0) == TP_PRESSED)
 	{	
 		s_tTouch.chStatus &= ~(1 << 6);
 		pos[0] = s_tTouch.hwXpos;
