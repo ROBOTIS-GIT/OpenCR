@@ -1,0 +1,11 @@
+13:08:10 **** Incremental Build of configuration Debug for project opencr_fw ****
+make -j8 all 
+Invoking: Cross ARM GNU Print Size
+arm-none-eabi-size --format=berkeley "opencr_fw.elf"
+   text	   data	    bss	    dec	    hex	filename
+  38792	   2564	  67832	 109188	  1aa84	opencr_fw.elf
+Finished building: opencr_fw.siz
+ 
+
+13:08:12 Build Finished (took 1s.144ms)
+

@@ -1,3 +1,7 @@
+/* Author: KurtE
+ * Modified by : Kei
+ */
+
 GPIO_TypeDef *pin0_port;
 uint32_t  pin0_set_mask;
 uint32_t  pin0_clear_mask;
