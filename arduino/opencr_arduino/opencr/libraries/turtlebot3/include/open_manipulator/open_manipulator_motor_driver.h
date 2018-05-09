@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Darby Lim */
+/* Authors: Taehun Lim (Darby) */
 
 #ifndef OPEN_MANIPULATOR_MOTOR_DRIVER_H_
 #define OPEN_MANIPULATOR_MOTOR_DRIVER_H_
@@ -53,9 +53,10 @@ class OpenManipulatorMotorDriver
   bool writeGripperPosition(double value);
 
  private:
-  DynamixelWorkbench joint_controller;
-  DynamixelWorkbench gripper_controller;
+  DynamixelWorkbench joint_controller_;
+  DynamixelWorkbench gripper_controller_;
   uint8_t dxl_id_[JOINT_NUM];
+  float protocol_version_;
 };
 
 #endif // OPEN_MANIPULATOR_MOTOR_DRIVER_H_

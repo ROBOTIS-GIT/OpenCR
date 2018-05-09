@@ -55,6 +55,7 @@ class DynamixelWorkbench
   bool setBaud(uint8_t id, uint32_t new_baud);
   bool setPacketHandler(float protocol_version);
 
+  float getProtocolVersion();
   char* getModelName(uint8_t id);
 
   bool ledOn(uint8_t id);

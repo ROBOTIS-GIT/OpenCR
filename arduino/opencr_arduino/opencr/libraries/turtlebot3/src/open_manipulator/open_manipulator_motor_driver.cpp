@@ -33,21 +33,36 @@ OpenManipulatorMotorDriver::~OpenManipulatorMotorDriver()
 
 bool OpenManipulatorMotorDriver::init(void)
 {
-  joint_controller.begin(DEVICENAME, BAUDRATE);
-  gripper_controller.begin(DEVICENAME, BAUDRATE);
+  joint_controller_.begin(DEVICENAME, BAUDRATE);
+  gripper_controller_.begin(DEVICENAME, BAUDRATE);
 
+  uint16_t get_model_number;
   for (int num = 0; num < JOINT_NUM; num++)
   {
-    joint_controller.ping(dxl_id_[num]);
-    joint_controller.jointMode(dxl_id_[num]);
+    joint_controller_.ping(dxl_id_[num], &get_model_number);
+    joint_controller_.jointMode(dxl_id_[num]);
   }
 
-  gripper_controller.ping(GRIPPER);
-  gripper_controller.currentMode(GRIPPER, 30);
+  gripper_controller_.ping(GRIPPER, &get_model_number);
 
-  joint_controller.addSyncWrite("Goal_Position");
-  joint_controller.addSyncRead("Present_Position");
-  joint_controller.addSyncRead("Present_Velocity");
+  protocol_version_ = joint_controller_.getProtocolVersion();  
+
+  if (protocol_version_ == 2.0)
+    gripper_controller_.currentMode(GRIPPER, 30);
+  else
+    gripper_controller_.jointMode(GRIPPER);
+
+  joint_controller_.addSyncWrite("Goal_Position");
+
+  if (protocol_version_ == 2.0)
+  {
+    joint_controller_.addSyncRead("Present_Position");
+    joint_controller_.addSyncRead("Present_Velocity");
+  }
+
+  double init_joint_position[4] = {0.0, -1.5707, 1.37, 0.2258};
+  writeJointPosition(init_joint_position);
+  writeGripperPosition(0.0);
 
   return true;
 }
@@ -55,27 +70,34 @@ bool OpenManipulatorMotorDriver::init(void)
 void OpenManipulatorMotorDriver::closeDynamixel(void)
 {
   // Disable Dynamixel Torque
-  for (int num = 0; num < JOINT_NUM; num++)  
-    joint_controller.itemWrite(dxl_id_[num], "Torque_Enable", false);
-
-  gripper_controller.itemWrite(GRIPPER, "Torque_Enable", false);
+  setJointTorque(false);
+  setGripperTorque(false);
 }
 
 bool OpenManipulatorMotorDriver::setJointTorque(bool onoff)
 { 
   for (int num = 0; num < JOINT_NUM; num++)  
-    joint_controller.itemWrite(dxl_id_[num], "Torque_Enable", onoff);
+    joint_controller_.itemWrite(dxl_id_[num], "Torque_Enable", onoff);
 }
 
 bool OpenManipulatorMotorDriver::setGripperTorque(bool onoff)
 { 
-  gripper_controller.itemWrite(GRIPPER, "Torque_Enable", onoff);
+  gripper_controller_.itemWrite(GRIPPER, "Torque_Enable", onoff);
 }
 
 bool OpenManipulatorMotorDriver::readPosition(double *value)
 {
-  int32_t* get_joint_present_position = joint_controller.syncRead("Present_Position");
-  int32_t get_gripper_present_position = gripper_controller.itemRead(GRIPPER, "Present_Position");
+  int32_t* get_joint_present_position = NULL;
+
+  if (protocol_version_ == 2.0)
+    get_joint_present_position = joint_controller_.syncRead("Present_Position");
+  else if (protocol_version_ == 1.0)
+  {
+    for (int index = 0; index < JOINT_NUM; index++)
+      get_joint_present_position[index] = joint_controller_.itemRead(dxl_id_[index], "Present_Position");
+  }
+
+  int32_t get_gripper_present_position = gripper_controller_.itemRead(GRIPPER, "Present_Position");
   int32_t present_position[DXL_NUM] = {0, };
 
   for (int index = 0; index < JOINT_NUM; index++)
@@ -85,16 +107,25 @@ bool OpenManipulatorMotorDriver::readPosition(double *value)
 
   for (int index = 0; index < JOINT_NUM; index++)
   {
-    value[index] = joint_controller.convertValue2Radian(dxl_id_[index], present_position[index]);
+    value[index] = joint_controller_.convertValue2Radian(dxl_id_[index], present_position[index]);
   }
 
-  value[DXL_NUM-1] = gripper_controller.convertValue2Radian(GRIPPER, present_position[DXL_NUM-1]);
+  value[DXL_NUM-1] = gripper_controller_.convertValue2Radian(GRIPPER, present_position[DXL_NUM-1]);
 }
 
 bool OpenManipulatorMotorDriver::readVelocity(double *value)
 {
-  int32_t* get_joint_present_velocity = joint_controller.syncRead("Present_Velocity");
-  int32_t get_gripper_present_velocity = gripper_controller.itemRead(GRIPPER, "Present_Velocity");
+  int32_t* get_joint_present_velocity = NULL;
+
+  if (protocol_version_ == 2.0)
+    get_joint_present_velocity = joint_controller_.syncRead("Present_Velocity");
+  else if (protocol_version_ == 1.0)
+  {
+    for (int index = 0; index < JOINT_NUM; index++)
+      get_joint_present_velocity[index] = joint_controller_.itemRead(dxl_id_[index], "Present_Velocity");
+  }
+
+  int32_t get_gripper_present_velocity = gripper_controller_.itemRead(GRIPPER, "Present_Velocity");
   int32_t present_velocity[DXL_NUM] = {0, };
 
   for (int index = 0; index < JOINT_NUM; index++)
@@ -104,10 +135,10 @@ bool OpenManipulatorMotorDriver::readVelocity(double *value)
 
   for (int index = 0; index < JOINT_NUM; index++)
   {
-    value[index] = joint_controller.convertValue2Velocity(dxl_id_[index], present_velocity[index]);
+    value[index] = joint_controller_.convertValue2Velocity(dxl_id_[index], present_velocity[index]);
   }
 
-  value[DXL_NUM-1] = gripper_controller.convertValue2Velocity(GRIPPER, present_velocity[DXL_NUM-1]);
+  value[DXL_NUM-1] = gripper_controller_.convertValue2Velocity(GRIPPER, present_velocity[DXL_NUM-1]);
 }
 
 bool OpenManipulatorMotorDriver::writeJointPosition(double *value)
@@ -116,13 +147,13 @@ bool OpenManipulatorMotorDriver::writeJointPosition(double *value)
 
   for (int index = 0; index < JOINT_NUM; index++)
   {
-    goal_position[index] = joint_controller.convertRadian2Value(dxl_id_[index], value[index]);
+    goal_position[index] = joint_controller_.convertRadian2Value(dxl_id_[index], value[index]);
   }
 
-  return joint_controller.syncWrite("Goal_Position", goal_position);
+  return joint_controller_.syncWrite("Goal_Position", goal_position);
 }
 
 bool OpenManipulatorMotorDriver::writeGripperPosition(double value)
 {
-  return gripper_controller.itemWrite(GRIPPER, "Goal_Position", gripper_controller.convertRadian2Value(GRIPPER, value));
+  return gripper_controller_.itemWrite(GRIPPER, "Goal_Position", gripper_controller_.convertRadian2Value(GRIPPER, value));
 }
