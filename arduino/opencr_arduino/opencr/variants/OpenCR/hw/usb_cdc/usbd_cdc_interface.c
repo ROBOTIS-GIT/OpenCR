@@ -555,6 +555,11 @@ uint8_t CDC_Itf_Getch( void )
 }
 
 
+BOOL CDC_Itf_IsTxTransmitted( void )
+{
+  return (UserTxBufPtrIn == UserTxBufPtrOut) ? TRUE : FALSE;
+}
+
 
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
