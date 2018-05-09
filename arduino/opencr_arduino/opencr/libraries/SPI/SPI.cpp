@@ -139,6 +139,57 @@ void SPIClass::transferFast(void *buf, size_t count) {
   }
 }
 
+
+// Write only functions many used by Adafruit libraries.
+
+void SPIClass::write(uint8_t data) {
+  HAL_SPI_Transmit(_hspi, &data, 1, 0xffff);
+}
+
+void SPIClass::write16(uint16_t data) {
+  uint8_t tBuf[2];
+  tBuf[0] = (uint8_t)(data>>8);
+  tBuf[1] = (uint8_t)data;
+  HAL_SPI_Transmit(_hspi, tBuf, 2, 0xffff);
+}
+
+void SPIClass::write32(uint32_t data) {
+  uint8_t tBuf[4];
+  tBuf[0] = (uint8_t)(data>>24);
+  tBuf[1] = (uint8_t)(data>>16);
+  tBuf[2] = (uint8_t)(data>>8);
+  tBuf[3] = (uint8_t)data;
+  HAL_SPI_Transmit(_hspi, tBuf, 4, 0xffff);
+}
+
+void SPIClass::writeBytes(uint8_t * data, uint32_t size) {
+  HAL_SPI_Transmit(_hspi, data, size, 0xffff);
+}
+
+void SPIClass::writePixels(const void * data, uint32_t size) { //ili9341 compatible
+    // First pass a hack! need to reverse bytes... Use internal buffer.. 
+    uint8_t tBuf[64];
+    uint16_t *pixels = (uint16_t *)data;
+
+    // size is the number of bytes. 
+    while (size) {
+      uint8_t *pb = tBuf;
+
+      uint32_t cb = (size > 64)? 64 : size;
+
+      for (uint32_t i = 0; i < cb; i += 2) {
+        *pb++ = *pixels >> 8;
+        *pb++ = (uint8_t)*pixels;
+        pixels++;
+      }
+      HAL_SPI_Transmit(_hspi, tBuf, cb, 0xffff);
+      size -= cb; 
+
+    }
+}
+
+
+
 void SPIClass::setBitOrder(uint8_t bitOrder) {
   _bitOrder = bitOrder;
   if (bitOrder == 1)

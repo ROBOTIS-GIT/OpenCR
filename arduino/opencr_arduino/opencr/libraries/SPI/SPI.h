@@ -125,9 +125,19 @@ class SPIClass {
     uint16_t transfer16(uint16_t data);
     void transfer(void *buf, size_t count);
     void transferFast(void *buf, size_t count);
+
+    // Write only functions similar to ESP32 and the like
+    void write(uint8_t data);
+    void write16(uint16_t data);
+    void write32(uint32_t data);
+    void writeBytes(uint8_t * data, uint32_t size);
+    void writePixels(const void * data, uint32_t size);//ili9341 compatible
+
+
     void setBitOrder(uint8_t bitOrder);
     void setClockDivider(uint8_t clockDiv);
     void setDataMode(uint8_t dataMode);
+
 
   private:
     uint32_t _Mode;
