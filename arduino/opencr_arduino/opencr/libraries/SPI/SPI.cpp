@@ -27,29 +27,6 @@ SPIClass SPI_IMU(SPI1);
 
 
 
-void SPISettings::init_AlwaysInline(uint32_t clock, uint8_t bitOrder, uint8_t dataMode)
-{
-  if (clock >= 50000000 / 2) {
-    clockDiv = SPI_CLOCK_DIV2;
-  } else if (clock >= 50000000 / 4) {
-    clockDiv = SPI_CLOCK_DIV4;
-  } else if (clock >= 50000000 / 8) {
-    clockDiv = SPI_CLOCK_DIV8;
-  } else if (clock >= 50000000 / 16) {
-    clockDiv = SPI_CLOCK_DIV16;
-  } else if (clock >= 50000000 / 32) {
-    clockDiv = SPI_CLOCK_DIV32;
-  } else if (clock >= 50000000 / 64) {
-    clockDiv = SPI_CLOCK_DIV64;
-  } else {
-    clockDiv = SPI_CLOCK_DIV64;
-  }
-
-  _bitOrder = bitOrder;
-  _dataMode = dataMode;
-}
-
-
 SPIClass::SPIClass(SPI_TypeDef *spiPort) {
   _spiPort = spiPort;
 
@@ -88,6 +65,10 @@ void SPIClass::beginFast(void) {
 }
 
 void SPIClass::init(void){
+  // Keep track of transaction logical values.
+  _clockDiv = SPI_CLOCK_DIV16;
+  _bitOrder = MSBFIRST;
+  _dataMode = SPI_MODE0;
 
   _hspi->Instance               = _spiPort;
   _hspi->Init.Mode              = SPI_MODE_MASTER;
@@ -159,14 +140,17 @@ void SPIClass::transferFast(void *buf, size_t count) {
 }
 
 void SPIClass::setBitOrder(uint8_t bitOrder) {
-    if (bitOrder == 1)
-      _hspi->Init.FirstBit = SPI_FIRSTBIT_MSB;
-    else
-      _hspi->Init.FirstBit = SPI_FIRSTBIT_LSB;
+  _bitOrder = bitOrder;
+  if (bitOrder == 1)
+    _hspi->Init.FirstBit = SPI_FIRSTBIT_MSB;
+  else
+    _hspi->Init.FirstBit = SPI_FIRSTBIT_LSB;
     HAL_SPI_Init(_hspi);
 }
 
+
 void SPIClass::setClockDivider(uint8_t clockDiv) {
+  _clockDiv = clockDiv;
   switch(clockDiv){
     case SPI_CLOCK_DIV2:
       _hspi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
@@ -200,6 +184,7 @@ void SPIClass::setDataMode(uint8_t dataMode){
 
   switch( dataMode )
   {
+    _dataMode = dataMode;
     // CPOL=0, CPHA=0
     case SPI_MODE0:
       _hspi->Init.CLKPolarity = SPI_POLARITY_LOW;
