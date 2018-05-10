@@ -27,29 +27,6 @@ SPIClass SPI_IMU(SPI1);
 
 
 
-void SPISettings::init_AlwaysInline(uint32_t clock, uint8_t bitOrder, uint8_t dataMode)
-{
-  if (clock >= 50000000 / 2) {
-    clockDiv = SPI_CLOCK_DIV2;
-  } else if (clock >= 50000000 / 4) {
-    clockDiv = SPI_CLOCK_DIV4;
-  } else if (clock >= 50000000 / 8) {
-    clockDiv = SPI_CLOCK_DIV8;
-  } else if (clock >= 50000000 / 16) {
-    clockDiv = SPI_CLOCK_DIV16;
-  } else if (clock >= 50000000 / 32) {
-    clockDiv = SPI_CLOCK_DIV32;
-  } else if (clock >= 50000000 / 64) {
-    clockDiv = SPI_CLOCK_DIV64;
-  } else {
-    clockDiv = SPI_CLOCK_DIV64;
-  }
-
-  _bitOrder = bitOrder;
-  _dataMode = dataMode;
-}
-
-
 SPIClass::SPIClass(SPI_TypeDef *spiPort) {
   _spiPort = spiPort;
 
@@ -88,6 +65,10 @@ void SPIClass::beginFast(void) {
 }
 
 void SPIClass::init(void){
+  // Keep track of transaction logical values.
+  _clockDiv = SPI_CLOCK_DIV16;
+  _bitOrder = MSBFIRST;
+  _dataMode = SPI_MODE0;
 
   _hspi->Instance               = _spiPort;
   _hspi->Init.Mode              = SPI_MODE_MASTER;
@@ -158,15 +139,69 @@ void SPIClass::transferFast(void *buf, size_t count) {
   }
 }
 
+
+// Write only functions many used by Adafruit libraries.
+
+void SPIClass::write(uint8_t data) {
+  HAL_SPI_Transmit(_hspi, &data, 1, 0xffff);
+}
+
+void SPIClass::write16(uint16_t data) {
+  uint8_t tBuf[2];
+  tBuf[0] = (uint8_t)(data>>8);
+  tBuf[1] = (uint8_t)data;
+  HAL_SPI_Transmit(_hspi, tBuf, 2, 0xffff);
+}
+
+void SPIClass::write32(uint32_t data) {
+  uint8_t tBuf[4];
+  tBuf[0] = (uint8_t)(data>>24);
+  tBuf[1] = (uint8_t)(data>>16);
+  tBuf[2] = (uint8_t)(data>>8);
+  tBuf[3] = (uint8_t)data;
+  HAL_SPI_Transmit(_hspi, tBuf, 4, 0xffff);
+}
+
+void SPIClass::writeBytes(uint8_t * data, uint32_t size) {
+  HAL_SPI_Transmit(_hspi, data, size, 0xffff);
+}
+
+void SPIClass::writePixels(const void * data, uint32_t size) { //ili9341 compatible
+    // First pass a hack! need to reverse bytes... Use internal buffer.. 
+    uint8_t tBuf[64];
+    uint16_t *pixels = (uint16_t *)data;
+
+    // size is the number of bytes. 
+    while (size) {
+      uint8_t *pb = tBuf;
+
+      uint32_t cb = (size > 64)? 64 : size;
+
+      for (uint32_t i = 0; i < cb; i += 2) {
+        *pb++ = *pixels >> 8;
+        *pb++ = (uint8_t)*pixels;
+        pixels++;
+      }
+      HAL_SPI_Transmit(_hspi, tBuf, cb, 0xffff);
+      size -= cb; 
+
+    }
+}
+
+
+
 void SPIClass::setBitOrder(uint8_t bitOrder) {
-    if (bitOrder == 1)
-      _hspi->Init.FirstBit = SPI_FIRSTBIT_MSB;
-    else
-      _hspi->Init.FirstBit = SPI_FIRSTBIT_LSB;
+  _bitOrder = bitOrder;
+  if (bitOrder == 1)
+    _hspi->Init.FirstBit = SPI_FIRSTBIT_MSB;
+  else
+    _hspi->Init.FirstBit = SPI_FIRSTBIT_LSB;
     HAL_SPI_Init(_hspi);
 }
 
+
 void SPIClass::setClockDivider(uint8_t clockDiv) {
+  _clockDiv = clockDiv;
   switch(clockDiv){
     case SPI_CLOCK_DIV2:
       _hspi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
@@ -200,6 +235,7 @@ void SPIClass::setDataMode(uint8_t dataMode){
 
   switch( dataMode )
   {
+    _dataMode = dataMode;
     // CPOL=0, CPHA=0
     case SPI_MODE0:
       _hspi->Init.CLKPolarity = SPI_POLARITY_LOW;
