@@ -123,14 +123,14 @@ class SPIClass {
     }
     uint8_t transfer(uint8_t _data) const;
     uint16_t transfer16(uint16_t data);
-    void transfer(void *buf, size_t count);
-    void transferFast(void *buf, size_t count);
+    
 
     // Write only functions similar to ESP32 and the like
     void write(uint8_t data);
     void write16(uint16_t data);
     void write32(uint32_t data);
     void writeBytes(uint8_t * data, uint32_t size);
+    void writeFast(void *buf, size_t count);//For waveshare HX8347
     void writePixels(const void * data, uint32_t size);//ili9341 compatible
 
 

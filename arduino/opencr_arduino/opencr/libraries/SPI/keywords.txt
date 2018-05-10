@@ -17,7 +17,7 @@ beginTransaction	KEYWORD2
 endTransaction	KEYWORD2
 transfer		KEYWORD2
 transfer16		KEYWORD2
-transferFast		KEYWORD2
+writeFast		KEYWORD2
 write		KEYWORD2
 write16		KEYWORD2
 write32		KEYWORD2
