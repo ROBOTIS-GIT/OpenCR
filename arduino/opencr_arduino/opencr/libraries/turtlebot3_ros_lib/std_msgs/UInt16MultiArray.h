@@ -13,10 +13,12 @@ namespace std_msgs
   class UInt16MultiArray : public ros::Msg
   {
     public:
-      std_msgs::MultiArrayLayout layout;
+      typedef std_msgs::MultiArrayLayout _layout_type;
+      _layout_type layout;
       uint32_t data_length;
-      uint16_t st_data;
-      uint16_t * data;
+      typedef uint16_t _data_type;
+      _data_type st_data;
+      _data_type * data;
 
     UInt16MultiArray():
       layout(),

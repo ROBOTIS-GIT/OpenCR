@@ -14,20 +14,30 @@ namespace sensor_msgs
   class MultiEchoLaserScan : public ros::Msg
   {
     public:
-      std_msgs::Header header;
-      float angle_min;
-      float angle_max;
-      float angle_increment;
-      float time_increment;
-      float scan_time;
-      float range_min;
-      float range_max;
+      typedef std_msgs::Header _header_type;
+      _header_type header;
+      typedef float _angle_min_type;
+      _angle_min_type angle_min;
+      typedef float _angle_max_type;
+      _angle_max_type angle_max;
+      typedef float _angle_increment_type;
+      _angle_increment_type angle_increment;
+      typedef float _time_increment_type;
+      _time_increment_type time_increment;
+      typedef float _scan_time_type;
+      _scan_time_type scan_time;
+      typedef float _range_min_type;
+      _range_min_type range_min;
+      typedef float _range_max_type;
+      _range_max_type range_max;
       uint32_t ranges_length;
-      sensor_msgs::LaserEcho st_ranges;
-      sensor_msgs::LaserEcho * ranges;
+      typedef sensor_msgs::LaserEcho _ranges_type;
+      _ranges_type st_ranges;
+      _ranges_type * ranges;
       uint32_t intensities_length;
-      sensor_msgs::LaserEcho st_intensities;
-      sensor_msgs::LaserEcho * intensities;
+      typedef sensor_msgs::LaserEcho _intensities_type;
+      _intensities_type st_intensities;
+      _intensities_type * intensities;
 
     MultiEchoLaserScan():
       header(),

@@ -14,8 +14,10 @@ namespace sensor_msgs
   class MagneticField : public ros::Msg
   {
     public:
-      std_msgs::Header header;
-      geometry_msgs::Vector3 magnetic_field;
+      typedef std_msgs::Header _header_type;
+      _header_type header;
+      typedef geometry_msgs::Vector3 _magnetic_field_type;
+      _magnetic_field_type magnetic_field;
       float magnetic_field_covariance[9];
 
     MagneticField():

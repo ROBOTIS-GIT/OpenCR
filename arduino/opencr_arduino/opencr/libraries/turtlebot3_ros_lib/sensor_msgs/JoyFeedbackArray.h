@@ -14,8 +14,9 @@ namespace sensor_msgs
   {
     public:
       uint32_t array_length;
-      sensor_msgs::JoyFeedback st_array;
-      sensor_msgs::JoyFeedback * array;
+      typedef sensor_msgs::JoyFeedback _array_type;
+      _array_type st_array;
+      _array_type * array;
 
     JoyFeedbackArray():
       array_length(0), array(NULL)

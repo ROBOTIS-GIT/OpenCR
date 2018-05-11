@@ -14,8 +14,9 @@ namespace geometry_msgs
   {
     public:
       uint32_t points_length;
-      geometry_msgs::Point32 st_points;
-      geometry_msgs::Point32 * points;
+      typedef geometry_msgs::Point32 _points_type;
+      _points_type st_points;
+      _points_type * points;
 
     Polygon():
       points_length(0), points(NULL)

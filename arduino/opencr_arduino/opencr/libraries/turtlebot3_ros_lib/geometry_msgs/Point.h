@@ -12,9 +12,12 @@ namespace geometry_msgs
   class Point : public ros::Msg
   {
     public:
-      float x;
-      float y;
-      float z;
+      typedef float _x_type;
+      _x_type x;
+      typedef float _y_type;
+      _y_type y;
+      typedef float _z_type;
+      _z_type z;
 
     Point():
       x(0),

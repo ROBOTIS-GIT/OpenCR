@@ -14,9 +14,11 @@ namespace std_msgs
   {
     public:
       uint32_t dim_length;
-      std_msgs::MultiArrayDimension st_dim;
-      std_msgs::MultiArrayDimension * dim;
-      uint32_t data_offset;
+      typedef std_msgs::MultiArrayDimension _dim_type;
+      _dim_type st_dim;
+      _dim_type * dim;
+      typedef uint32_t _data_offset_type;
+      _data_offset_type data_offset;
 
     MultiArrayLayout():
       dim_length(0), dim(NULL),

@@ -15,9 +15,12 @@ namespace tf2_msgs
   class LookupTransformAction : public ros::Msg
   {
     public:
-      tf2_msgs::LookupTransformActionGoal action_goal;
-      tf2_msgs::LookupTransformActionResult action_result;
-      tf2_msgs::LookupTransformActionFeedback action_feedback;
+      typedef tf2_msgs::LookupTransformActionGoal _action_goal_type;
+      _action_goal_type action_goal;
+      typedef tf2_msgs::LookupTransformActionResult _action_result_type;
+      _action_result_type action_result;
+      typedef tf2_msgs::LookupTransformActionFeedback _action_feedback_type;
+      _action_feedback_type action_feedback;
 
     LookupTransformAction():
       action_goal(),

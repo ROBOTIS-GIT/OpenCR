@@ -14,19 +14,27 @@ namespace sensor_msgs
   class CameraInfo : public ros::Msg
   {
     public:
-      std_msgs::Header header;
-      uint32_t height;
-      uint32_t width;
-      const char* distortion_model;
+      typedef std_msgs::Header _header_type;
+      _header_type header;
+      typedef uint32_t _height_type;
+      _height_type height;
+      typedef uint32_t _width_type;
+      _width_type width;
+      typedef const char* _distortion_model_type;
+      _distortion_model_type distortion_model;
       uint32_t D_length;
-      float st_D;
-      float * D;
+      typedef float _D_type;
+      _D_type st_D;
+      _D_type * D;
       float K[9];
       float R[9];
       float P[12];
-      uint32_t binning_x;
-      uint32_t binning_y;
-      sensor_msgs::RegionOfInterest roi;
+      typedef uint32_t _binning_x_type;
+      _binning_x_type binning_x;
+      typedef uint32_t _binning_y_type;
+      _binning_y_type binning_y;
+      typedef sensor_msgs::RegionOfInterest _roi_type;
+      _roi_type roi;
 
     CameraInfo():
       header(),
@@ -58,7 +66,7 @@ namespace sensor_msgs
       *(outbuffer + offset + 3) = (this->width >> (8 * 3)) & 0xFF;
       offset += sizeof(this->width);
       uint32_t length_distortion_model = strlen(this->distortion_model);
-      memcpy(outbuffer + offset, &length_distortion_model, sizeof(uint32_t));
+      varToArr(outbuffer + offset, length_distortion_model);
       offset += 4;
       memcpy(outbuffer + offset, this->distortion_model, length_distortion_model);
       offset += length_distortion_model;
@@ -108,7 +116,7 @@ namespace sensor_msgs
       this->width |= ((uint32_t) (*(inbuffer + offset + 3))) << (8 * 3);
       offset += sizeof(this->width);
       uint32_t length_distortion_model;
-      memcpy(&length_distortion_model, (inbuffer + offset), sizeof(uint32_t));
+      arrToVar(length_distortion_model, (inbuffer + offset));
       offset += 4;
       for(unsigned int k= offset; k< offset+length_distortion_model; ++k){
           inbuffer[k-1]=inbuffer[k];
