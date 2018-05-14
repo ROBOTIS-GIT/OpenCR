@@ -54,8 +54,7 @@ bool Turtlebot3MotorDriver::init(void)
   }
 
   // Enable Dynamixel Torque
-  setTorque(left_wheel_id_, true);
-  setTorque(right_wheel_id_, true);
+  setTorque(true);
 
   groupSyncWriteVelocity_ = new dynamixel::GroupSyncWrite(portHandler_, packetHandler_, ADDR_X_GOAL_VELOCITY, LEN_X_GOAL_VELOCITY);
   groupSyncReadEncoder_   = new dynamixel::GroupSyncRead(portHandler_, packetHandler_, ADDR_X_PRESENT_POSITION, LEN_X_PRESENT_POSITION);
@@ -106,8 +105,7 @@ bool Turtlebot3MotorDriver::getTorque()
 void Turtlebot3MotorDriver::close(void)
 {
   // Disable Dynamixel Torque
-  setTorque(left_wheel_id_, false);
-  setTorque(right_wheel_id_, false);
+  setTorque(false);
 
   // Close port
   portHandler_->closePort();
