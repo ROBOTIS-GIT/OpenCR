@@ -25,9 +25,12 @@
 #include <sensor_msgs/BatteryState.h>
 #include <sensor_msgs/MagneticField.h>
 
-#define ACCEL_FACTOR                     -0.000598  // 2.0 * -9.8 / 32768    adc * 2/32768 = g
-#define GYRO_FACTOR                       0.000133  // pi / (131 * 180)      adc * 1/16.4 = deg/s => 1/16.4 deg/s -> 0.001064225157909 rad/s
-#define MAG_FACTOR                       6e-7
+#define ACCEL_FACTOR                     -0.0005981  // (-9.8) * ADC_Value / Scale               => Range : +- 2[g]
+                                                     //                                             Scale : +- 16384
+#define GYRO_FACTOR                       0.0010642  // (ADC_Value/Scale) * (pi/180)             => Range : +- 2000[deg/s]
+                                                     //                                             Scale : +- 16.4[deg/s]
+
+#define MAG_FACTOR                        6e-7
 
 class Turtlebot3Sensor
 {
