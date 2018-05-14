@@ -29,23 +29,27 @@ Turtlebot3MotorDriver::Turtlebot3MotorDriver()
 
 Turtlebot3MotorDriver::~Turtlebot3MotorDriver()
 {
-  closeDynamixel();
+  close();
 }
 
 bool Turtlebot3MotorDriver::init(void)
 {
+  DEBUG_SERIAL.begin(57600);
+
   portHandler_   = dynamixel::PortHandler::getPortHandler(DEVICENAME);
   packetHandler_ = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
 
   // Open port
   if (portHandler_->openPort() == false)
   {
+    DEBUG_SERIAL.println("Failed to open port");
     return false;
   }
 
   // Set port baudrate
   if (portHandler_->setBaudRate(baudrate_) == false)
   {
+    DEBUG_SERIAL.println("Failed to set baud rate");
     return false;
   }
 
@@ -56,6 +60,7 @@ bool Turtlebot3MotorDriver::init(void)
   groupSyncWriteVelocity_ = new dynamixel::GroupSyncWrite(portHandler_, packetHandler_, ADDR_X_GOAL_VELOCITY, LEN_X_GOAL_VELOCITY);
   groupSyncReadEncoder_   = new dynamixel::GroupSyncRead(portHandler_, packetHandler_, ADDR_X_PRESENT_POSITION, LEN_X_PRESENT_POSITION);
 
+  DEBUG_SERIAL.println("Dynamixel is On!");
   return true;
 }
 
@@ -85,7 +90,7 @@ bool Turtlebot3MotorDriver::getTorque()
   return torque_;
 }
 
-void Turtlebot3MotorDriver::closeDynamixel(void)
+void Turtlebot3MotorDriver::close(void)
 {
   // Disable Dynamixel Torque
   setTorque(left_wheel_id_, false);
@@ -93,6 +98,7 @@ void Turtlebot3MotorDriver::closeDynamixel(void)
 
   // Close port
   portHandler_->closePort();
+  DEBUG_SERIAL.end();
 }
 
 bool Turtlebot3MotorDriver::readEncoder(int32_t &left_value, int32_t &right_value)
