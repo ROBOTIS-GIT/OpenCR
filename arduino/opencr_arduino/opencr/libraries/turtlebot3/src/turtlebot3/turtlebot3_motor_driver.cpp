@@ -64,12 +64,14 @@ bool Turtlebot3MotorDriver::init(void)
   return true;
 }
 
-bool Turtlebot3MotorDriver::setTorque(uint8_t id, bool onoff)
+bool Turtlebot3MotorDriver::setTorque(bool onoff)
 {
   uint8_t dxl_error = 0;
   int dxl_comm_result = COMM_TX_FAIL;
 
-  dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, id, ADDR_X_TORQUE_ENABLE, onoff, &dxl_error);
+  torque_ = onoff;
+
+  dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, DXL_LEFT_ID, ADDR_X_TORQUE_ENABLE, onoff, &dxl_error);
   if(dxl_comm_result != COMM_SUCCESS)
   {
     Serial.println(packetHandler_->getTxRxResult(dxl_comm_result));
@@ -81,7 +83,18 @@ bool Turtlebot3MotorDriver::setTorque(uint8_t id, bool onoff)
     return false;
   }
 
-  torque_ = onoff;
+  dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, DXL_RIGHT_ID, ADDR_X_TORQUE_ENABLE, onoff, &dxl_error);
+  if(dxl_comm_result != COMM_SUCCESS)
+  {
+    Serial.println(packetHandler_->getTxRxResult(dxl_comm_result));
+    return false;
+  }
+  else if(dxl_error != 0)
+  {
+    Serial.println(packetHandler_->getRxPacketError(dxl_error));
+    return false;
+  }
+
   return true;
 }
 

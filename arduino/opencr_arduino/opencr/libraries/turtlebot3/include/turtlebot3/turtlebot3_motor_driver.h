@@ -70,7 +70,7 @@ class Turtlebot3MotorDriver
   ~Turtlebot3MotorDriver();
   bool init(void);
   void close(void);
-  bool setTorque(uint8_t id, bool onoff);
+  bool setTorque(bool onoff);
   bool getTorque();
   bool readEncoder(int32_t &left_value, int32_t &right_value);
   bool writeVelocity(int64_t left_value, int64_t right_value);
