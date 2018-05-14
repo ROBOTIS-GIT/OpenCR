@@ -687,8 +687,12 @@ void updateGyroCali(void)
 void sendLogMsg(void)
 {
   static bool log_flag = false;
-  char log_msg[100];
-  const char* init_log_data = INIT_LOG_DATA;
+  char log_msg[100];  
+
+  String firmware_version = FIRMWARE_VER;
+  String bringup_log      = "This core(v" + firmware_version + ") is compatible with TB3 Burger";
+   
+  const char* init_log_data = bringup_log.c_str();
 
   if (nh.connected())
   {
