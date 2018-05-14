@@ -247,8 +247,7 @@ void motorPowerCallback(const std_msgs::Bool& power_msg)
 {
   bool dxl_power = power_msg.data;
 
-  motor_driver.setTorque(DXL_LEFT_ID, dxl_power);
-  motor_driver.setTorque(DXL_RIGHT_ID, dxl_power);
+  motor_driver.setTorque(dxl_power);
 }
 
 /*******************************************************************************
