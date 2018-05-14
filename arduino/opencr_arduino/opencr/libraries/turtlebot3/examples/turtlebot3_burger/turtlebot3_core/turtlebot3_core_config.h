@@ -39,26 +39,11 @@
 #include <turtlebot3_msgs/VersionInfo.h>
 
 #include <TurtleBot3.h>
+#include "turtlebot3_burger.h"
 
 #include <math.h>
 
-#define HARDWARE_VER "1.0.0"
-#define SOFTWARE_VER "1.0.0"
-#define FIRMWARE_VER "1.1.3"
-
-#define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
-#define IMU_PUBLISH_FREQUENCY                  200  //hz
-#define CMD_VEL_PUBLISH_FREQUENCY              30   //hz
-#define DRIVE_INFORMATION_PUBLISH_FREQUENCY    30   //hz
-#define VERSION_INFORMATION_PUBLISH_FREQUENCY  1    //hz 
-
 #define WHEEL_NUM                        2
-#define WHEEL_RADIUS                     0.033           // meter
-#define WHEEL_SEPARATION                 0.160           // meter (BURGER : 0.160, WAFFLE : 0.287)
-#define TURNING_RADIUS                   0.080           // meter (BURGER : 0.080, WAFFLE : 0.1435)
-#define ROBOT_RADIUS                     0.105           // meter (BURGER : 0.105, WAFFLE : 0.220)
-#define ENCODER_MIN                      -2147483648     // raw
-#define ENCODER_MAX                      2147483648      // raw
 
 #define LEFT                             0
 #define RIGHT                            1
@@ -66,18 +51,13 @@
 #define LINEAR                           0
 #define ANGULAR                          1
 
-#define MAX_LINEAR_VELOCITY              0.22   // m/s   (BURGER : 0.22, WAFFLE : 0.25)
-#define MAX_ANGULAR_VELOCITY             2.84   // rad/s (BURGER : 2.84, WAFFLE : 1.82)
-
-#define TICK2RAD                         0.001533981  // 0.087890625[deg] * 3.14159265359 / 180 = 0.001533981f
-
 #define DEG2RAD(x)                       (x * 0.01745329252)  // *PI/180
 #define RAD2DEG(x)                       (x * 57.2957795131)  // *180/PI
 
+#define TICK2RAD                         0.001533981  // 0.087890625[deg] * 3.14159265359 / 180 = 0.001533981f
+
 #define TEST_DISTANCE                    0.300     // meter
 #define TEST_RADIAN                      3.14      // 180 degree
-
-#define VELOCITY_UNIT                    2
 
 // Callback function prototypes
 void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
@@ -205,10 +185,10 @@ Turtlebot3Sensor sensors;
 * Declaration for controllers
 *******************************************************************************/
 Turtlebot3Controller controllers;
-float goal_velocity[VELOCITY_UNIT] = {0.0, 0.0};
-float goal_velocity_from_button[VELOCITY_UNIT] = {0.0, 0.0};
-float goal_velocity_from_cmd[VELOCITY_UNIT] = {0.0, 0.0};
-float goal_velocity_from_rc100[VELOCITY_UNIT] = {0.0, 0.0};
+float goal_velocity[WHEEL_NUM] = {0.0, 0.0};
+float goal_velocity_from_button[WHEEL_NUM] = {0.0, 0.0};
+float goal_velocity_from_cmd[WHEEL_NUM] = {0.0, 0.0};
+float goal_velocity_from_rc100[WHEEL_NUM] = {0.0, 0.0};
 
 /*******************************************************************************
 * Declaration for diagnosis
