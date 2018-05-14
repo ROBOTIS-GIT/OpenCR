@@ -147,7 +147,7 @@ void TFT::drawFrame(void)
     __LCD_WRITE_BYTE(frame_buf[i] & 0xFF);
   }
   */
-  SPI.transferFast(frame_buf, LCD_WIDTH*LCD_HEIGHT*2);
+  SPI.writeFast(frame_buf, LCD_WIDTH*LCD_HEIGHT*2);
 
   __LCD_CS_SET();
 

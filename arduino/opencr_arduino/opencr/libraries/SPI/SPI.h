@@ -22,6 +22,10 @@
 #include <chip.h>
 #include "variant.h"
 
+// SPI_HAS_TRANSACTION means SPI has beginTransaction(), endTransaction(),
+// usingInterrupt(), and SPISetting(clock, bitOrder, dataMode)
+#define SPI_HAS_TRANSACTION 1
+
 
 #define SPI_CLOCK_DIV4      0x00
 #define SPI_CLOCK_DIV16     0x01
@@ -50,16 +54,44 @@ class SPISettings {
 public:
   SPISettings(uint32_t clock, uint8_t bitOrder, uint8_t dataMode)
   {
-    init_AlwaysInline(clock, bitOrder, dataMode);
+    if (__builtin_constant_p(clock)) {
+      init_Inline(clock, bitOrder, dataMode);
+    } else {
+      init_NotInline(clock, bitOrder, dataMode);
+    }
   }
   SPISettings()
   {
-    init_AlwaysInline(4000000, MSBFIRST, SPI_MODE0);
+    init_Inline(4000000, MSBFIRST, SPI_MODE0);
   }
 private:
-  void init_AlwaysInline(uint32_t clock, uint8_t bitOrder, uint8_t dataMode);
+  void init_NotInline(uint32_t clock, uint8_t bitOrder, uint8_t dataMode) {
+    init_Inline(clock, bitOrder, dataMode);
+  }
 
-  uint8_t clockDiv;
+  void init_Inline(uint32_t clock, uint8_t bitOrder, uint8_t dataMode) 
+    __attribute__((__always_inline__))  {
+      if (clock >= 50000000 / 2) {
+        _clockDiv = SPI_CLOCK_DIV2;
+      } else if (clock >= 50000000 / 4) {
+        _clockDiv = SPI_CLOCK_DIV4;
+      } else if (clock >= 50000000 / 8) {
+        _clockDiv = SPI_CLOCK_DIV8;
+      } else if (clock >= 50000000 / 16) {
+        _clockDiv = SPI_CLOCK_DIV16;
+      } else if (clock >= 50000000 / 32) {
+        _clockDiv = SPI_CLOCK_DIV32;
+      } else if (clock >= 50000000 / 64) {
+        _clockDiv = SPI_CLOCK_DIV64;
+      } else {
+        _clockDiv = SPI_CLOCK_DIV64;
+      }
+
+      _bitOrder = bitOrder;
+      _dataMode = dataMode;
+  }
+
+  uint8_t _clockDiv;
   uint8_t _bitOrder;
   uint8_t _dataMode;
 
@@ -76,20 +108,36 @@ class SPIClass {
 
     void beginTransaction(SPISettings settings)
     {
-      setClockDivider(settings.clockDiv);
-      setBitOrder(settings._bitOrder);
-      setDataMode(settings._dataMode);
+      if (settings._clockDiv != _clockDiv) {
+        setClockDivider(settings._clockDiv);
+      }
+      if (settings._bitOrder != _bitOrder) {
+        setBitOrder(settings._bitOrder);
+      }
+      if (settings._dataMode != _dataMode) {
+        setDataMode(settings._dataMode);
+      }
     }
     void endTransaction(void)
     {
     }
     uint8_t transfer(uint8_t _data) const;
     uint16_t transfer16(uint16_t data);
-    void transfer(void *buf, size_t count);
-    void transferFast(void *buf, size_t count);
+    
+
+    // Write only functions similar to ESP32 and the like
+    void write(uint8_t data);
+    void write16(uint16_t data);
+    void write32(uint32_t data);
+    void writeBytes(uint8_t * data, uint32_t size);
+    void writeFast(void *buf, size_t count);//For waveshare HX8347
+    void writePixels(const void * data, uint32_t size);//ili9341 compatible
+
+
     void setBitOrder(uint8_t bitOrder);
     void setClockDivider(uint8_t clockDiv);
     void setDataMode(uint8_t dataMode);
+
 
   private:
     uint32_t _Mode;
@@ -103,6 +151,11 @@ class SPIClass {
     uint32_t _TIMode;
     uint32_t _CRCCalculation;
     uint32_t _CRCPolynomial;
+    // Keep track of values we set for transactions 
+    uint8_t _clockDiv;
+    uint8_t _bitOrder;
+    uint8_t _dataMode;
+
 
     SPI_HandleTypeDef *_hspi;
     SPI_TypeDef *_spiPort;

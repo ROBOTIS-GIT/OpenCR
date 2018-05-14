@@ -496,7 +496,7 @@ void Waveshare_HX8347D::drawFrame(void)
   digitalWrite(_dc, HIGH);
   digitalWrite(_cs, LOW);
 
-  SPI.transferFast(frame_buf, _width*_height*2);
+  SPI.writeFast(frame_buf, _width*_height*2);
 
 
   digitalWrite(_cs, HIGH);
