@@ -115,7 +115,7 @@ void loop()
   controllers.getRCdata(goal_velocity_from_rc100);
 
   // Check push button pressed for simple test drive
-  driveTest(diagnosis.getButtonPress());
+  driveTest(diagnosis.getButtonPress(3000));
 
   // Update the IMU unit
   sensors.updateIMU();

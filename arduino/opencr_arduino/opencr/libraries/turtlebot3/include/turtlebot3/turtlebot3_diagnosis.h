@@ -53,8 +53,7 @@ class Turtlebot3Diagnosis
 
   uint8_t updateVoltageCheck(bool check_setup);
 
-  uint8_t getButtonPress(void);
-  
+  uint8_t getButtonPress(uint16_t time_to_press);  
 
  private:
 
