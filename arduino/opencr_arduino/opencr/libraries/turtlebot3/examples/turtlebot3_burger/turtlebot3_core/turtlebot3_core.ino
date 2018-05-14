@@ -74,20 +74,20 @@ void loop()
   updateTime();
   updateVariable();
 
-  if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_PERIOD))
+  if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_FREQUENCY))
   {
     updateGoalVelocity();
     motor_driver.controlMotor(WHEEL_SEPARATION, goal_velocity);
     tTime[0] = t;
   }
 
-  if ((t-tTime[1]) >= (1000 / CMD_VEL_PUBLISH_PERIOD))
+  if ((t-tTime[1]) >= (1000 / CMD_VEL_PUBLISH_FREQUENCY))
   {
     publishCmdVelFromRC100Msg();
     tTime[1] = t;
   }
 
-  if ((t-tTime[2]) >= (1000 / DRIVE_INFORMATION_PUBLISH_PERIOD))
+  if ((t-tTime[2]) >= (1000 / DRIVE_INFORMATION_PUBLISH_FREQUENCY))
   {
     publishSensorStateMsg();
     publishBatteryStateMsg();
@@ -95,14 +95,14 @@ void loop()
     tTime[2] = t;
   }
 
-  if ((t-tTime[3]) >= (1000 / IMU_PUBLISH_PERIOD))
+  if ((t-tTime[3]) >= (1000 / IMU_PUBLISH_FREQUENCY))
   {
     publishImuMsg();
     publishMagMsg();
     tTime[3] = t;
   }
 
-  if ((t-tTime[4]) >= (1000 / VERSION_INFORMATION_PUBLISH_PERIOD))
+  if ((t-tTime[4]) >= (1000 / VERSION_INFORMATION_PUBLISH_FREQUENCY))
   {
     publishVersionInfoMsg();
     tTime[4] = t;

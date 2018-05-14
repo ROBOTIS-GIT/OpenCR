@@ -48,11 +48,11 @@
 #define SOFTWARE_VER "1.0.0"
 #define FIRMWARE_VER "1.1.3"
 
-#define CONTROL_MOTOR_SPEED_PERIOD          30   //hz
-#define IMU_PUBLISH_PERIOD                  200  //hz
-#define CMD_VEL_PUBLISH_PERIOD              30   //hz
-#define DRIVE_INFORMATION_PUBLISH_PERIOD    30   //hz
-#define VERSION_INFORMATION_PUBLISH_PERIOD  1    //hz 
+#define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
+#define IMU_PUBLISH_FREQUENCY                  200  //hz
+#define CMD_VEL_PUBLISH_FREQUENCY              30   //hz
+#define DRIVE_INFORMATION_PUBLISH_FREQUENCY    30   //hz
+#define VERSION_INFORMATION_PUBLISH_FREQUENCY  1    //hz 
 
 #define WHEEL_NUM                        2
 #define WHEEL_RADIUS                     0.033           // meter
