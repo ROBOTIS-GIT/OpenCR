@@ -25,6 +25,7 @@ Turtlebot3MotorDriver::Turtlebot3MotorDriver()
   right_wheel_id_(DXL_RIGHT_ID),
   torque_(false)
 {
+  DEBUG_SERIAL.begin(57600);
 }
 
 Turtlebot3MotorDriver::~Turtlebot3MotorDriver()
@@ -34,8 +35,6 @@ Turtlebot3MotorDriver::~Turtlebot3MotorDriver()
 
 bool Turtlebot3MotorDriver::init(void)
 {
-  DEBUG_SERIAL.begin(57600);
-
   portHandler_   = dynamixel::PortHandler::getPortHandler(DEVICENAME);
   packetHandler_ = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
 
