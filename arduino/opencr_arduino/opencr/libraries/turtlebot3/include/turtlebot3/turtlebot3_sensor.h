@@ -57,6 +57,10 @@ class Turtlebot3Sensor
   // Button
   uint8_t checkPushButton(void);
 
+  // Sound
+  void melody(uint16_t* note, uint8_t note_num, uint8_t* durations);
+  void makeSound(uint8_t index);  
+
   // Bumper
   uint8_t getPushedBumper(void);
 
