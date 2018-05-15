@@ -43,6 +43,17 @@
 
 #include <math.h>
 
+#define HARDWARE_VER "1.0.0"
+#define SOFTWARE_VER "1.0.0"
+#define FIRMWARE_VER "1.1.3"
+
+#define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
+#define IMU_PUBLISH_FREQUENCY                  200  //hz
+#define CMD_VEL_PUBLISH_FREQUENCY              30   //hz
+#define DRIVE_INFORMATION_PUBLISH_FREQUENCY    30   //hz
+#define VERSION_INFORMATION_PUBLISH_FREQUENCY  1    //hz 
+#define DEBUG_LOG_FREQUENCY                    2   //hz 
+
 #define WHEEL_NUM                        2
 
 #define LEFT                             0
@@ -59,7 +70,7 @@
 #define TEST_DISTANCE                    0.300     // meter
 #define TEST_RADIAN                      3.14      // 180 degree
 
-#define DEBUG                            1
+// #define DEBUG                            
 #define DEBUG_SERIAL                     SerialBT2
 
 // Callback function prototypes
@@ -159,7 +170,7 @@ tf::TransformBroadcaster tf_broadcaster;
 /*******************************************************************************
 * SoftwareTimer of Turtlebot3
 *******************************************************************************/
-static uint32_t tTime[5];
+static uint32_t tTime[10];
 
 /*******************************************************************************
 * Declaration for motor
