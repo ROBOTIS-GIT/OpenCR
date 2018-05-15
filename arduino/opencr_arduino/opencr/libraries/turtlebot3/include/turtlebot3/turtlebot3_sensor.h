@@ -32,8 +32,6 @@
 
 #define MAG_FACTOR                        6e-7
 
-#define DEBUG_SERIAL SerialBT2
-
 class Turtlebot3Sensor
 {
  public:

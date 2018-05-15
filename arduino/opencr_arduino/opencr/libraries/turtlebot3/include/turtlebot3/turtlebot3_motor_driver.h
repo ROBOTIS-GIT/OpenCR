@@ -61,8 +61,6 @@
                                                         //
                                                         // Goal_Velocity = V * 1263.632956882
 
-#define DEBUG_SERIAL SerialBT2
-
 class Turtlebot3MotorDriver
 {
  public:

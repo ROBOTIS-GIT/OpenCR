@@ -25,7 +25,6 @@ Turtlebot3MotorDriver::Turtlebot3MotorDriver()
   right_wheel_id_(DXL_RIGHT_ID),
   torque_(false)
 {
-  DEBUG_SERIAL.begin(57600);
 }
 
 Turtlebot3MotorDriver::~Turtlebot3MotorDriver()
@@ -41,14 +40,12 @@ bool Turtlebot3MotorDriver::init(void)
   // Open port
   if (portHandler_->openPort() == false)
   {
-    DEBUG_SERIAL.println("Failed to open port");
     return false;
   }
 
   // Set port baudrate
   if (portHandler_->setBaudRate(baudrate_) == false)
   {
-    DEBUG_SERIAL.println("Failed to set baud rate");
     return false;
   }
 
@@ -57,8 +54,7 @@ bool Turtlebot3MotorDriver::init(void)
 
   groupSyncWriteVelocity_ = new dynamixel::GroupSyncWrite(portHandler_, packetHandler_, ADDR_X_GOAL_VELOCITY, LEN_X_GOAL_VELOCITY);
   groupSyncReadEncoder_   = new dynamixel::GroupSyncRead(portHandler_, packetHandler_, ADDR_X_PRESENT_POSITION, LEN_X_PRESENT_POSITION);
-
-  DEBUG_SERIAL.println("Dynamixel is On!");
+  
   return true;
 }
 

@@ -28,6 +28,7 @@ Turtlebot3Diagnosis::~Turtlebot3Diagnosis()
 
 bool Turtlebot3Diagnosis::init(void)
 {
+  return true;
 }
 
 void Turtlebot3Diagnosis::showLedStatus(bool isConnected)

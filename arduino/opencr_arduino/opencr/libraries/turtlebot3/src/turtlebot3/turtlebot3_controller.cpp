@@ -20,13 +20,11 @@
 
 Turtlebot3Controller::Turtlebot3Controller()
 {
-  DEBUG_SERIAL.begin(57600);
   const_cmd_vel_ = CONST_VEL;
 }
 
 Turtlebot3Controller::~Turtlebot3Controller()
 {  
-  DEBUG_SERIAL.end();
 }
 
 bool Turtlebot3Controller::init(float max_lin_vel, float max_ang_vel, uint8_t scale_lin_vel, uint8_t scale_ang_vel)
@@ -41,7 +39,7 @@ bool Turtlebot3Controller::init(float max_lin_vel, float max_ang_vel, uint8_t sc
   scale_lin_vel_ = scale_lin_vel;
   scale_ang_vel_ = scale_ang_vel;
 
-  DEBUG_SERIAL.println("Success initialization to controller");
+  return true;
 }
 
 void Turtlebot3Controller::getRCdata(float *get_cmd_vel)
