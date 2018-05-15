@@ -286,22 +286,22 @@ void Turtlebot3Sensor::makeSound(uint8_t index)
   melody(note, 8, duration);
 }
 
-uint8_t getPushedBumper(void)
+int8_t Turtlebot3Sensor::getPushedBumper(void)
 {
   return 1;
 }
 
-float getIRsensorData(void)
+float Turtlebot3Sensor::getIRsensorData(void)
 {
   return 1.0;
 }
 
-float getSonarData(void)
+float Turtlebot3Sensor::getSonarData(void)
 {
   return 1.0;
 }
 
-float getIlluminationData(void)
+float Turtlebot3Sensor::getIlluminationData(void)
 {
   return 1.0;
 }

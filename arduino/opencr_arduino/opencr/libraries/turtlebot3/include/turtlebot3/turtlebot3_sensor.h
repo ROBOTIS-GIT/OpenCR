@@ -62,7 +62,7 @@ class Turtlebot3Sensor
   void makeSound(uint8_t index);  
 
   // Bumper
-  uint8_t getPushedBumper(void);
+  int8_t getPushedBumper(void);
 
   // Cliff sensor
   float getIRsensorData(void);
