@@ -34,18 +34,21 @@ Turtlebot3MotorDriver::~Turtlebot3MotorDriver()
 
 bool Turtlebot3MotorDriver::init(void)
 {
+  DEBUG_SERIAL.begin(57600);
   portHandler_   = dynamixel::PortHandler::getPortHandler(DEVICENAME);
   packetHandler_ = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
 
   // Open port
   if (portHandler_->openPort() == false)
   {
+    DEBUG_SERIAL.println("Failed to open port(Motor Driver)");
     return false;
   }
 
   // Set port baudrate
   if (portHandler_->setBaudRate(baudrate_) == false)
   {
+    DEBUG_SERIAL.println("Failed to set baud rate(Motor Driver)");
     return false;
   }
 
@@ -55,6 +58,7 @@ bool Turtlebot3MotorDriver::init(void)
   groupSyncWriteVelocity_ = new dynamixel::GroupSyncWrite(portHandler_, packetHandler_, ADDR_X_GOAL_VELOCITY, LEN_X_GOAL_VELOCITY);
   groupSyncReadEncoder_   = new dynamixel::GroupSyncRead(portHandler_, packetHandler_, ADDR_X_PRESENT_POSITION, LEN_X_PRESENT_POSITION);
   
+  DEBUG_SERIAL.println("Success to init Motor Driver");
   return true;
 }
 

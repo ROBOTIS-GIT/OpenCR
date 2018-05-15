@@ -23,11 +23,15 @@ Turtlebot3Diagnosis::Turtlebot3Diagnosis()
 }
 
 Turtlebot3Diagnosis::~Turtlebot3Diagnosis()
-{  
+{
+  DEBUG_SERIAL.end();  
 }
 
 bool Turtlebot3Diagnosis::init(void)
 {
+  DEBUG_SERIAL.begin(57600);
+
+  DEBUG_SERIAL.println("Success to init Diagnosis");
   return true;
 }
 

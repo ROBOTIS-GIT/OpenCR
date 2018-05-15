@@ -24,11 +24,13 @@ Turtlebot3Controller::Turtlebot3Controller()
 }
 
 Turtlebot3Controller::~Turtlebot3Controller()
-{  
+{
+  DEBUG_SERIAL.end();
 }
 
 bool Turtlebot3Controller::init(float max_lin_vel, float max_ang_vel, uint8_t scale_lin_vel, uint8_t scale_ang_vel)
 {
+  DEBUG_SERIAL.begin(57600);
   // 57600bps baudrate for RC100 control
   rc100_.begin(1);  
 
@@ -39,6 +41,7 @@ bool Turtlebot3Controller::init(float max_lin_vel, float max_ang_vel, uint8_t sc
   scale_lin_vel_ = scale_lin_vel;
   scale_ang_vel_ = scale_ang_vel;
 
+  DEBUG_SERIAL.println("Success to init Controller");
   return true;
 }
 

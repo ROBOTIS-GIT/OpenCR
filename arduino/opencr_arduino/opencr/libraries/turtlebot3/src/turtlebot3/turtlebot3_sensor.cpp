@@ -24,10 +24,12 @@ Turtlebot3Sensor::Turtlebot3Sensor()
 
 Turtlebot3Sensor::~Turtlebot3Sensor()
 {
+  DEBUG_SERIAL.end();
 }
 
 bool Turtlebot3Sensor::init(void)
 {
+  DEBUG_SERIAL.begin(57600);
   uint8_t get_error_code = 0x00;
 
   battery_state_msg_.current         = NAN;
@@ -37,6 +39,11 @@ bool Turtlebot3Sensor::init(void)
   battery_state_msg_.percentage      = NAN;
 
   get_error_code = imu_.begin();
+
+  if (get_error_code != 0x00)
+    DEBUG_SERIAL.println("Failed to init Sensor");
+  else
+    DEBUG_SERIAL.println("Success to init Sensor");
 
   return get_error_code;
 }

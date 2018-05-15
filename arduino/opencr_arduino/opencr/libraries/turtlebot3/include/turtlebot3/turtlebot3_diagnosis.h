@@ -37,6 +37,8 @@
 #define WAIT_SECOND                      1
 #define CHECK_BUTTON_RELEASED            2
 
+#define DEBUG_SERIAL  SerialBT2
+
 class Turtlebot3Diagnosis
 {
  public:
