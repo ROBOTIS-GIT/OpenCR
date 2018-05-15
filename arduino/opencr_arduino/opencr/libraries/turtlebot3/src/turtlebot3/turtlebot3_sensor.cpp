@@ -20,10 +20,12 @@
 
 Turtlebot3Sensor::Turtlebot3Sensor()
 {
+   DEBUG_SERIAL.begin(57600);
 }
 
 Turtlebot3Sensor::~Turtlebot3Sensor()
 {  
+  DEBUG_SERIAL.end();
 }
 
 bool Turtlebot3Sensor::init(void)
@@ -34,7 +36,10 @@ bool Turtlebot3Sensor::init(void)
   battery_state_msg_.design_capacity = NAN;
   battery_state_msg_.percentage      = NAN;
 
-  imu_.begin();
+  if (imu_.begin() != 0x00)
+    DEBUG_SERIAL.println("Success to begin IMU");
+  else
+    DEBUG_SERIAL.println("Failed to begin IMU");
 }
 
 void Turtlebot3Sensor::initIMU(void)
