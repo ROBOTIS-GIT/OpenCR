@@ -59,6 +59,9 @@
 #define TEST_DISTANCE                    0.300     // meter
 #define TEST_RADIAN                      3.14      // 180 degree
 
+#define DEBUG                            1
+#define DEBUG_SERIAL                     SerialBT2
+
 // Callback function prototypes
 void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
 void soundCallback(const turtlebot3_msgs::Sound& sound_msg);
@@ -92,7 +95,6 @@ void initJointStates(void);
 bool calcOdometry(double diff_time);
 
 void sendLogMsg(void);
-void melody(uint16_t* note, uint8_t note_num, uint8_t* durations);
 
 /*******************************************************************************
 * ROS NodeHandle
