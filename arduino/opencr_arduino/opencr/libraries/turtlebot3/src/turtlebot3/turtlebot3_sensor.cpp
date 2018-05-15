@@ -177,3 +177,23 @@ uint8_t Turtlebot3Sensor::checkPushButton(void)
 {
   return getPushButton();
 }
+
+uint8_t getPushedBumper(void)
+{
+  return 1;
+}
+
+float getIRsensorData(void)
+{
+  return 1.0;
+}
+
+float getSonarData(void)
+{
+  return 1.0;
+}
+
+float getIlluminationData(void)
+{
+  return 1.0;
+}

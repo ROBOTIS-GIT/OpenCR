@@ -42,18 +42,32 @@ class Turtlebot3Sensor
 
   bool init(void);
 
+  // IMU
   void initIMU(void);
   sensor_msgs::Imu getIMU(void);
   void updateIMU(void);
   void calibrationGyro(void);
 
   float* getOrientation(void);
-
   sensor_msgs::MagneticField getMag(void);
 
+  // Battery
   float checkVoltage(void);
 
-  uint8_t checkPushButton(void);  
+  // Button
+  uint8_t checkPushButton(void);
+
+  // Bumper
+  uint8_t getPushedBumper(void);
+
+  // Cliff sensor
+  float getIRsensorData(void);
+
+  // Sonar sensor
+  float getSonarData(void);
+
+  // Illumination sensor
+  float getIlluminationData(void);
 
  private:
   sensor_msgs::Imu           imu_msg_;
