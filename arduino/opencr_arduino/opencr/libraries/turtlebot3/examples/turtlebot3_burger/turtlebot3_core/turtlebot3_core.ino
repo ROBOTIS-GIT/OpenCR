@@ -23,13 +23,17 @@
 *******************************************************************************/
 void setup()
 {
+  DEBUG_SERIAL.begin(57600);
+
   // Initialize ROS node handle, advertise and subscribe the topics
   nh.initNode();
   nh.getHardware()->setBaud(115200);
+
   nh.subscribe(cmd_vel_sub);
   nh.subscribe(sound_sub);
   nh.subscribe(motor_power_sub);
   nh.subscribe(reset_sub);
+
   nh.advertise(sensor_state_pub);  
   nh.advertise(version_info_pub);
   nh.advertise(imu_pub);
@@ -38,6 +42,7 @@ void setup()
   nh.advertise(joint_states_pub);
   nh.advertise(battery_state_pub);
   nh.advertise(mag_pub);
+
   tf_broadcaster.init(nh);
 
   // Setting for Dynamixel motors
@@ -46,6 +51,7 @@ void setup()
   // Setting for IMU
   sensors.init();
 
+  // Init diagnosis
   diagnosis.init();
 
   // Setting for ROBOTIS RC100 remote controller and cmd_vel
@@ -60,8 +66,6 @@ void setup()
 
   pinMode(LED_WORKING_CHECK, OUTPUT);
 
-  SerialBT2.begin(57600);
-
   setup_end = true;
 }
 
@@ -74,20 +78,20 @@ void loop()
   updateTime();
   updateVariable();
 
-  if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_PERIOD))
+  if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_FREQUENCY))
   {
     updateGoalVelocity();
     motor_driver.controlMotor(WHEEL_SEPARATION, goal_velocity);
     tTime[0] = t;
   }
 
-  if ((t-tTime[1]) >= (1000 / CMD_VEL_PUBLISH_PERIOD))
+  if ((t-tTime[1]) >= (1000 / CMD_VEL_PUBLISH_FREQUENCY))
   {
     publishCmdVelFromRC100Msg();
     tTime[1] = t;
   }
 
-  if ((t-tTime[2]) >= (1000 / DRIVE_INFORMATION_PUBLISH_PERIOD))
+  if ((t-tTime[2]) >= (1000 / DRIVE_INFORMATION_PUBLISH_FREQUENCY))
   {
     publishSensorStateMsg();
     publishBatteryStateMsg();
@@ -95,14 +99,14 @@ void loop()
     tTime[2] = t;
   }
 
-  if ((t-tTime[3]) >= (1000 / IMU_PUBLISH_PERIOD))
+  if ((t-tTime[3]) >= (1000 / IMU_PUBLISH_FREQUENCY))
   {
     publishImuMsg();
     publishMagMsg();
     tTime[3] = t;
   }
 
-  if ((t-tTime[4]) >= (1000 / VERSION_INFORMATION_PUBLISH_PERIOD))
+  if ((t-tTime[4]) >= (1000 / VERSION_INFORMATION_PUBLISH_FREQUENCY))
   {
     publishVersionInfoMsg();
     tTime[4] = t;
@@ -115,7 +119,7 @@ void loop()
   controllers.getRCdata(goal_velocity_from_rc100);
 
   // Check push button pressed for simple test drive
-  driveTest(diagnosis.getButtonPress());
+  driveTest(diagnosis.getButtonPress(3000));
 
   // Update the IMU unit
   sensors.updateIMU();
@@ -128,6 +132,10 @@ void loop()
 
   // Update Voltage
   battery_state = diagnosis.updateVoltageCheck(setup_end);
+
+#ifdef DEBUG
+  sendDebuglog();
+#endif
 
   // Call all the callbacks waiting to be called at that point in time
   nh.spinOnce();
@@ -144,8 +152,8 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
   goal_velocity_from_cmd[LINEAR]  = cmd_vel_msg.linear.x;
   goal_velocity_from_cmd[ANGULAR] = cmd_vel_msg.angular.z;
 
-  goal_velocity_from_cmd[LINEAR]  = constrain(goal_velocity_from_cmd[LINEAR],  (-1)*MAX_LINEAR_VELOCITY, MAX_LINEAR_VELOCITY);
-  goal_velocity_from_cmd[ANGULAR] = constrain(goal_velocity_from_cmd[ANGULAR], (-1)*MAX_ANGULAR_VELOCITY, MAX_ANGULAR_VELOCITY);
+  goal_velocity_from_cmd[LINEAR]  = constrain(goal_velocity_from_cmd[LINEAR],  MIN_LINEAR_VELOCITY, MAX_LINEAR_VELOCITY);
+  goal_velocity_from_cmd[ANGULAR] = constrain(goal_velocity_from_cmd[ANGULAR], MIN_ANGULAR_VELOCITY, MAX_ANGULAR_VELOCITY);
 }
 
 /*******************************************************************************
@@ -153,91 +161,7 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
 *******************************************************************************/
 void soundCallback(const turtlebot3_msgs::Sound& sound_msg)
 {
-  const uint16_t NOTE_C4 = 262;
-  const uint16_t NOTE_D4 = 294;
-  const uint16_t NOTE_E4 = 330;
-  const uint16_t NOTE_F4 = 349;
-  const uint16_t NOTE_G4 = 392;
-  const uint16_t NOTE_A4 = 440;
-  const uint16_t NOTE_B4 = 494;
-  const uint16_t NOTE_C5 = 523;
-  const uint16_t NOTE_C6 = 1047;
-
-  const uint8_t OFF         = 0;
-  const uint8_t ON          = 1;
-  const uint8_t LOW_BATTERY = 2;
-  const uint8_t ERROR       = 3;
-  const uint8_t BUTTON1     = 4;
-  const uint8_t BUTTON2     = 5;
-
-  uint16_t note[8]     = {0, 0};
-  uint8_t  duration[8] = {0, 0};
-
-  switch (sound_msg.value)
-  {
-    case ON:
-      note[0] = NOTE_C4;   duration[0] = 4;
-      note[1] = NOTE_D4;   duration[1] = 4;
-      note[2] = NOTE_E4;   duration[2] = 4;
-      note[3] = NOTE_F4;   duration[3] = 4;
-      note[4] = NOTE_G4;   duration[4] = 4;
-      note[5] = NOTE_A4;   duration[5] = 4;
-      note[6] = NOTE_B4;   duration[6] = 4;
-      note[7] = NOTE_C5;   duration[7] = 4;   
-     break;
-
-    case OFF:
-      note[0] = NOTE_C5;   duration[0] = 4;
-      note[1] = NOTE_B4;   duration[1] = 4;
-      note[2] = NOTE_A4;   duration[2] = 4;
-      note[3] = NOTE_G4;   duration[3] = 4;
-      note[4] = NOTE_F4;   duration[4] = 4;
-      note[5] = NOTE_E4;   duration[5] = 4;
-      note[6] = NOTE_D4;   duration[6] = 4;
-      note[7] = NOTE_C4;   duration[7] = 4;  
-     break;
-
-    case LOW_BATTERY:
-      note[0] = 1000;      duration[0] = 1;
-      note[1] = 1000;      duration[1] = 1;
-      note[2] = 1000;      duration[2] = 1;
-      note[3] = 1000;      duration[3] = 1;
-      note[4] = 0;         duration[4] = 8;
-      note[5] = 0;         duration[5] = 8;
-      note[6] = 0;         duration[6] = 8;
-      note[7] = 0;         duration[7] = 8;
-     break;
-
-    case ERROR:
-      note[0] = 1000;      duration[0] = 3;
-      note[1] = 500;       duration[1] = 3;
-      note[2] = 1000;      duration[2] = 3;
-      note[3] = 500;       duration[3] = 3;
-      note[4] = 1000;      duration[4] = 3;
-      note[5] = 500;       duration[5] = 3;
-      note[6] = 1000;      duration[6] = 3;
-      note[7] = 500;       duration[7] = 3;
-     break;
-
-    case BUTTON1:
-     break;
-
-    case BUTTON2:
-     break;
-
-    default:
-      note[0] = NOTE_C4;   duration[0] = 4;
-      note[1] = NOTE_D4;   duration[1] = 4;
-      note[2] = NOTE_E4;   duration[2] = 4;
-      note[3] = NOTE_F4;   duration[3] = 4;
-      note[4] = NOTE_G4;   duration[4] = 4;
-      note[5] = NOTE_A4;   duration[5] = 4;
-      note[6] = NOTE_B4;   duration[6] = 4;
-      note[7] = NOTE_C4;   duration[7] = 4; 
-     break;
-  }
-
-  melody(note, 8, duration);
+  sensors.makeSound(sound_msg.value);
 }
 
 /*******************************************************************************
@@ -247,8 +171,7 @@ void motorPowerCallback(const std_msgs::Bool& power_msg)
 {
   bool dxl_power = power_msg.data;
 
-  motor_driver.setTorque(DXL_LEFT_ID, dxl_power);
-  motor_driver.setTorque(DXL_RIGHT_ID, dxl_power);
+  motor_driver.setTorque(dxl_power);
 }
 
 /*******************************************************************************
@@ -687,8 +610,12 @@ void updateGyroCali(void)
 void sendLogMsg(void)
 {
   static bool log_flag = false;
-  char log_msg[100];
-  const char* init_log_data = INIT_LOG_DATA;
+  char log_msg[100];  
+
+  String firmware_version = FIRMWARE_VER;
+  String bringup_log      = "This core(v" + firmware_version + ") is compatible with TB3 Burger";
+   
+  const char* init_log_data = bringup_log.c_str();
 
   if (nh.connected())
   {
@@ -715,6 +642,9 @@ void sendLogMsg(void)
   }
 }
 
+/*******************************************************************************
+* Initialization odometry data
+*******************************************************************************/
 void initOdom(void)
 {
   init_encoder = true;
@@ -738,6 +668,9 @@ void initOdom(void)
   odom.twist.twist.angular.z = 0.0;
 }
 
+/*******************************************************************************
+* Initialization joint states data
+*******************************************************************************/
 void initJointStates(void)
 {
   static char *joint_states_name[] = {"wheel_left_joint", "wheel_right_joint"};
@@ -751,25 +684,6 @@ void initJointStates(void)
   joint_states.effort_length   = WHEEL_NUM;
 }
 
-void melody(uint16_t* note, uint8_t note_num, uint8_t* durations)
-{
-  for (int thisNote = 0; thisNote < note_num; thisNote++) 
-  {
-    // to calculate the note duration, take one second
-    // divided by the note type.
-    //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
-    int noteDuration = 1000 / durations[thisNote];
-    tone(BDPIN_BUZZER, note[thisNote], noteDuration);
-
-    // to distinguish the notes, set a minimum time between them.
-    // the note's duration + 30% seems to work well:
-    int pauseBetweenNotes = noteDuration * 1.30;
-    delay(pauseBetweenNotes);
-    // stop the tone playing:
-    noTone(BDPIN_BUZZER);
-  }
-}
-
 /*******************************************************************************
 * Update Goal Velocity
 *******************************************************************************/
@@ -777,4 +691,40 @@ void updateGoalVelocity(void)
 {
   goal_velocity[LINEAR]  = goal_velocity_from_button[LINEAR]  + goal_velocity_from_cmd[LINEAR]  + goal_velocity_from_rc100[LINEAR];
   goal_velocity[ANGULAR] = goal_velocity_from_button[ANGULAR] + goal_velocity_from_cmd[ANGULAR] + goal_velocity_from_rc100[ANGULAR];
+}
+
+/*******************************************************************************
+* Send Debug data
+*******************************************************************************/
+void sendDebuglog(void)
+{
+  DEBUG_SERIAL.println("---------------------------------------");
+  DEBUG_SERIAL.println("EXTERNAL SENSORS");
+  DEBUG_SERIAL.println("---------------------------------------\n");
+  DEBUG_SERIAL.println("bumper : ");
+  DEBUG_SERIAL.println("cliff : ");
+  DEBUG_SERIAL.println("sonar : ");
+  DEBUG_SERIAL.println("illumination : ");
+  DEBUG_SERIAL.println("led : ");
+
+  DEBUG_SERIAL.println("---------------------------------------");
+  DEBUG_SERIAL.println("OpenCR SENSORS");
+  DEBUG_SERIAL.println("---------------------------------------\n");
+  DEBUG_SERIAL.println("battery : ");
+  DEBUG_SERIAL.println("button : ");
+  DEBUG_SERIAL.println("imu : ");
+  
+  DEBUG_SERIAL.println("---------------------------------------");
+  DEBUG_SERIAL.println("DYNAMIXELS");
+  DEBUG_SERIAL.println("---------------------------------------\n");
+  DEBUG_SERIAL.println("torque : ");
+  DEBUG_SERIAL.println("left_encoder : ");
+  DEBUG_SERIAL.println("right_encoder : ");
+
+  DEBUG_SERIAL.println("---------------------------------------");
+  DEBUG_SERIAL.println("TurtleBot3");
+  DEBUG_SERIAL.println("---------------------------------------\n");
+  DEBUG_SERIAL.println("odometry : ");    
+
+  // Serial.println("   id : " + String(scanned_id[i]) + "   Model Name : " + String(dxl_wb.getModelName(scanned_id[i])));
 }

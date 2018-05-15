@@ -19,6 +19,7 @@
 #ifndef TURTLEBOT3_MOTOR_DRIVER_H_
 #define TURTLEBOT3_MOTOR_DRIVER_H_
 
+#include "variant.h"
 #include <DynamixelSDK.h>
 
 // Control table address (Dynamixel X-series)
@@ -29,8 +30,9 @@
 #define ADDR_X_PRESENT_VELOCITY         128
 #define ADDR_X_PRESENT_POSITION         132
 
-// Limit values (XM430-W210-T)
-#define LIMIT_X_MAX_VELOCITY            240
+// Limit values (XM430-W210-T and XM430-W350-T)
+#define LIMIT_X_MAX_VELOCITY            337     // MAX RPM is 77 when DXL is powered 12.0V
+                                                // 77 / 0.229 (RPM) = 336.24454...
 
 // Data Byte Length
 #define LEN_X_TORQUE_ENABLE             1
@@ -44,6 +46,7 @@
 
 #define DXL_LEFT_ID                     1       // ID of left motor
 #define DXL_RIGHT_ID                    2       // ID of right motor
+
 #define BAUDRATE                        1000000 // baurd rate of Dynamixel
 #define DEVICENAME                      ""      // no need setting on OpenCR
 
@@ -53,9 +56,12 @@
 #define LEFT                            0
 #define RIGHT                           1
 
-#define VELOCITY_CONSTANT_VALUE         1263.632956882  // V = r * w = r * RPM * 0.10472
-                                                        //   = 0.033 * 0.229 * Goal RPM * 0.10472
-                                                        // Goal RPM = V * 1263.632956882
+#define VELOCITY_CONSTANT_VALUE         1263.632956882  // V = r * w = r     *        (RPM             * 0.10472)
+                                                        //           = 0.033 * (0.229 * Goal_Velocity) * 0.10472
+                                                        //
+                                                        // Goal_Velocity = V * 1263.632956882
+
+#define DEBUG_SERIAL  SerialBT2
 
 class Turtlebot3MotorDriver
 {
@@ -63,8 +69,8 @@ class Turtlebot3MotorDriver
   Turtlebot3MotorDriver();
   ~Turtlebot3MotorDriver();
   bool init(void);
-  void closeDynamixel(void);
-  bool setTorque(uint8_t id, bool onoff);
+  void close(void);
+  bool setTorque(bool onoff);
   bool getTorque();
   bool readEncoder(int32_t &left_value, int32_t &right_value);
   bool writeVelocity(int64_t left_value, int64_t right_value);

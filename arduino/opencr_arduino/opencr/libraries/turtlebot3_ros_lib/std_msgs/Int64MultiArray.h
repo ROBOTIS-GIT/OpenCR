@@ -13,10 +13,12 @@ namespace std_msgs
   class Int64MultiArray : public ros::Msg
   {
     public:
-      std_msgs::MultiArrayLayout layout;
+      typedef std_msgs::MultiArrayLayout _layout_type;
+      _layout_type layout;
       uint32_t data_length;
-      int64_t st_data;
-      int64_t * data;
+      typedef int64_t _data_type;
+      _data_type st_data;
+      _data_type * data;
 
     Int64MultiArray():
       layout(),

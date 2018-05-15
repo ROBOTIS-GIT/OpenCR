@@ -23,11 +23,16 @@ Turtlebot3Diagnosis::Turtlebot3Diagnosis()
 }
 
 Turtlebot3Diagnosis::~Turtlebot3Diagnosis()
-{  
+{
+  DEBUG_SERIAL.end();  
 }
 
 bool Turtlebot3Diagnosis::init(void)
 {
+  DEBUG_SERIAL.begin(57600);
+
+  DEBUG_SERIAL.println("Success to init Diagnosis");
+  return true;
 }
 
 void Turtlebot3Diagnosis::showLedStatus(bool isConnected)
@@ -285,7 +290,7 @@ uint8_t Turtlebot3Diagnosis::updateVoltageCheck(bool check_setup)
   return battery_state;
 }
 
-uint8_t Turtlebot3Diagnosis::getButtonPress(void)
+uint8_t Turtlebot3Diagnosis::getButtonPress(uint16_t time_to_press)
 {
   uint8_t button_state = 0;
   static uint32_t t_time[2];
@@ -304,7 +309,7 @@ uint8_t Turtlebot3Diagnosis::getButtonPress(void)
        break;
 
      case WAIT_SECOND:
-       if ((millis()-t_time[button_num]) >= 1000)
+       if ((millis()-t_time[button_num]) >= time_to_press)
        {
          if (getPushButton() & (1 << button_num))
          {

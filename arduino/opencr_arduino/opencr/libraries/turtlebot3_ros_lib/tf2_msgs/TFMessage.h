@@ -14,8 +14,9 @@ namespace tf2_msgs
   {
     public:
       uint32_t transforms_length;
-      geometry_msgs::TransformStamped st_transforms;
-      geometry_msgs::TransformStamped * transforms;
+      typedef geometry_msgs::TransformStamped _transforms_type;
+      _transforms_type st_transforms;
+      _transforms_type * transforms;
 
     TFMessage():
       transforms_length(0), transforms(NULL)

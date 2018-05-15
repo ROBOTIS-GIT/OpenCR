@@ -40,8 +40,9 @@ static const char GETLOGGERS[] = "roscpp/GetLoggers";
   {
     public:
       uint32_t loggers_length;
-      roscpp::Logger st_loggers;
-      roscpp::Logger * loggers;
+      typedef roscpp::Logger _loggers_type;
+      _loggers_type st_loggers;
+      _loggers_type * loggers;
 
     GetLoggersResponse():
       loggers_length(0), loggers(NULL)

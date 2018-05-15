@@ -13,7 +13,8 @@ namespace geometry_msgs
   class PoseWithCovariance : public ros::Msg
   {
     public:
-      geometry_msgs::Pose pose;
+      typedef geometry_msgs::Pose _pose_type;
+      _pose_type pose;
       float covariance[36];
 
     PoseWithCovariance():

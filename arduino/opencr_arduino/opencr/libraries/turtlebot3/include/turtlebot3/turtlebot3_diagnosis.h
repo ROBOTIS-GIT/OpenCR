@@ -37,6 +37,8 @@
 #define WAIT_SECOND                      1
 #define CHECK_BUTTON_RELEASED            2
 
+#define DEBUG_SERIAL  SerialBT2
+
 class Turtlebot3Diagnosis
 {
  public:
@@ -53,8 +55,7 @@ class Turtlebot3Diagnosis
 
   uint8_t updateVoltageCheck(bool check_setup);
 
-  uint8_t getButtonPress(void);
-  
+  uint8_t getButtonPress(uint16_t time_to_press);  
 
  private:
 

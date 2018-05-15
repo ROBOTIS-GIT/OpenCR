@@ -14,8 +14,10 @@ namespace tf2_msgs
   class LookupTransformResult : public ros::Msg
   {
     public:
-      geometry_msgs::TransformStamped transform;
-      tf2_msgs::TF2Error error;
+      typedef geometry_msgs::TransformStamped _transform_type;
+      _transform_type transform;
+      typedef tf2_msgs::TF2Error _error_type;
+      _error_type error;
 
     LookupTransformResult():
       transform(),

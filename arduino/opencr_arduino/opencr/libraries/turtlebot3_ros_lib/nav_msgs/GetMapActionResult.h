@@ -15,9 +15,12 @@ namespace nav_msgs
   class GetMapActionResult : public ros::Msg
   {
     public:
-      std_msgs::Header header;
-      actionlib_msgs::GoalStatus status;
-      nav_msgs::GetMapResult result;
+      typedef std_msgs::Header _header_type;
+      _header_type header;
+      typedef actionlib_msgs::GoalStatus _status_type;
+      _status_type status;
+      typedef nav_msgs::GetMapResult _result_type;
+      _result_type result;
 
     GetMapActionResult():
       header(),

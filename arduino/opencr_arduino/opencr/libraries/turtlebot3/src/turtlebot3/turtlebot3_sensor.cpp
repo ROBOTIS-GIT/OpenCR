@@ -23,18 +23,29 @@ Turtlebot3Sensor::Turtlebot3Sensor()
 }
 
 Turtlebot3Sensor::~Turtlebot3Sensor()
-{  
+{
+  DEBUG_SERIAL.end();
 }
 
 bool Turtlebot3Sensor::init(void)
 {
+  DEBUG_SERIAL.begin(57600);
+  uint8_t get_error_code = 0x00;
+
   battery_state_msg_.current         = NAN;
   battery_state_msg_.charge          = NAN;
   battery_state_msg_.capacity        = NAN;
   battery_state_msg_.design_capacity = NAN;
   battery_state_msg_.percentage      = NAN;
 
-  imu_.begin();
+  get_error_code = imu_.begin();
+
+  if (get_error_code != 0x00)
+    DEBUG_SERIAL.println("Failed to init Sensor");
+  else
+    DEBUG_SERIAL.println("Success to init Sensor");
+
+  return get_error_code;
 }
 
 void Turtlebot3Sensor::initIMU(void)
@@ -165,4 +176,132 @@ float Turtlebot3Sensor::checkVoltage(void)
 uint8_t Turtlebot3Sensor::checkPushButton(void)
 {
   return getPushButton();
+}
+
+void Turtlebot3Sensor::melody(uint16_t* note, uint8_t note_num, uint8_t* durations)
+{
+  for (int thisNote = 0; thisNote < note_num; thisNote++) 
+  {
+    // to calculate the note duration, take one second
+    // divided by the note type.
+    //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+    int noteDuration = 1000 / durations[thisNote];
+    tone(BDPIN_BUZZER, note[thisNote], noteDuration);
+
+    // to distinguish the notes, set a minimum time between them.
+    // the note's duration + 30% seems to work well:
+    int pauseBetweenNotes = noteDuration * 1.30;
+    delay(pauseBetweenNotes);
+    // stop the tone playing:
+    noTone(BDPIN_BUZZER);
+  }
+}
+
+void Turtlebot3Sensor::makeSound(uint8_t index)
+{
+  const uint16_t NOTE_C4 = 262;
+  const uint16_t NOTE_D4 = 294;
+  const uint16_t NOTE_E4 = 330;
+  const uint16_t NOTE_F4 = 349;
+  const uint16_t NOTE_G4 = 392;
+  const uint16_t NOTE_A4 = 440;
+  const uint16_t NOTE_B4 = 494;
+  const uint16_t NOTE_C5 = 523;
+  const uint16_t NOTE_C6 = 1047;
+
+  const uint8_t OFF         = 0;
+  const uint8_t ON          = 1;
+  const uint8_t LOW_BATTERY = 2;
+  const uint8_t ERROR       = 3;
+  const uint8_t BUTTON1     = 4;
+  const uint8_t BUTTON2     = 5;
+
+  uint16_t note[8]     = {0, 0};
+  uint8_t  duration[8] = {0, 0};
+
+  switch (index)
+  {
+    case ON:
+      note[0] = NOTE_C4;   duration[0] = 4;
+      note[1] = NOTE_D4;   duration[1] = 4;
+      note[2] = NOTE_E4;   duration[2] = 4;
+      note[3] = NOTE_F4;   duration[3] = 4;
+      note[4] = NOTE_G4;   duration[4] = 4;
+      note[5] = NOTE_A4;   duration[5] = 4;
+      note[6] = NOTE_B4;   duration[6] = 4;
+      note[7] = NOTE_C5;   duration[7] = 4;   
+     break;
+
+    case OFF:
+      note[0] = NOTE_C5;   duration[0] = 4;
+      note[1] = NOTE_B4;   duration[1] = 4;
+      note[2] = NOTE_A4;   duration[2] = 4;
+      note[3] = NOTE_G4;   duration[3] = 4;
+      note[4] = NOTE_F4;   duration[4] = 4;
+      note[5] = NOTE_E4;   duration[5] = 4;
+      note[6] = NOTE_D4;   duration[6] = 4;
+      note[7] = NOTE_C4;   duration[7] = 4;  
+     break;
+
+    case LOW_BATTERY:
+      note[0] = 1000;      duration[0] = 1;
+      note[1] = 1000;      duration[1] = 1;
+      note[2] = 1000;      duration[2] = 1;
+      note[3] = 1000;      duration[3] = 1;
+      note[4] = 0;         duration[4] = 8;
+      note[5] = 0;         duration[5] = 8;
+      note[6] = 0;         duration[6] = 8;
+      note[7] = 0;         duration[7] = 8;
+     break;
+
+    case ERROR:
+      note[0] = 1000;      duration[0] = 3;
+      note[1] = 500;       duration[1] = 3;
+      note[2] = 1000;      duration[2] = 3;
+      note[3] = 500;       duration[3] = 3;
+      note[4] = 1000;      duration[4] = 3;
+      note[5] = 500;       duration[5] = 3;
+      note[6] = 1000;      duration[6] = 3;
+      note[7] = 500;       duration[7] = 3;
+     break;
+
+    case BUTTON1:
+     break;
+
+    case BUTTON2:
+     break;
+
+    default:
+      note[0] = NOTE_C4;   duration[0] = 4;
+      note[1] = NOTE_D4;   duration[1] = 4;
+      note[2] = NOTE_E4;   duration[2] = 4;
+      note[3] = NOTE_F4;   duration[3] = 4;
+      note[4] = NOTE_G4;   duration[4] = 4;
+      note[5] = NOTE_A4;   duration[5] = 4;
+      note[6] = NOTE_B4;   duration[6] = 4;
+      note[7] = NOTE_C4;   duration[7] = 4; 
+     break;
+  }
+
+  melody(note, 8, duration);
+}
+
+uint8_t getPushedBumper(void)
+{
+  return 1;
+}
+
+float getIRsensorData(void)
+{
+  return 1.0;
+}
+
+float getSonarData(void)
+{
+  return 1.0;
+}
+
+float getIlluminationData(void)
+{
+  return 1.0;
 }

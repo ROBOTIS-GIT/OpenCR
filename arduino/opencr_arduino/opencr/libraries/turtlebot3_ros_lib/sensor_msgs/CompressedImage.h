@@ -13,11 +13,14 @@ namespace sensor_msgs
   class CompressedImage : public ros::Msg
   {
     public:
-      std_msgs::Header header;
-      const char* format;
+      typedef std_msgs::Header _header_type;
+      _header_type header;
+      typedef const char* _format_type;
+      _format_type format;
       uint32_t data_length;
-      uint8_t st_data;
-      uint8_t * data;
+      typedef uint8_t _data_type;
+      _data_type st_data;
+      _data_type * data;
 
     CompressedImage():
       header(),
@@ -31,7 +34,7 @@ namespace sensor_msgs
       int offset = 0;
       offset += this->header.serialize(outbuffer + offset);
       uint32_t length_format = strlen(this->format);
-      memcpy(outbuffer + offset, &length_format, sizeof(uint32_t));
+      varToArr(outbuffer + offset, length_format);
       offset += 4;
       memcpy(outbuffer + offset, this->format, length_format);
       offset += length_format;
@@ -52,7 +55,7 @@ namespace sensor_msgs
       int offset = 0;
       offset += this->header.deserialize(inbuffer + offset);
       uint32_t length_format;
-      memcpy(&length_format, (inbuffer + offset), sizeof(uint32_t));
+      arrToVar(length_format, (inbuffer + offset));
       offset += 4;
       for(unsigned int k= offset; k< offset+length_format; ++k){
           inbuffer[k-1]=inbuffer[k];

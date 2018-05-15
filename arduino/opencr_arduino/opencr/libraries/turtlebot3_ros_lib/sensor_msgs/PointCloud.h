@@ -15,13 +15,16 @@ namespace sensor_msgs
   class PointCloud : public ros::Msg
   {
     public:
-      std_msgs::Header header;
+      typedef std_msgs::Header _header_type;
+      _header_type header;
       uint32_t points_length;
-      geometry_msgs::Point32 st_points;
-      geometry_msgs::Point32 * points;
+      typedef geometry_msgs::Point32 _points_type;
+      _points_type st_points;
+      _points_type * points;
       uint32_t channels_length;
-      sensor_msgs::ChannelFloat32 st_channels;
-      sensor_msgs::ChannelFloat32 * channels;
+      typedef sensor_msgs::ChannelFloat32 _channels_type;
+      _channels_type st_channels;
+      _channels_type * channels;
 
     PointCloud():
       header(),

@@ -14,19 +14,28 @@ namespace sensor_msgs
   class PointCloud2 : public ros::Msg
   {
     public:
-      std_msgs::Header header;
-      uint32_t height;
-      uint32_t width;
+      typedef std_msgs::Header _header_type;
+      _header_type header;
+      typedef uint32_t _height_type;
+      _height_type height;
+      typedef uint32_t _width_type;
+      _width_type width;
       uint32_t fields_length;
-      sensor_msgs::PointField st_fields;
-      sensor_msgs::PointField * fields;
-      bool is_bigendian;
-      uint32_t point_step;
-      uint32_t row_step;
+      typedef sensor_msgs::PointField _fields_type;
+      _fields_type st_fields;
+      _fields_type * fields;
+      typedef bool _is_bigendian_type;
+      _is_bigendian_type is_bigendian;
+      typedef uint32_t _point_step_type;
+      _point_step_type point_step;
+      typedef uint32_t _row_step_type;
+      _row_step_type row_step;
       uint32_t data_length;
-      uint8_t st_data;
-      uint8_t * data;
-      bool is_dense;
+      typedef uint8_t _data_type;
+      _data_type st_data;
+      _data_type * data;
+      typedef bool _is_dense_type;
+      _is_dense_type is_dense;
 
     PointCloud2():
       header(),

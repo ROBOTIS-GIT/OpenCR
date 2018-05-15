@@ -13,9 +13,12 @@ namespace sensor_msgs
   class Illuminance : public ros::Msg
   {
     public:
-      std_msgs::Header header;
-      float illuminance;
-      float variance;
+      typedef std_msgs::Header _header_type;
+      _header_type header;
+      typedef float _illuminance_type;
+      _illuminance_type illuminance;
+      typedef float _variance_type;
+      _variance_type variance;
 
     Illuminance():
       header(),

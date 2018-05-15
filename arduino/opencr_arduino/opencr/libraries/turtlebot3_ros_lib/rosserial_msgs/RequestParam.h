@@ -13,7 +13,8 @@ static const char REQUESTPARAM[] = "rosserial_msgs/RequestParam";
   class RequestParamRequest : public ros::Msg
   {
     public:
-      const char* name;
+      typedef const char* _name_type;
+      _name_type name;
 
     RequestParamRequest():
       name("")
@@ -24,7 +25,7 @@ static const char REQUESTPARAM[] = "rosserial_msgs/RequestParam";
     {
       int offset = 0;
       uint32_t length_name = strlen(this->name);
-      memcpy(outbuffer + offset, &length_name, sizeof(uint32_t));
+      varToArr(outbuffer + offset, length_name);
       offset += 4;
       memcpy(outbuffer + offset, this->name, length_name);
       offset += length_name;
@@ -35,7 +36,7 @@ static const char REQUESTPARAM[] = "rosserial_msgs/RequestParam";
     {
       int offset = 0;
       uint32_t length_name;
-      memcpy(&length_name, (inbuffer + offset), sizeof(uint32_t));
+      arrToVar(length_name, (inbuffer + offset));
       offset += 4;
       for(unsigned int k= offset; k< offset+length_name; ++k){
           inbuffer[k-1]=inbuffer[k];
@@ -55,14 +56,17 @@ static const char REQUESTPARAM[] = "rosserial_msgs/RequestParam";
   {
     public:
       uint32_t ints_length;
-      int32_t st_ints;
-      int32_t * ints;
+      typedef int32_t _ints_type;
+      _ints_type st_ints;
+      _ints_type * ints;
       uint32_t floats_length;
-      float st_floats;
-      float * floats;
+      typedef float _floats_type;
+      _floats_type st_floats;
+      _floats_type * floats;
       uint32_t strings_length;
-      char* st_strings;
-      char* * strings;
+      typedef char* _strings_type;
+      _strings_type st_strings;
+      _strings_type * strings;
 
     RequestParamResponse():
       ints_length(0), ints(NULL),
@@ -115,7 +119,7 @@ static const char REQUESTPARAM[] = "rosserial_msgs/RequestParam";
       offset += sizeof(this->strings_length);
       for( uint32_t i = 0; i < strings_length; i++){
       uint32_t length_stringsi = strlen(this->strings[i]);
-      memcpy(outbuffer + offset, &length_stringsi, sizeof(uint32_t));
+      varToArr(outbuffer + offset, length_stringsi);
       offset += 4;
       memcpy(outbuffer + offset, this->strings[i], length_stringsi);
       offset += length_stringsi;
@@ -180,7 +184,7 @@ static const char REQUESTPARAM[] = "rosserial_msgs/RequestParam";
       strings_length = strings_lengthT;
       for( uint32_t i = 0; i < strings_length; i++){
       uint32_t length_st_strings;
-      memcpy(&length_st_strings, (inbuffer + offset), sizeof(uint32_t));
+      arrToVar(length_st_strings, (inbuffer + offset));
       offset += 4;
       for(unsigned int k= offset; k< offset+length_st_strings; ++k){
           inbuffer[k-1]=inbuffer[k];

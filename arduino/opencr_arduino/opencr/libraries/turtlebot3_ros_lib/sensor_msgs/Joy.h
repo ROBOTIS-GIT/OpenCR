@@ -13,13 +13,16 @@ namespace sensor_msgs
   class Joy : public ros::Msg
   {
     public:
-      std_msgs::Header header;
+      typedef std_msgs::Header _header_type;
+      _header_type header;
       uint32_t axes_length;
-      float st_axes;
-      float * axes;
+      typedef float _axes_type;
+      _axes_type st_axes;
+      _axes_type * axes;
       uint32_t buttons_length;
-      int32_t st_buttons;
-      int32_t * buttons;
+      typedef int32_t _buttons_type;
+      _buttons_type st_buttons;
+      _buttons_type * buttons;
 
     Joy():
       header(),

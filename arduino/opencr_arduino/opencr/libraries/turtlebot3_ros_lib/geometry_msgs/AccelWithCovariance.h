@@ -13,7 +13,8 @@ namespace geometry_msgs
   class AccelWithCovariance : public ros::Msg
   {
     public:
-      geometry_msgs::Accel accel;
+      typedef geometry_msgs::Accel _accel_type;
+      _accel_type accel;
       float covariance[36];
 
     AccelWithCovariance():

@@ -12,9 +12,12 @@ namespace geometry_msgs
   class Vector3 : public ros::Msg
   {
     public:
-      float x;
-      float y;
-      float z;
+      typedef float _x_type;
+      _x_type x;
+      typedef float _y_type;
+      _y_type y;
+      typedef float _z_type;
+      _z_type z;
 
     Vector3():
       x(0),

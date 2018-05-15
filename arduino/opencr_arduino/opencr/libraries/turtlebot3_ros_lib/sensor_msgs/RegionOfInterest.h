@@ -12,11 +12,16 @@ namespace sensor_msgs
   class RegionOfInterest : public ros::Msg
   {
     public:
-      uint32_t x_offset;
-      uint32_t y_offset;
-      uint32_t height;
-      uint32_t width;
-      bool do_rectify;
+      typedef uint32_t _x_offset_type;
+      _x_offset_type x_offset;
+      typedef uint32_t _y_offset_type;
+      _y_offset_type y_offset;
+      typedef uint32_t _height_type;
+      _height_type height;
+      typedef uint32_t _width_type;
+      _width_type width;
+      typedef bool _do_rectify_type;
+      _do_rectify_type do_rectify;
 
     RegionOfInterest():
       x_offset(0),
