@@ -55,8 +55,16 @@ static long map(long x, long in_min, long in_max, long out_min, long out_max)
 
 void drv_pwm_set_freq(uint32_t ulPin, uint32_t freq_data)
 {
-  freq_data = constrain(freq_data, 1, 1000000);
-  pwm_freq[ulPin] = freq_data;
+  if(ulPin == BDPIN_GPIO_8)
+  {
+    freq_data = constrain(freq_data, 1, 20000000);  //Increase the maximum frequency constraint for OV7725. (Min 10Mhz)
+    pwm_freq[ulPin] = freq_data;
+  }
+  else
+  {
+    freq_data = constrain(freq_data, 1, 1000000);
+    pwm_freq[ulPin] = freq_data;
+  }
 }
 
 
