@@ -71,7 +71,7 @@
 #define TEST_DISTANCE                    0.300     // meter
 #define TEST_RADIAN                      3.14      // 180 degree
 
-#define DEBUG                            
+// #define DEBUG                            
 #define DEBUG_SERIAL                     SerialBT2
 
 // Callback function prototypes
