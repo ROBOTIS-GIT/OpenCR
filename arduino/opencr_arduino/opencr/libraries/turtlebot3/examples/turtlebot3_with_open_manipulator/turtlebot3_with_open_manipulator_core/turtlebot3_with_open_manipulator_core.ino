@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright 2016 ROBOTIS CO., LTD.
+* Copyright 2018 ROBOTIS CO., LTD.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -23,15 +23,19 @@
 *******************************************************************************/
 void setup()
 {
+  DEBUG_SERIAL.begin(57600);
+
   // Initialize ROS node handle, advertise and subscribe the topics
   nh.initNode();
   nh.getHardware()->setBaud(115200);
+
   nh.subscribe(cmd_vel_sub);
   nh.subscribe(joint_position_sub);
   nh.subscribe(gripper_position_sub);
   nh.subscribe(sound_sub);
   nh.subscribe(motor_power_sub);
   nh.subscribe(reset_sub);
+
   nh.advertise(sensor_state_pub);  
   nh.advertise(version_info_pub);
   nh.advertise(imu_pub);
@@ -40,6 +44,7 @@ void setup()
   nh.advertise(joint_states_pub);
   nh.advertise(battery_state_pub);
   nh.advertise(mag_pub);
+
   tf_broadcaster.init(nh);
 
   // Setting for Dynamixel motors
@@ -49,6 +54,7 @@ void setup()
   // Setting for IMU
   sensors.init();
 
+  // Init diagnosis
   diagnosis.init();
 
   // Setting for ROBOTIS RC100 remote controller and cmd_vel
@@ -63,8 +69,6 @@ void setup()
 
   pinMode(LED_WORKING_CHECK, OUTPUT);
 
-  SerialBT2.begin(57600);
-
   setup_end = true;
 }
 
@@ -77,20 +81,20 @@ void loop()
   updateTime();
   updateVariable();
 
-  if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_PERIOD))
+  if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_FREQUENCY))
   {
     updateGoalVelocity();
     motor_driver.controlMotor(WHEEL_SEPARATION, goal_velocity);
     tTime[0] = t;
   }
 
-  if ((t-tTime[1]) >= (1000 / CMD_VEL_PUBLISH_PERIOD))
+  if ((t-tTime[1]) >= (1000 / CMD_VEL_PUBLISH_FREQUENCY))
   {
     publishCmdVelFromRC100Msg();
     tTime[1] = t;
   }
 
-  if ((t-tTime[2]) >= (1000 / DRIVE_INFORMATION_PUBLISH_PERIOD))
+  if ((t-tTime[2]) >= (1000 / DRIVE_INFORMATION_PUBLISH_FREQUENCY))
   {
     publishSensorStateMsg();
     publishBatteryStateMsg();
@@ -98,18 +102,26 @@ void loop()
     tTime[2] = t;
   }
 
-  if ((t-tTime[3]) >= (1000 / IMU_PUBLISH_PERIOD))
+  if ((t-tTime[3]) >= (1000 / IMU_PUBLISH_FREQUENCY))
   {
     publishImuMsg();
     publishMagMsg();
     tTime[3] = t;
   }
 
-  if ((t-tTime[4]) >= (1000 / VERSION_INFORMATION_PUBLISH_PERIOD))
+  if ((t-tTime[4]) >= (1000 / VERSION_INFORMATION_PUBLISH_FREQUENCY))
   {
     publishVersionInfoMsg();
     tTime[4] = t;
   }
+
+#ifdef DEBUG
+  if ((t-tTime[5]) >= (1000 / DEBUG_LOG_FREQUENCY))
+  {
+    sendDebuglog();
+    tTime[5] = t;
+  }
+#endif
 
   // Send log message after ROS connection
   sendLogMsg();
@@ -118,7 +130,7 @@ void loop()
   controllers.getRCdata(goal_velocity_from_rc100);
 
   // Check push button pressed for simple test drive
-  driveTest(diagnosis.getButtonPress());
+  driveTest(diagnosis.getButtonPress(3000));
 
   // Update the IMU unit
   sensors.updateIMU();
@@ -147,8 +159,8 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
   goal_velocity_from_cmd[LINEAR]  = cmd_vel_msg.linear.x;
   goal_velocity_from_cmd[ANGULAR] = cmd_vel_msg.angular.z;
 
-  goal_velocity_from_cmd[LINEAR]  = constrain(goal_velocity_from_cmd[LINEAR],  (-1)*MAX_LINEAR_VELOCITY, MAX_LINEAR_VELOCITY);
-  goal_velocity_from_cmd[ANGULAR] = constrain(goal_velocity_from_cmd[ANGULAR], (-1)*MAX_ANGULAR_VELOCITY, MAX_ANGULAR_VELOCITY);
+  goal_velocity_from_cmd[LINEAR]  = constrain(goal_velocity_from_cmd[LINEAR],  MIN_LINEAR_VELOCITY, MAX_LINEAR_VELOCITY);
+  goal_velocity_from_cmd[ANGULAR] = constrain(goal_velocity_from_cmd[ANGULAR], MIN_ANGULAR_VELOCITY, MAX_ANGULAR_VELOCITY);
 }
 
 /*******************************************************************************
@@ -180,91 +192,7 @@ void goalGripperPositionCallback(const sensor_msgs::JointState& goal_gripper_pos
 *******************************************************************************/
 void soundCallback(const turtlebot3_msgs::Sound& sound_msg)
 {
-  const uint16_t NOTE_C4 = 262;
-  const uint16_t NOTE_D4 = 294;
-  const uint16_t NOTE_E4 = 330;
-  const uint16_t NOTE_F4 = 349;
-  const uint16_t NOTE_G4 = 392;
-  const uint16_t NOTE_A4 = 440;
-  const uint16_t NOTE_B4 = 494;
-  const uint16_t NOTE_C5 = 523;
-  const uint16_t NOTE_C6 = 1047;
-
-  const uint8_t OFF         = 0;
-  const uint8_t ON          = 1;
-  const uint8_t LOW_BATTERY = 2;
-  const uint8_t ERROR       = 3;
-  const uint8_t BUTTON1     = 4;
-  const uint8_t BUTTON2     = 5;
-
-  uint16_t note[8]     = {0, 0};
-  uint8_t  duration[8] = {0, 0};
-
-  switch (sound_msg.value)
-  {
-    case ON:
-      note[0] = NOTE_C4;   duration[0] = 4;
-      note[1] = NOTE_D4;   duration[1] = 4;
-      note[2] = NOTE_E4;   duration[2] = 4;
-      note[3] = NOTE_F4;   duration[3] = 4;
-      note[4] = NOTE_G4;   duration[4] = 4;
-      note[5] = NOTE_A4;   duration[5] = 4;
-      note[6] = NOTE_B4;   duration[6] = 4;
-      note[7] = NOTE_C5;   duration[7] = 4;   
-     break;
-
-    case OFF:
-      note[0] = NOTE_C5;   duration[0] = 4;
-      note[1] = NOTE_B4;   duration[1] = 4;
-      note[2] = NOTE_A4;   duration[2] = 4;
-      note[3] = NOTE_G4;   duration[3] = 4;
-      note[4] = NOTE_F4;   duration[4] = 4;
-      note[5] = NOTE_E4;   duration[5] = 4;
-      note[6] = NOTE_D4;   duration[6] = 4;
-      note[7] = NOTE_C4;   duration[7] = 4;  
-     break;
-
-    case LOW_BATTERY:
-      note[0] = 1000;      duration[0] = 1;
-      note[1] = 1000;      duration[1] = 1;
-      note[2] = 1000;      duration[2] = 1;
-      note[3] = 1000;      duration[3] = 1;
-      note[4] = 0;         duration[4] = 8;
-      note[5] = 0;         duration[5] = 8;
-      note[6] = 0;         duration[6] = 8;
-      note[7] = 0;         duration[7] = 8;
-     break;
-
-    case ERROR:
-      note[0] = 1000;      duration[0] = 3;
-      note[1] = 500;       duration[1] = 3;
-      note[2] = 1000;      duration[2] = 3;
-      note[3] = 500;       duration[3] = 3;
-      note[4] = 1000;      duration[4] = 3;
-      note[5] = 500;       duration[5] = 3;
-      note[6] = 1000;      duration[6] = 3;
-      note[7] = 500;       duration[7] = 3;
-     break;
-
-    case BUTTON1:
-     break;
-
-    case BUTTON2:
-     break;
-
-    default:
-      note[0] = NOTE_C4;   duration[0] = 4;
-      note[1] = NOTE_D4;   duration[1] = 4;
-      note[2] = NOTE_E4;   duration[2] = 4;
-      note[3] = NOTE_F4;   duration[3] = 4;
-      note[4] = NOTE_G4;   duration[4] = 4;
-      note[5] = NOTE_A4;   duration[5] = 4;
-      note[6] = NOTE_B4;   duration[6] = 4;
-      note[7] = NOTE_C4;   duration[7] = 4; 
-     break;
-  }
-
-  melody(note, 8, duration);
+  sensors.makeSound(sound_msg.value);
 }
 
 /*******************************************************************************
@@ -274,8 +202,7 @@ void motorPowerCallback(const std_msgs::Bool& power_msg)
 {
   bool dxl_power = power_msg.data;
 
-  motor_driver.setTorque(DXL_LEFT_ID, dxl_power);
-  motor_driver.setTorque(DXL_RIGHT_ID, dxl_power);
+  motor_driver.setTorque(dxl_power);
   joint_driver.setJointTorque(dxl_power);
   joint_driver.setGripperTorque(dxl_power);
 }
@@ -568,22 +495,22 @@ bool calcOdometry(double diff_time)
 
   delta_theta = theta - last_theta;
 
-  v = delta_s / step_time;
-  w = delta_theta / step_time;
-
-  last_velocity[LEFT]  = wheel_l / step_time;
-  last_velocity[RIGHT] = wheel_r / step_time;
-
   // compute odometric pose
   odom_pose[0] += delta_s * cos(odom_pose[2] + (delta_theta / 2.0));
   odom_pose[1] += delta_s * sin(odom_pose[2] + (delta_theta / 2.0));
   odom_pose[2] += delta_theta;
 
   // compute odometric instantaneouse velocity
+
+  v = delta_s / step_time;
+  w = delta_theta / step_time;
+
   odom_vel[0] = v;
   odom_vel[1] = 0.0;
   odom_vel[2] = w;
 
+  last_velocity[LEFT]  = wheel_l / step_time;
+  last_velocity[RIGHT] = wheel_r / step_time;
   last_theta = theta;
 
   return true;
@@ -605,14 +532,14 @@ void driveTest(uint8_t buttons)
   if (buttons & (1<<0))  
   {
     move[LINEAR] = true;
-    saved_tick[RIGHT] = sensor_state_msg.right_encoder;
+    saved_tick[RIGHT] = current_tick[RIGHT];
 
     diff_encoder = TEST_DISTANCE / (0.207 / 4096); // (Circumference of Wheel) / (The number of tick per revolution)
   }
   else if (buttons & (1<<1))
   {
     move[ANGULAR] = true;
-    saved_tick[RIGHT] = sensor_state_msg.right_encoder;
+    saved_tick[RIGHT] = current_tick[RIGHT];
 
     diff_encoder = (TEST_RADIAN * TURNING_RADIUS) / (0.207 / 4096);
   }
@@ -735,8 +662,12 @@ void updateGyroCali(void)
 void sendLogMsg(void)
 {
   static bool log_flag = false;
-  char log_msg[100];
-  const char* init_log_data = INIT_LOG_DATA;
+  char log_msg[100];  
+
+  String firmware_version = FIRMWARE_VER;
+  String bringup_log      = "This core(v" + firmware_version + ") is compatible with TB3 with OpenManipulator";
+   
+  const char* init_log_data = bringup_log.c_str();
 
   if (nh.connected())
   {
@@ -763,6 +694,9 @@ void sendLogMsg(void)
   }
 }
 
+/*******************************************************************************
+* Initialization odometry data
+*******************************************************************************/
 void initOdom(void)
 {
   init_encoder = true;
@@ -786,6 +720,9 @@ void initOdom(void)
   odom.twist.twist.angular.z = 0.0;
 }
 
+/*******************************************************************************
+* Initialization joint states data
+*******************************************************************************/
 void initJointStates(void)
 {
   static char *joint_states_name[] = {"wheel_left_joint", "wheel_right_joint", "joint1", "joint2", "joint3", "joint4", "grip_joint", "grip_joint_sub"};
@@ -797,25 +734,6 @@ void initJointStates(void)
   joint_states.position_length = WHEEL_NUM + JOINT_NUM + PALM_NUM;
   joint_states.velocity_length = WHEEL_NUM + JOINT_NUM + PALM_NUM;
   joint_states.effort_length   = WHEEL_NUM + JOINT_NUM + PALM_NUM;
-}
-
-void melody(uint16_t* note, uint8_t note_num, uint8_t* durations)
-{
-  for (int thisNote = 0; thisNote < note_num; thisNote++) 
-  {
-    // to calculate the note duration, take one second
-    // divided by the note type.
-    //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
-    int noteDuration = 1000 / durations[thisNote];
-    tone(BDPIN_BUZZER, note[thisNote], noteDuration);
-
-    // to distinguish the notes, set a minimum time between them.
-    // the note's duration + 30% seems to work well:
-    int pauseBetweenNotes = noteDuration * 1.30;
-    delay(pauseBetweenNotes);
-    // stop the tone playing:
-    noTone(BDPIN_BUZZER);
-  }
 }
 
 /*******************************************************************************
@@ -833,4 +751,62 @@ void updateGoalVelocity(void)
 double mapd(double x, double in_min, double in_max, double out_min, double out_max)
 {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+/*******************************************************************************
+* Send Debug data
+*******************************************************************************/
+void sendDebuglog(void)
+{
+  DEBUG_SERIAL.println("---------------------------------------");
+  DEBUG_SERIAL.println("EXTERNAL SENSORS");
+  DEBUG_SERIAL.println("---------------------------------------");
+  DEBUG_SERIAL.print("Bumper : "); DEBUG_SERIAL.println(sensors.getPushedBumper());
+  DEBUG_SERIAL.print("Cliff : "); DEBUG_SERIAL.println(sensors.getIRsensorData());
+  DEBUG_SERIAL.print("Sonar : "); DEBUG_SERIAL.println(sensors.getSonarData());
+  DEBUG_SERIAL.print("Illumination : "); DEBUG_SERIAL.println(sensors.getIlluminationData());
+
+  DEBUG_SERIAL.println("---------------------------------------");
+  DEBUG_SERIAL.println("OpenCR SENSORS");
+  DEBUG_SERIAL.println("---------------------------------------");
+  DEBUG_SERIAL.print("Battery : "); DEBUG_SERIAL.println(sensors.checkVoltage());
+  DEBUG_SERIAL.println("Button : " + String(sensors.checkPushButton()));
+
+  float* quat = sensors.getOrientation();
+
+  DEBUG_SERIAL.println("IMU : ");
+  DEBUG_SERIAL.print("    w : "); DEBUG_SERIAL.println(quat[0]);
+  DEBUG_SERIAL.print("    x : "); DEBUG_SERIAL.println(quat[1]);
+  DEBUG_SERIAL.print("    y : "); DEBUG_SERIAL.println(quat[2]);
+  DEBUG_SERIAL.print("    z : "); DEBUG_SERIAL.println(quat[3]);
+  
+  DEBUG_SERIAL.println("---------------------------------------");
+  DEBUG_SERIAL.println("DYNAMIXELS");
+  DEBUG_SERIAL.println("---------------------------------------");
+  DEBUG_SERIAL.println("Torque(wheel) : " + String(motor_driver.getTorque()));
+  DEBUG_SERIAL.println("Torque(joint) : " + String(joint_driver.getJointTorque()));
+  DEBUG_SERIAL.println("Torque(gripper) : " + String(joint_driver.getGripperTorque()));
+
+  int32_t encoder[WHEEL_NUM] = {0, 0};
+  motor_driver.readEncoder(encoder[LEFT], encoder[RIGHT]);
+
+  double present_position[JOINT_NUM + GRIP_NUM] = {0, 0, 0, 0, 0};
+  joint_driver.readPosition(present_position);
+  
+  DEBUG_SERIAL.println("Encoder(left) : " + String(encoder[LEFT]));
+  DEBUG_SERIAL.println("Encoder(right) : " + String(encoder[RIGHT]));
+
+  DEBUG_SERIAL.print("Present Position(Joint 1) : ");       DEBUG_SERIAL.println(present_position[0]);
+  DEBUG_SERIAL.print("Present Position(Joint 2) : ");       DEBUG_SERIAL.println(present_position[1]);
+  DEBUG_SERIAL.print("Present Position(Joint 3) : ");       DEBUG_SERIAL.println(present_position[2]);
+  DEBUG_SERIAL.print("Present Position(Joint 4) : ");       DEBUG_SERIAL.println(present_position[3]);
+  DEBUG_SERIAL.print("Present Position(Gripper Joint) : "); DEBUG_SERIAL.println(present_position[4]);
+
+  DEBUG_SERIAL.println("---------------------------------------");
+  DEBUG_SERIAL.println("TurtleBot3");
+  DEBUG_SERIAL.println("---------------------------------------");
+  DEBUG_SERIAL.println("Odometry : ");   
+  DEBUG_SERIAL.print("         x : "); DEBUG_SERIAL.println(odom_pose[0]);
+  DEBUG_SERIAL.print("         y : "); DEBUG_SERIAL.println(odom_pose[1]);
+  DEBUG_SERIAL.print("     theta : "); DEBUG_SERIAL.println(odom_pose[2]);
 }

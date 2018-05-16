@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright 2016 ROBOTIS CO., LTD.
+* Copyright 2018 ROBOTIS CO., LTD.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 /* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
 
-#ifndef TURTLEBOT3_CORE_CONFIG_H_
-#define TURTLEBOT3_CORE_CONFIG_H_
+#ifndef TURTLEBOT3_WITH_OPEN_MANIPULATOR_CORE_CONFIG_H_
+#define TURTLEBOT3_WITH_OPEN_MANIPULATOR_CORE_CONFIG_H_
 
 #include <ros.h>
 #include <ros/time.h>
@@ -40,32 +40,22 @@
 
 #include <TurtleBot3.h>
 #include <OpenManipulator.h>
+#include "turtlebot3_with_open_manipulator.h"
 
 #include <math.h>
 
-#define INIT_LOG_DATA "This core(v1.1.2) is compatible with TB3 Waffle with OpenManipulator"
-
 #define HARDWARE_VER "1.0.0"
 #define SOFTWARE_VER "1.0.0"
-#define FIRMWARE_VER "1.1.2"
+#define FIRMWARE_VER "1.0.1"
 
-#define CONTROL_MOTOR_SPEED_PERIOD          30   //hz
-#define IMU_PUBLISH_PERIOD                  200  //hz
-#define CMD_VEL_PUBLISH_PERIOD              30   //hz
-#define DRIVE_INFORMATION_PUBLISH_PERIOD    30   //hz
-#define VERSION_INFORMATION_PUBLISH_PERIOD  1    //hz 
+#define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
+#define IMU_PUBLISH_FREQUENCY                  200  //hz
+#define CMD_VEL_PUBLISH_FREQUENCY              30   //hz
+#define DRIVE_INFORMATION_PUBLISH_FREQUENCY    30   //hz
+#define VERSION_INFORMATION_PUBLISH_FREQUENCY  1    //hz 
+#define DEBUG_LOG_FREQUENCY                    2   //hz 
 
 #define WHEEL_NUM                        2
-#define WHEEL_RADIUS                     0.033           // meter
-#define WHEEL_SEPARATION                 0.287           // meter (BURGER : 0.160, WAFFLE : 0.287)
-#define TURNING_RADIUS                   0.1435          // meter (BURGER : 0.080, WAFFLE : 0.1435)
-#define ROBOT_RADIUS                     0.220           // meter (BURGER : 0.105, WAFFLE : 0.220)
-#define ENCODER_MIN                      -2147483648     // raw
-#define ENCODER_MAX                      2147483648      // raw
-
-#define JOINT_NUM                        4
-#define PALM_NUM                         2  // grip_joint + grip_joint_sub
-#define GRIP_NUM                         1    
 
 #define LEFT                             0
 #define RIGHT                            1
@@ -73,18 +63,16 @@
 #define LINEAR                           0
 #define ANGULAR                          1
 
-#define MAX_LINEAR_VELOCITY              0.25   // m/s   (BURGER : 0.22, WAFFLE : 0.25)
-#define MAX_ANGULAR_VELOCITY             1.82   // rad/s (BURGER : 2.84, WAFFLE : 1.82)
-
-#define TICK2RAD                         0.001533981  // 0.087890625[deg] * 3.14159265359 / 180 = 0.001533981f
-
 #define DEG2RAD(x)                       (x * 0.01745329252)  // *PI/180
 #define RAD2DEG(x)                       (x * 57.2957795131)  // *180/PI
+
+#define TICK2RAD                         0.001533981  // 0.087890625[deg] * 3.14159265359 / 180 = 0.001533981f
 
 #define TEST_DISTANCE                    0.300     // meter
 #define TEST_RADIAN                      3.14      // 180 degree
 
-#define VELOCITY_UNIT                    2
+#define DEBUG                            
+#define DEBUG_SERIAL                     SerialBT2
 
 // Callback function prototypes
 void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
@@ -121,7 +109,6 @@ void initJointStates(void);
 bool calcOdometry(double diff_time);
 
 void sendLogMsg(void);
-void melody(uint16_t* note, uint8_t note_num, uint8_t* durations);
 
 double mapd(double x, double in_min, double in_max, double out_min, double out_max);
 
@@ -192,7 +179,7 @@ tf::TransformBroadcaster tf_broadcaster;
 /*******************************************************************************
 * SoftwareTimer of Turtlebot3
 *******************************************************************************/
-static uint32_t tTime[5];
+static uint32_t tTime[10];
 
 /*******************************************************************************
 * Declaration for motor
@@ -221,10 +208,10 @@ Turtlebot3Sensor sensors;
 * Declaration for controllers
 *******************************************************************************/
 Turtlebot3Controller controllers;
-float goal_velocity[VELOCITY_UNIT] = {0.0, 0.0};
-float goal_velocity_from_button[VELOCITY_UNIT] = {0.0, 0.0};
-float goal_velocity_from_cmd[VELOCITY_UNIT] = {0.0, 0.0};
-float goal_velocity_from_rc100[VELOCITY_UNIT] = {0.0, 0.0};
+float goal_velocity[WHEEL_NUM] = {0.0, 0.0};
+float goal_velocity_from_button[WHEEL_NUM] = {0.0, 0.0};
+float goal_velocity_from_cmd[WHEEL_NUM] = {0.0, 0.0};
+float goal_velocity_from_rc100[WHEEL_NUM] = {0.0, 0.0};
 
 /*******************************************************************************
 * Declaration for diagnosis
@@ -244,4 +231,4 @@ double odom_vel[3];
 bool setup_end        = false;
 uint8_t battery_state = 0;
 
-#endif // TURTLEBOT3_CORE_CONFIG_H_
+#endif // TURTLEBOT3_WITH_OPEN_MANIPULATOR_CONFIG_H_
