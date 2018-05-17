@@ -9,11 +9,30 @@
 
 enum shape_list {CIRCLE, SQUARE};
 
+typedef struct {
+  float maxRed;
+  float maxGreen;
+  float maxBlue;
+  float minRed;
+  float minGreen;
+  float minBlue;
+} color_range_t;
+
+const color_range_t selected_color[] = {
+  {1.0, 0.5, 0.5, 0.5, 0.0, 0.0},	//red object
+  {0.5, 1.0, 0.5, 0.0, 0.5, 0.0},	//green object
+  {0.6, 0.6, 1.0, 0.0, 0.0, 0.4},	//blue object
+};
+
 void lcdInit(void);
 void drawShape(shape_list shape, uint16_t x_pos, uint16_t y_pos, uint16_t radius, uint16_t color);
-void swapXY();
+void clearScreen(uint16_t color);
+void lcdRotation(uint8_t rotation);
 void drawText(uint16_t x_pos, uint16_t y_pos, const uint8_t *string, uint8_t ch_size, uint16_t color);
-void setGRamArea(uint8_t size, bool swap);
+void setGRamArea(uint8_t size);
+
+void colorFilter(uint16_t *image, uint8_t size);
+bool colorFinder(const uint16_t *image, uint32_t pixelLocation);
 
 
 #endif

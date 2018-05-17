@@ -93,23 +93,23 @@
 #define PORT_SOURCE_VSYNC_CMOS             GPIO_PortSourceGPIOA
 #define PIN_SOURCE_VSYNC_CMOS              GPIO_PinSource0
 
-#define _USE_QVGA
+// #define _USE_QVGA
 // #define _USE_QUARTERSIZE
 
-#ifdef _USE_QQVGA
-#define IMG_WIDTH	120
-#define IMG_HEIGHT	160
-#endif
+// #ifdef _USE_QQVGA
+// #define IMG_WIDTH	120
+// #define IMG_HEIGHT	160
+// #endif
 
-#ifdef _USE_QVGA
-  #ifdef _USE_QUARTERSIZE
-    #define IMG_WIDTH	120
-    #define IMG_HEIGHT	160
-  #else
-    #define IMG_WIDTH	240
-    #define IMG_HEIGHT	320
-  #endif
-#endif
+// #ifdef _USE_QVGA
+//   #ifdef _USE_QUARTERSIZE
+//     #define IMG_WIDTH	120
+//     #define IMG_HEIGHT	160
+//   #else
+//     #define IMG_WIDTH	240
+//     #define IMG_HEIGHT	320
+//   #endif
+// #endif
 
 const uint8_t OV7725_Reg[REG_NUM][2] =
 {
@@ -193,7 +193,7 @@ const uint8_t OV7725_Reg[REG_NUM][2] =
 	{0x4c,0x17}, //{0x4c,0x17}
 	{0x46,0x00}, //{0x46,0x05}
 	{0x0e,0x01}, //{0x0e,0xf5}1111,0101
-	{0x0c,0x50}, //bit6 : Horizontal Mirror, bit0 : test pattern enable
+	{0x0c,0xD0}, //bit6 : Horizontal Mirror, bit0 : test pattern enable
 	
 	{0x29,0x50},	//_USE_QVGA
 	{0x2c,0x78},	//_USE_QVGA
@@ -207,7 +207,7 @@ const uint8_t OV7725_Reg[REG_NUM][2] =
 int  OV7725_Init(void);
 uint8_t getVsync(void);
 void setVsync(uint8_t value);
-void readIMG(void);
+void readIMG(uint8_t size);
 void setRawImgSize(uint8_t value);
 
 #endif

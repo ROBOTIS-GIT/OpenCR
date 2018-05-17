@@ -100,8 +100,9 @@ class TFT_LCD
 public:
 
     void drawFrame(void);
-	void MVRotation(uint8_t direction);
-	void setLcdMemoryArea(uint8_t size, bool swapXY);
+	void setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
+	void LCDRotation(uint8_t direction);
+	void setLcdMemoryArea(uint8_t size);
 	void swapLCDWH(bool swapXY)
 	{
 		if(swapXY == true)

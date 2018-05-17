@@ -7,15 +7,15 @@
   uint16_t image_buf[LCD_WIDTH*LCD_HEIGHT];
 #endif
 
-uint16_t IMG_WIDTH = 0;
-uint16_t IMG_HEIGHT = 0;
+uint16_t IMG_WIDTH = LCD_WIDTH;
+uint16_t IMG_HEIGHT = LCD_HEIGHT;
 uint16_t rotation = 2;
 
 void TFT_LCD::lcd_init()
 {
-  // lcd_width = LCD_WIDTH;
-  // lcd_height = LCD_HEIGHT;
-  setLcdMemoryArea(QVGA, false);
+  lcd_width = LCD_WIDTH;
+  lcd_height = LCD_HEIGHT;
+  setLcdMemoryArea(QVGA);
 
   __LCD_DC_OUT();
   __LCD_DC_SET();
@@ -103,7 +103,7 @@ void TFT_LCD::lcd_init()
   lcd_write_register(0x08,0x01);
   lcd_write_register(0x09,0x3F); //Row End
 
-  lcd_clear_screen(WHITE);
+  lcd_clear_screen(BLACK);
   __LCD_BKL_ON();
 }
 
@@ -134,109 +134,75 @@ void TFT_LCD::lcd_draw_point(uint16_t hwXpos, uint16_t hwYpos, uint16_t hwColor)
 }
 #endif
 
-void TFT_LCD::MVRotation(uint8_t direction)
+void TFT_LCD::setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
 {
-  lcd_write_register(0x16,0x28);
-  // uint8_t setting = 0;
-  // rotation = direction % 4;
-  // switch(rotation)
-  // {
-  //   case 0:
-  //     setting = MACR_MX | MACR_MY | MACR_BGR;
-  //     _lcd_width = LCD_WIDTH;
-  //     _lcd_height = LCD_HEIGHT;
-  //     break;
-  //   case 1:
-  //     setting = MACR_MY | MACR_MV | MACR_BGR;
-  //     _lcd_width = LCD_HEIGHT;
-  //     _lcd_height = LCD_WIDTH;
-  //     break;
-  //   case 2:
-  //     setting = MACR_BGR;
-  //     _lcd_width = LCD_WIDTH;
-  //     _lcd_height = LCD_HEIGHT;
-  //     break;
-  //   case 3:
-  //     setting = MACR_MX | MACR_MV | MACR_BGR;
-  //     _lcd_width = LCD_HEIGHT;
-  //     _lcd_height = LCD_WIDTH;
-  //     break;
-  // }
-  // lcd_write_register(0x16, setting);
+  lcd_write_register(0x03,(x0>>0)); //Column Start
+  lcd_write_register(0x02,(x0>>8));
+  lcd_write_register(0x05,(x1>>0)); //Column End
+  lcd_write_register(0x04,(x1>>8));
+  lcd_write_register(0x07,(y0>>0)); //Row Start
+  lcd_write_register(0x06,(y0>>8));
+  lcd_write_register(0x09,(y1>>0)); //Row End
+  lcd_write_register(0x08,(y1>>8));
 }
 
-void TFT_LCD::setLcdMemoryArea(uint8_t size, bool swapXY)
+void TFT_LCD::LCDRotation(uint8_t rotation)
 {
-  uint8_t CEnd_L;
-  uint8_t CEnd_H;
-  uint8_t REnd_L;
-  uint8_t REnd_H;
-  
-  if(swapXY == true)
+//   lcd_write_register(0x16,0x28);
+  uint8_t setting = 0;
+  switch(rotation)
   {
-    CEnd_L = 0x08;
-    CEnd_H = 0x09;
-    REnd_L = 0x04;
-    REnd_H = 0x05;
+    case 0:
+      setting = MACR_MX | MACR_MY | MACR_BGR;
+      lcd_width = LCD_WIDTH;
+      lcd_height = LCD_HEIGHT;
+      break;
+    case 1:
+      setting = MACR_MY | MACR_MV | MACR_BGR;
+      lcd_width = LCD_HEIGHT;
+      lcd_height = LCD_WIDTH;
+      break;
+    case 2:
+      setting = MACR_BGR;
+      lcd_width = LCD_WIDTH;
+      lcd_height = LCD_HEIGHT;
+      break;
+    case 3:
+      setting = MACR_MX | MACR_MV | MACR_BGR;
+      lcd_width = LCD_HEIGHT;
+      lcd_height = LCD_WIDTH;
+      break;
   }
-  else
-  {
-    CEnd_L = 0x04;
-    CEnd_H = 0x05;
-    REnd_L = 0x08;
-    REnd_H = 0x09;
-  }
+  IMG_WIDTH = lcd_width;
+  IMG_HEIGHT = lcd_height;
+  lcd_write_register(0x16, setting);
+  setAddrWindow(0, 0, lcd_width-1, lcd_height-1);
+}
 
-  swapLCDWH(swapXY);
-
+void TFT_LCD::setLcdMemoryArea(uint8_t size)
+{
   switch(size)
   {
     //QVGA
     case 0:
-      lcd_write_register(0x02,0x00);
-      lcd_write_register(0x03,0x00); //Column Start
-      lcd_write_register(CEnd_L,0x00);
-      lcd_write_register(CEnd_H,0xEF); //Column End
-      lcd_write_register(0x06,0x00);
-      lcd_write_register(0x07,0x00); //Row Start
-      lcd_write_register(REnd_L,0x01);
-      lcd_write_register(REnd_H,0x3F); //Row End
-
       IMG_WIDTH = lcd_width;
       IMG_HEIGHT = lcd_height;
+      setAddrWindow(0, 0, IMG_WIDTH-1, IMG_HEIGHT-1);
       break;
     
     //QQVGA
     case 1:
     //QUARTERVIEW of QVGA
     case 2:
-      lcd_write_register(0x02,0x00);
-      lcd_write_register(0x03,0x00); //Column Start
-      lcd_write_register(CEnd_L,0x00);
-      lcd_write_register(CEnd_H,0x77); //Column End
-      lcd_write_register(0x06,0x00);
-      lcd_write_register(0x07,0x00); //Row Start
-      lcd_write_register(REnd_L,0x00);
-      lcd_write_register(REnd_H,0x9F); //Row End
-
-      lcd_clear_screen(BLACK);
-
       IMG_WIDTH = lcd_width / 2;
       IMG_HEIGHT = lcd_height / 2;
+      setAddrWindow(0, 0, IMG_WIDTH-1, IMG_HEIGHT-1);
       break;
     
     default:
-      lcd_write_register(0x02,0x00);
-      lcd_write_register(0x03,0x00); //Column Start
-      lcd_write_register(CEnd_L,0x00);
-      lcd_write_register(CEnd_H,0xEF); //Column End
-      lcd_write_register(0x06,0x00);
-      lcd_write_register(0x07,0x00); //Row Start
-      lcd_write_register(REnd_L,0x01);
-      lcd_write_register(REnd_H,0x3F); //Row End
-      
       IMG_WIDTH = lcd_width;
       IMG_HEIGHT = lcd_height;
+      setAddrWindow(0, 0, IMG_WIDTH-1, IMG_HEIGHT-1);
       break;
   }
 }
@@ -252,19 +218,7 @@ void TFT_LCD::drawFrame(void)
   __LCD_DC_SET();
   __LCD_CS_CLR();
 
-/*
-  for (int i=0; i<lcd_width*lcd_height; i++)
-  {
-    __LCD_WRITE_BYTE(image_buf[i] >> 8);
-    __LCD_WRITE_BYTE(image_buf[i] & 0xFF);
-  }
-  */
   SPI.writeFast(image_buf, IMG_WIDTH*IMG_HEIGHT*2);
-
-  // for (int i=0; i<(IMG_WIDTH*IMG_HEIGHT); i++)
-  // {
-	//   SPI.transfer16(image_buf[i]);
-  // }
 
   __LCD_CS_SET();
 
@@ -278,35 +232,34 @@ void TFT_LCD::lcd_display_char(uint16_t hwXpos, //specify x position.
                          uint8_t chSize,  //specify the size of the char
                          uint16_t hwColor) //specify the color of the char
 {
-    uint8_t i, j, chTemp;
-    uint16_t hwYpos0 = hwYpos, hwColorVal = 0;
+  uint8_t i, j, chTemp;
+  uint16_t hwYpos0 = hwYpos, hwColorVal = 0;
 
-    if (hwXpos >= lcd_width || hwYpos >= lcd_height) {
-        return;
+  if (hwXpos >= lcd_width || hwYpos >= lcd_height) {
+    return;
+  }
+
+  for (i = 0; i < chSize; i ++) {
+    if (FONT_1206 == chSize) {
+      chTemp = pgm_read_byte(&c_chFont1206[chChr - 0x20][i]);
+    } else if (FONT_1608 == chSize) {
+      chTemp = pgm_read_byte(&c_chFont1608[chChr - 0x20][i]);
     }
 
-
-    for (i = 0; i < chSize; i ++) {
-        if (FONT_1206 == chSize) {
-            chTemp = pgm_read_byte(&c_chFont1206[chChr - 0x20][i]);
-        } else if (FONT_1608 == chSize) {
-            chTemp = pgm_read_byte(&c_chFont1608[chChr - 0x20][i]);
-        }
-
-        for (j = 0; j < 8; j ++) {
-            if (chTemp & 0x80) {
-                hwColorVal = hwColor;
-                lcd_draw_point(hwXpos, hwYpos, hwColorVal);
-            }
-            chTemp <<= 1;
-            hwYpos ++;
-            if ((hwYpos - hwYpos0) == chSize) {
-                hwYpos = hwYpos0;
-                hwXpos ++;
-                break;
-            }
-        }
+    for (j = 0; j < 8; j ++) {
+      if (chTemp & 0x80) {
+        hwColorVal = hwColor;
+        lcd_draw_point(hwXpos, hwYpos, hwColorVal);
+      }
+      chTemp <<= 1;
+      hwYpos ++;
+      if ((hwYpos - hwYpos0) == chSize) {
+        hwYpos = hwYpos0;
+        hwXpos ++;
+        break;
+      }
     }
+  }
 }
 
 

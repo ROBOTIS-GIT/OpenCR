@@ -215,23 +215,12 @@ void setRawImgSize(uint8_t value)
 }
 
 // Read Image from FIFO
-void readIMG(void) 
+void readIMG(uint8_t size) 
 {
   uint32_t pixelCount = 0;
   uint32_t qtPixelCount = 0;
   float    fWeight = 0;
 
-  // Original Code
-  // FIFO_RRST_L(); 
-  // FIFO_RCLK_L();
-
-  // FIFO_RCLK_H();
-  // FIFO_RRST_H();
-  // FIFO_RCLK_L();
-
-  // FIFO_RCLK_H();
-
-  // My Code
   FIFO_WE_L();
 
   FIFO_RRST_L();
@@ -242,17 +231,60 @@ void readIMG(void)
   FIFO_RCLK_H();  //Read Reset
   FIFO_RCLK_L();
 
-  delay_ms(1);
-
   FIFO_RRST_H();
 
-  #ifdef _USE_QUARTERSIZE
-  for(; pixelCount < (LCD_WIDTH*LCD_HEIGHT) ;pixelCount++)
+  if(size == QUARTERVIEW)
   {
-    if((pixelCount % 2 == 0) && ((pixelCount / 320) % 2 == 0))
+    for(pixelCount = 0; pixelCount < (LCD_WIDTH*LCD_HEIGHT) ;pixelCount++)
+    {
+      if((pixelCount % 2 == 0) && ((pixelCount / 320) % 2 == 0))
+      {
+        FIFO_RCLK_H();
+
+        //High Byte
+        FIFO_RCLK_L();
+        firstHData = first->IDR; 	  //XXX0 0000 0000 0000
+        secondHData = second->IDR; 	//0000 0000 000X 0XXX
+        thirdHData = third->IDR;		//0000 000X 0000 0000
+        FIFO_RCLK_H();
+
+        //Low Byte
+        FIFO_RCLK_L();
+        firstLData = first->IDR; 	  //XXX0 0000 0000 0000
+        secondLData = second->IDR; 	//0000 0000 000X 0XXX
+        thirdLData = third->IDR;	  //0000 000X 0000 0000
+        FIFO_RCLK_H();
+
+        cmosData = (((firstLData >> 5) & 0x0700) | ((secondLData << 11) & 0xB800) | ((thirdLData << 6) & 0x4000) | ((firstHData >> 13) & 0x0007) | ((secondHData << 3) & 0x00B8) | ((thirdHData >> 2) & 0x0040));
+        image_buf[qtPixelCount++] = cmosData;
+      }
+      //read and waste unnecessary data
+      else
+      {
+        FIFO_RCLK_H();
+
+        //High Byte
+        FIFO_RCLK_L();
+        firstHData = first->IDR; 	  //XXX0 0000 0000 0000
+        secondHData = second->IDR; 	//0000 0000 000X 0XXX
+        thirdHData = third->IDR;		//0000 000X 0000 0000
+        FIFO_RCLK_H();
+
+        //Low Byte
+        FIFO_RCLK_L();
+        firstLData = first->IDR; 	  //XXX0 0000 0000 0000
+        secondLData = second->IDR; 	//0000 0000 000X 0XXX
+        thirdLData = third->IDR;	  //0000 000X 0000 0000
+        FIFO_RCLK_H();
+      }
+    }
+  }
+  else if(size == QVGA)
+  {
+    for(pixelCount = 0; pixelCount < (LCD_WIDTH*LCD_HEIGHT) ;pixelCount++)
     {
       FIFO_RCLK_H();
-		  FIFO_RCLK_L();
+
       //High Byte
       FIFO_RCLK_L();
       firstHData = first->IDR; 	  //XXX0 0000 0000 0000
@@ -267,70 +299,10 @@ void readIMG(void)
       thirdLData = third->IDR;	  //0000 000X 0000 0000
       FIFO_RCLK_H();
 
-      cmosData = (((firstHData >> 5) & 0x0700) | ((secondHData << 11) & 0xB800) | ((thirdHData << 6) & 0x4000) | ((firstLData >> 13) & 0x0007) | ((secondLData << 3) & 0x00B8) | ((thirdLData >> 2) & 0x0040));
-      image_buf[qtPixelCount++] = cmosData;
-    }
-    //read and waste unnecessary data
-    else
-    {
-      FIFO_RCLK_H();
-		  FIFO_RCLK_L();
-      //High Byte
-      FIFO_RCLK_L();
-      firstHData = first->IDR; 	  //XXX0 0000 0000 0000
-      secondHData = second->IDR; 	//0000 0000 000X 0XXX
-      thirdHData = third->IDR;		//0000 000X 0000 0000
-      FIFO_RCLK_H();
-
-      //Low Byte
-      FIFO_RCLK_L();
-      firstLData = first->IDR; 	  //XXX0 0000 0000 0000
-      secondLData = second->IDR; 	//0000 0000 000X 0XXX
-      thirdLData = third->IDR;	  //0000 000X 0000 0000
-      FIFO_RCLK_H();
+      cmosData = (((firstLData >> 5) & 0x0700) | ((secondLData << 11) & 0xB800) | ((thirdLData << 6) & 0x4000) | ((firstHData >> 13) & 0x0007) | ((secondHData << 3) & 0x00B8) | ((thirdHData >> 2) & 0x0040));
+      image_buf[pixelCount] = cmosData;
     }
   }
-
-  #else
-  for(pixelCount = 0; pixelCount < (IMG_WIDTH*IMG_HEIGHT) ;pixelCount++)
-  {
-    FIFO_RCLK_H();
-    // FIFO_RCLK_L();
-
-    //High Byte
-    FIFO_RCLK_L();
-    firstHData = first->IDR; 	  //XXX0 0000 0000 0000
-    secondHData = second->IDR; 	//0000 0000 000X 0XXX
-    thirdHData = third->IDR;		//0000 000X 0000 0000
-    FIFO_RCLK_H();
-
-    //Low Byte
-    FIFO_RCLK_L();
-    firstLData = first->IDR; 	  //XXX0 0000 0000 0000
-    secondLData = second->IDR; 	//0000 0000 000X 0XXX
-    thirdLData = third->IDR;	  //0000 000X 0000 0000
-    FIFO_RCLK_H();
-
-    cmosData = (((firstLData >> 5) & 0x0700) | ((secondLData << 11) & 0xB800) | ((thirdLData << 6) & 0x4000) | ((firstHData >> 13) & 0x0007) | ((secondHData << 3) & 0x00B8) | ((thirdHData >> 2) & 0x0040));
-    image_buf[pixelCount] = cmosData;
-  }
-  #endif
-
-  // colorFilter(image_buf);
-  // objectFinder(color_filter);
-  // cellWeight();
-  // drawFrame();
-  // Tft.lcd_fill_rect(10, 20, 10, 10, RED);
-  // Tft.drawFrame();
-
-  //display boxes
-  // displayCell();
-
-  //display text information
-  // displayInfo();
-
-  // Vsync = 0;
-  // fpsCount++;
 }
 
 /*********************************************************************************************************
