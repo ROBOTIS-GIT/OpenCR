@@ -23,8 +23,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "OV7725.h"
 #include "../sccb/sccb.h"
-
-// I2Cdev i2c_cambus;
+#include "../../settings.h"
 
 volatile uint8_t Vsync = 0;
 uint8_t rawImgSize = QVGA;
@@ -38,7 +37,6 @@ uint16_t cmosData = 0;
 uint8_t  camAddress = 0;
 
 static uint8_t toggle = 0;
-// int16_t imgBuffer[IMG_WIDTH*IMG_HEIGHT];
 
 GPIO_TypeDef *first;
 GPIO_TypeDef *second;
@@ -49,19 +47,11 @@ static void vsync_interrupt(void)
   if(Vsync == 0)
   {
     //FIFO Write Reset
-    
-    // Original Code
     FIFO_WRST_L();
     FIFO_WE_H();
     Vsync = 1;
     FIFO_WE_H();
     FIFO_WRST_H();
-    
-    // My Code
-    // FIFO_WE_H();
-    // FIFO_WRST_L();
-    // FIFO_WRST_H();
-    // Vsync = 1;
   }
   else if(Vsync == 1)
   {
@@ -255,6 +245,7 @@ void readIMG(uint8_t size)
         thirdLData = third->IDR;	  //0000 000X 0000 0000
         FIFO_RCLK_H();
 
+        //1st and 2nd byte is inverted. therefore, GGGBBBBB RRRRRGGG
         cmosData = (((firstLData >> 5) & 0x0700) | ((secondLData << 11) & 0xB800) | ((thirdLData << 6) & 0x4000) | ((firstHData >> 13) & 0x0007) | ((secondHData << 3) & 0x00B8) | ((thirdHData >> 2) & 0x0040));
         image_buf[qtPixelCount++] = cmosData;
       }
@@ -299,6 +290,7 @@ void readIMG(uint8_t size)
       thirdLData = third->IDR;	  //0000 000X 0000 0000
       FIFO_RCLK_H();
 
+      //1st and 2nd byte is inverted. therefore, GGGBBBBB RRRRRGGG
       cmosData = (((firstLData >> 5) & 0x0700) | ((secondLData << 11) & 0xB800) | ((thirdLData << 6) & 0x4000) | ((firstHData >> 13) & 0x0007) | ((secondHData << 3) & 0x00B8) | ((thirdHData >> 2) & 0x0040));
       image_buf[pixelCount] = cmosData;
     }

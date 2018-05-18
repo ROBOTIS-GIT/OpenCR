@@ -7,21 +7,37 @@
 
 #include "font.h"
 
-//Basic Colors
+//Basic Colors for RGB565
+// #define WHITE          0xFFFF
+// #define BLACK          0x0000
+// #define BLUE           0x001F
+// #define BRED           0XF81F
+// #define GRED 		   0XFFE0
+// #define GBLUE		   0X07FF
+// #define RED            0xF800
+// #define MAGENTA        0xF81F
+// #define GREEN          0x07E0
+// #define CYAN           0x7FFF
+// #define YELLOW         0xFFE0
+// #define BROWN 		   0XBC40
+// #define BRRED 		   0XFC07
+// #define GRAY  		   0X8430
+
+//Colors for SPI DMA
 #define WHITE          0xFFFF
 #define BLACK          0x0000
-#define BLUE           0x001F
-#define BRED           0XF81F
-#define GRED 		   0XFFE0
-#define GBLUE		   0X07FF
-#define RED            0xF800
-#define MAGENTA        0xF81F
-#define GREEN          0x07E0
-#define CYAN           0x7FFF
-#define YELLOW         0xFFE0
-#define BROWN 		   0XBC40
-#define BRRED 		   0XFC07
-#define GRAY  		   0X8430
+#define BLUE           0x1F00
+#define BRED           0x1FF8
+#define GRED 		   0xE0FF
+#define GBLUE		   0xFF07
+#define RED            0x00F8
+#define MAGENTA        0x1FF8
+#define GREEN          0xE007
+#define CYAN           0xFF7F
+#define YELLOW         0xE0FF
+#define BROWN 		   0x40BC
+#define BRRED 		   0x07FC
+#define GRAY  		   0x3084
 
 #define MACR_MY		0x80
 #define MACR_MX		0x40
@@ -99,7 +115,7 @@ class TFT_LCD
 
 public:
 
-    void drawFrame(void);
+    void drawFrame();
 	void setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
 	void LCDRotation(uint8_t direction);
 	void setLcdMemoryArea(uint8_t size);
@@ -230,6 +246,8 @@ public:
 					uint16_t hwWidth, //specify the width of the rectangle.
 					uint16_t hwHeight, //specify the height of the rectangle.
 					uint16_t hwColor);  //specify the color of rectangle.
+	uint16_t get_lcd_width(void);
+	uint16_t get_lcd_height(void);
 
 private:
 
@@ -239,7 +257,6 @@ uint16_t lcd_height;
 };
 
 extern TFT_LCD TFTLCD;
-extern uint16_t image_buf[];
 
 #endif
 

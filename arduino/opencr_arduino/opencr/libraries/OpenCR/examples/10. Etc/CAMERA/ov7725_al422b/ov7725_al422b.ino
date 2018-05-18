@@ -1,19 +1,15 @@
 
 #include "ov7725_al422b.h"
-
-#define BOARD_LED_PIN           BDPIN_LED_STATUS    //Status LED
-#define LED_RATE                500000              // in microseconds; should toggle every 0.5sec
-#define _USE_FULLSCREEN         false
-
+#include "settings.h"
 
 HardwareTimer Timer(TIMER_CH1);
 uint8_t fps = 0;
+uint8_t frameCount = 0;
 uint8_t size = QVGA;
-char fpsString[3];
 
-////////////////////////////////////
 void setup() {
   uint8_t ov7725Vsync = 0;
+
   if(_USE_FULLSCREEN == true)
   {
     size = QVGA;
@@ -29,8 +25,7 @@ void setup() {
   pinMode(BDPIN_LED_USER_2, OUTPUT);
   pinMode(BDPIN_LED_USER_3, OUTPUT);
   pinMode(BDPIN_PUSH_SW_1, INPUT);
-  // memcpy(image_buf, BLACK, 160*120);
-    
+      
   Timer.stop();
   Timer.setPeriod(LED_RATE);
   Timer.attachInterrupt(status_led);
@@ -52,15 +47,15 @@ void setup() {
     if(ov7725Vsync == 2)
     {
       readIMG(size);
-      // colorFilter(image_buf, size);
-      // objectFinder(color_filter);
-      // cellWeight();
+      colorFilter(image_buf, size);
+      objectFinder(masked_image_buf);
+      cellWeight();
+      displayCell();
       //display text information
-      drawText(20, 5, (const uint8_t *)"fps", 12, RED);
-      drawText(5, 5, (const uint8_t *)fpsString, 12, RED);
-      TFTLCD.drawFrame();
+      displayInfo(fps);
+      drawScreen();
       setVsync(0);
-      fps++;
+      frameCount++;
     }
   }
 }
@@ -72,8 +67,8 @@ void status_led(void) {
   flag ^= 1;
   if(flag == 0)
   {
-    itoa(fps, fpsString, 10);
-    fps = 0;
+    fps = frameCount;
+    frameCount = 0;
   }
 }
 

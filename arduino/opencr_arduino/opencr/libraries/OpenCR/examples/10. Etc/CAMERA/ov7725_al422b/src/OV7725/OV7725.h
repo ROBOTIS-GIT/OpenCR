@@ -93,24 +93,6 @@
 #define PORT_SOURCE_VSYNC_CMOS             GPIO_PortSourceGPIOA
 #define PIN_SOURCE_VSYNC_CMOS              GPIO_PinSource0
 
-// #define _USE_QVGA
-// #define _USE_QUARTERSIZE
-
-// #ifdef _USE_QQVGA
-// #define IMG_WIDTH	120
-// #define IMG_HEIGHT	160
-// #endif
-
-// #ifdef _USE_QVGA
-//   #ifdef _USE_QUARTERSIZE
-//     #define IMG_WIDTH	120
-//     #define IMG_HEIGHT	160
-//   #else
-//     #define IMG_WIDTH	240
-//     #define IMG_HEIGHT	320
-//   #endif
-// #endif
-
 const uint8_t OV7725_Reg[REG_NUM][2] =
 {
   /* Setting OV7725QVGA RGB565 */

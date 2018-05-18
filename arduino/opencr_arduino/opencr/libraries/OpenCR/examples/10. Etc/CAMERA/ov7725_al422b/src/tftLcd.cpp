@@ -1,11 +1,8 @@
 
 #include "tftLcd.h"
+#include "../settings.h"
 
 #define USE_image_bufFER     1
-
-#if USE_image_bufFER == 1
-  uint16_t image_buf[LCD_WIDTH*LCD_HEIGHT];
-#endif
 
 uint16_t IMG_WIDTH = LCD_WIDTH;
 uint16_t IMG_HEIGHT = LCD_HEIGHT;
@@ -118,7 +115,7 @@ void TFT_LCD::lcd_draw_point(uint16_t hwXpos, uint16_t hwYpos, uint16_t hwColor)
       return;
     }
 
-  image_buf[hwYpos*IMG_WIDTH+hwXpos] = hwColor>>8 | hwColor<<8;
+  image_buf[hwYpos*IMG_WIDTH+hwXpos] = hwColor;
 }
 
 #else
@@ -130,7 +127,7 @@ void TFT_LCD::lcd_draw_point(uint16_t hwXpos, uint16_t hwYpos, uint16_t hwColor)
 
     lcd_set_cursor(hwXpos, hwYpos);
     lcd_write_byte(0x22, LCD_CMD);
-  lcd_write_word(hwColor);
+    lcd_write_word(hwColor);
 }
 #endif
 
@@ -210,8 +207,6 @@ void TFT_LCD::setLcdMemoryArea(uint8_t size)
 
 void TFT_LCD::drawFrame(void)
 {
-
-#if USE_image_bufFER == 1
   lcd_set_cursor(0, 0);
   lcd_write_byte(0x22, LCD_CMD);
 
@@ -221,8 +216,6 @@ void TFT_LCD::drawFrame(void)
   SPI.writeFast(image_buf, IMG_WIDTH*IMG_HEIGHT*2);
 
   __LCD_CS_SET();
-
-#endif
 }
 
 //display a char at the specified position on lcd.
@@ -454,6 +447,16 @@ void TFT_LCD::lcd_draw_rect(uint16_t hwXpos,  //specify x position.
     lcd_draw_h_line(hwXpos, hwYpos + hwHeight, hwWidth, hwColor);
     lcd_draw_v_line(hwXpos, hwYpos, hwHeight, hwColor);
     lcd_draw_v_line(hwXpos + hwWidth, hwYpos, hwHeight + 1, hwColor);
+}
+
+uint16_t TFT_LCD::get_lcd_width(void)
+{
+    return lcd_width;
+}
+
+uint16_t TFT_LCD::get_lcd_height(void)
+{
+    return lcd_height;
 }
 
 
