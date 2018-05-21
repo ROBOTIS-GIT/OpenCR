@@ -1,3 +1,4 @@
+#include <DynamixelSDK.h>
 #include "ov7725_al422b.h"
 #include "settings.h"
 
@@ -13,11 +14,11 @@ char fpsString[3];
 
 #if _USE_FULLSCREEN == true
   uint16_t image_buf[LCD_WIDTH*LCD_HEIGHT];
-  //masked_image_buf is not available due to RAM overflow
+  //use bit for each pixel info or else : RAM overflow
+  uint16_t __attribute__((section(".NoneCacheableMem"))) masked_image_buf[(LCD_WIDTH*LCD_HEIGHT)/16];
 #else
   uint16_t image_buf[(LCD_WIDTH/2)*(LCD_HEIGHT/2)];
   uint16_t masked_image_buf[(LCD_WIDTH/2)*(LCD_HEIGHT/2)];
-  // uint8_t masked_image_buf[(120*160/8)]; //use bit for each pixel info or else : RAM overflow
 #endif
 
 void lcdInit()
@@ -81,7 +82,6 @@ void colorFilter(uint16_t *image, uint8_t size)
   img_height = LCD_HEIGHT;
   uint16_t u_quotient = 0;
   uint8_t  u_remainder = 0;
-  // memset(masked_image_buf, 0, 120*160/8);
   
   if((size == QUARTERVIEW) || (size == QQVGA))
   {
@@ -89,28 +89,27 @@ void colorFilter(uint16_t *image, uint8_t size)
     img_height = LCD_HEIGHT / 2;
   }
 
-  // maxRed = MIN(((TARGET_COLOR & 0xF800) + (COLOR_RANGE << 11 )), 0xF800);
-  // maxGreen = MIN(((TARGET_COLOR & 0x07E0) + (COLOR_RANGE << 5)), 0x07E0);
-  // maxBlue = MIN(((TARGET_COLOR & 0x001F) + COLOR_RANGE), 0x001F);
-  // minRed = MAX(((TARGET_COLOR & 0xF800) - (COLOR_RANGE << 11)), 0x0000);
-  // minGreen = MAX(((TARGET_COLOR & 0x07E0) - (COLOR_RANGE << 5)), 0x0000);
-  // minBlue = MAX(((TARGET_COLOR & 0x001F) - COLOR_RANGE), 0x0000);
-
   for(pixelCount = 0; pixelCount < img_width*img_height; pixelCount++)
   {
     if(colorFinder(image, pixelCount))
     {
-      // u_quotient = pixelCount / 8;
-      // u_remainder = pixelCount % 8;
-      // masked_image_buf[u_quotient] |= (0x80 >> u_remainder);  // 1000 0000
-      //change the detected color to BLUE
-      masked_image_buf[pixelCount] = BLUE;
+      #if _USE_FULLSCREEN == true
+        u_quotient = pixelCount / 16;
+        u_remainder = pixelCount % 16;
+        masked_image_buf[u_quotient] |= (0x8000 >> u_remainder);  // 1000 0000
+      #else
+        //change the detected color to BLUE
+        masked_image_buf[pixelCount] = BLUE;
+      #endif
     }
     else
     {
-      // masked_image_buf[pixelCount] = 0;
-      // masked_image_buf[u_quotient] = (0x0 >> u_remainder);
-      masked_image_buf[pixelCount] = BLACK;
+      #if _USE_FULLSCREEN == true
+        masked_image_buf[pixelCount] = 0;
+        masked_image_buf[u_quotient] &= ~(0x8000 >> u_remainder);  // 0111 1111
+      #else
+        masked_image_buf[pixelCount] = BLACK;
+      #endif
     }
   }
 }
@@ -173,16 +172,22 @@ void objectFinder(const uint16_t *masked_image)
         pixeltoCheck = cellRawCount + cellColumnCount + img_height*yCount;
         for(xCount = 0; xCount < MIN_OBJECT_PIXEL; xCount++)
         {
-          // u_quotient = pixeltoCheck / 8;
-          // u_remainder = pixeltoCheck % 8;
-          // cellValue = cellValue + (uint16_t)((masked_image[u_quotient] >> (7 - u_remainder)) & 0x0001);
-          // pixeltoCheck++;
-          cellValue = cellValue + (masked_image[pixeltoCheck] >> 8 | masked_image[pixeltoCheck] << 8);
-          pixeltoCheck++;
+          #if _USE_FULLSCREEN == true
+            u_quotient = pixeltoCheck / 16;
+            u_remainder = pixeltoCheck % 16;
+            cellValue = cellValue + (uint16_t)((masked_image[u_quotient] >> (7 - u_remainder)) & 0x0001);
+            pixeltoCheck++;
+          #else
+            cellValue = cellValue + (masked_image[pixeltoCheck] >> 8 | masked_image[pixeltoCheck] << 8);
+            pixeltoCheck++;
+          #endif
         }
       }
-      // if(cellValue > ((MIN_OBJECT_PIXEL * MIN_OBJECT_PIXEL) / 2))
-      if(cellValue > (15 * MIN_OBJECT_PIXEL * MIN_OBJECT_PIXEL))
+      #if _USE_FULLSCREEN == true
+        if(cellValue > ((MIN_OBJECT_PIXEL * MIN_OBJECT_PIXEL) / 2))
+      #else
+        if(cellValue > (15 * MIN_OBJECT_PIXEL * MIN_OBJECT_PIXEL))
+      #endif
       {
         detected_object[detectCount].coordX = cellColumnCount;					  //X coordinate
         detected_object[detectCount].coordY = cellRawCount / img_height;		//Y coordinate
@@ -198,7 +203,7 @@ void objectFinder(const uint16_t *masked_image)
 }
 
 //calculate weight for each cell
-void cellWeight()
+void cellWeight(void)
 {
   uint8_t cellWeightCounter = 0;
   uint8_t i = 0;
@@ -211,8 +216,8 @@ void cellWeight()
     detected_object[cellWeightCounter].object_weight = 0;
     for(i = 0; i < detectCount; i++)
     {
-      x = (detected_object[cellWeightCounter].coordX - detected_object[i].coordX) / 5;
-      y = (detected_object[cellWeightCounter].coordY - detected_object[i].coordY) / 5;
+      x = (detected_object[cellWeightCounter].coordX - detected_object[i].coordX) / MIN_OBJECT_PIXEL;
+      y = (detected_object[cellWeightCounter].coordY - detected_object[i].coordY) / MIN_OBJECT_PIXEL;
       distance = x*x + y*y;
       switch(distance)
       {
@@ -235,7 +240,7 @@ void cellWeight()
   }
 }
 
-void displayCell()
+void findCenterCell(void)
 {
   float fWeight = 0.0;
   for(uint8_t i = 0; i < detectCount; i++)
@@ -247,8 +252,10 @@ void displayCell()
     }
     TFTLCD.lcd_draw_rect(detected_object[i].coordX, detected_object[i].coordY, detected_object[i].object_width, detected_object[i].object_height, WHITE);
   }
-
-  TFTLCD.lcd_draw_rect(detected_object[target].coordX, detected_object[target].coordY, detected_object[target].object_width, detected_object[target].object_height, RED);
+  if (detectCount < MAX_OBJECT)
+  {
+    TFTLCD.lcd_draw_rect(detected_object[target].coordX, detected_object[target].coordY, detected_object[target].object_width, detected_object[target].object_height, RED);
+  }
 }
 
 void displayInfo(uint8_t fps)
@@ -267,4 +274,143 @@ void displayInfo(uint8_t fps)
   drawText(5, 15, (const uint8_t *)detectCounter, 12, WHITE);
   drawText(5, 25, (const uint8_t *)coordinateX, 12, WHITE);
   drawText(5, 35, (const uint8_t *)coordinateY, 12, WHITE);
+}
+
+/********************************************
+ * Dynamixel Initialization for Object tracking
+********************************************/
+void initDynamixel(dynamixel::PortHandler *hPort, dynamixel::PacketHandler *hPacket)
+{
+  if(hPort->openPort()) {Serial.print("Succeeded to open the port!\n");}
+  else                  {Serial.print("Failed to open the port!\n");}
+
+  if(hPort->setBaudRate(BAUDRATE))  {Serial.print("Succeeded to set the baudrate!\n");}
+  else                              {Serial.print("Failed to set the baudrate!\n");}
+
+  dxlCommResult = hPacket->write1ByteTxRx(hPort, PAN_ID, ADD_TORQUE_ENABLE, TORQUE_OFF, &dxlError);
+  if (dxlCommResult != COMM_SUCCESS)  {Serial.print(hPacket->getTxRxResult(dxlCommResult));}
+  else if (dxlError != 0)             {Serial.print(hPacket->getRxPacketError(dxlError));}
+  else                                {Serial.print("Pan Dynamixel On \n");}
+
+  dxlCommResult = hPacket->write1ByteTxRx(hPort, TILT_ID, ADD_TORQUE_ENABLE, TORQUE_OFF, &dxlError);
+  if (dxlCommResult != COMM_SUCCESS)  {Serial.print(hPacket->getTxRxResult(dxlCommResult));}
+  else if (dxlError != 0)             {Serial.print(hPacket->getRxPacketError(dxlError));}
+  else                                {Serial.print("Tilt Dynamixel On \n");}
+
+  delay_ms(10);
+
+  dxlCommResult = hPacket->write4ByteTxRx(hPort, PAN_ID, ADD_PROF_ACCEL, PROF_ACCEL, &dxlError);
+  if (dxlCommResult != COMM_SUCCESS)  {Serial.print(hPacket->getTxRxResult(dxlCommResult));}
+  else if (dxlError != 0)             {Serial.print(hPacket->getRxPacketError(dxlError));}
+  else                                {Serial.print("Pan Profile Accel Set \n");}
+  
+  dxlCommResult = hPacket->write4ByteTxRx(hPort, TILT_ID, ADD_PROF_ACCEL, PROF_ACCEL, &dxlError);
+  if (dxlCommResult != COMM_SUCCESS)  {Serial.print(hPacket->getTxRxResult(dxlCommResult));}
+  else if (dxlError != 0)             {Serial.print(hPacket->getRxPacketError(dxlError));}
+  else                                {Serial.print("Tilt Profile Accel Set \n");}
+
+  delay_ms(1000);
+
+  dxlCommResult = hPacket->write4ByteTxRx(hPort, PAN_ID, ADD_PROF_VEL, PROF_VEL, &dxlError);
+  if (dxlCommResult != COMM_SUCCESS)  {Serial.print(hPacket->getTxRxResult(dxlCommResult));}
+  else if (dxlError != 0)             {Serial.print(hPacket->getRxPacketError(dxlError));}
+  else                                {Serial.print("Pan Profile Velocity Set \n");}
+  
+  dxlCommResult = hPacket->write4ByteTxRx(hPort, TILT_ID, ADD_PROF_VEL, PROF_VEL, &dxlError);
+  if (dxlCommResult != COMM_SUCCESS)  {Serial.print(hPacket->getTxRxResult(dxlCommResult));}
+  else if (dxlError != 0)             {Serial.print(hPacket->getRxPacketError(dxlError));}
+  else                                {Serial.print("Tilt Profile Velocity Set \n");}
+
+  delay_ms(1000);
+
+  dxlCommResult = hPacket->write1ByteTxRx(hPort, PAN_ID, ADD_TORQUE_ENABLE, TORQUE_ON, &dxlError);
+  if (dxlCommResult != COMM_SUCCESS)  {Serial.print(hPacket->getTxRxResult(dxlCommResult));}
+  else if (dxlError != 0)             {Serial.print(hPacket->getRxPacketError(dxlError));}
+  else                                {Serial.print("Pan Dynamixel On \n");}
+
+  dxlCommResult = hPacket->write1ByteTxRx(hPort, TILT_ID, ADD_TORQUE_ENABLE, TORQUE_ON, &dxlError);
+  if (dxlCommResult != COMM_SUCCESS)  {Serial.print(hPacket->getTxRxResult(dxlCommResult));}
+  else if (dxlError != 0)             {Serial.print(hPacket->getRxPacketError(dxlError));}
+  else                                {Serial.print("Tilt Dynamixel On \n");}
+
+  delay_ms(10);
+
+  // Pan Initial Center Position
+  dxlCommResult = hPacket->write4ByteTxRx(hPort, PAN_ID, ADD_GOAL_POSITION, 2048, &dxlError);
+  if (dxlCommResult != COMM_SUCCESS)  {Serial.print(hPacket->getTxRxResult(dxlCommResult));}
+  else if (dxlError != 0)             {Serial.print(hPacket->getRxPacketError(dxlError));}
+  else                                {Serial.print("Pan Dynamixel Init Completed \n");}
+
+  // Tilt Initial Center Position
+  dxlCommResult = hPacket->write4ByteTxRx(hPort, TILT_ID, ADD_GOAL_POSITION, 2048, &dxlError);
+  if (dxlCommResult != COMM_SUCCESS)  {Serial.print(hPacket->getTxRxResult(dxlCommResult));}
+  else if (dxlError != 0)             {Serial.print(hPacket->getRxPacketError(dxlError));}
+  else                                {Serial.print("Tilt Dynamixel Init Completed \n");}
+  
+  delay_ms(1000);
+
+  // Read Pan present position
+  dxlCommResult = hPacket->read4ByteTxRx(hPort, PAN_ID, ADD_PRESENT_POSITION, (uint32_t*)&panPresentPosition, &dxlError);
+  // Read Tilt present position
+  dxlCommResult = hPacket->read4ByteTxRx(hPort, TILT_ID, ADD_PRESENT_POSITION, (uint32_t*)&tiltPresentPosition, &dxlError);
+  Serial.print("PanPresentPos : ");
+  Serial.print(panPresentPosition);
+  Serial.print("\nTiltPresentPos : ");
+  Serial.print(tiltPresentPosition);
+}
+
+
+/********************************************
+ * Dynamixel Control for Object tracking
+********************************************/
+void trackObject(dynamixel::PortHandler *hPort, dynamixel::PacketHandler *hPacket)
+{
+  // Read Pan present position
+  dxlCommResult = hPacket->read4ByteTxRx(hPort, PAN_ID, ADD_PRESENT_POSITION, (uint32_t*)&panPresentPosition, &dxlError);
+  // Read Tilt present position
+  dxlCommResult = hPacket->read4ByteTxRx(hPort, TILT_ID, ADD_PRESENT_POSITION, (uint32_t*)&tiltPresentPosition, &dxlError);
+
+  if((detectCount > 3) && (detectCount < MAX_OBJECT))
+  {
+    //Track the object
+    //find the angle between target x, y and center(80,60)
+    if (detected_object[target].coordX > 80 + MOVING_THRESHOLD)       {panGoalPosition = panPresentPosition - (detected_object[target].coordX - 80);}
+    else if (detected_object[target].coordX < 80 - MOVING_THRESHOLD)  {panGoalPosition = panPresentPosition + (80 - detected_object[target].coordX);}
+    else                                                              {panGoalPosition = panPresentPosition;}
+
+    if(panGoalPosition > PAN_MAX_POSITION)        {panGoalPosition = PAN_MAX_POSITION;}
+    else if(panGoalPosition < PAN_MIN_POSITION)   {panGoalPosition = PAN_MIN_POSITION;}
+    else                                          {}
+
+    dxlCommResult = hPacket->write4ByteTxRx(hPort, PAN_ID, ADD_GOAL_POSITION, panGoalPosition, &dxlError);
+    if (dxlCommResult != COMM_SUCCESS)  {Serial.print(hPacket->getTxRxResult(dxlCommResult));}
+    else if (dxlError != 0)             {Serial.print(hPacket->getRxPacketError(dxlError));}
+    else {}
+
+    if (detected_object[target].coordY > (60 + MOVING_THRESHOLD))       {tiltGoalPosition = tiltPresentPosition - (detected_object[target].coordY - 60);}
+    else if (detected_object[target].coordY < (60 - MOVING_THRESHOLD))  {tiltGoalPosition = tiltPresentPosition + (60 - detected_object[target].coordY);}
+    else                                                                {tiltGoalPosition = tiltPresentPosition;}
+
+    if(tiltGoalPosition > TILT_MAX_POSITION)        {tiltGoalPosition = TILT_MAX_POSITION;}
+    else if(tiltGoalPosition < TILT_MIN_POSITION)   {tiltGoalPosition = TILT_MIN_POSITION;}
+    else                                            {}
+
+    dxlCommResult = hPacket->write4ByteTxOnly(hPort, TILT_ID, ADD_GOAL_POSITION, tiltGoalPosition);
+    if (dxlCommResult != COMM_SUCCESS)  {Serial.print(hPacket->getTxRxResult(dxlCommResult));}
+    else if (dxlError != 0)             {Serial.print(hPacket->getRxPacketError(dxlError));}
+  }
+  else
+  {
+    // Serial.print("The object is too small or too large!\n");
+  }
+}
+
+/********************************************
+ * Dynamixel Control for Operating Platform
+ * Left ID : 1(Positive Forward), Right ID : 2(Negative Forward)
+ * Velocity Control Mode
+********************************************/
+void movePlatform(dynamixel::PortHandler *hPort, dynamixel::PacketHandler *hPacket)
+{
+
 }

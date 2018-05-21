@@ -7,10 +7,13 @@
 #include "./src/sccb/sccb.h"
 #include "./src/tftLcd.h"
 
-#define MIN_OBJECT_PIXEL		5	//Set the object size to detect
-#define MAX_OBJECT				  30	//maximum number of object to detect
-
 enum shape_list {CIRCLE, SQUARE};
+extern  uint32_t panGoalPosition;
+extern  uint32_t tiltGoalPosition;
+extern  uint32_t panPresentPosition;
+extern  uint32_t tiltPresentPosition;
+extern  uint8_t  dxlError;
+extern  int      dxlCommResult;
 
 typedef struct {
   uint16_t coordX;
@@ -47,8 +50,12 @@ void colorFilter(uint16_t *image, uint8_t size);
 bool colorFinder(const uint16_t *image, uint32_t pixelLocation);
 void objectFinder(const uint16_t *masked_image);
 void cellWeight(void);
-void displayCell(void);
+void findCenterCell(void);
 void displayInfo(uint8_t fps);
+
+void initDynamixel(dynamixel::PortHandler *hPort, dynamixel::PacketHandler *hPacket);
+void trackObject(dynamixel::PortHandler *hPort, dynamixel::PacketHandler *hPacket);
+void movePlatform(dynamixel::PortHandler *hPort, dynamixel::PacketHandler *hPacket);
 
 
 #endif
