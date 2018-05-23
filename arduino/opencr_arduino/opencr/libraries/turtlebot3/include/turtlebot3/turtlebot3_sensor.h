@@ -25,10 +25,10 @@
 #include <sensor_msgs/BatteryState.h>
 #include <sensor_msgs/MagneticField.h>
 
-#define ACCEL_FACTOR                     -0.0005981  // (-9.8) * ADC_Value / Scale               => Range : +- 2[g]
-                                                     //                                             Scale : +- 16384
-#define GYRO_FACTOR                       0.0010642  // (ADC_Value/Scale) * (pi/180)             => Range : +- 2000[deg/s]
-                                                     //                                             Scale : +- 16.4[deg/s]
+#define ACCEL_FACTOR                      0.000598550415   // (ADC_Value / Scale) * 9.80665            => Range : +- 2[g]
+                                                           //                                             Scale : +- 16384
+#define GYRO_FACTOR                       0.0010642        // (ADC_Value/Scale) * (pi/180)             => Range : +- 2000[deg/s]
+                                                           //                                             Scale : +- 16.4[deg/s]
 
 #define MAG_FACTOR                        6e-7
 
