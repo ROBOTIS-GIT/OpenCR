@@ -286,9 +286,19 @@ void Turtlebot3Sensor::makeSound(uint8_t index)
   melody(note, 8, duration);
 }
 
-int8_t Turtlebot3Sensor::getPushedBumper(void)
+uint8_t Turtlebot3Sensor::checkPushBumper(void)
 {
-  return 1;
+
+  OLLO touchOLLO;
+  touchOLLO.begin(3, TOUCH_SENSOR);
+  touchOLLO.begin(4, TOUCH_SENSOR);
+
+  uint8_t push_state = 0;
+
+  if (touchOLLO.read(3, TOUCH_SENSOR) == HIGH) push_state = 1;
+  if (touchOLLO.read(4, TOUCH_SENSOR) == HIGH) push_state = 2;
+
+  return push_state;
 }
 
 float Turtlebot3Sensor::getIRsensorData(void)

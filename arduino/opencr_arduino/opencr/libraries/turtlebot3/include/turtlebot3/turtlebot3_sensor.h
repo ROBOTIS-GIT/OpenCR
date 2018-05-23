@@ -21,6 +21,7 @@
 
 #include <IMU.h>
 
+#include "OLLO.h"
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/BatteryState.h>
 #include <sensor_msgs/MagneticField.h>
@@ -62,7 +63,7 @@ class Turtlebot3Sensor
   void makeSound(uint8_t index);  
 
   // Bumper
-  int8_t getPushedBumper(void);
+  uint8_t checkPushBumper(void);
 
   // Cliff sensor
   float getIRsensorData(void);

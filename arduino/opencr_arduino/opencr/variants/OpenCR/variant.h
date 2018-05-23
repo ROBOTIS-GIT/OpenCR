@@ -128,7 +128,7 @@ void setLedToggle(uint8_t led_num);
 
 #define WIRE_INTERFACES_COUNT       1
 #define SPI_INTERFACES_COUNT        2
-#define EXTI_COUNT                  10
+#define EXTI_COUNT                  9
 #define PINS_COUNT                  85
 
 #endif
