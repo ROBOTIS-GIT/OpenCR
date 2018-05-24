@@ -14,45 +14,50 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
+/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho, Gilbert */
+uint32_t t_time;
+uint32_t pre_time;
+uint32_t start_time;
+uint32_t end_time;
+uint32_t count_start = 0;
+uint32_t data = 1;
 
-#include <ros.h>
-#include <std_msgs/Float32.h>
-#include <OLLO.h>
-
-ros::NodeHandle nh;
-std_msgs::Float32 sonar_msg;
-ros::Publisher pub_sonar("sonar", &sonar_msg);
+float duration;
 
 const int echoPin = BDPIN_GPIO_1;
 const int trigPin = BDPIN_GPIO_2;
 
-long duration;
-int distance;
-
-void setup() 
-{
-  nh.initNode();
-  nh.advertise(pub_sonar);
-  
-  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
-  pinMode(echoPin, INPUT); // Sets the echoPin as an Input
-  Serial.begin(9600); // Starts the serial communication
+void setup() {
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
 }
 
-void loop() 
-{
-  digitalWrite(trigPin, HIGH);
-  delay(10);
-  digitalWrite(trigPin, LOW);
+void loop() {
+    digitalWrite(trigPin, data);
+    if (millis()-pre_time >= 10 && data == 1)
+    {
+      data = 0;
+      pre_time = millis();
+    }
+    
+    if (millis()-pre_time >= 5 && data == 0)
+    {
+      data = 1;
+      pre_time = millis();
+    }
 
-  duration = pulseIn(echoPin, HIGH);
-  distance= (float(duration/2) / 29.1);
-  sonar_msg.data = distance;
-  Serial.print("Distance: ");
-  Serial.println(distance);
-  delay(3);
+    if (digitalRead(echoPin) == HIGH && count_start == 0)
+    {
+      start_time = micros();
+      count_start = 1;
+    }
 
-  pub_sonar.publish(&sonar_msg);
-  nh.spinOnce();
+    else if (digitalRead(echoPin) == LOW && count_start == 1)
+    {
+      end_time = micros();
+      count_start = 0;
+      duration = (end_time - start_time) / 2 / 29.1;
+      Serial.print("t_time: ");
+      Serial.println(duration);
+    }
 }
