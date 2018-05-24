@@ -69,7 +69,7 @@ class Turtlebot3Sensor
   float getIRsensorData(void);
 
   // Sonar sensor
-  float getSonarData(void);
+  float getSonarData(uint32_t time);
 
   // Illumination sensor
   float getIlluminationData(void);

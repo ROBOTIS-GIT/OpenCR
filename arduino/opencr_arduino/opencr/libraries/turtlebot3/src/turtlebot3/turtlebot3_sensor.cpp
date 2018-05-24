@@ -312,42 +312,57 @@ float Turtlebot3Sensor::getIRsensorData(void)
   return ir_data;
 }
 
-float Turtlebot3Sensor::getSonarData(void)
-{/*
-  uint32_t t_time;
-  uint32_t pre_time;
-  uint32_t count_start = 0;
-  const int echoPin = BDPIN_GPIO_1;
-  const int trigPin = BDPIN_GPIO_2;
-  
- 
+float Turtlebot3Sensor::getSonarData(uint32_t time)
+{
+  int echoPin = BDPIN_GPIO_1;
+  int trigPin = BDPIN_GPIO_2;
+  static uint8_t start_time = 0;
+  static uint8_t end_time = 0;
+  static uint8_t pre_time = 0;
+  static uint8_t input = 1;
+  static uint32_t count_start = 0;
 
-  long duration;
-  int distance;
+  float duration;
+  float distance;
 
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
 
-  if((digitalRead(trigPin) == HIGH) && count_start ==0)
-  {  
-    t_time = millis();
+  digitalWrite(trigPin, input);
+
+  if (time-pre_time >= 10 && input == 1)
+  {
+    input = 0;
+    pre_time = time;
+  }
+  digitalWrite(trigPin, input);
+
+  if (time-pre_time >= 5 && input == 0)
+  {
+    input = 1;
+    pre_time = time;
+  }
+
+  if (digitalRead(echoPin) == HIGH && count_start == 0)
+  {
+    start_time = time/1000;
     count_start = 1;
   }
-  if (millis()-pre_time >= 10)
+
+  else if (digitalRead(echoPin) == LOW && count_start == 1)
   {
-    digitalWrite(trigPin, LOW);
-
-    if (digitalRead(echoPin) == HIGH)
-    {
-       pre_time = millis();
-       duration =  pre_time - t_time
-       count_start = 0;
-    }
+    end_time = time/1000;
+    count_start = 0;
+    duration = end_time - start_time;
+    distance = duration / 2 / 29.1;
+    
+    return distance; 
   }
-  distance= (float(duration/2) / 29.1);
 
-  return distance;*/
-  return 1.0;
+  else 
+  {
+    return -1.0; 
+  }
 }
 
 float Turtlebot3Sensor::getIlluminationData(void)
