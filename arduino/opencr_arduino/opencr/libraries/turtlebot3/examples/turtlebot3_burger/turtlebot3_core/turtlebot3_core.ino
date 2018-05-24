@@ -34,6 +34,7 @@ void setup()
   nh.subscribe(motor_power_sub);
   nh.subscribe(reset_sub);
 
+
   nh.advertise(sensor_state_pub);  
   nh.advertise(version_info_pub);
   nh.advertise(imu_pub);
@@ -255,6 +256,12 @@ void publishSensorStateMsg(void)
 
   sensor_state_msg.bumper = sensors.checkPushBumper();
 
+  sensor_state_msg.cliff = sensors.getIRsensorData();
+
+  sensor_state_msg.sonar = sensors.getSonarData();
+
+  sensor_state_msg.illumination = sensors.getIlluminationData();
+  
   sensor_state_msg.button = sensors.checkPushButton();
 
   sensor_state_msg.torque = motor_driver.getTorque();
@@ -697,6 +704,8 @@ void updateGoalVelocity(void)
 {
   goal_velocity[LINEAR]  = goal_velocity_from_button[LINEAR]  + goal_velocity_from_cmd[LINEAR]  + goal_velocity_from_rc100[LINEAR];
   goal_velocity[ANGULAR] = goal_velocity_from_button[ANGULAR] + goal_velocity_from_cmd[ANGULAR] + goal_velocity_from_rc100[ANGULAR];
+
+  sensors.setLedPattern(goal_velocity[LINEAR], goal_velocity[ANGULAR]);
 }
 
 /*******************************************************************************

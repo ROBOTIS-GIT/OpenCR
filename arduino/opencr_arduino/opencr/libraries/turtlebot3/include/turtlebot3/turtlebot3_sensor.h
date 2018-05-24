@@ -74,6 +74,8 @@ class Turtlebot3Sensor
   // Illumination sensor
   float getIlluminationData(void);
 
+  // led pattern
+  void setLedPattern(double linear_vel, double angular_vel);
  private:
   sensor_msgs::Imu           imu_msg_;
   sensor_msgs::BatteryState  battery_state_msg_;

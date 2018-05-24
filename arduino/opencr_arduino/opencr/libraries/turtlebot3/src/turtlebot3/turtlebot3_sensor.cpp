@@ -295,23 +295,140 @@ uint8_t Turtlebot3Sensor::checkPushBumper(void)
 
   uint8_t push_state = 0;
 
-  if (touchOLLO.read(3, TOUCH_SENSOR) == HIGH) push_state = 1;
-  if (touchOLLO.read(4, TOUCH_SENSOR) == HIGH) push_state = 2;
-
+  if      (touchOLLO.read(3, TOUCH_SENSOR) == HIGH) push_state = 2;
+  else if (touchOLLO.read(4, TOUCH_SENSOR) == HIGH) push_state = 1;
+  
   return push_state;
 }
 
 float Turtlebot3Sensor::getIRsensorData(void)
 {
-  return 1.0;
+
+  OLLO IROLLO;
+  IROLLO.begin(2, IR_SENSOR);
+
+  float ir_data = IROLLO.read(2, IR_SENSOR);
+  
+  return ir_data;
 }
 
 float Turtlebot3Sensor::getSonarData(void)
-{
+{/*
+  uint32_t t_time;
+  uint32_t pre_time;
+  uint32_t count_start = 0;
+  const int echoPin = BDPIN_GPIO_1;
+  const int trigPin = BDPIN_GPIO_2;
+  
+ 
+
+  long duration;
+  int distance;
+
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+
+  if((digitalRead(trigPin) == HIGH) && count_start ==0)
+  {  
+    t_time = millis();
+    count_start = 1;
+  }
+  if (millis()-pre_time >= 10)
+  {
+    digitalWrite(trigPin, LOW);
+
+    if (digitalRead(echoPin) == HIGH)
+    {
+       pre_time = millis();
+       duration =  pre_time - t_time
+       count_start = 0;
+    }
+  }
+  distance= (float(duration/2) / 29.1);
+
+  return distance;*/
   return 1.0;
 }
 
 float Turtlebot3Sensor::getIlluminationData(void)
 {
-  return 1.0;
+
+  long light;
+
+  light = analogRead(A1);
+
+  return light;
 }
+
+void Turtlebot3Sensor::setLedPattern(double linear_vel, double angular_vel)
+{
+  int front_left  = BDPIN_GPIO_4;
+  int front_right = BDPIN_GPIO_6;
+  int back_left   = BDPIN_GPIO_8;
+  int back_right  = BDPIN_GPIO_10;
+ 
+  pinMode(front_left, OUTPUT);
+  pinMode(front_right, OUTPUT);
+  pinMode(back_left, OUTPUT);
+  pinMode(back_right, OUTPUT);
+
+  if (linear_vel > 0.0 && angular_vel == 0.0)     // front
+  {
+    digitalWrite(front_left, HIGH);
+    digitalWrite(front_right, HIGH);
+    digitalWrite(back_left, LOW);
+    digitalWrite(back_right, LOW);
+  }
+
+  else if (linear_vel >= 0.0 && angular_vel > 0.0)  // front left
+  {
+    digitalWrite(front_left, HIGH);
+    digitalWrite(front_right, LOW);
+    digitalWrite(back_left, LOW);
+    digitalWrite(back_right, LOW);
+  }
+
+  else if (linear_vel >= 0.0 && angular_vel < 0.0)  // front right
+  {
+    digitalWrite(front_left, LOW);
+    digitalWrite(front_right, HIGH);
+    digitalWrite(back_left, LOW);
+    digitalWrite(back_right, LOW);
+  }
+  else if (linear_vel < 0.0 && angular_vel == 0.0) // back
+  {
+    digitalWrite(front_left, LOW);
+    digitalWrite(front_right, LOW);
+    digitalWrite(back_left, HIGH);
+    digitalWrite(back_right, HIGH);
+  }
+
+  else if (linear_vel <= 0.0 && angular_vel > 0.0)  // back right
+  {
+    digitalWrite(front_left, LOW);
+    digitalWrite(front_right, LOW);
+    digitalWrite(back_left, LOW);
+    digitalWrite(back_right, HIGH);
+  }
+
+  else if (linear_vel <= 0.0 && angular_vel < 0.0)  // back left
+  {
+    digitalWrite(front_left, LOW);
+    digitalWrite(front_right, LOW);
+    digitalWrite(back_left, HIGH);
+    digitalWrite(back_right, LOW);
+  }
+
+  else 
+  {
+    digitalWrite(front_left, LOW);
+    digitalWrite(front_right, LOW);
+    digitalWrite(back_left, LOW);
+    digitalWrite(back_right, LOW);
+  }
+}
+
+
+
+
+

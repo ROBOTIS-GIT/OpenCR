@@ -17,28 +17,42 @@
 /* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
 
 #include <ros.h>
-#include <std_msgs/UInt16.h>
+#include <std_msgs/Float32.h>
 #include <OLLO.h>
 
-OLLO IROLLO;
 ros::NodeHandle nh;
-std_msgs::UInt16 IR_msg;
-ros::Publisher pub_IR("IR", &IR_msg);
+std_msgs::Float32 sonar_msg;
+ros::Publisher pub_sonar("sonar", &sonar_msg);
 
-void setup()
+const int echoPin = BDPIN_GPIO_1;
+const int trigPin = BDPIN_GPIO_2;
+
+long duration;
+int distance;
+
+void setup() 
 {
   nh.initNode();
-  nh.advertise(pub_IR);
+  nh.advertise(pub_sonar);
   
-  IROLLO.begin(2, IR_SENSOR);//IR Module must be connected at port 1.
+  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+  Serial.begin(9600); // Starts the serial communication
 }
 
-void loop()
+void loop() 
 {
-  IR_msg.data = IROLLO.read(2, IR_SENSOR);
-  pub_IR.publish(&IR_msg);
-    
-  Serial.println(IR_msg.data);
-  delay(60);
+  digitalWrite(trigPin, HIGH);
+  delay(10);
+  digitalWrite(trigPin, LOW);
+
+  duration = pulseIn(echoPin, HIGH);
+  distance= (float(duration/2) / 29.1);
+  sonar_msg.data = distance;
+  Serial.print("Distance: ");
+  Serial.println(distance);
+  delay(3);
+
+  pub_sonar.publish(&sonar_msg);
   nh.spinOnce();
 }

@@ -20,30 +20,25 @@
 #include <std_msgs/UInt16.h>
 #include <OLLO.h>
 
-const int trigPin = 51;
-const int echoPin = 50;
-// defines variables
-long duration;
-int distance;
-void setup() {
-pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
-pinMode(echoPin, INPUT); // Sets the echoPin as an Input
-Serial.begin(9600); // Starts the serial communication
+OLLO IROLLO;
+ros::NodeHandle nh;
+std_msgs::UInt16 cliff_msg;
+ros::Publisher pub_cliff("cliff", &cliff_msg);
+
+void setup()
+{
+  nh.initNode();
+  nh.advertise(pub_cliff);
+  
+  IROLLO.begin(2, IR_SENSOR);//IR Module must be connected at port 1.
 }
-void loop() {
-// Clears the trigPin
-digitalWrite(trigPin, HIGH);
-delay(10);
-// Sets the trigPin on HIGH state for 10 micro seconds
-digitalWrite(trigPin, LOW);
 
-
-// Reads the echoPin, returns the sound wave travel time in microseconds
-duration = pulseIn(echoPin, HIGH);
-// Calculating the distance
-distance= (float(duration/2) / 29.1);
-// Prints the distance on the Serial Monitor
-Serial.print("Distance: ");
-Serial.println(distance);
-delay(3);
+void loop()
+{
+  cliff_msg.data = IROLLO.read(2, IR_SENSOR);
+  pub_cliff.publish(&cliff_msg);
+    
+  Serial.println(cliff_msg.data);
+  delay(10);
+  nh.spinOnce();
 }

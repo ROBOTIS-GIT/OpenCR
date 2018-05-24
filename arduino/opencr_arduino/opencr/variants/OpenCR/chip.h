@@ -78,11 +78,6 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define BDPIN_GPIO_17           66
 #define BDPIN_GPIO_18           67
 
-#define OLLO_P1_ADC             42
-#define OLLO_P2_ADC             45
-#define OLLO_P3_ADC             72
-#define OLLO_P4_ADC             75
-
 #define BDPIN_UART1_RX          80
 #define BDPIN_UART1_TX          81
 #define BDPIN_UART2_RX          82
