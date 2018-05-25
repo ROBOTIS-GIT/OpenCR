@@ -14,13 +14,13 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
+/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho, Gilbert */
 
 #include <ros.h>
-#include <std_msgs/Byte.h>
+#include <std_msgs/Float32.h>
 
 ros::NodeHandle nh;
-std_msgs::Byte illumination_msg;
+std_msgs::Float32 illumination_msg;
 ros::Publisher pub_illumination("illumination", &illumination_msg);
 
 void setup() 
@@ -29,24 +29,22 @@ void setup()
   nh.advertise(pub_illumination);
   
   Serial.begin(9600);
-  pinMode(BDPIN_GPIO_18, INPUT);
 }
  
 void loop()
 {
-  uint8_t reading = 0;
+  float reading = 0;
   static uint32_t pre_time;
 
-  reading = digitalRead(BDPIN_GPIO_18);
+  reading = analogRead(A1);
   
   if (millis()-pre_time >= 50)
   {
     illumination_msg.data = reading;
     pub_illumination.publish(&illumination_msg);
     pre_time = millis();
+    Serial.println(illumination_msg.data);
   }
-  
-  Serial.println(illumination_msg.data);
   nh.spinOnce();
 }
 

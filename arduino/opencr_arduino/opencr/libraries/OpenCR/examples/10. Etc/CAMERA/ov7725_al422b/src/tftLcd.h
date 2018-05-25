@@ -93,6 +93,19 @@
 #define LCD_BKL_PIN        9
 #define LCD_CS_PIN        10
 
+#define TP_PRESS_DOWN           0x80
+#define TP_PRESSED              0x40
+
+#define XPOS 0
+#define YPOS 1
+
+#define TOUCH_MIN 127
+#define TOUCH_MAX 1950
+#define TOUCH_RANGE (TOUCH_MAX-TOUCH_MIN)
+
+#define LCD_MAX_X 240
+#define LCD_MAX_Y 320
+
 #define __LCD_CS_OUT()    pinMode(LCD_CS_PIN, OUTPUT)
 #define __LCD_CS_CLR()    digitalWriteFast(LCD_CS_PIN, LOW)
 #define __LCD_CS_SET()    digitalWriteFast(LCD_CS_PIN, HIGH)
@@ -250,7 +263,6 @@ public:
 	uint16_t get_lcd_height(void);
 
 private:
-
 uint16_t lcd_width;
 uint16_t lcd_height;
 

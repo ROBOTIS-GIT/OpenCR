@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
+/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho, Gilbert */
 
 #include "turtlebot3_core_config.h"
 
@@ -33,6 +33,7 @@ void setup()
   nh.subscribe(sound_sub);
   nh.subscribe(motor_power_sub);
   nh.subscribe(reset_sub);
+
 
   nh.advertise(sensor_state_pub);  
   nh.advertise(version_info_pub);
@@ -131,6 +132,10 @@ void loop()
 
   // Update the IMU unit
   sensors.updateIMU();
+
+  // TODO
+  // Update sonar data
+  // sensors.updateSonar(t);
 
   // Start Gyro Calibration after ROS connection
   updateGyroCali();
@@ -253,6 +258,15 @@ void publishSensorStateMsg(void)
   else
     return;
 
+  sensor_state_msg.bumper = sensors.checkPushBumper();
+
+  sensor_state_msg.cliff = sensors.getIRsensorData();
+
+  // TODO
+  // sensor_state_msg.sonar = sensors.getSonarData();
+
+  sensor_state_msg.illumination = sensors.getIlluminationData();
+  
   sensor_state_msg.button = sensors.checkPushButton();
 
   sensor_state_msg.torque = motor_driver.getTorque();
@@ -616,8 +630,9 @@ void sendLogMsg(void)
   static bool log_flag = false;
   char log_msg[100];  
 
+  String name             = NAME;
   String firmware_version = FIRMWARE_VER;
-  String bringup_log      = "This core(v" + firmware_version + ") is compatible with TB3 Burger";
+  String bringup_log      = "This core(v" + firmware_version + ") is compatible with TB3 " + name;
    
   const char* init_log_data = bringup_log.c_str();
 
@@ -695,6 +710,8 @@ void updateGoalVelocity(void)
 {
   goal_velocity[LINEAR]  = goal_velocity_from_button[LINEAR]  + goal_velocity_from_cmd[LINEAR]  + goal_velocity_from_rc100[LINEAR];
   goal_velocity[ANGULAR] = goal_velocity_from_button[ANGULAR] + goal_velocity_from_cmd[ANGULAR] + goal_velocity_from_rc100[ANGULAR];
+
+  sensors.setLedPattern(goal_velocity[LINEAR], goal_velocity[ANGULAR]);
 }
 
 /*******************************************************************************
@@ -705,7 +722,7 @@ void sendDebuglog(void)
   DEBUG_SERIAL.println("---------------------------------------");
   DEBUG_SERIAL.println("EXTERNAL SENSORS");
   DEBUG_SERIAL.println("---------------------------------------");
-  DEBUG_SERIAL.print("Bumper : "); DEBUG_SERIAL.println(sensors.getPushedBumper());
+  DEBUG_SERIAL.print("Bumper : "); DEBUG_SERIAL.println(sensors.checkPushBumper());
   DEBUG_SERIAL.print("Cliff : "); DEBUG_SERIAL.println(sensors.getIRsensorData());
   DEBUG_SERIAL.print("Sonar : "); DEBUG_SERIAL.println(sensors.getSonarData());
   DEBUG_SERIAL.print("Illumination : "); DEBUG_SERIAL.println(sensors.getIlluminationData());

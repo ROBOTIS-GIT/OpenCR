@@ -282,6 +282,15 @@ void publishSensorStateMsg(void)
   else
     return;
 
+  sensor_state_msg.bumper = sensors.checkPushBumper();
+
+  sensor_state_msg.cliff = sensors.getIRsensorData();
+
+  // TODO
+  // sensor_state_msg.sonar = sensors.getSonarData();
+
+  sensor_state_msg.illumination = sensors.getIlluminationData();
+  
   sensor_state_msg.button = sensors.checkPushButton();
 
   sensor_state_msg.torque = motor_driver.getTorque();
@@ -761,7 +770,7 @@ void sendDebuglog(void)
   DEBUG_SERIAL.println("---------------------------------------");
   DEBUG_SERIAL.println("EXTERNAL SENSORS");
   DEBUG_SERIAL.println("---------------------------------------");
-  DEBUG_SERIAL.print("Bumper : "); DEBUG_SERIAL.println(sensors.getPushedBumper());
+  DEBUG_SERIAL.print("Bumper : "); DEBUG_SERIAL.println(sensors.checkPushBumper());
   DEBUG_SERIAL.print("Cliff : "); DEBUG_SERIAL.println(sensors.getIRsensorData());
   DEBUG_SERIAL.print("Sonar : "); DEBUG_SERIAL.println(sensors.getSonarData());
   DEBUG_SERIAL.print("Illumination : "); DEBUG_SERIAL.println(sensors.getIlluminationData());

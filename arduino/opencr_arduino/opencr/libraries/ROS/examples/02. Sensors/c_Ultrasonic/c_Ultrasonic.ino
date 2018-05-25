@@ -14,31 +14,35 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
+/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho, Gilbert */
 
-#include <ros.h>
-#include <std_msgs/UInt16.h>
-#include <OLLO.h>
+const int trigPin = BDPIN_GPIO_1;
+const int echoPin = BDPIN_GPIO_2;
 
-OLLO IROLLO;
-ros::NodeHandle nh;
-std_msgs::UInt16 IR_msg;
-ros::Publisher pub_IR("IR", &IR_msg);
+float duration, distance;
 
-void setup()
+void setup() 
 {
-  nh.initNode();
-  nh.advertise(pub_IR);
-  
-  IROLLO.begin(2, IR_SENSOR);//IR Module must be connected at port 1.
+  Serial.begin(9600);
+
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
 }
 
-void loop()
-{
-  IR_msg.data = IROLLO.read(2, IR_SENSOR);
-  pub_IR.publish(&IR_msg);
-    
-  Serial.println(IR_msg.data);
-  delay(60);
-  nh.spinOnce();
+void loop() 
+{  
+  digitalWrite(trigPin, HIGH);
+  delay(10);
+  digitalWrite(trigPin, LOW);
+ 
+  duration = pulseIn(echoPin, HIGH);
+  distance = ((float)(340 * duration) / 10000) / 2;
+
+  Serial.print("duration: ");
+  Serial.print(duration);
+
+  Serial.print(" distance: ");
+  Serial.println(distance);
+
+  delay(500);
 }

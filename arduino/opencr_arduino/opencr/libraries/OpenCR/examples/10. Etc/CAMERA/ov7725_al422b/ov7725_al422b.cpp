@@ -1,4 +1,5 @@
-#include <DynamixelSDK.h>
+#include <Touch.h>
+#include <XPT2046.h>
 #include "ov7725_al422b.h"
 #include "settings.h"
 
@@ -30,20 +31,17 @@ void lcdInit()
     SPI.setClockDivider(SPI_CLOCK_DIV4);
 
     TFTLCD.lcd_init();
+    Tp.tp_init();
 }
 
-void drawShape(shape_list shape, uint16_t x_pos, uint16_t y_pos, uint16_t radius, uint16_t color)
+void getSingleTouchPoint(uint16_t* touch_list)
 {
-  switch(shape)
-  {
-    case CIRCLE:
-     TFTLCD.lcd_draw_circle(x_pos, y_pos, radius, color);
-     break;
-     
-    case SQUARE:
-     TFTLCD.lcd_fill_rect(x_pos, y_pos, radius, radius, color);
-     break;
-  }
+    //Make sure, that before reading the touch info, you must decrease the SPI speed under 2MHz. After finish this process, return to SPI_CLOCK_DIV4.
+    SPI.setClockDivider(SPI_CLOCK_DIV32);
+    Tp.tp_show_single_info(touch_list);
+    touch_list[XPOS] = constrain(touch_list[XPOS], TOUCH_MIN, TOUCH_MAX);
+    touch_list[YPOS] = constrain(touch_list[YPOS], TOUCH_MIN, TOUCH_MAX);
+    SPI.setClockDivider(SPI_CLOCK_DIV4);
 }
 
 void drawScreen()
@@ -105,7 +103,8 @@ void colorFilter(uint16_t *image, uint8_t size)
     else
     {
       #if _USE_FULLSCREEN == true
-        masked_image_buf[pixelCount] = 0;
+        u_quotient = pixelCount / 16;
+        u_remainder = pixelCount % 16;
         masked_image_buf[u_quotient] &= ~(0x8000 >> u_remainder);  // 0111 1111
       #else
         masked_image_buf[pixelCount] = BLACK;
@@ -116,7 +115,7 @@ void colorFilter(uint16_t *image, uint8_t size)
 
 bool colorFinder(const uint16_t *image, uint32_t pixelLocation)
 {
-  const color_range_t* target_color = &selected_color[2];	//select color to detect
+  const color_range_t* target_color = &selected_color[SELECTED_COLOR];	//select color to detect
   uint16_t pixelColor;
   float propRed;
   float propGreen;
@@ -148,6 +147,59 @@ bool colorFinder(const uint16_t *image, uint32_t pixelLocation)
   return false;
 }
 
+/**
+ * This function is copied and modified from 
+ * https://github.com/ratkins/RGBConverter/blob/master/RGBConverter.cpp
+ * 
+ * Converts an RGB565 color value to HSL. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+ * ----Assumes r, g, and b are contained in the set [0, 255]---- and
+ * returns h, s, and l in the set [0, 1].
+ *
+ * @param   Number  r       The red color value
+ * @param   Number  g       The green color value
+ * @param   Number  b       The blue color value
+ * @return  Array           The HSL representation
+**/
+// void rgbToHsl(byte r, byte g, byte b, double hsl[])
+// {
+//   double rd = (double) r/31;
+//   double gd = (double) g/63;
+//   double bd = (double) b/31;
+//   double max = MAX(MAX(rd,gd),bd);
+//   double min = MIN(MIN(rd,gd),bd);
+//   double h = 0;
+//   double s = 0;
+//   double l = 0;
+//   h = s = l = (max + min) / 2;
+
+//   if (max == min)
+//   {
+//     h = s = 0; // achromatic
+//   }
+//   else
+//   {
+//     double d = max - min;
+//     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+//     if (max == rd)
+//     {
+//       h = (gd - bd) / d + (gd < bd ? 6 : 0);
+//     }
+//     else if (max == gd)
+//     {
+//       h = (bd - rd) / d + 2;
+//     }
+//     else if (max == bd)
+//     {
+//       h = (rd - gd) / d + 4;
+//     }
+//     h = h / 6;
+//   }
+//   hsl[0] = h;
+//   hsl[1] = s;
+//   hsl[2] = l;
+// }
+
 //find the most attracting detection and mark around it
 void objectFinder(const uint16_t *masked_image)
 {
@@ -175,7 +227,7 @@ void objectFinder(const uint16_t *masked_image)
           #if _USE_FULLSCREEN == true
             u_quotient = pixeltoCheck / 16;
             u_remainder = pixeltoCheck % 16;
-            cellValue = cellValue + (uint16_t)((masked_image[u_quotient] >> (7 - u_remainder)) & 0x0001);
+            cellValue = cellValue + (uint16_t)((masked_image[u_quotient] >> (15 - u_remainder)) & 0x0001);
             pixeltoCheck++;
           #else
             cellValue = cellValue + (masked_image[pixeltoCheck] >> 8 | masked_image[pixeltoCheck] << 8);
@@ -252,23 +304,26 @@ void findCenterCell(void)
     }
     TFTLCD.lcd_draw_rect(detected_object[i].coordX, detected_object[i].coordY, detected_object[i].object_width, detected_object[i].object_height, WHITE);
   }
-  if (detectCount < MAX_OBJECT)
+  if ((detected_object[target].object_weight < 4) || (detectCount < MIN_OBJECT_PIXEL))
   {
-    TFTLCD.lcd_draw_rect(detected_object[target].coordX, detected_object[target].coordY, detected_object[target].object_width, detected_object[target].object_height, RED);
+    detected_object[target].coordX = img_height / 2;
+    detected_object[target].coordY = img_width / 2;
+    detected_object[target].track = false;
   }
+  else
+  {
+    detected_object[target].track = true;
+  }
+  TFTLCD.lcd_draw_rect(detected_object[target].coordX, detected_object[target].coordY, detected_object[target].object_width, detected_object[target].object_height, RED);
 }
 
 void displayInfo(uint8_t fps)
 {
-//  itoa((int16_t)fWeight, cWeight, 10);
-//  itoa(presentPos, panPos, 10);
   itoa(fps, fpsString, 10);
   itoa(detectCount, detectCounter, 10);
   itoa(detected_object[target].coordX, coordinateX, 10);
   itoa(detected_object[target].coordY, coordinateY, 10);
 
-//  drawText(10, 100, (const uint8_t *)cWeight, 16, WHITE);
-//  drawText(10, 80, (const uint8_t *)panPos, 16, WHITE);
   drawText(20, 5, (const uint8_t *)"fps", 12, RED);
   drawText(5, 5, (const uint8_t *)fpsString, 12, RED);
   drawText(5, 15, (const uint8_t *)detectCounter, 12, WHITE);
@@ -309,7 +364,7 @@ void initDynamixel(dynamixel::PortHandler *hPort, dynamixel::PacketHandler *hPac
   else if (dxlError != 0)             {Serial.print(hPacket->getRxPacketError(dxlError));}
   else                                {Serial.print("Tilt Profile Accel Set \n");}
 
-  delay_ms(1000);
+  delay_ms(10);
 
   dxlCommResult = hPacket->write4ByteTxRx(hPort, PAN_ID, ADD_PROF_VEL, PROF_VEL, &dxlError);
   if (dxlCommResult != COMM_SUCCESS)  {Serial.print(hPacket->getTxRxResult(dxlCommResult));}
@@ -321,7 +376,7 @@ void initDynamixel(dynamixel::PortHandler *hPort, dynamixel::PacketHandler *hPac
   else if (dxlError != 0)             {Serial.print(hPacket->getRxPacketError(dxlError));}
   else                                {Serial.print("Tilt Profile Velocity Set \n");}
 
-  delay_ms(1000);
+  delay_ms(10);
 
   dxlCommResult = hPacket->write1ByteTxRx(hPort, PAN_ID, ADD_TORQUE_ENABLE, TORQUE_ON, &dxlError);
   if (dxlCommResult != COMM_SUCCESS)  {Serial.print(hPacket->getTxRxResult(dxlCommResult));}
@@ -353,10 +408,6 @@ void initDynamixel(dynamixel::PortHandler *hPort, dynamixel::PacketHandler *hPac
   dxlCommResult = hPacket->read4ByteTxRx(hPort, PAN_ID, ADD_PRESENT_POSITION, (uint32_t*)&panPresentPosition, &dxlError);
   // Read Tilt present position
   dxlCommResult = hPacket->read4ByteTxRx(hPort, TILT_ID, ADD_PRESENT_POSITION, (uint32_t*)&tiltPresentPosition, &dxlError);
-  Serial.print("PanPresentPos : ");
-  Serial.print(panPresentPosition);
-  Serial.print("\nTiltPresentPos : ");
-  Serial.print(tiltPresentPosition);
 }
 
 
@@ -370,30 +421,28 @@ void trackObject(dynamixel::PortHandler *hPort, dynamixel::PacketHandler *hPacke
   // Read Tilt present position
   dxlCommResult = hPacket->read4ByteTxRx(hPort, TILT_ID, ADD_PRESENT_POSITION, (uint32_t*)&tiltPresentPosition, &dxlError);
 
-  if((detectCount > 3) && (detectCount < MAX_OBJECT))
+  if(detected_object[target].track == true)
   {
     //Track the object
-    //find the angle between target x, y and center(80,60)
-    if (detected_object[target].coordX > 80 + MOVING_THRESHOLD)       {panGoalPosition = panPresentPosition - (detected_object[target].coordX - 80);}
-    else if (detected_object[target].coordX < 80 - MOVING_THRESHOLD)  {panGoalPosition = panPresentPosition + (80 - detected_object[target].coordX);}
+    //find the angle between target x, y and image center
+    if (detected_object[target].coordX > (img_height / 2) + MOVING_THRESHOLD)       {panGoalPosition = panPresentPosition - (detected_object[target].coordX - (img_height / 2));}
+    else if (detected_object[target].coordX < (img_height / 2) - MOVING_THRESHOLD)  {panGoalPosition = panPresentPosition + ((img_height / 2) - detected_object[target].coordX);}
     else                                                              {panGoalPosition = panPresentPosition;}
 
-    if(panGoalPosition > PAN_MAX_POSITION)        {panGoalPosition = PAN_MAX_POSITION;}
-    else if(panGoalPosition < PAN_MIN_POSITION)   {panGoalPosition = PAN_MIN_POSITION;}
-    else                                          {}
+    if(panGoalPosition > PAN_MAX_POSITION)    {panGoalPosition = PAN_MAX_POSITION;}
+    if(panGoalPosition < PAN_MIN_POSITION)    {panGoalPosition = PAN_MIN_POSITION;}
 
     dxlCommResult = hPacket->write4ByteTxRx(hPort, PAN_ID, ADD_GOAL_POSITION, panGoalPosition, &dxlError);
     if (dxlCommResult != COMM_SUCCESS)  {Serial.print(hPacket->getTxRxResult(dxlCommResult));}
     else if (dxlError != 0)             {Serial.print(hPacket->getRxPacketError(dxlError));}
     else {}
 
-    if (detected_object[target].coordY > (60 + MOVING_THRESHOLD))       {tiltGoalPosition = tiltPresentPosition - (detected_object[target].coordY - 60);}
-    else if (detected_object[target].coordY < (60 - MOVING_THRESHOLD))  {tiltGoalPosition = tiltPresentPosition + (60 - detected_object[target].coordY);}
+    if (detected_object[target].coordY > ((img_width / 2) + MOVING_THRESHOLD))       {tiltGoalPosition = tiltPresentPosition - (detected_object[target].coordY - (img_width / 2));}
+    else if (detected_object[target].coordY < ((img_width / 2) - MOVING_THRESHOLD))  {tiltGoalPosition = tiltPresentPosition + ((img_width / 2) - detected_object[target].coordY);}
     else                                                                {tiltGoalPosition = tiltPresentPosition;}
 
-    if(tiltGoalPosition > TILT_MAX_POSITION)        {tiltGoalPosition = TILT_MAX_POSITION;}
-    else if(tiltGoalPosition < TILT_MIN_POSITION)   {tiltGoalPosition = TILT_MIN_POSITION;}
-    else                                            {}
+    if(tiltGoalPosition > TILT_MAX_POSITION)   {tiltGoalPosition = TILT_MAX_POSITION;}
+    if(tiltGoalPosition < TILT_MIN_POSITION)   {tiltGoalPosition = TILT_MIN_POSITION;}
 
     dxlCommResult = hPacket->write4ByteTxOnly(hPort, TILT_ID, ADD_GOAL_POSITION, tiltGoalPosition);
     if (dxlCommResult != COMM_SUCCESS)  {Serial.print(hPacket->getTxRxResult(dxlCommResult));}
@@ -407,10 +456,10 @@ void trackObject(dynamixel::PortHandler *hPort, dynamixel::PacketHandler *hPacke
 
 /********************************************
  * Dynamixel Control for Operating Platform
- * Left ID : 1(Positive Forward), Right ID : 2(Negative Forward)
+ * Left : Positive -> Forward, Right : Negative -> Forward
  * Velocity Control Mode
 ********************************************/
 void movePlatform(dynamixel::PortHandler *hPort, dynamixel::PacketHandler *hPacket)
 {
-
+  //to do
 }

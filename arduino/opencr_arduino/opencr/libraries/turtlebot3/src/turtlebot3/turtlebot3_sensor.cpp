@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
+/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho, Gilbert */
 
 #include "../../include/turtlebot3/turtlebot3_sensor.h"
 
@@ -30,6 +30,12 @@ Turtlebot3Sensor::~Turtlebot3Sensor()
 bool Turtlebot3Sensor::init(void)
 {
   DEBUG_SERIAL.begin(57600);
+
+  initBumper();
+  initIR();
+  initSonar();
+  initLED();
+
   uint8_t get_error_code = 0x00;
 
   battery_state_msg_.current         = NAN;
@@ -286,32 +292,164 @@ void Turtlebot3Sensor::makeSound(uint8_t index)
   melody(note, 8, duration);
 }
 
+void Turtlebot3Sensor::initBumper(void)
+{
+  ollo_.begin(3, TOUCH_SENSOR);
+  ollo_.begin(4, TOUCH_SENSOR);
+}
+
 uint8_t Turtlebot3Sensor::checkPushBumper(void)
 {
-
-  OLLO touchOLLO;
-  touchOLLO.begin(3, TOUCH_SENSOR);
-  touchOLLO.begin(4, TOUCH_SENSOR);
-
   uint8_t push_state = 0;
 
-  if (touchOLLO.read(3, TOUCH_SENSOR) == HIGH) push_state = 1;
-  if (touchOLLO.read(4, TOUCH_SENSOR) == HIGH) push_state = 2;
-
+  if      (ollo_.read(3, TOUCH_SENSOR) == HIGH) push_state = 2;
+  else if (ollo_.read(4, TOUCH_SENSOR) == HIGH) push_state = 1;
+  else    push_state = 0;
+  
   return push_state;
+}
+
+void Turtlebot3Sensor::initIR(void)
+{
+  ollo_.begin(2, IR_SENSOR);
 }
 
 float Turtlebot3Sensor::getIRsensorData(void)
 {
-  return 1.0;
+  float ir_data = ollo_.read(2, IR_SENSOR);
+  
+  return ir_data;
+}
+
+void Turtlebot3Sensor::initSonar(void)
+{
+  sonar_pin_.trig = BDPIN_GPIO_1;
+  sonar_pin_.echo = BDPIN_GPIO_2;
+
+  pinMode(sonar_pin_.trig, OUTPUT);
+  pinMode(sonar_pin_.echo, INPUT);
+}
+
+void Turtlebot3Sensor::updateSonar(uint32_t t)
+{
+  static uint32_t t_time = 0;
+  static bool make_pulse = TRUE;
+  static bool get_duration = FALSE;
+
+  float distance = 0.0, duration = 0.0;
+
+  if (make_pulse == TRUE)
+  {
+    digitalWrite(sonar_pin_.trig, HIGH);
+
+    if (t - t_time >= 10)
+    {
+      digitalWrite(sonar_pin_.trig, LOW);
+
+      get_duration = TRUE;
+      make_pulse = FALSE;
+
+      t_time = t;
+    }
+  }
+
+  if (get_duration == TRUE)
+  {
+    duration = pulseIn(sonar_pin_.echo, HIGH);
+    distance = ((float)(340 * duration) / 10000) / 2;
+
+    make_pulse = TRUE;
+    get_duration = FALSE;
+  }
+
+  sonar_data_ = distance;
 }
 
 float Turtlebot3Sensor::getSonarData(void)
 {
-  return 1.0;
+  float distance = 0.0;
+
+  distance = sonar_data_;
+
+  return distance;
 }
 
 float Turtlebot3Sensor::getIlluminationData(void)
 {
-  return 1.0;
+  uint16_t light;
+
+  light = analogRead(A1);
+
+  return light;
 }
+
+void Turtlebot3Sensor::initLED(void)
+{
+  led_pin_array_.front_left  = BDPIN_GPIO_4;
+  led_pin_array_.front_right = BDPIN_GPIO_6;
+  led_pin_array_.back_left   = BDPIN_GPIO_8;
+  led_pin_array_.back_right  = BDPIN_GPIO_10;
+ 
+  pinMode(led_pin_array_.front_left, OUTPUT);
+  pinMode(led_pin_array_.front_right, OUTPUT);
+  pinMode(led_pin_array_.back_left, OUTPUT);
+  pinMode(led_pin_array_.back_right, OUTPUT);
+}
+
+void Turtlebot3Sensor::setLedPattern(double linear_vel, double angular_vel)
+{
+  if (linear_vel > 0.0 && angular_vel == 0.0)     // front
+  {
+    digitalWrite(led_pin_array_.front_left, HIGH);
+    digitalWrite(led_pin_array_.front_right, HIGH);
+    digitalWrite(led_pin_array_.back_left, LOW);
+    digitalWrite(led_pin_array_.back_right, LOW);
+  }
+  else if (linear_vel >= 0.0 && angular_vel > 0.0)  // front left
+  {
+    digitalWrite(led_pin_array_.front_left, HIGH);
+    digitalWrite(led_pin_array_.front_right, LOW);
+    digitalWrite(led_pin_array_.back_left, LOW);
+    digitalWrite(led_pin_array_.back_right, LOW);
+  }
+  else if (linear_vel >= 0.0 && angular_vel < 0.0)  // front right
+  {
+    digitalWrite(led_pin_array_.front_left, LOW);
+    digitalWrite(led_pin_array_.front_right, HIGH);
+    digitalWrite(led_pin_array_.back_left, LOW);
+    digitalWrite(led_pin_array_.back_right, LOW);
+  }
+  else if (linear_vel < 0.0 && angular_vel == 0.0) // back
+  {
+    digitalWrite(led_pin_array_.front_left, LOW);
+    digitalWrite(led_pin_array_.front_right, LOW);
+    digitalWrite(led_pin_array_.back_left, HIGH);
+    digitalWrite(led_pin_array_.back_right, HIGH);
+  }
+  else if (linear_vel <= 0.0 && angular_vel > 0.0)  // back right
+  {
+    digitalWrite(led_pin_array_.front_left, LOW);
+    digitalWrite(led_pin_array_.front_right, LOW);
+    digitalWrite(led_pin_array_.back_left, LOW);
+    digitalWrite(led_pin_array_.back_right, HIGH);
+  }
+  else if (linear_vel <= 0.0 && angular_vel < 0.0)  // back left
+  {
+    digitalWrite(led_pin_array_.front_left, LOW);
+    digitalWrite(led_pin_array_.front_right, LOW);
+    digitalWrite(led_pin_array_.back_left, HIGH);
+    digitalWrite(led_pin_array_.back_right, LOW);
+  }
+  else 
+  {
+    digitalWrite(led_pin_array_.front_left, LOW);
+    digitalWrite(led_pin_array_.front_right, LOW);
+    digitalWrite(led_pin_array_.back_left, LOW);
+    digitalWrite(led_pin_array_.back_right, LOW);
+  }
+}
+
+
+
+
+
