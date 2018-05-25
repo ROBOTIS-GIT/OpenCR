@@ -42,7 +42,7 @@ DEPENDENCY_OUTPUT=$(arduino --install-boards OpenCR:OpenCR 2>&1)
 if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
 
 # Update OpenCR package manually
-git clone --recursive https://github.com/ROBOTIS-GIT/OpenCR.git --branch develop --single-branch 
+git clone --recursive https://github.com/ROBOTIS-GIT/OpenCR.git --branch master --single-branch 
 rm -rf $HOME/.arduino15/packages/OpenCR/hardware
 mkdir $HOME/Arduino/hardware
 mkdir $HOME/Arduino/hardware/OpenCR
