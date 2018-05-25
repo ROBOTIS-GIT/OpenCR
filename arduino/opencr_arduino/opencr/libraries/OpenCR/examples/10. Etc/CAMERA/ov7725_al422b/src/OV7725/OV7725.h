@@ -61,29 +61,29 @@
 
 /* Private define ------------------------------------------------------------*/
 
-#define FIFO_CS_PIN     GPIO_PIN_6   /* FIFOƬѡ */ 
-#define FIFO_WRST_PIN   GPIO_PIN_7   /* FIFOд��ַ��λ */
-#define FIFO_RRST_PIN   GPIO_PIN_0   /* FIFO����ַ��λ */ 
-#define FIFO_RCLK_PIN   GPIO_PIN_1   /* FIFO��ʱ�� */ 
-#define FIFO_WE_PIN     GPIO_PIN_3   /* FIFOд���� */
+#define FIFO_CS_PIN     GPIO_PIN_6
+#define FIFO_WRST_PIN   GPIO_PIN_7
+#define FIFO_RRST_PIN   GPIO_PIN_0
+#define FIFO_RCLK_PIN   GPIO_PIN_1
+#define FIFO_WE_PIN     GPIO_PIN_3
 
-#define FIFO_CS_H()     GPIOG->BSRR |= 0x00000004U		//digitalWriteFast(FIFO_CS_PIN, HIGH)	  	/* GPIO_SetBits(GPIOD , FIFO_CS_PIN)   */
-#define FIFO_CS_L()     GPIOG->BSRR |= 0x00040000U		//digitalWriteFast(FIFO_CS_PIN, LOW)	    /* GPIO_ResetBits(GPIOD , FIFO_CS_PIN) */
+#define FIFO_CS_H()     GPIOG->BSRR |= 0x00000004U
+#define FIFO_CS_L()     GPIOG->BSRR |= 0x00040000U
 
-#define FIFO_WRST_H()   GPIOD->BSRR |= 0x00000004U		//digitalWriteFast(FIFO_WRST_PIN, HIGH)	/* GPIO_SetBits(GPIOB , FIFO_WRST_PIN)   */
-#define FIFO_WRST_L()   GPIOD->BSRR |= 0x00040000U		//digitalWriteFast(FIFO_WRST_PIN, LOW)	/* GPIO_ResetBits(GPIOB , FIFO_WRST_PIN) */
+#define FIFO_WRST_H()   GPIOD->BSRR |= 0x00000004U
+#define FIFO_WRST_L()   GPIOD->BSRR |= 0x00040000U
 
-#define FIFO_RRST_H()   GPIOE->BSRR |= 0x00000400U		//digitalWriteFast(FIFO_RRST_PIN, HIGH)	/* GPIO_SetBits(GPIOE , FIFO_RRST_PIN)   */
-#define FIFO_RRST_L()   GPIOE->BSRR |= 0x04000000U		//digitalWriteFast(FIFO_RRST_PIN, LOW)	/* GPIO_ResetBits(GPIOE , FIFO_RRST_PIN) */
+#define FIFO_RRST_H()   GPIOE->BSRR |= 0x00000400U
+#define FIFO_RRST_L()   GPIOE->BSRR |= 0x04000000U
 
-#define FIFO_RCLK_H()   GPIOE->BSRR |= 0x00001000U		//digitalWriteFast(FIFO_RCLK_PIN, HIGH)	/* GPIO_SetBits(GPIOE , FIFO_RCLK_PIN)   */
-#define FIFO_RCLK_L()   GPIOE->BSRR |= 0x10000000U		//digitalWriteFast(FIFO_RCLK_PIN, LOW)	/* GPIO_ResetBits(GPIOE , FIFO_RCLK_PIN) */
+#define FIFO_RCLK_H()   GPIOE->BSRR |= 0x00001000U
+#define FIFO_RCLK_L()   GPIOE->BSRR |= 0x10000000U
 
-#define FIFO_WE_H()     GPIOE->BSRR |= 0x00000008U		//digitalWriteFast(FIFO_WE_PIN, HIGH)	  	/* GPIO_SetBits(GPIOD , FIFO_WE_PIN)   */
-#define FIFO_WE_L()     GPIOE->BSRR |= 0x00080000U		//digitalWriteFast(FIFO_WE_PIN, LOW)	    /* GPIO_ResetBits(GPIOD , FIFO_WE_PIN) */
+#define FIFO_WE_H()     GPIOE->BSRR |= 0x00000008U
+#define FIFO_WE_L()     GPIOE->BSRR |= 0x00080000U
 
-#define FIFO_OE_H()		GPIOG->BSRR |= 0x00000004U		//OE high
-#define FIFO_OE_L()		GPIOG->BSRR |= 0x00040000U		//OE low
+#define FIFO_OE_H()		GPIOG->BSRR |= 0x00000004U
+#define FIFO_OE_L()		GPIOG->BSRR |= 0x00040000U
 
 #define REG_NUM                            79
 #define PORT_VSYNC_CMOS                    GPIOA

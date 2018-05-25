@@ -1,4 +1,3 @@
-
 #include "tftLcd.h"
 #include "../settings.h"
 

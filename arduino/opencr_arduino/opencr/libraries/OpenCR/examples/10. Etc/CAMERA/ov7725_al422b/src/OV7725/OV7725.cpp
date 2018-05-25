@@ -13,10 +13,10 @@
 ** Descriptions:            The original version
 **
 **--------------------------------------------------------------------------------------------------------
-** Modified by:             
-** Modified date:           
-** Version:                 
-** Descriptions:            
+** Modified by:             Will Son
+** Modified date:           2018-5-2
+** Version:                 v1.0
+** Descriptions:            OV7725 for OpenCR1.0
 **
 *********************************************************************************************************/
 
