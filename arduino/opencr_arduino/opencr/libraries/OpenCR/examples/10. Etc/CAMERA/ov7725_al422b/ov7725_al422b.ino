@@ -1,4 +1,3 @@
-#include <DynamixelSDK.h>
 #include "ov7725_al422b.h"
 #include "settings.h"
 
@@ -12,13 +11,12 @@ uint32_t tiltGoalPosition = 2048;
 uint32_t panPresentPosition = 0;
 uint32_t tiltPresentPosition = 0;
 uint8_t  dxlError = 0;
-int      dxlCommResult = -1001; //COMM_TX_FAIL
+int      dxlCommResult = COMM_TX_FAIL;
 
 void setup() {
   uint8_t ov7725Vsync = 0;
   
   Serial.begin(115200);
-  Serial.println("start");
   
   dynamixel::PortHandler *hPort = dynamixel::PortHandler::getPortHandler(DXL_PORT);
   dynamixel::PacketHandler *hPacket = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
@@ -68,9 +66,6 @@ void setup() {
       findCenterCell();
       displayInfo(fps);
       drawScreen();
-      // Serial.print("FPS : ");
-      // Serial.print(fps);
-      // Serial.print("\n");
       trackObject(hPort, hPacket);
       setVsync(0);
       frameCount++;
