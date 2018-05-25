@@ -14,17 +14,18 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
+/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho, Gilbert */
 
 #ifndef TURTLEBOT3_SENSOR_H_
 #define TURTLEBOT3_SENSOR_H_
 
 #include <IMU.h>
 
-#include "OLLO.h"
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/BatteryState.h>
 #include <sensor_msgs/MagneticField.h>
+
+#include "OLLO.h"
 
 #define ACCEL_FACTOR                      0.000598550415   // (ADC_Value / Scale) * 9.80665            => Range : +- 2[g]
                                                            //                                             Scale : +- 16384
@@ -34,6 +35,20 @@
 #define MAG_FACTOR                        6e-7
 
 #define DEBUG_SERIAL  SerialBT2
+
+typedef struct LED_PIN_ARRAY
+{
+  int front_left;
+  int front_right;
+  int back_left;
+  int back_right;
+}LedPinArray;
+ 
+typedef struct SONAR_PIN
+{
+  int trig;
+  int echo;
+}SonarPin;
 
 class Turtlebot3Sensor
 {
@@ -63,18 +78,23 @@ class Turtlebot3Sensor
   void makeSound(uint8_t index);  
 
   // Bumper
+  void initBumper(void);
   uint8_t checkPushBumper(void);
 
   // Cliff sensor
+  void initIR(void);
   float getIRsensorData(void);
 
   // Sonar sensor
-  float getSonarData(uint32_t time);
+  void initSonar(void);
+  void updateSonar(uint32_t t);
+  float getSonarData(void);
 
   // Illumination sensor
   float getIlluminationData(void);
 
   // led pattern
+  void initLED(void);
   void setLedPattern(double linear_vel, double angular_vel);
  private:
   sensor_msgs::Imu           imu_msg_;
@@ -82,6 +102,12 @@ class Turtlebot3Sensor
   sensor_msgs::MagneticField mag_msg_;
 
   cIMU imu_;
+  OLLO ollo_;
+
+  LedPinArray led_pin_array_;
+  SonarPin sonar_pin_;
+
+  float sonar_data_;
 };
 
 #endif // TURTLEBOT3_SENSOR_H_
