@@ -630,8 +630,9 @@ void sendLogMsg(void)
   static bool log_flag = false;
   char log_msg[100];  
 
+  String name             = NAME;
   String firmware_version = FIRMWARE_VER;
-  String bringup_log      = "This core(v" + firmware_version + ") is compatible with TB3 Burger";
+  String bringup_log      = "This core(v" + firmware_version + ") is compatible with TB3 " + name;
    
   const char* init_log_data = bringup_log.c_str();
 
