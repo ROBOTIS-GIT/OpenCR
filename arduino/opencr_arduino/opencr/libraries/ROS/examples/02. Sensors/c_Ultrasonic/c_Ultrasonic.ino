@@ -15,49 +15,34 @@
 *******************************************************************************/
 
 /* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho, Gilbert */
-uint32_t t_time;
-uint32_t pre_time;
-uint32_t start_time;
-uint32_t end_time;
-uint32_t count_start = 0;
-uint32_t data = 1;
 
-float duration;
+const int trigPin = BDPIN_GPIO_1;
+const int echoPin = BDPIN_GPIO_2;
 
-const int echoPin = BDPIN_GPIO_1;
-const int trigPin = BDPIN_GPIO_2;
+float duration, distance;
 
-void setup() {
+void setup() 
+{
+  Serial.begin(9600);
+
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
 }
 
-void loop() {
-    digitalWrite(trigPin, data);
-    if (millis()-pre_time >= 10 && data == 1)
-    {
-      data = 0;
-      pre_time = millis();
-    }
-    
-    if (millis()-pre_time >= 5 && data == 0)
-    {
-      data = 1;
-      pre_time = millis();
-    }
+void loop() 
+{  
+  digitalWrite(trigPin, HIGH);
+  delay(10);
+  digitalWrite(trigPin, LOW);
+ 
+  duration = pulseIn(echoPin, HIGH);
+  distance = ((float)(340 * duration) / 10000) / 2;
 
-    if (digitalRead(echoPin) == HIGH && count_start == 0)
-    {
-      start_time = micros();
-      count_start = 1;
-    }
+  Serial.print("duration: ");
+  Serial.print(duration);
 
-    else if (digitalRead(echoPin) == LOW && count_start == 1)
-    {
-      end_time = micros();
-      count_start = 0;
-      duration = (end_time - start_time) / 2 / 29.1;
-      Serial.print("t_time: ");
-      Serial.println(duration);
-    }
+  Serial.print(" distance: ");
+  Serial.println(distance);
+
+  delay(500);
 }
