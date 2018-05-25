@@ -133,6 +133,10 @@ void loop()
   // Update the IMU unit
   sensors.updateIMU();
 
+  // TODO
+  // Update sonar data
+  // sensors.updateSonar(t);
+
   // Start Gyro Calibration after ROS connection
   updateGyroCali();
 
@@ -258,7 +262,8 @@ void publishSensorStateMsg(void)
 
   sensor_state_msg.cliff = sensors.getIRsensorData();
 
-  sensor_state_msg.sonar = sensors.getSonarData();
+  // TODO
+  // sensor_state_msg.sonar = sensors.getSonarData();
 
   sensor_state_msg.illumination = sensors.getIlluminationData();
   
