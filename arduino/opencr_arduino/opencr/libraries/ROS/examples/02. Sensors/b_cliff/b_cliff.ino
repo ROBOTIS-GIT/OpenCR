@@ -29,6 +29,8 @@ void setup()
 {
   nh.initNode();
   nh.advertise(pub_cliff);
+
+  Serial.begin(9600);
   
   IROLLO.begin(2, IR_SENSOR);//IR Module must be connected at port 1.
 }
