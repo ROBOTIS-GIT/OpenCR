@@ -29,42 +29,47 @@ Turtlebot3MotorDriver::Turtlebot3MotorDriver()
 
 Turtlebot3MotorDriver::~Turtlebot3MotorDriver()
 {
-  closeDynamixel();
+  close();
 }
 
 bool Turtlebot3MotorDriver::init(void)
 {
+  DEBUG_SERIAL.begin(57600);
   portHandler_   = dynamixel::PortHandler::getPortHandler(DEVICENAME);
   packetHandler_ = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
 
   // Open port
   if (portHandler_->openPort() == false)
   {
+    DEBUG_SERIAL.println("Failed to open port(Motor Driver)");
     return false;
   }
 
   // Set port baudrate
   if (portHandler_->setBaudRate(baudrate_) == false)
   {
+    DEBUG_SERIAL.println("Failed to set baud rate(Motor Driver)");
     return false;
   }
 
   // Enable Dynamixel Torque
-  setTorque(left_wheel_id_, true);
-  setTorque(right_wheel_id_, true);
+  setTorque(true);
 
   groupSyncWriteVelocity_ = new dynamixel::GroupSyncWrite(portHandler_, packetHandler_, ADDR_X_GOAL_VELOCITY, LEN_X_GOAL_VELOCITY);
   groupSyncReadEncoder_   = new dynamixel::GroupSyncRead(portHandler_, packetHandler_, ADDR_X_PRESENT_POSITION, LEN_X_PRESENT_POSITION);
-
+  
+  DEBUG_SERIAL.println("Success to init Motor Driver");
   return true;
 }
 
-bool Turtlebot3MotorDriver::setTorque(uint8_t id, bool onoff)
+bool Turtlebot3MotorDriver::setTorque(bool onoff)
 {
   uint8_t dxl_error = 0;
   int dxl_comm_result = COMM_TX_FAIL;
 
-  dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, id, ADDR_X_TORQUE_ENABLE, onoff, &dxl_error);
+  torque_ = onoff;
+
+  dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, DXL_LEFT_ID, ADDR_X_TORQUE_ENABLE, onoff, &dxl_error);
   if(dxl_comm_result != COMM_SUCCESS)
   {
     Serial.println(packetHandler_->getTxRxResult(dxl_comm_result));
@@ -76,7 +81,18 @@ bool Turtlebot3MotorDriver::setTorque(uint8_t id, bool onoff)
     return false;
   }
 
-  torque_ = onoff;
+  dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, DXL_RIGHT_ID, ADDR_X_TORQUE_ENABLE, onoff, &dxl_error);
+  if(dxl_comm_result != COMM_SUCCESS)
+  {
+    Serial.println(packetHandler_->getTxRxResult(dxl_comm_result));
+    return false;
+  }
+  else if(dxl_error != 0)
+  {
+    Serial.println(packetHandler_->getRxPacketError(dxl_error));
+    return false;
+  }
+
   return true;
 }
 
@@ -85,14 +101,14 @@ bool Turtlebot3MotorDriver::getTorque()
   return torque_;
 }
 
-void Turtlebot3MotorDriver::closeDynamixel(void)
+void Turtlebot3MotorDriver::close(void)
 {
   // Disable Dynamixel Torque
-  setTorque(left_wheel_id_, false);
-  setTorque(right_wheel_id_, false);
+  setTorque(false);
 
   // Close port
   portHandler_->closePort();
+  DEBUG_SERIAL.end();
 }
 
 bool Turtlebot3MotorDriver::readEncoder(int32_t &left_value, int32_t &right_value)

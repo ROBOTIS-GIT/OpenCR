@@ -15,9 +15,12 @@ namespace nav_msgs
   class GetMapAction : public ros::Msg
   {
     public:
-      nav_msgs::GetMapActionGoal action_goal;
-      nav_msgs::GetMapActionResult action_result;
-      nav_msgs::GetMapActionFeedback action_feedback;
+      typedef nav_msgs::GetMapActionGoal _action_goal_type;
+      _action_goal_type action_goal;
+      typedef nav_msgs::GetMapActionResult _action_result_type;
+      _action_result_type action_result;
+      typedef nav_msgs::GetMapActionFeedback _action_feedback_type;
+      _action_feedback_type action_feedback;
 
     GetMapAction():
       action_goal(),

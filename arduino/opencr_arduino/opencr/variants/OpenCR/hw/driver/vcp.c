@@ -113,3 +113,9 @@ int32_t vcp_printf( const char *fmt, ...)
 
   return ret;
 }
+
+
+BOOL vcp_is_transmitted( void )
+{
+  return CDC_Itf_IsTxTransmitted();
+}

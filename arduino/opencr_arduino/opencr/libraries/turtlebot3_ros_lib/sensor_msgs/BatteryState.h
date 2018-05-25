@@ -13,22 +13,36 @@ namespace sensor_msgs
   class BatteryState : public ros::Msg
   {
     public:
-      std_msgs::Header header;
-      float voltage;
-      float current;
-      float charge;
-      float capacity;
-      float design_capacity;
-      float percentage;
-      uint8_t power_supply_status;
-      uint8_t power_supply_health;
-      uint8_t power_supply_technology;
-      bool present;
+      typedef std_msgs::Header _header_type;
+      _header_type header;
+      typedef float _voltage_type;
+      _voltage_type voltage;
+      typedef float _current_type;
+      _current_type current;
+      typedef float _charge_type;
+      _charge_type charge;
+      typedef float _capacity_type;
+      _capacity_type capacity;
+      typedef float _design_capacity_type;
+      _design_capacity_type design_capacity;
+      typedef float _percentage_type;
+      _percentage_type percentage;
+      typedef uint8_t _power_supply_status_type;
+      _power_supply_status_type power_supply_status;
+      typedef uint8_t _power_supply_health_type;
+      _power_supply_health_type power_supply_health;
+      typedef uint8_t _power_supply_technology_type;
+      _power_supply_technology_type power_supply_technology;
+      typedef bool _present_type;
+      _present_type present;
       uint32_t cell_voltage_length;
-      float st_cell_voltage;
-      float * cell_voltage;
-      const char* location;
-      const char* serial_number;
+      typedef float _cell_voltage_type;
+      _cell_voltage_type st_cell_voltage;
+      _cell_voltage_type * cell_voltage;
+      typedef const char* _location_type;
+      _location_type location;
+      typedef const char* _serial_number_type;
+      _serial_number_type serial_number;
       enum { POWER_SUPPLY_STATUS_UNKNOWN =  0 };
       enum { POWER_SUPPLY_STATUS_CHARGING =  1 };
       enum { POWER_SUPPLY_STATUS_DISCHARGING =  2 };
@@ -164,12 +178,12 @@ namespace sensor_msgs
       offset += sizeof(this->cell_voltage[i]);
       }
       uint32_t length_location = strlen(this->location);
-      memcpy(outbuffer + offset, &length_location, sizeof(uint32_t));
+      varToArr(outbuffer + offset, length_location);
       offset += 4;
       memcpy(outbuffer + offset, this->location, length_location);
       offset += length_location;
       uint32_t length_serial_number = strlen(this->serial_number);
-      memcpy(outbuffer + offset, &length_serial_number, sizeof(uint32_t));
+      varToArr(outbuffer + offset, length_serial_number);
       offset += 4;
       memcpy(outbuffer + offset, this->serial_number, length_serial_number);
       offset += length_serial_number;
@@ -283,7 +297,7 @@ namespace sensor_msgs
         memcpy( &(this->cell_voltage[i]), &(this->st_cell_voltage), sizeof(float));
       }
       uint32_t length_location;
-      memcpy(&length_location, (inbuffer + offset), sizeof(uint32_t));
+      arrToVar(length_location, (inbuffer + offset));
       offset += 4;
       for(unsigned int k= offset; k< offset+length_location; ++k){
           inbuffer[k-1]=inbuffer[k];
@@ -292,7 +306,7 @@ namespace sensor_msgs
       this->location = (char *)(inbuffer + offset-1);
       offset += length_location;
       uint32_t length_serial_number;
-      memcpy(&length_serial_number, (inbuffer + offset), sizeof(uint32_t));
+      arrToVar(length_serial_number, (inbuffer + offset));
       offset += 4;
       for(unsigned int k= offset; k< offset+length_serial_number; ++k){
           inbuffer[k-1]=inbuffer[k];

@@ -1,9 +1,5 @@
-# OpenCR: Open Source Control Module for ROS
+# OpenCR: Open Source Control Module for ROS [![Build Status](https://travis-ci.org/ROBOTIS-GIT/OpenCR.svg?branch=master)](https://travis-ci.org/ROBOTIS-GIT/OpenCR/)
 ![](http://emanual.robotis.com/assets/images/parts/controller/opencr10/opencr_product.png)
-
-|master|develop|
-|:---:|:---:|
-|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/OpenCR.svg?branch=master)](https://travis-ci.org/ROBOTIS-GIT/OpenCR/)| [![Build Status](https://travis-ci.org/ROBOTIS-GIT/OpenCR.svg?branch=develop)](https://travis-ci.org/ROBOTIS-GIT/OpenCR/branches)|
 
 ## ROBOTIS e-Manual for OpenCR
 - [ROBOTIS e-Manual for OpenCR](http://emanual.robotis.com/docs/en/parts/controller/opencr10/)

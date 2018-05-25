@@ -36,6 +36,8 @@
 #define JOINT4    6
 #define GRIPPER   7
 
+#define DEBUG_SERIAL  SerialBT2
+
 class OpenManipulatorMotorDriver
 {
  public:
@@ -46,6 +48,8 @@ class OpenManipulatorMotorDriver
   void closeDynamixel(void);
   bool setJointTorque(bool onoff);
   bool setGripperTorque(bool onoff);
+  bool getJointTorque(void);
+  bool getGripperTorque(void);
   bool setOperatingMode(uint8_t id, uint8_t operating_mode);
   bool readPosition(double *value);
   bool readVelocity(double *value);
@@ -57,6 +61,9 @@ class OpenManipulatorMotorDriver
   DynamixelWorkbench gripper_controller_;
   uint8_t dxl_id_[JOINT_NUM];
   float protocol_version_;
+
+  bool joint_torque_state_;
+  bool gripper_torque_state_;
 };
 
 #endif // OPEN_MANIPULATOR_MOTOR_DRIVER_H_

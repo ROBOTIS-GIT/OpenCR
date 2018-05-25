@@ -13,8 +13,9 @@ namespace sensor_msgs
   {
     public:
       uint32_t echoes_length;
-      float st_echoes;
-      float * echoes;
+      typedef float _echoes_type;
+      _echoes_type st_echoes;
+      _echoes_type * echoes;
 
     LaserEcho():
       echoes_length(0), echoes(NULL)

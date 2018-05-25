@@ -15,9 +15,12 @@ namespace nav_msgs
   class GetMapActionFeedback : public ros::Msg
   {
     public:
-      std_msgs::Header header;
-      actionlib_msgs::GoalStatus status;
-      nav_msgs::GetMapFeedback feedback;
+      typedef std_msgs::Header _header_type;
+      _header_type header;
+      typedef actionlib_msgs::GoalStatus _status_type;
+      _status_type status;
+      typedef nav_msgs::GetMapFeedback _feedback_type;
+      _feedback_type feedback;
 
     GetMapActionFeedback():
       header(),

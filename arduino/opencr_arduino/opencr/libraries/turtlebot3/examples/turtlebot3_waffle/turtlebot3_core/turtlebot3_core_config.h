@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
+/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho, Gilbert */
 
 #ifndef TURTLEBOT3_CORE_CONFIG_H_
 #define TURTLEBOT3_CORE_CONFIG_H_
@@ -39,28 +39,22 @@
 #include <turtlebot3_msgs/VersionInfo.h>
 
 #include <TurtleBot3.h>
+#include "turtlebot3_waffle.h"
 
 #include <math.h>
 
-#define INIT_LOG_DATA "This core(v1.1.2) is compatible with TB3 Waffle or Waffle Pi"
-
 #define HARDWARE_VER "1.0.0"
 #define SOFTWARE_VER "1.0.0"
-#define FIRMWARE_VER "1.1.2"
+#define FIRMWARE_VER "1.2.0"
 
-#define CONTROL_MOTOR_SPEED_PERIOD          30   //hz
-#define IMU_PUBLISH_PERIOD                  200  //hz
-#define CMD_VEL_PUBLISH_PERIOD              30   //hz
-#define DRIVE_INFORMATION_PUBLISH_PERIOD    30   //hz
-#define VERSION_INFORMATION_PUBLISH_PERIOD  1    //hz 
+#define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
+#define IMU_PUBLISH_FREQUENCY                  200  //hz
+#define CMD_VEL_PUBLISH_FREQUENCY              30   //hz
+#define DRIVE_INFORMATION_PUBLISH_FREQUENCY    30   //hz
+#define VERSION_INFORMATION_PUBLISH_FREQUENCY  1    //hz 
+#define DEBUG_LOG_FREQUENCY                    10   //hz 
 
 #define WHEEL_NUM                        2
-#define WHEEL_RADIUS                     0.033           // meter
-#define WHEEL_SEPARATION                 0.287           // meter (BURGER : 0.160, WAFFLE : 0.287)
-#define TURNING_RADIUS                   0.1435          // meter (BURGER : 0.080, WAFFLE : 0.1435)
-#define ROBOT_RADIUS                     0.220           // meter (BURGER : 0.105, WAFFLE : 0.220)
-#define ENCODER_MIN                      -2147483648     // raw
-#define ENCODER_MAX                      2147483648      // raw
 
 #define LEFT                             0
 #define RIGHT                            1
@@ -68,18 +62,16 @@
 #define LINEAR                           0
 #define ANGULAR                          1
 
-#define MAX_LINEAR_VELOCITY              0.25   // m/s   (BURGER : 0.22, WAFFLE : 0.25)
-#define MAX_ANGULAR_VELOCITY             1.82   // rad/s (BURGER : 2.84, WAFFLE : 1.82)
-
-#define TICK2RAD                         0.001533981  // 0.087890625[deg] * 3.14159265359 / 180 = 0.001533981f
-
 #define DEG2RAD(x)                       (x * 0.01745329252)  // *PI/180
 #define RAD2DEG(x)                       (x * 57.2957795131)  // *180/PI
+
+#define TICK2RAD                         0.001533981  // 0.087890625[deg] * 3.14159265359 / 180 = 0.001533981f
 
 #define TEST_DISTANCE                    0.300     // meter
 #define TEST_RADIAN                      3.14      // 180 degree
 
-#define VELOCITY_UNIT                    2
+// #define DEBUG                            
+#define DEBUG_SERIAL                     SerialBT2
 
 // Callback function prototypes
 void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
@@ -114,7 +106,6 @@ void initJointStates(void);
 bool calcOdometry(double diff_time);
 
 void sendLogMsg(void);
-void melody(uint16_t* note, uint8_t note_num, uint8_t* durations);
 
 /*******************************************************************************
 * ROS NodeHandle
@@ -179,7 +170,7 @@ tf::TransformBroadcaster tf_broadcaster;
 /*******************************************************************************
 * SoftwareTimer of Turtlebot3
 *******************************************************************************/
-static uint32_t tTime[5];
+static uint32_t tTime[10];
 
 /*******************************************************************************
 * Declaration for motor
@@ -207,10 +198,10 @@ Turtlebot3Sensor sensors;
 * Declaration for controllers
 *******************************************************************************/
 Turtlebot3Controller controllers;
-float goal_velocity[VELOCITY_UNIT] = {0.0, 0.0};
-float goal_velocity_from_button[VELOCITY_UNIT] = {0.0, 0.0};
-float goal_velocity_from_cmd[VELOCITY_UNIT] = {0.0, 0.0};
-float goal_velocity_from_rc100[VELOCITY_UNIT] = {0.0, 0.0};
+float goal_velocity[WHEEL_NUM] = {0.0, 0.0};
+float goal_velocity_from_button[WHEEL_NUM] = {0.0, 0.0};
+float goal_velocity_from_cmd[WHEEL_NUM] = {0.0, 0.0};
+float goal_velocity_from_rc100[WHEEL_NUM] = {0.0, 0.0};
 
 /*******************************************************************************
 * Declaration for diagnosis

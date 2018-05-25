@@ -14,12 +14,16 @@ namespace nav_msgs
   class GridCells : public ros::Msg
   {
     public:
-      std_msgs::Header header;
-      float cell_width;
-      float cell_height;
+      typedef std_msgs::Header _header_type;
+      _header_type header;
+      typedef float _cell_width_type;
+      _cell_width_type cell_width;
+      typedef float _cell_height_type;
+      _cell_height_type cell_height;
       uint32_t cells_length;
-      geometry_msgs::Point st_cells;
-      geometry_msgs::Point * cells;
+      typedef geometry_msgs::Point _cells_type;
+      _cells_type st_cells;
+      _cells_type * cells;
 
     GridCells():
       header(),

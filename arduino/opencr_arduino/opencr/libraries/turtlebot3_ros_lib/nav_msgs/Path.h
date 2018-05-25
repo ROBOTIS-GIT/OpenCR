@@ -14,10 +14,12 @@ namespace nav_msgs
   class Path : public ros::Msg
   {
     public:
-      std_msgs::Header header;
+      typedef std_msgs::Header _header_type;
+      _header_type header;
       uint32_t poses_length;
-      geometry_msgs::PoseStamped st_poses;
-      geometry_msgs::PoseStamped * poses;
+      typedef geometry_msgs::PoseStamped _poses_type;
+      _poses_type st_poses;
+      _poses_type * poses;
 
     Path():
       header(),

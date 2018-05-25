@@ -33,17 +33,32 @@ OpenManipulatorMotorDriver::~OpenManipulatorMotorDriver()
 
 bool OpenManipulatorMotorDriver::init(void)
 {
-  joint_controller_.begin(DEVICENAME, BAUDRATE);
-  gripper_controller_.begin(DEVICENAME, BAUDRATE);
+  DEBUG_SERIAL.begin(57600);
+
+  bool joint_controller_state = false;
+  bool gripper_controller_state = false;
+
+  joint_controller_state   = joint_controller_.begin(DEVICENAME, BAUDRATE);
+  gripper_controller_state = gripper_controller_.begin(DEVICENAME, BAUDRATE);
+
+  if (joint_controller_state == false)
+    DEBUG_SERIAL.println("Failed to open port(joint controller)");
+  else if (gripper_controller_state == false)
+    DEBUG_SERIAL.println("Failed to open port(gripper controller)");
 
   uint16_t get_model_number;
   for (int num = 0; num < JOINT_NUM; num++)
   {
-    joint_controller_.ping(dxl_id_[num], &get_model_number);
+    joint_controller_state = joint_controller_.ping(dxl_id_[num], &get_model_number);
+    if (joint_controller_state == false)
+      DEBUG_SERIAL.println("Failed to ping(joint controller)");
+
     joint_controller_.jointMode(dxl_id_[num]);
   }
 
-  gripper_controller_.ping(GRIPPER, &get_model_number);
+  gripper_controller_state = gripper_controller_.ping(GRIPPER, &get_model_number);
+  if (gripper_controller_state == false)
+    DEBUG_SERIAL.println("Failed to ping(gripper controller)");
 
   protocol_version_ = joint_controller_.getProtocolVersion();  
 
@@ -64,6 +79,12 @@ bool OpenManipulatorMotorDriver::init(void)
   writeJointPosition(init_joint_position);
   writeGripperPosition(0.0);
 
+  joint_torque_state_   = true;
+  gripper_torque_state_ = true;
+
+  if (joint_controller_state && gripper_controller_state)
+    DEBUG_SERIAL.println("Success to init OpenManipulator Motor Driver(joint and gripper controller)");
+
   return true;
 }
 
@@ -78,11 +99,25 @@ bool OpenManipulatorMotorDriver::setJointTorque(bool onoff)
 { 
   for (int num = 0; num < JOINT_NUM; num++)  
     joint_controller_.itemWrite(dxl_id_[num], "Torque_Enable", onoff);
+
+  joint_torque_state_ = onoff;
+}
+
+bool OpenManipulatorMotorDriver::getJointTorque()
+{
+  return joint_torque_state_;
 }
 
 bool OpenManipulatorMotorDriver::setGripperTorque(bool onoff)
 { 
   gripper_controller_.itemWrite(GRIPPER, "Torque_Enable", onoff);
+
+  gripper_torque_state_ = onoff;
+}
+
+bool OpenManipulatorMotorDriver::getGripperTorque()
+{
+  return gripper_torque_state_;
 }
 
 bool OpenManipulatorMotorDriver::readPosition(double *value)

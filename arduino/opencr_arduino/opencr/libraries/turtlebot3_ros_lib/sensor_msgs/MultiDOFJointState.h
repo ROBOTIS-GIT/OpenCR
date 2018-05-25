@@ -16,19 +16,24 @@ namespace sensor_msgs
   class MultiDOFJointState : public ros::Msg
   {
     public:
-      std_msgs::Header header;
+      typedef std_msgs::Header _header_type;
+      _header_type header;
       uint32_t joint_names_length;
-      char* st_joint_names;
-      char* * joint_names;
+      typedef char* _joint_names_type;
+      _joint_names_type st_joint_names;
+      _joint_names_type * joint_names;
       uint32_t transforms_length;
-      geometry_msgs::Transform st_transforms;
-      geometry_msgs::Transform * transforms;
+      typedef geometry_msgs::Transform _transforms_type;
+      _transforms_type st_transforms;
+      _transforms_type * transforms;
       uint32_t twist_length;
-      geometry_msgs::Twist st_twist;
-      geometry_msgs::Twist * twist;
+      typedef geometry_msgs::Twist _twist_type;
+      _twist_type st_twist;
+      _twist_type * twist;
       uint32_t wrench_length;
-      geometry_msgs::Wrench st_wrench;
-      geometry_msgs::Wrench * wrench;
+      typedef geometry_msgs::Wrench _wrench_type;
+      _wrench_type st_wrench;
+      _wrench_type * wrench;
 
     MultiDOFJointState():
       header(),
@@ -50,7 +55,7 @@ namespace sensor_msgs
       offset += sizeof(this->joint_names_length);
       for( uint32_t i = 0; i < joint_names_length; i++){
       uint32_t length_joint_namesi = strlen(this->joint_names[i]);
-      memcpy(outbuffer + offset, &length_joint_namesi, sizeof(uint32_t));
+      varToArr(outbuffer + offset, length_joint_namesi);
       offset += 4;
       memcpy(outbuffer + offset, this->joint_names[i], length_joint_namesi);
       offset += length_joint_namesi;
@@ -96,7 +101,7 @@ namespace sensor_msgs
       joint_names_length = joint_names_lengthT;
       for( uint32_t i = 0; i < joint_names_length; i++){
       uint32_t length_st_joint_names;
-      memcpy(&length_st_joint_names, (inbuffer + offset), sizeof(uint32_t));
+      arrToVar(length_st_joint_names, (inbuffer + offset));
       offset += 4;
       for(unsigned int k= offset; k< offset+length_st_joint_names; ++k){
           inbuffer[k-1]=inbuffer[k];

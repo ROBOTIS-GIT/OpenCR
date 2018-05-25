@@ -12,7 +12,8 @@ namespace std_msgs
   class UInt64 : public ros::Msg
   {
     public:
-      uint64_t data;
+      typedef uint64_t _data_type;
+      _data_type data;
 
     UInt64():
       data(0)

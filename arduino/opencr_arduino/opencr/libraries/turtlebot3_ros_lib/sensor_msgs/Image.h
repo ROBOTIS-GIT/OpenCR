@@ -13,15 +13,22 @@ namespace sensor_msgs
   class Image : public ros::Msg
   {
     public:
-      std_msgs::Header header;
-      uint32_t height;
-      uint32_t width;
-      const char* encoding;
-      uint8_t is_bigendian;
-      uint32_t step;
+      typedef std_msgs::Header _header_type;
+      _header_type header;
+      typedef uint32_t _height_type;
+      _height_type height;
+      typedef uint32_t _width_type;
+      _width_type width;
+      typedef const char* _encoding_type;
+      _encoding_type encoding;
+      typedef uint8_t _is_bigendian_type;
+      _is_bigendian_type is_bigendian;
+      typedef uint32_t _step_type;
+      _step_type step;
       uint32_t data_length;
-      uint8_t st_data;
-      uint8_t * data;
+      typedef uint8_t _data_type;
+      _data_type st_data;
+      _data_type * data;
 
     Image():
       header(),
@@ -49,7 +56,7 @@ namespace sensor_msgs
       *(outbuffer + offset + 3) = (this->width >> (8 * 3)) & 0xFF;
       offset += sizeof(this->width);
       uint32_t length_encoding = strlen(this->encoding);
-      memcpy(outbuffer + offset, &length_encoding, sizeof(uint32_t));
+      varToArr(outbuffer + offset, length_encoding);
       offset += 4;
       memcpy(outbuffer + offset, this->encoding, length_encoding);
       offset += length_encoding;
@@ -87,7 +94,7 @@ namespace sensor_msgs
       this->width |= ((uint32_t) (*(inbuffer + offset + 3))) << (8 * 3);
       offset += sizeof(this->width);
       uint32_t length_encoding;
-      memcpy(&length_encoding, (inbuffer + offset), sizeof(uint32_t));
+      arrToVar(length_encoding, (inbuffer + offset));
       offset += 4;
       for(unsigned int k= offset; k< offset+length_encoding; ++k){
           inbuffer[k-1]=inbuffer[k];

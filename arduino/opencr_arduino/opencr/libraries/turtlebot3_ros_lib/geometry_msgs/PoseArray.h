@@ -14,10 +14,12 @@ namespace geometry_msgs
   class PoseArray : public ros::Msg
   {
     public:
-      std_msgs::Header header;
+      typedef std_msgs::Header _header_type;
+      _header_type header;
       uint32_t poses_length;
-      geometry_msgs::Pose st_poses;
-      geometry_msgs::Pose * poses;
+      typedef geometry_msgs::Pose _poses_type;
+      _poses_type st_poses;
+      _poses_type * poses;
 
     PoseArray():
       header(),

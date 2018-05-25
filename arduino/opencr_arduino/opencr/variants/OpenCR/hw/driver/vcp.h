@@ -30,6 +30,7 @@ int32_t  vcp_write(uint8_t *p_data, uint32_t length);
 
 int32_t  vcp_printf( const char *fmt, ...);
 
+BOOL     vcp_is_transmitted(void);
 
 #ifdef __cplusplus
 }

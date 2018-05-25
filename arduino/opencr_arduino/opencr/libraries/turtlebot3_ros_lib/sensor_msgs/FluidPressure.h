@@ -13,9 +13,12 @@ namespace sensor_msgs
   class FluidPressure : public ros::Msg
   {
     public:
-      std_msgs::Header header;
-      float fluid_pressure;
-      float variance;
+      typedef std_msgs::Header _header_type;
+      _header_type header;
+      typedef float _fluid_pressure_type;
+      _fluid_pressure_type fluid_pressure;
+      typedef float _variance_type;
+      _variance_type variance;
 
     FluidPressure():
       header(),

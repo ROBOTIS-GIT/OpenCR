@@ -1,4 +1,4 @@
-/* 
+/*
  * Software License Agreement (BSD License)
  *
  * Copyright (c) 2011, Willow Garage, Inc.
@@ -38,7 +38,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
-namespace ros {
+namespace ros
+{
 
 /* Base Message Type */
 class Msg
@@ -110,12 +111,12 @@ public:
     *val |= ((uint32_t)(*inbuffer) & 0x0f) << 19;
 
     // Copy truncated exponent.
-    uint32_t exp = ((uint32_t)(*(inbuffer++)) & 0xf0)>>4;
+    uint32_t exp = ((uint32_t)(*(inbuffer++)) & 0xf0) >> 4;
     exp |= ((uint32_t)(*inbuffer) & 0x7f) << 4;
     if (exp != 0)
     {
       *val |= ((exp) - 1023 + 127) << 23;
-    }  
+    }
 
     // Copy negative sign.
     *val |= ((uint32_t)(*(inbuffer++)) & 0x80) << 24;
@@ -127,7 +128,7 @@ public:
   template<typename A, typename V>
   static void varToArr(A arr, const V var)
   {
-    for(size_t i = 0; i < sizeof(V); i++)
+    for (size_t i = 0; i < sizeof(V); i++)
       arr[i] = (var >> (8 * i));
   }
 
@@ -136,9 +137,10 @@ public:
   static void arrToVar(V& var, const A arr)
   {
     var = 0;
-    for(size_t i = 0; i < sizeof(V); i++)
+    for (size_t i = 0; i < sizeof(V); i++)
       var |= (arr[i] << (8 * i));
   }
+
 };
 
 }  // namespace ros

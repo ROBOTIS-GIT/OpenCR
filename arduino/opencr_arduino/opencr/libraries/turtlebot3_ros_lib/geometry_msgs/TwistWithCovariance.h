@@ -13,7 +13,8 @@ namespace geometry_msgs
   class TwistWithCovariance : public ros::Msg
   {
     public:
-      geometry_msgs::Twist twist;
+      typedef geometry_msgs::Twist _twist_type;
+      _twist_type twist;
       float covariance[36];
 
     TwistWithCovariance():

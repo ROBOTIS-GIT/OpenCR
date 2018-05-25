@@ -12,9 +12,12 @@ namespace sensor_msgs
   class JoyFeedback : public ros::Msg
   {
     public:
-      uint8_t type;
-      uint8_t id;
-      float intensity;
+      typedef uint8_t _type_type;
+      _type_type type;
+      typedef uint8_t _id_type;
+      _id_type id;
+      typedef float _intensity_type;
+      _intensity_type intensity;
       enum { TYPE_LED =  0 };
       enum { TYPE_RUMBLE =  1 };
       enum { TYPE_BUZZER =  2 };

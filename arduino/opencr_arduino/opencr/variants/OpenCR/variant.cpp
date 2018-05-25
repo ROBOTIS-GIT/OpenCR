@@ -22,7 +22,6 @@
 #include "Arduino.h"
 
 
-
 static uint8_t user_led_tbl[] = { BDPIN_LED_USER_1,
                                   BDPIN_LED_USER_2,
                                   BDPIN_LED_USER_3,
@@ -94,12 +93,12 @@ extern const Pin2PortMapArray g_Pin2PortMapArray[]=
 
     {GPIOB, GPIO_PIN_10,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 50 BDPIN_GPIO_1
     {GPIOB, GPIO_PIN_11,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 51 BDPIN_GPIO_2
-    {GPIOC, GPIO_PIN_13,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 52 BDPIN_GPIO_3
+    {GPIOC, GPIO_PIN_13,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , 9       },  // 52 BDPIN_GPIO_3          EXTI_9
     {GPIOD, GPIO_PIN_2,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 53 BDPIN_GPIO_4
     {GPIOE, GPIO_PIN_3,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 54 BDPIN_GPIO_5
     {GPIOG, GPIO_PIN_2,   NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 55 BDPIN_GPIO_6
     {GPIOE, GPIO_PIN_10,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 56 BDPIN_GPIO_7
-    {GPIOE, GPIO_PIN_11,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 57 BDPIN_GPIO_8
+    {GPIOE, GPIO_PIN_11,  NULL,     NO_ADC        , &hTIM1 ,   TIM_CHANNEL_2, NO_EXTI },  // 57 BDPIN_GPIO_8
     {GPIOE, GPIO_PIN_12,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 58 BDPIN_GPIO_9
     {GPIOE, GPIO_PIN_13,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 59 BDPIN_GPIO_10
     {GPIOE, GPIO_PIN_14,  NULL,     NO_ADC        , NULL   ,   NO_PWM       , NO_EXTI },  // 60 BDPIN_GPIO_11
@@ -236,7 +235,6 @@ uint8_t getDipSwitch(void)
 uint8_t getPushButton(void)
 {
   int push_state;
-
 
   push_state  = digitalRead(BDPIN_PUSH_SW_1)<<0;
   push_state |= digitalRead(BDPIN_PUSH_SW_2)<<1;

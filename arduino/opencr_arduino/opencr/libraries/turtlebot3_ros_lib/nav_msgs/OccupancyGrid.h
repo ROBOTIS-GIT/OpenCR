@@ -14,11 +14,14 @@ namespace nav_msgs
   class OccupancyGrid : public ros::Msg
   {
     public:
-      std_msgs::Header header;
-      nav_msgs::MapMetaData info;
+      typedef std_msgs::Header _header_type;
+      _header_type header;
+      typedef nav_msgs::MapMetaData _info_type;
+      _info_type info;
       uint32_t data_length;
-      int8_t st_data;
-      int8_t * data;
+      typedef int8_t _data_type;
+      _data_type st_data;
+      _data_type * data;
 
     OccupancyGrid():
       header(),

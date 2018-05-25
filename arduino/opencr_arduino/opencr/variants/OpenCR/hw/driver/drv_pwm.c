@@ -31,6 +31,8 @@ TIM_OC_InitTypeDef        hOC12;
 uint32_t pwm_freq[PINS_COUNT];
 bool     pwm_init[PINS_COUNT];
 
+static void drv_pwm_HwInit(TIM_HandleTypeDef *htim, uint32_t tim_ch);
+
 
 int drv_pwm_init()
 {
@@ -53,8 +55,16 @@ static long map(long x, long in_min, long in_max, long out_min, long out_max)
 
 void drv_pwm_set_freq(uint32_t ulPin, uint32_t freq_data)
 {
-  freq_data = constrain(freq_data, 1, 1000000);
-  pwm_freq[ulPin] = freq_data;
+  if(ulPin == BDPIN_GPIO_8)
+  {
+    freq_data = constrain(freq_data, 1, 20000000);  //Increase the maximum frequency constraint for OV7725. (Min 10Mhz)
+    pwm_freq[ulPin] = freq_data;
+  }
+  else
+  {
+    freq_data = constrain(freq_data, 1, 1000000);
+    pwm_freq[ulPin] = freq_data;
+  }
 }
 
 
@@ -156,6 +166,8 @@ void drv_pwm_setup(uint32_t ulPin)
   pTIM->Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;
   pTIM->Init.CounterMode       = TIM_COUNTERMODE_UP;
   pTIM->Init.RepetitionCounter = 0;
+  
+  drv_pwm_HwInit(pTIM, tim_ch);
   HAL_TIM_PWM_Init(pTIM);
 
   memset(pOC, 0, sizeof(TIM_OC_InitTypeDef));
@@ -252,10 +264,9 @@ uint32_t drv_pwm_get_pulse(uint32_t ulPin)
 }
 
 
-void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim)
+static void drv_pwm_HwInit(TIM_HandleTypeDef *htim, uint32_t tim_ch)
 {
   GPIO_InitTypeDef   GPIO_InitStruct;
-
 
   if( htim->Instance == TIM3 )
   {
@@ -270,14 +281,23 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim)
   }
   if( htim->Instance == TIM1 )
   {
-    __HAL_RCC_TIM1_CLK_ENABLE();
-
-    GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull      = GPIO_PULLUP;
-    GPIO_InitStruct.Speed     = GPIO_SPEED_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF1_TIM1;
-    GPIO_InitStruct.Pin       = GPIO_PIN_8;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+      __HAL_RCC_TIM1_CLK_ENABLE();
+      GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+      GPIO_InitStruct.Pull      = GPIO_PULLUP;
+      GPIO_InitStruct.Speed     = GPIO_SPEED_LOW;
+      GPIO_InitStruct.Alternate = GPIO_AF1_TIM1;
+    
+    if(tim_ch == TIM_CHANNEL_1)
+    {
+      GPIO_InitStruct.Pin       = GPIO_PIN_8;
+      HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    }
+    //For OpenCR-Camera Example OV7725 XCLK PWM configuration
+    if(tim_ch == TIM_CHANNEL_2)
+    {
+      GPIO_InitStruct.Pin       = GPIO_PIN_11;
+      HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+    }
   }
   if( htim->Instance == TIM2 )
   {

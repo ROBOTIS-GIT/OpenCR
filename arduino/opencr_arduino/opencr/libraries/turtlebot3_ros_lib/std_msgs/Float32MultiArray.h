@@ -13,10 +13,12 @@ namespace std_msgs
   class Float32MultiArray : public ros::Msg
   {
     public:
-      std_msgs::MultiArrayLayout layout;
+      typedef std_msgs::MultiArrayLayout _layout_type;
+      _layout_type layout;
       uint32_t data_length;
-      float st_data;
-      float * data;
+      typedef float _data_type;
+      _data_type st_data;
+      _data_type * data;
 
     Float32MultiArray():
       layout(),
