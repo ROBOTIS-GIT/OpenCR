@@ -46,14 +46,14 @@
 
 #define HARDWARE_VER "1.0.0"
 #define SOFTWARE_VER "1.0.0"
-#define FIRMWARE_VER "1.0.1"
+#define FIRMWARE_VER "1.2.0"
 
 #define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
 #define IMU_PUBLISH_FREQUENCY                  200  //hz
 #define CMD_VEL_PUBLISH_FREQUENCY              30   //hz
 #define DRIVE_INFORMATION_PUBLISH_FREQUENCY    30   //hz
 #define VERSION_INFORMATION_PUBLISH_FREQUENCY  1    //hz 
-#define DEBUG_LOG_FREQUENCY                    2   //hz 
+#define DEBUG_LOG_FREQUENCY                    10   //hz 
 
 #define WHEEL_NUM                        2
 
