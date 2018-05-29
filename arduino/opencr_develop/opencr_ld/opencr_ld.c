@@ -325,6 +325,18 @@ int opencr_ld_down( int argc, const char **argv )
   ser_close( stm32_ser_id );
   fclose( opencr_fp );
 
+
+  for (int i=0; i<6; i++)
+  {
+    delay_ms(500);
+    if (ser_port_is_ready(portname) > 0)
+    {
+      printf("jump finished\r\n");
+      delay_ms(100);
+      break;
+    }
+  }
+
   return ret;
 }
 

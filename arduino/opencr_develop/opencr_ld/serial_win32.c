@@ -46,10 +46,18 @@ ser_handler ser_open( const char* sername )
 
   mbstowcs(pname, portname, WIN_MAX_PORT_NAME);
 
+#ifdef _MINGW_GCC_
+  hComm = CreateFile( portname, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0 );
+#else
   hComm = CreateFile( pname, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0 );
+#endif
   if( hComm == INVALID_HANDLE_VALUE )
   {
+#ifdef _MINGW_GCC_
+    printf("hComm err : %s\n", portname);
+#else
     printf("hComm err : %s\n", pname);
+#endif
     return WIN_ERROR;
   }
   if( !SetupComm( hComm, 2048, 2048 ) )
@@ -205,5 +213,34 @@ void ser_set_timeout_ms( ser_handler id, u32 timeout )
     ser_win32_set_timeouts( id, 0, 0, 0, 0, 0 );
   else
     ser_win32_set_timeouts( id, 0, 0, timeout, 0, 0 );
+}
+
+int ser_port_is_ready( const char* sername )
+{
+  char portname[ WIN_MAX_PORT_NAME + 1 ];
+  wchar_t pname[ WIN_MAX_PORT_NAME + 1 ];
+  HANDLE hComm;
+
+  portname[ 0 ] = portname[ WIN_MAX_PORT_NAME ] = '\0';
+  _snprintf( portname, WIN_MAX_PORT_NAME, "\\\\.\\%s", sername );
+  //swprintf( portname, WIN_MAX_PORT_NAME, "\\\\.\\%s", sername );
+
+  mbstowcs(pname, portname, WIN_MAX_PORT_NAME);
+
+#ifdef _MINGW_GCC_
+  hComm = CreateFile(portname, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0 );
+#else
+  hComm = CreateFile(pname, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0 );
+#endif
+  if( hComm == INVALID_HANDLE_VALUE )
+  {
+    return 0;
+  }
+  else
+  {
+    CloseHandle( hComm );
+
+    return 1;
+  }
 }
 
