@@ -34,7 +34,6 @@ void setup()
   nh.subscribe(motor_power_sub);
   nh.subscribe(reset_sub);
 
-
   nh.advertise(sensor_state_pub);  
   nh.advertise(version_info_pub);
   nh.advertise(imu_pub);
@@ -78,6 +77,7 @@ void loop()
   uint32_t t = millis();
   updateTime();
   updateVariable();
+  updateTFPrefix(nh.connected());
 
   if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_FREQUENCY))
   {
@@ -138,7 +138,7 @@ void loop()
   // sensors.updateSonar(t);
 
   // Start Gyro Calibration after ROS connection
-  updateGyroCali();
+  updateGyroCali(nh.connected());
 
   // Show LED status
   diagnosis.showLedStatus(nh.connected());
@@ -151,6 +151,43 @@ void loop()
 
   // give the serial link time to process
   delay(10);
+}
+
+void updateTFPrefix(bool isConnected)
+{
+  static bool isChecked = false;
+  char log_msg[50];
+
+  if (isConnected)
+  {
+    if (isChecked == false)
+    {
+      nh.getParam("~tf_prefix", &get_tf_prefix);
+
+      if (!strcmp(get_tf_prefix, ""))
+      {
+        sprintf(odom_header_frame_id, "odom");
+        sprintf(odom_child_frame_id, "base_footprint");  
+      }
+      else
+      {
+        strcpy(odom_header_frame_id, get_tf_prefix);
+        strcpy(odom_child_frame_id, get_tf_prefix);
+
+        strcat(odom_header_frame_id, "/odom");
+        strcat(odom_child_frame_id, "/base_footprint");
+      }
+
+      sprintf(log_msg, "Setup TF on odom [/%s]", odom_header_frame_id);
+      nh.loginfo(log_msg); 
+
+      isChecked = true;
+    }
+  }
+  else
+  {
+    isChecked = false;
+  }
 }
 
 /*******************************************************************************
@@ -339,8 +376,8 @@ void publishDriveInformation(void)
 *******************************************************************************/
 void updateOdometry(void)
 {
-  odom.header.frame_id = "odom";
-  odom.child_frame_id  = "base_link";
+  odom.header.frame_id = odom_header_frame_id;
+  odom.child_frame_id  = odom_child_frame_id;
 
   odom.pose.pose.position.x = odom_pose[0];
   odom.pose.pose.position.y = odom_pose[1];
@@ -376,7 +413,7 @@ void updateJointStates(void)
 void updateTF(geometry_msgs::TransformStamped& odom_tf)
 {
   odom_tf.header = odom.header;
-  odom_tf.child_frame_id = "base_footprint";
+  odom_tf.child_frame_id = odom.child_frame_id;
   odom_tf.transform.translation.x = odom.pose.pose.position.x;
   odom_tf.transform.translation.y = odom.pose.pose.position.y;
   odom_tf.transform.translation.z = odom.pose.pose.position.z;
@@ -596,7 +633,7 @@ ros::Time addMicros(ros::Time & t, uint32_t _micros)
 /*******************************************************************************
 * Start Gyro Calibration
 *******************************************************************************/
-void updateGyroCali(void)
+void updateGyroCali(bool isConnected)
 {
   static bool isEnded = false;
   char log_msg[50];
