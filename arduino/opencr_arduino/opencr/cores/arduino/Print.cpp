@@ -191,7 +191,7 @@ size_t Print::println(const Printable& x)
   return n;
 }
 
-size_t Print::printf(char *fmt, ... )
+size_t Print::printf(const char *fmt, ... )
 {
   char buf[256]; // resulting string limited to 128 chars
   char buf_out[256];
