@@ -145,11 +145,15 @@ class Manipulator
         Eigen::Matrix3f orientation_;
 
       public:
+        Tool();
+        ~Tool();
         void Init(String tool_type, int8_t number, Eigen::Vector3f position_from_final_joint, Eigen::Matrix3f orientation_from_final_joint);
-        void SetPosition();
-        void SetOrientation();
+        void SetPosition(Eigen::Vector3f position);
+        void SetOrientation(Eigen::Matrix3f orientation);
         Eigen::Vector3f GetPosition();
-        Eigen::Matrix3f 
+        Eigen::Matrix3f GetOrientation();
+        Pose GetPose();
+
     };
 };
 #endif // OMMANAGER_H_

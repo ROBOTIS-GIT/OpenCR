@@ -96,7 +96,7 @@ Eigen::Matrix3f Manipulator::Joint::GetOrientation()
 
 }
 
-Pose GetPose()
+Pose Manipulator::Joint::GetPose()
 {
 
 }
@@ -116,8 +116,8 @@ float Manipulator::Link::InertiaMoment()
 
 
 
-JointInLink();
-~JointInLink();
+Manipulator::Link::JointInLink::JointInLink(){}
+Manipulator::Link::JointInLink::~JointInLink(){}
 void Manipulator::Link::JointInLink::Init(int8_t joint_number, String type, Eigen::Vector3f relative_position, Eigen::Vector3f axis)
 {
 
@@ -126,6 +126,22 @@ void Manipulator::Link::JointInLink::Init(int8_t joint_number, String type, Eige
 {
 
 }
+
+
+
+
+Manipulator::Tool::Tool(){}
+Manipulator::Tool::~Tool(){}
+void Manipulator::Tool::Init(String tool_type, int8_t number, Eigen::Vector3f position_from_final_joint, Eigen::Matrix3f orientation_from_final_joint)
+{
+
+}
+void Manipulator::Tool::SetPosition(Eigen::Vector3f position);
+void Manipulator::Tool::SetPosition(Eigen::Vector3f position);
+void Manipulator::Tool::SetOrientation(Eigen::Matrix3f orientation);
+Eigen::Vector3f Manipulator::Tool::GetPosition();
+Eigen::Matrix3f Manipulator::Tool::GetOrientation();
+Pose Manipulator::Tool::GetPose();
 
 
 
