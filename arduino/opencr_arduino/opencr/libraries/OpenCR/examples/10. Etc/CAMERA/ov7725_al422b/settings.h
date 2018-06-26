@@ -6,8 +6,13 @@
 
 #define _USE_FULLSCREEN         true                // true : use 320x240, false : use 160x120
 
-#define MIN_OBJECT_PIXEL		3	//Set the object size to detect
-#define MAX_OBJECT				  50	//maximum number of object to detect
+#if _USE_FULLSCREEN == true
+  #define MIN_OBJECT_PIXEL		5	//Set the object size to detect
+#else
+  #define MIN_OBJECT_PIXEL		3	//Set the object size to detect
+#endif
+
+#define MAX_OBJECT				  200	//maximum number of object to detect
 #define SELECTED_COLOR      0   //0:Red, 1:Blue
 
 //Dynamixel Definition
