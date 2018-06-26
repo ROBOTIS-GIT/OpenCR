@@ -153,43 +153,6 @@ void loop()
   delay(10);
 }
 
-void updateTFPrefix(bool isConnected)
-{
-  static bool isChecked = false;
-  char log_msg[50];
-
-  if (isConnected)
-  {
-    if (isChecked == false)
-    {
-      nh.getParam("~tf_prefix", &get_tf_prefix);
-
-      if (!strcmp(get_tf_prefix, ""))
-      {
-        sprintf(odom_header_frame_id, "odom");
-        sprintf(odom_child_frame_id, "base_footprint");  
-      }
-      else
-      {
-        strcpy(odom_header_frame_id, get_tf_prefix);
-        strcpy(odom_child_frame_id, get_tf_prefix);
-
-        strcat(odom_header_frame_id, "/odom");
-        strcat(odom_child_frame_id, "/base_footprint");
-      }
-
-      sprintf(log_msg, "Setup TF on odom [/%s]", odom_header_frame_id);
-      nh.loginfo(log_msg); 
-
-      isChecked = true;
-    }
-  }
-  else
-  {
-    isChecked = false;
-  }
-}
-
 /*******************************************************************************
 * Callback function for cmd_vel msg
 *******************************************************************************/
@@ -369,6 +332,46 @@ void publishDriveInformation(void)
   updateJointStates();
   joint_states.header.stamp = stamp_now;
   joint_states_pub.publish(&joint_states);
+}
+
+/*******************************************************************************
+* Update TF Prefix
+*******************************************************************************/
+void updateTFPrefix(bool isConnected)
+{
+  static bool isChecked = false;
+  char log_msg[50];
+
+  if (isConnected)
+  {
+    if (isChecked == false)
+    {
+      nh.getParam("~tf_prefix", &get_tf_prefix);
+
+      if (!strcmp(get_tf_prefix, ""))
+      {
+        sprintf(odom_header_frame_id, "odom");
+        sprintf(odom_child_frame_id, "base_footprint");  
+      }
+      else
+      {
+        strcpy(odom_header_frame_id, get_tf_prefix);
+        strcpy(odom_child_frame_id, get_tf_prefix);
+
+        strcat(odom_header_frame_id, "/odom");
+        strcat(odom_child_frame_id, "/base_footprint");
+      }
+
+      sprintf(log_msg, "Setup TF on odom [/%s]", odom_header_frame_id);
+      nh.loginfo(log_msg); 
+
+      isChecked = true;
+    }
+  }
+  else
+  {
+    isChecked = false;
+  }
 }
 
 /*******************************************************************************
