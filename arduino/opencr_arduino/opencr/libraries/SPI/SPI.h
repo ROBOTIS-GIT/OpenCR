@@ -25,6 +25,16 @@
 // SPI_HAS_TRANSACTION means SPI has beginTransaction(), endTransaction(),
 // usingInterrupt(), and SPISetting(clock, bitOrder, dataMode)
 #define SPI_HAS_TRANSACTION 1
+// SPI_HAS_TRANSFER_BUF - is defined to signify that this library supports
+// a version of transfer which allows you to pass in both TX and RX buffer
+// pointers, either of which could be NULL
+#define SPI_HAS_TRANSFER_BUF 1
+
+#if defined(__has_include) && __has_include(<EventResponder.h>)
+#define SPI_HAS_TRANSFER_ASYNC 1
+#include <EventResponder.h>
+#endif
+
 
 
 #define SPI_CLOCK_DIV4      0x00
@@ -48,6 +58,9 @@ extern SPI_HandleTypeDef hspi1;
 #ifdef USE_SPI2
 extern SPI_HandleTypeDef hspi2;
 #endif
+#ifdef USE_SPI4
+extern SPI_HandleTypeDef hspi4;
+#endif
 
 
 class SPISettings {
@@ -69,29 +82,18 @@ private:
     init_Inline(clock, bitOrder, dataMode);
   }
 
+
+//The devices feature up to six SPIs in slave and master modes in full-duplex and simplex communication modes. 
+// SPI1, SPI4, SPI5, and SPI6 can communicate at up to 50 Mbits/s, SPI2 and SPI3 can communicate at up to 25 Mbit/s. 
   void init_Inline(uint32_t clock, uint8_t bitOrder, uint8_t dataMode) 
     __attribute__((__always_inline__))  {
-      if (clock >= 50000000 / 2) {
-        _clockDiv = SPI_CLOCK_DIV2;
-      } else if (clock >= 50000000 / 4) {
-        _clockDiv = SPI_CLOCK_DIV4;
-      } else if (clock >= 50000000 / 8) {
-        _clockDiv = SPI_CLOCK_DIV8;
-      } else if (clock >= 50000000 / 16) {
-        _clockDiv = SPI_CLOCK_DIV16;
-      } else if (clock >= 50000000 / 32) {
-        _clockDiv = SPI_CLOCK_DIV32;
-      } else if (clock >= 50000000 / 64) {
-        _clockDiv = SPI_CLOCK_DIV64;
-      } else {
-        _clockDiv = SPI_CLOCK_DIV64;
-      }
-
+      _clock = clock;
       _bitOrder = bitOrder;
       _dataMode = dataMode;
   }
 
-  uint8_t _clockDiv;
+  //uint8_t _clockDiv;
+  uint32_t _clock;
   uint8_t _bitOrder;
   uint8_t _dataMode;
 
@@ -101,15 +103,15 @@ private:
 
 class SPIClass {
   public:
-    SPIClass(SPI_TypeDef *spiPort);
+    SPIClass(SPI_TypeDef *spiPort, uint32_t spi_clock);
     SPIClass(uint8_t spiPort);
     void begin(void);
     void beginFast(void);
 
     void beginTransaction(SPISettings settings)
     {
-      if (settings._clockDiv != _clockDiv) {
-        setClockDivider(settings._clockDiv);
+      if (settings._clock != _clock) {
+        setClock(settings._clock);
       }
       if (settings._bitOrder != _bitOrder) {
         setBitOrder(settings._bitOrder);
@@ -123,24 +125,35 @@ class SPIClass {
     }
     uint8_t transfer(uint8_t _data) const;
     uint16_t transfer16(uint16_t data);
-    
+//    void transfer(void *buf, size_t count);
+
+    void inline transfer(void *buf, size_t count) {transfer(buf, buf, count);}
+    //void setTransferWriteFill(uint8_t ch ) {_transferWriteFill = ch;}
+    void transfer(const void * buf, void * retbuf, size_t count);
+
 
     // Write only functions similar to ESP32 and the like
     void write(uint8_t data);
     void write16(uint16_t data);
     void write32(uint32_t data);
     void writeBytes(uint8_t * data, uint32_t size);
-    void writeFast(void *buf, size_t count);//For waveshare HX8347
+
+    void inline writeFast(void *buf, size_t count) {transfer(buf, NULL, count);}
     void writePixels(const void * data, uint32_t size);//ili9341 compatible
 
 
     void setBitOrder(uint8_t bitOrder);
     void setClockDivider(uint8_t clockDiv);
+    void setClock(uint32_t clock);
     void setDataMode(uint8_t dataMode);
 
+#ifdef SPI_HAS_TRANSFER_ASYNC
+  bool transfer(const void *txBuffer, void *rxBuffer, size_t count,  EventResponderRef  event_responder);
+#endif
 
+  enum DMAState {DMA_NOTINITIALIZED=0, DMA_IDLE, DMA_ACTIVE, DMA_COMPETED};
   private:
-    uint32_t _Mode;
+    //uint32_t _Mode;
     uint32_t _Direction;
     uint32_t _DataSize;
     uint32_t _CLKPolarity;
@@ -152,18 +165,25 @@ class SPIClass {
     uint32_t _CRCCalculation;
     uint32_t _CRCPolynomial;
     // Keep track of values we set for transactions 
-    uint8_t _clockDiv;
+    uint32_t _clock;
     uint8_t _bitOrder;
     uint8_t _dataMode;
-
+    uint32_t _spi_clock;   
 
     SPI_HandleTypeDef *_hspi;
     SPI_TypeDef *_spiPort;
+#ifdef SPI_HAS_TRANSFER_ASYNC
+    uint8_t  _dma_state;
+    EventResponder *_dma_event_responder;
+static void dmaCallback(SPI_HandleTypeDef* hspi);
+    void processDMACallback();
+#endif
     void init(void);
 
 };
 
 extern SPIClass SPI;
 extern SPIClass SPI_IMU;
+extern SPIClass SPI_EXT;
 
 #endif

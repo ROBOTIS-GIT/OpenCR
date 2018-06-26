@@ -22,18 +22,21 @@
 
 
 /* Create an SPIClass instance */
-SPIClass SPI    (SPI2);
-SPIClass SPI_IMU(SPI1);
+SPIClass SPI    (SPI2, 50000000);
+SPIClass SPI_IMU(SPI1, 100000000);
+SPIClass SPI_EXT(SPI4, 100000000);
 
 
-
-SPIClass::SPIClass(SPI_TypeDef *spiPort) {
+SPIClass::SPIClass(SPI_TypeDef *spiPort, uint32_t spi_clock) {
   _spiPort = spiPort;
 
   if(spiPort == SPI1)
     _hspi = &hspi1;
-  if(spiPort == SPI2)
+  else if(spiPort == SPI2)
     _hspi = &hspi2;
+  else if(spiPort == SPI4)
+    _hspi = &hspi4;
+  _spi_clock = spi_clock;
 }
 
 /**
@@ -51,6 +54,10 @@ SPIClass::SPIClass(uint8_t spiPort){
       _spiPort = SPI2;
       _hspi = &hspi2;
     break;
+    case 4:
+      _spiPort = SPI4;
+      _hspi = &hspi4;
+    break;
   }
 }
 
@@ -66,10 +73,11 @@ void SPIClass::beginFast(void) {
 
 void SPIClass::init(void){
   // Keep track of transaction logical values.
-  _clockDiv = SPI_CLOCK_DIV16;
+  //_clockDiv = SPI_CLOCK_DIV16;
   _bitOrder = MSBFIRST;
   _dataMode = SPI_MODE0;
-
+  _dma_state = DMA_NOTINITIALIZED;
+  _dma_event_responder   = NULL;
   _hspi->Instance               = _spiPort;
   _hspi->Init.Mode              = SPI_MODE_MASTER;
   _hspi->Init.Direction         = SPI_DIRECTION_2LINES;
@@ -107,23 +115,26 @@ uint16_t SPIClass::transfer16(uint16_t data) {
 }
 
 
-void SPIClass::writeFast(void *buf, size_t count) {
-  uint32_t t_time;
-  
-  drv_spi_start_dma_tx(_hspi, (uint8_t *)buf, count);
+void SPIClass::transfer(const void * buf, void * retbuf, size_t count) {
+  if ((count == 0) || ((buf == NULL) && (retbuf == NULL))) return;    // nothing to do
 
-  t_time = millis();
-
-  while(1)
+//  bool dma_enabled = drv_spi_dma_enabled(_hspi);
+  HAL_StatusTypeDef status;
+  if (retbuf == NULL) { 
+    // write only transfer
+    status = HAL_SPI_Transmit(_hspi, (uint8_t *)buf, count, 0xffff);
+  } else if (buf == NULL) {
+    // Read only buffer
+    status = HAL_SPI_Receive(_hspi, (uint8_t*)retbuf, count, 0xffff);
+  } else {
+    // standard Read/write buffer transfer
+    // start off without DMA support
+    status = HAL_SPI_TransmitReceive(_hspi, (uint8_t *)buf, (uint8_t*)retbuf, count, 0xffff);
+  }
+  if (status != HAL_OK) 
   {
-    if(drv_spi_is_dma_tx_done(_hspi))
-    {
-      break;
-    }
-    if((millis()-t_time) > 1000)
-    {
-      break;
-    }
+    Serial.print("transfer status: ");
+    Serial.println((int)status, DEC);
   }
 }
 
@@ -189,7 +200,7 @@ void SPIClass::setBitOrder(uint8_t bitOrder) {
 
 
 void SPIClass::setClockDivider(uint8_t clockDiv) {
-  _clockDiv = clockDiv;
+  _clock = 0;   // clear out so we will set in setClock
   switch(clockDiv){
     case SPI_CLOCK_DIV2:
       _hspi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
@@ -215,6 +226,28 @@ void SPIClass::setClockDivider(uint8_t clockDiv) {
     case SPI_CLOCK_DIV256:
       _hspi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
     break;
+  }
+  HAL_SPI_Init(_hspi);
+}
+
+void SPIClass::setClock(uint32_t clock) {
+  _clock = clock; // remember our new clock  
+  if (clock >= _spi_clock / 2) {
+    _hspi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  } else if (clock >= _spi_clock / 4) {
+    _hspi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+  } else if (clock >= _spi_clock / 8) {
+    _hspi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+  } else if (clock >= _spi_clock / 16) {
+    _hspi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+  } else if (clock >= _spi_clock / 32) {
+    _hspi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
+  } else if (clock >= _spi_clock / 64) {
+    _hspi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
+  } else if (clock >= _spi_clock / 128) {
+    _hspi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;
+  } else {
+    _hspi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;  // Our slowest mode
   }
   HAL_SPI_Init(_hspi);
 }
@@ -252,4 +285,56 @@ void SPIClass::setDataMode(uint8_t dataMode){
       HAL_SPI_Init(_hspi);
       break;
   }
+}
+//=========================================================================
+// Main Async Transfer function
+//=========================================================================
+
+bool SPIClass::transfer(const void *buf, void *retbuf, size_t count, EventResponderRef event_responder) {
+//    Serial.println("Transfer with Event Call"); Serial.flush();
+  if (_dma_state == DMA_ACTIVE)
+    return false; // already active
+  else if (_dma_state == DMA_NOTINITIALIZED)
+  {
+//    Serial.println("Before SPI enable DMA"); Serial.flush();
+    drv_spi_enable_dma(_hspi);
+    _dma_state = DMA_IDLE;
+  }
+//  Serial.println("Before Clear event");  Serial.flush();
+  event_responder.clearEvent(); // Make sure it is not set yet
+  if (count < 2) {
+    // Use non-async version to simplify cases...
+    transfer(buf, retbuf, count);
+    event_responder.triggerEvent();
+    return true;
+  }
+
+  if ((count == 0) || ((buf == NULL) && (retbuf == NULL))) return false;    // nothing to do
+
+  _dma_event_responder = &event_responder;  // remember the event object
+  //bool dma_enabled = drv_spi_dma_enabled(_hspi);
+  // new version handles where buf or retbuf are null
+  drv_spi_start_dma_txrx(_hspi, (uint8_t *)buf, (uint8_t *)retbuf, count, &dmaCallback);
+  _dma_state = DMA_ACTIVE;
+  return true;
+}
+
+void SPIClass::dmaCallback(SPI_HandleTypeDef* hspi)
+{
+  // Static function call from our DMA DRV code
+  if (hspi == &hspi1) SPI_IMU.processDMACallback();
+  else if (hspi == &hspi2) SPI.processDMACallback();
+  else if (hspi == &hspi4) SPI_EXT.processDMACallback();
+
+}
+
+void SPIClass::processDMACallback()
+{
+  // We have been called back, that the DMA completed
+  if (_dma_event_responder)
+  {
+    _dma_state = DMA_COMPETED;   // set back to 1 in case our call wants to start up dma again
+    _dma_event_responder->triggerEvent();
+  }
+
 }

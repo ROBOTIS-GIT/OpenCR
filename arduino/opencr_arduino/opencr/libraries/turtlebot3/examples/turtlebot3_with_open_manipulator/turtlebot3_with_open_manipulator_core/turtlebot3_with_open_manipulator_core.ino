@@ -80,6 +80,7 @@ void loop()
   uint32_t t = millis();
   updateTime();
   updateVariable();
+  updateTFPrefix(nh.connected());
 
   if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_FREQUENCY))
   {
@@ -134,6 +135,10 @@ void loop()
 
   // Update the IMU unit
   sensors.updateIMU();
+
+  // TODO
+  // Update sonar data
+  // sensors.updateSonar(t);
 
   // Start Gyro Calibration after ROS connection
   updateGyroCali();
@@ -359,12 +364,52 @@ void publishDriveInformation(void)
 }
 
 /*******************************************************************************
+* Update TF Prefix
+*******************************************************************************/
+void updateTFPrefix(bool isConnected)
+{
+  static bool isChecked = false;
+  char log_msg[50];
+
+  if (isConnected)
+  {
+    if (isChecked == false)
+    {
+      nh.getParam("~tf_prefix", &get_tf_prefix);
+
+      if (!strcmp(get_tf_prefix, ""))
+      {
+        sprintf(odom_header_frame_id, "odom");
+        sprintf(odom_child_frame_id, "base_footprint");  
+      }
+      else
+      {
+        strcpy(odom_header_frame_id, get_tf_prefix);
+        strcpy(odom_child_frame_id, get_tf_prefix);
+
+        strcat(odom_header_frame_id, "/odom");
+        strcat(odom_child_frame_id, "/base_footprint");
+      }
+
+      sprintf(log_msg, "Setup TF on odom [/%s]", odom_header_frame_id);
+      nh.loginfo(log_msg); 
+
+      isChecked = true;
+    }
+  }
+  else
+  {
+    isChecked = false;
+  }
+}
+
+/*******************************************************************************
 * Update the odometry
 *******************************************************************************/
 void updateOdometry(void)
 {
-  odom.header.frame_id = "odom";
-  odom.child_frame_id  = "base_link";
+  odom.header.frame_id = odom_header_frame_id;
+  odom.child_frame_id  = odom_child_frame_id;
 
   odom.pose.pose.position.x = odom_pose[0];
   odom.pose.pose.position.y = odom_pose[1];

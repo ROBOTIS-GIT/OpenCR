@@ -264,3 +264,19 @@ void ser_set_timeout_ms( ser_handler id, u32 timeout )
   ser_timeout = timeout;
 }
 
+
+int ser_port_is_ready( const char* sername )
+{
+
+  int fd;
+
+  if( ( fd = open( sername, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK) ) == -1 )
+  {
+    return 0;
+  }
+  else
+  {
+    close(fd);
+    return 1;
+  }
+}

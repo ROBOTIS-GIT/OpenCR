@@ -45,7 +45,7 @@
 
 #define HARDWARE_VER "1.0.0"
 #define SOFTWARE_VER "1.0.0"
-#define FIRMWARE_VER "1.2.0"
+#define FIRMWARE_VER "1.2.1"
 
 #define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
 #define IMU_PUBLISH_FREQUENCY                  200  //hz
@@ -97,8 +97,9 @@ void updateTime(void);
 void updateOdometry(void);
 void updateJoint(void);
 void updateTF(geometry_msgs::TransformStamped& odom_tf);
-void updateGyroCali(void);
+void updateGyroCali(bool isConnected);
 void updateGoalVelocity(void);
+void updateTFPrefix(bool isConnected);
 
 void initOdom(void);
 void initJointStates(void);
@@ -113,6 +114,15 @@ void sendLogMsg(void);
 ros::NodeHandle nh;
 ros::Time current_time;
 uint32_t current_offset;
+
+/*******************************************************************************
+* ROS Parameter
+*******************************************************************************/
+char get_prefix[10];
+char* get_tf_prefix = get_prefix;
+
+char odom_header_frame_id[30];
+char odom_child_frame_id[30];
 
 /*******************************************************************************
 * Subscriber

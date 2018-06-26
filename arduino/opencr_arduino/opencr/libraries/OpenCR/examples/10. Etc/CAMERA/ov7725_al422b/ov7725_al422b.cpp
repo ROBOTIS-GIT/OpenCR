@@ -26,9 +26,6 @@ void lcdInit()
 {
     __SD_CS_DISABLE();
     SPI.beginFast();
-    SPI.setDataMode(SPI_MODE3);
-    SPI.setBitOrder(MSBFIRST);
-    SPI.setClockDivider(SPI_CLOCK_DIV4);
 
     TFTLCD.lcd_init();
     Tp.tp_init();

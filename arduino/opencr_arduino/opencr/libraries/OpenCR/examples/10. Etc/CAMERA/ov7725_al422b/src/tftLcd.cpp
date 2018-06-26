@@ -208,12 +208,10 @@ void TFT_LCD::drawFrame(void)
 {
   lcd_set_cursor(0, 0);
   lcd_write_byte(0x22, LCD_CMD);
-
+  SPI.beginTransaction(SPISettings(25000000, MSBFIRST, SPI_MODE0));
   __LCD_DC_SET();
   __LCD_CS_CLR();
-
-  SPI.writeFast(image_buf, IMG_WIDTH*IMG_HEIGHT*2);
-
+  SPI.transfer(image_buf, NULL, IMG_WIDTH*IMG_HEIGHT*2);
   __LCD_CS_SET();
 }
 
