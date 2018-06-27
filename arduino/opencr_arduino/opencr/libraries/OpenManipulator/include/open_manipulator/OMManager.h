@@ -39,13 +39,19 @@ typedef struct
   float acceleration;
 } State;
 
-/////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+/////////////////////////////////////////Manipulator//////////////////////////////////////////
 
 class Manipulator
 {
   private:
   
     int8_t dof_;
+    String name_;
 
   public:
     /////////////////func///////////////////
@@ -108,8 +114,8 @@ class Manipulator
         class JointInLink
         {
           private:
-            int8_t number_;orientation_from_final_joint_
-
+            int8_t number_;
+            
             Eigen::Vector3f relative_position_;
             Eigen::Matrix3f relative_orientation_;
           public:

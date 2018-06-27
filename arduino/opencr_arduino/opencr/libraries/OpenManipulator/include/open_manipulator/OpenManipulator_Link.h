@@ -22,16 +22,27 @@
 #include"OMManager.h"
    
 
-Manipulator OMlink;
-OMlink.Init(3,7,4);
+Manipulator OM;
+OM.Init(3,7,5,1);//dof,number of joint, number of link, number of tool
 
-OMlink::Joint[7];
+OM.joint[0].Init("YawBase", 1, 1);
+OM.joint[1].Init("PitchJoint1", 2, 2);
+OM.joint[2].Init("PitchJoint2", 3, 3);
+OM.joint[3].Init("PissiveJoint1", 4, -1);
+OM.joint[4].Init("PissiveJoint2", 5, -1);
+OM.joint[5].Init("PissiveJoint3", 6, -1);
+OM.joint[6].Init("PissiveJoint4", 7, -1);
 
+OM.link[0].Init("link1",3);
+OM.link[0].joint[0].Init(1);
+OM.link[0].joint[1].Init(2);
+OM.link[0].joint[2].Init(3);
 
+OM.link[1].Init("link2",2);
+OM.link[2].Init("link3",2);
+OM.link[3].Init("link4",2);
+OM.link[4].Init("link5",2);
 
-
-
-
-
+OM.tool[0].Init("link5",2);
 
 #endif // OPENMANIPULATORLINK_H_
