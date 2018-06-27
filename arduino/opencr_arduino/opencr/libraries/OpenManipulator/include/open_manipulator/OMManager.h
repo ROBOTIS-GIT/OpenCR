@@ -45,13 +45,12 @@ class Manipulator
 {
   private:
   
-    int8_t DOF_;
+    int8_t dof_;
 
   public:
     /////////////////func///////////////////
     Manipulator();
     ~Manipulator();
-
     void Init(int8_t dof, int8_t number_of_joint, int8_t number_of_link, int8_t number_of_tool);
     void Init(int8_t dof, int8_t number_of_joint, int8_t number_of_link);
     void SetDOF(int8_t dof);
@@ -64,8 +63,8 @@ class Manipulator
         int8_t number_;	
 
         float angle_;
-        float angular_velocity_;
-        float angular_acceleration_;
+        float velocity_;
+        float acceleration_;
 
         Eigen::Vector3f position_;
         Eigen::Matrix3f orientation_;
@@ -74,7 +73,6 @@ class Manipulator
         /////////////////func///////////////////
         Joint();
         ~Joint();
-
         void Init(String name, int8_t number, int8_t dxl_id);
         void SetAngle(float angle);
         void SetVelocity(float velocity);
@@ -103,34 +101,28 @@ class Manipulator
         /////////////////func///////////////////
         Link();
         ~Link();
-        
         void Init(String name, float mass, Eigen::Vector3f center_position, int8_t number_of_joint_in_link);
+        float GetInertiaMoment();
         ////////////////////////////////////////
 
         class JointInLink
         {
           private:
-            int8_t number_;
-            String type_;               //mother or child
+            int8_t number_;orientation_from_final_joint_
 
-            Eigen::Vector3f relative_position;
-            Eigen::Matrix3f relative_rotation;
-
-            Eigen::Vector3f axis_;
-            Eigen::Matrix3f relative_axis_matrix_;
-
+            Eigen::Vector3f relative_position_;
+            Eigen::Matrix3f relative_orientation_;
           public:
             /////////////////func///////////////////
             JointInLink();
             ~JointInLink();
 
-            void Init(int8_t joint_number, String type, Eigen::Vector3f relative_position, Eigen::Vector3f axis);
-            void Init(int8_t joint_number, String type, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_axis_matrix, Eigen::Vector3f axis);
+            void Init(int8_t joint_number, Eigen::Vector3f relative_position, Eigen::Vector3f axis);
+            void Init(int8_t joint_number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_axis_matrix, Eigen::Vector3f axis);
+
+
             ////////////////////////////////////////
         };
-        /////////////////func///////////////////
-        float InertiaMoment();
-        ////////////////////////////////////////
     };
     class Tool
     {
