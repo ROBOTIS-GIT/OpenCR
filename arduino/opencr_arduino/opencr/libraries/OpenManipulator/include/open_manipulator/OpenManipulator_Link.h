@@ -22,7 +22,8 @@
 #include"OMManager.h"
    
 
-Manipulator OMlink(3, "Suction");
+Manipulator OMlink;
+OMlink.Init(3,7,4);
 
 OMlink::Joint[7];
 
