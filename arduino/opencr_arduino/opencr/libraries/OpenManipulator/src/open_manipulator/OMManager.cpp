@@ -17,21 +17,27 @@
 /* Authors: Hye-Jong KIM*/
 
 
-#include "../../include/OMManager.h"
+#include "../../include/open_manipulator/OMManager.h"
 
 Manipulator::Manipulator():
+name_("UnknownManipulator"),
 dof_(0)
-{}
-Manipulator::~Manipulator(){}
-void Manipulator::Init(int8_t dof, int8_t number_of_joint, int8_t number_of_link)
 {
-    dof_=dof;
-    Manipulator::Joint joint[number_of_joint];
-    Manipulator::Link link[number_of_link];
+  base_position_ = Eigen::Vector3f::Zero();
+  base_orientation_ = Eigen::Matrix3f::Identity(3,3);
+}
+Manipulator::~Manipulator(){}
+void Manipulator::Init(String name, int8_t dof, int8_t number_of_joint, int8_t number_of_link)
+{
+  name_ = name;
+  dof_=dof;
+  Manipulator::Joint joint[number_of_joint];
+  Manipulator::Link link[number_of_link];
 }
 
-void Manipulator::Init(int8_t dof, int8_t number_of_joint, int8_t number_of_link, int8_t number_of_tool)
+void Manipulator::Init(String name, int8_t dof, int8_t number_of_joint, int8_t number_of_link, int8_t number_of_tool)
 {
+  name_ = name;
     dof_=dof;
     Manipulator::Joint joint[number_of_joint];
     Manipulator::Link link[number_of_link];
@@ -50,7 +56,7 @@ Manipulator::Joint::Joint():
     number_(-1),
     angle_(0.0),
     velocity_(0.0),
-    acceletation_(0.0)
+    acceleration_(0.0)
 {
     position_ = Eigen::Vector3f::Zero();
     orientation_ = Eigen::Matrix3f::Identity(3,3);
@@ -75,7 +81,7 @@ void Manipulator::Joint::SetVelocity(float velocity)
 
 void Manipulator::Joint::SetAcceleration(float acceleration)
 {
-    acceletation_ = acceleration;
+    acceleration_ = acceleration;
 }
 
 float Manipulator::Joint::GetAngle()
@@ -90,7 +96,7 @@ float Manipulator::Joint::GetVelocity()
 
 float Manipulator::Joint::GetAcceleration()
 {
-    return acceletation_;
+    return acceleration_;
 }
 
 void Manipulator::Joint::SetPosition(Eigen::Vector3f position)
@@ -128,8 +134,8 @@ Pose Manipulator::Joint::GetPose()
 
 Manipulator::Link::Link(): 
     name_("UnknownLink"),
-    mass_(0),
-    inertia_moment_(0),
+    mass_(0.0),
+    inertia_moment_(0.0)
 {
     center_position_ = Eigen::Vector3f::Zero();
 }
@@ -153,7 +159,7 @@ float Manipulator::Link::GetInertiaMoment()
 }
 
 Manipulator::Link::JointInLink::JointInLink():
-number_(-1),
+number_(-1)
 {
     relative_position_ = Eigen::Vector3f::Zero();
     relative_orientation_ = Eigen::Matrix3f::Identity(3,3);

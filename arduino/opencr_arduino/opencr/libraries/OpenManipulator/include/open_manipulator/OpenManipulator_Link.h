@@ -19,11 +19,11 @@
 #ifndef OPENMANIPULATORLINK_H_
 #define OPENMANIPULATORLINK_H_
 
-#include"OMManager.h"
+#include "../../include/open_manipulator/OMManager.h"
    
 
 Manipulator OM;
-OM.Init(3,7,5,1);//dof,number of joint, number of link, number of tool
+OM.Init("OpenManipulatorLink",3,7,5,1);//name_, dof,number of joint, number of link, number of tool
 
 OM.joint[0].Init("YawBase", 1, 1);
 OM.joint[1].Init("PitchJoint1", 2, 2);

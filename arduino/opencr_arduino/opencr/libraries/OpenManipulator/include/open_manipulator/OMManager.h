@@ -49,17 +49,19 @@ typedef struct
 class Manipulator
 {
   private:
-  
     int8_t dof_;
     String name_;
+    Eigen::Vector3f base_position_;
+    Eigen::Matrix3f base_orientation_;
 
   public:
     /////////////////func///////////////////
     Manipulator();
     ~Manipulator();
-    void Init(int8_t dof, int8_t number_of_joint, int8_t number_of_link, int8_t number_of_tool);
-    void Init(int8_t dof, int8_t number_of_joint, int8_t number_of_link);
+    void Init(String name, int8_t dof, int8_t number_of_joint, int8_t number_of_link, int8_t number_of_tool);
+    void Init(String name, int8_t dof, int8_t number_of_joint, int8_t number_of_link);
     void SetDOF(int8_t dof);
+
     ////////////////////////////////////////
     class Joint
     {
@@ -99,7 +101,7 @@ class Manipulator
       private:
         String name_;
         float mass_;			
-        float inertia_moment;
+        float inertia_moment_;
 
         Eigen::Vector3f center_position_;
 
@@ -107,7 +109,8 @@ class Manipulator
         /////////////////func///////////////////
         Link();
         ~Link();
-        void Init(String name, float mass, Eigen::Vector3f center_position, int8_t number_of_joint_in_link);
+        void Init(String name, int8_t number_of_joint_in_link);
+        void Init(String name, int8_t number_of_joint_in_link, float mass, Eigen::Vector3f center_position);
         float GetInertiaMoment();
         ////////////////////////////////////////
 
@@ -123,6 +126,7 @@ class Manipulator
             JointInLink();
             ~JointInLink();
 
+            void Init(int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation);
             void Init(int8_t joint_number, Eigen::Vector3f relative_position, Eigen::Vector3f axis);
             void Init(int8_t joint_number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_axis_matrix, Eigen::Vector3f axis);
 
