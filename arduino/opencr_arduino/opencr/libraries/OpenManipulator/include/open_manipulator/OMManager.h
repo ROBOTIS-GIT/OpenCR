@@ -60,6 +60,8 @@ class Manipulator
     ~Manipulator();
     void Init(String name, int8_t dof, int8_t number_of_joint, int8_t number_of_link, int8_t number_of_tool);
     void Init(String name, int8_t dof, int8_t number_of_joint, int8_t number_of_link);
+    void SetBasePosition(Eigen::Vector3f position);
+    void SetBaseOrientation(Eigen::Matrix3f orientation);
     void SetDOF(int8_t dof);
 
     ////////////////////////////////////////

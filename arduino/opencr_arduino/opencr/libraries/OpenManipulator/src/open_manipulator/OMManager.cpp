@@ -43,6 +43,14 @@ void Manipulator::Init(String name, int8_t dof, int8_t number_of_joint, int8_t n
     Manipulator::Link link[number_of_link];
     Manipulator::Tool tool[number_of_tool];
 }
+void Manipulator::SetBasePosition(Eigen::Vector3f base_position)
+{
+  base_position_ = base_position;
+}
+void Manipulator::SetBaseOrientation(Eigen::Matrix3f base_orientation)
+{
+  base_orientation_ = base_orientation;
+}
 void Manipulator::SetDOF(int8_t dof)
 {
     dof_=dof;
