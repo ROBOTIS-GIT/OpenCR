@@ -226,7 +226,11 @@ void inverseKinematics(OPMLink* link, int8_t to, Pose goal_pose, String method)
 
 void writeDXL(State* data)
 {
-  int32_t value[copy_link_num] ={0,};
+  int32_t value[copy_link_num];
+  for(int i=0; i < copy_link_num; i++)
+  {
+    value[i] = 0;
+  }
 
   for (int i = findMe("Joint1"); i <= findMe("Gripper"); i++)
   {

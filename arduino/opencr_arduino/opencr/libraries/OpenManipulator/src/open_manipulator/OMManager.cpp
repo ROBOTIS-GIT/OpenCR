@@ -27,21 +27,14 @@ dof_(0)
   base_orientation_ = Eigen::Matrix3f::Identity(3,3);
 }
 Manipulator::~Manipulator(){}
-void Manipulator::Init(String name, int8_t dof, int8_t number_of_joint, int8_t number_of_link)
-{
-  name_ = name;
-  dof_=dof;
-  Manipulator::Joint joint[number_of_joint];
-  Manipulator::Link link[number_of_link];
-}
 
 void Manipulator::Init(String name, int8_t dof, int8_t number_of_joint, int8_t number_of_link, int8_t number_of_tool)
 {
   name_ = name;
     dof_=dof;
-    Manipulator::Joint joint[number_of_joint];
-    Manipulator::Link link[number_of_link];
-    Manipulator::Tool tool[number_of_tool];
+    number_of_joint_ = number_of_joint;
+    number_of_link_ = number_of_link; 
+    number_of_tool_ = number_of_tool;
 }
 void Manipulator::SetBasePosition(Eigen::Vector3f base_position)
 {
@@ -151,14 +144,14 @@ Manipulator::Link::~Link(){}
 void Manipulator::Link::Init(String name, int8_t number_of_joint_in_link)
 {
     name_ = name;
-    Manipulator::Link::JointInLink joint[number_of_joint_in_link];
+    number_of_joint_in_link_ = number_of_joint_in_link;
 }
 void Manipulator::Link::Init(String name, int8_t number_of_joint_in_link, float mass, Eigen::Vector3f center_position)
 {
     name_ = name;
+    number_of_joint_in_link_ = number_of_joint_in_link;
     mass_ = mass;
     center_position_ = center_position;
-    Manipulator::Link::JointInLink joint[number_of_joint_in_link];
 }
 
 float Manipulator::Link::GetInertiaMoment()

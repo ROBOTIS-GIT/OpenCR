@@ -40,10 +40,6 @@ typedef struct
 } State;
 
 
-
-
-
-
 /////////////////////////////////////////Manipulator//////////////////////////////////////////
 
 class Manipulator
@@ -53,13 +49,15 @@ class Manipulator
     String name_;
     Eigen::Vector3f base_position_;
     Eigen::Matrix3f base_orientation_;
+    int8_t number_of_joint_;
+    int8_t number_of_link_;
+    int8_t number_of_tool_;
 
   public:
     /////////////////func///////////////////
     Manipulator();
     ~Manipulator();
     void Init(String name, int8_t dof, int8_t number_of_joint, int8_t number_of_link, int8_t number_of_tool);
-    void Init(String name, int8_t dof, int8_t number_of_joint, int8_t number_of_link);
     void SetBasePosition(Eigen::Vector3f position);
     void SetBaseOrientation(Eigen::Matrix3f orientation);
     void SetDOF(int8_t dof);
@@ -104,6 +102,7 @@ class Manipulator
         String name_;
         float mass_;			
         float inertia_moment_;
+        int8_t number_of_joint_in_link_;
 
         Eigen::Vector3f center_position_;
 
