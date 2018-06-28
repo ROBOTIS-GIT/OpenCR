@@ -21,10 +21,7 @@
 #include "../../include/open_manipulator/OMAPI.h"
 #include "../../include/open_manipulator/OMManager.h"
 
-void MakeManipulator(int8_t number_of_manipulator)
-{
-    Manipulator manipulator[number_of_manipulator];
-}
+
 
 void ManipulatorInit(Manipulator* manipulator, int8_t manipulator_number, String manipulator_name, int8_t dof, int8_t number_of_joint, int8_t number_of_link, int8_t number_of_tool)
 {

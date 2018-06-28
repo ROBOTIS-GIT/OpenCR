@@ -145,6 +145,7 @@ void Manipulator::Link::Init(String name, int8_t number_of_joint_in_link)
 {
     name_ = name;
     number_of_joint_in_link_ = number_of_joint_in_link;
+    Manipulator::Link::JointInLink jointinlink[number_of_joint_in_link];
 }
 void Manipulator::Link::Init(String name, int8_t number_of_joint_in_link, float mass, Eigen::Vector3f center_position)
 {
