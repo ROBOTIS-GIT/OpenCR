@@ -112,6 +112,7 @@ typedef enum
   HAL_I2C_STATE_SLAVE_BUSY_RX   = 0x42,  /*!< Slave Data Reception process is ongoing     */
   HAL_I2C_STATE_MEM_BUSY_TX     = 0x52,  /*!< Memory Data Transmission process is ongoing */
   HAL_I2C_STATE_MEM_BUSY_RX     = 0x62,  /*!< Memory Data Reception process is ongoing    */
+  HAL_I2C_STATE_SLAVE_BUSY_ADR  = 0x72,   /*!< Slave Data waiting for address match        */
   HAL_I2C_STATE_TIMEOUT         = 0x03,  /*!< Timeout state                               */
   HAL_I2C_STATE_ERROR           = 0x04   /*!< Reception process is ongoing                */
 }HAL_I2C_StateTypeDef;
@@ -407,6 +408,21 @@ typedef struct
   */
 #define __HAL_I2C_CLEAR_FLAG(__HANDLE__, __FLAG__) ((__HANDLE__)->Instance->ICR = ((__FLAG__) & I2C_FLAG_MASK))
  
+#define __HAL_I2C_GET_IT_SOURCE(__HANDLE__, __INTERRUPT__) ((((__HANDLE__)->Instance->CR1 & (__INTERRUPT__)) == (__INTERRUPT__)) ? SET : RESET)
+
+/** @brief Set I2C flag 
+  * @param  __HANDLE__: specifies the I2C Handle.
+  * @param  __FLAG__: specifies the flag to set.
+  *        This parameter can be one of the following values:
+  *            @arg I2C_FLAG_TXE:      Transmit data register empty
+  *            @arg I2C_FLAG_TXIS:     Transmit interrupt status
+  *
+  * @retval None
+  */
+#define I2C_FLAG_SET_MASK  ((uint32_t)0x03)
+#define __HAL_I2C_SET_FLAG(__HANDLE__, __FLAG__) (((__HANDLE__)->Instance->ISR) |= ((__FLAG__) & I2C_FLAG_SET_MASK))
+
+
 /** @brief  Enable the specified I2C peripheral.
   * @param  __HANDLE__: specifies the I2C Handle. 
   * @retval None
@@ -460,6 +476,7 @@ HAL_StatusTypeDef HAL_I2C_IsDeviceReady(I2C_HandleTypeDef *hi2c, uint16_t DevAdd
 HAL_StatusTypeDef HAL_I2C_Master_Transmit_IT(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint8_t *pData, uint16_t Size);
 HAL_StatusTypeDef HAL_I2C_Master_Receive_IT(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint8_t *pData, uint16_t Size);
 HAL_StatusTypeDef HAL_I2C_Slave_Transmit_IT(I2C_HandleTypeDef *hi2c, uint8_t *pData, uint16_t Size);
+HAL_StatusTypeDef HAL_I2C_Slave_Addr_IT(I2C_HandleTypeDef *hi2c);
 HAL_StatusTypeDef HAL_I2C_Slave_Receive_IT(I2C_HandleTypeDef *hi2c, uint8_t *pData, uint16_t Size);
 HAL_StatusTypeDef HAL_I2C_Mem_Write_IT(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint8_t *pData, uint16_t Size);
 HAL_StatusTypeDef HAL_I2C_Mem_Read_IT(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint8_t *pData, uint16_t Size);
@@ -485,6 +502,7 @@ void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c);
 void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c);
 void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c);
 void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c);
+void HAL_I2C_SlaveAddrCpltCallback(I2C_HandleTypeDef *hi2c);
 void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *hi2c);
 void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c);
 void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c);
