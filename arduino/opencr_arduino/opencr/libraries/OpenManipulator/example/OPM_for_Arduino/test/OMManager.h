@@ -42,55 +42,6 @@ typedef struct
 
 /////////////////////////////////////////Manipulator//////////////////////////////////////////
 
-template <typename number_of_joint, typename number_of_link, typename number_of_tool>
-class Manipulator
-{
-  private:
-    int8_t dof_;
-    String name_;
-    Eigen::Vector3f base_position_;
-    Eigen::Matrix3f base_orientation_;
-    int8_t number_of_joint_;
-    int8_t number_of_link_;
-    int8_t number_of_tool_;
-    Joint joint_[number_of_joint];
-    Link link_[number_of_link];
-    Tool tool_[number_of_tool];
-
-  public:
-    /////////////////func///////////////////
-    Manipulator(String name, int8_t dof, Joint* joint, Link* link, Tool* Tool):
-    number_of_joint_(number_of_joint),
-    number_of_link_(number_of_link),
-    number_of_tool_(number_of_tool)
-    {
-      name_ = name;
-      dof_ = dof;
-      base_position_ = Eigen::Vector3f::Zero();
-      base_orientation_ = Eigen::Matrix3f::Identity(3,3);
-    }
-    ~Manipulator(){}
-    void Load(Joint joint, Link link, Tool tool)
-    {
-      this.joint_ = joint;
-      this.link_ = link;
-      this.tool_ = tool;
-    }
-    void SetBasePosition(Eigen::Vector3f position)
-    {
-      base_position_ = base_position;
-    }
-    void SetBaseOrientation(Eigen::Matrix3f orientation)
-    {
-      base_orientation_ = base_orientation;
-    }
-    void SetDOF(int8_t dof)
-    {
-      dof_=dof;
-    }
-    ////////////////////////////////////////
-};   
-
 class Joint
 {
   private:
@@ -210,7 +161,7 @@ class Link
     {
       name_ = name;
       number_of_joint_in_link_ = number_of_joint_in_link;
-      JointInLink jointinlink[number_of_joint_in_link];
+      //JointInLink jointinlink[number_of_joint_in_link];
     }
     void Init(String name, int8_t number_of_joint_in_link, float mass, Eigen::Vector3f center_position)
     {
@@ -317,6 +268,56 @@ class Tool
       return tool_pose;
     }
 };
+
+//template <int8_t number_of_joint, int8_t number_of_link, int8_t number_of_tool>
+class Manipulator
+{
+  private:
+    int8_t dof_;
+    String name_;
+    Eigen::Vector3f base_position_;
+    Eigen::Matrix3f base_orientation_;
+    int8_t number_of_joint_;
+    int8_t number_of_link_;
+    int8_t number_of_tool_;
+    
+
+  public:
+    /////////////////func///////////////////
+    Joint joint_[3];
+    Link link_[2];
+    Tool tool_[1];
+    Manipulator(String name, int8_t dof):
+    number_of_joint_(0),
+    number_of_link_(0),
+    number_of_tool_(0)
+    {
+      name_ = name;
+      dof_ = dof;
+      base_position_ = Eigen::Vector3f::Zero();
+      base_orientation_ = Eigen::Matrix3f::Identity(3,3);
+    }
+    ~Manipulator(){}
+    void Load(Joint* joint, Link* link, Tool* tool)
+    {
+      joint_ < joint;
+      link_ < link;
+      tool_ < tool;
+    }
+    void SetBasePosition(Eigen::Vector3f base_position)
+    {
+      base_position_ = base_position;
+    }
+    void SetBaseOrientation(Eigen::Matrix3f base_orientation)
+    {
+      base_orientation_ = base_orientation;
+    }
+    void SetDOF(int8_t dof)
+    {
+      dof_=dof;
+    }
+    ////////////////////////////////////////
+};   
 
 #endif // OMMANAGER_H_
 
