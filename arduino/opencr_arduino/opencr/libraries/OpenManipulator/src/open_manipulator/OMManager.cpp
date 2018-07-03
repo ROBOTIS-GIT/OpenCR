@@ -22,9 +22,6 @@
 //////////////////////////////////////Manipulator////////////////////////////////////////////
 
     Manipulator::Manipulator(String name, int8_t dof):
-    number_of_joint_(0),
-    number_of_link_(0),
-    number_of_tool_(0)
     {
       name_ = name;
       dof_ = dof;
@@ -34,9 +31,6 @@
 
     Manipulator::Manipulator(int8_t dof):
     name("UnknownManipulator")
-    number_of_joint_(0),
-    number_of_link_(0),
-    number_of_tool_(0)
     {
       dof_ = dof;
       base_position_ = Eigen::Vector3f::Zero();
@@ -45,48 +39,48 @@
 
     Manipulator::~Manipulator(){}
 
-    void Manipulator::Init(int8_t number_of_joint, int8_t number_of_link, int8_t number_of_tool)
-    {
-      number_of_joint_ = number_of_joint;
-      number_of_link_ = number_of_link;
-      number_of_tool_ = number_of_tool;
-      joint.resize(number_of_joint_);
-      link.resize(number_of_link_);
-      tool.resize(number_of_tool_);
-    }
+    // void Manipulator::init(int8_t number_of_joint, int8_t number_of_link, int8_t number_of_tool)
+    // {
+    //   number_of_joint_ = number_of_joint;
+    //   number_of_link_ = number_of_link;
+    //   number_of_tool_ = number_of_tool;
+    //   joint.resize(number_of_joint_);
+    //   link.resize(number_of_link_);
+    //   tool.resize(number_of_tool_);
+    // }
 
-    void Manipulator::SetDOF(int8_t dof)
+    void Manipulator::setDOF(int8_t dof)
     {
       dof_=dof;
     }
 
-    void Manipulator::SetBasePosition(Eigen::Vector3f base_position)
+    void Manipulator::setBasePosition(Eigen::Vector3f base_position)
     {
       base_position_ = base_position;
     }
 
-    void Manipulator::SetBaseOrientation(Eigen::Matrix3f base_orientation)
+    void Manipulator::setBaseOrientation(Eigen::Matrix3f base_orientation)
     {
       base_orientation_ = base_orientation;
     }
 
-    void Manipulator::SetBasePose(Pose base_pose)
+    void Manipulator::setBasePose(Pose base_pose)
     {
       base_position_ = base_pose.position;
       base_orientation_ = base_pose.orientation;
     }
 
-    Eigen::Vector3f Manipulator::GetBasePosition()
+    Eigen::Vector3f Manipulator::getBasePosition()
     {
       return base_position_;
     }
 
-    Eigen::Matrix3f Manipulator::GetBaseOrientation()
+    Eigen::Matrix3f Manipulator::getBaseOrientation()
     {
       return base_orientation_;
     }
 
-    Pose Manipulator::GetBasePose()
+    Pose Manipulator::getBasePose()
     {
       Pose temp;
       temp.position = base_position_;
@@ -108,73 +102,79 @@
 
     Joint::~Joint(){}
 
-    void Joint::SetId(int8_t dxl_id)
+    void Joint::init(int8_t dxl_id, Eigen::Vector3f axis)
     {
       dxl_id_ = dxl_id;
+      axis_ = axis;
     }
 
-    int8_t Joint::GetId()
+    int8_t Joint::getId()
     {
       return dxl_id_;
     }
 
-    void Joint::SetAngle(float angle)
+    Eigen::Vector3f getAxis()
+    {
+      return axis_;
+    }
+
+    void Joint::setAngle(float angle)
     {
       angle_ = angle;
     }
     
-    float Joint::GetAngle()
+    float Joint::getAngle()
     {
       return angle_;
     }
 
-    void Joint::SetVelocity(float velocity)
+    void Joint::setVelocity(float velocity)
     {
       velocity_ = velocity;
     }
 
-    float Joint::GetVelocity()
+    float Joint::getVelocity()
     {
       return velocity_;
     }
     
-    void Joint::SetAcceleration(float acceleration)
+    void Joint::setAcceleration(float acceleration)
     {
       acceleration_ = acceleration;
     }
 
-    float Joint::GetAcceleration()
+    float Joint::getAcceleration()
     {
       return acceleration_;
     }
 
-    void Joint::SetPosition(Eigen::Vector3f position)
+    void Joint::setPosition(Eigen::Vector3f position)
     {
       position_ = position;
     }
 
-    Eigen::Vector3f Joint::GetPosition()
+    Eigen::Vector3f Joint::getPosition()
     {
       return position_;
     }
 
-    void Joint::SetOrientation(Eigen::Matrix3f orientation)
+    void Joint::setOrientation(Eigen::Matrix3f orientation)
     {
       orientation_ = orientation;
     }
 
-    Eigen::Matrix3f Joint::GetOrientation()
+    Eigen::Matrix3f Joint::getOrientation()
     {
       return orientation_;n
     }
 
-    void Joint::SetPose(Pose joint_pose)
+    void Joint::setPose(Pose joint_pose)
     {
       position_ = joint_pose.position;
       orientation_ = joint_pose.orientation;
     }
 
-    Pose Joint::GetPose()
+    Pose Joint::getPose()
     {
       Pose joint_pose;
       joint_pose.position = position_;
@@ -195,30 +195,20 @@
 
     Link::~Link(){}
 
-    void Link::Init(int8_t number_of_joint_in_link)
+    void Link::init(float mass, Eigen::Vector3f center_position)
     {
-      number_of_joint_in_link_ = number_of_joint_in_link;
-      jointinlink_.resize(number_of_joint_in_link_);
-    }
-
-    void Link::Init(int8_t number_of_joint_in_link, float mass, Eigen::Vector3f center_position)
-    {
-      number_of_joint_in_link_ = number_of_joint_in_link;
-      jointinlink_.resize(number_of_joint_in_link_);
       mass_ = mass;
       center_position_ = center_position;
     }
 
-    void Link::Init(int8_t number_of_joint_in_link, float mass, float inertia_moment, Eigen::Vector3f center_position)
+    void Link::init(float mass, float inertia_moment, Eigen::Vector3f center_position)
     {
-      number_of_joint_in_link_ = number_of_joint_in_link;
-      jointinlink_.resize(number_of_joint_in_link_);
       inertia_moment_ = inertia_moment;
       mass_ = mass;
       center_position_ = center_position;
     }
 
-    void Link::SetJointInLink(int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation)
+    void Link::setJointInLink(int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation)
     {
       jointinlink_(counter_).number = number;
       jointinlink_(counter_).relative_position = relative_position; 
@@ -226,14 +216,14 @@
       if(counter_ >= number_of_joint_in_link_){counter_++;}
     }
 
-    void Link::SetJointInLink(int8_t joint_in_link_number, int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation)
+    void Link::setJointInLink(int8_t joint_in_link_number, int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation)
     {
       jointinlink_(joint_in_link_number).number = number;
       jointinlink_(joint_in_link_number).relative_position = relative_position; 
       jointinlink_(joint_in_link_number).relative_orientation = relative_orientation;
     }
 
-    JointInLink Link::GetJointInformation(int8_t joint_in_link_number)
+    JointInLink Link::getJointInformation(int8_t joint_in_link_number)
     {
       JointInLink temp;
       temp.number = jointinlink_(joint_in_link_number).number;
@@ -242,32 +232,32 @@
       return temp;
     }
 
-    int8_t Link::GetTheNumberOfJoint()
+    int8_t Link::getTheNumberOfJoint()
     {
       return number_of_joint_in_link_;
     }
 
-    float Link::GetMass()
+    float Link::getMass()
     {
       return mass_;
     }
 
-    void Link::SetMass(float mass)
+    void Link::setMass(float mass)
     {
       mass_ = mass;
     }
 
-    float Link::GetInertiaMoment()
+    float Link::getInertiaMoment()
     {
       return inertia_moment_;
     }
 
-    void Link::SetInertiaMoment(float inertia_moment)
+    void Link::setInertiaMoment(float inertia_moment)
     {
       inertia_moment_ = inertia_moment;
     }
 
-    int8_t Link::FindJoint(int8_t joint_number)
+    int8_t Link::findJoint(int8_t joint_number)
     {
       int8_t i;
       for(i=0; i < number_of_joint_in_link_; i++)
@@ -279,12 +269,12 @@
       }
     }
 
-    Eigen::Vector3f Link::GetCenterPosition()
+    Eigen::Vector3f Link::getCenterPosition()
     {
       return center_position_;
     }
 
-    Eigen::Vector3f Link::GetCenterPosition(int8_t from)
+    Eigen::Vector3f Link::getCenterPosition(int8_t from)
     {
       Eigen::Vector3f temp;
       temp = center_position_ - jointinlink_.at(FineJoint(from)).relative_position;
@@ -292,7 +282,7 @@
       return temp;
     }
     
-    Eigen::Vector3f Link::GetRelativeJointPosition(int8_t to, int8_t from)
+    Eigen::Vector3f Link::getRelativeJointPosition(int8_t to, int8_t from)
     {
       Eigen::Vector3f temp;
 
@@ -300,7 +290,7 @@
       return temp; 
     }
 
-    Eigen::Vector3f Link::GetRelativeJointOrientation(int8_t to, int8_t from)
+    Eigen::Vector3f Link::getRelativeJointOrientation(int8_t to, int8_t from)
     {
       Eigen::Vector3f temp;
 
@@ -319,24 +309,24 @@
       orientation_ = Eigen::Matrix3f::Identity(3,3);
     }
     Tool::~Tool(){}
-    void Init(String tool_type, Eigen::Vector3f position_from_final_joint, Eigen::Matrix3f orientation_from_final_joint)
+    void init(String tool_type, Eigen::Vector3f position_from_final_joint, Eigen::Matrix3f orientation_from_final_joint)
     {
       tool_type_ = tool_type;
       position_from_final_joint_ = position_from_final_joint;
       orientation_from_final_joint_ = orientation_from_final_joint;
     }
 
-    Eigen::Vector3f Tool::GetRelativePosition()
+    Eigen::Vector3f Tool::getRelativePosition()
     {
       return position_from_final_joint_;
     }
 
-    Eigen::Matrix3f Tool::GetRlativeOrientation()
+    Eigen::Matrix3f Tool::getRlativeOrientation()
     {
       return orientation_from_final_joint_;
     }
 
-    Pose Tool::GetRelativePose()
+    Pose Tool::getRelativePose()
     {
       Pose temp;
       temp.position = position_from_final_joint_;
@@ -344,27 +334,27 @@
       return temp;
     }
 
-    void Tool::SetPosition(Eigen::Vector3f position)
+    void Tool::setPosition(Eigen::Vector3f position)
     {
       position_ = position;
     }
 
-    void Tool::SetOrientation(Eigen::Matrix3f orientation)
+    void Tool::setOrientation(Eigen::Matrix3f orientation)
     {
       orientation_ = orientation;
     }
 
-    Eigen::Vector3f Tool::GetPosition()
+    Eigen::Vector3f Tool::getPosition()
     {
       return position_;
     }
 
-    Eigen::Matrix3f Tool::GetOrientation()
+    Eigen::Matrix3f Tool::getOrientation()
     {
       return orientation_;
     }
 
-    Pose Tool::GetPose()
+    Pose Tool::getPose()
     {
       Pose tool_pose;
       tool_pose.position = position_;

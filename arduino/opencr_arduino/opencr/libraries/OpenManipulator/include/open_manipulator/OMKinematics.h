@@ -14,7 +14,33 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM*/
+/* Authors: Hye-Jong KIM */
 
-#include "../../include/open_manipulator/OMAPI.h"
-#include "../../include/open_manipulator/OMManager.h"
+#ifndef OMKINEMATICS_H_
+#define OMKINEMATICS_H_
+
+#include "OMManager.h"
+#include "OMMath.h"
+
+#include <Eigen.h>        // Calls main Eigen matrix class library
+#include <Eigen/LU>       // Calls inverse, determinant, LU decomp., etc.
+#include <Eigen/Dense>
+#include <math.h>
+
+class OMKinematics
+{
+ private:
+   OMMath math_;
+
+ public:
+  OMKinematics();
+  ~OMKinematics();
+
+  void forward_kinematics();
+
+  void Jacobian();
+
+
+};
+
+#endif // OMKINEMATICS_H_

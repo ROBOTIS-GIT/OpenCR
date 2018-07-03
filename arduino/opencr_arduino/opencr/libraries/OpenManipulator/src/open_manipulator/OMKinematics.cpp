@@ -14,7 +14,21 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM*/
+/* Authors: Hye-Jong KIM */
 
-#include "../../include/open_manipulator/OMAPI.h"
-#include "../../include/open_manipulator/OMManager.h"
+#include "../../include/open_manipulator/OMKinematics.h"
+
+
+OMKinematics::OMKinematics(){}
+
+OMKinematics::~OMKinematics(){}
+
+void OMKinematics::forward_kinematics()
+{
+  
+}
+
+void OMKinematics::Jacobian()
+{
+
+}

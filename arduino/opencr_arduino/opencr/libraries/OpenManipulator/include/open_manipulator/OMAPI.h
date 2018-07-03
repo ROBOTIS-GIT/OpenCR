@@ -20,8 +20,33 @@
 #define OMAPI_H_
 
 #include "../../include/open_manipulator/OMManager.h"
+#include "../../include/open_manipulator/OMKinematics.h"
+//#include "../../include/open_manipulator/OMDynamixel.h"
+//#include "../../include/open_manipulator/OMPath.h"
 
-void MakeManipulator(int8_t number_of_manipulator);
+
+///////////////////////////////////////get(joint level)//////////////////////////////////////
+
+
+
+
+///////////////////////////////////////set(joint level)//////////////////////////////////////
+
+
+
+
+///////////////////////////////////////get(position level)///////////////////////////////////
+
+
+
+
+
+///////////////////////////////////////set(position level)///////////////////////////////////
+
+
+
+
+
 
 #endif // OMAPI_H_  
    

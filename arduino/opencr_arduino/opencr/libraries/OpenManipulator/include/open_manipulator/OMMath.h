@@ -14,7 +14,26 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM*/
+/* Authors: Hye-Jong KIM */
 
-#include "../../include/open_manipulator/OMAPI.h"
-#include "../../include/open_manipulator/OMManager.h"
+#ifndef OMMATH_H_
+#define OMMATH_H_
+
+#include <Eigen.h>        // Calls main Eigen matrix class library
+#include <Eigen/LU>       // Calls inverse, determinant, LU decomp., etc.
+
+#include <math.h>
+
+class OMMath
+{
+ public:
+  OMMath();
+  ~OMMath();
+  float sign(float number);
+  Eigen::Matrix3f skewSymmetricMatrix(Eigen::Vector3f v);
+  Eigen::Matrix3f rodriguesRotationMatrix(Eigen::Vector3f axis, float angle);
+
+  
+};
+
+#endif // OMMATH_H_
