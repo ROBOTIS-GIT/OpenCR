@@ -76,7 +76,7 @@ void loop()
 {
   uint32_t t = millis();
   updateTime();
-  updateVariable();
+  updateVariable(nh.connected());
   updateTFPrefix(nh.connected());
 
   if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_FREQUENCY))
@@ -148,6 +148,9 @@ void loop()
 
   // Call all the callbacks waiting to be called at that point in time
   nh.spinOnce();
+
+  // Wait the serial link time to process
+  waitForSerialLink(nh.connected());
 }
 
 /*******************************************************************************
@@ -597,11 +600,11 @@ void driveTest(uint8_t buttons)
 /*******************************************************************************
 * Update variable (initialization)
 *******************************************************************************/
-void updateVariable(void)
+void updateVariable(bool isConnected)
 {
   static bool variable_flag = false;
   
-  if (nh.connected())
+  if (isConnected)
   {
     if (variable_flag == false)
     {      
@@ -614,6 +617,28 @@ void updateVariable(void)
   else
   {
     variable_flag = false;
+  }
+}
+
+/*******************************************************************************
+* Wait for Serial Link
+*******************************************************************************/
+void waitForSerialLink(bool isConnected)
+{
+  static bool wait_flag = false;
+  
+  if (isConnected)
+  {
+    if (wait_flag == false)
+    {      
+      delay(10);
+
+      wait_flag = true;
+    }
+  }
+  else
+  {
+    wait_flag = false;
   }
 }
 
@@ -644,11 +669,11 @@ ros::Time addMicros(ros::Time & t, uint32_t _micros)
   sec  = _micros / 1000000 + t.sec;
   nsec = _micros % 1000000 + 1000 * (t.nsec / 1000);
   
-  if (nsec >= 1e9) 
-  {
-    sec  = sec + 1;
-    nsec = nsec - 1e9;
-  }
+  // if (nsec >= 1e9) 
+  // {
+  //   sec  = sec + 1;
+  //   nsec = nsec - 1e9;
+  // }
   return ros::Time(sec, nsec);
 }
 
