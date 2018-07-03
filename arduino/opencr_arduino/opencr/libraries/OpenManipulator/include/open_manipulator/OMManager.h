@@ -21,10 +21,13 @@
 
 #include <unistd.h>
 #include <WString.h>
-#include <Eigen.h>       
+#include <Eigen.h>
+#include <vector>       
 
 #define DEG2RAD (M_PI / 180.0)
 #define RAD2DEG (180.0 / M_PI)
+
+using namespace std;
 
 typedef struct
 {
@@ -39,64 +42,17 @@ typedef struct
   float acceleration;
 } State;
 
-
-/////////////////////////////////////////Manipulator//////////////////////////////////////////
-
-template <typename number_of_joint, typename number_of_link, typename number_of_tool>
-class Manipulator
+typedef struct
 {
-  private:
-    int8_t dof_;
-    String name_;
-    Eigen::Vector3f base_position_;
-    Eigen::Matrix3f base_orientation_;
-    int8_t number_of_joint_;
-    int8_t number_of_link_;
-    int8_t number_of_tool_;
-    Joint joint_[number_of_joint];
-    Link link_[number_of_link];
-    Tool tool_[number_of_tool];
-
-  public:
-    /////////////////func///////////////////
-    Manipulator(String name, int8_t dof, Joint* joint, Link* link, Tool* Tool):
-    number_of_joint_(number_of_joint),
-    number_of_link_(number_of_link),
-    number_of_tool_(number_of_tool)
-    {
-      name_ = name;
-      dof_ = dof;
-      base_position_ = Eigen::Vector3f::Zero();
-      base_orientation_ = Eigen::Matrix3f::Identity(3,3);
-    }
-    ~Manipulator(){}
-    void Load(Joint joint, Link link, Tool tool)
-    {
-      this.joint_ = joint;
-      this.link_ = link;
-      this.tool_ = tool;
-    }
-    void SetBasePosition(Eigen::Vector3f position)
-    {
-      base_position_ = base_position;
-    }
-    void SetBaseOrientation(Eigen::Matrix3f orientation)
-    {
-      base_orientation_ = base_orientation;
-    }
-    void SetDOF(int8_t dof)
-    {
-      dof_=dof;
-    }
-    ////////////////////////////////////////
-};   
+  int8_t number;
+  Eigen::Vector3f relative_position;
+  Eigen::Matrix3f relative_orientation;
+} JointInLink;
 
 class Joint
 {
   private:
-    String name_;
     int8_t dxl_id_;
-    int8_t number_;	
 
     float angle_;
     float velocity_;
@@ -107,159 +63,57 @@ class Joint
 
   public:
     /////////////////func///////////////////
-    Joint(): 
-      name_("UnknownJoint"),
-      dxl_id_(-1),
-      number_(-1),
-      angle_(0.0),
-      velocity_(0.0),
-      acceleration_(0.0)
-    {
-      position_ = Eigen::Vector3f::Zero();
-      orientation_ = Eigen::Matrix3f::Identity(3,3);
-    }
-    ~Joint(){}
-    void Init(String name, int8_t number, int8_t dxl_id)
-    {
-      name_ = name;
-      number_ = number;
-      dxl_id_ = dxl_id;
-    }
-
-    void SetAngle(float angle)
-    {
-      angle_ = angle;
-    }
-
-    void SetVelocity(float velocity)
-    {
-      velocity_ = velocity;
-    }
-
-    void SetAcceleration(float acceleration)
-    {
-      acceleration_ = acceleration;
-    }
-
-    float GetAngle()
-    {
-      return angle_;
-    }
-
-    float GetVelocity()
-    {
-      return velocity_;
-    }
-
-    float GetAcceleration()
-    {
-      return acceleration_;
-    }
-
-    void SetPosition(Eigen::Vector3f position)
-    {
-      position_ = position;
-    }
-
-    void SetOrientation(Eigen::Matrix3f orientation)
-    {
-      orientation_ = orientation;
-    }
-
-    Eigen::Vector3f GetPosition()
-    {
-      return position_;
-    }
-
-    Eigen::Matrix3f GetOrientation()
-    {
-      return orientation_;
-    }
-
-    Pose GetPose()
-    {
-      Pose joint_pose;
-      joint_pose.position = position_;
-      joint_pose.orientation = orientation_;
-      return joint_pose;
-    }
+    Joint();
+    ~Joint();
+    void SetId(int8_t dxl_id);
+    int8_t GetId();
+    void SetAngle(float angle);
+    float GetAngle();
+    void SetVelocity(float velocity);
+    float GetVelocity();    
+    void SetAcceleration(float acceleration);
+    float GetAcceleration();
+    void SetPosition(Eigen::Vector3f position);
+    Eigen::Vector3f GetPosition();
+    void SetOrientation(Eigen::Matrix3f orientation);
+    Eigen::Matrix3f GetOrientation();
+    void SetPose(Pose joint_pose);
+    Pose GetPose();
     ////////////////////////////////////////
 };
 
 class Link
 {
   private:
-    String name_;
+
+    int8_t counter_;
+    int8_t number_of_joint_in_link_;
     float mass_;			
     float inertia_moment_;
-    int8_t number_of_joint_in_link_;
-
     Eigen::Vector3f center_position_;
 
+    vector<JointInLink> jointinlink_(1);
+
   public:
     /////////////////func///////////////////
-    Link(): 
-    name_("UnknownLink"),
-    mass_(0.0),
-    inertia_moment_(0.0)
-    {
-      center_position_ = Eigen::Vector3f::Zero();
-    }
-    ~Link(){}
-    void Init(String name, int8_t number_of_joint_in_link)
-    {
-      name_ = name;
-      number_of_joint_in_link_ = number_of_joint_in_link;
-      JointInLink jointinlink[number_of_joint_in_link];
-    }
-    void Init(String name, int8_t number_of_joint_in_link, float mass, Eigen::Vector3f center_position)
-    {
-      name_ = name;
-      number_of_joint_in_link_ = number_of_joint_in_link;
-      mass_ = mass;
-      center_position_ = center_position;
-    }
-
-    float GetInertiaMoment()
-    {
-      return inertia_moment_;
-    }
-    ////////////////////////////////////////
-};
-
-class JointInLink
-{
-  private:
-  int8_t number_;
-            
-  Eigen::Vector3f relative_position_;
-  Eigen::Matrix3f relative_orientation_;
-  public:
-    /////////////////func///////////////////
-    JointInLink():
-    number_(-1)
-    {
-      relative_position_ = Eigen::Vector3f::Zero();
-      relative_orientation_ = Eigen::Matrix3f::Identity(3,3);
-    }
-    ~JointInLink(){}
-    void Init(int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation)
-    {
-      number_=number;
-      relative_position_ = relative_position;
-      relative_orientation_ = relative_orientation;
-    }
-    void Init(int8_t number, Eigen::Vector3f relative_position, Eigen::Vector3f axis)
-    {
-      number_=number;
-      relative_position_ = relative_position;
-      relative_orientation_;
-    }
-    void Init(int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_rotation_matrix, Eigen::Vector3f axis)
-    {
-      number_=number;
-      relative_position_ = relative_position;
-    }
+    Link();
+    ~Link();
+    void Init(int8_t number_of_joint_in_link);
+    void Init(int8_t number_of_joint_in_link, float mass, Eigen::Vector3f center_position);
+    void Init(int8_t number_of_joint_in_link, float mass, float inertia_moment, Eigen::Vector3f center_position);
+    void SetJointInLink(int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation);
+    void SetJointInLink(int8_t joint_in_link_number, int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation);
+    JointInLink GetJointInformation(int8_t joint_in_link_number);
+    int8_t GetTheNumberOfJoint();
+    float GetMass();
+    void SetMass(float mass);
+    float GetInertiaMoment();
+    void SetInertiaMoment(float inertia_moment);
+    int8_t FindJoint(int8_t joint_number);
+    Eigen::Vector3f GetCenterPosition();
+    Eigen::Vector3f GetCenterPosition(int8_t from);    
+    Eigen::Vector3f GetRelativeJointPosition(int8_t to, int8_t from);
+    Eigen::Vector3f GetRelativeJointOrientation(int8_t to, int8_t from);
     ////////////////////////////////////////
 };
 
@@ -267,8 +121,6 @@ class Tool
 {
   private:
     String tool_type_;
-    int8_t number_;
-
     Eigen::Vector3f position_from_final_joint_;
     Eigen::Matrix3f orientation_from_final_joint_;
 
@@ -276,47 +128,50 @@ class Tool
     Eigen::Matrix3f orientation_;
 
   public:
-    Tool():
-    tool_type_("null"),
-    number_(-1)
-    {
-      position_from_final_joint_ = Eigen::Vector3f::Zero();
-      orientation_from_final_joint_ = Eigen::Matrix3f::Identity(3,3);
-      position_ = Eigen::Vector3f::Zero();
-      orientation_ = Eigen::Matrix3f::Identity(3,3);
-    }
-    ~Tool(){}
-    void Init(String tool_type, int8_t number, Eigen::Vector3f position_from_final_joint, Eigen::Matrix3f orientation_from_final_joint)
-    {
-      tool_type_ = tool_type;
-      number_ = number;
-      position_from_final_joint_ = position_from_final_joint;
-      orientation_from_final_joint_ = orientation_from_final_joint;
-    }
-    void SetPosition(Eigen::Vector3f position)
-    {
-      position_ = position;
-    }
-    void SetOrientation(Eigen::Matrix3f orientation)
-    {
-      orientation_ = orientation;
-    }
-    Eigen::Vector3f GetPosition()
-    {
-      return position_;
-    }
-    Eigen::Matrix3f GetOrientation()
-    {
-      return orientation_;
-    }
-    Pose GetPose()
-    {
-      Pose tool_pose;
-      tool_pose.position = position_;
-      tool_pose.orientation = orientation_;
-      return tool_pose;
-    }
+    /////////////////func///////////////////
+    Tool();
+    ~Tool();
+    void Init(String tool_type, Eigen::Vector3f position_from_final_joint, Eigen::Matrix3f orientation_from_final_joint);
+    Eigen::Vector3f GetRelativePosition();
+    Eigen::Matrix3f GetRlativeOrientation();
+    Pose GetRelativePose();
+    void SetPosition(Eigen::Vector3f position);
+    void SetOrientation(Eigen::Matrix3f orientation);
+    Eigen::Vector3f GetPosition();
+    Eigen::Matrix3f GetOrientation();
+    Pose GetPose();
+    ////////////////////////////////////////
 };
+
+class Manipulator
+{
+  private:
+    int8_t dof_;
+    String name_;
+    Eigen::Vector3f base_position_;
+    Eigen::Matrix3f base_orientation_;
+    int8_t number_of_joint_;
+    int8_t number_of_link_;
+    int8_t number_of_tool_;
+  public:
+    vector<Joint> joint(1);
+    vector<Link> link(1);
+    vector<Tool> tool(1);
+
+    /////////////////func///////////////////
+    Manipulator(String name, int8_t dof);
+    Manipulator(int8_t dof);
+    ~Manipulator();
+    void Init(int8_t number_of_joint, int8_t number_of_link, int8_t number_of_tool);
+    void SetDOF(int8_t dof);
+    void SetBasePosition(Eigen::Vector3f base_position);
+    void SetBaseOrientation(Eigen::Matrix3f base_orientation);
+    void SetBasePose(Pose base_pose);
+    Eigen::Vector3f GetBasePosition();
+    Eigen::Matrix3f GetBaseOrientation();
+    Pose GetBasePose();
+    ////////////////////////////////////////
+};   
 
 #endif // OMMANAGER_H_
 
