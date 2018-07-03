@@ -148,9 +148,6 @@ void loop()
 
   // Call all the callbacks waiting to be called at that point in time
   nh.spinOnce();
-
-  // give the serial link time to process
-  delay(10);
 }
 
 /*******************************************************************************
@@ -649,7 +646,8 @@ ros::Time addMicros(ros::Time & t, uint32_t _micros)
   
   if (nsec >= 1e9) 
   {
-    sec++, nsec--;
+    sec  = sec + 1;
+    nsec = nsec - 1e9;
   }
   return ros::Time(sec, nsec);
 }
