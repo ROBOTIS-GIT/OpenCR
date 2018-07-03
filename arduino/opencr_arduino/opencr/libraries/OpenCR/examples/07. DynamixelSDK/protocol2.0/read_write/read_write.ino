@@ -53,8 +53,7 @@
 // Default setting
 #define DXL_ID                          1                   // Dynamixel ID: 1
 #define BAUDRATE                        57600
-#define DEVICENAME                      "1"                 // Check which port is being used on your controller
-                                                            // ex) Serial1: "1"   Serial2: "2"   Serial3: "3"
+#define DEVICENAME                      "OpenCR_DXL_Port"   // This definition only has a symbolic meaning and does not affect to any functionality
 
 #define TORQUE_ENABLE                   1                   // Value for enabling the torque
 #define TORQUE_DISABLE                  0                   // Value for disabling the torque

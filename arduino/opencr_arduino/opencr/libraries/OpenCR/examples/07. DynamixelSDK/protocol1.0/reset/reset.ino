@@ -54,8 +54,7 @@
 // Default setting
 #define DXL_ID                          1                   // Dynamixel ID: 1
 #define BAUDRATE                        57600
-#define DEVICENAME                      "1"                 // Check which port is being used on your controller
-                                                            // ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
+#define DEVICENAME                      "OpenCR_DXL_Port"   // This definition only has a symbolic meaning and does not affect to any functionality
 
 #define FACTORYRST_DEFAULTBAUDRATE      57600               // Dynamixel baudrate set by factoryreset
 #define NEW_BAUDNUM                     1                   // New baudnum to recover Dynamixel baudrate as it was
