@@ -46,6 +46,75 @@ typedef struct
   Eigen::Matrix3f relative_orientation;
 } JointInLink;
 
+class Manipulator;
+class Base;
+class Joint;
+class Link;
+class Tool;
+
+template <int8_t number_of_joint_, int8_t number_of_link_, int8_t number_of_tool_>
+class Manipulator
+{
+  private:
+    int8_t dof_;
+    String name_;
+
+  public:
+    Base base;
+    Joint joint[number_of_joint_];
+    Link link[number_of_link_];
+    Tool tool[number_of_tool_];
+
+    /////////////////func///////////////////
+    Manipulator(String name, int8_t dof);
+    Manipulator(int8_t dof);
+    ~Manipulator();
+    void setDOF(int8_t dof);
+    ////////////////////////////////////////
+};   
+
+
+class Base
+{
+  private:
+    int8_t counter_;
+    int8_t number_of_base_joint_;
+    float mass_;			
+    float inertia_moment_;
+    Eigen::Vector3f center_position_;
+    Eigen::Vector3f base_position_;
+    Eigen::Matrix3f base_orientation_;
+
+    vector<JointInLink> base_joint_(1);
+
+  public:
+    /////////////////func///////////////////
+    Base();
+    ~Base();
+    void init(int8_t number_of_base_joint);
+    void init(int8_t number_of_base_joint, float mass, Eigen::Vector3f center_position);
+    void init(int8_t number_of_base_joint, float mass, float inertia_moment, Eigen::Vector3f center_position);
+    void setBaseJoint(int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation);
+    void setBaseJoint(int8_t base_joint_number, int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation);
+    JointInLink getJointInformation(int8_t base_joint_number);
+    int8_t getTheNumberOfJoint();
+    float getMass();
+    void setMass(float mass);
+    float getInertiaMoment();
+    void setInertiaMoment(float inertia_moment);
+    int8_t findJoint(int8_t joint_number);
+    Eigen::Vector3f getCenterPosition(); 
+    Eigen::Vector3f getBaseJointPosition(int8_t to);
+    Eigen::Vector3f getBaseJointOrientation(int8_t to);
+    void setBasePosition(Eigen::Vector3f base_position);
+    void setBaseOrientation(Eigen::Matrix3f base_orientation);
+    void setBasePose(Pose base_pose);
+    Eigen::Vector3f getBasePosition();
+    Eigen::Matrix3f getBaseOrientation();
+    Pose getBasePose();
+    ////////////////////////////////////////
+};
+
 class Joint
 {
   private:
@@ -84,7 +153,6 @@ class Joint
 class Link
 {
   private:
-
     int8_t counter_;
     int8_t number_of_joint_in_link_;
     float mass_;			
@@ -142,34 +210,6 @@ class Tool
     ////////////////////////////////////////
 };
 
-template <int8_t number_of_joint_, int8_t number_of_link_, int8_t number_of_tool_>
-class Manipulator
-{
-  private:
-    int8_t dof_;
-    String name_;
-    Eigen::Vector3f base_position_;
-    Eigen::Matrix3f base_orientation_;
-
-  public:
-    Joint joint[number_of_joint_];
-    Link link[number_of_link_];
-    Tool tool[number_of_tool_];
-
-    /////////////////func///////////////////
-    Manipulator(String name, int8_t dof);
-    Manipulator(int8_t dof);
-    ~Manipulator();
-    //void init(int8_t number_of_joint, int8_t number_of_link, int8_t number_of_tool);
-    void setDOF(int8_t dof);
-    void setBasePosition(Eigen::Vector3f base_position);
-    void setBaseOrientation(Eigen::Matrix3f base_orientation);
-    void setBasePose(Pose base_pose);
-    Eigen::Vector3f getBasePosition();
-    Eigen::Matrix3f getBaseOrientation();
-    Pose getBasePose();
-    ////////////////////////////////////////
-};   
 
 #endif // OMMANAGER_H_
 
