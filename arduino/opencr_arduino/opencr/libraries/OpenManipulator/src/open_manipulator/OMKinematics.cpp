@@ -25,7 +25,7 @@ OMKinematics::~OMKinematics(){}
 
 void OMKinematics::forward_kinematics()
 {
-  
+  Base //base joint
 }
 
 void OMKinematics::Jacobian()

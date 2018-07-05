@@ -34,78 +34,91 @@ typedef struct
 
 typedef struct
 {
-  float position;
-  float velocity;
-  float acceleration;
+  float angle;
+  float angular_velocity;
+  float angular_acceleration;
 } State;
 
 typedef struct
 {
-  int8_t number;
+  int8_t joint_number;
   Eigen::Vector3f relative_position;
   Eigen::Matrix3f relative_orientation;
-} JointInLink;
+} InnerJoint;
+
+typedef struct
+{
+  float mass;
+  Eigen::Vector3f center_position;
+  float moment;
+} Inertia;
+
 
 class Manipulator;
+class Link;
 class Base;
 class Joint;
-class Link;
 class Tool;
 
-template <int8_t number_of_joint_, int8_t number_of_link_, int8_t number_of_tool_>
+template <int8_t type_, int8_t joint_size_, int8_t link_size_, int8_t tool_size>
 class Manipulator
 {
   private:
     int8_t dof_;
-    String name_;
 
   public:
-    Base base;
-    Joint joint[number_of_joint_];
-    Link link[number_of_link_];
-    Tool tool[number_of_tool_];
+    Base base_;
+    Joint joint_[joint_size_];
+    Link link_[link_size_];
+    Tool tool_[tool_size];
 
     /////////////////func///////////////////
-    Manipulator(String name, int8_t dof);
     Manipulator(int8_t dof);
     ~Manipulator();
     void setDOF(int8_t dof);
     ////////////////////////////////////////
-};   
+};
 
-
-class Base
+class Link
 {
   private:
-    int8_t counter_;
-    int8_t number_of_base_joint_;
-    float mass_;			
-    float inertia_moment_;
-    Eigen::Vector3f center_position_;
-    Eigen::Vector3f base_position_;
-    Eigen::Matrix3f base_orientation_;
+    int8_t inner_joint_size_;
+    Inertia inertia_;
+    vector<InnerJoint> inner_joint_(1);
+  public:
+    /////////////////func///////////////////
+    Link();
+    ~Link();
+    void init(int8_t inner_joint_size);
 
-    vector<JointInLink> base_joint_(1);
+    void setInertia(Inertia inertia);
+    void setMass(float mass);
+    void setCenterPosition(Eigen::Vector3f center_position);
+    void setInertiaMoment(float inertia_moment);
+    Inertia getInertia();
+    float getMass();
+    Eigen::Vector3f getCenterPosition();
+    Eigen::Vector3f getCenterPosition(int8_t from);
+    float getInertiaMoment();
 
+    int8_t getInnerJointSize();
+    void setInnerJoint(int8_t joint_number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation);
+    InnerJoint getInnerJointInformation(int8_t joint_number);
+    Eigen::Vector3f getRelativeJointPosition(int8_t to, int8_t from);
+    Eigen::Vector3f getRelativeJointOrientation(int8_t to, int8_t from);
+    
+    int8_t findJoint(int8_t joint_number);
+    ////////////////////////////////////////
+};
+
+class Base: public Link
+{
+  private:
+    Pose base_pose_;
   public:
     /////////////////func///////////////////
     Base();
     ~Base();
-    void init(int8_t number_of_base_joint);
-    void init(int8_t number_of_base_joint, float mass, Eigen::Vector3f center_position);
-    void init(int8_t number_of_base_joint, float mass, float inertia_moment, Eigen::Vector3f center_position);
-    void setBaseJoint(int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation);
-    void setBaseJoint(int8_t base_joint_number, int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation);
-    JointInLink getJointInformation(int8_t base_joint_number);
-    int8_t getTheNumberOfJoint();
-    float getMass();
-    void setMass(float mass);
-    float getInertiaMoment();
-    void setInertiaMoment(float inertia_moment);
-    int8_t findJoint(int8_t joint_number);
-    Eigen::Vector3f getCenterPosition(); 
-    Eigen::Vector3f getBaseJointPosition(int8_t to);
-    Eigen::Vector3f getBaseJointOrientation(int8_t to);
     void setBasePosition(Eigen::Vector3f base_position);
     void setBaseOrientation(Eigen::Matrix3f base_orientation);
     void setBasePose(Pose base_pose);
@@ -119,14 +132,9 @@ class Joint
 {
   private:
     int8_t dxl_id_;
-
-    float angle_;
-    float velocity_;
-    float acceleration_;
+    State joint_state_;
     Eigen::Vector3f axis_;
-
-    Eigen::Vector3f position_;
-    Eigen::Matrix3f orientation_;
+    Pose joint_pose_;
 
   public:
     /////////////////func///////////////////
@@ -150,50 +158,11 @@ class Joint
     ////////////////////////////////////////
 };
 
-class Link
-{
-  private:
-    int8_t counter_;
-    int8_t number_of_joint_in_link_;
-    float mass_;			
-    float inertia_moment_;
-    Eigen::Vector3f center_position_;
-
-    vector<JointInLink> jointinlink_(1);
-
-  public:
-    /////////////////func///////////////////
-    Link();
-    ~Link();
-    void init(int8_t number_of_joint_in_link);
-    void init(int8_t number_of_joint_in_link, float mass, Eigen::Vector3f center_position);
-    void init(int8_t number_of_joint_in_link, float mass, float inertia_moment, Eigen::Vector3f center_position);
-    void setJointInLink(int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation);
-    void setJointInLink(int8_t joint_in_link_number, int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation);
-    JointInLink getJointInformation(int8_t joint_in_link_number);
-    int8_t getTheNumberOfJoint();
-    float getMass();
-    void setMass(float mass);
-    float getInertiaMoment();
-    void setInertiaMoment(float inertia_moment);
-    int8_t findJoint(int8_t joint_number);
-    Eigen::Vector3f getCenterPosition();
-    Eigen::Vector3f getCenterPosition(int8_t from);    
-    Eigen::Vector3f getRelativeJointPosition(int8_t to, int8_t from);
-    Eigen::Vector3f getRelativeJointOrientation(int8_t to, int8_t from);
-    ////////////////////////////////////////
-};
 
 class Tool
 {
   private:
-    String tool_type_;
-    Eigen::Vector3f position_from_final_joint_;
-    Eigen::Matrix3f orientation_from_final_joint_;
-
-    Eigen::Vector3f position_;
-    Eigen::Matrix3f orientation_;
-
+    int8_t tool_type_;
   public:
     /////////////////func///////////////////
     Tool();

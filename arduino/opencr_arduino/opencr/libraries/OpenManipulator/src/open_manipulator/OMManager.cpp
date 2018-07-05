@@ -20,13 +20,6 @@
 #include "../../include/open_manipulator/OMManager.h"
 
 //////////////////////////////////////Manipulator////////////////////////////////////////////
-
-Manipulator::Manipulator(String name, int8_t dof):
-{
-  name_ = name;
-  dof_ = dof;
-}
-
 Manipulator::Manipulator(int8_t dof):
 name("UnknownManipulator")
 {
@@ -39,6 +32,151 @@ void Manipulator::setDOF(int8_t dof)
 {
   dof_=dof;
 }
+
+//////////////////////////////////////Link////////////////////////////////////////////
+
+Link::Link():
+inner_joint_size_(1),
+{
+  inertia_.mass = 0;
+  inertia_.center_position = Eigen::Vector3f::Zero();
+  inertia_.moment = 0;
+}
+
+Link::~Link(){}
+
+void Link::init(int8_t inner_joint_size)
+{
+  inner_joint_size_ = inner_joint_size;
+  inner_joint_.resize(inner_joint_size_);
+}
+
+void Link::setInertia(Inertia inertia)
+{
+  inertia_ = inertia;
+}
+
+void Link::setMass(float mass)
+{
+  inertia_.mass = mass;
+}
+
+void Link::setCenterPosition(Eigen::Vector3f center_position)
+{
+  inertia_.center_position =center_position;
+}
+
+void Link::setInertiaMoment(float inertia_moment)
+{
+  inertia_.moment = inertia_moment;
+}
+
+Inertia Link::getInertia()
+{
+  return inertia_;
+}
+
+float Link::getMass()
+{
+  return inertia_.mass;
+}
+
+Eigen::Vector3f Link::getCenterPosition()
+{
+  return inertia_.center_position;
+}
+
+Eigen::Vector3f Link::getCenterPosition(int8_t from)
+{
+  Eigen::Vector3f temp;
+  temp = inertia_.center_position - inner_joint_.at(FineJoint(from)).relative_position;
+  return temp;
+}
+
+float Link::getInertiaMoment()
+{
+  return inertia_.moment;
+}
+
+int8_t getInnerJointSize()
+{
+  return inner_joint_size_;
+}
+
+void Link::setInnerJoint(int8_t joint_number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation)
+{
+  int8_t i;
+  if(findJoint(joint_number) >= 0)
+  {
+    inner_joint_.at(findJoint(joint_number)).joint_number = joint_number;
+    inner_joint_.at(findJoint(joint_number)).relative_position = relative_position;
+    inner_joint_.at(findJoint(joint_number)).relative_orientation = relative_orientation;
+  }
+  else
+  {
+    for(i=0; i>inner_joint_size_;i++)
+    {
+      if(findJoint(i) == -1)
+      {
+        inner_joint_.at(findJoint(i)).joint_number = joint_number;
+        inner_joint_.at(findJoint(i)).relative_position = relative_position;
+        inner_joint_.at(findJoint(i)).relative_orientation = relative_orientation;
+        return
+      }
+      else
+      {
+        //error
+      }
+    }
+  }
+}
+
+
+JointInLink Link::getJointInformation(int8_t joint_in_link_number)
+{
+  JointInLink temp;
+  temp.number = jointinlink_.at(joint_in_link_number).number;
+  temp.relative_position = jointinlink_.at(joint_in_link_number).relative_position;
+  temp.relative_orientation = jointinlink_.at(joint_in_link_number).relative_orientation;
+  return temp;
+}
+
+Eigen::Vector3f Link::getRelativeJointPosition(int8_t to, int8_t from)
+{
+  Eigen::Vector3f temp;
+  temp = jointinlink_.at(FindJoint(to)).relative_position - jointinlink_.at(FindJoint(from)).relative_position;
+  return temp; 
+}
+
+Eigen::Vector3f Link::getRelativeJointOrientation(int8_t to, int8_t from)
+{
+  Eigen::Vector3f temp;
+  temp = jointinlink_.at(FindJoint(from)).relative_orientation.transpose() * jointinlink_.at(FindJoint(to)).relative_orientation;
+  return temp; 
+}
+
+
+
+int8_t Link::findJoint(int8_t joint_number)
+{
+  int8_t i;
+  for(i=0; i < number_of_joint_in_link_; i++)
+  {
+    if(jointinlink_.at(i).number == joint_number)
+    {
+      return i;
+    }
+  }
+  return -1;
+}
+
+    
+
+
+
+
+
+
 
 //////////////////////////////////////////Base///////////////////////////////////////////////
 
@@ -285,128 +423,6 @@ Pose Joint::getPose()
   return joint_pose;
 }
  
-//////////////////////////////////////Link////////////////////////////////////////////
-
-Link::Link(): 
-counter_(0),
-number_of_joint_in_link_(0),
-mass_(0.0),
-inertia_moment_(0.0)
-{
-  center_position_ = Eigen::Vector3f::Zero();
-}
-
-Link::~Link(){}
-
-void Link::init(int8_t number_of_joint_in_link)
-{
-  number_of_joint_in_link_ = number_of_joint_in_link;
-  jointinlink_.resize(number_of_joint_in_link_);
-}
-
-void Link::init(int8_t number_of_joint_in_link, float mass, Eigen::Vector3f center_position)
-{
-  number_of_joint_in_link_ = number_of_joint_in_link;
-  jointinlink_.resize(number_of_joint_in_link_);
-  mass_ = mass;
-  center_position_ = center_position;
-}
-
-void Link::init(int8_t number_of_joint_in_link, float mass, float inertia_moment, Eigen::Vector3f center_position)
-{
-  number_of_joint_in_link_ = number_of_joint_in_link;
-  jointinlink_.resize(number_of_joint_in_link_);
-  inertia_moment_ = inertia_moment;
-  mass_ = mass;
-  center_position_ = center_position;
-}
-
-void Link::setJointInLink(int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation)
-{
-  jointinlink_.at(counter_).number = number;
-  jointinlink_.at(counter_).relative_position = relative_position; 
-  jointinlink_.at(counter_).relative_orientation = relative_orientation;
-  if(counter_ >= number_of_joint_in_link_){counter_++;}
-}
-
-void Link::setJointInLink(int8_t joint_in_link_number, int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation)
-{
-  jointinlink_.at(joint_in_link_number).number = number;
-  jointinlink_.at(joint_in_link_number).relative_position = relative_position; 
-  jointinlink_.at(joint_in_link_number).relative_orientation = relative_orientation;
-}
-
-JointInLink Link::getJointInformation(int8_t joint_in_link_number)
-{
-  JointInLink temp;
-  temp.number = jointinlink_.at(joint_in_link_number).number;
-  temp.relative_position = jointinlink_.at(joint_in_link_number).relative_position;
-  temp.relative_orientation = jointinlink_.at(joint_in_link_number).relative_orientation;
-  return temp;
-}
-
-int8_t Link::getTheNumberOfJoint()
-{
-  return number_of_joint_in_link_;
-}
-
-float Link::getMass()
-{
-  return mass_;
-}
-
-void Link::setMass(float mass)
-{
-  mass_ = mass;
-}
-
-float Link::getInertiaMoment()
-{
-  return inertia_moment_;
-}
-
-void Link::setInertiaMoment(float inertia_moment)
-{
-  inertia_moment_ = inertia_moment;
-}
-
-int8_t Link::findJoint(int8_t joint_number)
-{
-  int8_t i;
-  for(i=0; i < number_of_joint_in_link_; i++)
-  {
-    if(jointinlink_.at(i).number == joint_number)
-    {
-      return i;
-    }
-  }
-}
-
-Eigen::Vector3f Link::getCenterPosition()
-{
-  return center_position_;
-}
-
-Eigen::Vector3f Link::getCenterPosition(int8_t from)
-{
-  Eigen::Vector3f temp;
-  temp = center_position_ - jointinlink_.at(FineJoint(from)).relative_position;
-  return temp;
-}
-    
-Eigen::Vector3f Link::getRelativeJointPosition(int8_t to, int8_t from)
-{
-  Eigen::Vector3f temp;
-  temp = jointinlink_.at(FindJoint(to)).relative_position - jointinlink_.at(FindJoint(from)).relative_position;
-  return temp; 
-}
-
-Eigen::Vector3f Link::getRelativeJointOrientation(int8_t to, int8_t from)
-{
-  Eigen::Vector3f temp;
-  temp = jointinlink_.at(FindJoint(from)).relative_orientation.transpose() * jointinlink_.at(FindJoint(to)).relative_orientation;
-  return temp; 
-}
 
 //////////////////////////////////////Tool////////////////////////////////////////////
 
