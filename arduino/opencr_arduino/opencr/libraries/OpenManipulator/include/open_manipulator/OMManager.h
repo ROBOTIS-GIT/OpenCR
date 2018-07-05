@@ -60,6 +60,9 @@ class Base;
 class Joint;
 class Tool;
 
+Eigen::Vector3f MakeEigenVector3(float v1, float v2, float v3);
+Eigen::Matrix3f MakeEigenMatrix3(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33);
+
 template <int8_t type_, int8_t joint_size_, int8_t link_size_, int8_t tool_size>
 class Manipulator
 {
@@ -76,6 +79,40 @@ class Manipulator
     Manipulator(int8_t dof);
     ~Manipulator();
     void setDOF(int8_t dof);
+    ////////////////////////////////////////
+};
+
+class Joint
+{
+  private:
+    int8_t dxl_id_;
+    Eigen::Vector3f axis_;
+    State joint_state_;
+    Pose joint_pose_;
+
+  public:
+    /////////////////func///////////////////
+    Joint();
+    ~Joint();
+    void init(int8_t dxl_id, Eigen::Vector3f axis);
+    int8_t getId();
+    Eigen::Vector3f getAxis();
+
+    void setAngle(float angle);
+    void setAngularVelocity(float angular_velocity);
+    void setAngularAcceleration(float angular_acceleration);
+    void setJointState(State joint_state);
+    float getAngle();
+    float getAngularVelocity();    
+    float getAngularAcceleration();
+    State getJointState();
+
+    void setPosition(Eigen::Vector3f position);
+    void setOrientation(Eigen::Matrix3f orientation);
+    void setPose(Pose joint_pose);
+    Eigen::Vector3f getPosition();
+    Eigen::Matrix3f getOrientation();
+    Pose getPose();
     ////////////////////////////////////////
 };
 
@@ -128,57 +165,26 @@ class Base: public Link
     ////////////////////////////////////////
 };
 
-class Joint
-{
-  private:
-    int8_t dxl_id_;
-    State joint_state_;
-    Eigen::Vector3f axis_;
-    Pose joint_pose_;
-
-  public:
-    /////////////////func///////////////////
-    Joint();
-    ~Joint();
-    void init(int8_t dxl_id, Eigen::Vector3f axis);
-    int8_t getId();
-    Eigen::Vector3f getAxis();
-    void setAngle(float angle);
-    float getAngle();
-    void setVelocity(float velocity);
-    float getVelocity();    
-    void setAcceleration(float acceleration);
-    float getAcceleration();
-    void setPosition(Eigen::Vector3f position);
-    Eigen::Vector3f getPosition();
-    void setOrientation(Eigen::Matrix3f orientation);
-    Eigen::Matrix3f getOrientation();
-    void setPose(Pose joint_pose);
-    Pose getPose();
-    ////////////////////////////////////////
-};
-
-
-class Tool
+class Tool: public Link
 {
   private:
     int8_t tool_type_;
+    Pose tool_pose_;
   public:
     /////////////////func///////////////////
     Tool();
     ~Tool();
-    void init(String tool_type, Eigen::Vector3f position_from_final_joint, Eigen::Matrix3f orientation_from_final_joint);
-    Eigen::Vector3f getRelativePosition();
-    Eigen::Matrix3f getRlativeOrientation();
-    Pose getRelativePose();
-    void setPosition(Eigen::Vector3f position);
-    void setOrientation(Eigen::Matrix3f orientation);
-    Eigen::Vector3f getPosition();
-    Eigen::Matrix3f getOrientation();
-    Pose getPose();
+    void setToolType(int8_t tool_type);
+    int8_t getToolType();
+
+    void setToolPosition(Eigen::Vector3f tool_position);
+    void setToolOrientation(Eigen::Matrix3f tool_orientation);
+    void setToolPose(Pose tool_pose);
+    Eigen::Vector3f getToolPosition();
+    Eigen::Matrix3f getToolOrientation();
+    Pose getToolPose();
     ////////////////////////////////////////
 };
-
 
 #endif // OMMANAGER_H_
 
