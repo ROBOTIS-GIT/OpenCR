@@ -54,11 +54,17 @@ class OMLinkKinematics
   private:
     OMMath math_;
 
+    void getPassiveJointAngle(Joint* joint);
+    void getBasePose(Base& base, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation);
+    void getSinglejointPose(Manipulator* om, int8_t joint_number, int8_t mather_joint_number, int8_t link_number);
+    void getToolPose(Manipulator* om, int8_t tool_number, int8_t mather_joint_number);
+
+
   public:
     OMLinkKinematics();
     ~OMLinkKinematics();
 
-    void forward(Manipulator* omlink);
+    void forward(Manipulator* omlink, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation);
     void inverse(Manipulator* omlink);
 };
 

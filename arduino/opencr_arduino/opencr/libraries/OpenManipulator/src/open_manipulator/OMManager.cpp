@@ -287,19 +287,34 @@ Eigen::Vector3f Link::getRelativeJointOrientation(int8_t to, int8_t from)
   return temp; 
 }
 
-Eigen::Vector3f Link::getRelativeJointPosition(int8_t to)
-{
-  Eigen::Vector3f temp;
-  temp = inner_joint_.at(FindJoint(to)).relative_position;
-  return temp; 
-}
+// Eigen::Vector3f Link::getRelativeBasePosition(int8_t to)
+// {
+//   Eigen::Vector3f temp;
+//   temp = inner_joint_.at(FindJoint(to)).relative_position;
+//   return temp; 
+// }
 
-Eigen::Vector3f Link::getRelativeJointOrientation(int8_t to)
-{
-  Eigen::Vector3f temp;
-  temp = inner_joint_.at(FindJoint(to)).relative_orientation;
-  return temp; 
-}
+// Eigen::Vector3f Link::getRelativeBaseOrientation(int8_t to)
+// {
+//   Eigen::Vector3f temp;
+//   temp = inner_joint_.at(FindJoint(to)).relative_orientation;
+//   return temp; 
+// }
+
+// Eigen::Vector3f Link::getRelativeToolPosition(int8_t from)
+// {
+//   Eigen::Vector3f temp;
+//   temp = tool_pose_inner_joint_.at(FindJoint(to)).relative_position - inner_joint_.at(FindJoint(from)).relative_position;
+//   return temp; 
+// }
+
+// Eigen::Vector3f Link::getRelativeToolOrientation(int8_t from)
+// {
+//   Eigen::Vector3f temp;
+//   temp = inner_joint_.at(FindJoint(from)).relative_orientation.transpose() * inner_joint_.at(FindJoint(to)).relative_orientation;
+//   return temp; 
+// }
+
 
 int8_t Link::findJoint(int8_t joint_number)
 {

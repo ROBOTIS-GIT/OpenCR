@@ -151,8 +151,10 @@ class Link
     InnerJoint getInnerJointInformation(int8_t joint_number);
     Eigen::Vector3f getRelativeJointPosition(int8_t to, int8_t from);
     Eigen::Vector3f getRelativeJointOrientation(int8_t to, int8_t from);
-    Eigen::Vector3f getRelativeJointPosition(int8_t to);
-    Eigen::Vector3f getRelativeJointOrientation(int8_t to);
+    // Eigen::Vector3f getRelativeBasePosition(int8_t to);
+    // Eigen::Vector3f getRelativeBaseOrientation(int8_t to);
+    // Eigen::Vector3f getRelativeToolPosition(int8_t from);
+    // Eigen::Vector3f getRelativeToolOrientation(int8_t from);
     
     int8_t findJoint(int8_t joint_number);
     ////////////////////////////////////////
