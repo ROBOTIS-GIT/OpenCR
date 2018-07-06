@@ -14,21 +14,40 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM */
+/* Authors: Hye-Jong KIM, Darby Lim */
 
 #include "../../include/open_manipulator/OMKinematics.h"
 
+///////////////////////////////////OMChainKinematics/////////////////////////////////////////
 
-OMKinematics::OMKinematics(){}
+OMChainKinematics::OMChainKinematics(){}
+OMChainKinematics::~OMChainKinematics(){}
 
-OMKinematics::~OMKinematics(){}
+///////////////////////////////////OMScaraKinematics/////////////////////////////////////////
 
-void OMKinematics::forward_kinematics()
+OMScaraKinematics::OMScaraKinematics(){}
+OMScaraKinematics::~OMScaraKinematics(){}
+
+///////////////////////////////////OMLinkKinematics/////////////////////////////////////////
+
+OMLinkKinematics::OMLinkKinematics(){}
+OMLinkKinematics::~OMLinkKinematics(){}
+
+void OMLinkKinematics::forward(Manipulator* omlink)
 {
-  Base //base joint
+
+}
+void OMLinkKinematics::inverse(Manipulator* omlink)
+{
+
 }
 
-void OMKinematics::Jacobian()
-{
+///////////////////////////////////OMDeltaKinematics/////////////////////////////////////////
 
-}
+OMDeltaKinematics::OMDeltaKinematics(){}
+OMDeltaKinematics::~OMDeltaKinematics(){}
+
+///////////////////////////////////MYKinematics/////////////////////////////////////////
+
+MYKinematics::MYKinematics(){}
+MYKinematics::~MYKinematics(){}

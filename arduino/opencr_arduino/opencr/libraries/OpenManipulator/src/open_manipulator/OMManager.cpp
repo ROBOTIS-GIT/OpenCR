@@ -206,12 +206,12 @@ float Link::getMass()
   return inertia_.mass;
 }
 
-Eigen::Vector3f Link::getCenterPosition()
+Eigen::Vector3f Link::getRelativeCenterPosition()
 {
   return inertia_.center_position;
 }
 
-Eigen::Vector3f Link::getCenterPosition(int8_t from)
+Eigen::Vector3f Link::getRelativeCenterPosition(int8_t from)
 {
   Eigen::Vector3f temp;
   temp = inertia_.center_position - inner_joint_.at(FineJoint(from)).relative_position;
@@ -223,7 +223,18 @@ float Link::getInertiaMoment()
   return inertia_.moment;
 }
 
-int8_t getInnerJointSize()
+void Link::setCenterPosition(Eigen::Vector3f center_position)
+{
+  center_position_ = center_position;
+}
+
+Eigen::Vector3f Link::getCenterPosition()
+{
+  return center_position_;
+}
+
+
+int8_t Link::getInnerJointSize()
 {
   return inner_joint_size_;
 }
@@ -276,6 +287,20 @@ Eigen::Vector3f Link::getRelativeJointOrientation(int8_t to, int8_t from)
   return temp; 
 }
 
+Eigen::Vector3f Link::getRelativeJointPosition(int8_t to)
+{
+  Eigen::Vector3f temp;
+  temp = inner_joint_.at(FindJoint(to)).relative_position;
+  return temp; 
+}
+
+Eigen::Vector3f Link::getRelativeJointOrientation(int8_t to)
+{
+  Eigen::Vector3f temp;
+  temp = inner_joint_.at(FindJoint(to)).relative_orientation;
+  return temp; 
+}
+
 int8_t Link::findJoint(int8_t joint_number)
 {
   int8_t i;
@@ -298,33 +323,33 @@ Base::Base():
 }
 Base::~Base(){}
     
-void Base::setBasePosition(Eigen::Vector3f base_position)
+void Base::setPosition(Eigen::Vector3f base_position)
 {
   base_pose_.position = base_position;
 }
 
-void Base::setBaseOrientation(Eigen::Matrix3f base_orientation)
+void Base::setOrientation(Eigen::Matrix3f base_orientation)
 {
   base_pose_.orientation = base_orientation;
 }
 
-void Base::setBasePose(Pose base_pose)
+void Base::setPose(Pose base_pose)
 {
   base_pose_.position = base_pose.position;
   base_pose_.orientation = base_pose.orientation;
 }
 
-Eigen::Vector3f Base::getBasePosition()
+Eigen::Vector3f Base::getPosition()
 {
   return base_pose_.position;
 }
 
-Eigen::Matrix3f Base::getBaseOrientation()
+Eigen::Matrix3f Base::getOrientation()
 {
   return base_pose_.orientation;
 }
 
-Pose Base::getBasePose()
+Pose Base::getPose()
 {
   Pose temp;
   temp.position = base_pose_.position;
@@ -353,33 +378,33 @@ int8_t Tool::getToolType()
   return tool_type_;
 }
 
-void Tool::setToolPosition(Eigen::Vector3f tool_position)
+void Tool::setPosition(Eigen::Vector3f tool_position)
 {
   tool_pose_.position = tool_position;
 }
 
-void Tool::setToolOrientation(Eigen::Matrix3f tool_orientation)
+void Tool::setOrientation(Eigen::Matrix3f tool_orientation)
 {
   tool_pose_.orientation = tool_orientation;
 }
 
-void Tool::setToolPose(Pose tool_pose)
+void Tool::setPose(Pose tool_pose)
 {
   tool_pose_.position = tool_pose.position;
   tool_pose_.orientation = tool_pose.orientation;
 }
 
-Eigen::Vector3f Tool::getToolPosition()
+Eigen::Vector3f Tool::getPosition()
 {
   return tool_pose_.position;
 }
 
-Eigen::Matrix3f Tool::getToolOrientation()
+Eigen::Matrix3f Tool::getOrientation()
 {
   return tool_pose_.orientation;
 }
 
-Pose Tool::getToolPose()
+Pose Tool::getPose()
 {
   Pose temp;
   temp.position = tool_pose_.position;

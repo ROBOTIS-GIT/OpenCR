@@ -14,28 +14,46 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM */
+/* Authors: Darby Lim, Hye-Jong KIM */
 
-#ifndef OMMATH_H_
-#define OMMATH_H_
+#ifndef OMDEBUG_H_
+#define OMDEBUG_H_
 
-#include "../../include/open_manipulator/OMDebug.h"
+#include <Arduino.h>
+#include <Eigen.h>
 
-#include <Eigen.h>        // Calls main Eigen matrix class library
-#include <Eigen/LU>       // Calls inverse, determinant, LU decomp., etc.
+/*
+Manager Error
 
-#include <math.h>
 
-class OMMath
-{
- public:
-  OMMath();
-  ~OMMath();
-  float sign(float number);
-  Eigen::Matrix3f skewSymmetricMatrix(Eigen::Vector3f v);
-  Eigen::Matrix3f rodriguesRotationMatrix(Eigen::Vector3f axis, float angle);
 
-  
-};
+*/
 
-#endif // OMMATH_H_
+/*
+Kinematics Error
+
+
+
+*/
+
+/*
+Math Error
+
+
+
+*/
+
+
+
+int8_t manager_error;
+int8_t kinematics_error;
+int8_t math_error;
+int8_t api_error;
+int8_t path_error;
+int8_t dynamixel_error;
+
+
+
+
+#endif // OMDEBUG_H_
+

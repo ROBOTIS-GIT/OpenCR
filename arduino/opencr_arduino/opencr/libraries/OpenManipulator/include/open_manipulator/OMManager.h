@@ -19,6 +19,8 @@
 #ifndef OMMANAGER_H_
 #define OMMANAGER_H_
 
+#include "../../include/open_manipulator/OMDebug.h"
+
 #include <unistd.h>
 #include <WString.h>
 #include <Eigen.h>
@@ -49,7 +51,7 @@ typedef struct
 typedef struct
 {
   float mass;
-  Eigen::Vector3f center_position;
+  Eigen::Vector3f relative_center_position;
   float moment;
 } Inertia;
 
@@ -78,6 +80,7 @@ class Manipulator
     /////////////////func///////////////////
     Manipulator(int8_t dof);
     ~Manipulator();
+
     void setDOF(int8_t dof);
     ////////////////////////////////////////
 };
@@ -122,6 +125,8 @@ class Link
     int8_t inner_joint_size_;
     Inertia inertia_;
     vector<InnerJoint> inner_joint_(1);
+
+    Eigen::Vector3f center_position_;
   public:
     /////////////////func///////////////////
     Link();
@@ -130,19 +135,24 @@ class Link
 
     void setInertia(Inertia inertia);
     void setMass(float mass);
-    void setCenterPosition(Eigen::Vector3f center_position);
+    void setRelativeCenterPosition(Eigen::Vector3f relative_center_position);
     void setInertiaMoment(float inertia_moment);
     Inertia getInertia();
     float getMass();
-    Eigen::Vector3f getCenterPosition();
-    Eigen::Vector3f getCenterPosition(int8_t from);
+    Eigen::Vector3f getRelativeCenterPosition();
+    Eigen::Vector3f getRelativeCenterPosition(int8_t from);
     float getInertiaMoment();
+
+    void setCenterPosition(Eigen::Vector3f center_position);
+    Eigen::Vector3f getCenterPosition();
 
     int8_t getInnerJointSize();
     void setInnerJoint(int8_t joint_number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation);
     InnerJoint getInnerJointInformation(int8_t joint_number);
     Eigen::Vector3f getRelativeJointPosition(int8_t to, int8_t from);
     Eigen::Vector3f getRelativeJointOrientation(int8_t to, int8_t from);
+    Eigen::Vector3f getRelativeJointPosition(int8_t to);
+    Eigen::Vector3f getRelativeJointOrientation(int8_t to);
     
     int8_t findJoint(int8_t joint_number);
     ////////////////////////////////////////
@@ -156,12 +166,12 @@ class Base: public Link
     /////////////////func///////////////////
     Base();
     ~Base();
-    void setBasePosition(Eigen::Vector3f base_position);
-    void setBaseOrientation(Eigen::Matrix3f base_orientation);
-    void setBasePose(Pose base_pose);
-    Eigen::Vector3f getBasePosition();
-    Eigen::Matrix3f getBaseOrientation();
-    Pose getBasePose();
+    void setPosition(Eigen::Vector3f base_position);
+    void setOrientation(Eigen::Matrix3f base_orientation);
+    void setPose(Pose base_pose);
+    Eigen::Vector3f getPosition();
+    Eigen::Matrix3f getOrientation();
+    Pose getPose();
     ////////////////////////////////////////
 };
 
@@ -177,12 +187,12 @@ class Tool: public Link
     void setToolType(int8_t tool_type);
     int8_t getToolType();
 
-    void setToolPosition(Eigen::Vector3f tool_position);
-    void setToolOrientation(Eigen::Matrix3f tool_orientation);
-    void setToolPose(Pose tool_pose);
-    Eigen::Vector3f getToolPosition();
-    Eigen::Matrix3f getToolOrientation();
-    Pose getToolPose();
+    void setPosition(Eigen::Vector3f tool_position);
+    void setOrientation(Eigen::Matrix3f tool_orientation);
+    void setPose(Pose tool_pose);
+    Eigen::Vector3f getPosition();
+    Eigen::Matrix3f getOrientation();
+    Pose getPose();
     ////////////////////////////////////////
 };
 

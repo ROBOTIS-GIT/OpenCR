@@ -19,28 +19,68 @@
 #ifndef OMKINEMATICS_H_
 #define OMKINEMATICS_H_
 
-#include "OMManager.h"
-#include "OMMath.h"
+#include "../../include/open_manipulator/OMManager.h"
+#include "../../include/open_manipulator/OMMath.h"
+#include "../../include/open_manipulator/OMDebug.h"
 
 #include <Eigen.h>        // Calls main Eigen matrix class library
 #include <Eigen/LU>       // Calls inverse, determinant, LU decomp., etc.
 #include <Eigen/Dense>
 #include <math.h>
 
-class OMKinematics
+class OMChainKinematics
+{
+  private:
+    OMMath math_;
+
+  public:
+    OMChainKinematics();
+    ~OMChainKinematics();
+};
+
+class OMScaraKinematics
+{
+  private:
+    OMMath math_;
+
+  public:
+    OMScaraKinematics();
+    ~OMScaraKinematics();
+
+};
+
+class OMLinkKinematics
+{
+  private:
+    OMMath math_;
+
+  public:
+    OMLinkKinematics();
+    ~OMLinkKinematics();
+
+    void forward(Manipulator* omlink);
+    void inverse(Manipulator* omlink);
+};
+
+class OMDeltaKinematics
+{
+  private:
+    OMMath math_;
+
+  public:
+    OMDeltaKinematics();
+    ~OMDeltaKinematics();
+
+};
+
+class MYKinematics
 {
  private:
    OMMath math_;
 
  public:
-  OMKinematics();
-  ~OMKinematics();
-
-  void forward_kinematics();
-
-  void Jacobian();
-
-
+   MYKinematics();
+   ~MYKinematics();
 };
 
 #endif // OMKINEMATICS_H_

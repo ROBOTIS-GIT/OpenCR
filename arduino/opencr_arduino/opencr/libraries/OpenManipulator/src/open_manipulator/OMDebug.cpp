@@ -14,31 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM */
+/* Authors: Hye-Jong KIM, Darby Lim */
 
-#ifndef OPENMANIPULATORLINK_H_
-#define OPENMANIPULATORLINK_H_
+#include "../../include/open_manipulator/OMDebug.h"
 
-#include "../../include/open_manipulator/OMManager.h"
-   
-
-Joint OMLjoint[7];
-
-
-
-
-Link ONLlink[5];
-
-
-
-
-
-
-Tool OMLtool[1];
-
-//Manipulator<7,5,1> manipulator1("name", 3);
-
-//Manipulator OM();
-
-
-#endif // OPENMANIPULATORLINK_H_
