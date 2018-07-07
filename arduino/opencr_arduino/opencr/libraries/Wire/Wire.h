@@ -80,7 +80,7 @@ public:
 // Some temporary DEBUG defines
 //#define WIRE_USE_DEBUG_IO_PINS  // If defined enables debug
 #define WIRE_DEBUG_RECEIVE_FROM 11
-
+#define WIRE_DEBUG_END_TRANSFER 9
 // Some default buffer length and timeouts 
 #define BUFFER_LENGTH 32
 #define WIRE_TX_TIMEOUT 1000 // timeout in ms
@@ -171,6 +171,7 @@ private:
   uint8_t error;
   uint8_t slave_mode;
   uint8_t state_;                      // What state are we in 0=not active 1=begin() called
+  uint8_t sendStop_;                  // Last communications do sendStop?
   I2C_HandleTypeDef *hi2c_;           // Handle to the hardware I2c...
   void (*user_onRequest)(void);
   void (*user_onReceive)(int);

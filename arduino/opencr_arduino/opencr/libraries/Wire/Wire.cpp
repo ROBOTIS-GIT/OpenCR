@@ -216,6 +216,7 @@ TwoWire::TwoWire(I2C_HandleTypeDef *hi2c) {
 
   frequency_ = 100000;
   state_ = 0; // Begin has not been called. 
+  sendStop_ = 1;      // assume last call did a stop...
 }
 
 
@@ -233,6 +234,8 @@ void TwoWire::begin(void) {
 #ifdef WIRE_USE_DEBUG_IO_PINS
   pinMode(WIRE_DEBUG_RECEIVE_FROM, OUTPUT);
   digitalWriteFast(WIRE_DEBUG_RECEIVE_FROM, LOW);
+  pinMode(WIRE_DEBUG_END_TRANSFER, OUTPUT);
+  digitalWriteFast(WIRE_DEBUG_END_TRANSFER, LOW);
 #endif
   setClock(frequency_);   // set the clock.
 }
@@ -297,8 +300,11 @@ uint8_t  TwoWire::endTransmission(uint8_t sendStop)
     uint8_t *pData = txBuffer;
     uint16_t Size = txBufferLength;
   
-    if(hi2c_->State != HAL_I2C_STATE_READY) return HAL_BUSY;    
-    if(__HAL_I2C_GET_FLAG(hi2c_, I2C_FLAG_BUSY) == SET) return HAL_BUSY;
+    if(hi2c_->State != HAL_I2C_STATE_READY) return HAL_BUSY;
+
+    // If our last call did a sendStop we should not do something if bus is busy
+    if(sendStop_ && (__HAL_I2C_GET_FLAG(hi2c_, I2C_FLAG_BUSY) == SET)) return HAL_BUSY;
+
     /* Process Locked */
     __HAL_LOCK(hi2c_);
     
@@ -309,6 +315,8 @@ uint8_t  TwoWire::endTransmission(uint8_t sendStop)
     // Mode will depend on if sendStop is set
     transferConfig(device_address,txBufferLength, sendStop? I2C_AUTOEND_MODE : I2C_SOFTEND_MODE, 
         I2C_GENERATE_START_WRITE);
+
+    sendStop_ = sendStop; // remember for the next call...
 
     while(Size > 0) {
       /* Wait until TXIS flag is set */
@@ -339,14 +347,19 @@ uint8_t  TwoWire::endTransmission(uint8_t sendStop)
       /* Clear Configuration Register 2 */
       I2C_RESET_CR2(hi2c_);
     } else {
-      // not generating stop so wait until Transfer compelte
+      // not generating stop so wait until Transfer complete
+      debugDigitalWrite(WIRE_DEBUG_END_TRANSFER, HIGH);
       if(waitOnFlagUntilTimeout(I2C_FLAG_TC, WIRE_TX_TIMEOUT) != HAL_OK) {
+        debugDigitalWrite(WIRE_DEBUG_END_TRANSFER, LOW);
+        debugDigitalWrite(WIRE_DEBUG_END_TRANSFER, HIGH);
+        debugDigitalWrite(WIRE_DEBUG_END_TRANSFER, LOW);
         if(hi2c_->ErrorCode == HAL_I2C_ERROR_AF) {
           return HAL_ERROR; 
         } else {
           return HAL_TIMEOUT;
         }
       }
+      debugDigitalWrite(WIRE_DEBUG_END_TRANSFER, LOW);
       // Not sure if we need to reset CR2?  or wait for stop condtion? 
       // Assuming not and next transfer will do it.
     }
@@ -407,12 +420,12 @@ uint8_t TwoWire::requestFrom(uint8_t address, uint8_t quantity, uint8_t sendStop
 
   if(hi2c_->State == HAL_I2C_STATE_READY)
   {    
-    if(__HAL_I2C_GET_FLAG(hi2c_, I2C_FLAG_BUSY) == SET)
+    // If last call did a sendStop then we should not continue if the BUS is busy
+    if(sendStop_ && (__HAL_I2C_GET_FLAG(hi2c_, I2C_FLAG_BUSY) == SET))
     {
       //Serial.println("TwoWire::requestFrom Busy");
       return 0; //HAL_BUSY;
     }
-    
     /* Process Locked */
     __HAL_LOCK(hi2c_);
     
@@ -421,6 +434,7 @@ uint8_t TwoWire::requestFrom(uint8_t address, uint8_t quantity, uint8_t sendStop
     
     transferConfig(address<<1,  quantity, sendStop? I2C_AUTOEND_MODE : I2C_SOFTEND_MODE, 
         I2C_GENERATE_START_READ);
+    sendStop_ = sendStop; // remember for the next call...
     
     do
     {
