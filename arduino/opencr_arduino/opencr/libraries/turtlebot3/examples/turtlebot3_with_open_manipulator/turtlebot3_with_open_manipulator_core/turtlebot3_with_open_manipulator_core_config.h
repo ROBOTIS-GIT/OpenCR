@@ -39,7 +39,7 @@
 #include <turtlebot3_msgs/VersionInfo.h>
 
 #include <TurtleBot3.h>
-#include <OpenManipulator.h>
+#include <OpenManipulator_for_tb3.h>
 #include "turtlebot3_with_open_manipulator.h"
 
 #include <math.h>
