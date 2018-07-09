@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-#if 0
+
 /* Authors: Hye-Jong KIM */
 
 #include "../../include/open_manipulator/OMMath.h"
@@ -57,6 +57,3 @@ Eigen::Matrix3f OPMMath::rodriguesRotationMatrix(Eigen::Vector3f axis, float ang
 
   return rotation_matrix;
 }
-
-
-#endif

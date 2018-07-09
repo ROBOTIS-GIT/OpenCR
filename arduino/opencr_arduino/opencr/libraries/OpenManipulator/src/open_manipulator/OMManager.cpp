@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-#if 0
+
 /* Authors: Hye-Jong KIM*/
 
 
@@ -520,6 +520,3 @@ Eigen::Matrix3f Link::getRelativeToolOrientation(int8_t from)
   temp = getRelativeJointorientation(from).transpose() * relative_tool_pose_.orientation;
   return temp; 
 }
-
-
-#endif

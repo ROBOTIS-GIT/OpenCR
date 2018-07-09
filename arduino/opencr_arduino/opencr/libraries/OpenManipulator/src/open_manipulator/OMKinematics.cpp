@@ -15,7 +15,7 @@
 *******************************************************************************/
 
 /* Authors: Hye-Jong KIM, Darby Lim */
-#if 0
+
 #include "../../include/open_manipulator/OMKinematics.h"
 
 ///////////////////////////////////OMKinematicsMethod/////////////////////////////////////////
@@ -161,5 +161,3 @@ OMDeltaKinematics::~OMDeltaKinematics(){}
 
 MYKinematics::MYKinematics(){}
 MYKinematics::~MYKinematics(){}
-
-#endif
