@@ -16,7 +16,7 @@
 
 /* Authors: Darby Lim */
 
-#include "../../include/open_manipulator/OPMDraw.h"
+#include "../../../include/open_manipulator/OPM/OPMDraw.h"
 
 OPMDraw::OPMDraw() 
   : control_period(CONTROL_RATE * 1e-6)

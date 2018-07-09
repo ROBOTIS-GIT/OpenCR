@@ -16,7 +16,7 @@
 
 /* Authors: Darby Lim */
 
-#include "../../include/open_manipulator/OPMDebug.h"
+#include "../../../include/open_manipulator/OPM/OPMDebug.h"
 
 void showLedStatus(void)
 {

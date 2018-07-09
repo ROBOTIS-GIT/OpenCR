@@ -16,7 +16,7 @@
 
 /* Authors: Darby Lim */
 
-#include "../../include/open_manipulator/OPMAPI.h"
+#include "../../../include/open_manipulator/OPM/OPMAPI.h"
 
 #define CONTROL_RATE 10000
 #define MOVE_TIME    3.0

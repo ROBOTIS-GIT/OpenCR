@@ -16,7 +16,7 @@
 
 /* Authors: Darby Lim */
 
-#include "../../include/open_manipulator/OPMDynamixel.h"
+#include "../../../include/open_manipulator/OPM/OPMDynamixel.h"
 
 OPMDynamixel::OPMDynamixel() : dxl_cnt_(0) {}
 

@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-
+#if 0
 /* Authors: Hye-Jong KIM*/
 
 
@@ -522,3 +522,4 @@ Eigen::Matrix3f Link::getRelativeToolOrientation(int8_t from)
 }
 
 
+#endif

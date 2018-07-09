@@ -16,7 +16,7 @@
 
 /* Authors: Darby Lim */
 
-#include "../../include/open_manipulator/OPMKinematics.h"
+#include "../../../include/open_manipulator/OPM/OPMKinematics.h"
 
 #define BASE 0
 

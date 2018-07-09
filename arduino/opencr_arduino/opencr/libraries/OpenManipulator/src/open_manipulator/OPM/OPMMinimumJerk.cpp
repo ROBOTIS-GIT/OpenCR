@@ -16,7 +16,7 @@
 
 /* Authors: Darby Lim */
 
-#include "../../include/open_manipulator/OPMMinimumJerk.h"
+#include "../../../include/open_manipulator/OPM/OPMMinimumJerk.h"
 
 OPMMinimumJerk::OPMMinimumJerk(){}
 
