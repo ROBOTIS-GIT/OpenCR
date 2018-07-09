@@ -57,20 +57,32 @@ void OMKinematicsMethod::getToolPose(Manipulator *manipulator, int8_t tool_numbe
   manipulator.tool[tool_number].setPose(temp);
 }
 
-Eigen::MatrixXf jacobian(Manipulator *manipulator, Pose tool_pose, int8_t tool_number)
+Eigen::MatrixXf OMKinematicsMethod::jacobian(Manipulator *manipulator, Pose tool_pose, int8_t tool_number)
 {
-  Eigen::MatrixXf jacobian(6,manipulator.getDOF());
   
+  Eigen::MatrixXf jacobian(6,manipulator.getDOF());
   Eigen::Vector3f position_changed    = Eigen::Vector3f::Zero();
   Eigen::Vector3f orientation_changed = Eigen::Vector3f::Zero();
-
   Eigen::VectorXf pose_changed(6);
 
-  for(int8_t i=0; i <  )
+  int8_t j = 0;
+  for(int8_t i = 0; i < manipulator.getJointSize(); i++)
   {
     if(manipulator.joint[i].getId() >= 0)
-
-
+    {
+      position_changed = math_.skewSymmetricMatrix(manipulator.joint[i].getOrientation()*manipulator.joint[i].getAxis()) * ( manipulator.tool[tool_number].getPosition() - manipulator.joint[i].getPosition());
+      orientation_changed = manipulator.joint[i].getOrientation()*manipulator.joint[i].getAxis();
+      
+      pose_changed(6) << position_changed(0),
+                         position_changed(1),
+                         position_changed(2),
+                         orientation_changed(0),
+                         orientation_changed(1),
+                         orientation_changed(2);
+      
+      jacobian.col(j) = pose_changed;
+      j++;
+    }
   }
     
 

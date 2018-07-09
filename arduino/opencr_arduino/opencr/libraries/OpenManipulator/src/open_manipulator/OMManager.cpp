@@ -520,3 +520,5 @@ Eigen::Matrix3f Link::getRelativeToolOrientation(int8_t from)
   temp = getRelativeJointorientation(from).transpose() * relative_tool_pose_.orientation;
   return temp; 
 }
+
+
