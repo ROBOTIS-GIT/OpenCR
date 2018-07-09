@@ -62,8 +62,9 @@ class Base;
 class Joint;
 class Tool;
 
-Eigen::Vector3f MakeEigenVector3(float v1, float v2, float v3);
-Eigen::Matrix3f MakeEigenMatrix3(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33);
+Eigen::Vector3f makeEigenVector3(float v1, float v2, float v3);
+Eigen::Matrix3f makeEigenMatrix3(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33);
+Eigen::Matrix3f makeRotationMatrix(float roll, float pitch, float yaw);
 
 template <int8_t type_, int8_t joint_size_, int8_t link_size_, int8_t tool_size>
 class Manipulator
@@ -132,6 +133,16 @@ class Link
     Link();
     ~Link();
     void init(int8_t inner_joint_size);
+    void setInnerJoint(int8_t joint_number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation);
+
+    int8_t getInnerJointSize();
+    InnerJoint getInnerJointInformation(int8_t joint_number);
+    Eigen::Vector3f getRelativeJointPosition(int8_t to, int8_t from);
+    Eigen::Matrix3f getRelativeJointOrientation(int8_t to, int8_t from);
+    Eigen::Vector3f getRelativeJointPosition(int8_t joint_number);
+    Eigen::Matrix3f getRelativeJointOrientation(int8_t joint_number);
+    
+    int8_t findJoint(int8_t joint_number);
 
     void setInertia(Inertia inertia);
     void setMass(float mass);
@@ -142,21 +153,8 @@ class Link
     Eigen::Vector3f getRelativeCenterPosition();
     Eigen::Vector3f getRelativeCenterPosition(int8_t from);
     float getInertiaMoment();
-
     void setCenterPosition(Eigen::Vector3f center_position);
     Eigen::Vector3f getCenterPosition();
-
-    int8_t getInnerJointSize();
-    void setInnerJoint(int8_t joint_number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation);
-    InnerJoint getInnerJointInformation(int8_t joint_number);
-    Eigen::Vector3f getRelativeJointPosition(int8_t to, int8_t from);
-    Eigen::Vector3f getRelativeJointOrientation(int8_t to, int8_t from);
-    // Eigen::Vector3f getRelativeBasePosition(int8_t to);
-    // Eigen::Vector3f getRelativeBaseOrientation(int8_t to);
-    // Eigen::Vector3f getRelativeToolPosition(int8_t from);
-    // Eigen::Vector3f getRelativeToolOrientation(int8_t from);
-    
-    int8_t findJoint(int8_t joint_number);
     ////////////////////////////////////////
 };
 
@@ -174,6 +172,8 @@ class Base: public Link
     Eigen::Vector3f getPosition();
     Eigen::Matrix3f getOrientation();
     Pose getPose();
+    Eigen::Vector3f getRelativeBaseJointPosition(int8_t to);
+    Eigen::Matrix3f getRelativeBaseJointOrientation(int8_t to);
     ////////////////////////////////////////
 };
 
@@ -195,6 +195,8 @@ class Tool: public Link
     Eigen::Vector3f getPosition();
     Eigen::Matrix3f getOrientation();
     Pose getPose();
+    Eigen::Vector3f getRelativeToolPosition(int8_t from);
+    Eigen::Matrix3f getRelativeToolOrientation(int8_t from);
     ////////////////////////////////////////
 };
 

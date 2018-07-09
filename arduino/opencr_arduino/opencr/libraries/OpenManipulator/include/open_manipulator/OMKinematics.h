@@ -28,6 +28,22 @@
 #include <Eigen/Dense>
 #include <math.h>
 
+
+
+class OMKinematicsChainMethod
+{
+  private:
+    OMMath math_;
+
+  public: 
+    OMKinematicsChainMethod();
+    ~OMKinematicsChainMethod();
+    void getBasePose(Base& base, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation);
+    void getBaseJointPose(Manipulator* manipulator, int8_t base_joint_number);
+    void getSinglejointPose(Manipulator* manipulator, int8_t joint_number, int8_t mather_joint_number, int8_t link_number);
+    void getToolPose(Manipulator* manipulator, int8_t tool_number, int8_t mather_joint_number);
+}
+
 class OMChainKinematics
 {
   private:
@@ -55,10 +71,6 @@ class OMLinkKinematics
     OMMath math_;
 
     void getPassiveJointAngle(Joint* joint);
-    void getBasePose(Base& base, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation);
-    void getSinglejointPose(Manipulator* om, int8_t joint_number, int8_t mather_joint_number, int8_t link_number);
-    void getToolPose(Manipulator* om, int8_t tool_number, int8_t mather_joint_number);
-
 
   public:
     OMLinkKinematics();

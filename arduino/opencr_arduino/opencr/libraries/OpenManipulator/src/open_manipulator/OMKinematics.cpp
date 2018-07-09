@@ -18,6 +18,45 @@
 
 #include "../../include/open_manipulator/OMKinematics.h"
 
+///////////////////////////////////OMKinematicsChainMethod/////////////////////////////////////////
+
+OMKinematicsChainMethod::OMKinematicsChainMethod(){}
+
+OMKinematicsChainMethod::~OMKinematicsChainMethod(){}
+
+void OMKinematicsChainMethod::getBasePose(Base& base, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation)
+{
+  Pose temp;
+  base.setPosition(base_position);
+  base.setOrientaion(base_orientation);
+  temp.position = base_position + base.inertia_.relative_center_position;
+  base.setCenterPosition(temp.position);
+}
+
+void OMKinematicsChainMethod::getBaseJointPose(Manipulator* manipulator, int8_t base_joint_number)
+{
+  Pose temp;
+  temp.position = manipulator.base.getPosition() + manipulator.base.getOrientation()*manipulator.base.getRelativeBaseJointPosition(base_joint_number);
+  temp.orientation = manipulator.base.getOrientation() * manipulator.base.getRelativeBaseJointOrientation(base_joint_number) * math_.rodriguesRotationMatrix(manipulator.joint[base_joint_number].getAxis(), manipulator.joint[base_joint_number].getAngle());
+  manipulator.joint[base_joint_number].setJointPose(temp);
+}
+
+void OMKinematicsChainMethod::getSinglejointPose(Manipulator* manipulator, int8_t joint_number, int8_t mather_joint_number, int8_t link_number)
+{
+  Pose temp;
+  temp.position = manipulator.joint[mather_joint_number].getPosition() + manipulator.joint[mather_joint_number].getOrientation()*manipulator.link.getRelativeJointPosition(mather_joint_number,joint_number);
+  temp.orientation = manipulator.joint[mather_joint_number].getOrientation() * manipulator.link.getRelativeJointOrientation(mather_joint_number,joint_number) * math_.rodriguesRotationMatrix(manipulator.joint[joint_number].getAxis(), manipulator.joint[joint_number].getAngle());
+  manipulator.joint[joint_number].setPose(temp);
+}
+
+void OMKinematicsChainMethod::getToolPose(Manipulator* manipulator, int8_t tool_number, int8_t mather_joint_number)
+{
+  Pose temp;
+  temp.position = manipulator.joint[mather_joint_number].getPosition() + manipulator.joint[mather_joint_number].getOrientation()*manipulator.tool[tool_number].getRelativeToolPosition(mather_joint_number);
+  temp.orientation = manipulator.joint[mather_joint_number].getOrientation() * manipulator.tool[tool_number].getRelativeToolOrientation(mather_joint_number);
+  manipulator.tool[tool_number].setPose(temp);
+}
+
 ///////////////////////////////////OMChainKinematics/////////////////////////////////////////
 
 OMChainKinematics::OMChainKinematics(){}
@@ -33,62 +72,39 @@ OMScaraKinematics::~OMScaraKinematics(){}
 OMLinkKinematics::OMLinkKinematics(){}
 OMLinkKinematics::~OMLinkKinematics(){}
 
-
 void OMLinkKinematics::getPassiveJointAngle(Joint* joint)
 {
-
+  // joint[0].setAngle();
+  // joint[1].setAngle(); // 0 < joint[1].setAngle < 3PI/4
+  // joint[2].setAngle(); // PI/2 && joint[1].setAngle + 45? < joint[2].setAngle < PI
+  joint[3].setAngle(joint[1].getAngle()-joint[2].getAngle());
+  joint[4].setAngle(-M_PI-(joint[1].getAngle()-joint[2].getAngle()));
+  joint[5].setAngle(-M_PI-(joint[1].getAngle()-joint[2].getAngle()));
+  joint[6].setAngle((155 * DEG2RAD) - joint[2].getAngle());
+  joint[7].setAngle(joint[1].getAngle());
+  joint[8].setAngle((25 * DEG2RAD)-joint[1].getAngle());
+  joint[9].setAngle(joint[2].getAngle() - (205 * DEG2RAD));
+  joint[10].setAngle((90 * DEG2RAD) - joint[2].getAngle());
 }
-
-void OMLinkKinematics::getBasePose(Base& base, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation)
-{
-  Pose temp;
-  base.setPosition(base_position);
-  base.setOrientaion(base_orientation);
-  temp.position = base_position + base.inertia_.relative_center_position;
-  base.setCenterPosition(temp.position);
-}
-
-void OMLinkKinematics::getSinglejointPose(Manipulator* om, int8_t joint_number, int8_t mather_joint_number, int8_t link_number)
-{
-  Pose temp;
-  temp.position = om.joint[mather_joint_number].getPosition() + om.joint[mather_joint_number].getOrientation()*om.link.getRelativeJointPosition(mather_joint_number,joint_number);
-  temp.orientation = om.joint[mather_joint_number].getOrientation() * om.link.getRelativeJointOrientation(mather_joint_number,joint_number) * math_.rodriguesRotationMatrix(om.joint[joint_number].getAxis(), om.joint[joint_number].getAngle());
-  om.joint[joint_number].setPose(temp);
-}
-
-void OMLinkKinematics::getToolPose(Manipulator* om, int8_t tool_number, int8_t mather_joint_number)
-{
-  // Pose temp;
-  // temp.position = om.joint[mather_joint_number].getPosition() + om.joint[mather_joint_number].getOrientation()*om.tool[tool_number].getRelativeToolPosition(mather_joint_number);
-  // temp.orientation = om.joint[mather_joint_number].getOrientation() * om.tool[tool_number].getRelativeToolOrientation(mather_joint_number);
-  // om.tool[tool_number].setPose(temp);
-}
-
 
 void OMLinkKinematics::forward(Manipulator* omlink, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation)
 {
   Pose temp;
 
   getPassiveJointAngle(omlink.joint);
-  getBasePose(omlink.base, base_position, base_orientation);
-
-  // temp.position = omlink.base.getPosition() + omlink.base.getOrientation()*omlink.base.getRelativeBasePosition(0);
-  // temp.orientation = omlink.base.getOrientation() * omlink.base.getRelativeBaseOrientation(0) * math_.rodriguesRotationMatrix(omlink.joint[0].getAxis(), omlink.joint[0].getAngle());
-  // omlink.joint[0].setJointPose(temp);
-
-  getSinglejointPose(omlink, 1, 0, 0);
-  getSinglejointPose(omlink, 2, 0, 0);
-  getSinglejointPose(omlink, 3, 2, 2);
-  getSinglejointPose(omlink, 4, 3, 3);
-  getSinglejointPose(omlink, 5, 1, 1);
-  getSinglejointPose(omlink, 6, 5, 4);
-  getSinglejointPose(omlink, 7, 0, 0);
-  getSinglejointPose(omlink, 8, 7, 5);
-  getSinglejointPose(omlink, 9, 8, 6);
-  getSinglejointPose(omlink, 10, 9, 7);
-
-  getToolPose(omlink, 0, 6);
-
+  OMKinematicsChainMethod::getBasePose(omlink.base, base_position, base_orientation);
+  OMKinematicsChainMethod::getBaseJointPose(omlink,0);
+  OMKinematicsChainMethod::getSinglejointPose(omlink, 1, 0, 0);
+  OMKinematicsChainMethod::getSinglejointPose(omlink, 2, 0, 0);
+  OMKinematicsChainMethod::getSinglejointPose(omlink, 3, 2, 2);
+  OMKinematicsChainMethod::getSinglejointPose(omlink, 4, 3, 3);
+  OMKinematicsChainMethod::getSinglejointPose(omlink, 5, 1, 1);
+  OMKinematicsChainMethod::getSinglejointPose(omlink, 6, 5, 4);
+  OMKinematicsChainMethod::getSinglejointPose(omlink, 7, 0, 0);
+  OMKinematicsChainMethod::getSinglejointPose(omlink, 8, 7, 5);
+  OMKinematicsChainMethod::getSinglejointPose(omlink, 9, 8, 6);
+  OMKinematicsChainMethod::getSinglejointPose(omlink, 10, 9, 7);
+  OMKinematicsChainMethod::getToolPose(omlink, 0, 6);
 
 }
 

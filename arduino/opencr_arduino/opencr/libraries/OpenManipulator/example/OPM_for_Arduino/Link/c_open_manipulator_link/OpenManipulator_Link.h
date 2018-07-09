@@ -19,82 +19,71 @@
 #ifndef OPENMANIPULATOR_LINK_H_
 #define OPENMANIPULATOR_LINK_H_
 
-#define BASE    0
-#define JOINT1  1
-#define JOINT2  2
-#define JOINT3  3
-#define GRIP    4
+#include "../../include/open_manipulator/OMManager.h"
+#include "../../include/open_manipulator/OMMath.h"
 
-#define LINK_NUM 5
+Manipulator<3, 11, 8, 1> omlink(3); // <type "link", the number of joint, the number of link, the number of tool> (dof)
 
-OPMLink links[LINK_NUM];
-
-void initLink()
+void initManipulator()
 {
-  links[BASE].name_                      = "Base";
-  links[BASE].me_                        = BASE;
-  links[BASE].mother_                    = -1;
-  links[BASE].sibling_                   = -1;
-  links[BASE].child_                     = JOINT1;
-  links[BASE].p_                         = Eigen::Vector3f::Zero();
-  links[BASE].R_                         = Eigen::Matrix3f::Identity(3,3);
-  links[BASE].joint_angle_               = 0.0;
-  links[BASE].joint_vel_                 = 0.0;
-  links[BASE].joint_acc_                 = 0.0;
-  links[BASE].joint_axis_                = Eigen::Vector3f::Zero();
-  links[BASE].joint_pos_                 = Eigen::Vector3f::Zero();
 
-  links[JOINT1].name_                    = "Joint1";
-  links[JOINT1].me_                      = JOINT1;
-  links[JOINT1].mother_                  = 0;
-  links[JOINT1].sibling_                 = JOINT3;
-  links[JOINT1].child_                   = JOINT2;
-  links[JOINT1].p_                       = Eigen::Vector3f::Zero();
-  links[JOINT1].R_                       = Eigen::Matrix3f::Identity(3,3);
-  links[JOINT1].joint_angle_             = 0.0;
-  links[JOINT1].joint_vel_               = 0.0;
-  links[JOINT1].joint_acc_               = 0.0;
-  links[JOINT1].joint_axis_              << 0, 0, 1;
-  links[JOINT1].joint_pos_               << 0.012, 0, 0.036;
+  omlink.joint[0].init(1, makeEigenVector3(0,0,1));
+  omlink.joint[1].init(2, makeEigenVector3(0,1,0));
+  omlink.joint[2].init(3, makeEigenVector3(0,1,0));
+  omlink.joint[3].init(-1, makeEigenVector3(0,1,0));
+  omlink.joint[4].init(-1, makeEigenVector3(0,1,0));
+  omlink.joint[5].init(-1, makeEigenVector3(0,1,0));
+  omlink.joint[6].init(-1, makeEigenVector3(0,1,0));
+  omlink.joint[7].init(-1, makeEigenVector3(0,1,0));
+  omlink.joint[8].init(-1, makeEigenVector3(0,1,0));
+  omlink.joint[9].init(-1, makeEigenVector3(0,1,0));
+  omlink.joint[10].init(-1, makeEigenVector3(0,1,0));
 
-  links[JOINT2].name_                    = "Joint2";
-  links[JOINT2].me_                      = JOINT2;
-  links[JOINT2].mother_                  = JOINT1;
-  links[JOINT2].sibling_                 = -1;
-  links[JOINT2].child_                   = -1;
-  links[JOINT2].p_                       = Eigen::Vector3f::Zero();
-  links[JOINT2].R_                       = Eigen::Matrix3f::Identity(3,3);
-  links[JOINT2].joint_angle_             = 0.0;
-  links[JOINT2].joint_vel_               = 0.0;
-  links[JOINT2].joint_acc_               = 0.0;
-  links[JOINT2].joint_axis_              << 0, 1, 0;
-  links[JOINT2].joint_pos_               << 0, 0, 0.040;
+  omlink.base.init(1);
+  omlink.base.setPostion(Eigen::Vector3f::Zero());
+  omlink.base.setOrientation(Eigen::Matrix3f::Identity(3,3));
+  omlink.base.setInnerJoint(0, makeEigenVector3(150, 0, 0), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
 
-  links[JOINT3].name_                    = "Joint3";
-  links[JOINT3].me_                      = JOINT3;
-  links[JOINT3].mother_                  = JOINT1;
-  links[JOINT3].sibling_                 = -1;
-  links[JOINT3].child_                   = GRIP;
-  links[JOINT3].p_                       = Eigen::Vector3f::Zero();
-  links[JOINT3].R_                       = Eigen::Matrix3f::Identity(3,3);
-  links[JOINT3].joint_angle_             = 0.0;
-  links[JOINT3].joint_vel_               = 0.0;
-  links[JOINT3].joint_acc_               = 0.0;
-  links[JOINT3].joint_axis_              << 0, -1, 0;
-  links[JOINT3].joint_pos_               << 0.022, 0, 0.122;
+  omlink.link[0].init(4);
+  omlink.link[0].setInnerJoint(0, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[0].setInnerJoint(1, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[0].setInnerJoint(2, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[0].setInnerJoint(7, makeEigenVector3(), makeRotationMatrix());
 
-  links[GRIP].name_                      = "Gripper";
-  links[GRIP].me_                        = GRIP;
-  links[GRIP].mother_                    = JOINT3;
-  links[GRIP].sibling_                   = -1;
-  links[GRIP].child_                     = -1;
-  links[GRIP].p_                         = Eigen::Vector3f::Zero();
-  links[GRIP].R_                         = Eigen::Matrix3f::Identity(3,3);
-  links[GRIP].joint_angle_               = 0.0;
-  links[GRIP].joint_vel_                 = 0.0;
-  links[GRIP].joint_acc_                 = 0.0;
-  links[GRIP].joint_axis_                = Eigen::Vector3f::Zero();
-  links[GRIP].joint_pos_                 = Eigen::Vector3f::Zero();
+  omlink.link[1].init(2);
+  omlink.link[1].setInnerJoint(1, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[1].setInnerJoint(5, makeEigenVector3(), makeRotationMatrix());
+
+  omlink.link[2].init(2);
+  omlink.link[2].setInnerJoint(2, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[2].setInnerJoint(3, makeEigenVector3(), makeRotationMatrix());
+
+  omlink.link[3].init(2);
+  omlink.link[3].setInnerJoint(3, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[3].setInnerJoint(4, makeEigenVector3(), makeRotationMatrix());
+
+  omlink.link[4].init(3);
+  omlink.link[4].setInnerJoint(4, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[4].setInnerJoint(5, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[4].setInnerJoint(6, makeEigenVector3(), makeRotationMatrix());
+
+  omlink.link[5].init(2);
+  omlink.link[5].setInnerJoint(7, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[5].setInnerJoint(8, makeEigenVector3(), makeRotationMatrix());
+
+  omlink.link[6].init(3);
+  omlink.link[6].setInnerJoint(5, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[6].setInnerJoint(8, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[6].setInnerJoint(9, makeEigenVector3(), makeRotationMatrix());
+
+  omlink.link[7].init(2);
+  omlink.link[7].setInnerJoint(9, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[7].setInnerJoint(10, makeEigenVector3(), makeRotationMatrix());
+
+  omlink.tool[0].init(2);
+  omlink.tool[0].setInnerJoint(6, makeEigenVector3(), makeRotationMatrix());
+  omlink.tool[0].setInnerJoint(10, makeEigenVector3(), makeRotationMatrix());
+
 }
 
 #endif //OPENMANIPULATOR_LINK_H_
