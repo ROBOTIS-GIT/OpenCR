@@ -55,36 +55,9 @@ typedef struct
   float moment;
 } Inertia;
 
-
-class Manipulator;
-class Link;
-class Base;
-class Joint;
-class Tool;
-
 Eigen::Vector3f makeEigenVector3(float v1, float v2, float v3);
 Eigen::Matrix3f makeEigenMatrix3(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33);
 Eigen::Matrix3f makeRotationMatrix(float roll, float pitch, float yaw);
-
-template <int8_t type_, int8_t joint_size_, int8_t link_size_, int8_t tool_size>
-class Manipulator
-{
-  private:
-    int8_t dof_;
-
-  public:
-    Base base_;
-    Joint joint_[joint_size_];
-    Link link_[link_size_];
-    Tool tool_[tool_size];
-
-    /////////////////func///////////////////
-    Manipulator(int8_t dof);
-    ~Manipulator();
-
-    void setDOF(int8_t dof);
-    ////////////////////////////////////////
-};
 
 class Joint
 {
@@ -125,7 +98,7 @@ class Link
   private:
     int8_t inner_joint_size_;
     Inertia inertia_;
-    vector<InnerJoint> inner_joint_(1);
+    vector<InnerJoint> inner_joint_;
 
     Eigen::Vector3f center_position_;
   public:
@@ -197,6 +170,26 @@ class Tool: public Link
     Pose getPose();
     Eigen::Vector3f getRelativeToolPosition(int8_t from);
     Eigen::Matrix3f getRelativeToolOrientation(int8_t from);
+    ////////////////////////////////////////
+};
+
+template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
+class Manipulator
+{
+  private:
+    int8_t dof_;
+
+  public:
+    Base base_;
+    Joint joint_[JOINT_SIZE];
+    Link link_[LINK_SIZE];
+    Tool tool_[TOOL_SIZE];
+
+    /////////////////func///////////////////
+    Manipulator(int8_t dof);
+    ~Manipulator();
+
+    void setDOF(int8_t dof);
     ////////////////////////////////////////
 };
 
