@@ -55,7 +55,6 @@ typedef struct
   float moment;
 } Inertia;
 
-
 Eigen::Vector3f makeEigenVector3(float v1, float v2, float v3);
 Eigen::Matrix3f makeEigenMatrix3(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33);
 Eigen::Matrix3f makeRotationMatrix(float roll, float pitch, float yaw);
@@ -99,7 +98,7 @@ class Link
   private:
     int8_t inner_joint_size_;
     Inertia inertia_;
-    vector<InnerJoint> inner_joint_(1);
+    vector<InnerJoint> inner_joint_;
 
     Eigen::Vector3f center_position_;
   public:
@@ -135,18 +134,11 @@ class Link
 class Base: public Link
 {
   private:
-    Pose relative_base_pose_;
-    
     Pose base_pose_;
   public:
     /////////////////func///////////////////
     Base();
     ~Base();
-
-    void setRelativeBasePostion(Eigen::Vector3f relative_base_position);
-    void setRelativeBaseOrientation(Eigen::Matrix3f relative_base_orientation);
-    void setRelativeBasePose(Pose relative_base_pose);
-
     void setPosition(Eigen::Vector3f base_position);
     void setOrientation(Eigen::Matrix3f base_orientation);
     void setPose(Pose base_pose);
@@ -162,8 +154,6 @@ class Tool: public Link
 {
   private:
     int8_t tool_type_;
-    Pose relative_tool_pose_;
-    
     Pose tool_pose_;
   public:
     /////////////////func///////////////////
@@ -171,10 +161,6 @@ class Tool: public Link
     ~Tool();
     void setToolType(int8_t tool_type);
     int8_t getToolType();
-
-    void setRelativeToolPosition(Eigen::Vector3f relative_tool_position);
-    void setRelativeToolOrientation(Eigen::Matrix3f relative_tool_orientation);
-    void setRelativeToolPose(Pose relative_tool_pose);
 
     void setPosition(Eigen::Vector3f tool_position);
     void setOrientation(Eigen::Matrix3f tool_orientation);
@@ -208,4 +194,3 @@ class Manipulator
 };
 
 #endif // OMMANAGER_H_
-

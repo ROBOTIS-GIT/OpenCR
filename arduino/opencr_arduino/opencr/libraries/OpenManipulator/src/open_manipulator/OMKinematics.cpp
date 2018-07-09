@@ -18,13 +18,13 @@
 
 #include "../../include/open_manipulator/OMKinematics.h"
 
-///////////////////////////////////OMKinematicsChainMethod/////////////////////////////////////////
+///////////////////////////////////OMKinematicsMethod/////////////////////////////////////////
 
-OMKinematicsChainMethod::OMKinematicsChainMethod(){}
+OMKinematicsMethod::OMKinematicsChainMethod(){}
 
-OMKinematicsChainMethod::~OMKinematicsChainMethod(){}
+OMKinematicsMethod::~OMKinematicsChainMethod(){}
 
-void OMKinematicsChainMethod::getBasePose(Base& base, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation)
+void OMKinematicsMethod::getBasePose(Base &base, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation)
 {
   Pose temp;
   base.setPosition(base_position);
@@ -33,7 +33,7 @@ void OMKinematicsChainMethod::getBasePose(Base& base, Eigen::Vector3f base_posit
   base.setCenterPosition(temp.position);
 }
 
-void OMKinematicsChainMethod::getBaseJointPose(Manipulator* manipulator, int8_t base_joint_number)
+void OMKinematicsMethod::getBaseJointPose(Manipulator *manipulator, int8_t base_joint_number)
 {
   Pose temp;
   temp.position = manipulator.base.getPosition() + manipulator.base.getOrientation()*manipulator.base.getRelativeBaseJointPosition(base_joint_number);
@@ -41,7 +41,7 @@ void OMKinematicsChainMethod::getBaseJointPose(Manipulator* manipulator, int8_t 
   manipulator.joint[base_joint_number].setJointPose(temp);
 }
 
-void OMKinematicsChainMethod::getSinglejointPose(Manipulator* manipulator, int8_t joint_number, int8_t mather_joint_number, int8_t link_number)
+void OMKinematicsMethod::getSinglejointPose(Manipulator *manipulator, int8_t joint_number, int8_t mather_joint_number, int8_t link_number)
 {
   Pose temp;
   temp.position = manipulator.joint[mather_joint_number].getPosition() + manipulator.joint[mather_joint_number].getOrientation()*manipulator.link.getRelativeJointPosition(mather_joint_number,joint_number);
@@ -49,12 +49,36 @@ void OMKinematicsChainMethod::getSinglejointPose(Manipulator* manipulator, int8_
   manipulator.joint[joint_number].setPose(temp);
 }
 
-void OMKinematicsChainMethod::getToolPose(Manipulator* manipulator, int8_t tool_number, int8_t mather_joint_number)
+void OMKinematicsMethod::getToolPose(Manipulator *manipulator, int8_t tool_number, int8_t mather_joint_number)
 {
   Pose temp;
   temp.position = manipulator.joint[mather_joint_number].getPosition() + manipulator.joint[mather_joint_number].getOrientation()*manipulator.tool[tool_number].getRelativeToolPosition(mather_joint_number);
   temp.orientation = manipulator.joint[mather_joint_number].getOrientation() * manipulator.tool[tool_number].getRelativeToolOrientation(mather_joint_number);
   manipulator.tool[tool_number].setPose(temp);
+}
+
+Eigen::MatrixXf jacobian(Manipulator *manipulator, Pose tool_pose, int8_t tool_number)
+{
+  Eigen::MatrixXf jacobian(6,manipulator.getDOF());
+  
+  Eigen::Vector3f position_changed    = Eigen::Vector3f::Zero();
+  Eigen::Vector3f orientation_changed = Eigen::Vector3f::Zero();
+
+  Eigen::VectorXf pose_changed(6);
+
+  for(int8_t i=0; i <  )
+  {
+    if(manipulator.joint[i].getId() >= 0)
+
+
+  }
+    
+
+
+
+
+
+
 }
 
 ///////////////////////////////////OMChainKinematics/////////////////////////////////////////
@@ -72,7 +96,7 @@ OMScaraKinematics::~OMScaraKinematics(){}
 OMLinkKinematics::OMLinkKinematics(){}
 OMLinkKinematics::~OMLinkKinematics(){}
 
-void OMLinkKinematics::getPassiveJointAngle(Joint* joint)
+void OMLinkKinematics::getPassiveJointAngle(Joint *joint)
 {
   // joint[0].setAngle();
   // joint[1].setAngle(); // 0 < joint[1].setAngle < 3PI/4
@@ -87,29 +111,44 @@ void OMLinkKinematics::getPassiveJointAngle(Joint* joint)
   joint[10].setAngle((90 * DEG2RAD) - joint[2].getAngle());
 }
 
-void OMLinkKinematics::forward(Manipulator* omlink, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation)
+void OMLinkKinematics::forward(Manipulator *omlink, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation)
 {
-  Pose temp;
-
-  getPassiveJointAngle(omlink.joint);
-  OMKinematicsChainMethod::getBasePose(omlink.base, base_position, base_orientation);
-  OMKinematicsChainMethod::getBaseJointPose(omlink,0);
-  OMKinematicsChainMethod::getSinglejointPose(omlink, 1, 0, 0);
-  OMKinematicsChainMethod::getSinglejointPose(omlink, 2, 0, 0);
-  OMKinematicsChainMethod::getSinglejointPose(omlink, 3, 2, 2);
-  OMKinematicsChainMethod::getSinglejointPose(omlink, 4, 3, 3);
-  OMKinematicsChainMethod::getSinglejointPose(omlink, 5, 1, 1);
-  OMKinematicsChainMethod::getSinglejointPose(omlink, 6, 5, 4);
-  OMKinematicsChainMethod::getSinglejointPose(omlink, 7, 0, 0);
-  OMKinematicsChainMethod::getSinglejointPose(omlink, 8, 7, 5);
-  OMKinematicsChainMethod::getSinglejointPose(omlink, 9, 8, 6);
-  OMKinematicsChainMethod::getSinglejointPose(omlink, 10, 9, 7);
-  OMKinematicsChainMethod::getToolPose(omlink, 0, 6);
-
+  OMKinematicsMethod::getBasePose(omlink.base, base_position, base_orientation);
+  forward(omlink);
 }
 
-void OMLinkKinematics::inverse(Manipulator* omlink)
+void OMLinkKinematics::forward(Manipulator *omlink)
 {
+  getPassiveJointAngle(omlink.joint);
+  OMKinematicsMethod::getBaseJointPose(omlink,0);
+  OMKinematicsMethod::getSinglejointPose(omlink, 1, 0, 0);
+  OMKinematicsMethod::getSinglejointPose(omlink, 2, 0, 0);
+  OMKinematicsMethod::getSinglejointPose(omlink, 3, 2, 2);
+  OMKinematicsMethod::getSinglejointPose(omlink, 4, 3, 3);
+  OMKinematicsMethod::getSinglejointPose(omlink, 5, 1, 1);
+  OMKinematicsMethod::getSinglejointPose(omlink, 6, 5, 4);
+  OMKinematicsMethod::getSinglejointPose(omlink, 7, 0, 0);
+  OMKinematicsMethod::getSinglejointPose(omlink, 8, 7, 5);
+  OMKinematicsMethod::getSinglejointPose(omlink, 9, 8, 6);
+  OMKinematicsMethod::getSinglejointPose(omlink, 10, 9, 7);
+  OMKinematicsMethod::getToolPose(omlink, 0, 6);
+}
+
+float* OMLinkKinematics::inverse(Manipulator *omlink, Eigen::Vector3f target_position)
+{
+  Eigen::Vector3f target_angle_vector;
+  float target_angle[3];
+  
+
+  target_angle_vector << 
+  
+  
+  
+  target_angle[0] = 
+
+
+
+
 
 }
 

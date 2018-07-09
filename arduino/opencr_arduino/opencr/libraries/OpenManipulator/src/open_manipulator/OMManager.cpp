@@ -344,8 +344,26 @@ Base::Base():
 {
   base_pose_.position = Eigen::Vector3f::Zero();
   base_pose_.orientation = Eigen::Matrix3f::Identity(3,3);
+  relative_base_pose_.position = Eigen::Vector3f::Zero();
+  relative_base_pose_.orientation = Eigen::Matrix3f::Identity(3,3);
 }
 Base::~Base(){}
+
+void Base::setRelativeBasePosition(Eigen::Vector3f relative_base_position)
+{
+  relative_base_pose_.position = relative_base_position;
+}
+
+void Base::setRelativeBaseOrientation(Eigen::Matrix3f relative_base_orientation)
+{
+  relative_base_pose_.orientation = relative_base_orientation;
+}
+
+void Base::setRelativeBasePose(Pose relative_base_pose)
+{
+  relative_base_pose_.position = relative_base_pose.position;
+  relative_base_pose_.orientation = relative_base_pose.orientation;
+}
     
 void Base::setPosition(Eigen::Vector3f base_position)
 {
@@ -384,14 +402,14 @@ Pose Base::getPose()
 Eigen::Vector3f Link::getRelativeBaseJointPosition(int8_t to)
 {
   Eigen::Vector3f temp;
-  temp = getRelativeJointPosition(to) - base_pose_.position;
+  temp = getRelativeJointPosition(to) - relative_base_pose_.position;
   return temp; 
 }
 
 Eigen::Matrix3f Link::getRelativeBaseJointOrientation(int8_t to)
 {
   Eigen::Matrix3f temp;
-  temp = base_pose_.orientation.transpose() * getRelativeJointorientation(to);
+  temp = relative_base_pose_.orientation.transpose() * getRelativeJointorientation(to);
   return temp; 
 }
 
@@ -403,6 +421,8 @@ tool_type_(0),
 {
   tool_pose_.position = Eigen::Vector3f::Zero();
   tool_pose_.orientation = Eigen::Matrix3f::Identity(3,3);
+  relatvie_tool_pose_.position = Eigen::Vector3f::Zero();
+  relatvie_tool_pose_.orientation = Eigen::Matrix3f::Identity(3,3);
 }
 
 Tool::~Tool(){}
@@ -415,6 +435,22 @@ void Tool::setToolType(int8_t tool_type)
 int8_t Tool::getToolType()
 {
   return tool_type_;
+}
+
+void Tool::setRelativeToolPosition(Eigen::Vector3f relatvie_tool_position)
+{
+  relatvie_tool_pose_.position = relatvie_tool_position;
+}
+
+void Tool::setRelativeToolOrientation(Eigen::Matrix3f relatvie_tool_orientation)
+{
+  relatvie_tool_pose_.orientation = relatvie_tool_orientation;
+}
+
+void Tool::setRelativeToolPose(Pose tool_pose)
+{
+  relatvie_tool_pose_.position = relatvie_tool_pose.position;
+  relatvie_tool_pose_.orientation = relatvie_tool_pose.orientation;
 }
 
 void Tool::setPosition(Eigen::Vector3f tool_position)
@@ -454,14 +490,14 @@ Pose Tool::getPose()
 Eigen::Vector3f Link::getRelativeToolPosition(int8_t from)
 {
   Eigen::Vector3f temp;
-  temp = tool_pose_.position - getRelativeJointPosition(from);
+  temp = relative_tool_pose_.position - getRelativeJointPosition(from);
   return temp; 
 }
 
 Eigen::Matrix3f Link::getRelativeToolOrientation(int8_t from)
 {
   Eigen::Matrix3f temp;
-  temp = getRelativeJointorientation(from).transpose() * tool_pose_.orientation;
+  temp = getRelativeJointorientation(from).transpose() * relative_tool_pose_.orientation;
   return temp; 
 }
 

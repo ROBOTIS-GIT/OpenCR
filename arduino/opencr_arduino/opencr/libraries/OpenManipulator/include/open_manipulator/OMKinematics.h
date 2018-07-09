@@ -30,18 +30,19 @@
 
 
 
-class OMKinematicsChainMethod
+class OMKinematicsMethod
 {
   private:
     OMMath math_;
 
   public: 
-    OMKinematicsChainMethod();
-    ~OMKinematicsChainMethod();
-    void getBasePose(Base& base, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation);
-    void getBaseJointPose(Manipulator* manipulator, int8_t base_joint_number);
-    void getSinglejointPose(Manipulator* manipulator, int8_t joint_number, int8_t mather_joint_number, int8_t link_number);
-    void getToolPose(Manipulator* manipulator, int8_t tool_number, int8_t mather_joint_number);
+    OMKinematicsMethod();
+    ~OMKinematicsMethod();
+    void getBasePose(Base &base, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation);
+    void getBaseJointPose(Manipulator *manipulator, int8_t base_joint_number);
+    void getSinglejointPose(Manipulator *manipulator, int8_t joint_number, int8_t mather_joint_number, int8_t link_number);
+    void getToolPose(Manipulator *manipulator, int8_t tool_number, int8_t mather_joint_number);
+    void jacobian();
 }
 
 class OMChainKinematics
@@ -70,14 +71,15 @@ class OMLinkKinematics
   private:
     OMMath math_;
 
-    void getPassiveJointAngle(Joint* joint);
+    void getPassiveJointAngle(Joint *joint);
 
   public:
     OMLinkKinematics();
     ~OMLinkKinematics();
 
-    void forward(Manipulator* omlink, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation);
-    void inverse(Manipulator* omlink);
+    void forward(Manipulator *omlink, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation);
+    void forward(Manipulator *omlink);
+    void inverse(Manipulator *omlink);
 };
 
 class OMDeltaKinematics

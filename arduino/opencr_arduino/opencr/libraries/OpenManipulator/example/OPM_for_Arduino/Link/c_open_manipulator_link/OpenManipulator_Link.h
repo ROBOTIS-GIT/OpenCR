@@ -42,47 +42,51 @@ void initManipulator()
   omlink.base.init(1);
   omlink.base.setPostion(Eigen::Vector3f::Zero());
   omlink.base.setOrientation(Eigen::Matrix3f::Identity(3,3));
-  omlink.base.setInnerJoint(0, makeEigenVector3(150, 0, 0), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
+  omlink.base.setRelativeBasePostion(Eigen::Vector3f::Zero());
+  omlink.base.setRelativeBaseOrientation(Eigen::Matrix3f::Identity(3,3));
+  omlink.base.setInnerJoint(0, makeEigenVector3(-150, 0, 0), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));     //from base_pose
 
   omlink.link[0].init(4);
-  omlink.link[0].setInnerJoint(0, makeEigenVector3(), makeRotationMatrix());
-  omlink.link[0].setInnerJoint(1, makeEigenVector3(), makeRotationMatrix());
-  omlink.link[0].setInnerJoint(2, makeEigenVector3(), makeRotationMatrix());
-  omlink.link[0].setInnerJoint(7, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[0].setInnerJoint(0, makeEigenVector3(0, 0, 0), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
+  omlink.link[0].setInnerJoint(1, makeEigenVector3(0, 22, 52), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
+  omlink.link[0].setInnerJoint(2, makeEigenVector3(0,-22, 52), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
+  omlink.link[0].setInnerJoint(7, makeEigenVector3(-45.31539, 6, 73.13091), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
 
   omlink.link[1].init(2);
-  omlink.link[1].setInnerJoint(1, makeEigenVector3(), makeRotationMatrix());
-  omlink.link[1].setInnerJoint(5, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[1].setInnerJoint(1, makeEigenVector3(0, 0, 0), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
+  omlink.link[1].setInnerJoint(5, makeEigenVector3(200, -16, 0), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
 
   omlink.link[2].init(2);
-  omlink.link[2].setInnerJoint(2, makeEigenVector3(), makeRotationMatrix());
-  omlink.link[2].setInnerJoint(3, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[2].setInnerJoint(2, makeEigenVector3(0, 0, 0), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
+  omlink.link[2].setInnerJoint(3, makeEigenVector3(50, 7, 0), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
 
   omlink.link[3].init(2);
-  omlink.link[3].setInnerJoint(3, makeEigenVector3(), makeRotationMatrix());
-  omlink.link[3].setInnerJoint(4, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[3].setInnerJoint(3, makeEigenVector3(0, 0, 0), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
+  omlink.link[3].setInnerJoint(4, makeEigenVector3(200, 6, 0), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
 
   omlink.link[4].init(3);
-  omlink.link[4].setInnerJoint(4, makeEigenVector3(), makeRotationMatrix());
-  omlink.link[4].setInnerJoint(5, makeEigenVector3(), makeRotationMatrix());
-  omlink.link[4].setInnerJoint(6, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[4].setInnerJoint(4, makeEigenVector3(0, 0, 0), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
+  omlink.link[4].setInnerJoint(5, makeEigenVector3(50, 15, 0), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
+  omlink.link[4].setInnerJoint(6, makeEigenVector3(250, 6, 0), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
 
   omlink.link[5].init(2);
-  omlink.link[5].setInnerJoint(7, makeEigenVector3(), makeRotationMatrix());
-  omlink.link[5].setInnerJoint(8, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[5].setInnerJoint(7, makeEigenVector3(0, 0, 0), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
+  omlink.link[5].setInnerJoint(8, makeEigenVector3(200, 9, 0), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
 
   omlink.link[6].init(3);
-  omlink.link[6].setInnerJoint(5, makeEigenVector3(), makeRotationMatrix());
-  omlink.link[6].setInnerJoint(8, makeEigenVector3(), makeRotationMatrix());
-  omlink.link[6].setInnerJoint(9, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[6].setInnerJoint(5, makeEigenVector3(0, 0, 0), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
+  omlink.link[6].setInnerJoint(8, makeEigenVector3(-38.30222, 9, 32.13938), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
+  omlink.link[6].setInnerJoint(9, makeEigenVector3(38.30222, 3, 32.13938), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
 
   omlink.link[7].init(2);
-  omlink.link[7].setInnerJoint(9, makeEigenVector3(), makeRotationMatrix());
-  omlink.link[7].setInnerJoint(10, makeEigenVector3(), makeRotationMatrix());
+  omlink.link[7].setInnerJoint(9, makeEigenVector3(0, 0, 0), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
+  omlink.link[7].setInnerJoint(10, makeEigenVector3(200, -6, 0), makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
 
   omlink.tool[0].init(2);
-  omlink.tool[0].setInnerJoint(6, makeEigenVector3(), makeRotationMatrix());
-  omlink.tool[0].setInnerJoint(10, makeEigenVector3(), makeRotationMatrix());
+  omlink.tool[0].setRelativeToolPosition(Eigen::Vector3f::Zero());
+  omlink.tool[0].setRelativeToolOrientation(Eigen::Matrix3f::Identity(3,3));
+  omlink.tool[0].setInnerJoint(6, makeEigenVector3(-38.67882, -3, 13.37315), makeRotationMatrix(0*DEG2RAD, -90*DEG2RAD, 0*DEG2RAD));
+  omlink.tool[0].setInnerJoint(10, makeEigenVector3(-10, 3, 54.33076), makeRotationMatrix(0*DEG2RAD, -25*DEG2RAD, 0*DEG2RAD));
 
 }
 
