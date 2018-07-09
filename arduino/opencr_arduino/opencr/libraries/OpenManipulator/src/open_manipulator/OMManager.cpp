@@ -71,6 +71,26 @@ void Manipulator::setDOF(int8_t dof)
   dof_=dof;
 }
 
+int8_t getDOF()
+{
+  return dof_;
+}
+
+int8_t getJointSize()
+{
+  return JOINT_SIZE;
+}
+
+int8_t getLinkSize()
+{
+  return LINK_SIZE;
+}
+
+int8_t getToolSize()
+{
+  return TOOL_SIZE;
+}
+
 //////////////////////////////////////Joint////////////////////////////////////////////
 
 Joint::Joint(): 

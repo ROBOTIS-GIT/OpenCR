@@ -134,11 +134,18 @@ class Link
 class Base: public Link
 {
   private:
+    Pose relative_base_pose_;
+    
     Pose base_pose_;
   public:
     /////////////////func///////////////////
     Base();
     ~Base();
+
+    void setRelativeBasePostion(Eigen::Vector3f relative_base_position);
+    void setRelativeBaseOrientation(Eigen::Matrix3f relative_base_orientation);
+    void setRelativeBasePose(Pose relative_base_pose);
+
     void setPosition(Eigen::Vector3f base_position);
     void setOrientation(Eigen::Matrix3f base_orientation);
     void setPose(Pose base_pose);
@@ -154,6 +161,8 @@ class Tool: public Link
 {
   private:
     int8_t tool_type_;
+    Pose relative_tool_pose_;
+    
     Pose tool_pose_;
   public:
     /////////////////func///////////////////
@@ -161,6 +170,10 @@ class Tool: public Link
     ~Tool();
     void setToolType(int8_t tool_type);
     int8_t getToolType();
+
+    void setRelativeToolPosition(Eigen::Vector3f relative_tool_position);
+    void setRelativeToolOrientation(Eigen::Matrix3f relative_tool_orientation);
+    void setRelativeToolPose(Pose relative_tool_pose);
 
     void setPosition(Eigen::Vector3f tool_position);
     void setOrientation(Eigen::Matrix3f tool_orientation);
@@ -190,7 +203,13 @@ class Manipulator
     ~Manipulator();
 
     void setDOF(int8_t dof);
+    int8_t getDOF();
+
+    int8_t getJointSize();
+    int8_t getLinkSize();
+    int8_t getToolSize();
     ////////////////////////////////////////
 };
 
 #endif // OMMANAGER_H_
+
