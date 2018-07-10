@@ -19,11 +19,11 @@
 #ifndef OMAPI_H_
 #define OMAPI_H_
 
-#include "../../include/open_manipulator/OMManager.h"
-#include "../../include/open_manipulator/OMKinematics.h"
-#include "../../include/open_manipulator/OMDynamixel.h"
-#include "../../include/open_manipulator/OMPath.h"
-#include "../../include/open_manipulator/OMDebug.h"
+// #include "../../include/open_manipulator/OMManager.h"
+// #include "../../include/open_manipulator/OMKinematics.h"
+// #include "../../include/open_manipulator/OMDynamixel.h"
+// #include "../../include/open_manipulator/OMPath.h"
+// #include "../../include/open_manipulator/OMDebug.h"
 
 
 ///////////////////////////////////////get(joint level)//////////////////////////////////////
