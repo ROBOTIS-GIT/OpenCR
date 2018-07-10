@@ -19,44 +19,6 @@
 
 #include "../../include/open_manipulator/OMManager.h"
 
-Eigen::Vector3f MakeEigenVector3(float v1, float v2, float v3)
-{
-  Eigen::Vector3f temp;
-  temp << v1, v2, v3;
-  return temp;
-}
-
-Eigen::Matrix3f MakeEigenMatrix3(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33)
-{
-  Eigen::Matrix3f temp;
-  temp << m11, m12, m13, m21, m22, m23, m31, m32, m33;
-  return temp;
-}
-
-Eigen::Matrix3f makeRotationMatrix(float roll, float pitch, float yaw)
-{
-  Eigen::Matrix3f rotation_matrix;
-  Eigen::Matrix3f roll_matrix;
-  Eigen::Matrix3f pitch_matrix;
-  Eigen::Matrix3f yaw_matrix;
-
-  roll_matrix  << 1.000,  0.000,     0.000,
-                  0.000,  cos(roll), sin(roll),
-                  0.000, -sin(roll), cos(roll);
-
-  pitch_matrix << cos(pitch),  0.000, sin(pitch),
-                  0.000,       1.000, 0.000,
-                  -sin(pitch), 0.000, cos(pitch);
-
-  yaw_matrix   << cos(yaw), -sin(yaw), 0.000,
-                  sin(yaw), cos(yaw),  0.000,
-                  0.000,    0.000,     1.000;
-  
-  rotation_matrix = roll_matrix * pitch_matrix * yaw_matrix;
-
-  return rotation_matrix;
-}
-
 //////////////////////////////////////Manipulator////////////////////////////////////////////
 template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
 Manipulator::Manipulator(int8_t dof):
@@ -108,7 +70,7 @@ dxl_id_(-1),
   joint_state_.angular_acceleration = 0.0;
   joint_pose_.position = Eigen::Vector3f::Zero();
   joint_pose_.orientation = Eigen::Matrix3f::Identity(3,3);
-  axis_ = MakeEigenVector3(0,0,0);
+  axis_ = Eigen::Vector3f::Zero();
 }
 
 Joint::~Joint(){}

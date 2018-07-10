@@ -57,7 +57,7 @@ void OMKinematicsMethod::getToolPose(Manipulator *manipulator, int8_t tool_numbe
   manipulator.tool_[tool_number].setPose(temp);
 }
 
-Eigen::MatrixXf OMKinematicsMethod::jacobian(Manipulator *manipulator, Pose tool_pose, int8_t tool_number)
+Eigen::MatrixXf OMKinematicsMethod::jacobian(Manipulator *manipulator, int8_t tool_number)
 {
   
   Eigen::MatrixXf jacobian(6,manipulator.getDOF());
@@ -84,13 +84,6 @@ Eigen::MatrixXf OMKinematicsMethod::jacobian(Manipulator *manipulator, Pose tool
       j++;
     }
   }
-    
-
-
-
-
-
-
 }
 
 ///////////////////////////////////OMChainKinematics/////////////////////////////////////////
@@ -125,46 +118,63 @@ void OMLinkKinematics::getPassiveJointAngle(Joint *joint)
 
 void OMLinkKinematics::forward(Manipulator *omlink, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation)
 {
-  OMKinematicsMethod::getBasePose(omlink.base_, base_position, base_orientation);
+  OMKinematicsMethod method_;
+  method_.getBasePose(omlink.base_, base_position, base_orientation);
   forward(omlink);
 }
 
 void OMLinkKinematics::forward(Manipulator *omlink)
 {
+  OMKinematicsMethod method_;
   getPassiveJointAngle(omlink.joint_);
-  OMKinematicsMethod::getBaseJointPose(omlink,0);
-  OMKinematicsMethod::getSinglejointPose(omlink, 1, 0, 0);
-  OMKinematicsMethod::getSinglejointPose(omlink, 2, 0, 0);
-  OMKinematicsMethod::getSinglejointPose(omlink, 3, 2, 2);
-  OMKinematicsMethod::getSinglejointPose(omlink, 4, 3, 3);
-  OMKinematicsMethod::getSinglejointPose(omlink, 5, 1, 1);
-  OMKinematicsMethod::getSinglejointPose(omlink, 6, 5, 4);
-  OMKinematicsMethod::getSinglejointPose(omlink, 7, 0, 0);
-  OMKinematicsMethod::getSinglejointPose(omlink, 8, 7, 5);
-  OMKinematicsMethod::getSinglejointPose(omlink, 9, 8, 6);
-  OMKinematicsMethod::getSinglejointPose(omlink, 10, 9, 7);
-  OMKinematicsMethod::getToolPose(omlink, 0, 6);
+  method_.getBaseJointPose(omlink,0);
+  method_.getSinglejointPose(omlink, 1, 0, 0);
+  method_.getSinglejointPose(omlink, 2, 0, 0);
+  method_.getSinglejointPose(omlink, 3, 2, 2);
+  method_.getSinglejointPose(omlink, 4, 3, 3);
+  method_.getSinglejointPose(omlink, 5, 1, 1);
+  method_.getSinglejointPose(omlink, 6, 5, 4);
+  method_.getSinglejointPose(omlink, 7, 0, 0);
+  method_.getSinglejointPose(omlink, 8, 7, 5);
+  method_.getSinglejointPose(omlink, 9, 8, 6);
+  method_.getSinglejointPose(omlink, 10, 9, 7);
+  method_.getToolPose(omlink, 0, 6);
 }
 
-float* OMLinkKinematics::inverse(Manipulator *omlink, Eigen::Vector3f target_position)
+float* OMLinkKinematics::inverse(Manipulator omlink, int8_t tool_number, Pose target_pose)
 {
-  Base base;
-  Joint joint;
-  Link link;
+  OMKinematicsMethod method_;
+  float target_angle[omlink.getDOF()];
+  Pose  differential_pose;
 
 
-  Eigen::Vector3f target_angle_vector;
-  float target_angle[3];
+  // int8_t i=0;
+  // Base base;
+  // base = omlink.base_;
+  // Joint joint[omlink.getJointSize()];
+  // for(i=0; i<omlink.getJointSize(); i++){
+  //   joint[i] = omlink.joint_[i];
+  // }
+  // Tool tool[omlink.getToolSize()];
+  // for(i=0; i<omlink.getToolSize(); i++){
+  //   tool[i] = omlink.tool_[i];
+  // }
+
+  for(int8_t i;  ;  i++;)
+  {
+    forward(omlink);
+    differential_position = target_position 
+    method_.jacobian(omlink, tool_number);
+
+
+  }
+
+  omlink 
+  
   
 
-  target_angle_vector << 
-  
-  
-  
-  target_angle[0] = 
 
-
-
+  return target_angle;
 
 
 }
