@@ -210,13 +210,15 @@ class OMLinkKinematics
     return target_angle;
   }
 
-  Eigen::Vector3f geometricInverse(Manipulator *omlink, int8_t tool_number, Pose target_pose)
+  Eigen::Vector3f geometricInverse(Manipulator *omlink, Pose target_pose)
   {
     OMKinematicsMethod method_;
     OMMath math_;
 
-    target_pose.position - omlink.tool[tool_number].
+    target_pose.position - omlink.tool[0].getRelativeToolPosition[6]
 
+
+    
   }
 
 
