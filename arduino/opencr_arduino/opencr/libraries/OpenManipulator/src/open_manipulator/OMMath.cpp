@@ -33,6 +33,44 @@ float OMMath::sign(float num)
   }
 }
 
+Eigen::Vector3f OMMath::MakeEigenVector3(float v1, float v2, float v3)
+{
+  Eigen::Vector3f temp;
+  temp << v1, v2, v3;
+  return temp;
+}
+
+Eigen::Matrix3f OMMath::MakeEigenMatrix3(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33)
+{
+  Eigen::Matrix3f temp;
+  temp << m11, m12, m13, m21, m22, m23, m31, m32, m33;
+  return temp;
+}
+
+Eigen::Matrix3f OMMath::makeRotationMatrix(float roll, float pitch, float yaw)
+{
+  Eigen::Matrix3f rotation_matrix;
+  Eigen::Matrix3f roll_matrix;
+  Eigen::Matrix3f pitch_matrix;
+  Eigen::Matrix3f yaw_matrix;
+
+  roll_matrix  << 1.000,  0.000,     0.000,
+                  0.000,  cos(roll), sin(roll),
+                  0.000, -sin(roll), cos(roll);
+
+  pitch_matrix << cos(pitch),  0.000, sin(pitch),
+                  0.000,       1.000, 0.000,
+                  -sin(pitch), 0.000, cos(pitch);
+
+  yaw_matrix   << cos(yaw), -sin(yaw), 0.000,
+                  sin(yaw), cos(yaw),  0.000,
+                  0.000,    0.000,     1.000;
+  
+  rotation_matrix = roll_matrix * pitch_matrix * yaw_matrix;
+
+  return rotation_matrix;
+}
+
 Eigen::Matrix3f OMMath::skewSymmetricMatrix(Eigen::Vector3f v)
 {
   Eigen::Matrix3f skew_symmetric_matrix = Eigen::Matrix3f::Zero();
@@ -57,3 +95,5 @@ Eigen::Matrix3f OPMMath::rodriguesRotationMatrix(Eigen::Vector3f axis, float ang
 
   return rotation_matrix;
 }
+
+Eigen::MatrixXf OPMMath::differentialPose()

@@ -35,9 +35,13 @@ class OMMath
   OMMath();
   ~OMMath();
   float sign(float number);
+  Eigen::Vector3f makeEigenVector3(float v1, float v2, float v3);
+  Eigen::Matrix3f makeEigenMatrix3(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33);
+  Eigen::Matrix3f makeRotationMatrix(float roll, float pitch, float yaw);
+  
   Eigen::Matrix3f skewSymmetricMatrix(Eigen::Vector3f v);
   Eigen::Matrix3f rodriguesRotationMatrix(Eigen::Vector3f axis, float angle);
-
+  
   
 };
 
