@@ -58,34 +58,41 @@ Eigen::Matrix3f makeRotationMatrix(float roll, float pitch, float yaw)
 }
 
 //////////////////////////////////////Manipulator////////////////////////////////////////////
+template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
 Manipulator::Manipulator(int8_t dof):
 name("UnknownManipulator")
 {
   dof_ = dof;
 }
 
+template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
 Manipulator::~Manipulator(){}
 
+template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
 void Manipulator::setDOF(int8_t dof)
 {
   dof_=dof;
 }
 
+template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
 int8_t getDOF()
 {
   return dof_;
 }
 
+template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
 int8_t getJointSize()
 {
   return JOINT_SIZE;
 }
 
+template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
 int8_t getLinkSize()
 {
   return LINK_SIZE;
 }
 
+template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
 int8_t getToolSize()
 {
   return TOOL_SIZE;
