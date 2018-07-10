@@ -266,8 +266,8 @@ void  TwoWire::end(void) {
 void  TwoWire::setClock(uint32_t frequency) {
   if (state_) {
     // BUGBUG: Need to figure this out more...
-    if     (frequency <  400000 ) hi2c_->Init.Timing = 0x40912732; // Ask for something < 400K use 100K
-    else if(frequency < 1000000 ) hi2c_->Init.Timing = 0x40940607; // Ask for someting under 1000K so use 400K
+    if     (frequency <  400000 ) hi2c_->Init.Timing = 0x20404768; // Ask for something < 400K use 100K
+    else if(frequency < 1000000 ) hi2c_->Init.Timing = 0x6000030D; // Ask for someting under 1000K so use 400K
     else                          hi2c_->Init.Timing = 0x00200922; // 0x50310001; // Ask for 1000K+ try to give 1000K
 
     HAL_StatusTypeDef hal_status;
