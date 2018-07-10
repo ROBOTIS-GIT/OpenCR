@@ -19,15 +19,14 @@
 #ifndef OMKINEMATICS_H_
 #define OMKINEMATICS_H_
 
-#include "../../include/open_manipulator/OMManager.h"
-#include "../../include/open_manipulator/OMMath.h"
-#include "../../include/open_manipulator/OMDebug.h"
+#include "../../include/open_manipulator/OMManager.hpp"
+#include "../../include/open_manipulator/OMMath.hpp"
+#include "../../include/open_manipulator/OMDebug.hpp"
 
 #include <Eigen.h>        // Calls main Eigen matrix class library
 #include <Eigen/LU>       // Calls inverse, determinant, LU decomp., etc.
 #include <Eigen/Dense>
 #include <math.h>
-
 
 
 class OMKinematicsMethod
@@ -72,7 +71,7 @@ class OMKinematicsMethod
     manipulator.tool_[tool_number].setPose(temp);
   }
 
-  void jacobian()
+  void jacobian(Manipulator *manipulator, int8_t tool_number)
   {
     Eigen::MatrixXf jacobian(6,manipulator.getDOF());
     Eigen::Vector3f position_changed    = Eigen::Vector3f::Zero();
@@ -171,41 +170,57 @@ class OMLinkKinematics
     method_.getToolPose(omlink, 0, 6);
   }
 
-  void inverse(Manipulator *omlink)
+  Eigen::VectorXf numericalInverse(Manipulator omlink, int8_t tool_number, Pose target_pose, float gain)
   {
     OMKinematicsMethod method_;
-    float target_angle[omlink.getDOF()];
-    Pose  differential_pose;
+    OMMath math_;
 
+    Eigen::VectorXf target_angle(omlink.getDOF());
+    Eigen::MatrixXf jacobian(6,omlink.getDOF());
+    Eigen::VectorXf differential_pose(6);
+    Eigen::VectorXf previous_differential_pose(6);
 
-    // int8_t i=0;
-    // Base base;
-    // base = omlink.base_;
-    // Joint joint[omlink.getJointSize()];
-    // for(i=0; i<omlink.getJointSize(); i++){
-    //   joint[i] = omlink.joint_[i];
-    // }
-    // Tool tool[omlink.getToolSize()];
-    // for(i=0; i<omlink.getToolSize(); i++){
-    //   tool[i] = omlink.tool_[i];
-    // }
-
-    for(int8_t i;  ;  i++;)
+    while(differential_pose.norm() < 1E-6)
     {
       forward(omlink);
-      differential_position = target_position 
-      method_.jacobian(omlink, tool_number);
+      jacobian = method_.jacobian(omlink, tool_number);
+      differential_pose = math_.differentialPose(target_pose.position, omlink.tool[tool_number].getPosition(), target_pose.orientation, omlink.tool[tool_number].getOrientation())
+      
+      Eigen::ColPivHouseholderQR<Eigen::MatrixXf> qrmethod(jacobian);
+      target_angle = gain * qrmethod.solve(differential_pose);
 
+      int8_t k = 0;
+      for(int8_t j = 0; j < omlink.getJointSize(); j++)
+      {
+        if(omlink.joint_[j].getId() >= 0)
+        {
+          omlink.joint_[j].setAngle(target_angle(k));
+          k++;
+        }
+      }
 
+      if(differential_pose.norm()>previous_differential_pose.norm())
+      {
+        //ERROR
+        break;
+      }
+      previous_differential_pose = differential_pose;
     }
-
-    omlink 
     
-    
-
-
     return target_angle;
   }
+
+  Eigen::Vector3f geometricInverse(Manipulator *omlink, int8_t tool_number, Pose target_pose)
+  {
+    OMKinematicsMethod method_;
+    OMMath math_;
+
+    target_pose.position - omlink.tool[tool_number].
+
+  }
+
+
+
 };
 
 class OMDeltaKinematics

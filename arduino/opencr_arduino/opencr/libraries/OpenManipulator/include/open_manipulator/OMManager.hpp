@@ -19,7 +19,7 @@
 #ifndef OMMANAGER_H_
 #define OMMANAGER_H_
 
-#include "../../include/open_manipulator/OMDebug.h"
+#include "../../include/open_manipulator/OMDebug.hpp"
 
 #include <unistd.h>
 #include <WString.h>

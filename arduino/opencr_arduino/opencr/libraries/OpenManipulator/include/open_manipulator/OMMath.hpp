@@ -19,7 +19,7 @@
 #ifndef OMMATH_H_
 #define OMMATH_H_
 
-#include "../../include/open_manipulator/OMDebug.h"
+#include "../../include/open_manipulator/OMDebug.hpp"
 
 #include <Eigen.h>        // Calls main Eigen matrix class library
 #include <Eigen/LU>       // Calls inverse, determinant, LU decomp., etc.
@@ -84,7 +84,59 @@ class OMMath
 
     return rotation_matrix;
   }
+
+  Eigen::Matrix3f makeRotationMatrix(Eigen::Vector3f rotation_vector)
+  {
+    Eigen::Matrix3f rotation_matrix;
+    rotation_matrix = makeRotationMatrix(rotation_vector(0), rotation_vector(1), rotation_vector(2));
+    return rotation_matrix;
+  }
   
+  Eigen::Vector3f makeRotationVector(Eigen::Matrix3f rotation_matrix)
+  {
+    Eigen::Matrix3f R = rotation_matrix;
+    Eigen::Vector3f l = Eigen::Vector3f::Zero();
+    Eigen::Vector3f rotation_vector = Eigen::Vector3f::Zero();
+
+    float theta = 0.0;
+    float diag  = 0.0;
+    bool diagonal_matrix = true;
+
+    l << R(2,1) - R(1,2),
+         R(0,2) - R(2,0),
+         R(1,0) - R(0,1);
+    theta = atan2(l.norm(), R(0,0) + R(1,1) + R(2,2) - 1);
+    diag  = R(0,0) + R(1,1) + R(2,2);
+
+    for (int8_t i = 0; i < 3; i++)
+    {
+      for (int8_t j = 0; j < 3; j++)
+      {
+        if (i != j)
+        {
+          if (R(i, j) != 0)
+          {
+            diagonal_matrix = false;
+          }
+        }
+      }
+    }
+    if (R == Eigen::Matrix3f::Identity())
+    {
+      rotation_vector = Eigen::Vector3f::Zero();
+    }
+    else if (diagonal_matrix == true)
+    {
+      rotation_vector << R(0,0) + 1, R(1,1) + 1, R(2,2) + 1;
+      rotation_vector = rotation_vector * M_PI_2;
+    }
+    else
+    {
+      rotation_vector = theta * (l / l.norm());
+    }
+    return rotation_vector;
+  }
+
   Eigen::Matrix3f skewSymmetricMatrix(Eigen::Vector3f v)
   {
     Eigen::Matrix3f skew_symmetric_matrix = Eigen::Matrix3f::Zero();
@@ -110,9 +162,38 @@ class OMMath
     return rotation_matrix;
   }
   
-  Eigen::MatrixXf OPMMath::differentialPose()
+  Eigen::Vector3f differentialPosition(Eigen::Vector3f desired_position, Eigen::Vector3f present_position)
   {
-    
+    Eigen::Vector3f differential_position;
+    differential_position = desired_position - present_position;
+
+    return differential_position;
+  }
+
+  Eigen::Vector3f differentialOrientation(Eigen::Matrix3f desired_orientation, Eigen::Matrix3f present_orientation)
+  {
+    Eigen::Vector3f differential_orientation;
+    differential_orientation = present_orientation * makeRotationVector(present_orientation.transpose() * desired_orientation);
+
+    return differential_orientation;
+  }
+
+
+  Eigen::VectorXf differentialPose(Eigen::Vector3f desired_position, Eigen::Vector3f present_position, Eigen::Matrix3f desired_orientation, Eigen::Matrix3f present_orientation)
+  {
+    Eigen::Vector3f differential_position;
+    Eigen::Vector3f differential_orientation;
+    Eigen::VectorXf  differential_pose(6);
+
+    differential_position = differentialPosition(desired_position, present_position);
+    differential_orientation = differentialOrientation(desired_orientation, present_orientation)
+    differential_pose << differential_position(0),
+                         differential_position(1),
+                         differential_position(2),
+                         differential_orientation(0),
+                         differential_orientation(1),
+                         differential_orientation(2);
+    return differential_pose;
   }
 };
 
