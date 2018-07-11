@@ -70,9 +70,9 @@ void I2Cdev::begin( uint32_t freq )
   #if I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
   I2cHandle.Instance             = I2C1;
 
-  if     ( freq == 400 ) I2cHandle.Init.Timing = 0x40940607; //0x4 0 9 1 27 32;
-  else if( freq == 100 ) I2cHandle.Init.Timing = 0x40912732;
-  else                   I2cHandle.Init.Timing = 0x40940607; //0x4 0 9 1 27 32;
+  if     ( freq == 400 ) I2cHandle.Init.Timing = 0x6000030D; //0x4 0 9 1 27 32;
+  else if( freq == 100 ) I2cHandle.Init.Timing = 0x20404768;
+  else                   I2cHandle.Init.Timing = 0x6000030D; //0x4 0 9 1 27 32;
 
 
   I2cHandle.Init.OwnAddress1     = 0x00;

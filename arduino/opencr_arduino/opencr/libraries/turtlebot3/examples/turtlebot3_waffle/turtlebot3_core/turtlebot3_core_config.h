@@ -124,6 +124,11 @@ char* get_tf_prefix = get_prefix;
 char odom_header_frame_id[30];
 char odom_child_frame_id[30];
 
+char imu_frame_id[30];
+char mag_frame_id[30];
+
+char joint_state_header_frame_id[30];
+
 /*******************************************************************************
 * Subscriber
 *******************************************************************************/

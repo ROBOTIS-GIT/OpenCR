@@ -76,7 +76,7 @@ void loop()
 {
   uint32_t t = millis();
   updateTime();
-  updateVariable();
+  updateVariable(nh.connected());
   updateTFPrefix(nh.connected());
 
   if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_FREQUENCY))
@@ -149,8 +149,8 @@ void loop()
   // Call all the callbacks waiting to be called at that point in time
   nh.spinOnce();
 
-  // give the serial link time to process
-  delay(10);
+  // Wait the serial link time to process
+  waitForSerialLink(nh.connected());
 }
 
 /*******************************************************************************
@@ -223,7 +223,7 @@ void publishImuMsg(void)
   imu_msg = sensors.getIMU();
 
   imu_msg.header.stamp    = rosNow();
-  imu_msg.header.frame_id = "imu_link";
+  imu_msg.header.frame_id = imu_frame_id;
 
   imu_pub.publish(&imu_msg);
 }
@@ -236,7 +236,7 @@ void publishMagMsg(void)
   mag_msg = sensors.getMag();
 
   mag_msg.header.stamp    = rosNow();
-  mag_msg.header.frame_id = "mag_link";
+  mag_msg.header.frame_id = mag_frame_id;
 
   mag_pub.publish(&mag_msg);
 }
@@ -352,17 +352,38 @@ void updateTFPrefix(bool isConnected)
       {
         sprintf(odom_header_frame_id, "odom");
         sprintf(odom_child_frame_id, "base_footprint");  
+
+        sprintf(imu_frame_id, "imu_link");
+        sprintf(mag_frame_id, "mag_link");
+        sprintf(joint_state_header_frame_id, "base_link");
       }
       else
       {
         strcpy(odom_header_frame_id, get_tf_prefix);
         strcpy(odom_child_frame_id, get_tf_prefix);
 
+        strcpy(imu_frame_id, get_tf_prefix);
+        strcpy(mag_frame_id, get_tf_prefix);
+        strcpy(joint_state_header_frame_id, get_tf_prefix);
+
         strcat(odom_header_frame_id, "/odom");
         strcat(odom_child_frame_id, "/base_footprint");
+
+        strcat(imu_frame_id, "/imu_link");
+        strcat(mag_frame_id, "/mag_link");
+        strcat(joint_state_header_frame_id, "/base_link");
       }
 
-      sprintf(log_msg, "Setup TF on odom [/%s]", odom_header_frame_id);
+      sprintf(log_msg, "Setup TF on Odometry [%s]", odom_header_frame_id);
+      nh.loginfo(log_msg); 
+
+      sprintf(log_msg, "Setup TF on IMU [%s]", imu_frame_id);
+      nh.loginfo(log_msg); 
+
+      sprintf(log_msg, "Setup TF on MagneticField [%s]", mag_frame_id);
+      nh.loginfo(log_msg); 
+
+      sprintf(log_msg, "Setup TF on JointState [%s]", joint_state_header_frame_id);
       nh.loginfo(log_msg); 
 
       isChecked = true;
@@ -579,11 +600,11 @@ void driveTest(uint8_t buttons)
 /*******************************************************************************
 * Update variable (initialization)
 *******************************************************************************/
-void updateVariable(void)
+void updateVariable(bool isConnected)
 {
   static bool variable_flag = false;
   
-  if (nh.connected())
+  if (isConnected)
   {
     if (variable_flag == false)
     {      
@@ -600,11 +621,33 @@ void updateVariable(void)
 }
 
 /*******************************************************************************
+* Wait for Serial Link
+*******************************************************************************/
+void waitForSerialLink(bool isConnected)
+{
+  static bool wait_flag = false;
+  
+  if (isConnected)
+  {
+    if (wait_flag == false)
+    {      
+      delay(10);
+
+      wait_flag = true;
+    }
+  }
+  else
+  {
+    wait_flag = false;
+  }
+}
+
+/*******************************************************************************
 * Update the base time for interpolation
 *******************************************************************************/
 void updateTime()
 {
-  current_offset = micros();
+  current_offset = millis();//micros();
   current_time = nh.now();
 }
 
@@ -613,7 +656,8 @@ void updateTime()
 *******************************************************************************/
 ros::Time rosNow()
 {
-  return addMicros(current_time, micros() - current_offset);
+  return nh.now();
+  //return addMicros(current_time, millis()-current_offset);//micros() - current_offset);
 }
 
 /*******************************************************************************
@@ -623,13 +667,14 @@ ros::Time addMicros(ros::Time & t, uint32_t _micros)
 {
   uint32_t sec, nsec;
 
-  sec  = _micros / 1000000 + t.sec;
-  nsec = _micros % 1000000 + 1000 * (t.nsec / 1000);
+  sec  = _micros / 1000 + t.sec;
+  nsec = _micros % 1000000000 + t.nsec;// + 1000 * (t.nsec / 1000);
   
-  if (nsec >= 1e9) 
-  {
-    sec++, nsec--;
-  }
+  // if (nsec >= 1e9) 
+  // {
+  //   sec  = sec + 1;
+  //   nsec = nsec - 1e9;
+  // }
   return ros::Time(sec, nsec);
 }
 
@@ -734,7 +779,7 @@ void initJointStates(void)
 {
   static char *joint_states_name[] = {"wheel_left_joint", "wheel_right_joint"};
 
-  joint_states.header.frame_id = "base_link";
+  joint_states.header.frame_id = joint_state_header_frame_id;
   joint_states.name            = joint_states_name;
 
   joint_states.name_length     = WHEEL_NUM;
