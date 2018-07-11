@@ -149,11 +149,6 @@ class OMLinkKinematics
   void forward(Manipulator *omlink, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation)
   {
     method_.getBasePose(omlink.base_, base_position, base_orientation);
-    forward(omlink);
-  }
-
-  void forward(Manipulator *omlink)
-  {
     getPassiveJointAngle(omlink.joint_);
     method_.getBaseJointPose(omlink,0);
     method_.getSinglejointPose(omlink, 1, 0, 0);
@@ -168,6 +163,7 @@ class OMLinkKinematics
     method_.getSinglejointPose(omlink, 10, 9, 7);
     method_.getToolPose(omlink, 0, 6);
   }
+
 
   Eigen::VectorXf numericalInverse(Manipulator omlink, int8_t tool_number, Pose target_pose, float gain)
   {
@@ -206,12 +202,12 @@ class OMLinkKinematics
     return target_angle;
   }
 
-  Eigen::Vector3f geometricInverse(Manipulator *omlink, Pose target_pose) //for basic model
+  Eigen::VectorXf geometricInverse(Manipulator *omlink, int8_t tool_number, Pose target_pose, float gain) //for basic model
   {
     OMKinematicsMethod method_;
     OMMath math_;
 
-    Eigen::Vector3f target_angle_vector;
+    Eigen::VectorXf target_angle_vector(3);
     Eigen::Vector3f control_position; //joint6-joint1
     Eigen::Vector3f tool_joint6_position = omlink.tool[0].getRelativeToolPosition(6);
     Eigen::Vector3f joint0_position = omlink.joint_[0].getPosition();
@@ -248,7 +244,6 @@ class OMLinkKinematics
                            target_angle[2];
     return target_angle_vector;
   }
-
 };
 
 class OMDeltaKinematics
