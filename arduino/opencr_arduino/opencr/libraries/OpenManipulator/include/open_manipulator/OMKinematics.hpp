@@ -125,6 +125,7 @@ class OMLinkKinematics
 {
  private:
   OMMath math_;
+  OMKinematicsMethod method_;
 
   void getPassiveJointAngle(Joint *joint)
   {
@@ -147,14 +148,12 @@ class OMLinkKinematics
 
   void forward(Manipulator *omlink, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation)
   {
-    OMKinematicsMethod method_;
     method_.getBasePose(omlink.base_, base_position, base_orientation);
     forward(omlink);
   }
 
   void forward(Manipulator *omlink)
   {
-    OMKinematicsMethod method_;
     getPassiveJointAngle(omlink.joint_);
     method_.getBaseJointPose(omlink,0);
     method_.getSinglejointPose(omlink, 1, 0, 0);
@@ -172,9 +171,6 @@ class OMLinkKinematics
 
   Eigen::VectorXf numericalInverse(Manipulator omlink, int8_t tool_number, Pose target_pose, float gain)
   {
-    OMKinematicsMethod method_;
-    OMMath math_;
-
     Eigen::VectorXf target_angle(omlink.getDOF());
     Eigen::MatrixXf jacobian(6,omlink.getDOF());
     Eigen::VectorXf differential_pose(6);
@@ -210,18 +206,48 @@ class OMLinkKinematics
     return target_angle;
   }
 
-  Eigen::Vector3f geometricInverse(Manipulator *omlink, Pose target_pose)
+  Eigen::Vector3f geometricInverse(Manipulator *omlink, Pose target_pose) //for basic model
   {
     OMKinematicsMethod method_;
     OMMath math_;
 
-    target_pose.position - omlink.tool[0].getRelativeToolPosition[6]
+    Eigen::Vector3f target_angle_vector;
+    Eigen::Vector3f control_position; //joint6-joint1
+    Eigen::Vector3f tool_joint6_position = omlink.tool[0].getRelativeToolPosition(6);
+    Eigen::Vector3f joint0_position = omlink.joint_[0].getPosition();
+    Eigen::Vector3f temp_vector;
 
+    float target_angle[3];
+    float link[3];
+    float temp_x;
+    float temp_y;
 
-    
+    temp_y = target_pose.position(0)-joint0_position(0);
+    temp_x = target_pose.position(1)-joint0_position(1);
+    target_angle[0] = atan2(temp_y, temp_x);
+
+    control_position(0) = target_pose.position(0) - tool_joint6_position(0)*cos(target_angle[0]);
+    control_position(1) = target_pose.position(1) - tool_joint6_position(0)*sin(target_angle[0]);
+    control_position(2) = target_pose.position(2) - tool_joint6_position(3)
+
+    temp_vector = omlink.link_[0].getRelativeJointPosition(1,0);
+    link[0] = temp_vector(2);
+    temp_vector = omlink.link_[1].getRelativeJointPosition(5,1);
+    link[1] = temp_vector(0);
+    temp_vector = omlink.link_[4].getRelativeJointPosition(6,5);
+    link[2] = -temp_vector(0);
+
+    temp_y = control_position(2)-joint0_position(2);
+    temp_x = (control_position(0)-joint0_position(0))*cos(target_angle[0]);
+
+    target_angle[1] = acos(((temp_x*temp_x+temp_y*temp_y+link[1]*link[1]-link[2]*link[2]))/(2*link[1]*sqrt(temp_x*temp_x+temp_y*temp_y)) + atan2(temp_y, temp_x);
+    target_angle[2] = acos((link[1]*link[1]+link[2]*link[2]-(temp_x*temp_x+temp_y*temp_y))/(2*link[1]*link[2])) + target_angle[1];
+
+    target_angle_vector << target_angle[0],
+                           target_angle[1],
+                           target_angle[2];
+    return target_angle_vector;
   }
-
-
 
 };
 
