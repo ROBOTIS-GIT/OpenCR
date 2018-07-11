@@ -382,6 +382,9 @@ public:
     uint32_t offset = hardware_.time() - rt_time;
 
     t.deserialize(data);
+
+    // SerialBT2.print(t.data.sec); SerialBT2.print("   "); SerialBT2.println(t.data.nsec);
+
     t.data.sec += offset / 1000;
     t.data.nsec += (offset % 1000) * 1000000UL;
 
@@ -391,7 +394,7 @@ public:
 
   Time now()
   {
-    uint32_t ms = hardware_.time();
+    uint32_t ms = hardware_.time()-last_sync_receive_time;
     Time current_time;
     current_time.sec = ms / 1000 + sec_offset;
     current_time.nsec = (ms % 1000) * 1000000UL + nsec_offset;
@@ -402,8 +405,8 @@ public:
   void setNow(Time & new_now)
   {
     uint32_t ms = hardware_.time();
-    sec_offset = new_now.sec - ms / 1000 - 1;
-    nsec_offset = new_now.nsec - (ms % 1000) * 1000000UL + 1000000000UL;
+    sec_offset = new_now.sec;// - ms / 1000 - 1;
+    nsec_offset = new_now.nsec;// - (ms % 1000) * 1000000UL + 1000000000UL;
     normalizeSecNSec(sec_offset, nsec_offset);
   }
 
