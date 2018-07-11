@@ -39,14 +39,14 @@
 #include <turtlebot3_msgs/VersionInfo.h>
 
 #include <TurtleBot3.h>
-#include <OpenManipulator.h>
+#include <OpenManipulatorDriver.h>
 #include "turtlebot3_with_open_manipulator.h"
 
 #include <math.h>
 
 #define HARDWARE_VER "1.0.0"
 #define SOFTWARE_VER "1.0.0"
-#define FIRMWARE_VER "1.2.0"
+#define FIRMWARE_VER "1.2.1"
 
 #define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
 #define IMU_PUBLISH_FREQUENCY                  200  //hz
@@ -92,16 +92,17 @@ void publishBatteryStateMsg(void);
 void publishDriveInformation(void);
 
 ros::Time rosNow(void);
-ros::Time addMicros(ros::Time & t, uint32_t _micros);
+ros::Time addMicros(ros::Time & t, uint32_t _micros); // deprecated
 
-void updateVariable(void);
+void updateVariable(bool isConnected);
 void updateMotorInfo(int32_t left_tick, int32_t right_tick);
 void updateTime(void);
 void updateOdometry(void);
 void updateJoint(void);
 void updateTF(geometry_msgs::TransformStamped& odom_tf);
-void updateGyroCali(void);
+void updateGyroCali(bool isConnected);
 void updateGoalVelocity(void);
+void updateTFPrefix(bool isConnected);
 
 void initOdom(void);
 void initJointStates(void);
@@ -109,6 +110,7 @@ void initJointStates(void);
 bool calcOdometry(double diff_time);
 
 void sendLogMsg(void);
+void waitForSerialLink(bool isConnected);
 
 double mapd(double x, double in_min, double in_max, double out_min, double out_max);
 
@@ -118,6 +120,20 @@ double mapd(double x, double in_min, double in_max, double out_min, double out_m
 ros::NodeHandle nh;
 ros::Time current_time;
 uint32_t current_offset;
+
+/*******************************************************************************
+* ROS Parameter
+*******************************************************************************/
+char get_prefix[10];
+char* get_tf_prefix = get_prefix;
+
+char odom_header_frame_id[30];
+char odom_child_frame_id[30];
+
+char imu_frame_id[30];
+char mag_frame_id[30];
+
+char joint_state_header_frame_id[30];
 
 /*******************************************************************************
 * Subscriber

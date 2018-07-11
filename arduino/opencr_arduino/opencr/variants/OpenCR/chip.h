@@ -13,7 +13,7 @@
 
 #define USE_SPI1
 #define USE_SPI2
-
+#define USE_SPI4
 
 #define BOARD_NR_I2C  2
 #define HAL_I2C1      I2C1

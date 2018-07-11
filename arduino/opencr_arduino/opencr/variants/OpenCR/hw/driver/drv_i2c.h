@@ -20,9 +20,10 @@
 
 
 
+#define DRV_I2C_CNT 2
 
-
-
+extern I2C_HandleTypeDef drv_i2c_handles[DRV_I2C_CNT];     // If we are doing hardware I2C
+ 
 
 int drv_i2c_init();
 
