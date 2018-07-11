@@ -647,7 +647,7 @@ void waitForSerialLink(bool isConnected)
 *******************************************************************************/
 void updateTime()
 {
-  current_offset = micros();
+  current_offset = millis();//micros();
   current_time = nh.now();
 }
 
@@ -656,7 +656,8 @@ void updateTime()
 *******************************************************************************/
 ros::Time rosNow()
 {
-  return addMicros(current_time, micros() - current_offset);
+  return nh.now();
+  //return addMicros(current_time, millis()-current_offset);//micros() - current_offset);
 }
 
 /*******************************************************************************
@@ -666,8 +667,8 @@ ros::Time addMicros(ros::Time & t, uint32_t _micros)
 {
   uint32_t sec, nsec;
 
-  sec  = _micros / 1000000 + t.sec;
-  nsec = _micros % 1000000 + 1000 * (t.nsec / 1000);
+  sec  = _micros / 1000 + t.sec;
+  nsec = _micros % 1000000000 + t.nsec;// + 1000 * (t.nsec / 1000);
   
   // if (nsec >= 1e9) 
   // {
