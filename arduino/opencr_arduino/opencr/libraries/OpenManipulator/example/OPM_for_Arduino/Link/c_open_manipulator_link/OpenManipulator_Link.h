@@ -19,15 +19,14 @@
 #ifndef OPENMANIPULATOR_LINK_H_
 #define OPENMANIPULATOR_LINK_H_
 
-#include "../../include/open_manipulator/OMManager.h"
-#include "../../include/open_manipulator/OMMath.h"
+#include "../../include/open_manipulator/OMManager.hpp"
+#include "../../include/open_manipulator/OMMath.hpp"
 
 Manipulator<3, 11, 8, 1> omlink(3); // <type "link", the number of joint, the number of link, the number of tool> (dof)
-OMMath math_;
 
 void initManipulator()
 {
-
+  OMMath math_;
   omlink.joint[0].init(1, math_.makeEigenVector3(0,0,1));
   omlink.joint[1].init(2, math_.makeEigenVector3(0,1,0));
   omlink.joint[2].init(3, math_.makeEigenVector3(0,1,0));

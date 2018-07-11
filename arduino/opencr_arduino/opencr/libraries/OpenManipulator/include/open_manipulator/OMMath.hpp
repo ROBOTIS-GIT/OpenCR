@@ -16,8 +16,8 @@
 
 /* Authors: Hye-Jong KIM */
 
-#ifndef OMMATH_H_
-#define OMMATH_H_
+#ifndef OMMATH_HPP_
+#define OMMATH_HPP_
 
 #include "../../include/open_manipulator/OMDebug.hpp"
 
@@ -197,4 +197,4 @@ class OMMath
   }
 };
 
-#endif // OMMATH_H_
+#endif // OMMATH_HPP_

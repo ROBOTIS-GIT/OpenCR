@@ -16,8 +16,8 @@
 
 /* Authors: Hye-Jong KIM */
 
-#ifndef OMKINEMATICS_H_
-#define OMKINEMATICS_H_
+#ifndef OMKINEMATICS_HPP_
+#define OMKINEMATICS_HPP_
 
 #include "../../include/open_manipulator/OMManager.hpp"
 #include "../../include/open_manipulator/OMMath.hpp"
@@ -267,4 +267,4 @@ class MYKinematics
    ~MYKinematics(){};
 };
 
-#endif // OMKINEMATICS_H_
+#endif // OMKINEMATICS_HPP_

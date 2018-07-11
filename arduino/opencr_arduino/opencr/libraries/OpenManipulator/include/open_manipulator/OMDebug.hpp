@@ -16,8 +16,8 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM */
 
-#ifndef OMDEBUG_H_
-#define OMDEBUG_H_
+#ifndef OMDEBUG_HPP_
+#define OMDEBUG_HPP_
 
 #include <Arduino.h>
 #include <Eigen.h>
@@ -55,5 +55,5 @@ int8_t dynamixel_error;
 
 
 
-#endif // OMDEBUG_H_
+#endif // OMDEBUG_HPP_
 

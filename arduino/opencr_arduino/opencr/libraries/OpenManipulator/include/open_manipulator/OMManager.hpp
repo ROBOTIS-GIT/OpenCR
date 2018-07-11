@@ -16,10 +16,10 @@
 
 /* Authors: Hye-Jong KIM*/
 
-#ifndef OMMANAGER_H_
-#define OMMANAGER_H_
+#ifndef OMMANAGER_HPP_
+#define OMMANAGER_HPP_
 
-#include "../../include/open_manipulator/OMDebug.hpp"
+#include "OMDebug.hpp"
 
 #include <unistd.h>
 #include <WString.h>
@@ -573,4 +573,4 @@ class Manipulator
 ////////////////////////////////////////
 };
 
-#endif // OMMANAGER_H_
+#endif // OMMANAGER_HPP_

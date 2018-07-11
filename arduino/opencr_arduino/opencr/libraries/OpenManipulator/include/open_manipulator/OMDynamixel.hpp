@@ -16,8 +16,8 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM */
 
-#ifndef OMDYNAMIXEL_H_
-#define OMDYNAMIXEL_H_
+#ifndef OMDYNAMIXEL_HPP_
+#define OMDYNAMIXEL_HPP_
 
 #include <DynamixelWorkbench.h>
 
@@ -203,4 +203,4 @@ class OMDynamixel
   }
 };
 
-#endif // OMDYNAMIXEL_H_
+#endif // OMDYNAMIXEL_HPP_

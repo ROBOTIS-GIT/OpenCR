@@ -16,8 +16,8 @@
 
 /* Authors: Hye-Jong KIM, Darby Lim*/
    
-#ifndef OMAPI_H_
-#define OMAPI_H_
+#ifndef OMAPI_HPP_
+#define OMAPI_HPP_
 
 // #include "../../include/open_manipulator/OMManager.h"
 // #include "../../include/open_manipulator/OMKinematics.h"
@@ -49,7 +49,7 @@
 
 
 
-#endif // OMAPI_H_  
+#endif // OMAPI_HPP_  
    
    
    
