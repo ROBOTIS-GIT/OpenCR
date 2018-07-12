@@ -137,8 +137,8 @@ class OMLinkKinematics
     joint[5].setAngle(-M_PI-(joint[1].getAngle()-joint[2].getAngle()));
     joint[6].setAngle((155 * DEG2RAD) - joint[2].getAngle());
     joint[7].setAngle(joint[1].getAngle());
-    joint[8].setAngle((25 * DEG2RAD)-joint[1].getAngle());
-    joint[9].setAngle(joint[2].getAngle() - (205 * DEG2RAD));
+    joint[8].setAngle((15 * DEG2RAD)-joint[1].getAngle());
+    joint[9].setAngle(joint[2].getAngle() - (195 * DEG2RAD));
     joint[10].setAngle((90 * DEG2RAD) - joint[2].getAngle());
   }
 
