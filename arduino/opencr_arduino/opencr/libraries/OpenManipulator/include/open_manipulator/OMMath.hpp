@@ -37,7 +37,7 @@ class OMMath
 
   float sign(float number)
   {
-    if (num >= 0.0)
+    if (number >= 0.0)
     {
       return 1.0;
     }
@@ -186,12 +186,12 @@ class OMMath
     Eigen::VectorXf  differential_pose(6);
 
     differential_position = differentialPosition(desired_position, present_position);
-    differential_orientation = differentialOrientation(desired_orientation, present_orientation)
-    differential_pose << differential_position(0),
-                         differential_position(1),
-                         differential_position(2),
-                         differential_orientation(0),
-                         differential_orientation(1),
+    differential_orientation = differentialOrientation(desired_orientation, present_orientation);
+    differential_pose << differential_position(0),    
+                         differential_position(1),    
+                         differential_position(2),    
+                         differential_orientation(0), 
+                         differential_orientation(1), 
                          differential_orientation(2);
     return differential_pose;
   }

@@ -28,7 +28,6 @@
 #include <Eigen/Dense>
 #include <math.h>
 
-
 class OMKinematicsMethod
 {
  private:
@@ -42,12 +41,13 @@ class OMKinematicsMethod
   {
     Pose temp;
     base.setPosition(base_position);
-    base.setOrientaion(base_orientation);
-    temp.position = base_position + base.inertia_.relative_center_position;
+    base.setOrientation(base_orientation);
+    temp.position = base_position + base.getRelativeCenterPosition();
     base.setCenterPosition(temp.position);
   }
 
-  void getBaseJointPose(Manipulator *manipulator, int8_t base_joint_number)
+  template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
+  void getBaseJointPose(Manipulator<TYPE, JOINT_SIZE, LINK_SIZE, TOOL_SIZE> &manipulator, int8_t base_joint_number)
   {
     Pose temp;
     temp.position = manipulator.base_.getPosition() + manipulator.base_.getOrientation()*manipulator.base_.getRelativeBaseJointPosition(base_joint_number);
@@ -55,7 +55,8 @@ class OMKinematicsMethod
     manipulator.joint[base_joint_number].setJointPose(temp);
   }
 
-  void getSinglejointPose(Manipulator *manipulator, int8_t joint_number, int8_t mather_joint_number, int8_t link_number)
+  template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
+  void getSinglejointPose(Manipulator<TYPE, JOINT_SIZE, LINK_SIZE, TOOL_SIZE> &manipulator, int8_t joint_number, int8_t mather_joint_number, int8_t link_number)
   {
     Pose temp;
     temp.position = manipulator.joint_[mather_joint_number].getPosition() + manipulator.joint_[mather_joint_number].getOrientation()*manipulator.link_[link_number].getRelativeJointPosition(mather_joint_number,joint_number);
@@ -63,7 +64,8 @@ class OMKinematicsMethod
     manipulator.joint_[joint_number].setPose(temp);
   }
 
-  void getToolPose(Manipulator *manipulator, int8_t tool_number, int8_t mather_joint_number)
+  template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
+  void getToolPose(Manipulator<TYPE, JOINT_SIZE, LINK_SIZE, TOOL_SIZE> &manipulator, int8_t tool_number, int8_t mather_joint_number)
   {
     Pose temp;
     temp.position = manipulator.joint_[mather_joint_number].getPosition() + manipulator.joint_[mather_joint_number].getOrientation()*manipulator.tool_[tool_number].getRelativeToolPosition(mather_joint_number);
@@ -71,7 +73,8 @@ class OMKinematicsMethod
     manipulator.tool_[tool_number].setPose(temp);
   }
 
-  void jacobian(Manipulator *manipulator, int8_t tool_number)
+  template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
+  void jacobian(Manipulator<TYPE, JOINT_SIZE, LINK_SIZE, TOOL_SIZE> &manipulator, int8_t tool_number)
   {
     Eigen::MatrixXf jacobian(6,manipulator.getDOF());
     Eigen::Vector3f position_changed    = Eigen::Vector3f::Zero();
@@ -86,7 +89,7 @@ class OMKinematicsMethod
         position_changed = math_.skewSymmetricMatrix(manipulator.joint_[i].getOrientation()*manipulator.joint_[i].getAxis()) * ( manipulator.tool_[tool_number].getPosition() - manipulator.joint_[i].getPosition());
         orientation_changed = manipulator.joint_[i].getOrientation()*manipulator.joint_[i].getAxis();
         
-        pose_changed(6) << position_changed(0),
+        pose_changed   << position_changed(0),
                           position_changed(1),
                           position_changed(2),
                           orientation_changed(0),
@@ -98,7 +101,7 @@ class OMKinematicsMethod
       }
     }
   }
-}
+};
 
 class OMChainKinematics
 {
@@ -146,7 +149,8 @@ class OMLinkKinematics
   OMLinkKinematics(){};
   ~OMLinkKinematics(){};
 
-  void forward(Manipulator *omlink, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation)
+  template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
+  void forward(Manipulator<TYPE, JOINT_SIZE, LINK_SIZE, TOOL_SIZE> &omlink, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation)
   {
     method_.getBasePose(omlink.base_, base_position, base_orientation);
     getPassiveJointAngle(omlink.joint_);
@@ -164,8 +168,8 @@ class OMLinkKinematics
     method_.getToolPose(omlink, 0, 6);
   }
 
-
-  Eigen::VectorXf numericalInverse(Manipulator omlink, int8_t tool_number, Pose target_pose, float gain)
+  template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
+  Eigen::VectorXf numericalInverse(Manipulator<TYPE, JOINT_SIZE, LINK_SIZE, TOOL_SIZE>  &omlink, int8_t tool_number, Pose target_pose, float gain)
   {
     Eigen::VectorXf target_angle(omlink.getDOF());
     Eigen::MatrixXf jacobian(6,omlink.getDOF());
@@ -176,7 +180,7 @@ class OMLinkKinematics
     {
       forward(omlink);
       jacobian = method_.jacobian(omlink, tool_number);
-      differential_pose = math_.differentialPose(target_pose.position, omlink.tool[tool_number].getPosition(), target_pose.orientation, omlink.tool[tool_number].getOrientation())
+      differential_pose = math_.differentialPose(target_pose.position, omlink.tool[tool_number].getPosition(), target_pose.orientation, omlink.tool[tool_number].getOrientation());
       
       Eigen::ColPivHouseholderQR<Eigen::MatrixXf> qrmethod(jacobian);
       target_angle = gain * qrmethod.solve(differential_pose);
@@ -202,14 +206,15 @@ class OMLinkKinematics
     return target_angle;
   }
 
-  Eigen::VectorXf geometricInverse(Manipulator *omlink, int8_t tool_number, Pose target_pose, float gain) //for basic model
+  template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
+  Eigen::VectorXf geometricInverse(Manipulator<TYPE, JOINT_SIZE, LINK_SIZE, TOOL_SIZE> &omlink, int8_t tool_number, Pose target_pose, float gain) //for basic model
   {
     OMKinematicsMethod method_;
     OMMath math_;
 
     Eigen::VectorXf target_angle_vector(3);
     Eigen::Vector3f control_position; //joint6-joint1
-    Eigen::Vector3f tool_joint6_position = omlink.tool[0].getRelativeToolPosition(6);
+    Eigen::Vector3f tool_joint6_position = omlink.tool_[0].getRelativeToolPosition(6);
     Eigen::Vector3f joint0_position = omlink.joint_[0].getPosition();
     Eigen::Vector3f temp_vector;
 
@@ -224,7 +229,7 @@ class OMLinkKinematics
 
     control_position(0) = target_pose.position(0) - tool_joint6_position(0)*cos(target_angle[0]);
     control_position(1) = target_pose.position(1) - tool_joint6_position(0)*sin(target_angle[0]);
-    control_position(2) = target_pose.position(2) - tool_joint6_position(3)
+    control_position(2) = target_pose.position(2) - tool_joint6_position(3);
 
     temp_vector = omlink.link_[0].getRelativeJointPosition(1,0);
     link[0] = temp_vector(2);
@@ -236,7 +241,7 @@ class OMLinkKinematics
     temp_y = control_position(2)-joint0_position(2);
     temp_x = (control_position(0)-joint0_position(0))*cos(target_angle[0]);
 
-    target_angle[1] = acos(((temp_x*temp_x+temp_y*temp_y+link[1]*link[1]-link[2]*link[2]))/(2*link[1]*sqrt(temp_x*temp_x+temp_y*temp_y)) + atan2(temp_y, temp_x);
+    target_angle[1] = acos(((temp_x*temp_x+temp_y*temp_y+link[1]*link[1]-link[2]*link[2]))/(2*link[1]*sqrt(temp_x*temp_x+temp_y*temp_y))) + atan2(temp_y, temp_x);
     target_angle[2] = acos((link[1]*link[1]+link[2]*link[2]-(temp_x*temp_x+temp_y*temp_y))/(2*link[1]*link[2])) + target_angle[1];
 
     target_angle_vector << target_angle[0],

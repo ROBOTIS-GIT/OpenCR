@@ -65,8 +65,7 @@ class Joint
 
  public:
   /////////////////func///////////////////
-  Joint(): 
-  dxl_id_(-1),
+  Joint(): dxl_id_(-1)
   {
     joint_state_.angle = 0.0;
     joint_state_.angular_velocity = 0.0;
@@ -117,7 +116,7 @@ class Joint
 
   float getAngle()
   {
-    return joint_state_.angle_;
+    return joint_state_.angle;
   }
 
   float getAngularVelocity()
@@ -185,11 +184,10 @@ class Link
   Eigen::Vector3f center_position_;
  public:
   /////////////////func///////////////////
-  Link():
-  inner_joint_size_(1),
+  Link(): inner_joint_size_(1)
   {
     inertia_.mass = 0;
-    inertia_.center_position = Eigen::Vector3f::Zero();
+    inertia_.relative_center_position = Eigen::Vector3f::Zero();
     inertia_.moment = 0;
   }
 
@@ -209,7 +207,7 @@ class Link
       inner_joint_.at(findJoint(joint_number)).joint_number = joint_number;
       inner_joint_.at(findJoint(joint_number)).relative_position = relative_position;
       inner_joint_.at(findJoint(joint_number)).relative_orientation = relative_orientation;
-      return 0;
+      return;
     }
     else
     {
@@ -220,7 +218,7 @@ class Link
           inner_joint_.at(findJoint(i)).joint_number = joint_number;
           inner_joint_.at(findJoint(i)).relative_position = relative_position;
           inner_joint_.at(findJoint(i)).relative_orientation = relative_orientation;
-          return 0;
+          return;
         }
       }
     }
@@ -243,28 +241,28 @@ class Link
   Eigen::Vector3f getRelativeJointPosition(int8_t to, int8_t from)
   {
     Eigen::Vector3f temp;
-    temp = inner_joint_.at(FindJoint(to)).relative_position - inner_joint_.at(FindJoint(from)).relative_position;
+    temp = inner_joint_.at(findJoint(to)).relative_position - inner_joint_.at(findJoint(from)).relative_position;
     return temp; 
   }
 
   Eigen::Matrix3f getRelativeJointOrientation(int8_t to, int8_t from)
   {
     Eigen::Matrix3f temp;
-    temp = inner_joint_.at(FindJoint(from)).relative_orientation.transpose() * inner_joint_.at(FindJoint(to)).relative_orientation;
+    temp = inner_joint_.at(findJoint(from)).relative_orientation.transpose() * inner_joint_.at(findJoint(to)).relative_orientation;
     return temp; 
   }
 
   Eigen::Vector3f getRelativeJointPosition(int8_t joint_number)
   {
     Eigen::Vector3f temp;
-    temp = inner_joint_.at(FindJoint(joint_number)).relative_position;
+    temp = inner_joint_.at(findJoint(joint_number)).relative_position;
     return temp; 
   }
 
   Eigen::Matrix3f getRelativeJointOrientation(int8_t joint_number)
   {
     Eigen::Matrix3f temp;
-    temp = inner_joint_.at(FindJoint(joint_number)).relative_orientation;
+    temp = inner_joint_.at(findJoint(joint_number)).relative_orientation;
     return temp; 
   }
   
@@ -303,7 +301,7 @@ class Link
 
   void setRelativeCenterPosition(Eigen::Vector3f relative_center_position)
   {
-    inertia_.center_position =center_position;
+    inertia_.relative_center_position =relative_center_position;
   }
 
   void setInertiaMoment(float inertia_moment)
@@ -323,13 +321,13 @@ class Link
 
   Eigen::Vector3f getRelativeCenterPosition()
   {
-    return inertia_.center_position;
+    return inertia_.relative_center_position;
   }
 
   Eigen::Vector3f getRelativeCenterPosition(int8_t from)
   {
     Eigen::Vector3f temp;
-    temp = inertia_.center_position - inner_joint_.at(FineJoint(from)).relative_position;
+    temp = inertia_.relative_center_position - inner_joint_.at(findJoint(from)).relative_position;
     return temp;
   }
 
@@ -350,14 +348,15 @@ class Base: public Link
   Pose base_pose_;
  public:
   /////////////////func///////////////////
-  Base(): 
+  Base() 
   {
     base_pose_.position = Eigen::Vector3f::Zero();
     base_pose_.orientation = Eigen::Matrix3f::Identity(3,3);
     relative_base_pose_.position = Eigen::Vector3f::Zero();
     relative_base_pose_.orientation = Eigen::Matrix3f::Identity(3,3);
   }
-    ~Base(){}
+
+  ~Base(){}
 
   void setRelativeBasePostion(Eigen::Vector3f relative_base_position)
   {
@@ -419,7 +418,7 @@ class Base: public Link
   Eigen::Matrix3f getRelativeBaseJointOrientation(int8_t to)
   {
     Eigen::Matrix3f temp;
-    temp = relative_base_pose_.orientation.transpose() * getRelativeJointorientation(to);
+    temp = relative_base_pose_.orientation.transpose() * getRelativeJointOrientation(to);
     return temp; 
   }
     ////////////////////////////////////////
@@ -434,13 +433,12 @@ class Tool: public Link
   Pose tool_pose_;
  public:
   /////////////////func///////////////////
-  Tool():
-  tool_type_(0)
+  Tool(): tool_type_(0)
   {
     tool_pose_.position = Eigen::Vector3f::Zero();
     tool_pose_.orientation = Eigen::Matrix3f::Identity(3,3);
-    relatvie_tool_pose_.position = Eigen::Vector3f::Zero();
-    relatvie_tool_pose_.orientation = Eigen::Matrix3f::Identity(3,3);
+    relative_tool_pose_.position = Eigen::Vector3f::Zero();
+    relative_tool_pose_.orientation = Eigen::Matrix3f::Identity(3,3);
   }
 
   ~Tool(){}
@@ -457,18 +455,18 @@ class Tool: public Link
 
   void setRelativeToolPosition(Eigen::Vector3f relative_tool_position)
   {
-    relatvie_tool_pose_.position = relatvie_tool_position;
+    relative_tool_pose_.position = relative_tool_position;
   }
 
-  void setRelativeToolOrientation(Eigen::Matrix3f relatvie_tool_orientation)
+  void setRelativeToolOrientation(Eigen::Matrix3f relative_tool_orientation)
   {
-    relatvie_tool_pose_.orientation = relatvie_tool_orientation;
+    relative_tool_pose_.orientation = relative_tool_orientation;
   }
 
   void setRelativeToolPose(Pose relative_tool_pose)
   {
-    relatvie_tool_pose_.position = relatvie_tool_pose.position;
-    relatvie_tool_pose_.orientation = relatvie_tool_pose.orientation;
+    relative_tool_pose_.position = relative_tool_pose.position;
+    relative_tool_pose_.orientation = relative_tool_pose.orientation;
   }
 
   void setPosition(Eigen::Vector3f tool_position)
@@ -515,7 +513,7 @@ class Tool: public Link
   Eigen::Matrix3f getRelativeToolOrientation(int8_t from)
   {
     Eigen::Matrix3f temp;
-    temp = getRelativeJointorientation(from).transpose() * relative_tool_pose_.orientation;
+    temp = getRelativeJointOrientation(from).transpose() * relative_tool_pose_.orientation;
     return temp; 
   }
   ////////////////////////////////////////
@@ -525,7 +523,7 @@ template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
 class Manipulator
 {
  private:
-  inte8_t type_ = TYPE;
+  int8_t type_ = TYPE;
   int8_t dof_;
   int8_t joint_size_ = JOINT_SIZE;
   int8_t link_size_ = LINK_SIZE;
@@ -538,14 +536,14 @@ class Manipulator
   Tool tool_[TOOL_SIZE];
 
   /////////////////func///////////////////
-  Manipulator(int8_t dof):
-  name("UnknownManipulator")
+  Manipulator(int8_t dof)
   {
     dof_ = dof;
   }
+
   ~Manipulator(){}
 
-  void setDOF(int8_t dof);
+  void setDOF(int8_t dof)
   {
     dof_=dof;
   }
