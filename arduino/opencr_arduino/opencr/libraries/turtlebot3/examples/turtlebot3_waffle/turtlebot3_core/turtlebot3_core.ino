@@ -76,7 +76,7 @@ void loop()
 {
   uint32_t t = millis();
   updateTime();
-  updateVariable();
+  updateVariable(nh.connected());
   updateTFPrefix(nh.connected());
 
   if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_FREQUENCY))
@@ -149,8 +149,8 @@ void loop()
   // Call all the callbacks waiting to be called at that point in time
   nh.spinOnce();
 
-  // give the serial link time to process
-  delay(10);
+  // Wait the serial link time to process
+  waitForSerialLink(nh.connected());
 }
 
 /*******************************************************************************
@@ -600,11 +600,11 @@ void driveTest(uint8_t buttons)
 /*******************************************************************************
 * Update variable (initialization)
 *******************************************************************************/
-void updateVariable(void)
+void updateVariable(bool isConnected)
 {
   static bool variable_flag = false;
   
-  if (nh.connected())
+  if (isConnected)
   {
     if (variable_flag == false)
     {      
@@ -621,11 +621,33 @@ void updateVariable(void)
 }
 
 /*******************************************************************************
+* Wait for Serial Link
+*******************************************************************************/
+void waitForSerialLink(bool isConnected)
+{
+  static bool wait_flag = false;
+  
+  if (isConnected)
+  {
+    if (wait_flag == false)
+    {      
+      delay(10);
+
+      wait_flag = true;
+    }
+  }
+  else
+  {
+    wait_flag = false;
+  }
+}
+
+/*******************************************************************************
 * Update the base time for interpolation
 *******************************************************************************/
 void updateTime()
 {
-  current_offset = micros();
+  current_offset = millis();
   current_time = nh.now();
 }
 
@@ -634,23 +656,19 @@ void updateTime()
 *******************************************************************************/
 ros::Time rosNow()
 {
-  return addMicros(current_time, micros() - current_offset);
+  return nh.now();
 }
 
 /*******************************************************************************
-* Time Interpolation function
+* Time Interpolation function (deprecated)
 *******************************************************************************/
 ros::Time addMicros(ros::Time & t, uint32_t _micros)
 {
   uint32_t sec, nsec;
 
-  sec  = _micros / 1000000 + t.sec;
-  nsec = _micros % 1000000 + 1000 * (t.nsec / 1000);
-  
-  if (nsec >= 1e9) 
-  {
-    sec++, nsec--;
-  }
+  sec  = _micros / 1000 + t.sec;
+  nsec = _micros % 1000000000 + t.nsec;
+
   return ros::Time(sec, nsec);
 }
 
