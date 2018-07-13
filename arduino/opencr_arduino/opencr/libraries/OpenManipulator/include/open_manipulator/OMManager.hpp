@@ -109,8 +109,8 @@ class Joint
 
   void setJointState(State joint_state)
   {
-    joint_state_.angle = joint_state.angle;
-    joint_state_.angular_velocity = joint_state.angular_velocity;
+    joint_state_.angle                = joint_state.angle;
+    joint_state_.angular_velocity     = joint_state.angular_velocity;
     joint_state_.angular_acceleration = joint_state.angular_acceleration;
   }
 
@@ -132,8 +132,8 @@ class Joint
   State getJointState()
   {
     State temp; 
-    temp.angle = joint_state_.angle;
-    temp.angular_velocity = joint_state_.angular_velocity;
+    temp.angle                = joint_state_.angle;
+    temp.angular_velocity     = joint_state_.angular_velocity;
     temp.angular_acceleration = joint_state_.angular_acceleration;
     return temp;
   }
@@ -150,7 +150,7 @@ class Joint
 
   void setPose(Pose joint_pose)
   {
-    joint_pose_.position = joint_pose.position;
+    joint_pose_.position    = joint_pose.position;
     joint_pose_.orientation = joint_pose.orientation;
   }
 
@@ -167,7 +167,7 @@ class Joint
   Pose getPose()
   {
     Pose temp;
-    temp.position = joint_pose_.position;
+    temp.position    = joint_pose_.position;
     temp.orientation = joint_pose_.orientation;
     return temp;
   }
