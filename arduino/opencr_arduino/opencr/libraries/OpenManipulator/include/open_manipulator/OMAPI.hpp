@@ -14,16 +14,15 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM, Darby Lim*/
+/* Authors: Darby Limm, Hye-Jong KIM */
    
 #ifndef OMAPI_HPP_
 #define OMAPI_HPP_
 
-// #include "../../include/open_manipulator/OMManager.h"
-// #include "../../include/open_manipulator/OMKinematics.h"
-// #include "../../include/open_manipulator/OMDynamixel.h"
-// #include "../../include/open_manipulator/OMPath.h"
-// #include "../../include/open_manipulator/OMDebug.h"
+#include "OMManager.hpp"
+#include "OMMath.hpp"
+#include "OMKinematics.hpp"
+
 
 
 ///////////////////////////////////////get(joint level)//////////////////////////////////////
