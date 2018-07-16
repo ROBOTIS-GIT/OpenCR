@@ -14,13 +14,13 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Darby Lim */
+/* Authors: Hye-Jong KIM */
 
 #ifndef OPENMANIPULATOR_LINK_H_
 #define OPENMANIPULATOR_LINK_H_
 
-#include "../../include/open_manipulator/OMManager.hpp"
-#include "../../include/open_manipulator/OMMath.hpp"
+#include "OMManager.hpp"
+#include "OMMath.hpp"
 
 Manipulator<3, 11, 8, 1> omlink(3); // <type "link", the number of joint, the number of link, the number of tool> (dof)
 
@@ -40,7 +40,7 @@ void initManipulator()
   omlink.joint[10].init(-1, math_.makeEigenVector3(0,1,0));
 
   omlink.base.init(1);
-  omlink.base.setPostion(Eigen::Vector3f::Zero());
+  omlink.base.setPosition(Eigen::Vector3f::Zero());
   omlink.base.setOrientation(Eigen::Matrix3f::Identity(3,3));
   omlink.base.setRelativeBasePostion(Eigen::Vector3f::Zero());
   omlink.base.setRelativeBaseOrientation(Eigen::Matrix3f::Identity(3,3));
