@@ -29,6 +29,9 @@
 #define DEG2RAD (M_PI / 180.0)
 #define RAD2DEG (180.0 / M_PI)
 
+#define ZERO_VECTOR     Eigen::Vector3f::Zero()
+#define IDENTITY_MATRIX Eigen::Matrix3f::Identity(3,3)
+
 class OMMath
 {
  public:
