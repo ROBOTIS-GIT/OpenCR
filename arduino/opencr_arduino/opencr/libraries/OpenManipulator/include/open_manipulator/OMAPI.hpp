@@ -19,9 +19,63 @@
 #ifndef OMAPI_HPP_
 #define OMAPI_HPP_
 
+#include <RTOS.h>
+
 #include "OMManager.hpp"
 #include "OMMath.hpp"
 #include "OMKinematics.hpp"
+#include "OMDynamixel.hpp"
+
+namespace OPEN_MANIPULATOR
+{
+template <uint8_t DXL_SIZE, uint32_t BAUD_RATE>
+OMDynamixel omDynamixel
+
+void initDynamixel()
+{
+  // OMDynamixel<DYNAMIXEL::DXL_SIZE,DYNAMIXEL::BAUD_RATE> omDynamixel;
+
+    // omDynamixel.init();
+  // omDynamixel.setDisable(1);
+  // omDynamixel.setPositionControlMode(1);
+  // omDynamixel.setEnable(1);
+
+    // float* angle = omDynamixel.getAngle();
+  // Serial.print("angle : "); Serial.println(angle[0]);
+
+    static uint32_t loop_cnt = 0;
+  
+  Serial.print("Loop Cnt : ");
+  Serial.println(loop_cnt++);
+}
+
+void Thread_Robot_State(void const *argument)
+{
+  (void) argument;
+
+  // pinMode(13, OUTPUT);
+
+  // static bool index = false;
+
+  for(;;)
+  {
+    // if (index)
+    //   omDynamixel.setAngle(1, 0.0);
+    // else
+    //   omDynamixel.setAngle(1, 1.0);
+
+    // index = !index;
+    // digitalWrite(13, !digitalRead(13));
+    static uint32_t robot_state_cnt = 0;
+  
+    Serial.print("Robot State Cnt : ");
+    Serial.println(robot_state_cnt++);
+    osDelay(300);
+  }
+}
+}
+
+
 
 
 
