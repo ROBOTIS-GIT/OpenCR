@@ -358,7 +358,7 @@ class Base: public Link
 
   ~Base(){}
 
-  void setRelativeBasePostion(Eigen::Vector3f relative_base_position)
+  void setRelativeBasePosition(Eigen::Vector3f relative_base_position)
   {
     relative_base_pose_.position = relative_base_position;
   }
