@@ -17,8 +17,10 @@
 /* Authors: Darby Lim */
 
 #include <RTOS.h>
-#include <OpenManipulator.h>
 #include "OpenManipulator_Chain.h"
+
+#define ACTUATOR_ENABLE  true
+#define ACTUATOR_DISABLE false
 
 namespace THREAD
 {
@@ -29,27 +31,47 @@ osThreadId robot_state;
 void setup() 
 {
   Serial.begin(57600);
+  while(!Serial);
+
+  MY_ROBOT::initManipulator();
+  MY_ROBOT::initActuator(ACTUATOR_ENABLE);
+
+  OPEN_MANIPULATOR::linkSetAllJointAnglefunctionToAPI(MY_ROBOT::setAllJointAngle);
+  OPEN_MANIPULATOR::linkSetJointAnglefunctionToAPI(MY_ROBOT::setJointAngle);
+  OPEN_MANIPULATOR::linkSetGetAnglefunctionToAPI(MY_ROBOT::getAngle);
 
   initThread();
   startThread();
-
-  MY_ROBOT::initManipulator();
-  MY_ROBOT::initDyanmixel();
 }
 
 void loop() 
 {
-
+  static int loop_cnt = 0;
+  if (loop_cnt%10 == 0)
+  {
+    MUTEX::wait();
+    MY_ROBOT::setJointAngle(1, -2.0);
+    MUTEX::release();
+    Serial.println("order -2.0");
+  }
+  else if (loop_cnt%10 == 5)
+  {
+    MUTEX::wait();
+    MY_ROBOT::setJointAngle(1, 2.0);
+    MUTEX::release();
+    Serial.println("order 2.0");
+  }
+  loop_cnt++;
   osDelay(100);    
 }
 
-
 /// DON'T TOUCH ///
+
 void initThread()
 {
   // define thread
   osThreadDef(THREAD_NAME_LOOP,         Thread_Loop,                           osPriorityNormal, 0, 1024*10);
-  osThreadDef(THREAD_NAME_ROBOT_STATE,  OPEN_MANIPULATOR::Thread_Robot_State,  osPriorityNormal, 0, 1024*10);
+  osThreadDef(THREAD_NAME_ROBOT_STATE,  OPEN_MANIPULATOR::Thread_Robot_State,  osPriorityNormal, 0, 1024*20);
 
   // create thread
   THREAD::loop         = osThreadCreate(osThread(THREAD_NAME_LOOP), NULL);
@@ -59,8 +81,8 @@ void initThread()
 void startThread()
 {
   // start kernel
-  osKernelStart();
   Serial.println("Thread Start");
+  osKernelStart();
 }
 
 static void Thread_Loop(void const *argument)
