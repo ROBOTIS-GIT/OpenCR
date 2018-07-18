@@ -58,14 +58,14 @@ typedef struct
 class Joint
 {
  private:
-  int8_t dxl_id_;
+  int8_t actuator_id_;
   Eigen::Vector3f axis_;
   State joint_state_;
   Pose joint_pose_;
 
  public:
   /////////////////func///////////////////
-  Joint(): dxl_id_(-1)
+  Joint(): actuator_id_(-1)
   {
     joint_state_.angle = 0.0;
     joint_state_.angular_velocity = 0.0;
@@ -77,15 +77,15 @@ class Joint
 
   ~Joint(){}
 
-  void init(int8_t dxl_id, Eigen::Vector3f axis)
+  void init(int8_t actuator_id, Eigen::Vector3f axis)
   {
-    dxl_id_ = dxl_id;
+    actuator_id_ = actuator_id;
     axis_ = axis;
   }    
   
   int8_t getId()
   {
-    return dxl_id_;
+    return actuator_id_;
   }
   Eigen::Vector3f getAxis()
   {
