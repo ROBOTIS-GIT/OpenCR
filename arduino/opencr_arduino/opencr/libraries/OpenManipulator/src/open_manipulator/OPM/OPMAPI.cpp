@@ -18,6 +18,7 @@
 
 #include "../../../include/open_manipulator/OPM/OPMAPI.h"
 
+#if 0
 #define CONTROL_RATE 10000
 #define MOVE_TIME    3.0
 #define STORAGE 20
@@ -337,3 +338,5 @@ void jointControl()
     }
   }  
 }
+
+#endif
