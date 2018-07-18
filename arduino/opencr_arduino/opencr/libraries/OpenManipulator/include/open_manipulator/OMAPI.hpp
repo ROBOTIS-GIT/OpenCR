@@ -21,86 +21,59 @@
 
 #include <RTOS.h>
 
+#include "OMDebug.hpp"
 #include "OMManager.hpp"
 #include "OMMath.hpp"
 #include "OMKinematics.hpp"
 #include "OMDynamixel.hpp"
+#include "OMPath.hpp"
+
+osMutexDef(om_mutex);
+osMutexId(om_mutex_id);
+
+namespace MUTEX
+{
+void create(){ om_mutex_id = osMutexCreate(osMutex(om_mutex)); }
+void wait(){ osMutexWait(om_mutex_id, osWaitForever); }
+void release(){ osMutexRelease(om_mutex_id); }
+} // namespace THREAD
 
 namespace OPEN_MANIPULATOR
 {
-template <uint8_t DXL_SIZE, uint32_t BAUD_RATE>
-OMDynamixel omDynamixel
-
-void initDynamixel()
+namespace ACTUATOR
 {
-  // OMDynamixel<DYNAMIXEL::DXL_SIZE,DYNAMIXEL::BAUD_RATE> omDynamixel;
+bool (*setAllJointAngle)(float*) = NULL;
+bool (*setJointAngle)(uint8_t, float) = NULL;
+float* (*getAngle)() = NULL;
+} // namespace ACTUATOR
 
-    // omDynamixel.init();
-  // omDynamixel.setDisable(1);
-  // omDynamixel.setPositionControlMode(1);
-  // omDynamixel.setEnable(1);
+void linkSetAllJointAnglefunctionToAPI(bool (*fp)(float*)){ ACTUATOR::setAllJointAngle = fp; }
+void linkSetJointAnglefunctionToAPI(bool (*fp)(uint8_t, float)){ ACTUATOR::setJointAngle = fp; }
+void linkSetGetAnglefunctionToAPI(float* (*fp)()){ ACTUATOR::getAngle = fp; }
 
-    // float* angle = omDynamixel.getAngle();
-  // Serial.print("angle : "); Serial.println(angle[0]);
+// get(position level)
 
-    static uint32_t loop_cnt = 0;
-  
-  Serial.print("Loop Cnt : ");
-  Serial.println(loop_cnt++);
-}
+
+// set(position level)
 
 void Thread_Robot_State(void const *argument)
 {
   (void) argument;
 
-  // pinMode(13, OUTPUT);
-
-  // static bool index = false;
+  LOG::init();
+  MUTEX::create();
 
   for(;;)
   {
-    // if (index)
-    //   omDynamixel.setAngle(1, 0.0);
-    // else
-    //   omDynamixel.setAngle(1, 1.0);
+  MUTEX::wait();
+    float* angle_ptr = ACTUATOR::getAngle();
+  MUTEX::release();
+    LOG::INFO("angle : " + String(angle_ptr[0])); 
 
-    // index = !index;
-    // digitalWrite(13, !digitalRead(13));
-    static uint32_t robot_state_cnt = 0;
-  
-    Serial.print("Robot State Cnt : ");
-    Serial.println(robot_state_cnt++);
-    osDelay(300);
+  osDelay(10);
   }
 }
-}
-
-
-
-
-
-///////////////////////////////////////get(joint level)//////////////////////////////////////
-
-
-
-
-///////////////////////////////////////set(joint level)//////////////////////////////////////
-
-
-
-
-///////////////////////////////////////get(position level)///////////////////////////////////
-
-
-
-
-
-///////////////////////////////////////set(position level)///////////////////////////////////
-
-
-
-
-
+} // namespace OPEN_MANIPULATOR
 
 #endif // OMAPI_HPP_  
    
