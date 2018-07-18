@@ -115,21 +115,21 @@ class OMDynamixel
     for (uint8_t index = 0; index < dxl_info_.size; index++)
       dxl_wb_.itemWrite(dxl_info_.id_ptr[index], TORQUE_ENABLE, false);
 
-    return false;    
+    return true;    
   }
 
-  bool setAngle(float *data)
+  bool setAngle(float *radian)
   {
     int32_t set_position[dxl_info_.size] = {0, };
     for (uint8_t index = 0; index < dxl_info_.size; index++)
-      set_position[index] = dxl_wb_.convertRadian2Value(dxl_info_.id_ptr[index], data[index]);
+      set_position[index] = dxl_wb_.convertRadian2Value(dxl_info_.id_ptr[index], radian[index]);
 
     return dxl_wb_.syncWrite(GOAL_POSITION, set_position);
   }
 
-  bool setAngle(uint8_t id, float data)
+  bool setAngle(uint8_t id, float radian)
   {
-    int32_t set_position = dxl_wb_.convertRadian2Value(id, data);
+    int32_t set_position = dxl_wb_.convertRadian2Value(id, radian);
     
     return dxl_wb_.itemWrite(id, GOAL_POSITION, set_position);   
   }
