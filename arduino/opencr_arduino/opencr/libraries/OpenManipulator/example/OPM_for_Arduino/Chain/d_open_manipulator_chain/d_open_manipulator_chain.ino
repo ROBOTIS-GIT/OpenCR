@@ -36,9 +36,9 @@ void setup()
   MY_ROBOT::initManipulator();
   MY_ROBOT::initActuator(ACTUATOR_ENABLE);
 
-  OPEN_MANIPULATOR::linkSetAllJointAnglefunctionToAPI(MY_ROBOT::setAllJointAngle);
-  OPEN_MANIPULATOR::linkSetJointAnglefunctionToAPI(MY_ROBOT::setJointAngle);
-  OPEN_MANIPULATOR::linkSetGetAnglefunctionToAPI(MY_ROBOT::getAngle);
+  OPEN_MANIPULATOR::connectSetAllJointAngleToAPI(MY_ROBOT::setAllJointAngle);
+  OPEN_MANIPULATOR::connectSetJointAngleToAPI(MY_ROBOT::setJointAngle);
+  OPEN_MANIPULATOR::connectSetGetAngleToAPI(MY_ROBOT::getAngle);
 
   initThread();
   startThread();
