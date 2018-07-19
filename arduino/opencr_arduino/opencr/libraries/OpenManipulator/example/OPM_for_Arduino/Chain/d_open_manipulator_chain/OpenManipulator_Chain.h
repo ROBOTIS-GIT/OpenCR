@@ -21,16 +21,18 @@
 
 #include <OpenManipulator.h>
 #include <OMDynamixel.h>
+#include <OMKinematics.h>
+
 #include <Eigen.h>
 
 #define INFO(x) Serial.println(x)
 
 namespace DYNAMIXEL
 {
-const int8_t ACTUATOR_ID1 = 11;
-const int8_t ACTUATOR_ID2 = 12;
-const int8_t ACTUATOR_ID3 = 13;
-const int8_t ACTUATOR_ID4 = 14;
+const int8_t ACTUATOR_ID1 = 1;
+const int8_t ACTUATOR_ID2 = 2;
+const int8_t ACTUATOR_ID3 = 3;
+const int8_t ACTUATOR_ID4 = 4;
 
 const int32_t BAUD_RATE = 57600;
 const int8_t  SIZE  = 1;
@@ -118,25 +120,30 @@ bool initManipulator()
 bool initActuator(bool enable)
 {
   // Add configuration for actuators(DC motor, servo, Dynamixel) such as port, motor speed, etc
-  bool ret = MY_ROBOT::omDynamixel.init();
-  ret == true ? INFO("Success to load Dynamixels") : INFO("Failed to load Dynamixels");
+  bool isOK = false;
+  
+  isOK = MY_ROBOT::omDynamixel.init();
+  isOK == true ? INFO("Success to load Dynamixels") : INFO("Failed to load Dynamixels");
+
+  isOK = MY_ROBOT::omDynamixel.setPositionControlMode(DYNAMIXEL::ACTUATOR_ID1);
+  isOK == true ? INFO("Success to set Position Control Mode to Dynamixels") : INFO("Failed to set Position Control Mode to Dynamixels");
 
   if (enable) MY_ROBOT::omDynamixel.enableAllDynamixel();
   else        MY_ROBOT::omDynamixel.disableAllDynamixel();
 
-  return ret;  
+  return isOK;  
 }
 
 bool setAllJointAngle(float *radian)
 {
-  bool ret = MY_ROBOT::omDynamixel.setAngle(radian);
-  return ret;
+  bool isOK = MY_ROBOT::omDynamixel.setAngle(radian);
+  return isOK;
 }
 
 bool setJointAngle(uint8_t actuator_id, float radian)
 {
-  bool ret = MY_ROBOT::omDynamixel.setAngle(actuator_id, radian);
-  return ret;
+  bool isOK = MY_ROBOT::omDynamixel.setAngle(actuator_id, radian);
+  return isOK;
 }
 
 float* getAngle()
