@@ -47,9 +47,9 @@ bool (*setJointAngle)(uint8_t, float) = NULL;
 float* (*getAngle)() = NULL;
 } // namespace ACTUATOR
 
-void linkSetAllJointAnglefunctionToAPI(bool (*fp)(float*)){ ACTUATOR::setAllJointAngle = fp; }
-void linkSetJointAnglefunctionToAPI(bool (*fp)(uint8_t, float)){ ACTUATOR::setJointAngle = fp; }
-void linkSetGetAnglefunctionToAPI(float* (*fp)()){ ACTUATOR::getAngle = fp; }
+void connectSetAllJointAngleToAPI(bool (*fp)(float*)){ ACTUATOR::setAllJointAngle = fp; }
+void connectSetJointAngleToAPI(bool (*fp)(uint8_t, float)){ ACTUATOR::setJointAngle = fp; }
+void connectSetGetAngleToAPI(float* (*fp)()){ ACTUATOR::getAngle = fp; }
 
 // get(position level)
 
