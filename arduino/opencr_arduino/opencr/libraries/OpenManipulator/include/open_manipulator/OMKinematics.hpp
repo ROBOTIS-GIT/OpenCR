@@ -107,6 +107,7 @@ class OMChainKinematics
 {
   private:
     OMMath math_;
+    OMKinematicsMethod method_;
 
   public:
     OMChainKinematics(){};
