@@ -77,6 +77,8 @@ void loop()
   getData(100); //millis
 
   showLedStatus();
+
+  Serial.write(22);
 }
 
 void initRC100()
