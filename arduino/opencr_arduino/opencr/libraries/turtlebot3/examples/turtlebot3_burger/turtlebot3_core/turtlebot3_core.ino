@@ -279,8 +279,8 @@ void publishSensorStateMsg(void)
 *******************************************************************************/
 void publishVersionInfoMsg(void)
 {
-  version_info_msg.hardware = HARDWARE_VER;
-  version_info_msg.software = SOFTWARE_VER;
+  version_info_msg.hardware = "0.0.0";
+  version_info_msg.software = "0.0.0";
   version_info_msg.firmware = FIRMWARE_VER;
 
   version_info_pub.publish(&version_info_msg);
