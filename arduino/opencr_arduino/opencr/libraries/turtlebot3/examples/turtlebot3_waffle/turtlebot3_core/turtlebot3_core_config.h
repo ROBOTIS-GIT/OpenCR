@@ -43,9 +43,7 @@
 
 #include <math.h>
 
-#define HARDWARE_VER "1.0.0"
-#define SOFTWARE_VER "1.0.0"
-#define FIRMWARE_VER "1.2.1"
+#define FIRMWARE_VER "1.2.2"
 
 #define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
 #define IMU_PUBLISH_FREQUENCY                  200  //hz
@@ -150,7 +148,7 @@ ros::Publisher sensor_state_pub("sensor_state", &sensor_state_msg);
 
 // Version information of Turtlebot3
 turtlebot3_msgs::VersionInfo version_info_msg;
-ros::Publisher version_info_pub("version_info", &version_info_msg);
+ros::Publisher version_info_pub("firmware_version", &version_info_msg);
 
 // IMU of Turtlebot3
 sensor_msgs::Imu imu_msg;
