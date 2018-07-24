@@ -2,6 +2,17 @@
     "files.associations": {
         "core": "cpp",
         "dense": "cpp",
-        "cmath": "cpp"
+        "cmath": "cpp",
+        "vector": "cpp",
+        "array": "cpp",
+        "initializer_list": "cpp",
+        "utility": "cpp",
+        "typeindex": "cpp",
+        "typeinfo": "cpp",
+        "*.tcc": "cpp",
+        "unordered_map": "cpp",
+        "functional": "cpp",
+        "deque": "cpp",
+        "ostream": "cpp"
     }
 }

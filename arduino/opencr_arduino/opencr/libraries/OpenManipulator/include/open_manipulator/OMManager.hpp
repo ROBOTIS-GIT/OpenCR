@@ -24,7 +24,7 @@
 #include <unistd.h>
 #include <WString.h>
 #include <Eigen.h>
-#include <vector>       
+#include <map>       
 
 using namespace std;
 
@@ -67,33 +67,35 @@ class Link
   RelativePose centor_of_mass_;
 
  public:
-  Link():control_point_size_(1),
-         mass_(0)
+  Link()
   {
+    control_point_size_ = 1;
+    mass_ = 0;
     initial_inertia_tensor_ = Eigen::Matrix3f::Identity(3,3);
     centor_of_mass_.relative_position = Eigen::Vector3f::Zero();
     centor_of_mass_.relative_orientation = Eigen::Matrix3f::Identity(3,3);
   }
   ~Link(){}
   ///////////////////////////*initialize fuction*/////////////////////////////
-  void init(int8_t inner_control_point_size)
+  void init(int8_t inner_control_point_size, bool* error = false)
   {
     inner_control_point_size_=inner_control_point_size;
   }
 
-  void addControlPoint(char* name, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation)
+  void addControlPoint(char* name, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation, bool* error = false)
   {
     RelativePose temp;
     temp.relative_position = relative_position;
     temp.relative_orientation = relative_orientation;
-    inner_control_point_.insert(pair<char*, RelativePose>(name,temp));
+    inner_control_point_[name] = temp;
     if(inner_control_point_.size()>inner_control_point_size_)
     {
       cout << "error : control point size over in link [" << name_ << "]" << endl;
+      error = true;
     }
   }
 
-  void setCenterOfMass(float mass, Eigen::Matrix3f initial_inertia_tensor, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation)
+  void setCenterOfMass(float mass, Eigen::Matrix3f initial_inertia_tensor, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation, bool* error = false)
   {
     mass_ = mass;
     initial_inertia_tensor_ = initial_inertia_tensor;
@@ -103,30 +105,31 @@ class Link
   //////////////////////////////////////////////////////////////////////////
 
   /////////////////////////////Get fuction//////////////////////////////////
-  int8_t getControlPointSize()
+  int8_t getControlPointSize(bool* error = false)
   {
     return inner_control_point_size_;
   }
 
-  RelativePose getRelativePose(char* name)
+  RelativePose getRelativePose(char* name, bool* error = false)
   {
-    if(inner_control_point_.find(name) != inner_control_point_.cend())
+    if(inner_control_point_.find(name) != inner_control_point_.end())
     {
       return inner_control_point_.at(name);
     }
     else
     {
       cout << "error : undefined control point (fuction : getRelativePose)" << endl;
-      return NULL;
+      error = true;
+      return;
     }
   }
 
-  RelativePose getRelativePose(char* to_name, char* from_name)
+  RelativePose getRelativePose(char* to_name, char* from_name, bool* error = false)
   {
     RelativePose result;
-    if(inner_control_point_.find(to_name) != inner_control_point_.cend())
+    if(inner_control_point_.find(to_name) != inner_control_point_.end())
     {
-      if(inner_control_point_.find(from_name) != inner_control_point_.cend())
+      if(inner_control_point_.find(from_name) != inner_control_point_.end())
       {
         result = inner_control_point_.at(to_name).relative_position - inner_control_point_.at(from_name).relative_position;
         result = inner_control_point_.at(from_name).relative_orientation.transpose() * inner_control_point_.at(to_name).relative_orientation;
@@ -135,38 +138,48 @@ class Link
       else
       {
         cout << "error : undefined control point (fuction : getRelativePose)" << endl;
-        return NULL;
+        error = true;
+        return;
       }
     }
     else
     {
       cout << "error : undefined control point (fuction : getRelativePose)" << endl;
-      return NULL;
+      error = true;
+      return;
     }
   }
 
-  float getMass()
+  float getMass(bool* error = false)
   {
     return mass_;
   }
 
-  Eigen::Matrix3f getInitialInertiaTensor()
+  Eigen::Matrix3f getInitialInertiaTensor(bool* error = false)
   {
     return initial_inertia_tensor_;
   } 
 
-  RelativePose getRelativeCenterOfMassPose()
+  RelativePose getRelativeCenterOfMassPose(bool* error = false)
   {
     return centor_of_mass_;
   }
 
-  RelativePose getRelativeCenterOfMassPose(char* from_name)
+  RelativePose getRelativeCenterOfMassPose(char* from_name, bool* error = false)
   {
     RelativePose result;
-
-    result = centor_of_mass_.relative_position - inner_control_point_.at(from_name).relative_position;
-    result = inner_control_point_.at(from_name).relative_orientation.transpose() * centor_of_mass_.relative_orientation;
-    return result;
+    if(inner_control_point_.find(from_name) != inner_control_point_.end())
+    {
+      result = centor_of_mass_.relative_position - inner_control_point_.at(from_name).relative_position;
+      result = inner_control_point_.at(from_name).relative_orientation.transpose() * centor_of_mass_.relative_orientation;
+      return result;
+    }
+    else
+    {
+      cout << "error : undefined control point (fuction : getRelativePose)" << endl;
+      error = true;
+      return;
+    }    
   }
   //////////////////////////////////////////////////////////////////////////
 };
@@ -189,58 +202,54 @@ class ControlPoint
   }
   ~ControlPoint(){}
   ////////////////////////////////*Set fuction*///////////////////////////////
-  void setPosition(Eigen::Vector3f position)
+  void setPosition(Eigen::Vector3f position, bool* error = false)
   {
     control_point_.position = position;
   }
 
-  void setOrientation(Eigen::Vector3f orientation)
+  void setOrientation(Eigen::Vector3f orientation, bool* error = false)
   {
     control_point_.orientation = orientation;
   }
 
-  void setPose(Pose pose)
+  void setPose(Pose pose, bool* error = false)
   {
-    control_point_.position    = pose.position;
-    control_point_.orientation = pose.orientation;
+    control_point_ = pose;
   }
 
-  void setLinearVelocity(Eigen::Vector3f linear_velocity)
+  void setLinearVelocity(Eigen::Vector3f linear_velocity, bool* error = false)
   {
     dynamic_control_point_.linear_velocity = linear_velocity;
   }
 
-  void setAngularVelocity(Eigen::Vector3f angular_velocity)
+  void setAngularVelocity(Eigen::Vector3f angular_velocity, bool* error = false)
   {
     dynamic_control_point_.angular_velocity = angular_velocity;
   }
 
-  void setLinearAcceleration(Eigen::Vector3f linear_acceleration)
+  void setLinearAcceleration(Eigen::Vector3f linear_acceleration, bool* error = false)
   {
     dynamic_control_point_.linear_acceleration = linear_acceleration;
   }
 
-  void setAngularAcceleration(Eigen::Vector3f angular_acceleration)
+  void setAngularAcceleration(Eigen::Vector3f angular_acceleration, bool* error = false)
   {
     dynamic_control_point_.angular_acceleration = angular_acceleration;
   }
 
-  void setDynamicPose(DynamicPose dynamic_pose)
+  void setDynamicPose(DynamicPose dynamic_pose, bool* error = false)
   {
-    dynamic_control_point_.linear_velocity = dynamic_pose.linear_velocity;
-    dynamic_control_point_.angular_velocity = dynamic_pose.angular_velocity;
-    dynamic_control_point_.linear_acceleration = dynamic_pose.linear_acceleration;
-    dynamic_control_point_.angular_acceleration = dynamic_pose.angular_acceleration;
+    dynamic_control_point_ = dynamic_pose;
   }
   ////////////////////////////////////////////////////////////////////////////
 
   ////////////////////////////////*Get fuction*///////////////////////////////
-  Pose getPose()
+  Pose getPose(bool* error = false)
   {
     return control_point_;
   }
 
-  DynamicPose getDynamicPose()
+  DynamicPose getDynamicPose(bool* error = false)
   {
     return dynamic_control_point_;
   }
@@ -255,13 +264,12 @@ class Base: public ControlPoint
   Base(){}
   ~Base(){}
   ///////////////////////////*initialize fuction*/////////////////////////////
-  void init(Eigen::Vector3f base_position, Eigen::Vector3f base_orientation)
+  void init(Eigen::Vector3f base_position, Eigen::Vector3f base_orientation, bool* error = false)
   {
-    control_point_.position = base_position;
-    control_point_.orientation = base_orientation;
+    setPosition(base_position);
+    setOrientation(base_orientation);
   }    
   ////////////////////////////////////////////////////////////////////////////
-
 };
 
 class Mass: public ControlPoint
@@ -281,8 +289,9 @@ class Joint: public ControlPoint
   JointState state_;
 
  public:
-  Joint(): actuator_id_(-1)
+  Joint()
   {
+    actuator_id_ = -1;
     axis_ = Eigen::Vector3f::Zero();
     state_.angle = 0.0;
     state_.velocity = 0.0;
@@ -290,64 +299,62 @@ class Joint: public ControlPoint
   }
   ~Joint(){}
   ///////////////////////////*initialize fuction*/////////////////////////////
-  void init(int8_t actuator_id, Eigen::Vector3f axis)
+  void init(int8_t actuator_id = -1, Eigen::Vector3f axis, bool* error = false)
   {
     actuator_id_ = actuator_id;
     axis_ = axis;
-  }    
+  }
   ////////////////////////////////////////////////////////////////////////////
 
   ////////////////////////////////*Set fuction*///////////////////////////////
-  void setAngle(float angle)
+  void setAngle(float angle, bool* error = false)
   {
     state_.angle = angle;
   }
 
-  void setAngularVelocity(float velocity)
+  void setAngularVelocity(float velocity, bool* error = false)
   {
     state_.velocity = velocity;
   }
 
-  void setAngularAcceleration(float acceleration)
+  void setAngularAcceleration(float acceleration, bool* error = false)
   {
     state_.acceleration = acceleration;
   }
 
-  void setJointState(JointState state)
+  void setJointState(JointState state, bool* error = false)
   {
-    state_.angle                = state.angle;
-    state_.velocity             = state.velocity;
-    state_.aacceleration        = state.acceleration;
+    state_ = state;
   }
   ////////////////////////////////////////////////////////////////////////////
 
   ////////////////////////////////*Get fuction*///////////////////////////////
-  int8_t getActuatorId()
+  int8_t getActuatorId(bool* error = false)
   {
     return actuator_id_;
   }
 
-  Eigen::Vector3f getAxis()
+  Eigen::Vector3f getAxis(bool* error = false)
   {
     return axis_;
   }
 
-  float getAngle()
+  float getAngle(bool* error = false)
   {
     return state_.angle;
   }
 
-  float getAngularVelocity()
+  float getAngularVelocity(bool* error = false)
   {
     return state_.angular_velocity;
   }
 
-  float getAngularAcceleration()
+  float getAngularAcceleration(bool* error = false)
   {
     return state_.angular_acceleration;
   }
 
-  JointState getJointState()
+  JointState getJointState(bool* error = false)
   {
     return state_;
   }
@@ -363,15 +370,16 @@ class Tool: public ControlPoint
   float actuator_value_;
 
  public:
-  Tool(): actuator_id_(-1),
-          on_off_(false),
-          actuator_value_(0.0)
+  Tool()
   {
+    actuator_id_ = -1;
+    on_off_ = false;
+    actuator_value_ = 0.0;
     axis_ = Eigen::Vector3f::Zero();
   }
   ~Tool(){}
   ///////////////////////////*initialize fuction*/////////////////////////////
-  void init(int8_t actuator_id, Eigen::Vector3f axis)
+  void init(int8_t actuator_id, Eigen::Vector3f axis, bool* error = false)
   {
     actuator_id_ = actuator_id;
     axis_ = axis;
@@ -379,34 +387,34 @@ class Tool: public ControlPoint
   ////////////////////////////////////////////////////////////////////////////
   
   ////////////////////////////////*Set fuction*///////////////////////////////
-  void setOnOff(bool on_off)
+  void setOnOff(bool on_off, bool* error = false)
   {
     on_off_=on_off;
   }
 
-  void setActuatorValue(float actuator_value)
+  void setActuatorValue(float actuator_value, bool* error = false)
   {
     actuator_value_ = actuator_value;
   }
   ////////////////////////////////////////////////////////////////////////////
 
   ////////////////////////////////*Get fuction*///////////////////////////////
-  int8_t getActuatorId()
+  int8_t getActuatorId(bool* error = false)
   {
     return actuator_id_;
   }
 
-  Eigen::Vector3f getAxis()
+  Eigen::Vector3f getAxis(bool* error = false)
   {
     return axis_;
   }
 
-  bool getOnOff()
+  bool getOnOff(bool* error = false)
   {
     return on_off_;
   }
 
-  float getActuatorValue()
+  float getActuatorValue(bool* error = false)
   {
     return actuator_value_;
   }
@@ -428,14 +436,43 @@ class Manipulator
   map<char*, Tool> tool_;
 
  public:
-  Manipulator():dof_(0),
-                joint_size_(0),
-                link_size_(0),
-                tool_size_(0)
-  {}
+  Manipulator()
+  {
+    dof_ = 0;
+    joint_size_ = 0;
+    link_size_ = 0;
+    tool_size_ = 0;
+  }
   ~Manipulator(){}
+  ////////////////////////////////*Find fuction*//////////////////////////////
+  ControlPoint* findControlPoint(char* point_name, bool* error = false)
+  {
+    if(base_.find(point_name) != base_.end())
+    {
+      return (ControlPoint*) &base_[point_name];
+    }
+    else if(joint_.find(point_name) != joint_.end())
+    {
+      return (ControlPoint*) &joint_[point_name];
+    }
+    else if(tool_.find(point_name) != tool_.end())
+    {
+      return (ControlPoint*) &tool_[point_name];
+    }
+    else if(mass_.find(point_name) != mass_.end())
+    {
+      return (ControlPoint*) &mass_[point_name];
+    }
+    else
+    {
+      cout << "error" << endl;
+      error = true;
+    }
+  }
+  ////////////////////////////////////////////////////////////////////////////
+
   ///////////////////////////*initialize fuction*/////////////////////////////
-  void initManipulator(int8_t dof, int8_t joint_size, int8_t link_size, int8_t tool_size)
+  void initManipulator(int8_t dof, int8_t joint_size, int8_t link_size, int8_t tool_size, bool* error = false)
   {
     dof_=dof;
     joint_size_ = joint_size;
@@ -443,405 +480,622 @@ class Manipulator
     tool_size_ = tool_size;
   }
 
-  void makeBase(char* base_name, Eigen::Vector3f base_position, Eigen::Vector3f base_orientation)
+  void makeBase(char* base_name, Eigen::Vector3f base_position, Eigen::Vector3f base_orientation, bool* error = false)
   {
     Base base_temp;
-    base_.insert(pair<char*, Base>(base_name,base_temp));
-    base_.at(base_name).init(base_position, base_orientation);
+    base_[base_name] = base_temp;
+    base_.at(base_name).init(base_position, base_orientation, error);
+    if(!error)return;
     if(base_.size()>1)
     {
       cout << "error : base size over" << endl;
+      error = true;
     }
   }
 
-  void makeJoint(char* joint_name, int8_t actuator_id, Eigen::Vector3f axis)
+  void makeJoint(char* joint_name, int8_t actuator_id, Eigen::Vector3f axis, bool* error = false)
   {
     Joint joint_temp;
-    joint_.insert(pair<char*, Joint>(joint_name,joint_temp));
-    joint_.at(joint_name).init(actuator_id, axis);
+    joint_[joint_name] = joint_temp;
+    joint_.at(joint_name).init(actuator_id, axis, error);
+    if(!error)return;
     if(joint_.size()>joint_size_)
     {
-      cout << "error : joint size over"<< "(joint : " << joint_name << ")" << endl;
+      cout << "error : joint size over" << "(joint : " << joint_name << ")" << endl;
+      error = true;
     }
   }
 
-  void makeTool(char* tool_name, int8_t actuator_id, Eigen::Vector3f axis)
+  void makeTool(char* tool_name, int8_t actuator_id, Eigen::Vector3f axis, bool* error = false)
   {
     Tool tool_temp;
-    tool_.insert(pair<char*, Tool>(tool_name,tool_temp));
-    tool_.at(tool_name).init(actuator_id, axis);
+    tool_[tool_name] = tool_temp;
+    tool_.at(tool_name).init(actuator_id, axis, error);
+    if(!error)return;
     if(tool_.size()>tool_size_)
     {
       cout << "error : tool size over"<< "(tool : " << tool_name << ")" << endl;
+      error = true;
     }
   }
 
-  void makeLink(char* link_name, int8_t inner_control_point_size)
+  void makeLink(char* link_name, int8_t inner_control_point_size, bool* error = false)
   {
     Link link_temp;
-    link_.insert(pair<char*, Link>(link_name,link_temp));
-    link_.at(link_name).init(inner_control_point_size);
+    link_[link_name] = link_temp;
+    link_.at(link_name).init(inner_control_point_size, error);
     Mass mass_temp;
-    mass_.insert(pair<char*, Mass>(link_name,mass_temp));
+    mass_.at(link_name) = mass_temp;
+    if(!error)return;
     if(link_.size()>link_size_)
     {
       cout << "error : link size over"<< "(link : " << link_name << ")" << endl;
+      error = true;
     }
   }
 
-  void addControlPoint(char* link_name, char* point_name, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation)
+  void addControlPoint(char* link_name, char* point_name, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation, bool* error = false)
   {
-    if(link_.find(link_name) != link_.cend())
+    if(link_.find(link_name) != link_.end())
     {
-      if(findControlPoint(point_name)!=NULL)
+      findControlPoint(point_name, error);
+      if(!error)
       {
-        link_.at(link_name).addControlPoint(point_name, relative_position, relative_orientation);
+        link_.at(link_name).addControlPoint(point_name, relative_position, relative_orientation, error);
       }
       else
       {
         cout << "error : Unknown control point"<< " (point name : " << point_name << ", link_name : " << link_name << ")" << endl;
+        error = true;
       }
     }
     else
     {
       cout << "error : added control point to unknown link"<< " (point name : " << point_name << ", link_name : " << link_name << ")" << endl;
+      error = true;
     }
   }
 
-  void setCenterOfMass(char* link_name, float mass, Eigen::Matrix3f initial_inertia_tensor, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation)
+  void setCenterOfMass(char* link_name, float mass, Eigen::Matrix3f initial_inertia_tensor, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation, bool* error = false)
   {
-    if(link_.find(link_name) != link_.cend())
+    if(link_.find(link_name) != link_.end())
     {
-      link_.at(link_name).setCenterOfMass(mass, initial_inertia_tensor, relative_position, relative_orientation);
+      link_.at(link_name).setCenterOfMass(mass, initial_inertia_tensor, relative_position, relative_orientation, error);
     }
     else
     {
       cout << "error : set center of mass to unknown link"<< " (link_name : " << link_name << ")" << endl;
-    }
-  }
-  ////////////////////////////////////////////////////////////////////////////
-
-  ////////////////////////////////*Find fuction*//////////////////////////////
-  char findControlPoint(char* point_name)
-  {
-    if(base_.find(point_name) != base_.cend())
-    {
-      return "b";
-    }
-    else if(joint_.find(point_name) != joint_.cend())
-    {
-      return "j";
-    }
-    else if(tool_.find(point_name) != tool_.cend())
-    {
-      return "t";
-    }
-    else if(mass_.find(point_name) != mass_.cend())
-    {
-      return "m";
-    }
-    else
-    {
-      return NULL;
+      error = true;
     }
   }
   ////////////////////////////////////////////////////////////////////////////
 
   ////////////////////////////////*Set fuction*///////////////////////////////
-  void setPosition(char* name, Eigen::Vector3f position)
+  void setPosition(char* name, Eigen::Vector3f position, bool* error = false)
   {
-    if(findControlPoint(name)=="b")
+    ControlPoint* control_point;
+    control_point = findControlPoint(name, error);
+    if(!error)
     {
-      base_.at(name).setPosition(position);
-    }
-    else if(findControlPoint(name)=="j")
-    {
-      joint_.at(name).setPosition(position);
-    }
-    else if(findControlPoint(name)=="t")
-    {
-      tool_.at(name).setPosition(position);
-    }
-    else if(findControlPoint(name)=="m")
-    {
-      mass_.at(name).setPosition(position);
+      control_point.setPosition(position, error);
     }
     else
     {
       cout << "error" << endl;
+      return;
     }
   }
   
-  void setOrientation(char* name, Eigen::Vector3f orientation)
+  void setOrientation(char* name, Eigen::Vector3f orientation, bool* error = false)
   {
-    if(findControlPoint(name)=="b")
+    ControlPoint* control_point;
+    control_point = findControlPoint(name, error);
+    if(!error)
     {
-      base_.at(name).setOrientation(orientation);
-    }
-    else if(findControlPoint(name)=="j")
-    {
-      joint_.at(name).setOrientation(orientation);
-    }
-    else if(findControlPoint(name)=="t")
-    {
-      tool_.at(name).setOrientation(orientation);
-    }
-    else if(findControlPoint(name)=="m")
-    {
-      mass_.at(name).setOrientation(orientation);
+      control_point.setOrientation(orientation, error);
     }
     else
     {
       cout << "error" << endl;
+      return;
     }
   }
   
-  void setPose(char* name, Pose pose)
+  void setPose(char* name, Pose pose, bool* error = false)
   {
-    if(findControlPoint(name)=="b")
+    ControlPoint* control_point;
+    control_point = findControlPoint(name, error);
+    if(!error)
     {
-      base_.at(name).setPose(pose);
-    }
-    else if(findControlPoint(name)=="j")
-    {
-      joint_.at(name).setPose(pose);
-    }
-    else if(findControlPoint(name)=="t")
-    {
-      tool_.at(name).setPose(pose);
-    }
-    else if(findControlPoint(name)=="m")
-    {
-      mass_.at(name).setPose(pose);
+      control_point.setPose(pose, error);
     }
     else
     {
       cout << "error" << endl;
+      return;
     }
   }
 
-  void setLinearVelocity(char* name, Eigen::Vector3f linear_velocity)
+  void setLinearVelocity(char* name, Eigen::Vector3f linear_velocity, bool* error = false)
   {
-    if(findControlPoint(name)=="b")
+    ControlPoint* control_point;
+    control_point = findControlPoint(name, error);
+    if(!error)
     {
-      base_.at(name).setLinearVelocity(linear_velocity);
-    }
-    else if(findControlPoint(name)=="j")
-    {
-      joint_.at(name).setLinearVelocity(linear_velocity);
-    }
-    else if(findControlPoint(name)=="t")
-    {
-      tool_.at(name).setLinearVelocity(linear_velocity);
-    }
-    else if(findControlPoint(name)=="m")
-    {
-      mass_.at(name).setLinearVelocity(linear_velocity);
+      control_point.setLinearVelocity(linear_velocity, error);
     }
     else
     {
       cout << "error" << endl;
+      return;
     }
   }
 
-  void setAngularVelocity(char* name, Eigen::Vector3f angular_velocity)
+  void setAngularVelocity(char* name, Eigen::Vector3f angular_velocity, bool* error = false)
   {
-    if(findControlPoint(name)=="b")
+    ControlPoint* control_point;
+    control_point = findControlPoint(name, error);
+    if(!error)
     {
-      base_.at(name).setAngularVelocity(angular_velocity);
-    }
-    else if(findControlPoint(name)=="j")
-    {
-      joint_.at(name).setAngularVelocity(angular_velocity);
-    }
-    else if(findControlPoint(name)=="t")
-    {
-      tool_.at(name).setAngularVelocity(angular_velocity);
-    }
-    else if(findControlPoint(name)=="m")
-    {
-      mass_.at(name).setAngularVelocity(angular_velocity);
+      control_point.setAngularVelocity(angular_velocity, error);
     }
     else
     {
       cout << "error" << endl;
+      return;
     }
   }
 
-  void setLinearAcceleration(char* name, Eigen::Vector3f linear_acceleration)
+  void setLinearAcceleration(char* name, Eigen::Vector3f linear_acceleration, bool* error = false)
   {
-    if(findControlPoint(name)=="b")
+    ControlPoint* control_point;
+    control_point = findControlPoint(name, error);
+    if(!error)
     {
-      base_.at(name).setLinearAcceleration(linear_acceleration);
-    }
-    else if(findControlPoint(name)=="j")
-    {
-      joint_.at(name).setLinearAcceleration(linear_acceleration);
-    }
-    else if(findControlPoint(name)=="t")
-    {
-      tool_.at(name).setLinearAcceleration(linear_acceleration);
-    }
-    else if(findControlPoint(name)=="m")
-    {
-      mass_.at(name).setLinearAcceleration(linear_acceleration);
+      control_point.setLinearAcceleration(linear_acceleration, error);
     }
     else
     {
       cout << "error" << endl;
+      return;
     }
   }
   
-  void setAngularAcceleration(char* name, Eigen::Vector3f angular_acceleration)
+  void setAngularAcceleration(char* name, Eigen::Vector3f angular_acceleration, bool* error = false)
   {
-    if(findControlPoint(name)=="b")
+    ControlPoint* control_point;
+    control_point = findControlPoint(name, error);
+    if(!error)
     {
-      base_.at(name).setAngularAcceleration(angular_acceleration);
-    }
-    else if(findControlPoint(name)=="j")
-    {
-      joint_.at(name).setAngularAcceleration(angular_acceleration);
-    }
-    else if(findControlPoint(name)=="t")
-    {
-      tool_.at(name).setAngularAcceleration(angular_acceleration);
-    }
-    else if(findControlPoint(name)=="m")
-    {
-      mass_.at(name).setAngularAcceleration(angular_acceleration);
+      control_point.setAngularAcceleration(angular_acceleration, error);
     }
     else
     {
       cout << "error" << endl;
+      return;
     }
   }
 
-  void setDynamicPose(char* name, DynamicPose dynamic_pose)
+  void setDynamicPose(char* name, DynamicPose dynamic_pose, bool* error = false)
   {
-    if(findControlPoint(name)=="b")
+    ControlPoint* control_point;
+    control_point = findControlPoint(name, error);
+    if(!error)
     {
-      base_.at(name).setDynamicPose(dynamic_pose);
-    }
-    else if(findControlPoint(name)=="j")
-    {
-      joint_.at(name).setDynamicPose(dynamic_pose);
-    }
-    else if(findControlPoint(name)=="t")
-    {
-      tool_.at(name).setDynamicPose(dynamic_pose);
-    }
-    else if(findControlPoint(name)=="m")
-    {
-      mass_.at(name).setDynamicPose(dynamic_pose);
+      control_point.setDynamicPose(dynamic_pose, error);
     }
     else
     {
       cout << "error" << endl;
+      return;
+    }
+  }
+
+  void setJointAngle(char* joint_name, float angle, bool* error = false)
+  {
+    if(joint_.find(joint_name) != joint_.end())
+    {
+      joint_.at(joint_name).setAngle(angle, error);
+    }
+    else
+    {
+      cout << "error" << endl;
+      error = true;
+    }
+  }
+
+  void setJointAngularVelocity(char* joint_name, float velocity, bool* error = false)
+  {
+    if(joint_.find(joint_name) != joint_.end())
+    {
+      joint_.at(joint_name).setAngularVelocity(velocity, error);
+    }
+    else
+    {
+      cout << "error" << endl;
+      error = true;
+    }
+  }
+
+  void setJointAngularAcceleration(char* joint_name, float acceleration, bool* error = false)
+  {
+    if(joint_.find(joint_name) != joint_.end())
+    {
+      joint_.at(joint_name).setAngularAcceleration(acceleration, error);
+    }
+    else
+    {
+      cout << "error" << endl;
+      error = true;
+    }
+  }
+
+  void setJointState(char* joint_name, JointState state, bool* error = false)
+  {
+    if(joint_.find(joint_name) != joint_.end())
+    {
+      joint_.at(joint_name).setJointState(state, error);
+    }
+    else
+    {
+      cout << "error" << endl;
+      error = true;
+    }
+  }
+
+  void setToolOnOff(char* tool_name, bool on_off, bool* error = false)
+  {
+    if(tool_.find(tool_name) != tool_.end())
+    {
+      tool_.at(tool_name).setOnOff(on_off, error);
+    }
+    else
+    {
+      cout << "error" << endl;
+      error = true;
+    }
+  }
+
+
+  void setToolActuatorValue(char* tool_name, float actuator_value, bool* error = false)
+  {
+    if(tool_.find(tool_name) != tool_.end())
+    {
+      tool_.at(tool_name).setActuatorValue(actuator_value, error);
+    }
+    else
+    {
+      cout << "error" << endl;
+      error = true;
     }
   }
   ////////////////////////////////////////////////////////////////////////////
 
   ////////////////////////////////*Get fuction*///////////////////////////////
-  int8_t getDOF()
+  int8_t getDOF(bool* error = false)
   {
     return dof_;
   }
 
-  int8_t getJointSize()
+  int8_t getJointSize(bool* error = false)
   {
     return joint_size_;
   }
 
-  int8_t getLinkSize()
+  int8_t getLinkSize(bool* error = false)
   {
     return link_size_;
   }
 
-  int8_t getToolSize()
+  int8_t getToolSize(bool* error = false)
   {
     return tool_size_;
   }
 
-  int8_t getControlPointSize()
+  int8_t getControlPointSize(bool* error = false)
   {
     return inner_control_point_size_;
   }
 
-  RelativePose getRelativePose(char* link_name, char* name)
+  RelativePose getRelativePose(char* link_name, char* name, bool* error = false)
   {
     return link_.at(link_name).getRelativePose(name);
   }
 
-  RelativePose getRelativePose(char* link_name, char* to_name, char* from_name)
+  RelativePose getRelativePose(char* link_name, char* to_name, char* from_name, bool* error = false)
   {
     return link_.at(link_name).getRelativePose(to_name, from_name);
   }
 
-  float getMass(char* link_name)
+  float getMass(char* link_name, bool* error = false)
   {
     return link_.at(link_name).getMass();
   }
 
-  Eigen::Matrix3f getInitialInertiaTensor(char* link_name)
+  Eigen::Matrix3f getInitialInertiaTensor(char* link_name, bool* error = false)
   {
     return link_.at(link_name).getInitialInertiaTensor();
   } 
 
-  RelativePose getRelativeCenterOfMassPose(char* link_name)
+  RelativePose getRelativeCenterOfMassPose(char* link_name, bool* error = false)
   {
     return link_.at(link_name).getRelativeCenterOfMassPose();
   }
 
-  RelativePose getRelativeCenterOfMassPose(char* link_name, char* from_name)
+  RelativePose getRelativeCenterOfMassPose(char* link_name, char* from_name, bool* error = false)
   {
     return link_.at(link_name).getRelativeCenterOfMassPose(from_name);
   }
 
-  Pose getPose(char* name)
+  Eigen::Vector3f getPosition(char* name, bool* error = false)
   {
-    if(findControlPoint(name)=="b")
+    Pose reuslt;
+    ControlPoint* control_point;
+    control_point = findControlPoint(name, error);
+    if(!error)
     {
-      return base_.at(name).getPose();
-    }
-    else if(findControlPoint(name)=="j")
-    {
-      return joint_.at(name).getPose();
-    }
-    else if(findControlPoint(name)=="t")
-    {
-      return tool_.at(name).getPose();
-    }
-    else if(findControlPoint(name)=="m")
-    {
-      return mass_.at(name).getPose();
+      reuslt = control_point.getPose(error);
+      return reuslt.position;
     }
     else
     {
       cout << "error" << endl;
+      return;
+    }
+  }
+  
+  Eigen::Vector3f getOrientation(char* name, bool* error = false)
+  {
+    Pose reuslt;
+    ControlPoint* control_point;
+    control_point = findControlPoint(name, error);
+    if(!error)
+    {
+      reuslt = control_point.getPose(error);
+      return reuslt.orientation;
+    }
+    else
+    {
+      cout << "error" << endl;
+      return;
     }
   }
 
-  DynamicPose getDynamicPose(char* name)
+  Pose getPose(char* name, bool* error = false)
   {
-    if(findControlPoint(name)=="b")
+    ControlPoint* control_point;
+    control_point = findControlPoint(name, error);
+    if(!error)
     {
-      return base_.at(name).getDynamicPose();
-    }
-    else if(findControlPoint(name)=="j")
-    {
-      return joint_.at(name).getDynamicPose();
-    }
-    else if(findControlPoint(name)=="t")
-    {
-      return tool_.at(name).getDynamicPose();
-    }
-    else if(findControlPoint(name)=="m")
-    {
-      return mass_.at(name).getDynamicPose();
+      return control_point.getPose(error);
     }
     else
     {
       cout << "error" << endl;
+      return;
+    }
+  }
+
+  Eigen::Vector3f getLinearVelocity(char* name, bool* error = false)
+  {
+    DynamicPose result;
+    ControlPoint* control_point;
+    control_point = findControlPoint(name, error);
+    if(!error)
+    {
+      result = control_point.getDynamicPose(error);
+      return result.linear_velocity;
+    }
+    else
+    {
+      cout << "error" << endl;
+      return;
+    }
+  }
+
+  Eigen::Vector3f getAngularVelocity(char* name, bool* error = false)
+  {
+    DynamicPose result;
+    ControlPoint* control_point;
+    control_point = findControlPoint(name, error);
+    if(!error)
+    {
+      result = control_point.getDynamicPose(error);
+      return result.angular_velocity;
+    }
+    else
+    {
+      cout << "error" << endl;
+      return;
+    }
+  }
+
+  Eigen::Vector3f getLinearAcceleration(char* name, bool* error = false)
+  {
+    DynamicPose result;
+    ControlPoint* control_point;
+    control_point = findControlPoint(name, error);
+    if(!error)
+    {
+      result = control_point.getDynamicPose(error);
+      return result.linear_acceleration;
+    }
+    else
+    {
+      cout << "error" << endl;
+      return;
+    }
+  }
+  
+  Eigen::Vector3f getAngularAcceleration(char* name, bool* error = false)
+  {
+    DynamicPose result;
+    ControlPoint* control_point;
+    control_point = findControlPoint(name, error);
+    if(!error)
+    {
+      result = control_point.getDynamicPose(error);
+      return result.angular_acceleration;
+    }
+    else
+    {
+      cout << "error" << endl;
+      return;
+    }
+  }
+
+  DynamicPose getDynamicPose(char* name, bool* error = false)
+  {
+    ControlPoint* control_point;
+    control_point = findControlPoint(name, error);
+    if(!error)
+    {
+      return control_point.getDynamicPose(error);
+    }
+    else
+    {
+      cout << "error" << endl;
+      return;
+    }
+  }
+
+  int8_t getJointActuatorId(char* joint_name, bool* error = false)
+  {
+    if(joint_.find(joint_name) != joint_.end())
+    {
+      return joint_.at(joint_name).getActuatorId(error);
+    }
+    else
+    {
+      cout << "error" << endl;
+      error = true;
+      return;
+    }
+  }
+
+  Eigen::Vector3f getJointAxis(char* joint_name, bool* error = false)
+  {
+    if(joint_.find(joint_name) != joint_.end())
+    {
+      return joint_.at(joint_name).getAxis(error);
+    }
+    else
+    {
+      cout << "error" << endl;
+      error = true;
+      return;
+    }
+  }
+
+  float getJointAngle(char* joint_name, bool* error = false)
+  {
+    if(joint_.find(joint_name) != joint_.end())
+    {
+      return joint_.at(joint_name).getAngle(error);
+    }
+    else
+    {
+      cout << "error" << endl;
+      error = true;
+      return;
+    }
+  }
+
+  float getJointAngularVelocity(char* joint_name, bool* error = false)
+  {
+    if(joint_.find(joint_name) != joint_.end())
+    {
+      return joint_.at(joint_name).getAngularVelocity(error);
+    }
+    else
+    {
+      cout << "error" << endl;
+      error = true;
+      return;
+    }
+  }
+
+  float getJointAngularAcceleration(char* joint_name, bool* error = false)
+  {
+    if(joint_.find(joint_name) != joint_.end())
+    {
+      return joint_.at(joint_name).getAngularAcceleration(error);
+    }
+    else
+    {
+      cout << "error" << endl;
+      error = true;
+      return;
+    }
+  }
+
+  JointState getJointJointState(char* joint_name, bool* error = false)
+  {
+    if(joint_.find(joint_name) != joint_.end())
+    {
+      return joint_.at(joint_name).getJointState(error);
+    }
+    else
+    {
+      cout << "error" << endl;
+      error = true;
+      return;
+    }
+  }
+
+  int8_t getToolActuatorId(char* tool_name, bool* error = false)
+  {
+    if(tool_.find(tool_name) != tool_.end())
+    {
+      return tool_.at(tool_name).getActuatorId(error);
+    }
+    else
+    {
+      cout << "error" << endl;
+      error = true;
+      return;
+    }
+  }
+
+  Eigen::Vector3f getToolAxis(char* tool_name, bool* error = false)
+  {
+    if(tool_.find(tool_name) != tool_.end())
+    {
+      return tool_.at(tool_name).getAxis(error);
+    }
+    else
+    {
+      cout << "error" << endl;
+      error = true;
+      return;
+    }
+  }
+
+  bool getToolOnOff(char* tool_name, bool* error = false)
+  {
+    if(tool_.find(tool_name) != tool_.end())
+    {
+      return tool_.at(tool_name).getOnOff(error);
+    }
+    else
+    {
+      cout << "error" << endl;
+      error = true;
+      return;
+    }
+  }
+
+  float getToolActuatorValue(char* tool_name, bool* error = false)
+  {
+    if(tool_.find(tool_name) != tool_.end())
+    {
+      return tool_.at(tool_name).getActuatorValue(error);
+    }
+    else
+    {
+      cout << "error" << endl;
+      error = true;
+      return;
     }
   }
   ////////////////////////////////////////////////////////////////////////////
