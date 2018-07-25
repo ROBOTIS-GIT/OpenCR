@@ -33,12 +33,21 @@ void setup()
   Serial.begin(57600);
   while(!Serial);
 
-  MY_ROBOT::initManipulator();
-  MY_ROBOT::initActuator(ACTUATOR_ENABLE);
+  initManipulator();
+  initActuator(ACTUATOR_ENABLE);
+  initKinematics();
+  initPath();  
 
-  OPEN_MANIPULATOR::connectSetAllJointAngleToAPI(MY_ROBOT::setAllJointAngle);
-  OPEN_MANIPULATOR::connectSetJointAngleToAPI(MY_ROBOT::setJointAngle);
-  OPEN_MANIPULATOR::connectSetGetAngleToAPI(MY_ROBOT::getAngle);
+  OPEN_MANIPULATOR::connectSetAllJointAngle(setAllJointAngle);
+  OPEN_MANIPULATOR::connectSetJointAngle(setJointAngle);
+  OPEN_MANIPULATOR::connectSetGetAngle(getAngle);
+
+  OPEN_MANIPULATOR::connectForward(forward);
+  OPEN_MANIPULATOR::connectInverse(inverse);
+
+  OPEN_MANIPULATOR::connectLine(line);
+  OPEN_MANIPULATOR::connectArc(arc);
+  OPEN_MANIPULATOR::connectCustom(heart);
 
   initThread();
   startThread();
@@ -46,22 +55,22 @@ void setup()
 
 void loop() 
 {
-  static int loop_cnt = 0;
-  if (loop_cnt%10 == 0)
-  {
-    MUTEX::wait();
-    MY_ROBOT::setJointAngle(1, -2.0);
-    MUTEX::release();
-    Serial.println("order -2.0");
-  }
-  else if (loop_cnt%10 == 5)
-  {
-    MUTEX::wait();
-    MY_ROBOT::setJointAngle(1, 2.0);
-    MUTEX::release();
-    Serial.println("order 2.0");
-  }
-  loop_cnt++;
+  // static int loop_cnt = 0;
+  // if (loop_cnt%10 == 0)
+  // {
+  //   MUTEX::wait();
+  //   setJointAngle(1, -2.0);
+  //   MUTEX::release();
+  //   Serial.println("order -2.0");
+  // }
+  // else if (loop_cnt%10 == 5)
+  // {
+  //   MUTEX::wait();
+  //   setJointAngle(1, 2.0);
+  //   MUTEX::release();
+  //   Serial.println("order 2.0");
+  // }
+  // loop_cnt++;
   osDelay(100);    
 }
 
