@@ -20,13 +20,8 @@
 #define OMAPI_HPP_
 
 #include <RTOS.h>
-
-#include "OMDebug.hpp"
-#include "OMManager.hpp"
-#include "OMMath.hpp"
-#include "OMKinematics.hpp"
-#include "OMDynamixel.hpp"
-#include "OMPath.hpp"
+#include <Eigen.h>
+#include <OpenManipulator.h>
 
 osMutexDef(om_mutex);
 osMutexId(om_mutex_id);
@@ -40,6 +35,7 @@ void release(){ osMutexRelease(om_mutex_id); }
 
 namespace OPEN_MANIPULATOR
 {
+// Connect functions
 namespace ACTUATOR
 {
 bool (*setAllJointAngle)(float*) = NULL;
@@ -47,15 +43,36 @@ bool (*setJointAngle)(uint8_t, float) = NULL;
 float* (*getAngle)() = NULL;
 } // namespace ACTUATOR
 
-void connectSetAllJointAngleToAPI(bool (*fp)(float*)){ ACTUATOR::setAllJointAngle = fp; }
-void connectSetJointAngleToAPI(bool (*fp)(uint8_t, float)){ ACTUATOR::setJointAngle = fp; }
-void connectSetGetAngleToAPI(float* (*fp)()){ ACTUATOR::getAngle = fp; }
+void connectSetAllJointAngle(bool (*fp)(float*)){ ACTUATOR::setAllJointAngle = fp; }
+void connectSetJointAngle(bool (*fp)(uint8_t, float)){ ACTUATOR::setJointAngle = fp; }
+void connectSetGetAngle(float* (*fp)()){ ACTUATOR::getAngle = fp; }
 
-// get(position level)
+namespace KINEMATICS
+{
+void (*foward)(void) = NULL;
+void (*inverse)(void) = NULL;
+} // namespace KINEMATICS
+
+void connectForward(void (*fp)(void)){KINEMATICS::foward = fp;}
+void connectInverse(void (*fp)(void)){KINEMATICS::inverse = fp;}
+
+namespace PATH
+{
+void (*line)(void) = NULL;
+void (*arc)(void) = NULL;
+void (*custom)(void) = NULL;
+} // namespace PATH
+
+void connectLine(void (*fp)(void)){PATH::line = fp;}
+void connectArc(void (*fp)(void)){PATH::arc = fp;}
+void connectCustom(void (*fp)(void)){PATH::custom = fp;}
+
+// Basic function
 
 
-// set(position level)
 
+
+// Thread
 void Thread_Robot_State(void const *argument)
 {
   (void) argument;
@@ -65,14 +82,17 @@ void Thread_Robot_State(void const *argument)
 
   for(;;)
   {
-  MUTEX::wait();
-    float* angle_ptr = ACTUATOR::getAngle();
-  MUTEX::release();
-    LOG::INFO("angle : " + String(angle_ptr[0])); 
+    KINEMATICS::inverse();
+
+  // MUTEX::wait();
+  //   float* angle_ptr = ACTUATOR::getAngle();
+  // MUTEX::release();
+  //   LOG::INFO("angle : " + String(angle_ptr[0])); 
 
   osDelay(10);
   }
 }
+
 } // namespace OPEN_MANIPULATOR
 
 #endif // OMAPI_HPP_  
