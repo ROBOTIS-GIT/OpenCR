@@ -19,36 +19,37 @@
 #ifndef OPEN_MANIPULATOR_CHAIN_H_
 #define OPEN_MANIPULATOR_CHAIN_H_
 
-#include <OpenManipulator.h>
-#include <OMDynamixel.h>
-#include <OMKinematics.h>
-
+// Necessary library
 #include <Eigen.h>
+#include <OpenManipulator.h>
+
+// User-defined library
+#include <OMKinematics.h>
+#include <OMDynamixel.h>
+#include <OMPath.h>
 
 #define INFO(x) Serial.println(x)
 
 namespace DYNAMIXEL
 {
-const int8_t ACTUATOR_ID1 = 1;
-const int8_t ACTUATOR_ID2 = 2;
-const int8_t ACTUATOR_ID3 = 3;
-const int8_t ACTUATOR_ID4 = 4;
+const int8_t ID1 = 1;
+const int8_t ID2 = 2;
+const int8_t ID3 = 3;
+const int8_t ID4 = 4;
 
 const int32_t BAUD_RATE = 57600;
 const int8_t  SIZE  = 1;
 } // namespace DYNAMIXEL
 
-namespace MY_ROBOT
-{
-const int8_t CHAIN = 1;
 const int8_t THE_NUMBER_OF_JOINT = 4;
 const int8_t THE_NUMBER_OF_LINK = 4;
 const int8_t THE_NUMBER_OF_TOOL = 1;
 const int8_t DOF = 4;
 
-Manipulator<CHAIN, THE_NUMBER_OF_JOINT, THE_NUMBER_OF_LINK, THE_NUMBER_OF_TOOL> omChain(DOF);
+// Manipulator<THE_NUMBER_OF_JOINT, THE_NUMBER_OF_LINK, THE_NUMBER_OF_TOOL> omChain(DOF);
 OMDynamixel<DYNAMIXEL::SIZE, DYNAMIXEL::BAUD_RATE> omDynamixel;
 
+#if 0
 static Eigen::Vector3f axisVector(float x, float y, float z)
 {
   OMMath math;
@@ -104,13 +105,14 @@ static void initTool()
   MY_ROBOT::omChain.tool_[0].setRelativeToolOrientation(IDENTITY_MATRIX);
   MY_ROBOT::omChain.tool_[0].setInnerJoint(3, relativePosition(0.070, 0.0, 0.0), relativeOrientation(0.0, 0.0, 0.0));
 }
+#endif
 
 bool initManipulator()
 {
   // Add configuration for your robot
-  initJoint();
-  initLink();
-  initTool();
+  // initJoint();
+  // initLink();
+  // initTool();
 
   INFO("Success to load manipulator");
 
@@ -122,34 +124,75 @@ bool initActuator(bool enable)
   // Add configuration for actuators(DC motor, servo, Dynamixel) such as port, motor speed, etc
   bool isOK = false;
   
-  isOK = MY_ROBOT::omDynamixel.init();
+  isOK = omDynamixel.init();
   isOK == true ? INFO("Success to load Dynamixels") : INFO("Failed to load Dynamixels");
 
-  isOK = MY_ROBOT::omDynamixel.setPositionControlMode(DYNAMIXEL::ACTUATOR_ID1);
+  isOK = omDynamixel.setPositionControlMode(DYNAMIXEL::ID1);
   isOK == true ? INFO("Success to set Position Control Mode to Dynamixels") : INFO("Failed to set Position Control Mode to Dynamixels");
 
-  if (enable) MY_ROBOT::omDynamixel.enableAllDynamixel();
-  else        MY_ROBOT::omDynamixel.disableAllDynamixel();
+  if (enable) omDynamixel.enableAllDynamixel();
+  else        omDynamixel.disableAllDynamixel();
 
   return isOK;  
 }
 
 bool setAllJointAngle(float *radian)
 {
-  bool isOK = MY_ROBOT::omDynamixel.setAngle(radian);
+  bool isOK = omDynamixel.setAngle(radian);
   return isOK;
 }
 
 bool setJointAngle(uint8_t actuator_id, float radian)
 {
-  bool isOK = MY_ROBOT::omDynamixel.setAngle(actuator_id, radian);
+  bool isOK = omDynamixel.setAngle(actuator_id, radian);
   return isOK;
 }
 
 float* getAngle()
 {
-  return MY_ROBOT::omDynamixel.getAngle();
+  return omDynamixel.getAngle();
 }
-} // namespace MY_ROBOT
+
+void initKinematics()
+{
+  INFO("Success to init kinematics lib");
+  return;
+}
+
+void forward()
+{
+  INFO("forward");
+  return;
+}
+
+void inverse()
+{
+  INFO("inverse");
+  return;
+}
+
+void initPath()
+{
+  INFO("Success to init path lib");
+  return;
+}
+
+void line()
+{
+  INFO("line path");
+  return;
+}
+
+void arc()
+{
+  INFO("arc path");
+  return;
+}
+
+void heart()
+{
+  INFO("heart path");
+  return;
+}
 
 #endif //OPEN_MANIPULATOR_CHAIN_H_
