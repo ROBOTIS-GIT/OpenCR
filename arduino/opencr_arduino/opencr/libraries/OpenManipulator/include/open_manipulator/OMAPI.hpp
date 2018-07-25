@@ -216,6 +216,11 @@ int8_t getManipulatorControlPointSize(Manipulator* manipulator, bool* error = fa
   return manipulator.getControlPointSize(error);;
 }
 
+char* getBaseName(Manipulator* manipulator, bool* error = false)
+{
+  return manipulator.getBaseName();
+}
+
   //link parameter get
 RelativePose getLinkParameter(Manipulator* manipulator, char* link_name, char* point_name, bool* error = false)
 {

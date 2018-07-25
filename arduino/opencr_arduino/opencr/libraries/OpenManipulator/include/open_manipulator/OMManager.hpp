@@ -571,6 +571,12 @@ class Manipulator
   ////////////////////////////////////////////////////////////////////////////
 
   ////////////////////////////////*Set function*///////////////////////////////
+  void setBasePose(Manipulator* manipulator, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation, bool* error = false)
+  {
+    manipulator.setPosition(manipulator.getBaseName(), base_position, error);
+    manipulator.setOrientation(manipulator.getBaseName(), base_orientation, error);
+  }
+
   void setPosition(char* name, Eigen::Vector3f position, bool* error = false)
   {
     ControlPoint* control_point;
@@ -795,6 +801,11 @@ class Manipulator
   int8_t getControlPointSize(bool* error = false)
   {
     return inner_control_point_size_;
+  }
+
+  char* getBaseName(bool* error = false)////////////////******
+  {
+    return base_.begin()->first;
   }
 
   RelativePose getRelativePose(char* link_name, char* name, bool* error = false)

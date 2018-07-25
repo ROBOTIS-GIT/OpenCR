@@ -19,7 +19,7 @@
 #ifndef OMKINEMATICS_HPP_
 #define OMKINEMATICS_HPP_
 
-#include "../../include/open_manipulator/OMManager.hpp"
+#include "../../include/open_manipulator/OMAPI.hpp"
 #include "../../include/open_manipulator/OMMath.hpp"
 #include "../../include/open_manipulator/OMDebug.hpp"
 
@@ -37,69 +37,74 @@ class OMKinematicsMethod
   OMKinematicsMethod(){};
   ~OMKinematicsMethod(){};
 
-  void getBasePose(Base &base, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation)
+  void solveKinematicsSinglePoint(Manipulator* manipulator, char* control_point_name, char* mother_control_point_name, char* link_name, bool* error = false)
   {
-    Pose temp;
-    base.setPosition(base_position);
-    base.setOrientation(base_orientation);
-    temp.position = base_position + base.getRelativeCenterPosition();
-    base.setCenterPosition(temp.position);
+    Pose mother_pose;
+    RelativePose link_relative_pose;
+    Eigen::Matrix3f rodrigues_rotation_matrix;
+    Pose result_pose;
+
+    mother_pose = getPose(manipulator, mother_control_point_name, error);
+    link_relative_pose = getLinkParameter(manipulator, link_name, control_point_name, mother_control_point_name);
+    rodrigues_rotation_matrix = math_.rodriguesRotationMatrix(getJointAxis(manipulator, mother_control_point_name, error), getJointAngle(manipulator, mother_control_point_name, error));
+
+    result_pose.poosition = mother_pose.position + mother_pose.orientation * link_relative_pose.relative_position;
+    result_pose.orientation = mother_pose.orientation * link_relative_pose.relative_orientation * rodrigues_rotation_matrix;
+
+    setPose(manipulator, control_point_name, result_pose, error);
   }
 
-  template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
-  void getBaseJointPose(Manipulator<TYPE, JOINT_SIZE, LINK_SIZE, TOOL_SIZE> &manipulator, int8_t base_joint_number)
+
+  void getBaseJointPose(Manipulator* manipulator, int8_t base_joint_number)
   {
-    Pose temp;
-    temp.position = manipulator.base_.getPosition() + manipulator.base_.getOrientation()*manipulator.base_.getRelativeBaseJointPosition(base_joint_number);
-    temp.orientation = manipulator.base_.getOrientation() * manipulator.base_.getRelativeBaseJointOrientation(base_joint_number) * math_.rodriguesRotationMatrix(manipulator.joint_[base_joint_number].getAxis(), manipulator.joint_[base_joint_number].getAngle());
-    manipulator.joint[base_joint_number].setJointPose(temp);
+    // Pose temp;
+    // temp.position = manipulator.base_.getPosition() + manipulator.base_.getOrientation()*manipulator.base_.getRelativeBaseJointPosition(base_joint_number);
+    // temp.orientation = manipulator.base_.getOrientation() * manipulator.base_.getRelativeBaseJointOrientation(base_joint_number) * math_.rodriguesRotationMatrix(manipulator.joint_[base_joint_number].getAxis(), manipulator.joint_[base_joint_number].getAngle());
+    // manipulator.joint[base_joint_number].setJointPose(temp);
   }
 
-  template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
-  void getSinglejointPose(Manipulator<TYPE, JOINT_SIZE, LINK_SIZE, TOOL_SIZE> &manipulator, int8_t joint_number, int8_t mather_joint_number, int8_t link_number)
+  void getSinglejointPose(Manipulator* manipulator, int8_t joint_number, int8_t mother_joint_number, int8_t link_number)
   {
-    Pose temp;
-    temp.position = manipulator.joint_[mather_joint_number].getPosition() + manipulator.joint_[mather_joint_number].getOrientation()*manipulator.link_[link_number].getRelativeJointPosition(mather_joint_number,joint_number);
-    temp.orientation = manipulator.joint_[mather_joint_number].getOrientation() * manipulator.link_[link_number].getRelativeJointOrientation(mather_joint_number,joint_number) * math_.rodriguesRotationMatrix(manipulator.joint_[joint_number].getAxis(), manipulator.joint[joint_number].getAngle());
-    manipulator.joint_[joint_number].setPose(temp);
+    // Pose temp;
+    // temp.position = manipulator.joint_[mother_joint_number].getPosition() + manipulator.joint_[mother_joint_number].getOrientation()*manipulator.link_[link_number].getRelativeJointPosition(mother_joint_number,joint_number);
+    // temp.orientation = manipulator.joint_[mother_joint_number].getOrientation() * manipulator.link_[link_number].getRelativeJointOrientation(mother_joint_number,joint_number) * math_.rodriguesRotationMatrix(manipulator.joint_[joint_number].getAxis(), manipulator.joint[joint_number].getAngle());
+    // manipulator.joint_[joint_number].setPose(temp);
   }
 
-  template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
-  void getToolPose(Manipulator<TYPE, JOINT_SIZE, LINK_SIZE, TOOL_SIZE> &manipulator, int8_t tool_number, int8_t mather_joint_number)
+  void getToolPose(Manipulator* manipulator, int8_t tool_number, int8_t mother_joint_number)
   {
-    Pose temp;
-    temp.position = manipulator.joint_[mather_joint_number].getPosition() + manipulator.joint_[mather_joint_number].getOrientation()*manipulator.tool_[tool_number].getRelativeToolPosition(mather_joint_number);
-    temp.orientation = manipulator.joint_[mather_joint_number].getOrientation() * manipulator.tool_[tool_number].getRelativeToolOrientation(mather_joint_number);
-    manipulator.tool_[tool_number].setPose(temp);
+    // Pose temp;
+    // temp.position = manipulator.joint_[mother_joint_number].getPosition() + manipulator.joint_[mother_joint_number].getOrientation()*manipulator.tool_[tool_number].getRelativeToolPosition(mother_joint_number);
+    // temp.orientation = manipulator.joint_[mother_joint_number].getOrientation() * manipulator.tool_[tool_number].getRelativeToolOrientation(mother_joint_number);
+    // manipulator.tool_[tool_number].setPose(temp);
   }
 
-  template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
-  void jacobian(Manipulator<TYPE, JOINT_SIZE, LINK_SIZE, TOOL_SIZE> &manipulator, int8_t tool_number)
+  void jacobian(Manipulator* manipulator, int8_t tool_number)
   {
-    Eigen::MatrixXf jacobian(6,manipulator.getDOF());
-    Eigen::Vector3f position_changed    = Eigen::Vector3f::Zero();
-    Eigen::Vector3f orientation_changed = Eigen::Vector3f::Zero();
-    Eigen::VectorXf pose_changed(6);
+  //   Eigen::MatrixXf jacobian(6,manipulator.getDOF());
+  //   Eigen::Vector3f position_changed    = Eigen::Vector3f::Zero();
+  //   Eigen::Vector3f orientation_changed = Eigen::Vector3f::Zero();
+  //   Eigen::VectorXf pose_changed(6);
 
-    int8_t j = 0;
-    for(int8_t i = 0; i < manipulator.getJointSize(); i++)
-    {
-      if(manipulator.joint_[i].getId() >= 0)
-      {
-        position_changed = math_.skewSymmetricMatrix(manipulator.joint_[i].getOrientation()*manipulator.joint_[i].getAxis()) * ( manipulator.tool_[tool_number].getPosition() - manipulator.joint_[i].getPosition());
-        orientation_changed = manipulator.joint_[i].getOrientation()*manipulator.joint_[i].getAxis();
+  //   int8_t j = 0;
+  //   for(int8_t i = 0; i < manipulator.getJointSize(); i++)
+  //   {
+  //     if(manipulator.joint_[i].getId() >= 0)
+  //     {
+  //       position_changed = math_.skewSymmetricMatrix(manipulator.joint_[i].getOrientation()*manipulator.joint_[i].getAxis()) * ( manipulator.tool_[tool_number].getPosition() - manipulator.joint_[i].getPosition());
+  //       orientation_changed = manipulator.joint_[i].getOrientation()*manipulator.joint_[i].getAxis();
         
-        pose_changed   << position_changed(0),
-                          position_changed(1),
-                          position_changed(2),
-                          orientation_changed(0),
-                          orientation_changed(1),
-                          orientation_changed(2);
+  //       pose_changed   << position_changed(0),
+  //                         position_changed(1),
+  //                         position_changed(2),
+  //                         orientation_changed(0),
+  //                         orientation_changed(1),
+  //                         orientation_changed(2);
         
-        jacobian.col(j) = pose_changed;
-        j++;
-      }
-    }
+  //       jacobian.col(j) = pose_changed;
+  //       j++;
+  //     }
+  //   }
   }
 };
 
@@ -150,10 +155,9 @@ class OMLinkKinematics
   OMLinkKinematics(){};
   ~OMLinkKinematics(){};
 
-  template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
   void forward(Manipulator<TYPE, JOINT_SIZE, LINK_SIZE, TOOL_SIZE> &omlink, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation)
   {
-    method_.getBasePose(omlink.base_, base_position, base_orientation);
+    method_.setBasePose(omlink.base_, base_position, base_orientation);
     getPassiveJointAngle(omlink.joint_);
     method_.getBaseJointPose(omlink,0);
     method_.getSinglejointPose(omlink, 1, 0, 0);
@@ -169,7 +173,6 @@ class OMLinkKinematics
     method_.getToolPose(omlink, 0, 6);
   }
 
-  template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
   Eigen::VectorXf numericalInverse(Manipulator<TYPE, JOINT_SIZE, LINK_SIZE, TOOL_SIZE>  &omlink, int8_t tool_number, Pose target_pose, float gain)
   {
     Eigen::VectorXf target_angle(omlink.getDOF());
@@ -207,7 +210,6 @@ class OMLinkKinematics
     return target_angle;
   }
 
-  template <int8_t TYPE, int8_t JOINT_SIZE, int8_t LINK_SIZE, int8_t TOOL_SIZE>
   Eigen::VectorXf geometricInverse(Manipulator<TYPE, JOINT_SIZE, LINK_SIZE, TOOL_SIZE> &omlink, int8_t tool_number, Pose target_pose, float gain) //for basic model
   {
     OMKinematicsMethod method_;
