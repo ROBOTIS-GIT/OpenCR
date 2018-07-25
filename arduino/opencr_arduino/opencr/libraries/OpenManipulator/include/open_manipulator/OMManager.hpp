@@ -38,7 +38,7 @@ typedef struct
 typedef struct
 {
   Eigen::Vector3f position;
-  Eigen::Vector3f orientation;
+  Eigen::Matrix3f orientation;
 } Pose;
 
 typedef struct
@@ -76,7 +76,7 @@ class Link
     centor_of_mass_.relative_orientation = Eigen::Matrix3f::Identity(3,3);
   }
   ~Link(){}
-  ///////////////////////////*initialize fuction*/////////////////////////////
+  ///////////////////////////*initialize function*/////////////////////////////
   void init(int8_t inner_control_point_size, bool* error = false)
   {
     inner_control_point_size_=inner_control_point_size;
@@ -104,7 +104,7 @@ class Link
   }
   //////////////////////////////////////////////////////////////////////////
 
-  /////////////////////////////Get fuction//////////////////////////////////
+  /////////////////////////////Get function//////////////////////////////////
   int8_t getControlPointSize(bool* error = false)
   {
     return inner_control_point_size_;
@@ -118,7 +118,7 @@ class Link
     }
     else
     {
-      cout << "error : undefined control point (fuction : getRelativePose)" << endl;
+      cout << "error : undefined control point (function : getRelativePose)" << endl;
       error = true;
       return;
     }
@@ -137,14 +137,14 @@ class Link
       }
       else
       {
-        cout << "error : undefined control point (fuction : getRelativePose)" << endl;
+        cout << "error : undefined control point (function : getRelativePose)" << endl;
         error = true;
         return;
       }
     }
     else
     {
-      cout << "error : undefined control point (fuction : getRelativePose)" << endl;
+      cout << "error : undefined control point (function : getRelativePose)" << endl;
       error = true;
       return;
     }
@@ -176,7 +176,7 @@ class Link
     }
     else
     {
-      cout << "error : undefined control point (fuction : getRelativePose)" << endl;
+      cout << "error : undefined control point (function : getRelativePose)" << endl;
       error = true;
       return;
     }    
@@ -201,13 +201,13 @@ class ControlPoint
     dynamic_control_point_.angular_acceleration = Eigen::Vector3f::Zero();
   }
   ~ControlPoint(){}
-  ////////////////////////////////*Set fuction*///////////////////////////////
+  ////////////////////////////////*Set function*///////////////////////////////
   void setPosition(Eigen::Vector3f position, bool* error = false)
   {
     control_point_.position = position;
   }
 
-  void setOrientation(Eigen::Vector3f orientation, bool* error = false)
+  void setOrientation(Eigen::Matrix3f orientation, bool* error = false)
   {
     control_point_.orientation = orientation;
   }
@@ -243,7 +243,7 @@ class ControlPoint
   }
   ////////////////////////////////////////////////////////////////////////////
 
-  ////////////////////////////////*Get fuction*///////////////////////////////
+  ////////////////////////////////*Get function*///////////////////////////////
   Pose getPose(bool* error = false)
   {
     return control_point_;
@@ -263,7 +263,7 @@ class Base: public ControlPoint
  public:
   Base(){}
   ~Base(){}
-  ///////////////////////////*initialize fuction*/////////////////////////////
+  ///////////////////////////*initialize function*/////////////////////////////
   void init(Eigen::Vector3f base_position, Eigen::Vector3f base_orientation, bool* error = false)
   {
     setPosition(base_position);
@@ -298,7 +298,7 @@ class Joint: public ControlPoint
     state_.acceleration = 0.0;
   }
   ~Joint(){}
-  ///////////////////////////*initialize fuction*/////////////////////////////
+  ///////////////////////////*initialize function*/////////////////////////////
   void init(int8_t actuator_id = -1, Eigen::Vector3f axis, bool* error = false)
   {
     actuator_id_ = actuator_id;
@@ -306,7 +306,7 @@ class Joint: public ControlPoint
   }
   ////////////////////////////////////////////////////////////////////////////
 
-  ////////////////////////////////*Set fuction*///////////////////////////////
+  ////////////////////////////////*Set function*///////////////////////////////
   void setAngle(float angle, bool* error = false)
   {
     state_.angle = angle;
@@ -328,7 +328,7 @@ class Joint: public ControlPoint
   }
   ////////////////////////////////////////////////////////////////////////////
 
-  ////////////////////////////////*Get fuction*///////////////////////////////
+  ////////////////////////////////*Get function*///////////////////////////////
   int8_t getActuatorId(bool* error = false)
   {
     return actuator_id_;
@@ -378,7 +378,7 @@ class Tool: public ControlPoint
     axis_ = Eigen::Vector3f::Zero();
   }
   ~Tool(){}
-  ///////////////////////////*initialize fuction*/////////////////////////////
+  ///////////////////////////*initialize function*/////////////////////////////
   void init(int8_t actuator_id, Eigen::Vector3f axis, bool* error = false)
   {
     actuator_id_ = actuator_id;
@@ -386,7 +386,7 @@ class Tool: public ControlPoint
   }    
   ////////////////////////////////////////////////////////////////////////////
   
-  ////////////////////////////////*Set fuction*///////////////////////////////
+  ////////////////////////////////*Set function*///////////////////////////////
   void setOnOff(bool on_off, bool* error = false)
   {
     on_off_=on_off;
@@ -398,7 +398,7 @@ class Tool: public ControlPoint
   }
   ////////////////////////////////////////////////////////////////////////////
 
-  ////////////////////////////////*Get fuction*///////////////////////////////
+  ////////////////////////////////*Get function*///////////////////////////////
   int8_t getActuatorId(bool* error = false)
   {
     return actuator_id_;
@@ -444,7 +444,7 @@ class Manipulator
     tool_size_ = 0;
   }
   ~Manipulator(){}
-  ////////////////////////////////*Find fuction*//////////////////////////////
+  ////////////////////////////////*Find function*//////////////////////////////
   ControlPoint* findControlPoint(char* point_name, bool* error = false)
   {
     if(base_.find(point_name) != base_.end())
@@ -471,7 +471,7 @@ class Manipulator
   }
   ////////////////////////////////////////////////////////////////////////////
 
-  ///////////////////////////*initialize fuction*/////////////////////////////
+  ///////////////////////////*initialize function*/////////////////////////////
   void initManipulator(int8_t dof, int8_t joint_size, int8_t link_size, int8_t tool_size, bool* error = false)
   {
     dof_=dof;
@@ -480,7 +480,7 @@ class Manipulator
     tool_size_ = tool_size;
   }
 
-  void makeBase(char* base_name, Eigen::Vector3f base_position, Eigen::Vector3f base_orientation, bool* error = false)
+  void makeBase(char* base_name, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation, bool* error = false)
   {
     Base base_temp;
     base_[base_name] = base_temp;
@@ -570,7 +570,7 @@ class Manipulator
   }
   ////////////////////////////////////////////////////////////////////////////
 
-  ////////////////////////////////*Set fuction*///////////////////////////////
+  ////////////////////////////////*Set function*///////////////////////////////
   void setPosition(char* name, Eigen::Vector3f position, bool* error = false)
   {
     ControlPoint* control_point;
@@ -586,7 +586,7 @@ class Manipulator
     }
   }
   
-  void setOrientation(char* name, Eigen::Vector3f orientation, bool* error = false)
+  void setOrientation(char* name, Eigen::Matrix3f orientation, bool* error = false)
   {
     ControlPoint* control_point;
     control_point = findControlPoint(name, error);
@@ -771,7 +771,7 @@ class Manipulator
   }
   ////////////////////////////////////////////////////////////////////////////
 
-  ////////////////////////////////*Get fuction*///////////////////////////////
+  ////////////////////////////////*Get function*///////////////////////////////
   int8_t getDOF(bool* error = false)
   {
     return dof_;
@@ -844,7 +844,7 @@ class Manipulator
     }
   }
   
-  Eigen::Vector3f getOrientation(char* name, bool* error = false)
+  Eigen::Matrix3f getOrientation(char* name, bool* error = false)
   {
     Pose reuslt;
     ControlPoint* control_point;
