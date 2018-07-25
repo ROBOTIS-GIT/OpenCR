@@ -24,6 +24,16 @@
 #define USB    Serial
 #define DEBUG  SerialBT2
 
+
+typedef struct
+{
+  bool error;
+  String fuction;
+} ManagerError;
+
+
+
+
 namespace LOG
 {
 void init()
