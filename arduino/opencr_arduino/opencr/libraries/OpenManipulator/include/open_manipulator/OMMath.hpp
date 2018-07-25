@@ -63,39 +63,8 @@ class OMMath
     temp << m11, m12, m13, m21, m22, m23, m31, m32, m33;
     return temp;
   }
-  
-  Eigen::Matrix3f makeRotationMatrix(float roll, float pitch, float yaw)
-  {
-    Eigen::Matrix3f rotation_matrix;
-    Eigen::Matrix3f roll_matrix;
-    Eigen::Matrix3f pitch_matrix;
-    Eigen::Matrix3f yaw_matrix;
-
-    roll_matrix  << 1.000,  0.000,     0.000,
-                    0.000,  cos(roll), sin(roll),
-                    0.000, -sin(roll), cos(roll);
-
-    pitch_matrix << cos(pitch),  0.000, sin(pitch),
-                    0.000,       1.000, 0.000,
-                    -sin(pitch), 0.000, cos(pitch);
-
-    yaw_matrix   << cos(yaw), -sin(yaw), 0.000,
-                    sin(yaw), cos(yaw),  0.000,
-                    0.000,    0.000,     1.000;
     
-    rotation_matrix = roll_matrix * pitch_matrix * yaw_matrix;
-
-    return rotation_matrix;
-  }
-
-  Eigen::Matrix3f makeRotationMatrix(Eigen::Vector3f rotation_vector)
-  {
-    Eigen::Matrix3f rotation_matrix;
-    rotation_matrix = makeRotationMatrix(rotation_vector(0), rotation_vector(1), rotation_vector(2));
-    return rotation_matrix;
-  }
-  
-  Eigen::Vector3f makeRotationVector(Eigen::Matrix3f rotation_matrix)
+  Eigen::Vector3f matrixLogarithm(Eigen::Matrix3f rotation_matrix)
   {
     Eigen::Matrix3f R = rotation_matrix;
     Eigen::Vector3f l = Eigen::Vector3f::Zero();
@@ -165,6 +134,26 @@ class OMMath
     return rotation_matrix;
   }
   
+  Eigen::Matrix3f makeRotationMatrix(Eigen::Vector3f rotation_vector)
+  {
+    Eigen::Matrix3f rotation_matrix;
+    Eigen::Vector3f axis;
+    float angle;
+
+    angle = rotation_vector.norm();
+    axis(0) = rotation_vector(0) / angle;
+    axis(1) = rotation_vector(1) / angle;
+    axis(2) = rotation_vector(2) / angle;
+
+    rotation_matrix = rodriguesRotationMatrix(axis, angle);
+    return rotation_matrix;
+  }
+
+  Eigen::Vector3f makeRotationVector(Eigen::Matrix3f rotation_matrix)
+  {
+    return matrixLogarithm(rotation_matrix);
+  }
+
   Eigen::Vector3f differentialPosition(Eigen::Vector3f desired_position, Eigen::Vector3f present_position)
   {
     Eigen::Vector3f differential_position;
