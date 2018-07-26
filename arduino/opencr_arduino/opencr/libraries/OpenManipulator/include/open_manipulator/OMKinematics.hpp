@@ -29,6 +29,8 @@
 #include <math.h>
 #include <vector>
 
+
+
 class OMKinematicsMethod
 {
  private:
@@ -137,31 +139,31 @@ class OMLinkKinematics
   OMMath math_;
   OMKinematicsMethod method_;
 
-  void getPassiveJointAngle(Joint *joint)
-  {
-    // joint[0].setAngle();
-    // joint[1].setAngle(); // 0 < joint[1].setAngle < 3PI/4
-    // joint[2].setAngle(); // PI/2 && joint[1].setAngle + 45? < joint[2].setAngle < PI
-    joint[3].setAngle(joint[1].getAngle()-joint[2].getAngle());
-    joint[4].setAngle(-M_PI-(joint[1].getAngle()-joint[2].getAngle()));
-    joint[5].setAngle(-M_PI-(joint[1].getAngle()-joint[2].getAngle()));
-    joint[6].setAngle((155 * DEG2RAD) - joint[2].getAngle());
-    joint[7].setAngle(joint[1].getAngle());
-    joint[8].setAngle((15 * DEG2RAD)-joint[1].getAngle());
-    joint[9].setAngle(joint[2].getAngle() - (195 * DEG2RAD));
-    joint[10].setAngle((90 * DEG2RAD) - joint[2].getAngle());
-  }
+  // void getPassiveJointAngle(Joint *joint)
+  // {
+  //   // joint[0].setAngle();
+  //   // joint[1].setAngle(); // 0 < joint[1].setAngle < 3PI/4
+  //   // joint[2].setAngle(); // PI/2 && joint[1].setAngle + 45? < joint[2].setAngle < PI
+  //   joint[3].setAngle(joint[1].getAngle()-joint[2].getAngle());
+  //   joint[4].setAngle(-M_PI-(joint[1].getAngle()-joint[2].getAngle()));
+  //   joint[5].setAngle(-M_PI-(joint[1].getAngle()-joint[2].getAngle()));
+  //   joint[6].setAngle((155 * DEG2RAD) - joint[2].getAngle());
+  //   joint[7].setAngle(joint[1].getAngle());
+  //   joint[8].setAngle((15 * DEG2RAD)-joint[1].getAngle());
+  //   joint[9].setAngle(joint[2].getAngle() - (195 * DEG2RAD));
+  //   joint[10].setAngle((90 * DEG2RAD) - joint[2].getAngle());
+  // }
 
  public:
   OMLinkKinematics(){};
   ~OMLinkKinematics(){};
 
-  void forward(Manipulator* manipulator, Eigen::Matrix rdf, bool* error = false)
+  void forward(Manipulator* manipulator, Eigen::Vector3f aaaa, bool* error = false)
   {
 
     getPassiveJointAngle(omlink.joint_);
 
-    method_.solveKinematicsSinglePoint(manipulator, control_point_name, mother_control_point_name, link_name, error)
+    method_.solveKinematicsSinglePoint(manipulator, aaaa(0), aaaa(1), aaaa(2), error)
 
  
 
@@ -181,84 +183,84 @@ class OMLinkKinematics
 
   }
 
-  Eigen::VectorXf numericalInverse(Manipulator<TYPE, JOINT_SIZE, LINK_SIZE, TOOL_SIZE>  &omlink, int8_t tool_number, Pose target_pose, float gain)
+  Eigen::VectorXf numericalInverse(Manipulator* manipulator, int8_t tool_number, Pose target_pose, float gain)
   {
-    Eigen::VectorXf target_angle(omlink.getDOF());
-    Eigen::MatrixXf jacobian(6,omlink.getDOF());
-    Eigen::VectorXf differential_pose(6);
-    Eigen::VectorXf previous_differential_pose(6);
+    // Eigen::VectorXf target_angle(omlink.getDOF());
+    // Eigen::MatrixXf jacobian(6,omlink.getDOF());
+    // Eigen::VectorXf differential_pose(6);
+    // Eigen::VectorXf previous_differential_pose(6);
 
-    while(differential_pose.norm() < 1E-6)
-    {
-      forward(omlink);
-      jacobian = method_.jacobian(omlink, tool_number);
-      differential_pose = math_.differentialPose(target_pose.position, omlink.tool[tool_number].getPosition(), target_pose.orientation, omlink.tool[tool_number].getOrientation());
+    // while(differential_pose.norm() < 1E-6)
+    // {
+    //   forward(omlink);
+    //   jacobian = method_.jacobian(omlink, tool_number);
+    //   differential_pose = math_.differentialPose(target_pose.position, omlink.tool[tool_number].getPosition(), target_pose.orientation, omlink.tool[tool_number].getOrientation());
       
-      Eigen::ColPivHouseholderQR<Eigen::MatrixXf> qrmethod(jacobian);
-      target_angle = gain * qrmethod.solve(differential_pose);
+    //   Eigen::ColPivHouseholderQR<Eigen::MatrixXf> qrmethod(jacobian);
+    //   target_angle = gain * qrmethod.solve(differential_pose);
 
-      int8_t k = 0;
-      for(int8_t j = 0; j < omlink.getJointSize(); j++)
-      {
-        if(omlink.joint_[j].getId() >= 0)
-        {
-          omlink.joint_[j].setAngle(target_angle(k));
-          k++;
-        }
-      }
+    //   int8_t k = 0;
+    //   for(int8_t j = 0; j < omlink.getJointSize(); j++)
+    //   {
+    //     if(omlink.joint_[j].getId() >= 0)
+    //     {
+    //       omlink.joint_[j].setAngle(target_angle(k));
+    //       k++;
+    //     }
+    //   }
 
-      if(differential_pose.norm()>previous_differential_pose.norm())
-      {
-        //ERROR
-        break;
-      }
-      previous_differential_pose = differential_pose;
-    }
+    //   if(differential_pose.norm()>previous_differential_pose.norm())
+    //   {
+    //     //ERROR
+    //     break;
+    //   }
+    //   previous_differential_pose = differential_pose;
+    // }
     
-    return target_angle;
+    // return target_angle;
   }
 
-  Eigen::VectorXf geometricInverse(Manipulator<TYPE, JOINT_SIZE, LINK_SIZE, TOOL_SIZE> &omlink, int8_t tool_number, Pose target_pose, float gain) //for basic model
+  Eigen::VectorXf geometricInverse(Manipulator* manipulator, int8_t tool_number, Pose target_pose, float gain) //for basic model
   {
-    OMKinematicsMethod method_;
-    OMMath math_;
+    // OMKinematicsMethod method_;
+    // OMMath math_;
 
-    Eigen::VectorXf target_angle_vector(3);
-    Eigen::Vector3f control_position; //joint6-joint1
-    Eigen::Vector3f tool_joint6_position = omlink.tool_[0].getRelativeToolPosition(6);
-    Eigen::Vector3f joint0_position = omlink.joint_[0].getPosition();
-    Eigen::Vector3f temp_vector;
+    // Eigen::VectorXf target_angle_vector(3);
+    // Eigen::Vector3f control_position; //joint6-joint1
+    // Eigen::Vector3f tool_joint6_position = omlink.tool_[0].getRelativeToolPosition(6);
+    // Eigen::Vector3f joint0_position = omlink.joint_[0].getPosition();
+    // Eigen::Vector3f temp_vector;
 
-    float target_angle[3];
-    float link[3];
-    float temp_x;
-    float temp_y;
+    // float target_angle[3];
+    // float link[3];
+    // float temp_x;
+    // float temp_y;
 
-    temp_y = target_pose.position(0)-joint0_position(0);
-    temp_x = target_pose.position(1)-joint0_position(1);
-    target_angle[0] = atan2(temp_y, temp_x);
+    // temp_y = target_pose.position(0)-joint0_position(0);
+    // temp_x = target_pose.position(1)-joint0_position(1);
+    // target_angle[0] = atan2(temp_y, temp_x);
 
-    control_position(0) = target_pose.position(0) - tool_joint6_position(0)*cos(target_angle[0]);
-    control_position(1) = target_pose.position(1) - tool_joint6_position(0)*sin(target_angle[0]);
-    control_position(2) = target_pose.position(2) - tool_joint6_position(3);
+    // control_position(0) = target_pose.position(0) - tool_joint6_position(0)*cos(target_angle[0]);
+    // control_position(1) = target_pose.position(1) - tool_joint6_position(0)*sin(target_angle[0]);
+    // control_position(2) = target_pose.position(2) - tool_joint6_position(3);
 
-    temp_vector = omlink.link_[0].getRelativeJointPosition(1,0);
-    link[0] = temp_vector(2);
-    temp_vector = omlink.link_[1].getRelativeJointPosition(5,1);
-    link[1] = temp_vector(0);
-    temp_vector = omlink.link_[4].getRelativeJointPosition(6,5);
-    link[2] = -temp_vector(0);
+    // temp_vector = omlink.link_[0].getRelativeJointPosition(1,0);
+    // link[0] = temp_vector(2);
+    // temp_vector = omlink.link_[1].getRelativeJointPosition(5,1);
+    // link[1] = temp_vector(0);
+    // temp_vector = omlink.link_[4].getRelativeJointPosition(6,5);
+    // link[2] = -temp_vector(0);
 
-    temp_y = control_position(2)-joint0_position(2);
-    temp_x = (control_position(0)-joint0_position(0))*cos(target_angle[0]);
+    // temp_y = control_position(2)-joint0_position(2);
+    // temp_x = (control_position(0)-joint0_position(0))*cos(target_angle[0]);
 
-    target_angle[1] = acos(((temp_x*temp_x+temp_y*temp_y+link[1]*link[1]-link[2]*link[2]))/(2*link[1]*sqrt(temp_x*temp_x+temp_y*temp_y))) + atan2(temp_y, temp_x);
-    target_angle[2] = acos((link[1]*link[1]+link[2]*link[2]-(temp_x*temp_x+temp_y*temp_y))/(2*link[1]*link[2])) + target_angle[1];
+    // target_angle[1] = acos(((temp_x*temp_x+temp_y*temp_y+link[1]*link[1]-link[2]*link[2]))/(2*link[1]*sqrt(temp_x*temp_x+temp_y*temp_y))) + atan2(temp_y, temp_x);
+    // target_angle[2] = acos((link[1]*link[1]+link[2]*link[2]-(temp_x*temp_x+temp_y*temp_y))/(2*link[1]*link[2])) + target_angle[1];
 
-    target_angle_vector << target_angle[0],
-                           target_angle[1],
-                           target_angle[2];
-    return target_angle_vector;
+    // target_angle_vector << target_angle[0],
+    //                        target_angle[1],
+    //                        target_angle[2];
+    // return target_angle_vector;
   }
 };
 

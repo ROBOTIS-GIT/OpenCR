@@ -134,6 +134,17 @@ class OMMath
     return rotation_matrix;
   }
   
+  Eigen::Matrix3f makeRotationMatrix(float rool, float pitch, float yaw)
+  {
+    Eigen::Vector3f rotation_vector;
+
+    rotation_vector(0) = rool;
+    rotation_vector(1) = pitch;
+    rotation_vector(2) = yaw;
+
+    return makeRotationMatrix(rotation_vector);
+  }
+
   Eigen::Matrix3f makeRotationMatrix(Eigen::Vector3f rotation_vector)
   {
     Eigen::Matrix3f rotation_matrix;
