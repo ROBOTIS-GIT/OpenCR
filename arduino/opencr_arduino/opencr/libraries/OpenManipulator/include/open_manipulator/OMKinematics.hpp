@@ -27,6 +27,7 @@
 #include <Eigen/LU>       // Calls inverse, determinant, LU decomp., etc.
 #include <Eigen/Dense>
 #include <math.h>
+#include <vector>
 
 class OMKinematicsMethod
 {
@@ -155,22 +156,29 @@ class OMLinkKinematics
   OMLinkKinematics(){};
   ~OMLinkKinematics(){};
 
-  void forward(Manipulator<TYPE, JOINT_SIZE, LINK_SIZE, TOOL_SIZE> &omlink, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation)
+  void forward(Manipulator* manipulator, Eigen::Matrix rdf, bool* error = false)
   {
-    method_.setBasePose(omlink.base_, base_position, base_orientation);
+
     getPassiveJointAngle(omlink.joint_);
-    method_.getBaseJointPose(omlink,0);
-    method_.getSinglejointPose(omlink, 1, 0, 0);
-    method_.getSinglejointPose(omlink, 2, 0, 0);
-    method_.getSinglejointPose(omlink, 3, 2, 2);
-    method_.getSinglejointPose(omlink, 4, 3, 3);
-    method_.getSinglejointPose(omlink, 5, 1, 1);
-    method_.getSinglejointPose(omlink, 6, 5, 4);
-    method_.getSinglejointPose(omlink, 7, 0, 0);
-    method_.getSinglejointPose(omlink, 8, 7, 5);
-    method_.getSinglejointPose(omlink, 9, 8, 6);
-    method_.getSinglejointPose(omlink, 10, 9, 7);
-    method_.getToolPose(omlink, 0, 6);
+
+    method_.solveKinematicsSinglePoint(manipulator, control_point_name, mother_control_point_name, link_name, error)
+
+ 
+
+    // method_.setBasePose(omlink.base_, base_position, base_orientation);
+    // method_.getBaseJointPose(omlink,0);
+    // method_.getSinglejointPose(omlink, 1, 0, 0);
+    // method_.getSinglejointPose(omlink, 2, 0, 0);
+    // method_.getSinglejointPose(omlink, 3, 2, 2);
+    // method_.getSinglejointPose(omlink, 4, 3, 3);
+    // method_.getSinglejointPose(omlink, 5, 1, 1);
+    // method_.getSinglejointPose(omlink, 6, 5, 4);
+    // method_.getSinglejointPose(omlink, 7, 0, 0);
+    // method_.getSinglejointPose(omlink, 8, 7, 5);
+    // method_.getSinglejointPose(omlink, 9, 8, 6);
+    // method_.getSinglejointPose(omlink, 10, 9, 7);
+    // method_.getToolPose(omlink, 0, 6);
+
   }
 
   Eigen::VectorXf numericalInverse(Manipulator<TYPE, JOINT_SIZE, LINK_SIZE, TOOL_SIZE>  &omlink, int8_t tool_number, Pose target_pose, float gain)
