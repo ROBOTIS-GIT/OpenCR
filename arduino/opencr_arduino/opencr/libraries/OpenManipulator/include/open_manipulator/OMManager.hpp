@@ -48,7 +48,7 @@ typedef struct
   Eigen::Vector3f angular_velocity;
   Eigen::Vector3f linear_acceleration;
   Eigen::Vector3f angular_acceleration;
-} DynamicPose
+} DynamicPose;
 
 typedef struct
 {
@@ -56,12 +56,11 @@ typedef struct
   Eigen::Matrix3f relative_orientation;
 } RelativePose;
 
-
 class Link
 {
  private:
   int8_t inner_control_point_size_;
-  map<char*, RelativePose> inner_control_point_;
+  std::map<char*, RelativePose> inner_control_point_;
 
   float mass_;
   Eigen::Matrix3f initial_inertia_tensor_; 
@@ -70,7 +69,7 @@ class Link
  public:
   Link()
   {
-    control_point_size_ = 1;
+    inner_control_point_size_ = 1;
     mass_ = 0;
     initial_inertia_tensor_ = Eigen::Matrix3f::Identity(3,3);
     centor_of_mass_.relative_position = Eigen::Vector3f::Zero();
@@ -91,8 +90,8 @@ class Link
     inner_control_point_[name] = temp;
     if(inner_control_point_.size()>inner_control_point_size_)
     {
-      cout << "error : control point size over in link [" << name_ << "]" << endl;
-      error = true;
+      // cout << "error : control point size over in link [" << name_ << "]" << endl;
+      *error = true;
     }
   }
 
@@ -113,7 +112,7 @@ class Link
 
   vector<char*> getLinkControlPointNameList(bool* error = false)/////////////////////***********************
   {
-    vector<char*> name_list;
+    vector<char*> name_list;std::
     map<char*, RelativePose>::iterator control_point_iterator;
 
     for(control_point_iterator = inner_control_point_.begin(); control_point_iterator != inner_control_point_.end(); control_point_iterator++)
@@ -131,9 +130,8 @@ class Link
     }
     else
     {
-      cout << "error : undefined control point (function : getRelativePose)" << endl;
-      error = true;
-      return;
+      // cout << "error : undefined control point (function : getRelativePose)" << endl;
+      *error = true;
     }
   }
 
@@ -144,22 +142,20 @@ class Link
     {
       if(inner_control_point_.find(from_name) != inner_control_point_.end())
       {
-        result = inner_control_point_.at(to_name).relative_position - inner_control_point_.at(from_name).relative_position;
-        result = inner_control_point_.at(from_name).relative_orientation.transpose() * inner_control_point_.at(to_name).relative_orientation;
+        result.relative_position = inner_control_point_.at(to_name).relative_position - inner_control_point_.at(from_name).relative_position;
+        result.relative_orientation = inner_control_point_.at(from_name).relative_orientation.transpose() * inner_control_point_.at(to_name).relative_orientation;
         return result;
       }
       else
       {
-        cout << "error : undefined control point (function : getRelativePose)" << endl;
-        error = true;
-        return;
+        // cout << "error : undefined control point (function : getRelativePose)" << endl;
+        *error = true;
       }
     }
     else
     {
-      cout << "error : undefined control point (function : getRelativePose)" << endl;
-      error = true;
-      return;
+      // cout << "error : undefined control point (function : getRelativePose)" << endl;
+    *error = true;
     }
   }
 
@@ -183,15 +179,14 @@ class Link
     RelativePose result;
     if(inner_control_point_.find(from_name) != inner_control_point_.end())
     {
-      result = centor_of_mass_.relative_position - inner_control_point_.at(from_name).relative_position;
-      result = inner_control_point_.at(from_name).relative_orientation.transpose() * centor_of_mass_.relative_orientation;
+      result.relative_position = centor_of_mass_.relative_position - inner_control_point_.at(from_name).relative_position;
+      result.relative_orientation = inner_control_point_.at(from_name).relative_orientation.transpose() * centor_of_mass_.relative_orientation;
       return result;
     }
     else
     {
-      cout << "error : undefined control point (function : getRelativePose)" << endl;
-      error = true;
-      return;
+      // cout << "error : undefined control point (function : getRelativePose)" << endl;
+      *error = true;
     }    
   }
   //////////////////////////////////////////////////////////////////////////
@@ -207,7 +202,7 @@ class ControlPoint
   ControlPoint()
   {
     control_point_.position = Eigen::Vector3f::Zero();
-    control_point_.orientation = Eigen::Vector3f::Zero();
+    control_point_.orientation = Eigen::Matrix3f::Zero();
     dynamic_control_point_.linear_velocity = Eigen::Vector3f::Zero();
     dynamic_control_point_.angular_velocity = Eigen::Vector3f::Zero();
     dynamic_control_point_.linear_acceleration = Eigen::Vector3f::Zero();
@@ -267,7 +262,7 @@ class ControlPoint
     return dynamic_control_point_;
   }
   ////////////////////////////////////////////////////////////////////////////
-}
+};
 
 class Base: public ControlPoint
 {
@@ -277,7 +272,7 @@ class Base: public ControlPoint
   Base(){}
   ~Base(){}
   ///////////////////////////*initialize function*/////////////////////////////
-  void init(Eigen::Vector3f base_position, Eigen::Vector3f base_orientation, bool* error = false)
+  void init(Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation, bool* error = false)
   {
     setPosition(base_position);
     setOrientation(base_orientation);
@@ -292,7 +287,7 @@ class Mass: public ControlPoint
  public:
   Mass(){}
   ~Mass(){}
-}
+};
 
 class Joint: public ControlPoint
 {
@@ -312,7 +307,7 @@ class Joint: public ControlPoint
   }
   ~Joint(){}
   ///////////////////////////*initialize function*/////////////////////////////
-  void init(int8_t actuator_id = -1, Eigen::Vector3f axis, bool* error = false)
+  void init(int8_t actuator_id = -1, Eigen::Vector3f axis = Eigen::Vector3f::Zero(), bool* error = false)
   {
     actuator_id_ = actuator_id;
     axis_ = axis;
@@ -359,12 +354,12 @@ class Joint: public ControlPoint
 
   float getAngularVelocity(bool* error = false)
   {
-    return state_.angular_velocity;
+    return state_.velocity;
   }
 
   float getAngularAcceleration(bool* error = false)
   {
-    return state_.angular_acceleration;
+    return state_.acceleration;
   }
 
   JointState getJointState(bool* error = false)
@@ -372,6 +367,7 @@ class Joint: public ControlPoint
     return state_;
   }
   ////////////////////////////////////////////////////////////////////////////
+};
 
 class Tool: public ControlPoint
 {
@@ -430,7 +426,7 @@ class Tool: public ControlPoint
   float getActuatorValue(bool* error = false)
   {
     return actuator_value_;
-  }
+  } 
   ////////////////////////////////////////////////////////////////////////////
 };
 
@@ -442,11 +438,11 @@ class Manipulator
   int8_t link_size_;
   int8_t tool_size_;
 
-  map<char*, Base> base_;
-  map<char*, Link> link_;
-  map<char*, Mass> mass_;
-  map<char*, Joint> joint_;
-  map<char*, Tool> tool_;
+  std::map<char*, Base> base_;
+  std::map<char*, Link> link_;
+  std::map<char*, Mass> mass_;
+  std::map<char*, Joint> joint_;
+  std::map<char*, Tool> tool_;
 
  public:
   Manipulator()
@@ -478,8 +474,8 @@ class Manipulator
     }
     else
     {
-      cout << "error" << endl;
-      error = true;
+      // cout << "error" << endl;
+      *error = true;
     }
   }
   ////////////////////////////////////////////////////////////////////////////
@@ -501,8 +497,8 @@ class Manipulator
     if(!error)return;
     if(base_.size()>1)
     {
-      cout << "error : base size over" << endl;
-      error = true;
+      // cout << "error : base size over" << endl;
+      *error = true;
     }
   }
 
@@ -514,8 +510,8 @@ class Manipulator
     if(!error)return;
     if(joint_.size()>joint_size_)
     {
-      cout << "error : joint size over" << "(joint : " << joint_name << ")" << endl;
-      error = true;
+      // cout << "error : joint size over" << "(joint : " << joint_name << ")" << endl;
+      *error = true;
     }
   }
 
@@ -527,8 +523,8 @@ class Manipulator
     if(!error)return;
     if(tool_.size()>tool_size_)
     {
-      cout << "error : tool size over"<< "(tool : " << tool_name << ")" << endl;
-      error = true;
+      // cout << "error : tool size over"<< "(tool : " << tool_name << ")" << endl;
+      *error = true;
     }
   }
 
@@ -542,8 +538,8 @@ class Manipulator
     if(!error)return;
     if(link_.size()>link_size_)
     {
-      cout << "error : link size over"<< "(link : " << link_name << ")" << endl;
-      error = true;
+    // cout << "error : link size over"<< "(link : " << link_name << ")" << endl;
+      *error = true;
     }
   }
 
@@ -558,14 +554,14 @@ class Manipulator
       }
       else
       {
-        cout << "error : Unknown control point"<< " (point name : " << point_name << ", link_name : " << link_name << ")" << endl;
-        error = true;
+        // cout << "error : Unknown control point"<< " (point name : " << point_name << ", link_name : " << link_name << ")" << endl;
+      *error = true;
       }
     }
     else
     {
-      cout << "error : added control point to unknown link"<< " (point name : " << point_name << ", link_name : " << link_name << ")" << endl;
-      error = true;
+      // cout << "error : added control point to unknown link"<< " (point name : " << point_name << ", link_name : " << link_name << ")" << endl;
+      *error = true;
     }
   }
 
@@ -577,8 +573,8 @@ class Manipulator
     }
     else
     {
-      cout << "error : set center of mass to unknown link"<< " (link_name : " << link_name << ")" << endl;
-      error = true;
+      // cout << "error : set center of mass to unknown link"<< " (link_name : " << link_name << ")" << endl;
+    *error = true;
     }
   }
   ////////////////////////////////////////////////////////////////////////////
@@ -604,9 +600,9 @@ class Manipulator
     return tool_size_;
   }
 
-  int8_t getControlPointSize(bool* error = false)
+  int8_t getControlPointSize(char* link_name, bool* error = false)
   {
-    return inner_control_point_size_;
+    return link_[link_name].getControlPointSize();
   }
 
   char* getBaseName(bool* error = false)////////////////******
@@ -622,7 +618,7 @@ class Manipulator
   vector<char*> getLinkNameList(char* point_name, bool* error = false)/////////////////////***********************
   {
     vector<char*> link_name_list;
-    vector<char*> control_point_name_list;
+    vector<char*> control_point_name_list;std::
     map<char*, Link>::iterator link_iterator;
 
     for(link_iterator = link_.begin(); link_iterator != link_.end(); link_iterator++)
@@ -678,13 +674,13 @@ class Manipulator
     control_point = findControlPoint(name, error);
     if(!error)
     {
-      reuslt = control_point.getPose(error);
+      reuslt = control_point->getPose(error);
       return reuslt.position;
     }
     else
     {
-      cout << "error" << endl;
-      return;
+      // cout << "error" << endl;
+      // return;
     }
   }
   
@@ -695,13 +691,13 @@ class Manipulator
     control_point = findControlPoint(name, error);
     if(!error)
     {
-      reuslt = control_point.getPose(error);
+      reuslt = control_point->getPose(error);
       return reuslt.orientation;
     }
     else
     {
-      cout << "error" << endl;
-      return;
+      // cout << "error" << endl;
+      // return;
     }
   }
 
@@ -711,12 +707,12 @@ class Manipulator
     control_point = findControlPoint(name, error);
     if(!error)
     {
-      return control_point.getPose(error);
+      return control_point->getPose(error);
     }
     else
     {
-      cout << "error" << endl;
-      return;
+      // cout << "error" << endl;
+      // return;
     }
   }
 
@@ -727,13 +723,13 @@ class Manipulator
     control_point = findControlPoint(name, error);
     if(!error)
     {
-      result = control_point.getDynamicPose(error);
+      result = control_point->getDynamicPose(error);
       return result.linear_velocity;
     }
     else
     {
-      cout << "error" << endl;
-      return;
+      // cout << "error" << endl;
+      // return;
     }
   }
 
@@ -744,13 +740,13 @@ class Manipulator
     control_point = findControlPoint(name, error);
     if(!error)
     {
-      result = control_point.getDynamicPose(error);
+      result = control_point->getDynamicPose(error);
       return result.angular_velocity;
     }
     else
     {
-      cout << "error" << endl;
-      return;
+      // cout << "error" << endl;
+      // return;
     }
   }
 
@@ -761,13 +757,13 @@ class Manipulator
     control_point = findControlPoint(name, error);
     if(!error)
     {
-      result = control_point.getDynamicPose(error);
+      result = control_point->getDynamicPose(error);
       return result.linear_acceleration;
     }
     else
     {
-      cout << "error" << endl;
-      return;
+      // cout << "error" << endl;
+      // return;
     }
   }
   
@@ -778,13 +774,13 @@ class Manipulator
     control_point = findControlPoint(name, error);
     if(!error)
     {
-      result = control_point.getDynamicPose(error);
+      result = control_point->getDynamicPose(error);
       return result.angular_acceleration;
     }
     else
     {
-      cout << "error" << endl;
-      return;
+      // cout << "error" << endl;
+      // return;
     }
   }
 
@@ -794,12 +790,12 @@ class Manipulator
     control_point = findControlPoint(name, error);
     if(!error)
     {
-      return control_point.getDynamicPose(error);
+      return control_point->getDynamicPose(error);
     }
     else
     {
-      cout << "error" << endl;
-      return;
+      // cout << "error" << endl;
+      // return;
     }
   }
 
@@ -847,9 +843,9 @@ class Manipulator
     }
     else
     {
-      cout << "error" << endl;
-      error = true;
-      return;
+      // cout << "error" << endl;
+    *error = true;
+      // return;
     }
   }
 
@@ -861,9 +857,9 @@ class Manipulator
     }
     else
     {
-      cout << "error" << endl;
-      error = true;
-      return;
+      // cout << "error" << endl;
+    *error = true;
+      // return;
     }
   }
 
@@ -875,9 +871,9 @@ class Manipulator
     }
     else
     {
-      cout << "error" << endl;
-      error = true;
-      return;
+      // cout << "error" << endl;
+    *error = true;
+      // return;
     }
   }
 
@@ -889,9 +885,9 @@ class Manipulator
     }
     else
     {
-      cout << "error" << endl;
-      error = true;
-      return;
+      // cout << "error" << endl;
+    *error = true;
+      // return;
     }
   }
 
@@ -903,9 +899,9 @@ class Manipulator
     }
     else
     {
-      cout << "error" << endl;
-      error = true;
-      return;
+      // cout << "error" << endl;
+    *error = true;
+      // return;
     }
   }
 
@@ -917,9 +913,9 @@ class Manipulator
     }
     else
     {
-      cout << "error" << endl;
-      error = true;
-      return;
+      // cout << "error" << endl;
+    *error = true;
+      // return;
     }
   }
 
@@ -931,9 +927,9 @@ class Manipulator
     }
     else
     {
-      cout << "error" << endl;
-      error = true;
-      return;
+      // cout << "error" << endl;
+    *error = true;
+      // return;
     }
   }
   ////////////////////////////////////////////////////////////////////////////
@@ -951,11 +947,11 @@ class Manipulator
     control_point = findControlPoint(name, error);
     if(!error)
     {
-      control_point.setPosition(position, error);
+      control_point->setPosition(position, error);
     }
     else
     {
-      cout << "error" << endl;
+      // cout << "error" << endl;
       return;
     }
   }
@@ -966,11 +962,11 @@ class Manipulator
     control_point = findControlPoint(name, error);
     if(!error)
     {
-      control_point.setOrientation(orientation, error);
+      control_point->setOrientation(orientation, error);
     }
     else
     {
-      cout << "error" << endl;
+      // cout << "error" << endl;
       return;
     }
   }
@@ -981,11 +977,11 @@ class Manipulator
     control_point = findControlPoint(name, error);
     if(!error)
     {
-      control_point.setPose(pose, error);
+      control_point->setPose(pose, error);
     }
     else
     {
-      cout << "error" << endl;
+      // cout << "error" << endl;
       return;
     }
   }
@@ -996,11 +992,11 @@ class Manipulator
     control_point = findControlPoint(name, error);
     if(!error)
     {
-      control_point.setLinearVelocity(linear_velocity, error);
+      control_point->setLinearVelocity(linear_velocity, error);
     }
     else
     {
-      cout << "error" << endl;
+      // cout << "error" << endl;
       return;
     }
   }
@@ -1011,11 +1007,11 @@ class Manipulator
     control_point = findControlPoint(name, error);
     if(!error)
     {
-      control_point.setAngularVelocity(angular_velocity, error);
+      control_point->setAngularVelocity(angular_velocity, error);
     }
     else
     {
-      cout << "error" << endl;
+      // cout << "error" << endl;
       return;
     }
   }
@@ -1026,11 +1022,11 @@ class Manipulator
     control_point = findControlPoint(name, error);
     if(!error)
     {
-      control_point.setLinearAcceleration(linear_acceleration, error);
+      control_point->setLinearAcceleration(linear_acceleration, error);
     }
     else
     {
-      cout << "error" << endl;
+      // cout << "error" << endl;
       return;
     }
   }
@@ -1041,11 +1037,11 @@ class Manipulator
     control_point = findControlPoint(name, error);
     if(!error)
     {
-      control_point.setAngularAcceleration(angular_acceleration, error);
+      control_point->setAngularAcceleration(angular_acceleration, error);
     }
     else
     {
-      cout << "error" << endl;
+      // cout << "error" << endl;
       return;
     }
   }
@@ -1056,11 +1052,11 @@ class Manipulator
     control_point = findControlPoint(name, error);
     if(!error)
     {
-      control_point.setDynamicPose(dynamic_pose, error);
+      control_point->setDynamicPose(dynamic_pose, error);
     }
     else
     {
-      cout << "error" << endl;
+      // cout << "error" << endl;
       return;
     }
   }
@@ -1073,8 +1069,8 @@ class Manipulator
     }
     else
     {
-      cout << "error" << endl;
-      error = true;
+      // cout << "error" << endl;
+    *error = true;
     }
   }
 
@@ -1086,8 +1082,8 @@ class Manipulator
     }
     else
     {
-      cout << "error" << endl;
-      error = true;
+      // cout << "error" << endl;
+    *error = true;
     }
   }
 
@@ -1099,8 +1095,8 @@ class Manipulator
     }
     else
     {
-      cout << "error" << endl;
-      error = true;
+      // cout << "error" << endl;
+    *error = true;
     }
   }
 
@@ -1112,8 +1108,8 @@ class Manipulator
     }
     else
     {
-      cout << "error" << endl;
-      error = true;
+      // cout << "error" << endl;
+    *error = true;
     }
   }
 
@@ -1125,8 +1121,8 @@ class Manipulator
     }
     else
     {
-      cout << "error" << endl;
-      error = true;
+      // cout << "error" << endl;
+    *error = true;
     }
   }
 
@@ -1139,8 +1135,8 @@ class Manipulator
     }
     else
     {
-      cout << "error" << endl;
-      error = true;
+      // cout << "error" << endl;
+    *error = true;
     }
   }
   ////////////////////////////////////////////////////////////////////////////
