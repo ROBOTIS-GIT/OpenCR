@@ -1,6 +1,34 @@
 #include <OMManager.h>
-#include <OMMath.h>
 
+#define WORLD     0
+#define BASE      1
+#define SHOULDER  2
+#define UPPER_ARM 3
+#define LOWER_ARM 4
+#define WRIST     5
+#define GRIPPER   6
+
+#define NONE      -1
+
+void setup()
+{
+  Manipulator manipulator;
+  manipulator.addComponent(WORLD, NONE, BASE, mass, inertia_tensor, relative_position, relative_orientation, axis_of_rotation);
+  manipulator.addComponent(WORLD, NONE, BASE, mass, inertia_tensor, relative_position, relative_orientation, axis_of_rotation);
+  manipulator.addComponent(WORLD, NONE, BASE, mass, inertia_tensor, relative_position, relative_orientation, axis_of_rotation);
+  manipulator.addComponent(WORLD, NONE, BASE, mass, inertia_tensor, relative_position, relative_orientation, axis_of_rotation);
+  manipulator.addComponent(WORLD, NONE, BASE, mass, inertia_tensor, relative_position, relative_orientation, axis_of_rotation);
+  
+}
+
+void loop()
+{
+
+}
+
+
+
+#if 0
 void setup()
 {
   OMMath math_;
@@ -76,3 +104,4 @@ void loop()
 {
 
 }
+#endif
