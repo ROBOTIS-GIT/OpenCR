@@ -14,19 +14,90 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM*/
+/* Authors: Hye-Jong KIM, Darby Lim */
 
 #ifndef OMMANAGER_HPP_
 #define OMMANAGER_HPP_
-
-#include "OMDebug.hpp"
 
 #include <unistd.h>
 #include <WString.h>
 #include <Eigen.h>
 #include <map>     
-#include <vector>       
+#include <vector>     
 
+#include "OMDebug.hpp"
+
+using namespace std, Eigen;
+
+typedef int8_t NAME
+
+typedef struct
+{
+  Vector3f position;
+  Matrix3f orientation;
+} Pose;
+
+typedef struct
+{
+  Vector3f linear_velocity;
+  Vector3f linear_acceleration;
+
+  Vector3f angular_velocity;  
+  Vector3f angular_acceleration;
+} State;
+
+typedef struct
+{
+  NAME id;
+
+  float angle;
+  float velocity;
+  float acceleration;
+} Actuator;
+
+typedef struct
+{
+  Vector3f axis;
+  Actuator actuator_; 
+} Joint;
+
+typedef struct
+{
+  float killogram;
+  Pose center_of_mass;
+} Mass;
+
+typedef struct
+{
+  NAME me_;           
+  NAME parent_;
+  vector<NAME> child_;
+
+  Mass mass_;  
+  Matrix3f inertia_tensor_;
+
+  Pose world_;
+  Pose relative_to_parent;
+  State origin_;
+
+  Joint joint_;
+} Component;
+
+class Manipulator
+{
+  vector<Component>;
+
+  Manipulator(){};
+  virtual ~Manipulator(){};
+
+  void init(int getComponentSize);
+  void getComponent();
+  void getInertiaTensor();
+  void getRelativeToParentParameter();
+  void getTheAxisOfRotation();
+};
+
+#if 0
 using namespace std;
 
 typedef struct
@@ -1143,5 +1214,7 @@ class Manipulator
 
 
 };
+
+#endif
 
 #endif // OMMANAGER_HPP_
