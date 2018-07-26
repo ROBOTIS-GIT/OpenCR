@@ -202,7 +202,7 @@ class ControlPoint
   ControlPoint()
   {
     control_point_.position = Eigen::Vector3f::Zero();
-    control_point_.orientation = Eigen::Matrix3f::Zero();
+    control_point_.orientation = Eigen::Matrix3f::Identity(3,3);
     dynamic_control_point_.linear_velocity = Eigen::Vector3f::Zero();
     dynamic_control_point_.angular_velocity = Eigen::Vector3f::Zero();
     dynamic_control_point_.linear_acceleration = Eigen::Vector3f::Zero();
@@ -489,7 +489,7 @@ class Manipulator
     tool_size_ = tool_size;
   }
 
-  void makeBase(char* base_name, Eigen::Vector3f base_position, Eigen::Matrix3f base_orientation, bool* error = false)
+  void makeBase(char* base_name, Eigen::Vector3f base_position = Eigen::Vector3f::Zero(), Eigen::Matrix3f base_orientation = Eigen::Matrix3f::Identity(3,3), bool* error = false)
   {
     Base base_temp;
     base_[base_name] = base_temp;
@@ -502,7 +502,7 @@ class Manipulator
     }
   }
 
-  void makeJoint(char* joint_name, int8_t actuator_id, Eigen::Vector3f axis, bool* error = false)
+  void makeJoint(char* joint_name, int8_t actuator_id = -1, Eigen::Vector3f axis = Eigen::Vector3f::Zero(), bool* error = false)
   {
     Joint joint_temp;
     joint_[joint_name] = joint_temp;
