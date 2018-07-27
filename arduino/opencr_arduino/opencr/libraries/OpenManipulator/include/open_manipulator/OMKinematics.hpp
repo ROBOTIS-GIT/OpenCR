@@ -80,6 +80,17 @@ class OMKinematicsMethod
       method_.solveKinematicsSinglePoint(manipulator, getComponentChildName(manipulator, getWorldChildName(manipulator, error), error).at(i), error);
     }
   }
+};
+
+class OMChainKinematics
+{
+ private:
+  OMMath math_;
+  OMKinematicsMethod method_;
+
+ public:
+  OMChainKinematics(){};
+  ~OMChainKinematics(){};
 
   void jacobian(Manipulator* manipulator, int8_t tool_component_name)
   {
@@ -93,8 +104,6 @@ class OMKinematicsMethod
 
     map<Name, Component>::iterator it_component_;
     for(it_component_ = manipulator)
-
-getComponent
 
     for(int8_t i = 0; i < getComponentSize(manipulator, error); i++)
     {
@@ -115,17 +124,6 @@ getComponent
       }
     }
   }
-};
-
-class OMChainKinematics
-{
-  private:
-    OMMath math_;
-    OMKinematicsMethod method_;
-
-  public:
-    OMChainKinematics(){};
-    ~OMChainKinematics(){};
 };
 
 class OMScaraKinematics
