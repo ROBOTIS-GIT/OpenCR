@@ -67,292 +67,522 @@ void connectLine(void (*fp)(void)){PATH::line = fp;}
 void connectArc(void (*fp)(void)){PATH::arc = fp;}
 void connectCustom(void (*fp)(void)){PATH::custom = fp;}
 
-// Basic function
-
-/////////////////////////////////////////////////////////////
-//init fuction
-void initManipulator(Manipulator* manipulator, int8_t dof, int8_t joint_size, int8_t link_size, int8_t tool_size, bool* error = false)
+// namespace Manipulator
+namespace Manipulator
 {
-  manipulator->initManipulator(dof, joint_size, link_size, tool_size, error);
+///////////////////////////*initialize function*/////////////////////////////
+void init(int dof, int component_size, bool *error)
+{
+
 }
 
-void makeBase(Manipulator* manipulator, char* base_name, Eigen::Vector3f base_position = Eigen::Vector3f::Zero(), Eigen::Matrix3f base_orientation = Eigen::Matrix3f::Identity(3,3), bool* error = false)
+void addComponent(Name me_name, Name parent_name, NAME child_name, Vector3f relative_position, Matrix3f relative_orientation, int8_t actuator_id = -1, Vector3f axis_of_rotation = Vector3f::Zero(), float mass = 0.0, Matrix3f inertia_tensor = Matrix3f::Identity(3,3), Vector3f center_of_mass = Vector3f::Zero(), bool *error)
 {
-  manipulator->makeBase(base_name, base_position, base_orientation, error);
+
 }
 
-void makeJoint(Manipulator* manipulator, char* joint_name, int8_t actuator_id = -1, Eigen::Vector3f axis = Eigen::Vector3f::Zero(), bool* error = false)
+void addComponentChild(Name me_name, NAME child_name, bool *error)
 {
-  manipulator->makeJoint(joint_name, actuator_id, axis, error);
+
 }
 
-void makeTool(Manipulator* manipulator, char* tool_name, int8_t actuator_id, Eigen::Vector3f axis, bool* error = false)
+void checkManipulatorSetting(bool *error)
 {
-  manipulator->makeTool(tool_name, actuator_id, axis, error);
+
 }
 
-void makeLink(Manipulator* manipulator, char* link_name, int8_t inner_control_point_size, bool* error = false)
+/////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////Set function//////////////////////////////////
+void setComponent(Name name, Component component, bool *error)
 {
-  manipulator->makeLink(link_name, inner_control_point_size, error);
+
 }
 
-void addControlPointInLink(Manipulator* manipulator, char* link_name, char* point_name, Eigen::Vector3f relative_position = Eigen::Vector3f::Zero(), Eigen::Matrix3f relative_orientation = Eigen::Matrix3f::Identity(3,3), bool* error = false)
+void setComponentPoseToWorld(Name name Pose pose_to_world, bool *error)
 {
-  manipulator->addControlPoint(link_name, point_name, relative_position, relative_orientation, error);
+
 }
 
-void setLinkCenterOfMass(Manipulator* manipulator, char* link_name, float mass, Eigen::Matrix3f initial_inertia_tensor, Eigen::Vector3f relative_position = Eigen::Vector3f::Zero(), Eigen::Matrix3f relative_orientation = Eigen::Matrix3f::Identity(3,3), bool* error = false)
+void setComponentPositionToWorld(Name name, Vector3f position_to_world, bool *error)
 {
-  manipulator->setCenterOfMass(link_name, mass, initial_inertia_tensor, relative_position, relative_orientation, error);
+
 }
 
-void checkManipulatorSetting(Manipulator* manipulator, bool* error = false)
+void setComponentOrientationToWorld(Name name, Matrix3f orientation_to_wolrd, bool *error)
 {
-  //check if all control point object is include in some link.
-  //check if all link has more than one control point.
-  //check if all map.size is same to int parameter
+
 }
 
-//set fuction
-
-  //pose set
-void setPose(Manipulator* manipulator, char* control_point_name, Pose pose, bool* error = false)
+void setComponentStateToWorld(Name name State state_to_world, bool *error)
 {
-  manipulator->setPose(control_point_name, pose, error);
+
 }
 
-void setPosition(Manipulator* manipulator, char* control_point_name, Eigen::Vector3f position, bool* error = false)
+void setComponentVelocityToWorld(Name name, Vector6f velocity, bool *error)
 {
-  manipulator->setPosition(control_point_name, position, error);
+
 }
 
-void setOrientation(Manipulator* manipulator, char* control_point_name, Eigen::Matrix3f orientation, bool* error = false)
+void setComponentAccelerationToWorld(Name name, Vector6f accelaration, bool *error)
 {
-  manipulator->setOrientation(control_point_name, orientation, error);
+
 }
 
-void setDynamicPose(Manipulator* manipulator, char* control_point_name, DynamicPose dynamic_pose, bool* error = false)
+void setComponentJointAngle(Name name, float angle, bool *error)
 {
-  manipulator->setDynamicPose(control_point_name, dynamic_pose, error);
+
 }
 
-void setLinearVelocity(Manipulator* manipulator, char* control_point_name, Eigen::Vector3f linear_velocity, bool* error = false)
+void setComponentJointVelocity(Name name, float angular_velocity, bool *error)
 {
-  manipulator->setLinearVelocity(control_point_name, linear_velocity, error);
+
 }
 
-void setAngularVelocity(Manipulator* manipulator, char* control_point_name, Eigen::Vector3f angular_velocity, bool* error = false)
+void setComponentJointAcceleration(Name name, float angular_acceleration, bool *error)
 {
-  manipulator->setAngularVelocity(control_point_name, angular_velocity, error);
+
 }
 
-void setLinearAcceleration(Manipulator* manipulator, char* control_point_name, Eigen::Vector3f linear_acceleration, bool* error = false)
+void setComponentActuatorOnOff(Name name, bool on_off, bool *error)
 {
-  manipulator->setLinearAcceleration(control_point_name, linear_acceleration, error);
+
 }
 
-void setAngularAcceleration(Manipulator* manipulator, char* control_point_name, Eigen::Vector3f angular_acceleration, bool* error = false)
+void setComponentActuatorValue(Name name, float actuator_value, bool *error)
 {
-  manipulator->setAngularAcceleration(control_point_name, angular_acceleration, error);
+
 }
 
-  //joint set
-void setJointState(Manipulator* manipulator, char* joint_name, JointState state, bool* error = false)
+/////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////Get function//////////////////////////////////
+int getDOF(, bool *error)
 {
-  manipulator->setJointState(joint_name, state, error);
+
 }
 
-void setJointAngle(Manipulator* manipulator, char* joint_name, float angle, bool* error = false)
+int8_t getComponentSize(, bool *error)
 {
-  manipulator->setJointAngle(joint_name, angle, error);
+
 }
 
-void setJointAngularVelocity(Manipulator* manipulator, char* joint_name, float velocity, bool* error = false)
+Component getComponent(Name name, bool *error)
 {
-  manipulator->setJointAngularVelocity(joint_name, velocity, error);
+
 }
 
-void setJointAngularAcceleration(Manipulator* manipulator, char* joint_name, float acceleration, bool* error = false)
+Name getComponentParentName(Name name, bool *error)
 {
-  manipulator->setJointAngularAcceleration(joint_name, acceleration, error);
+
 }
 
-  //tool set
-void setToolOnOff(Manipulator* manipulator, char* tool_name, bool on_off, bool* error = false)
+vector<NAME> getComponentChildName(Name name, bool *error)
 {
-  manipulator->setToolOnOff(tool_name, on_off, error);
+
 }
 
-void setToolActuatorValue(Manipulator* manipulator, char* tool_name, float actuator_value, bool* error = false)
+Pose getComponentPoseToWorld(Name name, bool *error)
 {
-  manipulator->setToolActuatorValue(tool_name, actuator_value, error);
+
 }
 
-//Get function
-  //manipulator get
-int8_t getManipulatorDOF(Manipulator* manipulator, bool* error = false)
+Vector3f getComponentPositionToWorld(Name name, bool *error)
 {
-  return manipulator->getDOF(error);
+
 }
 
-int8_t getManipulatorJointSize(Manipulator* manipulator, bool* error = false)
+Matrix3f getComponentOrientationToWorld(Name name, bool *error)
 {
-  return manipulator->getJointSize(error);
+
 }
 
-int8_t getManipulatorLinkSize(Manipulator* manipulator, bool* error = false)
+State getComponentStateToWorld(Name name, bool *error)
 {
-  return manipulator->getLinkSize(error);;
+
 }
 
-int8_t getManipulatorToolSize(Manipulator* manipulator, bool* error = false)
+Vector6f getComponentVelocityToWorld(Name name, bool *error)
 {
-  return manipulator->getToolSize(error);;
+
 }
 
-int8_t getManipulatorControlPointSize(Manipulator* manipulator, char* link_name, bool* error = false)
+Vector6f getComponentAccelerationToWorld(Name name, bool *error)
 {
-  return manipulator->getControlPointSize(link_name, error);;
+
 }
 
-char* getBaseName(Manipulator* manipulator, bool* error = false)
+Pose getComponentRelativePoseToParent(Name name, bool *error)
 {
-  return manipulator->getBaseName();
+
 }
 
-  //link parameter get
-RelativePose getLinkParameter(Manipulator* manipulator, char* link_name, char* point_name, bool* error = false)
+Vector3f getComponentRelativePositionToParent(Name name, bool *error)
 {
-  return manipulator->getRelativePose(link_name, point_name, error);
+
 }
 
-RelativePose getLinkParameter(Manipulator* manipulator, char* link_name, char* to_point_name, char* from_point_name, bool* error = false)
+Matrix3f getComponentRelativeOrientationToParent(Name name, bool *error)
 {
-  return manipulator->getRelativePose(link_name, to_point_name, from_point_name, error);
+
 }
 
-RelativePose getRelativePose(Manipulator* manipulator, char* link_name, char* point_name, bool* error = false)
+Joint getComponentJoint(Name name, bool *error)
 {
-  return manipulator->getRelativePose(link_name, point_name, error);
+
 }
 
-RelativePose getRelativePose(Manipulator* manipulator, char* link_name, char* to_point_name, char* from_point_name, bool* error = false)
+Vector3f getComponentJointAxis(Name name, bool *error)
 {
-  return manipulator->getRelativePose(link_name, to_point_name, from_point_name, error);
+
 }
 
-float getLinkMass(Manipulator* manipulator, char* link_name, bool* error = false)
+float getComponentJointAngle(Name name, bool *error)
 {
-  return manipulator->getMass(link_name, error);
+
 }
 
-Eigen::Matrix3f getLinkInitialInertiaTensor(Manipulator* manipulator, char* link_name, bool* error = false)
+float getComponentJointVelocity(Name name, bool *error)
 {
-  return manipulator->getInitialInertiaTensor(link_name, error);
+
 }
 
-RelativePose getRelativeCenterOfMassPose(Manipulator* manipulator, char* link_name, bool* error = false)
+float getComponentJointAcceleration(Name name, bool *error)
 {
-  return manipulator->getRelativeCenterOfMassPose(link_name, error);
+
 }
 
-RelativePose getRelativeCenterOfMassPose(Manipulator* manipulator, char* link_name, char* from_name, bool* error = false)
+int8_t getComponentActuatorId(Name name, bool *error)
 {
-  return manipulator->getRelativeCenterOfMassPose(link_name, from_name, error);
+
 }
 
-  //control point get
-Eigen::Vector3f getPosition(Manipulator* manipulator, char* point_name, bool* error = false)
+bool getComponentActuatorOnOff(Name name, bool *error)
 {
-  return manipulator->getPosition(point_name, error);
+
 }
 
-Eigen::Matrix3f getOrientation(Manipulator* manipulator, char* point_name, bool* error = false)
+float getComponentActuatorValue(Name name, bool *error)
 {
-  return manipulator->getOrientation(point_name, error);
+
 }
 
-Pose getPose(Manipulator* manipulator, char* point_name, bool* error = false)
+float getComponentMass(Name name, bool *error)
 {
-  return manipulator->getPose(point_name, error);
+
 }
 
-Eigen::Vector3f getLinearVelocity(Manipulator* manipulator, char* point_name, bool* error = false)
+Matrix3f getComponentInertiaTensor(Name name, bool *error)
 {
-  return manipulator->getLinearVelocity(point_name, error);
+
 }
 
-Eigen::Vector3f getAngularVelocity(Manipulator* manipulator, char* point_name, bool* error = false)
+Pose getComponentCenterOfMassPose(Name name, bool *error)
 {
-  return manipulator->getAngularVelocity(point_name, error);
+
 }
 
-Eigen::Vector3f getLinearAcceleration(Manipulator* manipulator, char* point_name, bool* error = false)
+Vector3f getComponentCenterOfMassPosition(Name name, bool *error)
 {
-  return manipulator->getLinearAcceleration(point_name, error);
+
 }
+
+Matrix3f getComponentCenterOfMassOrientation(Name name, bool *error)
+{
+
+}
+
+/////////////////////////////////////////////////////////////////////////////
+}
+
+
+
+
+
+
+
+// void initManipulator(Manipulator* manipulator, int8_t dof, int8_t joint_size, int8_t link_size, int8_t tool_size, bool* error = false)
+// {
+// manipulator->initManipulator(dof, joint_size, link_size, tool_size, error);
+// }
+
+// void makeBase(Manipulator* manipulator, char* base_name, Eigen::Vector3f base_position = Eigen::Vector3f::Zero(), Eigen::Matrix3f base_orientation = Eigen::Matrix3f::Identity(3,3), bool* error = false)
+// {
+// manipulator->makeBase(base_name, base_position, base_orientation, error);
+// }
+
+// void makeJoint(Manipulator* manipulator, char* joint_name, int8_t actuator_id = -1, Eigen::Vector3f axis = Eigen::Vector3f::Zero(), bool* error = false)
+// {
+//   manipulator->makeJoint(joint_name, actuator_id, axis, error);
+// }
+
+// void makeTool(Manipulator* manipulator, char* tool_name, int8_t actuator_id, Eigen::Vector3f axis, bool* error = false)
+// {
+//   manipulator->makeTool(tool_name, actuator_id, axis, error);
+// }
+
+// void makeLink(Manipulator* manipulator, char* link_name, int8_t inner_control_point_size, bool* error = false)
+// {
+//   manipulator->makeLink(link_name, inner_control_point_size, error);
+// }
+
+// void addControlPointInLink(Manipulator* manipulator, char* link_name, char* point_name, Eigen::Vector3f relative_position = Eigen::Vector3f::Zero(), Eigen::Matrix3f relative_orientation = Eigen::Matrix3f::Identity(3,3), bool* error = false)
+// {
+//   manipulator->addControlPoint(link_name, point_name, relative_position, relative_orientation, error);
+// }
+
+// void setLinkCenterOfMass(Manipulator* manipulator, char* link_name, float mass, Eigen::Matrix3f initial_inertia_tensor, Eigen::Vector3f relative_position = Eigen::Vector3f::Zero(), Eigen::Matrix3f relative_orientation = Eigen::Matrix3f::Identity(3,3), bool* error = false)
+// {
+//   manipulator->setCenterOfMass(link_name, mass, initial_inertia_tensor, relative_position, relative_orientation, error);
+// }
+
+// void checkManipulatorSetting(Manipulator* manipulator, bool* error = false)
+// {
+//   //check if all control point object is include in some link.
+//   //check if all link has more than one control point.
+//   //check if all map.size is same to int parameter
+// }
+
+// //set fuction
+
+//   //pose set
+// void setPose(Manipulator* manipulator, char* control_point_name, Pose pose, bool* error = false)
+// {
+//   manipulator->setPose(control_point_name, pose, error);
+// }
+
+// void setPosition(Manipulator* manipulator, char* control_point_name, Eigen::Vector3f position, bool* error = false)
+// {
+//   manipulator->setPosition(control_point_name, position, error);
+// }
+
+// void setOrientation(Manipulator* manipulator, char* control_point_name, Eigen::Matrix3f orientation, bool* error = false)
+// {
+//   manipulator->setOrientation(control_point_name, orientation, error);
+// }
+
+// void setDynamicPose(Manipulator* manipulator, char* control_point_name, DynamicPose dynamic_pose, bool* error = false)
+// {
+//   manipulator->setDynamicPose(control_point_name, dynamic_pose, error);
+// }
+
+// void setLinearVelocity(Manipulator* manipulator, char* control_point_name, Eigen::Vector3f linear_velocity, bool* error = false)
+// {
+//   manipulator->setLinearVelocity(control_point_name, linear_velocity, error);
+// }
+
+// void setAngularVelocity(Manipulator* manipulator, char* control_point_name, Eigen::Vector3f angular_velocity, bool* error = false)
+// {
+//   manipulator->setAngularVelocity(control_point_name, angular_velocity, error);
+// }
+
+// void setLinearAcceleration(Manipulator* manipulator, char* control_point_name, Eigen::Vector3f linear_acceleration, bool* error = false)
+// {
+//   manipulator->setLinearAcceleration(control_point_name, linear_acceleration, error);
+// }
+
+// void setAngularAcceleration(Manipulator* manipulator, char* control_point_name, Eigen::Vector3f angular_acceleration, bool* error = false)
+// {
+//   manipulator->setAngularAcceleration(control_point_name, angular_acceleration, error);
+// }
+
+//   //joint set
+// void setJointState(Manipulator* manipulator, char* joint_name, JointState state, bool* error = false)
+// {
+//   manipulator->setJointState(joint_name, state, error);
+// }
+
+// void setJointAngle(Manipulator* manipulator, char* joint_name, float angle, bool* error = false)
+// {
+//   manipulator->setJointAngle(joint_name, angle, error);
+// }
+
+// void setJointAngularVelocity(Manipulator* manipulator, char* joint_name, float velocity, bool* error = false)
+// {
+//   manipulator->setJointAngularVelocity(joint_name, velocity, error);
+// }
+
+// void setJointAngularAcceleration(Manipulator* manipulator, char* joint_name, float acceleration, bool* error = false)
+// {
+//   manipulator->setJointAngularAcceleration(joint_name, acceleration, error);
+// }
+
+//   //tool set
+// void setToolOnOff(Manipulator* manipulator, char* tool_name, bool on_off, bool* error = false)
+// {
+//   manipulator->setToolOnOff(tool_name, on_off, error);
+// }
+
+// void setToolActuatorValue(Manipulator* manipulator, char* tool_name, float actuator_value, bool* error = false)
+// {
+//   manipulator->setToolActuatorValue(tool_name, actuator_value, error);
+// }
+
+// //Get function
+//   //manipulator get
+// int8_t getManipulatorDOF(Manipulator* manipulator, bool* error = false)
+// {
+//   return manipulator->getDOF(error);
+// }
+
+// int8_t getManipulatorJointSize(Manipulator* manipulator, bool* error = false)
+// {
+//   return manipulator->getJointSize(error);
+// }
+
+// int8_t getManipulatorLinkSize(Manipulator* manipulator, bool* error = false)
+// {
+//   return manipulator->getLinkSize(error);;
+// }
+
+// int8_t getManipulatorToolSize(Manipulator* manipulator, bool* error = false)
+// {
+//   return manipulator->getToolSize(error);;
+// }
+
+// int8_t getManipulatorControlPointSize(Manipulator* manipulator, char* link_name, bool* error = false)
+// {
+//   return manipulator->getControlPointSize(link_name, error);;
+// }
+
+// char* getBaseName(Manipulator* manipulator, bool* error = false)
+// {
+//   return manipulator->getBaseName();
+// }
+
+//   //link parameter get
+// RelativePose getLinkParameter(Manipulator* manipulator, char* link_name, char* point_name, bool* error = false)
+// {
+//   return manipulator->getRelativePose(link_name, point_name, error);
+// }
+
+// RelativePose getLinkParameter(Manipulator* manipulator, char* link_name, char* to_point_name, char* from_point_name, bool* error = false)
+// {
+//   return manipulator->getRelativePose(link_name, to_point_name, from_point_name, error);
+// }
+
+// RelativePose getRelativePose(Manipulator* manipulator, char* link_name, char* point_name, bool* error = false)
+// {
+//   return manipulator->getRelativePose(link_name, point_name, error);
+// }
+
+// RelativePose getRelativePose(Manipulator* manipulator, char* link_name, char* to_point_name, char* from_point_name, bool* error = false)
+// {
+//   return manipulator->getRelativePose(link_name, to_point_name, from_point_name, error);
+// }
+
+// float getLinkMass(Manipulator* manipulator, char* link_name, bool* error = false)
+// {
+//   return manipulator->getMass(link_name, error);
+// }
+
+// Eigen::Matrix3f getLinkInitialInertiaTensor(Manipulator* manipulator, char* link_name, bool* error = false)
+// {
+//   return manipulator->getInitialInertiaTensor(link_name, error);
+// }
+
+// RelativePose getRelativeCenterOfMassPose(Manipulator* manipulator, char* link_name, bool* error = false)
+// {
+//   return manipulator->getRelativeCenterOfMassPose(link_name, error);
+// }
+
+// RelativePose getRelativeCenterOfMassPose(Manipulator* manipulator, char* link_name, char* from_name, bool* error = false)
+// {
+//   return manipulator->getRelativeCenterOfMassPose(link_name, from_name, error);
+// }
+
+//   //control point get
+// Eigen::Vector3f getPosition(Manipulator* manipulator, char* point_name, bool* error = false)
+// {
+//   return manipulator->getPosition(point_name, error);
+// }
+
+// Eigen::Matrix3f getOrientation(Manipulator* manipulator, char* point_name, bool* error = false)
+// {
+//   return manipulator->getOrientation(point_name, error);
+// }
+
+// Pose getPose(Manipulator* manipulator, char* point_name, bool* error = false)
+// {
+//   return manipulator->getPose(point_name, error);
+// }
+
+// Eigen::Vector3f getLinearVelocity(Manipulator* manipulator, char* point_name, bool* error = false)
+// {
+//   return manipulator->getLinearVelocity(point_name, error);
+// }
+
+// Eigen::Vector3f getAngularVelocity(Manipulator* manipulator, char* point_name, bool* error = false)
+// {
+//   return manipulator->getAngularVelocity(point_name, error);
+// }
+
+// Eigen::Vector3f getLinearAcceleration(Manipulator* manipulator, char* point_name, bool* error = false)
+// {
+//   return manipulator->getLinearAcceleration(point_name, error);
+// }
   
-Eigen::Vector3f getAngularAcceleration(Manipulator* manipulator, char* point_name, bool* error = false)
-{
-  return manipulator->getAngularAcceleration(point_name, error);
-}
+// Eigen::Vector3f getAngularAcceleration(Manipulator* manipulator, char* point_name, bool* error = false)
+// {
+//   return manipulator->getAngularAcceleration(point_name, error);
+// }
 
-DynamicPose getDynamicPose(Manipulator* manipulator, char* point_name, bool* error = false)
-{
-  return manipulator->getDynamicPose(point_name, error);
-}
+// DynamicPose getDynamicPose(Manipulator* manipulator, char* point_name, bool* error = false)
+// {
+//   return manipulator->getDynamicPose(point_name, error);
+// }
 
-  //joint parameter get
-int8_t getJointActuatorId(Manipulator* manipulator, char* joint_name, bool* error = false)
-{
-  return manipulator->getJointActuatorId(joint_name, error);
-}
+//   //joint parameter get
+// int8_t getJointActuatorId(Manipulator* manipulator, char* joint_name, bool* error = false)
+// {
+//   return manipulator->getJointActuatorId(joint_name, error);
+// }
 
-Eigen::Vector3f getJointAxis(Manipulator* manipulator, char* joint_name, bool* error = false)
-{
-  return manipulator->getJointAxis(joint_name, error);
-}
+// Eigen::Vector3f getJointAxis(Manipulator* manipulator, char* joint_name, bool* error = false)
+// {
+//   return manipulator->getJointAxis(joint_name, error);
+// }
 
-float getJointAngle(Manipulator* manipulator, char* joint_name, bool* error = false)
-{
-  return manipulator->getJointAngle(joint_name, error);
-}
+// float getJointAngle(Manipulator* manipulator, char* joint_name, bool* error = false)
+// {
+//   return manipulator->getJointAngle(joint_name, error);
+// }
 
-float getJointAngularVelocity(Manipulator* manipulator, char* joint_name, bool* error = false)
-{
-  return manipulator->getJointAngularVelocity(joint_name, error);
-}
+// float getJointAngularVelocity(Manipulator* manipulator, char* joint_name, bool* error = false)
+// {
+//   return manipulator->getJointAngularVelocity(joint_name, error);
+// }
 
-float getJointAngularAcceleration(Manipulator* manipulator, char* joint_name, bool* error = false)
-{
-  return manipulator->getJointAngularAcceleration(joint_name, error);
-}
+// float getJointAngularAcceleration(Manipulator* manipulator, char* joint_name, bool* error = false)
+// {
+//   return manipulator->getJointAngularAcceleration(joint_name, error);
+// }
 
-JointState getJointJointState(Manipulator* manipulator, char* joint_name, bool* error = false)
-{
-  return manipulator->getJointJointState(joint_name, error);
-}
+// JointState getJointJointState(Manipulator* manipulator, char* joint_name, bool* error = false)
+// {
+//   return manipulator->getJointJointState(joint_name, error);
+// }
 
-  //tool parameter get
-int8_t getToolActuatorId(Manipulator* manipulator, char* tool_name, bool* error = false)
-{
-  return manipulator->getToolActuatorId(tool_name, error);
-}
+//   //tool parameter get
+// int8_t getToolActuatorId(Manipulator* manipulator, char* tool_name, bool* error = false)
+// {
+//   return manipulator->getToolActuatorId(tool_name, error);
+// }
 
-Eigen::Vector3f getToolAxis(Manipulator* manipulator, char* tool_name, bool* error = false)
-{
-  return manipulator->getToolAxis(tool_name, error);
-}
+// Eigen::Vector3f getToolAxis(Manipulator* manipulator, char* tool_name, bool* error = false)
+// {
+//   return manipulator->getToolAxis(tool_name, error);
+// }
 
-bool getToolOnOff(Manipulator* manipulator, char* tool_name, bool* error = false)
-{
-  return manipulator->getToolOnOff(tool_name, error);
-}
+// bool getToolOnOff(Manipulator* manipulator, char* tool_name, bool* error = false)
+// {
+//   return manipulator->getToolOnOff(tool_name, error);
+// }
 
-float getToolActuatorValue(Manipulator* manipulator, char* tool_name, bool* error = false)
-{
-  return manipulator->getToolActuatorValue(tool_name, error);
-}
+// float getToolActuatorValue(Manipulator* manipulator, char* tool_name, bool* error = false)
+// {
+//   return manipulator->getToolActuatorValue(tool_name, error);
+// }
 /////////////////////////////////////////////////////////////
 
 
