@@ -70,229 +70,228 @@ void connectCustom(void (*fp)(void)){PATH::custom = fp;}
 // namespace Manipulator
 namespace Manipulator
 {
-///////////////////////////*initialize function*/////////////////////////////
-void init(int dof, int component_size, bool *error)
-{
-
-}
-
-void addComponent(Name me_name, Name parent_name, NAME child_name, Vector3f relative_position, Matrix3f relative_orientation, int8_t actuator_id = -1, Vector3f axis_of_rotation = Vector3f::Zero(), float mass = 0.0, Matrix3f inertia_tensor = Matrix3f::Identity(3,3), Vector3f center_of_mass = Vector3f::Zero(), bool *error)
-{
-
-}
-
-void addComponentChild(Name me_name, NAME child_name, bool *error)
-{
-
-}
-
-void checkManipulatorSetting(bool *error)
-{
-
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////Set function//////////////////////////////////
-void setComponent(Name name, Component component, bool *error)
-{
-
-}
-
-void setComponentPoseToWorld(Name name Pose pose_to_world, bool *error)
-{
-
-}
-
-void setComponentPositionToWorld(Name name, Vector3f position_to_world, bool *error)
-{
-
-}
-
-void setComponentOrientationToWorld(Name name, Matrix3f orientation_to_wolrd, bool *error)
-{
-
-}
-
-void setComponentStateToWorld(Name name State state_to_world, bool *error)
-{
-
-}
-
-void setComponentVelocityToWorld(Name name, Vector6f velocity, bool *error)
-{
-
-}
-
-void setComponentAccelerationToWorld(Name name, Vector6f accelaration, bool *error)
-{
-
-}
-
-void setComponentJointAngle(Name name, float angle, bool *error)
-{
-
-}
-
-void setComponentJointVelocity(Name name, float angular_velocity, bool *error)
-{
-
-}
-
-void setComponentJointAcceleration(Name name, float angular_acceleration, bool *error)
-{
-
-}
-
-void setComponentActuatorOnOff(Name name, bool on_off, bool *error)
-{
-
-}
-
-void setComponentActuatorValue(Name name, float actuator_value, bool *error)
-{
-
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////Get function//////////////////////////////////
-int getDOF(, bool *error)
-{
-
-}
-
-int8_t getComponentSize(, bool *error)
-{
-
-}
-
-Component getComponent(Name name, bool *error)
-{
-
-}
-
-Name getComponentParentName(Name name, bool *error)
-{
-
-}
-
-vector<NAME> getComponentChildName(Name name, bool *error)
-{
-
-}
-
-Pose getComponentPoseToWorld(Name name, bool *error)
-{
-
-}
-
-Vector3f getComponentPositionToWorld(Name name, bool *error)
-{
-
-}
-
-Matrix3f getComponentOrientationToWorld(Name name, bool *error)
-{
-
-}
-
-State getComponentStateToWorld(Name name, bool *error)
-{
-
-}
-
-Vector6f getComponentVelocityToWorld(Name name, bool *error)
-{
-
-}
-
-Vector6f getComponentAccelerationToWorld(Name name, bool *error)
-{
-
-}
-
-Pose getComponentRelativePoseToParent(Name name, bool *error)
-{
-
-}
-
-Vector3f getComponentRelativePositionToParent(Name name, bool *error)
-{
-
-}
-
-Matrix3f getComponentRelativeOrientationToParent(Name name, bool *error)
-{
-
-}
-
-Joint getComponentJoint(Name name, bool *error)
-{
-
-}
-
-Vector3f getComponentJointAxis(Name name, bool *error)
-{
-
-}
-
-float getComponentJointAngle(Name name, bool *error)
-{
-
-}
-
-float getComponentJointVelocity(Name name, bool *error)
-{
-
-}
-
-float getComponentJointAcceleration(Name name, bool *error)
-{
-
-}
-
-int8_t getComponentActuatorId(Name name, bool *error)
-{
-
-}
-
-bool getComponentActuatorOnOff(Name name, bool *error)
-{
-
-}
-
-float getComponentActuatorValue(Name name, bool *error)
-{
-
-}
-
-float getComponentMass(Name name, bool *error)
-{
-
-}
-
-Matrix3f getComponentInertiaTensor(Name name, bool *error)
-{
-
-}
-
-Pose getComponentCenterOfMassPose(Name name, bool *error)
-{
-
-}
-
-Vector3f getComponentCenterOfMassPosition(Name name, bool *error)
-{
-
-}
-
-Matrix3f getComponentCenterOfMassOrientation(Name name, bool *error)
-{
-
-}
-
-/////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////*initialize function*/////////////////////////////
+  void manipulatorInit(Manipulator *manipulator, int dof, int component_size, bool *error)
+  {
+    manipulator->init(dof, component_size, error);
+  }
+
+  void addComponent(Manipulator *manipulator, Name me_name, Name parent_name, NAME child_name, Vector3f relative_position, Matrix3f relative_orientation, int8_t actuator_id = -1, Vector3f axis_of_rotation = Vector3f::Zero(), float mass = 0.0, Matrix3f inertia_tensor = Matrix3f::Identity(3,3), Vector3f center_of_mass = Vector3f::Zero(), bool *error)
+  {
+    manipulator->addComponent(me_name, parent_name, child_name, relative_position, relative_orientation, actuator_id, axis_of_rotation, mass, inertia_tensor, center_of_mass, *error);
+  }
+
+  void addComponentChild(Manipulator *manipulator, Name me_name, NAME child_name, bool *error)
+  {
+    manipulator->addComponentChild(me_name, child_name, error);
+  }
+
+  void checkManipulatorSetting(Manipulator *manipulator, bool *error)
+  {
+    manipulator->checkManipulatorSetting(error);
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+
+  ///////////////////////////////Set function//////////////////////////////////
+  void setComponent(Manipulator *manipulator, Name name, Component component, bool *error)
+  {
+    manipulator->setComponent(name, component, error);
+  }
+
+  void setComponentPoseToWorld(Manipulator *manipulator, Name name, Pose pose_to_world, bool *error)
+  {
+    manipulator->setComponentPoseToWorld(name, pose_to_world, error);
+  }
+
+  void setComponentPositionToWorld(Manipulator *manipulator, Name name, Vector3f position_to_world, bool *error)
+  {
+    manipulator->setComponentPositionToWorld(name, position_to_world, error);
+  }
+
+  void setComponentOrientationToWorld(Manipulator *manipulator, Name name, Matrix3f orientation_to_wolrd, bool *error)
+  {
+    manipulator->setComponentOrientationToWorld(name, orientation_to_wolrd, error);
+  }
+
+  void setComponentStateToWorld(Manipulator *manipulator, Name name, State state_to_world, bool *error)
+  {
+    manipulator->setComponentStateToWorld(name, state_to_world, error);
+  }
+
+  void setComponentVelocityToWorld(Manipulator *manipulator, Name name, Vector6f velocity, bool *error)
+  {
+    manipulator->setComponentVelocityToWorld(name, velocity, error);
+  }
+
+  void setComponentAccelerationToWorld(Manipulator *manipulator, Name name, Vector6f accelaration, bool *error)
+  {
+    manipulator->setComponentAccelerationToWorld(name, accelaration, error);
+  }
+
+  void setComponentJointAngle(Manipulator *manipulator, Name name, float angle, bool *error)
+  {
+    manipulator->setComponentJointAngle(name, angle, error);
+  }
+
+  void setComponentJointVelocity(Manipulator *manipulator, Name name, float angular_velocity, bool *error)
+  {
+    manipulator->setComponentJointVelocity(name, angular_velocity, error);
+  }
+
+  void setComponentJointAcceleration(Manipulator *manipulator, Name name, float angular_acceleration, bool *error)
+  {
+    manipulator->setComponentJointAcceleration(name, angular_acceleration, error);
+  }
+
+  void setComponentActuatorOnOff(Manipulator *manipulator, Name name, bool on_off, bool *error)
+  {
+    manipulator->setComponentActuatorOnOff(name, on_off, error);
+  }
+
+  void setComponentActuatorValue(Manipulator *manipulator, Name name, float actuator_value, bool *error)
+  {
+    manipulator->setComponentActuatorValue(name, actuator_value, error);
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+
+  ///////////////////////////////Get function//////////////////////////////////
+  int getDOF(Manipulator *manipulator, bool *error)
+  {
+    return manipulator->getDOF(error);
+  }
+
+  int8_t getComponentSize(Manipulator *manipulator, bool *error)
+  {
+    return manipulator->getComponentSize(error);
+  }
+
+  Component getComponent(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponent(name, error);
+  }
+
+  Name getComponentParentName(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentParentName(name, error);
+  }
+
+  vector<NAME> getComponentChildName(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentChildName(name, error);
+  }
+
+  Pose getComponentPoseToWorld(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentPoseToWorld(name, error);
+  }
+
+  Vector3f getComponentPositionToWorld(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentPositionToWorld(name, error);
+  }
+
+  Matrix3f getComponentOrientationToWorld(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentOrientationToWorld(name, error);
+  }
+
+  State getComponentStateToWorld(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentStateToWorld(name, error);
+  }
+
+  Vector6f getComponentVelocityToWorld(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentVelocityToWorld(name, error);
+  }
+
+  Vector6f getComponentAccelerationToWorld(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentAccelerationToWorld(name, error);
+  }
+
+  Pose getComponentRelativePoseToParent(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentRelativePoseToParent(name, error);
+  }
+
+  Vector3f getComponentRelativePositionToParent(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentRelativePositionToParent(name, error);
+  }
+
+  Matrix3f getComponentRelativeOrientationToParent(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentRelativeOrientationToParent(name, error);
+  }
+
+  Joint getComponentJoint(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentJoint(name, error);
+  }
+
+  Vector3f getComponentJointAxis(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentJointAxis(name, error);
+  }
+
+  float getComponentJointAngle(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentJointAngle(name, error);
+  }
+
+  float getComponentJointVelocity(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentJointVelocity(name, error);
+  }
+
+  float getComponentJointAcceleration(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentJointAcceleration(name, error);
+  }
+
+  int8_t getComponentActuatorId(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentActuatorId(name, error);
+  }
+
+  bool getComponentActuatorOnOff(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentActuatorOnOff(name, error);
+  }
+
+  float getComponentActuatorValue(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentActuatorValue(name, error);
+  }
+
+  float getComponentMass(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentMass(name, error);
+  }
+
+  Matrix3f getComponentInertiaTensor(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentInertiaTensor(name, error);
+  }
+
+  Pose getComponentCenterOfMassPose(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentCenterOfMassPose(name, error);
+  }
+
+  Vector3f getComponentCenterOfMassPosition(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentCenterOfMassPosition(name, error);
+  }
+
+  Matrix3f getComponentCenterOfMassOrientation(Manipulator *manipulator, Name name, bool *error)
+  {
+    return manipulator->getComponentCenterOfMassOrientation(name, error);
+  }
+  /////////////////////////////////////////////////////////////////////////////
 }
 
 
