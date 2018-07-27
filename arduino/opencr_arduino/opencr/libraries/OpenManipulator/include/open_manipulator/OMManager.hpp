@@ -70,13 +70,13 @@ typedef struct
 
 typedef struct
 {
-  //NAME me_;           
+  NAME me_;           
   NAME parent_;
   vector<NAME> child_;
 
   Pose relative_to_parent_;
 
-  Pose world_;
+  Pose pose_to_world_;
   State origin_;
   
   Joint joint_;
@@ -84,13 +84,24 @@ typedef struct
   Inertia inertia_;  
 } Component;
 
+
+typedef struct
+{
+  NAME name_;           
+  NAME child_;
+
+  Pose pose_;
+  State origin_;
+} World;
+
 class Manipulator
 {
  private: 
   int dof_;
   int8_t component_size_;
-  
-  vector<Component> component_;
+
+  World world_;
+  map<Name, Component> component_;
 
  public:
   Manipulator()
@@ -104,12 +115,18 @@ class Manipulator
   /*
   dof_
   component_size_
+  world_.name_
+  world_.child_
+  world_.pose_.position
+  world_.pose_.orientation
+  world_.origin_.velocity
+  world_.origin_.acceleration
   component_.at(name).parent_
   component_.at(name).child_(i)
   component_.at(name).relative_to_parent_.position
   component_.at(name).relative_to_parent_.orientation
-  component_.at(name).world_.position
-  component_.at(name).world_.orientation
+  component_.at(name).pose_to_world_.position
+  component_.at(name).pose_to_world_.orientation
   component_.at(name).origin_.velocity
   component_.at(name).origin_.acceleration
   component_.at(name).joint_.axis
@@ -128,12 +145,19 @@ class Manipulator
 
   ///////////////////////////*initialize function*/////////////////////////////
   void init(int dof, int component_size, bool *error);
+  // void addWorld(Name world_name, NAME child_name, Vector3f world_position = Vector3f::Zero(), Matrix3f world_orientation = Matrix3f::Identity(3,3), bool *error)
   void addComponent(Name me_name, Name parent_name, NAME child_name, Vector3f relative_position, Matrix3f relative_orientation, int8_t actuator_id = -1, Vector3f axis_of_rotation = Vector3f::Zero(), float mass = 0.0, Matrix3f inertia_tensor = Matrix3f::Identity(3,3), Vector3f center_of_mass = Vector3f::Zero(), bool *error);
   void addComponentChild(Name me_name, NAME child_name, bool *error);
   void checkManipulatorSetting(bool *error);
   /////////////////////////////////////////////////////////////////////////////
 
   ///////////////////////////////Set function//////////////////////////////////
+  // void setWorldPose(Pose world_pose, bool *error);
+  // void setWorldPosition(Vector3f world_position, bool *error);
+  // void setWorldOrientation(Matrix3f world_orientation, bool *error);
+  // void setWorldState(State world_state, bool *error);
+  // void setWorldVelocity(Vector6f world_velocity, bool *error);
+  // void setWorldAcceleration(Vector6f world_acceleration, bool *error);
   void setComponent(Name name, Component component, bool *error);
   void setComponentPoseToWorld(Name name Pose pose_to_world, bool *error);
   void setComponentPositionToWorld(Name name, Vector3f position_to_world, bool *error);
@@ -151,6 +175,14 @@ class Manipulator
   ///////////////////////////////Get function//////////////////////////////////
   int getDOF(bool *error);
   int8_t getComponentSize(bool *error);
+  // Name getWorldName(bool *error);
+  // Name getWorldChildName(bool *error);
+  // Pose getWorldPose(bool *error);
+  // Vector3f getWorldPosition(bool *error);
+  // Matrix3f getWorldOrientation(bool *error);
+  // State getWorldState(bool *error);
+  // Vector6f getWorldVelocity(bool *error);
+  // Vector6f getWorldAcceleration(bool *error);
   Component getComponent(Name name, bool *error);
   Name getComponentParentName(Name name, bool *error);
   vector<NAME> getComponentChildName(Name name, bool *error);
