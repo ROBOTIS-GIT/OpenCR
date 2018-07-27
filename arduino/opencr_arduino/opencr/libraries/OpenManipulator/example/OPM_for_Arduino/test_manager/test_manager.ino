@@ -12,16 +12,27 @@
 
 #define NONE      -1
 
+#define FIST_MAni
+#define se
+
 void setup()
 {
-  Manipulator manipulator;
-  manipulator.addworld(WORLD,position, orientation)
+  // Manipulator manipulator;
+  addManipulator();
+  addworld(manipulator, WORLD,position, orientation);
+  addComponent();
+  addTool();
+
   manipulator.addComponent(WORLD, NONE, BASE, mass, inertia_tensor, relative_position, relative_orientation, axis_of_rotation);
   manipulator.addComponent(WORLD, NONE, BASE, mass, inertia_tensor, relative_position, relative_orientation, axis_of_rotation);
   manipulator.addComponent(WORLD, NONE, BASE, mass, inertia_tensor, relative_position, relative_orientation, axis_of_rotation);
   manipulator.addComponent(WORLD, NONE, BASE, mass, inertia_tensor, relative_position, relative_orientation, axis_of_rotation);
   manipulator.addComponent(WORLD, NONE, BASE, mass, inertia_tensor, relative_position, relative_orientation, axis_of_rotation);
   
+  getManipulator(manipulator);
+
+  OMLinkKinematics OMLinkKinematics;
+  connectForward(OMLinkKinematics.forward(First_manipulator));
 }
 
 void loop()

@@ -47,23 +47,29 @@ typedef struct
 {
   int8_t id;
 
-  bool on_off;
-  float value;   //mm or rad
+  float angle;
+  float velocity;
+  float acceleration;
 } Actuator;
 
 typedef struct
 {
   Vector3f axis;
-  float angle;
-  float velocity;
-  float acceleration;
-
-  Actuator actuator; 
+  Actuator actuator;
 } Joint;
 
 typedef struct
 {
+  int8_t id;
+
+  bool on_off;
+  float value;   //mm or rad
+} Tool;
+
+typedef struct
+{
   float mass;
+
   Matrix3f inertia_tensor;
   Pose center_of_mass;
 } Inertia;
@@ -80,10 +86,10 @@ typedef struct
   State origin_;
   
   Joint joint_;
+  Tool tool_;
 
   Inertia inertia_;  
 } Component;
-
 
 typedef struct
 {
@@ -98,7 +104,6 @@ class Manipulator
 {
  private: 
   int dof_;
-  int8_t component_size_;
 
   World world_;
   map<Name, Component> component_;
@@ -107,10 +112,8 @@ class Manipulator
   Manipulator()
   {
     dof_ = 0;
-    component_size_ = 0;
   }
-  ~Manipulator(){}
-  //virtual ~Manipulator(){};
+  virtual ~Manipulator(){};
   //////////////////////////////*Parameter list*///////////////////////////////
   /*
   dof_
@@ -146,7 +149,10 @@ class Manipulator
   ///////////////////////////*initialize function*/////////////////////////////
   void init(int dof, int component_size, bool *error);
   // void addWorld(Name world_name, NAME child_name, Vector3f world_position = Vector3f::Zero(), Matrix3f world_orientation = Matrix3f::Identity(3,3), bool *error)
-  void addComponent(Name me_name, Name parent_name, NAME child_name, Vector3f relative_position, Matrix3f relative_orientation, int8_t actuator_id = -1, Vector3f axis_of_rotation = Vector3f::Zero(), float mass = 0.0, Matrix3f inertia_tensor = Matrix3f::Identity(3,3), Vector3f center_of_mass = Vector3f::Zero(), bool *error);
+  void addComponent(Name me_name, Name parent_name, NAME child_name, Vector3f relative_position, Matrix3f relative_orientation, int8_t actuator_id = -1, 
+                    Vector3f axis_of_rotation = Vector3f::Zero(), float mass = 0.0, Matrix3f inertia_tensor = Matrix3f::Identity(3,3), Vector3f center_of_mass = Vector3f::Zero(), bool *error);
+  void addTool(Name me_name, Name parent_name, Vector3f relative_position, Matrix3f relative_orientation, int8_t tool_id = -1,
+               float mass = 0.0, Matrix3f inertia_tensor = Matrix3f::Identity(3,3), Vector3f center_of_mass = Vector3f::Zero());
   void addComponentChild(Name me_name, NAME child_name, bool *error);
   void checkManipulatorSetting(bool *error);
   /////////////////////////////////////////////////////////////////////////////
