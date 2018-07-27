@@ -89,7 +89,8 @@ class Manipulator
  private: 
   int dof_;
   int8_t component_size_;
-  map<Name, Component> component_;
+  
+  vector<Component> component_;
 
  public:
   Manipulator()
@@ -148,8 +149,8 @@ class Manipulator
   /////////////////////////////////////////////////////////////////////////////
 
   ///////////////////////////////Get function//////////////////////////////////
-  int getDOF(, bool *error);
-  int8_t getComponentSize(, bool *error);
+  int getDOF(bool *error);
+  int8_t getComponentSize(bool *error);
   Component getComponent(Name name, bool *error);
   Name getComponentParentName(Name name, bool *error);
   vector<NAME> getComponentChildName(Name name, bool *error);
@@ -208,7 +209,7 @@ void Manipulator::setComponent(Name name, Component component, bool *error)
 
 }
 
-void Manipulator::setComponentPoseToWorld(Name name Pose pose_to_world, bool *error)
+void Manipulator::setComponentPoseToWorld(Name name, Pose pose_to_world, bool *error)
 {
 
 }
@@ -223,7 +224,7 @@ void Manipulator::setComponentOrientationToWorld(Name name, Matrix3f orientation
 
 }
 
-void Manipulator::setComponentStateToWorld(Name name State state_to_world, bool *error)
+void Manipulator::setComponentStateToWorld(Name name, State state_to_world, bool *error)
 {
 
 }
