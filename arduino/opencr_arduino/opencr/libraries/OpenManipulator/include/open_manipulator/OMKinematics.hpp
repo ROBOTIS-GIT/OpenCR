@@ -29,8 +29,6 @@
 #include <math.h>
 #include <vector>
 
-
-
 class OMKinematicsMethod
 {
  private:
@@ -40,23 +38,22 @@ class OMKinematicsMethod
   OMKinematicsMethod(){};
   ~OMKinematicsMethod(){};
 
-  void solveKinematicsSinglePoint(Manipulator* manipulator, char* control_point_name, char* mother_control_point_name, char* link_name, bool* error = false)
+  void solveKinematicsSinglePoint(Manipulator* manipulator, char* component_name, bool* error = false)
   {
-    Pose mother_pose;
-    RelativePose link_relative_pose;
+    Pose parent_pose;
+    Pose link_relative_pose;
     Eigen::Matrix3f rodrigues_rotation_matrix;
     Pose result_pose;
 
-    mother_pose = getPose(manipulator, mother_control_point_name, error);
-    link_relative_pose = getLinkParameter(manipulator, link_name, control_point_name, mother_control_point_name);
-    rodrigues_rotation_matrix = math_.rodriguesRotationMatrix(getJointAxis(manipulator, mother_control_point_name, error), getJointAngle(manipulator, mother_control_point_name, error));
+    parent_pose = getComponentPoseToWorld(manipulator, getComponentParentName(manipulator, component_name, error), error);
+    link_relative_pose = getComponentRelativePoseToParent(manipulator, component_name, error);
+    rodrigues_rotation_matrix = math_.rodriguesRotationMatrix(getComponentJointAxis(manipulator, component_name, error), getComponentJointAngle(manipulator, component_name, error));
 
-    result_pose.poosition = mother_pose.position + mother_pose.orientation * link_relative_pose.relative_position;
-    result_pose.orientation = mother_pose.orientation * link_relative_pose.relative_orientation * rodrigues_rotation_matrix;
+    result_pose.poosition = parent_pose.position + parent_pose.orientation * link_relative_pose.relative_position;
+    result_pose.orientation = parent_pose.orientation * link_relative_pose.relative_orientation * rodrigues_rotation_matrix;
 
-    setPose(manipulator, control_point_name, result_pose, error);
+    setComponentPoseToWorld(manipulator, component_name, result_pose, error);
   }
-
 
   void getBaseJointPose(Manipulator* manipulator, int8_t base_joint_number)
   {
@@ -139,32 +136,30 @@ class OMLinkKinematics
   OMMath math_;
   OMKinematicsMethod method_;
 
-  // void getPassiveJointAngle(Joint *joint)
-  // {
-  //   // joint[0].setAngle();
-  //   // joint[1].setAngle(); // 0 < joint[1].setAngle < 3PI/4
-  //   // joint[2].setAngle(); // PI/2 && joint[1].setAngle + 45? < joint[2].setAngle < PI
-  //   joint[3].setAngle(joint[1].getAngle()-joint[2].getAngle());
-  //   joint[4].setAngle(-M_PI-(joint[1].getAngle()-joint[2].getAngle()));
-  //   joint[5].setAngle(-M_PI-(joint[1].getAngle()-joint[2].getAngle()));
-  //   joint[6].setAngle((155 * DEG2RAD) - joint[2].getAngle());
-  //   joint[7].setAngle(joint[1].getAngle());
-  //   joint[8].setAngle((15 * DEG2RAD)-joint[1].getAngle());
-  //   joint[9].setAngle(joint[2].getAngle() - (195 * DEG2RAD));
-  //   joint[10].setAngle((90 * DEG2RAD) - joint[2].getAngle());
-  // }
+  void getPassiveJointAngle(Manipulator* manipulator, bool* error = false)
+  {
+
+  }
 
  public:
   OMLinkKinematics(){};
   ~OMLinkKinematics(){};
 
-  void forward(Manipulator* manipulator, Eigen::Vector3f aaaa, bool* error = false)
+  void forward(Manipulator* manipulator, Name from, bool* error = false)
   {
 
-    getPassiveJointAngle(omlink.joint_);
+    Name component_name = from;
 
-    method_.solveKinematicsSinglePoint(manipulator, aaaa(0), aaaa(1), aaaa(2), error)
+    method_.solveKinematicsSinglePoint(manipulator, component_name, error);
 
+    
+
+
+    for(int i = 0; i > getComponentChildName(manipulator, component_name, error).size(); i++)
+    {
+      method_.solveKinematicsSinglePoint(manipulator, getComponentChildName(manipulator, component_name, error).at(i), error);
+    }
+    
  
 
     // method_.setBasePose(omlink.base_, base_position, base_orientation);
