@@ -39,62 +39,116 @@ typedef struct
 
 typedef struct
 {
-  Vector3f linear_velocity;
-  Vector3f linear_acceleration;
-
-  Vector3f angular_velocity;  
-  Vector3f angular_acceleration;
+  Vector6f velocity;
+  Vector6f acceleration;
 } State;
 
 typedef struct
 {
-  NAME id;
+  int8_t id;
 
-  float angle;
-  float velocity;
-  float acceleration;
+  bool on_off_;
+  float actuator_value;   //mm or rad
 } Actuator;
 
 typedef struct
 {
   Vector3f axis;
+  float angle;
+  float velocity;
+  float acceleration;
+
   Actuator actuator_; 
 } Joint;
 
 typedef struct
 {
-  float killogram;
+  float mass;
+  Matrix3f inertia_tensor_;
   Pose center_of_mass;
-} Mass;
+} Inertia;
 
 typedef struct
 {
-  NAME me_;           
+  //NAME me_;           
   NAME parent_;
   vector<NAME> child_;
 
-  Mass mass_;  
-  Matrix3f inertia_tensor_;
+  Pose relative_to_parent;
 
   Pose world_;
-  Pose relative_to_parent;
   State origin_;
-
+  
+  
   Joint joint_;
+
+  Inertia inertia_;  
 } Component;
 
 class Manipulator
 {
-  vector<Component>;
+ private: 
+  int dof_;
+  int8_t component_size_;
+  map<Name, Component> component_;
 
+ public:
   Manipulator(){};
   virtual ~Manipulator(){};
 
-  void init(int getComponentSize);
-  void getComponent();
-  void getInertiaTensor();
-  void getRelativeToParentParameter();
-  void getTheAxisOfRotation();
+  ///////////////////////////*initialize function*/////////////////////////////
+  void init(int dof, int ComponentSize, bool *error);
+  void addComponent(Name me_name, Name parent_name, NAME child_name, Vector3f relative_position, Matrix3f relative_orientation, int8_t actuator_id = -1, Vector3f axis_of_rotation = Vector3f::Zero(), float mass = 0.0, Matrix3f inertia_tensor = Matrix3f::Identity(3,3), Vector3f center_of_mass = Vector3f::Zero(), bool *error);
+  void addComponentChild(Name me_name, NAME child_name, bool *error);
+  void checkManipulatorSetting(bool *error);
+  /////////////////////////////////////////////////////////////////////////////
+
+  ///////////////////////////////Set function//////////////////////////////////
+  void setComponent(Name name, Component component);
+  void setComponentPoseToWorld(Name name Pose pose_to_world);
+  void setComponentPositionToWorld(Name name, Vector3f position_to_world);
+  void setComponentOrientationToWorld(Name name, Matrix3f orientation_to_wolrd);
+  void setComponentStateToWorld(Name name State state_to_world);
+  void setComponentVelocityToWorld(Name name, Vector6f velocity);
+  void setComponentAccelerationToWorld(Name name, Vector6f accelaration);
+  void setComponentJointAngle(Name name, float angle);
+  void setComponentJointVelocity(Name name, float angular_velocity);
+  void setComponentJointAcceleration(Name name, float angular_acceleration);
+  void setComponentActuatorOnOff(Name name, bool on_off);
+  void setComponentActuatorValue(Name name, float actuator_value);
+  /////////////////////////////////////////////////////////////////////////////
+
+  ///////////////////////////////Get function//////////////////////////////////
+  int getDOF();
+  int8_t getComponentSize();
+  Component getComponent(Name name);
+  Name getComponentParentName(Name name);
+  vector<NAME> getComponentChildName(Name name);
+  Pose getComponentPoseToWorld(Name name);
+  Vector3f getComponentPositionToWorld(Name name);
+  Matrix3f getComponentOrientationToWorld(Name name);
+  State getComponentStateToWorld(Name name);
+  Vector6f getComponentVelocityToWorld(Name name);
+  Vector6f getComponentAccelerationToWorld(Name name);
+  Pose getComponentRelativePoseToParent(Name name);
+  Vector3f getComponentRelativePositionToParent(Name name);
+  Matrix3f getComponentRelativeOrientationToParent(Name name);
+  Joint getComponentJoint(Name name);
+  Vector3f getComponentJointAxis(Name name);
+  float getComponentJointAngle(Name name);
+  float getComponentJointVelocity(Name name);
+  float getComponentJointAcceleration(Name name);
+  int8_t getComponentActuatorId(Name name);
+  bool getComponentActuatorOnOff(Name name);
+  float getComponentActuatorValue(Name name);
+  float getComponentMass(Name name);
+  Matrix3f getComponentInertiaTensor(Name name);
+  Pose getComponentCenterOfMassPose(Name name);
+  Vector3f getComponentCenterOfMassPosition(Name name);
+  Matrix3f getComponentCenterOfMassOrientation(Name name);
+  /////////////////////////////////////////////////////////////////////////////
+
+
 };
 
 #if 0
