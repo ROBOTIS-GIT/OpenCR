@@ -145,22 +145,40 @@ class OMLinkKinematics
   OMLinkKinematics(){};
   ~OMLinkKinematics(){};
 
-  void forward(Manipulator* manipulator, Name from, bool* error = false)
+  void forward(Manipulator* manipulator, bool* error = false)
   {
+    Pose pose_to_wolrd;
+    Pose link_relative_pose;
+    Eigen::Matrix3f rodrigues_rotation_matrix;
+    Pose result_pose;
 
-    Name component_name = from;
+    parent_pose = getComponentPoseToWorld(manipulator, getComponentParentName(manipulator, component_name, error), error);
+    link_relative_pose = getComponentRelativePoseToParent(manipulator, component_name, error);
+    rodrigues_rotation_matrix = math_.rodriguesRotationMatrix(getComponentJointAxis(manipulator, component_name, error), getComponentJointAngle(manipulator, component_name, error));
+
+    result_pose.poosition = parent_pose.position + parent_pose.orientation * link_relative_pose.relative_position;
+    result_pose.orientation = parent_pose.orientation * link_relative_pose.relative_orientation * rodrigues_rotation_matrix;
+
+    setComponentPoseToWorld(manipulator, component_name, result_pose, error);
+
 
     method_.solveKinematicsSinglePoint(manipulator, component_name, error);
-
-    
-
-
     for(int i = 0; i > getComponentChildName(manipulator, component_name, error).size(); i++)
     {
-      method_.solveKinematicsSinglePoint(manipulator, getComponentChildName(manipulator, component_name, error).at(i), error);
+      forward(manipulator, getComponentChildName(manipulator, component_name, error).at(i), error);
+    }
+  }
+
+
+  void forward(Manipulator* manipulator, Name from, bool* error = false)
+  {
+    Name component_name = from;
+    method_.solveKinematicsSinglePoint(manipulator, component_name, error);
+    for(int i = 0; i > getComponentChildName(manipulator, component_name, error).size(); i++)
+    {
+      forward(manipulator, getComponentChildName(manipulator, component_name, error).at(i), error);
     }
     
- 
 
     // method_.setBasePose(omlink.base_, base_position, base_orientation);
     // method_.getBaseJointPose(omlink,0);
