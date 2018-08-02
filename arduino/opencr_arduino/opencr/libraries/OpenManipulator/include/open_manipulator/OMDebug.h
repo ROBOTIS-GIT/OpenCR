@@ -14,27 +14,47 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM, Darby Lim*/
-   
-#ifndef OMPath_HPP_
-#define OMPath_HPP_
+/* Authors: Darby Lim, Hye-Jong KIM */
 
-// #include "../../include/open_manipulator/OMManager.h"
-// #include "../../include/open_manipulator/OMKinematics.h"
-// #include "../../include/open_manipulator/OMDynamixel.h"
-// #include "../../include/open_manipulator/OMPath.h"
-#include "../../include/open_manipulator/OMDebug.hpp"
+#ifndef OMDEBUG_H_
+#define OMDEBUG_H_
+
+#include <Eigen.h>
+
+#define USB    Serial
+#define DEBUG  SerialBT2
+
+namespace LOG
+{
+  void init();
+  void log(String form, String msg);
+  void INFO(String msg);
+  void WARN(String msg);
+  void ERROR(String msg);
+}
+
+/*
+Manager Error
 
 
 
+*/
+
+/*
+Kinematics Error
 
 
 
-#endif // OMPath_HPP_  
-   
-   
-   
-   
-   
-   
-  
+*/
+
+/*
+Math Error
+
+
+
+*/
+
+
+
+#endif // OMDEBUG_HPP_
+

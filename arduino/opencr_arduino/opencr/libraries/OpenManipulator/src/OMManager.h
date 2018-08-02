@@ -1,1 +1,1 @@
-#include "../include/open_manipulator/OMManager.hpp"
+#include "../include/open_manipulator/OMManager.h"

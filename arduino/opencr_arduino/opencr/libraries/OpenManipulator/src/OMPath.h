@@ -1,1 +1,1 @@
-#include "../include/open_manipulator/OMPath.hpp"
+#include "../include/open_manipulator/OMPath.h"

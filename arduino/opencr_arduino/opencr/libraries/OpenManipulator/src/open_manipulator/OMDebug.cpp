@@ -14,49 +14,31 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Darby Lim, Hye-Jong KIM */
+/* Authors: Hye-Jong KIM, Darby Lim*/
 
-#ifndef OMDEBUG_HPP_
-#define OMDEBUG_HPP_
+#include "../../../include/open_manipulator/OMDebug.h"
 
-#include <Eigen.h>
-
-#define USB    Serial
-#define DEBUG  SerialBT2
-
-
-typedef struct
-{
-  bool error;
-  String fuction;
-} ManagerError;
-
-
-
-
-namespace LOG
-{
-void init()
+void LOG::init()
 {
   DEBUG.begin(57600);
 }
 
-void log(String form, String msg)
+void LOG::log(String form, String msg)
 {
   DEBUG.println(form + msg);
 }
 
-void INFO(String msg)
+void LOG::INFO(String msg)
 {
   log("[INFO] ", msg);
 }
 
-void WARN(String msg)
+void LOG::WARN(String msg)
 {
   log("[WARN] ", msg);
 }
 
-void ERROR(String msg)
+void LOG::ERROR(String msg)
 {
   log("[ERROR] ", msg);
 }
@@ -152,41 +134,3 @@ void ERROR(String msg)
 //     Serial.println("R_ : "); print_mt3f(link[num].R_);
 //   }
 // }
-
-}
-
-/*
-Manager Error
-
-
-
-*/
-
-/*
-Kinematics Error
-
-
-
-*/
-
-/*
-Math Error
-
-
-
-*/
-
-
-
-int8_t manager_error;
-int8_t kinematics_error;
-int8_t math_error;
-int8_t api_error;
-int8_t path_error;
-int8_t dynamixel_error;
-
-
-
-
-#endif // OMDEBUG_HPP_
-

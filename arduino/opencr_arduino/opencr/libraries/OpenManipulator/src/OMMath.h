@@ -1,1 +1,1 @@
-#include "../include/open_manipulator/OMMath.hpp"
+#include "../include/open_manipulator/OMMath.h"

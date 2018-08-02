@@ -1,1 +1,1 @@
-#include "../include/open_manipulator/OMDynamixel.hpp"
+#include "../include/open_manipulator/OMDynamixel.h"

@@ -1,2 +1,2 @@
-#include "../include/open_manipulator/OMAPI.hpp"
-#include "../include/open_manipulator/OMManager.hpp"
+#include "../include/open_manipulator/OMAPI.h"
+#include "../include/open_manipulator/OMManager.h"

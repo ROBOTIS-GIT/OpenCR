@@ -1,1 +1,1 @@
-#include "../include/open_manipulator/OMKinematics.hpp"
+#include "../include/open_manipulator/OMKinematics.h"
