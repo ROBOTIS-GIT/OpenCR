@@ -45,16 +45,18 @@ float* (*getAngle)() = NULL;
 
 void connectSetAllJointAngle(bool (*fp)(float*)){ ACTUATOR::setAllJointAngle = fp; }
 void connectSetJointAngle(bool (*fp)(uint8_t, float)){ ACTUATOR::setJointAngle = fp; }
-void connectSetGetAngle(float* (*fp)()){ ACTUATOR::getAngle = fp; }
+void connectGetAngle(float* (*fp)()){ ACTUATOR::getAngle = fp; }
 
 namespace KINEMATICS
 {
 void (*foward)(void) = NULL;
 void (*inverse)(void) = NULL;
+void (*getPassiveJointAngle)(Manipulator* manipulator, bool *error = false) = NULL;
 } // namespace KINEMATICS
 
 void connectForward(void (*fp)(void)){KINEMATICS::foward = fp;}
 void connectInverse(void (*fp)(void)){KINEMATICS::inverse = fp;}
+void connectGetPassiveJointAngle(void (*fp)(void)){KINEMATICS::getPassiveJointAngle = fp;}
 
 namespace PATH
 {
@@ -384,10 +386,6 @@ namespace Manipulator
   }
   /////////////////////////////////////////////////////////////////////////////
 }
-
-
-
-
 
 // Thread
 void Thread_Robot_State(void const *argument)
