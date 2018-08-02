@@ -19,75 +19,67 @@
 #ifndef OPENMANIPULATOR_LINK_H_
 #define OPENMANIPULATOR_LINK_H_
 
-#include "OMManager.hpp"
-#include "OMMath.hpp"
+#include "OMManager.h"
+#include "OMAPI.h"
 
-Manipulator<3, 11, 8, 1> omlink(3); // <type "link", the number of joint, the number of link, the number of tool> (dof)
+#define WORLD     0
+#define BASE      1
+#define JOINT0    2
+#define JOINT1    3
+#define JOINT2    4
+#define JOINT3    5
+#define JOINT4    6
+#define JOINT5    7
+#define JOINT6    8
+#define JOINT7    9
+#define JOINT8    10
+#define JOINT9    11
+#define JOINT10   12
+#define SUCTION   13
 
-void initManipulator()
+Manipulator omlink(3); //(dof)
+
+void initOMLink()
 {
-  OMMath math_;
-  omlink.joint[0].init(1, math_.makeEigenVector3(0,0,1));
-  omlink.joint[1].init(2, math_.makeEigenVector3(0,1,0));
-  omlink.joint[2].init(3, math_.makeEigenVector3(0,1,0));
-  omlink.joint[3].init(-1, math_.makeEigenVector3(0,1,0));
-  omlink.joint[4].init(-1, math_.makeEigenVector3(0,1,0));
-  omlink.joint[5].init(-1, math_.makeEigenVector3(0,1,0));
-  omlink.joint[6].init(-1, math_.makeEigenVector3(0,1,0));
-  omlink.joint[7].init(-1, math_.makeEigenVector3(0,1,0));
-  omlink.joint[8].init(-1, math_.makeEigenVector3(0,1,0));
-  omlink.joint[9].init(-1, math_.makeEigenVector3(0,1,0));
-  omlink.joint[10].init(-1, math_.makeEigenVector3(0,1,0));
+  MANAGER::addWorld(omlink, WORLD, BASE);
+  MANAGER::addComponent(omlink, BASE, WORLD, JOINT0, MATH::makeEigenVector3(-150, 0, 0), Matrix3f::Identity(3,3));
+  MANAGER::addComponent(omlink, JOINT0, BASE, JOINT1, Vector3f::Zero(), Matrix3f::Identity(3,3), 1, MATH::makeEigenVector3(0,0,1));
+  MANAGER::addComponentChild(omlink, JOINT0, JOINT2);
+  MANAGER::addComponentChild(omlink, JOINT0, JOINT7);
+  MANAGER::addComponent(omlink, JOINT1, JOINT0, JOINT5, MATH::makeEigenVector3(0, 22, 52), Matrix3f::Identity(3,3), 1, MATH::makeEigenVector3(0,1,0));
+  MANAGER::addComponent(omlink, JOINT2, JOINT0, JOINT3, MATH::makeEigenVector3(0, -22, 52), Matrix3f::Identity(3,3), 2, MATH::makeEigenVector3(0,1,0));
+  MANAGER::addComponent(omlink, JOINT3, JOINT2, JOINT4, MATH::makeEigenVector3(50, 7, 0), Matrix3f::Identity(3,3), 3, MATH::makeEigenVector3(0,1,0));
+  MANAGER::addComponent(omlink, JOINT4, JOINT3, JOINT5, MATH::makeEigenVector3(200, 6, 0), Matrix3f::Identity(3,3), -1, MATH::makeEigenVector3(0,1,0));
+  MANAGER::addComponent(omlink, JOINT5, JOINT1, JOINT6, MATH::makeEigenVector3(200, -16, 0), Matrix3f::Identity(3,3), -1, MATH::makeEigenVector3(0,1,0));
+  MANAGER::addComponent(omlink, JOINT6, JOINT5, SUCTION, MATH::makeEigenVector3(200, -9, 0), Matrix3f::Identity(3,3), -1, MATH::makeEigenVector3(0,1,0));
+  MANAGER::addComponent(omlink, JOINT7, JOINT0, JOINT8, MATH::makeEigenVector3(-45.31539, 6, 73.13091), Matrix3f::Identity(3,3), -1, MATH::makeEigenVector3(0,1,0));
+  MANAGER::addComponent(omlink, JOINT8, JOINT7, JOINT9, MATH::makeEigenVector3(200, 9, 0), Matrix3f::Identity(3,3), -1, MATH::makeEigenVector3(0,1,0));
+  MANAGER::addComponent(omlink, JOINT9, JOINT8, JOINT10, MATH::makeEigenVector3(76.60444, -6, 0), Matrix3f::Identity(3,3), -1, MATH::makeEigenVector3(0,1,0));
+  MANAGER::addComponent(omlink, JOINT10, JOINT9, SUCTION, MATH::makeEigenVector3(200, -6, 0), Matrix3f::Identity(3,3), -1, MATH::makeEigenVector3(0,1,0));
+  MANAGER::addTool(omlink, SUCTION, JOINT6, MATH::makeEigenVector3(38.67882, 3, -13.37315), Matrix3f::Identity(3,3), 4);
 
-  omlink.base.init(1);
-  omlink.base.setPosition(Eigen::Vector3f::Zero());
-  omlink.base.setOrientation(Eigen::Matrix3f::Identity(3,3));
-  omlink.base.setRelativeBasePostion(Eigen::Vector3f::Zero());
-  omlink.base.setRelativeBaseOrientation(Eigen::Matrix3f::Identity(3,3));
-  omlink.base.setInnerJoint(0, math_.makeEigenVector3(-150, 0, 0), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));     //from base_pose
+  MANAGER::checkManipulatorSetting(omlink);
 
-  omlink.link[0].init(4);
-  omlink.link[0].setInnerJoint(0, math_.makeEigenVector3(0, 0, 0), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
-  omlink.link[0].setInnerJoint(1, math_.makeEigenVector3(0, 22, 52), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
-  omlink.link[0].setInnerJoint(2, math_.makeEigenVector3(0,-22, 52), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
-  omlink.link[0].setInnerJoint(7, math_.makeEigenVector3(-45.31539, 6, 73.13091), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
+  connectForward(OMLinkKinematics::forward());            //KINEMATICS::foward
+  connectInverse(OMLinkKinematics::geometricInverse());   //KINEMATICS::inverse
+  connectGetPassiveJointAngle(myGetPassiveJointAngle());  //KINEMATICS::getPassiveJointAngle
+}
 
-  omlink.link[1].init(2);
-  omlink.link[1].setInnerJoint(1, math_.makeEigenVector3(0, 0, 0), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
-  omlink.link[1].setInnerJoint(5, math_.makeEigenVector3(200, -16, 0), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
+void myGetPassiveJointAngle(Manipulator* omlink, bool* error = false)
+{
+  float joint_angle[3];
+  joint_angle[0] = getComponentJointAngle(omlink, JOINT0);
+  joint_angle[1] = getComponentJointAngle(omlink, JOINT1);
+  joint_angle[2] = getComponentJointAngle(omlink, JOINT2);
 
-  omlink.link[2].init(2);
-  omlink.link[2].setInnerJoint(2, math_.makeEigenVector3(0, 0, 0), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
-  omlink.link[2].setInnerJoint(3, math_.makeEigenVector3(50, 7, 0), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
-
-  omlink.link[3].init(2);
-  omlink.link[3].setInnerJoint(3, math_.makeEigenVector3(0, 0, 0), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
-  omlink.link[3].setInnerJoint(4, math_.makeEigenVector3(200, 6, 0), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
-
-  omlink.link[4].init(3);
-  omlink.link[4].setInnerJoint(4, math_.makeEigenVector3(0, 0, 0), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
-  omlink.link[4].setInnerJoint(5, math_.makeEigenVector3(50, 15, 0), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
-  omlink.link[4].setInnerJoint(6, math_.makeEigenVector3(250, 6, 0), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
-
-  omlink.link[5].init(2);
-  omlink.link[5].setInnerJoint(7, math_.makeEigenVector3(0, 0, 0), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
-  omlink.link[5].setInnerJoint(8, math_.makeEigenVector3(200, 9, 0), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
-
-  omlink.link[6].init(3);
-  omlink.link[6].setInnerJoint(5, math_.makeEigenVector3(0, 0, 0), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
-  omlink.link[6].setInnerJoint(8, math_.makeEigenVector3(-38.30222, 9, 32.13938), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
-  omlink.link[6].setInnerJoint(9, math_.makeEigenVector3(38.30222, 3, 32.13938), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
-
-  omlink.link[7].init(2);
-  omlink.link[7].setInnerJoint(9, math_.makeEigenVector3(0, 0, 0), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
-  omlink.link[7].setInnerJoint(10, math_.makeEigenVector3(200, -6, 0), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
-
-  omlink.tool[0].init(2);
-  omlink.tool[0].setRelativeToolPosition(Eigen::Vector3f::Zero());
-  omlink.tool[0].setRelativeToolOrientation(Eigen::Matrix3f::Identity(3,3));
-  omlink.tool[0].setInnerJoint(6, math_.makeEigenVector3(-38.67882, -3, 13.37315), math_.makeRotationMatrix(0*DEG2RAD, -90*DEG2RAD, 0*DEG2RAD));
-  omlink.tool[0].setInnerJoint(10, math_.makeEigenVector3(-10, 3, 54.33076), math_.makeRotationMatrix(0*DEG2RAD, -25*DEG2RAD, 0*DEG2RAD));
-
+  setComponentJointAngle(omlink, JOINT3, joint_angle[1]-joint_angle[2]);
+  setComponentJointAngle(omlink, JOINT4, -M_PI-(joint_angle[1]-joint_angle[2]));
+  setComponentJointAngle(omlink, JOINT5, -M_PI-(joint_angle[1]-joint_angle[2]));
+  setComponentJointAngle(omlink, JOINT6, (155 * DEG2RAD)-joint_angle[2]);
+  setComponentJointAngle(omlink, JOINT7, joint_angle[1]);
+  setComponentJointAngle(omlink, JOINT8, (15 * DEG2RAD)-joint_angle[1]);
+  setComponentJointAngle(omlink, JOINT9, joint_angle[2]-(195 * DEG2RAD));
+  setComponentJointAngle(omlink, JOINT10, (90 * DEG2RAD)-joint_angle[2]);
 }
 
 #endif //OPENMANIPULATOR_LINK_H_
