@@ -20,7 +20,6 @@
 #define OMKINEMATICS_HPP_
 
 #include "../../include/open_manipulator/OMAPI.hpp"
-#include "../../include/open_manipulator/OMMath.hpp"
 #include "../../include/open_manipulator/OMDebug.hpp"
 
 #include <Eigen.h>        // Calls main Eigen matrix class library
@@ -29,12 +28,11 @@
 #include <math.h>
 #include <vector>
 
+using namespace OPEN_MANIPULATOR;
+
 class OMKinematicsMethod
 {
- private:
-  OMMath math_;
-
- public: 
+ public:
   OMKinematicsMethod(){};
   ~OMKinematicsMethod(){};
 
@@ -45,17 +43,17 @@ class OMKinematicsMethod
     Eigen::Matrix3f rodrigues_rotation_matrix;
     Pose result_pose;
 
-    parent_pose = getComponentPoseToWorld(manipulator, getComponentParentName(manipulator, component_name, error), error);
-    link_relative_pose = getComponentRelativePoseToParent(manipulator, component_name, error);
-    rodrigues_rotation_matrix = math_.rodriguesRotationMatrix(getComponentJointAxis(manipulator, component_name, error), getComponentJointAngle(manipulator, component_name, error));
+    parent_pose = MANAGER::getComponentPoseToWorld(manipulator, MANAGER::getComponentParentName(manipulator, component_name, error), error);
+    link_relative_pose = MANAGER::getComponentRelativePoseToParent(manipulator, component_name, error);
+    rodrigues_rotation_matrix = MATH::rodriguesRotationMatrix(getComponentJointAxis(manipulator, component_name, error), MANAGER::getComponentJointAngle(manipulator, component_name, error));
 
     result_pose.poosition = parent_pose.position + parent_pose.orientation * link_relative_pose.relative_position;
     result_pose.orientation = parent_pose.orientation * link_relative_pose.relative_orientation * rodrigues_rotation_matrix;
 
-    setComponentPoseToWorld(manipulator, component_name, result_pose, error);
-    for(int i = 0; i > getComponentChildName(manipulator, component_name, error).size(); i++)
+    MANAGER::setComponentPoseToWorld(manipulator, component_name, result_pose, error);
+    for(int i = 0; i > MANAGER::getComponentChildName(manipulator, component_name, error).size(); i++)
     {
-      solveKinematicsSinglePoint(manipulator, getComponentChildName(manipulator, component_name, error).at(i), error);
+      solveKinematicsSinglePoint(manipulator, MANAGER::getComponentChildName(manipulator, component_name, error).at(i), error);
     }
   }
 
@@ -67,17 +65,17 @@ class OMKinematicsMethod
     Pose result_pose;
 
     //Base Pose Set (from world)
-    parent_pose = getWorldPose(manipulator, error);
-    link_relative_pose = getComponentRelativePoseToParent(manipulator, getWorldChildName(manipulator, error), error);
+    parent_pose = MANAGER::getWorldPose(manipulator, error);
+    link_relative_pose = MANAGER::getComponentRelativePoseToParent(manipulator, MANAGER::getWorldChildName(manipulator, error), error);
     
     result_pose.poosition = parent_pose.position + parent_pose.orientation * link_relative_pose.relative_position;
     result_pose.orientation = parent_pose.orientation * link_relative_pose.relative_orientation;
-    setComponentPoseToWorld(manipulator, getWorldChildName(manipulator, error), result_pose, error);
+    MANAGER::setComponentPoseToWorld(manipulator, MANAGER::getWorldChildName(manipulator, error), result_pose, error);
 
     //Next Component Pose Set
-    for(int i = 0; i > getComponentChildName(manipulator, getWorldChildName(manipulator, error), error).size(); i++)
+    for(int i = 0; i > MANAGER::getComponentChildName(manipulator, MANAGER::getWorldChildName(manipulator, error), error).size(); i++)
     {
-      method_.solveKinematicsSinglePoint(manipulator, getComponentChildName(manipulator, getWorldChildName(manipulator, error), error).at(i), error);
+      solveKinematicsSinglePoint(manipulator, MANAGER::getComponentChildName(manipulator, MANAGER::getWorldChildName(manipulator, error), error).at(i), error);
     }
   }
 };
@@ -85,31 +83,29 @@ class OMKinematicsMethod
 class OMChainKinematics
 {
  private:
-  OMMath math_;
-  OMKinematicsMethod method_;
 
  public:
   OMChainKinematics(){};
   ~OMChainKinematics(){};
 
-  Eigen::MatrixXf jacobian(Manipulator* manipulator, int8_t tool_component_name)
+  Eigen::MatrixXf jacobian(Manipulator* manipulator, int8_t tool_component_name, bool *error = false)
   {
-    Eigen::MatrixXf jacobian(6,getDOF(manipulator, error));
+    Eigen::MatrixXf jacobian(6,MANAGER::getDOF(manipulator, error));
     Eigen::Vector3f position_changed    = Eigen::Vector3f::Zero();
     Eigen::Vector3f orientation_changed = Eigen::Vector3f::Zero();
     Eigen::VectorXf pose_changed(6);
 
-    map<Name, Component> temp_component = getAllComponent(manipulator, error);
+    map<Name, Component> temp_component = MANAGER::getAllComponent(manipulator, error);
     map<Name, Component>::iterator it_component_;
     int8_t j = 0;
 
     for(it_component_ = temp_component.begin(); it_component_ != temp_component.end(); it_component_++)
     {
-      if(getComponentJointId(it_component_->first, error) >= 0)
+      if(MANAGER::getComponentJointId(it_component_->first, error) >= 0)
       {
-        position_changed = math_.skewSymmetricMatrix(getComponentOrientationToWorld(manipulator, it_component_->first, error)*getComponentJointAxis(manipulator, it_component_->first, error))
-                          * (getComponentPositionToWorld(manipulator, tool_component_name, error) - getComponentPositionToWorld(manipulator, it_component_->first, error));
-        orientation_changed = getComponentOrientationToWorld(manipulator, it_component_->first, error)*getComponentJointAxis(manipulator, it_component_->first, error);
+        position_changed = MATH::skewSymmetricMatrix(getComponentOrientationToWorld(manipulator, it_component_->first, error)*MANAGER::getComponentJointAxis(manipulator, it_component_->first, error))
+                          * (MANAGER::getComponentPositionToWorld(manipulator, tool_component_name, error) - MANAGER::getComponentPositionToWorld(manipulator, it_component_->first, error));
+        orientation_changed = MANAGER::getComponentOrientationToWorld(manipulator, it_component_->first, error)*MANAGER::getComponentJointAxis(manipulator, it_component_->first, error);
                 
         pose_changed   << position_changed(0),
                           position_changed(1),
@@ -130,7 +126,6 @@ class OMChainKinematics
 class OMScaraKinematics
 {
   private:
-    OMMath math_;
 
   public:
     OMScaraKinematics(){};
@@ -141,21 +136,15 @@ class OMScaraKinematics
 class OMLinkKinematics
 {
  private:
-  OMMath math_;
-  OMKinematicsMethod method_;
-
-  void getPassiveJointAngle(Manipulator* manipulator, bool* error = false)
-  {
-    
-  }
 
  public:
   OMLinkKinematics(){};
   ~OMLinkKinematics(){};
 
-  void forward(Manipulator* manipulator, bool* error = false)
+  void forward(Manipulator* manipulator, bool *error = false)
   {
-    method_.forward(manipulator, error);
+    KINEMATICS::getPassiveJointAngle(manipulator, error)
+    OMKinematicsMethod::forward(manipulator, error);
   }
 
   Eigen::VectorXf numericalInverse(Manipulator* manipulator, int8_t tool_number, Pose target_pose, float gain)
@@ -195,15 +184,12 @@ class OMLinkKinematics
     // return target_angle;
   }
 
-  Eigen::VectorXf geometricInverse(Manipulator* manipulator, int8_t tool_number, Pose target_pose, float gain) //for basic model
+  Eigen::VectorXf geometricInverse(Manipulator* manipulator, Name tool_number, Pose target_pose, float gain) //for basic model
   {
-    OMKinematicsMethod method_;
-    OMMath math_;
-
     Eigen::VectorXf target_angle_vector(3);
     Eigen::Vector3f control_position; //joint6-joint1
-    Eigen::Vector3f tool_joint6_position = omlink.tool_[0].getRelativeToolPosition(6);
-    Eigen::Vector3f joint0_position = omlink.joint_[0].getPosition();
+    Eigen::Vector3f tool_relative_position = MANAGER::getComponentRelativePositionToParent(manipulator, tool_number, error);
+    Eigen::Vector3f base_position = MANAGER::getComponentPositionToWorld(manipulator, MANAGER::getWorldChildName(manipulator, error), error);
     Eigen::Vector3f temp_vector;
 
     float target_angle[3];
@@ -211,23 +197,26 @@ class OMLinkKinematics
     float temp_x;
     float temp_y;
 
-    temp_y = target_pose.position(0)-joint0_position(0);
-    temp_x = target_pose.position(1)-joint0_position(1);
+    temp_y = target_pose.position(0)-base_position(0);
+    temp_x = target_pose.position(1)-base_position(1);
     target_angle[0] = atan2(temp_y, temp_x);
 
-    control_position(0) = target_pose.position(0) - tool_joint6_position(0)*cos(target_angle[0]);
-    control_position(1) = target_pose.position(1) - tool_joint6_position(0)*sin(target_angle[0]);
-    control_position(2) = target_pose.position(2) - tool_joint6_position(3);
+    control_position(0) = target_pose.position(0) - tool_relative_position(0)*cos(target_angle[0]);
+    control_position(1) = target_pose.position(1) - tool_relative_position(0)*sin(target_angle[0]);
+    control_position(2) = target_pose.position(2) - tool_relative_position(2);
 
-    temp_vector = omlink.link_[0].getRelativeJointPosition(1,0);
+    // temp_vector = omlink.link_[0].getRelativeJointPosition(1,0);
+    temp_vector = MANAGER::getComponentRelativePositionToParent(manipulator, MANAGER::getComponentParentName(manipulator, MANAGER::getComponentParentName(manipulator, MANAGER::getComponentParentName(manipulator, tool_number, error), error), error), error);
     link[0] = temp_vector(2);
-    temp_vector = omlink.link_[1].getRelativeJointPosition(5,1);
+    // temp_vector = omlink.link_[1].getRelativeJointPosition(5,1);
+    temp_vector = MANAGER::getComponentRelativePositionToParent(manipulator, MANAGER::getComponentParentName(manipulator, MANAGER::getComponentParentName(manipulator, tool_number, error), error), error);
     link[1] = temp_vector(0);
-    temp_vector = omlink.link_[4].getRelativeJointPosition(6,5);
+    // temp_vector = omlink.link_[4].getRelativeJointPosition(6,5);
+    temp_vector = MANAGER::getComponentRelativePositionToParent(manipulator, MANAGER::getComponentParentName(manipulator, tool_number, error), error);
     link[2] = -temp_vector(0);
 
-    temp_y = control_position(2)-joint0_position(2);
-    temp_x = (control_position(0)-joint0_position(0))*cos(target_angle[0]);
+    temp_y = control_position(2)-base_position(2);
+    temp_x = (control_position(0)-base_position(0))*cos(target_angle[0]);
 
     target_angle[1] = acos(((temp_x*temp_x+temp_y*temp_y+link[1]*link[1]-link[2]*link[2]))/(2*link[1]*sqrt(temp_x*temp_x+temp_y*temp_y))) + atan2(temp_y, temp_x);
     target_angle[2] = acos((link[1]*link[1]+link[2]*link[2]-(temp_x*temp_x+temp_y*temp_y))/(2*link[1]*link[2])) + target_angle[1];
@@ -242,7 +231,6 @@ class OMLinkKinematics
 class OMDeltaKinematics
 {
   private:
-    OMMath math_;
 
   public:
     OMDeltaKinematics(){};
@@ -253,7 +241,6 @@ class OMDeltaKinematics
 class MYKinematics
 {
  private:
-   OMMath math_;
 
  public:
    MYKinematics(){};
