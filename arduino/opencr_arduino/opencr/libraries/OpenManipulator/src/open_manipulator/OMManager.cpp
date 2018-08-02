@@ -63,7 +63,7 @@ void Manipulator::addComponentChild(Name me_name, NAME child_name, bool *error =
 }
 
 void Manipulator::addTool(Name me_name, Name parent_name, Vector3f relative_position, Matrix3f relative_orientation, int8_t tool_id = -1,
-              float mass = 0.0, Matrix3f inertia_tensor = Matrix3f::Identity(3,3), Vector3f center_of_mass = Vector3f::Zero())
+              float mass = 0.0, Matrix3f inertia_tensor = Matrix3f::Identity(3,3), Vector3f center_of_mass = Vector3f::Zero(), bool *error = false)
 {
   Component temp_component;
   temp_component.parent_ = parent_name;
