@@ -103,7 +103,7 @@ class OMChainKinematics
     Component temp_component getComponent(manipulator, )
 
     map<Name, Component>::iterator it_component_;
-    for(it_component_ = manipulator)
+    for(it_component_ = manipulator)d
 
     for(int8_t i = 0; i < getComponentSize(manipulator, error); i++)
     {
