@@ -96,7 +96,7 @@ Eigen::MatrixXf OMKinematicsMethod::jacobian(Manipulator* manipulator, int8_t to
 
 void OMLinkKinematics::forward(Manipulator* manipulator, bool *error = false)
 {
-  KINEMATICS::getPassiveJointAngle(manipulator, error)
+  // KINEMATICS::getPassiveJointAngle(manipulator, error);
   OMKinematicsMethod::forward(manipulator, error);
 }
 
