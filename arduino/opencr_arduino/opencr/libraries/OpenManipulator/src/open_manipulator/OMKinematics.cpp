@@ -100,7 +100,7 @@ void OMLinkKinematics::forward(Manipulator* manipulator, bool *error = false)
   OMKinematicsMethod::forward(manipulator, error);
 }
 
-Eigen::VectorXf OMLinkKinematics::geometricInverse(Manipulator* manipulator, Name tool_number, Pose target_pose, float gain) //for basic model
+Eigen::VectorXf OMLinkKinematics::geometricInverse(Manipulator* manipulator, Name tool_number, Pose target_pose, bool *error = false) //for basic model
 {
   Eigen::VectorXf target_angle_vector(3);
   Eigen::Vector3f control_position; //joint6-joint1

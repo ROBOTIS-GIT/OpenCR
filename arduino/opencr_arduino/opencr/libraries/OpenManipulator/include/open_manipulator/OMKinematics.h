@@ -68,7 +68,7 @@ class OMLinkKinematics
   ~OMLinkKinematics(){};
 
   void forward(Manipulator* manipulator, bool *error = false);
-  Eigen::VectorXf geometricInverse(Manipulator* manipulator, Name tool_number, Pose target_pose, float gain); //for basic model
+  Eigen::VectorXf geometricInverse(Manipulator* manipulator, Name tool_number, Pose target_pose, bool *error = false); //for basic model
 };
 
 class OMDeltaKinematics
