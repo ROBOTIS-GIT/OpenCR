@@ -132,12 +132,12 @@ void MANAGER::setWorldState(Manipulator *manipulator, State world_state, bool *e
   manipulator->setWorldState(world_state, error);
 }
 
-void MANAGER::setWorldVelocity(Manipulator *manipulator, Vector6f world_velocity, bool *error = false)
+void MANAGER::setWorldVelocity(Manipulator *manipulator, VectorXf world_velocity, bool *error = false)
 {
   manipulator->setWorldVelocity(world_velocity, error);
 }
 
-void MANAGER::setWorldAcceleration(Manipulator *manipulator, Vector6f world_acceleration, bool *error = false)
+void MANAGER::setWorldAcceleration(Manipulator *manipulator, VectorXf world_acceleration, bool *error = false)
 {
   manipulator->setWorldAcceleration(world_acceleration, error);
 }
@@ -167,12 +167,12 @@ void MANAGER::setComponentStateToWorld(Manipulator *manipulator, Name name, Stat
   manipulator->setComponentStateToWorld(name, state_to_world, error);
 }
 
-void MANAGER::setComponentVelocityToWorld(Manipulator *manipulator, Name name, Vector6f velocity, bool *error = false)
+void MANAGER::setComponentVelocityToWorld(Manipulator *manipulator, Name name, VectorXf velocity, bool *error = false)
 {
   manipulator->setComponentVelocityToWorld(name, velocity, error);
 }
 
-void MANAGER::setComponentAccelerationToWorld(Manipulator *manipulator, Name name, Vector6f accelaration, bool *error = false)
+void MANAGER::setComponentAccelerationToWorld(Manipulator *manipulator, Name name, VectorXf accelaration, bool *error = false)
 {
   manipulator->setComponentAccelerationToWorld(name, accelaration, error);
 }
@@ -242,12 +242,12 @@ State MANAGER::getWorldState((Manipulator *manipulator, bool *error = false)
   return manipulator->getWorldState(error);
 }
 
-Vector6f MANAGER::getWorldVelocity((Manipulator *manipulator, bool *error = false)
+VectorXf MANAGER::getWorldVelocity((Manipulator *manipulator, bool *error = false)
 {
   return manipulator->getWorldVelocity(error);
 }
 
-Vector6f MANAGER::getWorldAcceleration((Manipulator *manipulator, bool *error = false)
+VectorXf MANAGER::getWorldAcceleration((Manipulator *manipulator, bool *error = false)
 {
   return manipulator->getWorldAcceleration(error);
 }
@@ -292,12 +292,12 @@ State MANAGER::getComponentStateToWorld(Manipulator *manipulator, Name name, boo
   return manipulator->getComponentStateToWorld(name, error);
 }
 
-Vector6f MANAGER::getComponentVelocityToWorld(Manipulator *manipulator, Name name, bool *error = false)
+VectorXf MANAGER::getComponentVelocityToWorld(Manipulator *manipulator, Name name, bool *error = false)
 {
   return manipulator->getComponentVelocityToWorld(name, error);
 }
 
-Vector6f MANAGER::getComponentAccelerationToWorld(Manipulator *manipulator, Name name, bool *error = false)
+VectorXf MANAGER::getComponentAccelerationToWorld(Manipulator *manipulator, Name name, bool *error = false)
 {
   return manipulator->getComponentAccelerationToWorld(name, error);
 }

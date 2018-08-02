@@ -49,14 +49,14 @@ void connectGetAngle(float* (*fp)()){ ACTUATOR::getAngle = fp; }
 
 namespace KINEMATICS
 {
-void (*foward)(void) = NULL;
-void (*inverse)(void) = NULL;
-void (*getPassiveJointAngle)(Manipulator* manipulator, bool *error = false) = NULL;
+void (*foward)(Manipulator*, bool*) = NULL;
+void (*inverse)(Manipulator*, Name, Pose, bool*) = NULL;
+void (*getPassiveJointAngle)(Manipulator*, bool*) = NULL;
 } // namespace KINEMATICS
 
-void connectForward(void (*fp)(void)){KINEMATICS::foward = fp;}
-void connectInverse(void (*fp)(void)){KINEMATICS::inverse = fp;}
-void connectGetPassiveJointAngle(void (*fp)(void)){KINEMATICS::getPassiveJointAngle = fp;}
+void connectForward(void (*fp)(Manipulator*, bool*)){KINEMATICS::foward = fp;}
+void connectInverse(void (*fp)(Manipulator*, Name, Pose, bool*)){KINEMATICS::inverse = fp;}
+void connectGetPassiveJointAngle(void (*fp)(Manipulator*, bool*)){KINEMATICS::getPassiveJointAngle = fp;}
 
 namespace PATH
 {
@@ -100,15 +100,15 @@ namespace MANAGER
   void setWorldPosition(Manipulator *manipulator, Vector3f world_position, bool *error = false);
   void setWorldOrientation(Manipulator *manipulator, Matrix3f world_orientation, bool *error = false);
   void setWorldState(Manipulator *manipulator, State world_state, bool *error = false);
-  void setWorldVelocity(Manipulator *manipulator, Vector6f world_velocity, bool *error = false);
-  void setWorldAcceleration(Manipulator *manipulator, Vector6f world_acceleration, bool *error = false);
+  void setWorldVelocity(Manipulator *manipulator, VectorXf world_velocity, bool *error = false);
+  void setWorldAcceleration(Manipulator *manipulator, VectorXf world_acceleration, bool *error = false);
   void setComponent(Manipulator *manipulator, Name name, Component component, bool *error = false);
   void setComponentPoseToWorld(Manipulator *manipulator, Name name, Pose pose_to_world, bool *error = false);
   void setComponentPositionToWorld(Manipulator *manipulator, Name name, Vector3f position_to_world, bool *error = false);
   void setComponentOrientationToWorld(Manipulator *manipulator, Name name, Matrix3f orientation_to_wolrd, bool *error = false);
   void setComponentStateToWorld(Manipulator *manipulator, Name name, State state_to_world, bool *error = false);
-  void setComponentVelocityToWorld(Manipulator *manipulator, Name name, Vector6f velocity, bool *error = false);
-  void setComponentAccelerationToWorld(Manipulator *manipulator, Name name, Vector6f accelaration, bool *error = false);
+  void setComponentVelocityToWorld(Manipulator *manipulator, Name name, VectorXf velocity, bool *error = false);
+  void setComponentAccelerationToWorld(Manipulator *manipulator, Name name, VectorXf accelaration, bool *error = false);
   void setComponentJointAngle(Manipulator *manipulator, Name name, float angle, bool *error = false);
   void setComponentJointVelocity(Manipulator *manipulator, Name name, float angular_velocity, bool *error = false);
   void setComponentJointAcceleration(Manipulator *manipulator, Name name, float angular_acceleration, bool *error = false);
@@ -124,8 +124,8 @@ namespace MANAGER
   Vector3f getWorldPosition((Manipulator *manipulator, bool *error = false);
   Matrix3f getWorldOrientation((Manipulator *manipulator, bool *error = false);
   State getWorldState((Manipulator *manipulator, bool *error = false);
-  Vector6f getWorldVelocity((Manipulator *manipulator, bool *error = false);
-  Vector6f getWorldAcceleration((Manipulator *manipulator, bool *error = false);
+  VectorXf getWorldVelocity((Manipulator *manipulator, bool *error = false);
+  VectorXf getWorldAcceleration((Manipulator *manipulator, bool *error = false);
   map<Name, Component> getAllComponent((Manipulator *manipulator, bool *error = false);
   Component getComponent(Manipulator *manipulator, Name name, bool *error = false);
   Name getComponentParentName(Manipulator *manipulator, Name name, bool *error = false);
@@ -134,8 +134,8 @@ namespace MANAGER
   Vector3f getComponentPositionToWorld(Manipulator *manipulator, Name name, bool *error = false);
   Matrix3f getComponentOrientationToWorld(Manipulator *manipulator, Name name, bool *error = false);
   State getComponentStateToWorld(Manipulator *manipulator, Name name, bool *error = false);
-  Vector6f getComponentVelocityToWorld(Manipulator *manipulator, Name name, bool *error = false);
-  Vector6f getComponentAccelerationToWorld(Manipulator *manipulator, Name name, bool *error = false);
+  VectorXf getComponentVelocityToWorld(Manipulator *manipulator, Name name, bool *error = false);
+  VectorXf getComponentAccelerationToWorld(Manipulator *manipulator, Name name, bool *error = false);
   Pose getComponentRelativePoseToParent(Manipulator *manipulator, Name name, bool *error = false);
   Vector3f getComponentRelativePositionToParent(Manipulator *manipulator, Name name, bool *error = false);
   Matrix3f getComponentRelativeOrientationToParent(Manipulator *manipulator, Name name, bool *error = false);
