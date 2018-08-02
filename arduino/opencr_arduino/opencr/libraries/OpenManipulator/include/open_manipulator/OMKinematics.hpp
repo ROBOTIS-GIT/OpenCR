@@ -185,6 +185,7 @@ class OMLinkKinematics
   }
 
   Eigen::VectorXf geometricInverse(Manipulator* manipulator, Name tool_number, Pose target_pose, float gain) //for basic model
+  
   {
     Eigen::VectorXf target_angle_vector(3);
     Eigen::Vector3f control_position; //joint6-joint1
