@@ -19,8 +19,11 @@
 #ifndef OPENMANIPULATOR_LINK_H_
 #define OPENMANIPULATOR_LINK_H_
 
-#include "OMManager.h"
-#include "OMAPI.h"
+//#include "OMManager.h"
+//#include "OMAPI.h"
+//#include "OMMath.h"
+//#include "OMKinematics.h"
+
 
 #define WORLD     0
 #define BASE      1

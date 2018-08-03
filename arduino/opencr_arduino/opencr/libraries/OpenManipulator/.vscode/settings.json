@@ -13,6 +13,10 @@
         "unordered_map": "cpp",
         "functional": "cpp",
         "deque": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "ratio": "cpp",
+        "system_error": "cpp",
+        "type_traits": "cpp",
+        "thread": "cpp"
     }
 }
