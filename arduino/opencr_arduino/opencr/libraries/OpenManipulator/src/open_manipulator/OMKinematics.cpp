@@ -16,7 +16,7 @@
 
 /* Authors: Hye-Jong KIM, Darby Lim*/
 
-#include "../../../include/open_manipulator/OMKinematics.h"
+#include "../../include/open_manipulator/OMKinematics.h"
 
 
 void OMKinematicsMethod::solveKinematicsSinglePoint(Manipulator* manipulator, Name component_name, bool* error = false)

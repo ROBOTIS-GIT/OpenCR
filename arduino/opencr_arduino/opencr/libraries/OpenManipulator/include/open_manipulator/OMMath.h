@@ -19,7 +19,7 @@
 #ifndef OMMATH_H_
 #define OMMATH_H_
 
-#include "../../include/open_manipulator/OMDebug.h"
+#include "OMDebug.h"
 
 #include <Eigen.h>        // Calls main Eigen matrix class library
 #include <Eigen/LU>       // Calls inverse, determinant, LU decomp., etc.

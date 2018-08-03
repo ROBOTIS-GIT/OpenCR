@@ -19,8 +19,8 @@
 #ifndef OMKINEMATICS_H_
 #define OMKINEMATICS_H_
 
-#include "../../include/open_manipulator/OMAPI.h"
-#include "../../include/open_manipulator/OMDebug.h"
+#include "OMAPI.h"
+#include "OMDebug.h"
 
 #include <Eigen.h>        // Calls main Eigen matrix class library
 #include <Eigen/LU>       // Calls inverse, determinant, LU decomp., etc.

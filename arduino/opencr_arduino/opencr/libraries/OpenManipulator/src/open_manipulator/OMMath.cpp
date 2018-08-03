@@ -16,7 +16,7 @@
 
 /* Authors: Hye-Jong KIM, Darby Lim*/
 
-#include "../../../include/open_manipulator/OMMath.h"
+#include "../../include/open_manipulator/OMMath.h"
 
 OMMath::OMMath(){}
 OMMath::~OMMath(){}

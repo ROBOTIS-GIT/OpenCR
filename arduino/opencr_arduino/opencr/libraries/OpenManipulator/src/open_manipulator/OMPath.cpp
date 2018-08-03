@@ -16,4 +16,4 @@
 
 /* Authors: Hye-Jong KIM, Darby Lim*/
 
-#include "../../../include/open_manipulator/OMPath.h"
+#include "../../include/open_manipulator/OMPath.h"

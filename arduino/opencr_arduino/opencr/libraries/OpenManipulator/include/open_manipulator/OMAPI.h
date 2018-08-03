@@ -21,7 +21,10 @@
 
 #include <RTOS.h>
 #include <Eigen.h>
-#include <OpenManipulator.h>
+//#include <OpenManipulator.h>
+#include "OMManager.h"
+#include "OMMath.h"
+#include "OMDebug.h"
 
 osMutexDef(om_mutex);
 osMutexId(om_mutex_id);

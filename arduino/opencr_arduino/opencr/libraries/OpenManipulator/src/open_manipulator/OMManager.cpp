@@ -16,7 +16,7 @@
 
 /* Authors: Hye-Jong KIM, Darby Lim*/
 
-#include "../../../include/open_manipulator/OMManager.h"
+#include "../../include/open_manipulator/OMManager.h"
 
 using namespace std, Eigen;
 

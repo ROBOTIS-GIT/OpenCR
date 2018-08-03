@@ -16,7 +16,7 @@
 
 /* Authors: Darby Limm, Hye-Jong KIM */
 
-#include "../../../include/open_manipulator/OMAPI.h"
+#include "../../include/open_manipulator/OMAPI.h"
 
 
 ////////////////////////////////////////////////////////////////////////////

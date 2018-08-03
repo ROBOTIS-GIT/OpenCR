@@ -27,7 +27,8 @@
 
 #include "OMDebug.h"
 
-using namespace std, Eigen;
+using namespace std;
+using namespace  Eigen;
 
 typedef int8_t NAME
 

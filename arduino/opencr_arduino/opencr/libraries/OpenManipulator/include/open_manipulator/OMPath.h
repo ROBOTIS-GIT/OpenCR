@@ -19,7 +19,7 @@
 #ifndef OMPath_H_
 #define OMPath_H_
 
-#include "../../include/open_manipulator/OMDebug.h"
+#include "OMDebug.h"
 
 
 

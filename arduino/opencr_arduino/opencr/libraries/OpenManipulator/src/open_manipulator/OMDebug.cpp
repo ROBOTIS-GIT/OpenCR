@@ -16,7 +16,7 @@
 
 /* Authors: Hye-Jong KIM, Darby Lim*/
 
-#include "../../../include/open_manipulator/OMDebug.h"
+#include "../../include/open_manipulator/OMDebug.h"
 
 void LOG::init()
 {
