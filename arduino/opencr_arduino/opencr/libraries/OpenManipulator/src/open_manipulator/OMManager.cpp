@@ -117,16 +117,16 @@ void Manipulator::checkManipulatorSetting()
   USB.println("Size of Components : " + String(component_.size()));
 
   USB.println("\n<Configuration of world>");
-  USB.println("Name         : " + String(world_.name));
-  USB.println("Child name   : " + String(world_.child));
-  USB.println("Position     : ");
-  VECTOR::PRINT(world_.pose.position);
-  USB.println("Orientation  : ");
-  MATRIX::PRINT(world_.pose.orientation);
-  USB.println("Velocity     : ");
-  VECTOR::PRINT(world_.origin.velocity);
+  USB.println("Name : " + String(world_.name));
+  USB.println("Child name : " + String(world_.child));
+  USB.println("Position : ");
+  PRINT::VECTOR(world_.pose.position);
+  USB.println("Orientation : ");
+  PRINT::MATRIX(world_.pose.orientation);
+  USB.println("Velocity : ");
+  PRINT::VECTOR(world_.origin.velocity);
   USB.println("Acceleration : ");
-  VECTOR::PRINT(world_.origin.acceleration);
+  PRINT::VECTOR(world_.origin.acceleration);
 
   USB.println("\n<Configuration of components>");
 
@@ -140,26 +140,26 @@ void Manipulator::checkManipulatorSetting()
 
     USB.println("\nRelative to parent");
     USB.println(" Position : ");
-    VECTOR::PRINT(component_[it->first].relative_to_parent.position);
+    PRINT::VECTOR(component_[it->first].relative_to_parent.position);
     USB.println(" Orientation : ");
-    MATRIX::PRINT(component_[it->first].relative_to_parent.orientation);
+    PRINT::MATRIX(component_[it->first].relative_to_parent.orientation);
 
     USB.println("\nPose to world");
     USB.println(" Position : ");
-    VECTOR::PRINT(component_[it->first].pose_to_world.position);
+    PRINT::VECTOR(component_[it->first].pose_to_world.position);
     USB.println(" Orientation : ");
-    MATRIX::PRINT(component_[it->first].pose_to_world.orientation);
+    PRINT::MATRIX(component_[it->first].pose_to_world.orientation);
 
     USB.println("\nState to origin");
     USB.println(" Velocity : ");
-    VECTOR::PRINT(component_[it->first].origin.velocity);
+    PRINT::VECTOR(component_[it->first].origin.velocity);
     USB.println(" Acceleration : ");
-    MATRIX::PRINT(component_[it->first].origin.acceleration);
+    PRINT::MATRIX(component_[it->first].origin.acceleration);
 
     USB.println("\nJoint");
     USB.println(" ID : " + String(component_[it->first].joint.id));
     USB.println(" Axis : ");
-    VECTOR::PRINT(component_[it->first].joint.axis);
+    PRINT::VECTOR(component_[it->first].joint.axis);
     USB.print(" Angle : ");+ USB.println(component_[it->first].joint.angle);
     USB.print(" Velocity : "); + USB.println(component_[it->first].joint.velocity);
     USB.print(" Acceleration : "); + USB.println(component_[it->first].joint.acceleration);
@@ -172,9 +172,9 @@ void Manipulator::checkManipulatorSetting()
     USB.println("\nInertia");
     USB.print(" Mass : "); USB.println(component_[it->first].inertia.mass);
     USB.println(" Inertia tensor : ");
-    MATRIX::PRINT(component_[it->first].inertia.inertia_tensor);
+    PRINT::MATRIX(component_[it->first].inertia.inertia_tensor);
     USB.println(" Center of mass : ");
-    VECTOR::PRINT(component_[it->first].inertia.center_of_mass);
+    PRINT::VECTOR(component_[it->first].inertia.center_of_mass);
     USB.println();
   }
 }
