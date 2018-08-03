@@ -14,14 +14,13 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM, Darby Lim*/
+/* Authors: Hye-Jong KIM, Darby Lim */
 
 #include "../../include/open_manipulator/OMMath.h"
 
-OMMath::OMMath(){}
-OMMath::~OMMath(){}
+using namespace Eigen;
 
-float OMMath::sign(float number)
+float MATH::sign(float number)
 {
   if (number >= 0.0)
   {
@@ -33,35 +32,37 @@ float OMMath::sign(float number)
   }
 }
 
-Eigen::Vector3f OMMath::makeEigenVector3(float v1, float v2, float v3)
+Vector3f MATH::makeVector3(float v1, float v2, float v3)
 {
-  Eigen::Vector3f temp;
+  Vector3f temp;
   temp << v1, v2, v3;
   return temp;
 }
 
-Eigen::Matrix3f OMMath::makeEigenMatrix3(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33)
+Matrix3f MATH::makeMatrix3(float m11, float m12, float m13,
+                           float m21, float m22, float m23,
+                           float m31, float m32, float m33)
 {
-  Eigen::Matrix3f temp;
+  Matrix3f temp;
   temp << m11, m12, m13, m21, m22, m23, m31, m32, m33;
   return temp;
 }
-    
-Eigen::Vector3f OMMath::matrixLogarithm(Eigen::Matrix3f rotation_matrix)
+
+Vector3f MATH::matrixLogarithm(Matrix3f rotation_matrix)
 {
-  Eigen::Matrix3f R = rotation_matrix;
-  Eigen::Vector3f l = Eigen::Vector3f::Zero();
-  Eigen::Vector3f rotation_vector = Eigen::Vector3f::Zero();
+  Matrix3f R = rotation_matrix;
+  Vector3f l = Vector3f::Zero();
+  Vector3f rotation_vector = Vector3f::Zero();
 
   float theta = 0.0;
-  float diag  = 0.0;
+  float diag = 0.0;
   bool diagonal_matrix = true;
 
-  l << R(2,1) - R(1,2),
-       R(0,2) - R(2,0),
-       R(1,0) - R(0,1);
-  theta = atan2(l.norm(), R(0,0) + R(1,1) + R(2,2) - 1);
-  diag  = R(0,0) + R(1,1) + R(2,2);
+  l << R(2, 1) - R(1, 2),
+      R(0, 2) - R(2, 0),
+      R(1, 0) - R(0, 1);
+  theta = atan2(l.norm(), R(0, 0) + R(1, 1) + R(2, 2) - 1);
+  diag = R(0, 0) + R(1, 1) + R(2, 2);
 
   for (int8_t i = 0; i < 3; i++)
   {
@@ -76,13 +77,13 @@ Eigen::Vector3f OMMath::matrixLogarithm(Eigen::Matrix3f rotation_matrix)
       }
     }
   }
-  if (R == Eigen::Matrix3f::Identity())
+  if (R == Matrix3f::Identity())
   {
-    rotation_vector = Eigen::Vector3f::Zero();
+    rotation_vector = Vector3f::Zero();
   }
   else if (diagonal_matrix == true)
   {
-    rotation_vector << R(0,0) + 1, R(1,1) + 1, R(2,2) + 1;
+    rotation_vector << R(0, 0) + 1, R(1, 1) + 1, R(2, 2) + 1;
     rotation_vector = rotation_vector * M_PI_2;
   }
   else
@@ -92,20 +93,20 @@ Eigen::Vector3f OMMath::matrixLogarithm(Eigen::Matrix3f rotation_matrix)
   return rotation_vector;
 }
 
-Eigen::Matrix3f OMMath::skewSymmetricMatrix(Eigen::Vector3f v)
+Matrix3f MATH::skewSymmetricMatrix(Vector3f v)
 {
-  Eigen::Matrix3f skew_symmetric_matrix = Eigen::Matrix3f::Zero();
-  skew_symmetric_matrix <<    0,  -v(2),  v(1),
-                          v(2),      0, -v(0),
-                          -v(1),   v(0),     0;
+  Matrix3f skew_symmetric_matrix = Matrix3f::Zero();
+  skew_symmetric_matrix << 0, -v(2), v(1),
+      v(2), 0, -v(0),
+      -v(1), v(0), 0;
   return skew_symmetric_matrix;
 }
 
-Eigen::Matrix3f OMMath::rodriguesRotationMatrix(Eigen::Vector3f axis, float angle)
+Matrix3f MATH::rodriguesRotationMatrix(Vector3f axis, float angle)
 {
-  Eigen::Matrix3f skew_symmetric_matrix = Eigen::Matrix3f::Zero();
-  Eigen::Matrix3f rotation_matrix = Eigen::Matrix3f::Zero();
-  Eigen::Matrix3f Identity_matrix = Eigen::Matrix3f::Identity();
+  Matrix3f skew_symmetric_matrix = Matrix3f::Zero();
+  Matrix3f rotation_matrix = Matrix3f::Zero();
+  Matrix3f Identity_matrix = Matrix3f::Identity();
 
   skew_symmetric_matrix = skewSymmetricMatrix(axis);
   rotation_matrix = Identity_matrix +
@@ -113,22 +114,32 @@ Eigen::Matrix3f OMMath::rodriguesRotationMatrix(Eigen::Vector3f axis, float angl
                     skew_symmetric_matrix * skew_symmetric_matrix * (1 - cos(angle));
   return rotation_matrix;
 }
-  
-Eigen::Matrix3f OMMath::makeRotationMatrix(float rool, float pitch, float yaw)
-{
-  Eigen::Vector3f rotation_vector;
 
-  rotation_vector(0) = rool;
+Matrix3f MATH::makeRotationMatrix(float roll, float pitch, float yaw)
+{
+#if 0 // Euler angle
+  Eigen::Matrix3f rotation_matrix = Eigen::Matrix3f::Identity();
+
+  rotation_matrix << cos(yaw) * cos(pitch), (-1.0f) * sin(yaw) * cos(roll) + cos(yaw) * sin(pitch) * sin(roll), sin(yaw) * sin(roll) + cos(yaw) * sin(pitch) * cos(roll),
+      sin(yaw) * cos(pitch), cos(yaw) * cos(roll) + sin(yaw) * sin(pitch) * sin(roll), (-1.0f) * cos(yaw) * sin(roll) + sin(yaw) * sin(pitch) * cos(roll),
+      (-1.0f) * sin(pitch), cos(pitch) * sin(roll), cos(pitch) * cos(roll);
+
+  return rotation_matrix;
+#endif
+
+  Vector3f rotation_vector;
+
+  rotation_vector(0) = roll;
   rotation_vector(1) = pitch;
   rotation_vector(2) = yaw;
 
   return makeRotationMatrix(rotation_vector);
 }
 
-Eigen::Matrix3f OMMath::makeRotationMatrix(Eigen::Vector3f rotation_vector)
+Matrix3f MATH::makeRotationMatrix(Vector3f rotation_vector)
 {
-  Eigen::Matrix3f rotation_matrix;
-  Eigen::Vector3f axis;
+  Matrix3f rotation_matrix;
+  Vector3f axis;
   float angle;
 
   angle = rotation_vector.norm();
@@ -140,42 +151,38 @@ Eigen::Matrix3f OMMath::makeRotationMatrix(Eigen::Vector3f rotation_vector)
   return rotation_matrix;
 }
 
-Eigen::Vector3f OMMath::makeRotationVector(Eigen::Matrix3f rotation_matrix)
+Vector3f MATH::makeRotationVector(Matrix3f rotation_matrix)
 {
   return matrixLogarithm(rotation_matrix);
 }
 
-Eigen::Vector3f OMMath::differentialPosition(Eigen::Vector3f desired_position, Eigen::Vector3f present_position)
+Vector3f MATH::positionDifference(Vector3f desired_position, Vector3f present_position)
 {
-  Eigen::Vector3f differential_position;
-  differential_position = desired_position - present_position;
+  Vector3f position_difference;
+  position_difference = desired_position - present_position;
 
-  return differential_position;
+  return position_difference;
 }
 
-Eigen::Vector3f OMMath::differentialOrientation(Eigen::Matrix3f desired_orientation, Eigen::Matrix3f present_orientation)
+Vector3f MATH::orientationDifference(Matrix3f desired_orientation, Matrix3f present_orientation)
 {
-  Eigen::Vector3f differential_orientation;
-  differential_orientation = present_orientation * makeRotationVector(present_orientation.transpose() * desired_orientation);
+  Vector3f orientation_difference;
+  orientation_difference = present_orientation * makeRotationVector(present_orientation.transpose() * desired_orientation);
 
-  return differential_orientation;
+  return orientation_difference;
 }
 
-
-Eigen::VectorXf OMMath::differentialPose(Eigen::Vector3f desired_position, Eigen::Vector3f present_position, Eigen::Matrix3f desired_orientation, Eigen::Matrix3f present_orientation)
+VectorXf MATH::poseDifference(Vector3f desired_position, Vector3f present_position,
+                              Matrix3f desired_orientation, Matrix3f present_orientation)
 {
-  Eigen::Vector3f differential_position;
-  Eigen::Vector3f differential_orientation;
-  Eigen::VectorXf  differential_pose(6);
+  Vector3f position_difference;
+  Vector3f orientation_difference;
+  VectorXf pose_difference(6);
 
-  differential_position = differentialPosition(desired_position, present_position);
-  differential_orientation = differentialOrientation(desired_orientation, present_orientation);
-  differential_pose << differential_position(0),    
-                       differential_position(1),    
-                       differential_position(2),    
-                       differential_orientation(0), 
-                       differential_orientation(1), 
-                       differential_orientation(2);
-  return differential_pose;
+  position_difference = positionDifference(desired_position, present_position);
+  orientation_difference = orientationDifference(desired_orientation, present_orientation);
+  pose_difference << position_difference(0), position_difference(1), position_difference(2),
+      orientation_difference(0), orientation_difference(1), orientation_difference(2);
+
+  return pose_difference;
 }
-

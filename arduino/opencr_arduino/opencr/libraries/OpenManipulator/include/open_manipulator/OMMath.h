@@ -14,41 +14,47 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM */
+/* Authors: Hye-Jong KIM, Darby Lim */
 
 #ifndef OMMATH_H_
 #define OMMATH_H_
 
-#include "OMDebug.h"
-
-#include <Eigen.h>        // Calls main Eigen matrix class library
-#include <Eigen/LU>       // Calls inverse, determinant, LU decomp., etc.
+#include <unistd.h>
+#include <Eigen.h>  // Calls main Eigen matrix class library
+#include <Eigen/Geometry>
+#include <Eigen/LU> // Calls inverse, determinant, LU decomp., etc.
 
 #include <math.h>
+
+using namespace Eigen;
 
 #define DEG2RAD (M_PI / 180.0)
 #define RAD2DEG (180.0 / M_PI)
 
-#define ZERO_VECTOR     Eigen::Vector3f::Zero()
-#define IDENTITY_MATRIX Eigen::Matrix3f::Identity(3,3)
+#define ZERO_VECTOR Vector3f::Zero()
+#define IDENTITY_MATRIX Matrix3f::Identity(3, 3)
 
-class OMMath
+namespace MATH
 {
- public:
-  OMMath();
-  ~OMMath();
-  float sign(float number);
-  Eigen::Vector3f makeEigenVector3(float v1, float v2, float v3);
-  Eigen::Matrix3f makeEigenMatrix3(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33);
-  Eigen::Vector3f matrixLogarithm(Eigen::Matrix3f rotation_matrix);
-  Eigen::Matrix3f skewSymmetricMatrix(Eigen::Vector3f v);
-  Eigen::Matrix3f rodriguesRotationMatrix(Eigen::Vector3f axis, float angle);
-  Eigen::Matrix3f makeRotationMatrix(float rool, float pitch, float yaw);
-  Eigen::Matrix3f makeRotationMatrix(Eigen::Vector3f rotation_vector);
-  Eigen::Vector3f makeRotationVector(Eigen::Matrix3f rotation_matrix);
-  Eigen::Vector3f differentialPosition(Eigen::Vector3f desired_position, Eigen::Vector3f present_position);
-  Eigen::Vector3f differentialOrientation(Eigen::Matrix3f desired_orientation, Eigen::Matrix3f present_orientation);
-  Eigen::VectorXf differentialPose(Eigen::Vector3f desired_position, Eigen::Vector3f present_position, Eigen::Matrix3f desired_orientation, Eigen::Matrix3f present_orientation);
-};
+float sign(float number);
+
+Vector3f makeVector3(float v1, float v2, float v3);
+Matrix3f makeMatrix3(float m11, float m12, float m13,
+                     float m21, float m22, float m23,
+                     float m31, float m32, float m33);
+
+Vector3f matrixLogarithm(Matrix3f rotation_matrix);
+Matrix3f skewSymmetricMatrix(Vector3f v);
+Matrix3f rodriguesRotationMatrix(Vector3f axis, float angle);
+
+Matrix3f makeRotationMatrix(float roll, float pitch, float yaw);
+Matrix3f makeRotationMatrix(Vector3f rotation_vector);
+Vector3f makeRotationVector(Matrix3f rotation_matrix);
+
+Vector3f positionDifference(Vector3f desired_position, Vector3f present_position);
+Vector3f orientationDifference(Matrix3f desired_orientation, Matrix3f present_orientation);
+VectorXf poseDifference(Vector3f desired_position, Vector3f present_position,
+                        Matrix3f desired_orientation, Matrix3f present_orientation);
+} // namespace MATH
 
 #endif // OMMATH_HPP_
