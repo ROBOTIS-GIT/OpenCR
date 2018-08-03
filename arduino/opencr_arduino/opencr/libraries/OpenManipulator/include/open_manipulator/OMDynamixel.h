@@ -18,7 +18,7 @@
 
 #ifndef OMDYNAMIXEL_H_
 #define OMDYNAMIXEL_H_
-
+#if 0
 #include <DynamixelWorkbench.h>
 
 #define DEVICE_NAME       ""
@@ -72,5 +72,5 @@ class OMDynamixel
   void addSyncWriteHandler(const char* table_item);
   void addSyncReadHandler(const char* table_item);
 };
-
+#endif
 #endif // OMDYNAMIXEL_HPP_

@@ -15,7 +15,7 @@
 *******************************************************************************/
 
 /* Authors: Hye-Jong KIM */
-
+#if 0
 #ifndef OMKINEMATICS_H_
 #define OMKINEMATICS_H_
 
@@ -91,3 +91,4 @@ class MYKinematics
 };
 
 #endif // OMKINEMATICS_HPP_
+#endif

@@ -17,7 +17,7 @@
 /* Authors: Darby Limm, Hye-Jong KIM */
 
 #include "../../include/open_manipulator/OMAPI.h"
-
+#if 0
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////Basic Function//////////////////////////////
@@ -391,3 +391,4 @@ Matrix3f MANAGER::getComponentCenterOfMassOrientation(Manipulator *manipulator, 
 {
   return manipulator->getComponentCenterOfMassOrientation(name, error);
 }
+#endif

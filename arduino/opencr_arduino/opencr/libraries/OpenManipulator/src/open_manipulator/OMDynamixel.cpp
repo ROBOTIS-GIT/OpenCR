@@ -17,7 +17,7 @@
 /* Authors: Hye-Jong KIM, Darby Lim*/
 
 #include "../../include/open_manipulator/OMKinematics.h"
-
+#if 0
 
 OMDynamixel::OMDynamixel()
 {
@@ -167,3 +167,4 @@ void OMDynamixel::addSyncReadHandler(const char* table_item)
 {
   dxl_wb_.addSyncRead(table_item);
 }
+#endif

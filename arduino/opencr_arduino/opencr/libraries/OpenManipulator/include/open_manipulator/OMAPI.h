@@ -14,11 +14,12 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Darby Limm, Hye-Jong KIM */
+/* Authors: Darby Lim, Hye-Jong KIM */
    
 #ifndef OMAPI_H_
 #define OMAPI_H_
 
+#if 0
 #include <RTOS.h>
 #include <Eigen.h>
 //#include <OpenManipulator.h>
@@ -181,7 +182,7 @@ void Thread_Robot_State(void const *argument)
 }
 
 } // namespace OPEN_MANIPULATOR
-
+#endif
 #endif // OMAPI_HPP_  
    
    

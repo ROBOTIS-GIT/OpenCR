@@ -18,14 +18,19 @@
 
 #include "../../include/open_manipulator/OMDebug.h"
 
-void LOG::init()
+void OpenUSBSerialPort()
+{
+  USB.begin(57600);
+}
+
+void OpenDEBUGSerialPort()
 {
   DEBUG.begin(57600);
 }
 
 void LOG::log(String form, String msg)
 {
-  DEBUG.println(form + msg);
+  USB.println(form + msg);
 }
 
 void LOG::INFO(String msg)
@@ -43,62 +48,6 @@ void LOG::ERROR(String msg)
   log("[ERROR] ", msg);
 }
 
-// void print_mt3f(const Eigen::Matrix3f& m)
-// {
-//   uint8_t i = 0 , j = 0;
-
-//   for (i=0; i<3; i++)
-//   {
-//       for (j=0; j<3; j++)
-//       {
-//           Serial.print(m(i,j), 3);   // print 6 decimal places
-//           Serial.print(", ");
-//       }
-//       Serial.println();
-//   }
-//   Serial.println();
-// }
-
-// void print_vt3f(const Eigen::Vector3f& v)
-// {
-//   uint8_t i = 0;
-
-//   for (i=0; i<3; i++)
-//   {
-//     Serial.print(v(i), 3);
-//     Serial.print(", ");
-//   }
-//   Serial.println();
-// }
-
-// void print_mtXf(const Eigen::MatrixXf& m)
-// {
-//   uint8_t i = 0 , j = 0;
-
-//   for (i=0; i<m.rows(); i++)
-//   {
-//       for (j=0; j<m.cols(); j++)
-//       {
-//           Serial.print(m(i,j), 3);   // print 6 decimal places
-//           Serial.print(", ");
-//       }
-//       Serial.println();
-//   }
-//   Serial.println();
-// }
-
-// void print_vtXf(const Eigen::VectorXf& v)
-// {
-//   uint8_t i = 0;
-
-//   for (i=0; i<v.size(); i++)
-//   {
-//     Serial.print(v(i), 3);
-//     Serial.print(", ");
-//   }
-//   Serial.println();
-// }
-
 // void showJointAngle(String unit, OPMLink* link, int from, int to)
 // {
 //   int num = 0;
@@ -107,7 +56,7 @@ void LOG::ERROR(String msg)
 //   {
 //     for (num = from; num <= to; num++)
 //     {
-//       Serial.print(link[num].joint_angle_); 
+//       Serial.print(link[num].joint_angle_);
 //       Serial.print(" ");
 //     }
 //     Serial.println("");

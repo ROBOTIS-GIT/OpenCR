@@ -17,7 +17,7 @@
 /* Authors: Hye-Jong KIM, Darby Lim*/
 
 #include "../../include/open_manipulator/OMKinematics.h"
-
+#if 0
 
 void OMKinematicsMethod::solveKinematicsSinglePoint(Manipulator* manipulator, Name component_name, bool* error = false)
 {
@@ -145,3 +145,4 @@ Eigen::VectorXf OMLinkKinematics::geometricInverse(Manipulator* manipulator, Nam
 
 
 
+#endif
