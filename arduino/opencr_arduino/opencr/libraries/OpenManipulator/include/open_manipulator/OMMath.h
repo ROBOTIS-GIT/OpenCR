@@ -21,7 +21,6 @@
 
 #include <unistd.h>
 #include <Eigen.h>  // Calls main Eigen matrix class library
-#include <Eigen/Geometry>
 #include <Eigen/LU> // Calls inverse, determinant, LU decomp., etc.
 
 #include <math.h>

@@ -91,8 +91,9 @@ class Manipulator
   int8_t dof_;
   World world_;
   std::map<Name, Component> component_;
+  std::map<Name, Component>::iterator it_component_;
 
-  //////////////////////////////*Parameter list*///////////////////////////////
+  /////////////////////////////Parameter list///////////////////////////////
   /*
   dof_
   world_.name
@@ -127,7 +128,7 @@ class Manipulator
   Manipulator(){};
   virtual ~Manipulator(){};
 
-  ///////////////////////////*initialize function*/////////////////////////////
+  ///////////////////////////initialize function/////////////////////////////
 
   void addWorld(Name world_name,
                 Name child_name,
@@ -190,7 +191,10 @@ class Manipulator
   VectorXf getWorldVelocity();
   VectorXf getWorldAcceleration();
   int8_t getComponentSize();
+
   std::map<Name, Component> getAllComponent();
+  std::map<Name, Component>::iterator getIterator();
+
   Component getComponent(Name name);
   Name getComponentParentName(Name name);
   std::vector<Name> getComponentChildName(Name name);

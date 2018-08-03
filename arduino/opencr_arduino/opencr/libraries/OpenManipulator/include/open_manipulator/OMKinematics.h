@@ -14,81 +14,71 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM */
-#if 0
+/* Authors: Hye-Jong KIM, Darby Lim */
+
 #ifndef OMKINEMATICS_H_
 #define OMKINEMATICS_H_
+
+#include <Eigen.h>  // Calls main Eigen matrix class library
+#include <Eigen/LU> // Calls inverse, determinant, LU decomp., etc.
+#include <Eigen/Dense>
+
+#include <math.h>
+#include <vector>
+#include <map>
 
 #include "OMAPI.h"
 #include "OMDebug.h"
 
-#include <Eigen.h>        // Calls main Eigen matrix class library
-#include <Eigen/LU>       // Calls inverse, determinant, LU decomp., etc.
-#include <Eigen/Dense>
-#include <math.h>
-#include <vector>
+using namespace Eigen;
 
-using namespace OPEN_MANIPULATOR;
+namespace KINEMATICS
+{
+namespace CHAIN
+{
+MatrixXf jacobian(Manipulator *manipulator, int8_t tool_name);
 
+void forward(Manipulator *manipulator);
+VectorXf inverse(Manipulator *manipulator, int8_t tool_name);
+} // namespace CHAIN
+
+namespace LINK
+{
+void forward(Manipulator *manipulator);
+VectorXf inverse(Manipulator *manipulator, int8_t tool_name);
+} // namespace LINK
+
+#if 0
 class OMKinematicsMethod
 {
- public:
+public:
   OMKinematicsMethod(){};
   ~OMKinematicsMethod(){};
 
-  void solveKinematicsSinglePoint(Manipulator* manipulator, Name component_name, bool* error = false);
-  void forward(Manipulator* manipulator, bool* error = false);
-  Eigen::MatrixXf jacobian(Manipulator* manipulator, int8_t tool_component_name, bool *error = false);
+  void solveKinematicsSinglePoint(Manipulator *manipulator, Name component_name, bool *error = false);
+  void forward(Manipulator *manipulator, bool *error = false);
+  MatrixXf jacobian(Manipulator *manipulator, int8_t tool_component_name, bool *error = false);
 };
 
 class OMChainKinematics
 {
- private:
-
- public:
+private:
+public:
   OMChainKinematics(){};
   ~OMChainKinematics(){};
 };
 
-class OMScaraKinematics
-{
-  private:
-
-  public:
-    OMScaraKinematics(){};
-    ~OMScaraKinematics(){};
-};
-
 class OMLinkKinematics
 {
- private:
-
- public:
+private:
+public:
   OMLinkKinematics(){};
   ~OMLinkKinematics(){};
 
-  void forward(Manipulator* manipulator, bool *error = false);
-  Eigen::VectorXf geometricInverse(Manipulator* manipulator, Name tool_number, Pose target_pose, bool *error = false); //for basic model
+  void forward(Manipulator *manipulator, bool *error = false);
+  VectorXf geometricInverse(Manipulator *manipulator, Name tool_number, Pose target_pose, bool *error = false); //for basic model
 };
-
-class OMDeltaKinematics
-{
-  private:
-
-  public:
-    OMDeltaKinematics(){};
-    ~OMDeltaKinematics(){};
-
-};
-
-class MYKinematics
-{
- private:
-
- public:
-   MYKinematics(){};
-   ~MYKinematics(){};
-};
+#endif
+} // namespace KINEMATICS
 
 #endif // OMKINEMATICS_HPP_
-#endif

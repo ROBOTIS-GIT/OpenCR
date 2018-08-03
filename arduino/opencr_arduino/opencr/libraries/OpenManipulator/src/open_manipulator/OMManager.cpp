@@ -462,6 +462,11 @@ std::map<Name, Component> Manipulator::getAllComponent()
   return component_;
 }
 
+std::map<Name, Component>::iterator Manipulator::getIterator()
+{
+  return it_component_;
+}
+
 Component Manipulator::getComponent(Name name)
 {
   return component_.at(name);
