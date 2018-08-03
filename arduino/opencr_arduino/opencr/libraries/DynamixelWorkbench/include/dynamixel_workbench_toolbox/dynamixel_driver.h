@@ -30,7 +30,7 @@
   #include "dynamixel_sdk/dynamixel_sdk.h"
 #endif
 
-#define MAX_DXL_SERIES_NUM 3
+#define MAX_DXL_SERIES_NUM 5
 #define MAX_HANDLER_NUM 5
 
 #define BYTE  1
@@ -95,6 +95,7 @@ class DynamixelDriver
 
   bool writeRegister(uint8_t id, const char *item_name, int32_t data);
   bool readRegister(uint8_t id, const char *item_name, int32_t *data);
+  bool readRegister(uint8_t id, uint16_t length, uint8_t *data);
 
   void addSyncWrite(const char *item_name);
   bool syncWrite(const char *item_name, int32_t *data);

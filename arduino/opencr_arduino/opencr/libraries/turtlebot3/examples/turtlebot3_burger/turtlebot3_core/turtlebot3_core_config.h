@@ -89,9 +89,9 @@ void publishBatteryStateMsg(void);
 void publishDriveInformation(void);
 
 ros::Time rosNow(void);
-ros::Time addMicros(ros::Time & t, uint32_t _micros);
+ros::Time addMicros(ros::Time & t, uint32_t _micros); // deprecated
 
-void updateVariable(void);
+void updateVariable(bool isConnected);
 void updateMotorInfo(int32_t left_tick, int32_t right_tick);
 void updateTime(void);
 void updateOdometry(void);
@@ -107,6 +107,7 @@ void initJointStates(void);
 bool calcOdometry(double diff_time);
 
 void sendLogMsg(void);
+void waitForSerialLink(bool isConnected);
 
 /*******************************************************************************
 * ROS NodeHandle

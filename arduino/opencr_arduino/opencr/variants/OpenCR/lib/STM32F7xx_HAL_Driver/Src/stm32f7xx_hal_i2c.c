@@ -193,6 +193,23 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private constants ---------------------------------------------------------*/
+//#define WIRE_USE_DEBUG_IO_PINS
+#ifdef WIRE_USE_DEBUG_IO_PINS
+// Warning currently using pins 13 and 12 for this which must be set to IO mode externally... 
+#define DEBUG_DIGITAL_WRITE(port, pin, value) HAL_GPIO_WritePin(port, pin, value)    // digitalWrite(13, high);
+#else
+#define DEBUG_DIGITAL_WRITE(port, pin, value)     // digitalWrite(13, high);
+#endif
+
+//#define DEBUG_I2C_ISR_SIZE 50  // If defined will stash info about each ISR call
+// BUGBUG temporary debug support
+#ifdef DEBUG_I2C_ISR_SIZE
+uint32_t  debug_i2c_ISRs[DEBUG_I2C_ISR_SIZE];
+uint32_t  debug_i2c_CR1s[DEBUG_I2C_ISR_SIZE];
+uint32_t  debug_i2c_CR2s[DEBUG_I2C_ISR_SIZE];
+uint8_t   debug_i2c_isr_cnt = 0;
+#endif
+
 /** @addtogroup I2C_Private_Constants I2C Private Constants
   * @{
   */
@@ -237,6 +254,7 @@ static HAL_StatusTypeDef I2C_MasterReceive_ISR(I2C_HandleTypeDef *hi2c);
 
 static HAL_StatusTypeDef I2C_SlaveTransmit_ISR(I2C_HandleTypeDef *hi2c);
 static HAL_StatusTypeDef I2C_SlaveReceive_ISR(I2C_HandleTypeDef *hi2c);
+static HAL_StatusTypeDef I2C_SlaveAddr_ISR(I2C_HandleTypeDef *hi2c);
 
 static void I2C_TransferConfig(I2C_HandleTypeDef *hi2c,  uint16_t DevAddress, uint8_t Size, uint32_t Mode, uint32_t Request);
 /**
@@ -596,11 +614,11 @@ HAL_StatusTypeDef HAL_I2C_Master_Transmit(I2C_HandleTypeDef *hi2c, uint16_t DevA
     
     /* Clear STOP Flag */
     __HAL_I2C_CLEAR_FLAG(hi2c, I2C_FLAG_STOPF);
-  	
+    
     /* Clear Configuration Register 2 */
     I2C_RESET_CR2(hi2c);
     
-    hi2c->State = HAL_I2C_STATE_READY; 	  
+    hi2c->State = HAL_I2C_STATE_READY;    
     
     /* Process Unlocked */
     __HAL_UNLOCK(hi2c);
@@ -672,7 +690,7 @@ HAL_StatusTypeDef HAL_I2C_Master_Receive(I2C_HandleTypeDef *hi2c, uint16_t DevAd
         {
           return HAL_TIMEOUT;
         }
-	  }
+    }
       
       /* Write data to RXDR */
       (*pData++) =hi2c->Instance->RXDR;
@@ -717,11 +735,11 @@ HAL_StatusTypeDef HAL_I2C_Master_Receive(I2C_HandleTypeDef *hi2c, uint16_t DevAd
     
     /* Clear STOP Flag */
     __HAL_I2C_CLEAR_FLAG(hi2c, I2C_FLAG_STOPF);
-  	
+    
     /* Clear Configuration Register 2 */
     I2C_RESET_CR2(hi2c);
     
-    hi2c->State = HAL_I2C_STATE_READY; 	  
+    hi2c->State = HAL_I2C_STATE_READY;    
     
     /* Process Unlocked */
     __HAL_UNLOCK(hi2c);
@@ -1127,6 +1145,50 @@ HAL_StatusTypeDef HAL_I2C_Master_Receive_IT(I2C_HandleTypeDef *hi2c, uint16_t De
 }
 
 /**
+  * @brief  Interrupt on address match,  
+  * @param  hi2c : Pointer to a I2C_HandleTypeDef structure that contains
+  *                the configuration information for the specified I2C.
+  * @retval HAL status
+  */
+
+HAL_StatusTypeDef HAL_I2C_Slave_Addr_IT(I2C_HandleTypeDef *hi2c)
+{
+  if(hi2c->State == HAL_I2C_STATE_READY)
+  {
+    /* Process Locked */
+    __HAL_LOCK(hi2c);
+    
+    hi2c->State = HAL_I2C_STATE_SLAVE_BUSY_ADR;
+    hi2c->ErrorCode   = HAL_I2C_ERROR_NONE;
+    
+    /* Enable Address Acknowledge */
+    hi2c->Instance->CR2 &= ~I2C_CR2_NACK;
+    
+    hi2c->pBuffPtr = NULL;
+    hi2c->XferSize = 0;
+    hi2c->XferCount = 0;
+    
+    /* Process Unlocked */
+    __HAL_UNLOCK(hi2c); 
+    
+    /* Note : The I2C interrupts must be enabled after unlocking current process 
+    to avoid the risk of I2C interrupt handle execution before current
+    process unlock */
+    
+    /* Enable I2C_IT_ADDRI interrupt */
+    /* possible to enable all of these */
+    /* I2C_IT_ERRI | I2C_IT_TCI| I2C_IT_STOPI| I2C_IT_NACKI | I2C_IT_ADDRI | I2C_IT_RXI | I2C_IT_TXI */
+    __HAL_I2C_ENABLE_IT(hi2c, I2C_IT_ADDRI );
+    
+    return HAL_OK;
+  }
+  else
+  {
+    return HAL_BUSY; 
+  } 
+}
+
+/**
   * @brief  Transmit in slave mode an amount of data in no-blocking mode with Interrupt 
   * @param  hi2c : Pointer to a I2C_HandleTypeDef structure that contains
   *                the configuration information for the specified I2C.
@@ -1393,7 +1455,7 @@ HAL_StatusTypeDef HAL_I2C_Master_Receive_DMA(I2C_HandleTypeDef *hi2c, uint16_t D
       {
         return HAL_TIMEOUT;
       }
-	}
+  }
     
     /* Enable DMA Request */
     hi2c->Instance->CR1 |= I2C_CR1_RXDMAEN;   
@@ -1691,11 +1753,11 @@ HAL_StatusTypeDef HAL_I2C_Mem_Write(I2C_HandleTypeDef *hi2c, uint16_t DevAddress
     
     /* Clear STOP Flag */
     __HAL_I2C_CLEAR_FLAG(hi2c, I2C_FLAG_STOPF);
-  	
+    
     /* Clear Configuration Register 2 */
     I2C_RESET_CR2(hi2c);
     
-    hi2c->State = HAL_I2C_STATE_READY; 	  
+    hi2c->State = HAL_I2C_STATE_READY;    
     
     /* Process Unlocked */
     __HAL_UNLOCK(hi2c);
@@ -1829,7 +1891,7 @@ HAL_StatusTypeDef HAL_I2C_Mem_Read(I2C_HandleTypeDef *hi2c, uint16_t DevAddress,
     
     /* Clear STOP Flag */
     __HAL_I2C_CLEAR_FLAG(hi2c, I2C_FLAG_STOPF);
-  	
+    
     /* Clear Configuration Register 2 */
     I2C_RESET_CR2(hi2c);
     
@@ -2277,8 +2339,8 @@ HAL_StatusTypeDef HAL_I2C_IsDeviceReady(I2C_HandleTypeDef *hi2c, uint16_t DevAdd
       tickstart = HAL_GetTick();
       while((__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_STOPF) == RESET) && (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_AF) == RESET) && (hi2c->State != HAL_I2C_STATE_TIMEOUT))
       {
-      	if(Timeout != HAL_MAX_DELAY)
-      	{
+        if(Timeout != HAL_MAX_DELAY)
+        {
           if((Timeout == 0)||((HAL_GetTick() - tickstart ) > Timeout))
           {
             /* Device is ready */
@@ -2368,8 +2430,30 @@ HAL_StatusTypeDef HAL_I2C_IsDeviceReady(I2C_HandleTypeDef *hi2c, uint16_t DevAdd
   *                the configuration information for the specified I2C.
   * @retval None
   */
+
 void HAL_I2C_EV_IRQHandler(I2C_HandleTypeDef *hi2c)
 {
+  DEBUG_DIGITAL_WRITE(GPIOB, GPIO_PIN_14, 1);    // digitalWrite(12, high);
+#ifdef DEBUG_I2C_ISR_SIZE
+  if (debug_i2c_isr_cnt < DEBUG_I2C_ISR_SIZE) 
+  {
+    debug_i2c_ISRs[debug_i2c_isr_cnt] = hi2c->Instance->ISR;
+    debug_i2c_CR1s[debug_i2c_isr_cnt] = hi2c->Instance->CR1;
+    debug_i2c_CR2s[debug_i2c_isr_cnt] = hi2c->Instance->CR2;
+    debug_i2c_isr_cnt++;
+  }
+#endif
+  
+  /* I2C in slave wait for ADDR selected  (Kurt)--------------------------------*/
+  if ( (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_ADDR) == SET) && (__HAL_I2C_GET_IT_SOURCE(hi2c, I2C_IT_ADDRI) == SET))
+  {     
+    /* Slave mode selected */
+    if (hi2c->State == HAL_I2C_STATE_SLAVE_BUSY_ADR)
+    {
+      I2C_SlaveAddr_ISR(hi2c);
+    }
+  }
+
   /* I2C in mode Transmitter ---------------------------------------------------*/
   if (((__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_TXIS) == SET) || (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_TCR) == SET) || (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_TC) == SET) || (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_STOPF) == SET) || (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_AF) == SET) || (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_ADDR) == SET)) && (__HAL_I2C_GET_IT_SOURCE(hi2c, (I2C_IT_TCI | I2C_IT_STOPI | I2C_IT_NACKI | I2C_IT_TXI | I2C_IT_ADDRI)) == SET))
   {     
@@ -2406,6 +2490,7 @@ void HAL_I2C_EV_IRQHandler(I2C_HandleTypeDef *hi2c)
       I2C_MasterReceive_ISR(hi2c);
     }
   } 
+  DEBUG_DIGITAL_WRITE(GPIOB, GPIO_PIN_14, 0);    // digitalWrite(12, low);
 }
 
 /**
@@ -2416,6 +2501,7 @@ void HAL_I2C_EV_IRQHandler(I2C_HandleTypeDef *hi2c)
   */
 void HAL_I2C_ER_IRQHandler(I2C_HandleTypeDef *hi2c)
 {
+  DEBUG_DIGITAL_WRITE(GPIOB, GPIO_PIN_14, 1);    // digitalWrite(12, HIGH);
   /* I2C Bus error interrupt occurred ------------------------------------*/
   if((__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BERR) == SET) && (__HAL_I2C_GET_IT_SOURCE(hi2c, I2C_IT_ERRI) == SET))
   { 
@@ -2432,6 +2518,7 @@ void HAL_I2C_ER_IRQHandler(I2C_HandleTypeDef *hi2c)
     
     /* Clear OVR flag */
     __HAL_I2C_CLEAR_FLAG(hi2c, I2C_FLAG_OVR);
+    DEBUG_DIGITAL_WRITE(GPIOB, GPIO_PIN_14, 0);    // digitalWrite(12, low);
   }
   
   /* I2C Arbitration Loss error interrupt occurred -------------------------------------*/
@@ -2514,6 +2601,24 @@ __weak void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c)
             the HAL_I2C_TxCpltCallback could be implemented in the user file
    */
 }
+
+/**
+  * @brief  Slave Address Match completed callbacks.
+  * @param  hi2c : Pointer to a I2C_HandleTypeDef structure that contains
+  *                the configuration information for the specified I2C.
+  * @retval None
+  */
+__weak void HAL_I2C_SlaveAddrCpltCallback(I2C_HandleTypeDef *hi2c)
+{
+  /* Prevent unused argument(s) compilation warning */
+  UNUSED(hi2c);
+  
+  /* NOTE : This function Should not be modified, when the callback is needed,
+            the HAL_I2C_TxCpltCallback could be implemented in the user file
+   */
+}
+ 
+
 
 /**
   * @brief  Memory Tx Transfer completed callbacks.
@@ -2634,7 +2739,7 @@ static HAL_StatusTypeDef I2C_MasterTransmit_ISR(I2C_HandleTypeDef *hi2c)
     /* Write data to TXDR */
     hi2c->Instance->TXDR = (*hi2c->pBuffPtr++);
     hi2c->XferSize--;
-    hi2c->XferCount--;	
+    hi2c->XferCount--;  
   }
   else if(__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_TCR) == SET)
   {
@@ -2908,6 +3013,10 @@ static HAL_StatusTypeDef I2C_SlaveTransmit_ISR(I2C_HandleTypeDef *hi2c)
     /* So clear Flag NACKF only */
     if(hi2c->XferCount == 0)
     {
+      DEBUG_DIGITAL_WRITE(GPIOA, GPIO_PIN_9, 1);    // digitalWrite(13, high);
+      DEBUG_DIGITAL_WRITE(GPIOA, GPIO_PIN_9, 0);    // digitalWrite(13, high);
+      DEBUG_DIGITAL_WRITE(GPIOA, GPIO_PIN_9, 1);    // digitalWrite(13, high);
+      DEBUG_DIGITAL_WRITE(GPIOA, GPIO_PIN_9, 0);    // digitalWrite(13, high);
       /* Clear NACK Flag */
       __HAL_I2C_CLEAR_FLAG(hi2c, I2C_FLAG_AF);
       
@@ -2961,17 +3070,24 @@ static HAL_StatusTypeDef I2C_SlaveTransmit_ISR(I2C_HandleTypeDef *hi2c)
   {
     /* Write data to TXDR only if XferCount not reach "0" */
     /* A TXIS flag can be set, during STOP treatment      */
+    DEBUG_DIGITAL_WRITE(GPIOA, GPIO_PIN_9, 1);    // digitalWrite(13, high);
     if(hi2c->XferCount > 0)
     {
       /* Write data to TXDR */
       hi2c->Instance->TXDR = (*hi2c->pBuffPtr++);
       hi2c->XferCount--;
+    } else {
+      // No more data still send something?
+      hi2c->Instance->TXDR = 0;
+
     }
+    DEBUG_DIGITAL_WRITE(GPIOA, GPIO_PIN_9, 0);    // digitalWrite(13, high);
   }
   
   /* Process Unlocked */
   __HAL_UNLOCK(hi2c);
   
+  //DEBUG_DIGITAL_WRITE(GPIOA, GPIO_PIN_9, 0);    // digitalWrite(13, LOW);
   return HAL_OK;
 }  
 
@@ -2984,6 +3100,7 @@ static HAL_StatusTypeDef I2C_SlaveTransmit_ISR(I2C_HandleTypeDef *hi2c)
 static HAL_StatusTypeDef I2C_SlaveReceive_ISR(I2C_HandleTypeDef *hi2c) 
 {
   /* Process Locked */
+  DEBUG_DIGITAL_WRITE(GPIOA, GPIO_PIN_9, 1);    // digitalWrite(13, high);
   __HAL_LOCK(hi2c);
   
   if(__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_AF) != RESET)
@@ -3030,6 +3147,41 @@ static HAL_StatusTypeDef I2C_SlaveReceive_ISR(I2C_HandleTypeDef *hi2c)
   
   /* Process Unlocked */
   __HAL_UNLOCK(hi2c);
+  DEBUG_DIGITAL_WRITE(GPIOA, GPIO_PIN_9, 0);    // digitalWrite(13, Low);
+  
+  return HAL_OK;     
+}  
+
+
+/**
+  * @brief  Handle Interrupt Flags Slave Receive Mode
+  * @param  hi2c : Pointer to a I2C_HandleTypeDef structure that contains
+  *                the configuration information for the specified I2C.
+  * @retval HAL status
+  */
+static HAL_StatusTypeDef I2C_SlaveAddr_ISR(I2C_HandleTypeDef *hi2c) 
+{
+  /* Process Locked */
+  DEBUG_DIGITAL_WRITE(GPIOA, GPIO_PIN_9, 1);    // digitalWrite(13, high);
+
+  __HAL_LOCK(hi2c);
+
+  // This should only be called with ADDR flag set  
+  /* Clear ADDR flag */
+  __HAL_I2C_CLEAR_FLAG(hi2c, I2C_FLAG_ADDR);
+
+
+  // Now call back to the client code to let them decide what to do. 
+  __HAL_I2C_DISABLE_IT(hi2c, I2C_IT_ADDRI );
+    
+  hi2c->State = HAL_I2C_STATE_READY;
+  
+  /* Process Unlocked */
+  __HAL_UNLOCK(hi2c);
+    
+  HAL_I2C_SlaveAddrCpltCallback(hi2c);
+
+  DEBUG_DIGITAL_WRITE(GPIOA, GPIO_PIN_9, 0);    // digitalWrite(13, Low);
   
   return HAL_OK;     
 }  
@@ -3297,7 +3449,7 @@ static void I2C_DMAMasterTransmitCplt(DMA_HandleTypeDef *hdma)
     
     /* Clear STOP Flag */
     __HAL_I2C_CLEAR_FLAG(hi2c, I2C_FLAG_STOPF);
-  	
+    
     /* Clear Configuration Register 2 */
     I2C_RESET_CR2(hi2c);
     
@@ -3511,7 +3663,7 @@ static void I2C_DMAMasterReceiveCplt(DMA_HandleTypeDef *hdma)
     
     /* Clear STOP Flag */
     __HAL_I2C_CLEAR_FLAG(hi2c, I2C_FLAG_STOPF);
-  	
+    
     /* Clear Configuration Register 2 */
     I2C_RESET_CR2(hi2c);
     
@@ -3719,7 +3871,7 @@ static void I2C_DMAMemTransmitCplt(DMA_HandleTypeDef *hdma)
     
     /* Clear STOP Flag */
     __HAL_I2C_CLEAR_FLAG(hi2c, I2C_FLAG_STOPF);
-  	
+    
     /* Clear Configuration Register 2 */
     I2C_RESET_CR2(hi2c);
     
@@ -3881,7 +4033,7 @@ static void I2C_DMAMemReceiveCplt(DMA_HandleTypeDef *hdma)
     
     /* Clear STOP Flag */
     __HAL_I2C_CLEAR_FLAG(hi2c, I2C_FLAG_STOPF);
-  	
+    
     /* Clear Configuration Register 2 */
     I2C_RESET_CR2(hi2c);
     

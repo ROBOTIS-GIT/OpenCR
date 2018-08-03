@@ -14,227 +14,575 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM*/
-
+/* Authors: Hye-Jong KIM, Darby Lim*/
 
 #include "../../include/open_manipulator/OMManager.h"
 
-Manipulator::Manipulator():
-name_("UnknownManipulator"),
-dof_(0)
-{
-  base_position_ = Eigen::Vector3f::Zero();
-  base_orientation_ = Eigen::Matrix3f::Identity(3,3);
-}
-Manipulator::~Manipulator(){}
+using namespace Eigen;
 
-void Manipulator::Init(String name, int8_t dof, int8_t number_of_joint, int8_t number_of_link, int8_t number_of_tool)
+///////////////////////////*initialize function*/////////////////////////////
+void Manipulator::addWorld(Name world_name,
+                           Name child_name,
+                           Vector3f world_position,
+                           Matrix3f world_orientation)
 {
-  name_ = name;
-    dof_=dof;
-    number_of_joint_ = number_of_joint;
-    number_of_link_ = number_of_link; 
-    number_of_tool_ = number_of_tool;
-}
-void Manipulator::SetBasePosition(Eigen::Vector3f base_position)
-{
-  base_position_ = base_position;
-}
-void Manipulator::SetBaseOrientation(Eigen::Matrix3f base_orientation)
-{
-  base_orientation_ = base_orientation;
-}
-void Manipulator::SetDOF(int8_t dof)
-{
-    dof_=dof;
+  world_.name = world_name;
+  world_.child = child_name;
+  world_.pose.position = world_position;
+  world_.pose.orientation = world_orientation;
+  world_.origin.velocity = VectorXf::Zero(3);
+  world_.origin.acceleration = VectorXf::Zero(3);
 }
 
-//////////////////////////////////////Joint////////////////////////////////////////////
+void Manipulator::addComponent(Name my_name,
+                               Name parent_name,
+                               Name child_name,
+                               Vector3f relative_position,
+                               Matrix3f relative_orientation,
+                               int8_t joint_actuator_id,
+                               Vector3f axis_of_rotation,
+                               float mass,
+                               Matrix3f inertia_tensor,
+                               Vector3f center_of_mass)
+{
+  if (joint_actuator_id != -1)
+    dof_++;
 
-Manipulator::Joint::Joint(): 
-    name_("UnknownJoint"),
-    dxl_id_(-1),
-    number_(-1),
-    angle_(0.0),
-    velocity_(0.0),
-    acceleration_(0.0)
-{
-    position_ = Eigen::Vector3f::Zero();
-    orientation_ = Eigen::Matrix3f::Identity(3,3);
-}
-Manipulator::Joint::~Joint(){}
-void Manipulator::Joint::Init(String name, int8_t number, int8_t dxl_id)
-{
-    name_ = name;
-    number_ = number;
-    dxl_id_ = dxl_id;
-}
+  Component temp_component;
 
-void Manipulator::Joint::SetAngle(float angle)
-{
-    angle_ = angle;
-}
+  temp_component.parent = parent_name;
+  temp_component.child.push_back(child_name);
+  temp_component.relative_to_parent.position = relative_position;
+  temp_component.relative_to_parent.orientation = relative_orientation;
+  temp_component.pose_to_world.position = Vector3f::Zero();
+  temp_component.pose_to_world.orientation = Matrix3f::Identity(3, 3);
+  temp_component.origin.velocity = VectorXf::Zero(3);
+  temp_component.origin.acceleration = VectorXf::Zero(3);
+  temp_component.joint.id = joint_actuator_id;
+  temp_component.joint.axis = axis_of_rotation;
+  temp_component.joint.angle = 0.0;
+  temp_component.joint.velocity = 0.0;
+  temp_component.joint.acceleration = 0.0;
+  temp_component.tool.id = -1;
+  temp_component.tool.on_off = false;
+  temp_component.tool.value = 0.0;
+  temp_component.inertia.mass = mass;
+  temp_component.inertia.inertia_tensor = inertia_tensor;
+  temp_component.inertia.center_of_mass = center_of_mass;
 
-void Manipulator::Joint::SetVelocity(float velocity)
-{
-    velocity_ = velocity;
-}
-
-void Manipulator::Joint::SetAcceleration(float acceleration)
-{
-    acceleration_ = acceleration;
-}
-
-float Manipulator::Joint::GetAngle()
-{
-    return angle_;
+  component_.insert(std::make_pair(my_name, temp_component));
 }
 
-float Manipulator::Joint::GetVelocity()
+void Manipulator::addComponentChild(Name my_name, Name child_name)
 {
-    return velocity_;
+  component_.at(my_name).child.push_back(child_name);
 }
 
-float Manipulator::Joint::GetAcceleration()
+void Manipulator::addTool(Name my_name,
+                          Name parent_name,
+                          Vector3f relative_position,
+                          Matrix3f relative_orientation,
+                          int8_t tool_id,
+                          float mass,
+                          Matrix3f inertia_tensor,
+                          Vector3f center_of_mass)
 {
-    return acceleration_;
+  Component temp_component;
+
+  temp_component.parent = parent_name;
+  temp_component.relative_to_parent.position = relative_position;
+  temp_component.relative_to_parent.orientation = relative_orientation;
+  temp_component.pose_to_world.position = Vector3f::Zero();
+  temp_component.pose_to_world.orientation = Matrix3f::Identity(3, 3);
+  temp_component.origin.velocity = VectorXf::Zero(3);
+  temp_component.origin.acceleration = VectorXf::Zero(3);
+  temp_component.joint.id = -1;
+  temp_component.joint.axis = Vector3f::Zero();
+  temp_component.joint.angle = 0.0;
+  temp_component.joint.velocity = 0.0;
+  temp_component.joint.acceleration = 0.0;
+  temp_component.tool.id = tool_id;
+  temp_component.tool.on_off = false;
+  temp_component.tool.value = 0.0;
+  temp_component.inertia.mass = mass;
+  temp_component.inertia.inertia_tensor = inertia_tensor;
+  temp_component.inertia.center_of_mass = center_of_mass;
+
+  component_.insert(std::make_pair(my_name, temp_component));
 }
 
-void Manipulator::Joint::SetPosition(Eigen::Vector3f position)
+void Manipulator::checkManipulatorSetting()
 {
-    position_ = position;
+  USB.println("Degree of freedom : " + String(dof_));
+  USB.println("Size of Components : " + String(component_.size()));
+
+  USB.println("\n<Configuration of world>");
+  USB.println("Name         : " + String(world_.name));
+  USB.println("Child name   : " + String(world_.child));
+  USB.println("Position     : ");
+  VECTOR::PRINT(world_.pose.position);
+  USB.println("Orientation  : ");
+  MATRIX::PRINT(world_.pose.orientation);
+  USB.println("Velocity     : ");
+  VECTOR::PRINT(world_.origin.velocity);
+  USB.println("Acceleration : ");
+  VECTOR::PRINT(world_.origin.acceleration);
+
+  USB.println("\n<Configuration of components>");
+
+  for (std::map<Name, Component>::iterator it = component_.begin(); it != component_.end(); it++)
+  {
+    USB.println("Name : " + String(it->first) + " -----------------------------------------------");
+    USB.println("Parent : " + String(component_[it->first].parent));
+
+    for (std::vector<Name>::size_type index = 0; index < component_[it->first].child.size(); index++)
+      USB.println("Child  : " + String(component_[it->first].child[index]));
+
+    USB.println("\nRelative to parent");
+    USB.println(" Position : ");
+    VECTOR::PRINT(component_[it->first].relative_to_parent.position);
+    USB.println(" Orientation : ");
+    MATRIX::PRINT(component_[it->first].relative_to_parent.orientation);
+
+    USB.println("\nPose to world");
+    USB.println(" Position : ");
+    VECTOR::PRINT(component_[it->first].pose_to_world.position);
+    USB.println(" Orientation : ");
+    MATRIX::PRINT(component_[it->first].pose_to_world.orientation);
+
+    USB.println("\nState to origin");
+    USB.println(" Velocity : ");
+    VECTOR::PRINT(component_[it->first].origin.velocity);
+    USB.println(" Acceleration : ");
+    MATRIX::PRINT(component_[it->first].origin.acceleration);
+
+    USB.println("\nJoint");
+    USB.println(" ID : " + String(component_[it->first].joint.id));
+    USB.println(" Axis : ");
+    VECTOR::PRINT(component_[it->first].joint.axis);
+    USB.print(" Angle : ");+ USB.println(component_[it->first].joint.angle);
+    USB.print(" Velocity : "); + USB.println(component_[it->first].joint.velocity);
+    USB.print(" Acceleration : "); + USB.println(component_[it->first].joint.acceleration);
+
+    USB.println("\nTool");
+    USB.println(" ID : " + String(component_[it->first].tool.id));
+    USB.println(" OnOff : " + String(component_[it->first].tool.on_off));
+    USB.println(" Value : "); USB.println(component_[it->first].tool.value);
+
+    USB.println("\nInertia");
+    USB.print(" Mass : "); USB.println(component_[it->first].inertia.mass);
+    USB.println(" Inertia tensor : ");
+    MATRIX::PRINT(component_[it->first].inertia.inertia_tensor);
+    USB.println(" Center of mass : ");
+    VECTOR::PRINT(component_[it->first].inertia.center_of_mass);
+    USB.println();
+  }
+}
+/////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////Set function//////////////////////////////////
+void Manipulator::setWorldPose(Pose world_pose)
+{
+  world_.pose = world_pose;
 }
 
-void Manipulator::Joint::SetOrientation(Eigen::Matrix3f orientation)
+void Manipulator::setWorldPosition(Vector3f world_position)
 {
-    orientation_ = orientation;
+  world_.pose.position = world_position;
 }
 
-Eigen::Vector3f Manipulator::Joint::GetPosition()
+void Manipulator::setWorldOrientation(Matrix3f world_orientation)
 {
-    return position_;
+  world_.pose.orientation = world_orientation;
 }
 
-Eigen::Matrix3f Manipulator::Joint::GetOrientation()
+void Manipulator::setWorldState(State world_state)
 {
-    return orientation_;
+  world_.origin = world_state;
 }
 
-Pose Manipulator::Joint::GetPose()
+void Manipulator::setWorldVelocity(VectorXf world_velocity)
 {
-    Pose joint_pose;
-    joint_pose.position = position_;
-    joint_pose.orientation = orientation_;
-
-    return joint_pose;
+  world_.origin.velocity = world_velocity;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////Link/////////////////////////////////////////////
-
-Manipulator::Link::Link(): 
-    name_("UnknownLink"),
-    mass_(0.0),
-    inertia_moment_(0.0)
+void Manipulator::setWorldAcceleration(VectorXf world_acceleration)
 {
-    center_position_ = Eigen::Vector3f::Zero();
-}
-Manipulator::Link::~Link(){}
-void Manipulator::Link::Init(String name, int8_t number_of_joint_in_link)
-{
-    name_ = name;
-    number_of_joint_in_link_ = number_of_joint_in_link;
-    Manipulator::Link::JointInLink jointinlink[number_of_joint_in_link];
-}
-void Manipulator::Link::Init(String name, int8_t number_of_joint_in_link, float mass, Eigen::Vector3f center_position)
-{
-    name_ = name;
-    number_of_joint_in_link_ = number_of_joint_in_link;
-    mass_ = mass;
-    center_position_ = center_position;
+  world_.origin.acceleration = world_acceleration;
 }
 
-float Manipulator::Link::GetInertiaMoment()
+void Manipulator::setComponent(Name name, Component component, bool *error)
 {
-    return inertia_moment_;
+  if (component_.find(name) != component_.end())
+  {
+    component_.insert(std::make_pair(name, component));
+    *error = false;
+  }
+  else
+  {
+    *error = true;
+  }
 }
 
-Manipulator::Link::JointInLink::JointInLink():
-number_(-1)
+void Manipulator::setComponentPoseToWorld(Name name, Pose pose_to_world)
 {
-    relative_position_ = Eigen::Vector3f::Zero();
-    relative_orientation_ = Eigen::Matrix3f::Identity(3,3);
-}
-Manipulator::Link::JointInLink::~JointInLink(){}
-void Manipulator::Link::JointInLink::Init(int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation)
-{
-    number_=number;
-    relative_position_ = relative_position;
-    relative_orientation_ = relative_orientation;
-}
-void Manipulator::Link::JointInLink::Init(int8_t number, Eigen::Vector3f relative_position, Eigen::Vector3f axis)
-{
-    number_=number;
-    relative_position_ = relative_position;
-    relative_orientation_;
-}
-void Manipulator::Link::JointInLink::Init(int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_rotation_matrix, Eigen::Vector3f axis)
-{
-    number_=number;
-    relative_position_ = relative_position;
+  if (component_.find(name) != component_.end())
+  {
+    component_.at(name).pose_to_world = pose_to_world;
+  }
+  else
+  {
+    //error
+  }
 }
 
-///////////////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////Tool////////////////////////////////////////////
-
-Manipulator::Tool::Tool():
-tool_type_("null"),
-number_(-1)
+void Manipulator::setComponentPositionToWorld(Name name, Vector3f position_to_world)
 {
-    position_from_final_joint_ = Eigen::Vector3f::Zero();
-    orientation_from_final_joint_ = Eigen::Matrix3f::Identity(3,3);
-    position_ = Eigen::Vector3f::Zero();
-    orientation_ = Eigen::Matrix3f::Identity(3,3);
-}
-Manipulator::Tool::~Tool(){}
-void Manipulator::Tool::Init(String tool_type, int8_t number, Eigen::Vector3f position_from_final_joint, Eigen::Matrix3f orientation_from_final_joint)
-{
-    tool_type_ = tool_type;
-    number_ = number;
-    position_from_final_joint_ = position_from_final_joint;
-    orientation_from_final_joint_ = orientation_from_final_joint;
-}
-void Manipulator::Tool::SetPosition(Eigen::Vector3f position)
-{
-    position_ = position;
-}
-void Manipulator::Tool::SetOrientation(Eigen::Matrix3f orientation)
-{
-    orientation_ = orientation;
-}
-Eigen::Vector3f Manipulator::Tool::GetPosition()
-{
-    return position_;
-}
-Eigen::Matrix3f Manipulator::Tool::GetOrientation()
-{
-    return orientation_;
-}
-Pose Manipulator::Tool::GetPose()
-{
-    Pose tool_pose;
-    tool_pose.position = position_;
-    tool_pose.orientation = orientation_;
-
-    return tool_pose;
+  if (component_.find(name) != component_.end())
+  {
+    component_.at(name).pose_to_world.position = position_to_world;
+  }
+  else
+  {
+    //error
+  }
 }
 
-///////////////////////////////////////////////////////////////////////////////////////
+void Manipulator::setComponentOrientationToWorld(Name name, Matrix3f orientation_to_wolrd)
+{
+  if (component_.find(name) != component_.end())
+  {
+    component_.at(name).pose_to_world.orientation = orientation_to_wolrd;
+  }
+  else
+  {
+    //error
+  }
+}
 
+void Manipulator::setComponentStateToWorld(Name name, State state_to_world)
+{
+  if (component_.find(name) != component_.end())
+  {
+    component_.at(name).origin = state_to_world;
+  }
+  else
+  {
+    //error
+  }
+}
 
+void Manipulator::setComponentVelocityToWorld(Name name, VectorXf velocity)
+{
+  if (velocity.size() != 6)
+  {
+    //error
+  }
+  else
+  {
+    if (component_.find(name) != component_.end())
+    {
+      component_.at(name).origin.velocity = velocity;
+    }
+    else
+    {
+      //error
+    }
+  }
+}
 
+void Manipulator::setComponentAccelerationToWorld(Name name, VectorXf acceleration)
+{
+  if (acceleration.size() != 6)
+  {
+    //error
+  }
+  else
+  {
+    if (component_.find(name) != component_.end())
+    {
+      component_.at(name).origin.acceleration = acceleration;
+    }
+    else
+    {
+      //error
+    }
+  }
+}
 
+void Manipulator::setComponentJointAngle(Name name, float angle)
+{
+  if (component_.at(name).tool.id > 0)
+  {
+    //error
+  }
+  else
+  {
+    if (component_.find(name) != component_.end())
+    {
+      component_.at(name).joint.angle = angle;
+    }
+    else
+    {
+      //error
+    }
+  }
+}
 
+void Manipulator::setComponentJointVelocity(Name name, float angular_velocity)
+{
+  if (component_.at(name).tool.id > 0)
+  {
+    //error
+  }
+  else
+  {
+    if (component_.find(name) != component_.end())
+    {
+      component_.at(name).joint.velocity = angular_velocity;
+    }
+    else
+    {
+      //error
+    }
+  }
+}
 
+void Manipulator::setComponentJointAcceleration(Name name, float angular_acceleration)
+{
+  if (component_.at(name).tool.id > 0)
+  {
+    //error
+  }
+  else
+  {
+    if (component_.find(name) != component_.end())
+    {
+      component_.at(name).joint.acceleration = angular_acceleration;
+    }
+    else
+    {
+      //error
+    }
+  }
+}
+
+void Manipulator::setComponentToolOnOff(Name name, bool on_off)
+{
+  if (component_.at(name).tool.id > 0)
+  {
+    if (component_.find(name) != component_.end())
+    {
+      component_.at(name).tool.on_off = on_off;
+    }
+    else
+    {
+      //error
+    }
+  }
+  else
+  {
+    //error
+  }
+}
+
+void Manipulator::setComponentToolValue(Name name, float value)
+{
+  if (component_.at(name).tool.id > 0)
+  {
+    if (component_.find(name) != component_.end())
+    {
+      component_.at(name).tool.value = value;
+    }
+    else
+    {
+      //error
+    }
+  }
+  else
+  {
+    //error
+  }
+}
+
+///////////////////////////////Get function//////////////////////////////////
+
+int8_t Manipulator::getDOF()
+{
+  return dof_;
+}
+
+int8_t Manipulator::getComponentSize()
+{
+  return component_.size();
+}
+
+Name Manipulator::getWorldName()
+{
+  return world_.name;
+}
+
+Name Manipulator::getWorldChildName()
+{
+  return world_.child;
+}
+
+Pose Manipulator::getWorldPose()
+{
+  return world_.pose;
+}
+
+Vector3f Manipulator::getWorldPosition()
+{
+  return world_.pose.position;
+}
+
+Matrix3f Manipulator::getWorldOrientation()
+{
+  return world_.pose.orientation;
+}
+
+State Manipulator::getWorldState()
+{
+  return world_.origin;
+}
+
+VectorXf Manipulator::getWorldVelocity()
+{
+  return world_.origin.velocity;
+}
+
+VectorXf Manipulator::getWorldAcceleration()
+{
+  return world_.origin.acceleration;
+}
+
+std::map<Name, Component> Manipulator::getAllComponent()
+{
+  return component_;
+}
+
+Component Manipulator::getComponent(Name name)
+{
+  return component_.at(name);
+}
+
+Name Manipulator::getComponentParentName(Name name)
+{
+  return component_.at(name).parent;
+}
+
+std::vector<Name> Manipulator::getComponentChildName(Name name)
+{
+  return component_.at(name).child;
+}
+
+Pose Manipulator::getComponentPoseToWorld(Name name)
+{
+  return component_.at(name).pose_to_world;
+}
+
+Vector3f Manipulator::getComponentPositionToWorld(Name name)
+{
+  return component_.at(name).pose_to_world.position;
+}
+
+Matrix3f Manipulator::getComponentOrientationToWorld(Name name)
+{
+  return component_.at(name).pose_to_world.orientation;
+}
+
+State Manipulator::getComponentStateToWorld(Name name)
+{
+  return component_.at(name).origin;
+}
+
+VectorXf Manipulator::getComponentVelocityToWorld(Name name)
+{
+  return component_.at(name).origin.velocity;
+}
+
+VectorXf Manipulator::getComponentAccelerationToWorld(Name name)
+{
+  return component_.at(name).origin.acceleration;
+}
+
+Pose Manipulator::getComponentRelativePoseToParent(Name name)
+{
+  return component_.at(name).relative_to_parent;
+}
+
+Vector3f Manipulator::getComponentRelativePositionToParent(Name name)
+{
+  return component_.at(name).relative_to_parent.position;
+}
+
+Matrix3f Manipulator::getComponentRelativeOrientationToParent(Name name)
+{
+  return component_.at(name).relative_to_parent.orientation;
+}
+
+Joint Manipulator::getComponentJoint(Name name)
+{
+  return component_.at(name).joint;
+}
+
+int8_t Manipulator::getComponentJointId(Name name)
+{
+  return component_.at(name).joint.id;
+}
+
+Vector3f Manipulator::getComponentJointAxis(Name name)
+{
+  return component_.at(name).joint.axis;
+}
+
+float Manipulator::getComponentJointAngle(Name name)
+{
+  return component_.at(name).joint.angle;
+}
+
+float Manipulator::getComponentJointVelocity(Name name)
+{
+  return component_.at(name).joint.velocity;
+}
+
+float Manipulator::getComponentJointAcceleration(Name name)
+{
+  return component_.at(name).joint.acceleration;
+}
+
+Tool Manipulator::getComponentTool(Name name)
+{
+  return component_.at(name).tool;
+}
+
+int8_t Manipulator::getComponentToolId(Name name)
+{
+  return component_.at(name).tool.id;
+}
+
+bool Manipulator::getComponentToolOnOff(Name name)
+{
+  return component_.at(name).tool.on_off;
+}
+
+float Manipulator::getComponentToolValue(Name name)
+{
+  return component_.at(name).tool.value;
+}
+
+float Manipulator::getComponentMass(Name name)
+{
+  return component_.at(name).inertia.mass;
+}
+
+Matrix3f Manipulator::getComponentInertiaTensor(Name name)
+{
+  return component_.at(name).inertia.inertia_tensor;
+}
+
+Vector3f Manipulator::getComponentCenterOfMass(Name name)
+{
+  return component_.at(name).inertia.center_of_mass;
+}

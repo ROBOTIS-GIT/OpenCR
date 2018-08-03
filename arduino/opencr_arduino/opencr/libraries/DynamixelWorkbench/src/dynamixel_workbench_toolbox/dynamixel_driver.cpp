@@ -489,6 +489,28 @@ bool DynamixelDriver::readRegister(uint8_t id, const char *item_name, int32_t *d
   }
 }
 
+bool DynamixelDriver::readRegister(uint8_t id, uint16_t length, uint8_t *data)
+{
+  uint8_t error = 0;
+  int dxl_comm_result = COMM_RX_FAIL;
+
+  dxl_comm_result = packetHandler_->readTxRx(portHandler_, id, 0, length, data, &error);
+
+  if (dxl_comm_result == COMM_SUCCESS)
+  {
+    if (error != 0)
+    {
+      return false;
+    }
+
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
 uint8_t DynamixelDriver::getToolsFactor(uint8_t id)
 {
   for (int i = 0; i < tools_cnt_; i++)

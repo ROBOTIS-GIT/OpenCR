@@ -14,150 +14,208 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM*/
+/* Authors: Hye-Jong KIM, Darby Lim */
 
 #ifndef OMMANAGER_H_
 #define OMMANAGER_H_
 
 #include <unistd.h>
-#include <WString.h>
-#include <Eigen.h>       
+#include <Eigen.h>
+#include <map>
+#include <vector>
 
-#define DEG2RAD (M_PI / 180.0)
-#define RAD2DEG (180.0 / M_PI)
+#include "OMDebug.h"
+
+using namespace Eigen;
+
+typedef int8_t Name;
 
 typedef struct
 {
-  Eigen::Vector3f position;
-  Eigen::Matrix3f orientation;
+  Vector3f position;
+  Matrix3f orientation;
 } Pose;
 
 typedef struct
 {
-  float position;
-  float velocity;
-  float acceleration;
+  VectorXf velocity;
+  VectorXf acceleration;
 } State;
 
+typedef struct
+{
+  int8_t id;
+  Vector3f axis;
+  float angle;
+  float velocity;
+  float acceleration;
+} Joint;
 
-/////////////////////////////////////////Manipulator//////////////////////////////////////////
+typedef struct
+{
+  int8_t id;
+  bool on_off;
+  float value; //m or rad
+} Tool;
+
+typedef struct
+{
+  float mass;
+  Matrix3f inertia_tensor;
+  Vector3f center_of_mass;
+} Inertia;
+
+typedef struct
+{
+  Name name;
+  Name child;
+  Pose pose;
+  State origin;
+} World;
+
+typedef struct
+{
+  Name parent;
+  std::vector<Name> child;
+  Pose relative_to_parent;
+  Pose pose_to_world;
+  State origin;
+  Joint joint;
+  Tool tool;
+  Inertia inertia;
+} Component;
 
 class Manipulator
 {
-  private:
-    int8_t dof_;
-    String name_;
-    Eigen::Vector3f base_position_;
-    Eigen::Matrix3f base_orientation_;
-    int8_t number_of_joint_;
-    int8_t number_of_link_;
-    int8_t number_of_tool_;
+ private:
+  int8_t dof_;
+  World world_;
+  std::map<Name, Component> component_;
 
-  public:
-    /////////////////func///////////////////
-    Manipulator();
-    ~Manipulator();
-    void Init(String name, int8_t dof, int8_t number_of_joint, int8_t number_of_link, int8_t number_of_tool);
-    void SetBasePosition(Eigen::Vector3f position);
-    void SetBaseOrientation(Eigen::Matrix3f orientation);
-    void SetDOF(int8_t dof);
+  //////////////////////////////*Parameter list*///////////////////////////////
+  /*
+  dof_
+  world_.name
+  world_.child
+  world_.pose.position
+  world_.pose.orientation
+  world_.origin.velocity
+  world_.origin.acceleration
+  component_.at(name).parent
+  component_.at(name).child.at(i)
+  component_.at(name).relative_to_parent.position
+  component_.at(name).relative_to_parent.orientation
+  component_.at(name).pose_to_world.position
+  component_.at(name).pose_to_world.orientation
+  component_.at(name).origin.velocity
+  component_.at(name).origin.acceleration
+  component_.at(name).joint.id
+  component_.at(name).joint.axis
+  component_.at(name).joint.angle
+  component_.at(name).joint.velocity
+  component_.at(name).joint.acceleration
+  component_.at(name).tool.id
+  component_.at(name).tool.on_off
+  component_.at(name).tool.value
+  component_.at(name).inertia.mass
+  component_.at(name).inertia.inertia_tensor
+  component_.at(name).inertia.center_of_mass
+  */
+  /////////////////////////////////////////////////////////////////////////////
 
-    ////////////////////////////////////////
-    class Joint
-    {
-      private:
-        String name_;
-        int8_t dxl_id_;
-        int8_t number_;	
+ public:
+  Manipulator(){};
+  virtual ~Manipulator(){};
 
-        float angle_;
-        float velocity_;
-        float acceleration_;
+  ///////////////////////////*initialize function*/////////////////////////////
 
-        Eigen::Vector3f position_;
-        Eigen::Matrix3f orientation_;
+  void addWorld(Name world_name,
+                Name child_name,
+                Vector3f world_position = Vector3f::Zero(),
+                Matrix3f world_orientation = Matrix3f::Identity(3, 3));
 
-      public:
-        /////////////////func///////////////////
-        Joint();
-        ~Joint();
-        void Init(String name, int8_t number, int8_t dxl_id);
-        void SetAngle(float angle);
-        void SetVelocity(float velocity);
-        void SetAcceleration(float acceleration);
-        float GetAngle();
-        float GetVelocity();
-        float GetAcceleration();
-        void SetPosition(Eigen::Vector3f position);
-        void SetOrientation(Eigen::Matrix3f orientation);
-        Eigen::Vector3f GetPosition();
-        Eigen::Matrix3f GetOrientation();
-        Pose GetPose();
-        ////////////////////////////////////////
-    };
+  void addComponent(Name my_name,
+                    Name parent_name,
+                    Name child_name,
+                    Vector3f relative_position,
+                    Matrix3f relative_orientation,
+                    int8_t joint_actuator_id = -1,
+                    Vector3f axis_of_rotation = Vector3f::Zero(),
+                    float mass = 0.0,
+                    Matrix3f inertia_tensor = Matrix3f::Identity(3, 3),
+                    Vector3f center_of_mass = Vector3f::Zero());
 
-    class Link
-    {
-      private:
-        String name_;
-        float mass_;			
-        float inertia_moment_;
-        int8_t number_of_joint_in_link_;
+  void addTool(Name my_name,
+               Name parent_name,
+               Vector3f relative_position,
+               Matrix3f relative_orientation,
+               int8_t tool_id = -1,
+               float mass = 0.0,
+               Matrix3f inertia_tensor = Matrix3f::Identity(3, 3),
+               Vector3f center_of_mass = Vector3f::Zero());
 
-        Eigen::Vector3f center_position_;
+  void addComponentChild(Name my_name, Name child_name);
+  void checkManipulatorSetting();
 
-      public:
-        /////////////////func///////////////////
-        Link();
-        ~Link();
-        void Init(String name, int8_t number_of_joint_in_link);
-        void Init(String name, int8_t number_of_joint_in_link, float mass, Eigen::Vector3f center_position);
-        float GetInertiaMoment();
-        ////////////////////////////////////////
+  ///////////////////////////////Set function//////////////////////////////////
 
-        class JointInLink
-        {
-          private:
-            int8_t number_;
-            
-            Eigen::Vector3f relative_position_;
-            Eigen::Matrix3f relative_orientation_;
-          public:
-            /////////////////func///////////////////
-            JointInLink();
-            ~JointInLink();
+  void setWorldPose(Pose world_pose);
+  void setWorldPosition(Vector3f world_position);
+  void setWorldOrientation(Matrix3f world_orientation);
+  void setWorldState(State world_state);
+  void setWorldVelocity(VectorXf world_velocity);
+  void setWorldAcceleration(VectorXf world_acceleration);
+  void setComponent(Name name, Component component, bool *error = NULL);
+  void setComponentPoseToWorld(Name name, Pose pose_to_world);
+  void setComponentPositionToWorld(Name name, Vector3f position_to_world);
+  void setComponentOrientationToWorld(Name name, Matrix3f orientation_to_wolrd);
+  void setComponentStateToWorld(Name name, State state_to_world);
+  void setComponentVelocityToWorld(Name name, VectorXf velocity);
+  void setComponentAccelerationToWorld(Name name, VectorXf accelaration);
+  void setComponentJointAngle(Name name, float angle);
+  void setComponentJointVelocity(Name name, float angular_velocity);
+  void setComponentJointAcceleration(Name name, float angular_acceleration);
+  void setComponentToolOnOff(Name name, bool on_off);
+  void setComponentToolValue(Name name, float value);
 
-            void Init(int8_t number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_orientation);
-            void Init(int8_t joint_number, Eigen::Vector3f relative_position, Eigen::Vector3f axis);
-            void Init(int8_t joint_number, Eigen::Vector3f relative_position, Eigen::Matrix3f relative_axis_matrix, Eigen::Vector3f axis);
+  ///////////////////////////////Get function//////////////////////////////////
 
-
-            ////////////////////////////////////////
-        };
-    };
-    class Tool
-    {
-      private:
-        String tool_type_;
-        int8_t number_;
-
-        Eigen::Vector3f position_from_final_joint_;
-        Eigen::Matrix3f orientation_from_final_joint_;
-
-        Eigen::Vector3f position_;
-        Eigen::Matrix3f orientation_;
-
-      public:
-        Tool();
-        ~Tool();
-        void Init(String tool_type, int8_t number, Eigen::Vector3f position_from_final_joint, Eigen::Matrix3f orientation_from_final_joint);
-        void SetPosition(Eigen::Vector3f position);
-        void SetOrientation(Eigen::Matrix3f orientation);
-        Eigen::Vector3f GetPosition();
-        Eigen::Matrix3f GetOrientation();
-        Pose GetPose();
-
-    };
+  int8_t getDOF();
+  Name getWorldName();
+  Name getWorldChildName();
+  Pose getWorldPose();
+  Vector3f getWorldPosition();
+  Matrix3f getWorldOrientation();
+  State getWorldState();
+  VectorXf getWorldVelocity();
+  VectorXf getWorldAcceleration();
+  int8_t getComponentSize();
+  std::map<Name, Component> getAllComponent();
+  Component getComponent(Name name);
+  Name getComponentParentName(Name name);
+  std::vector<Name> getComponentChildName(Name name);
+  Pose getComponentPoseToWorld(Name name);
+  Vector3f getComponentPositionToWorld(Name name);
+  Matrix3f getComponentOrientationToWorld(Name name);
+  State getComponentStateToWorld(Name name);
+  VectorXf getComponentVelocityToWorld(Name name);
+  VectorXf getComponentAccelerationToWorld(Name name);
+  Pose getComponentRelativePoseToParent(Name name);
+  Vector3f getComponentRelativePositionToParent(Name name);
+  Matrix3f getComponentRelativeOrientationToParent(Name name);
+  Joint getComponentJoint(Name name);
+  int8_t getComponentJointId(Name name);
+  Vector3f getComponentJointAxis(Name name);
+  float getComponentJointAngle(Name name);
+  float getComponentJointVelocity(Name name);
+  float getComponentJointAcceleration(Name name);
+  Tool getComponentTool(Name name);
+  int8_t getComponentToolId(Name name);
+  bool getComponentToolOnOff(Name name);
+  float getComponentToolValue(Name name);
+  float getComponentMass(Name name);
+  Matrix3f getComponentInertiaTensor(Name name);
+  Vector3f getComponentCenterOfMass(Name name);
 };
-#endif // OMMANAGER_H_
 
+#endif // OMMANAGER_HPP_

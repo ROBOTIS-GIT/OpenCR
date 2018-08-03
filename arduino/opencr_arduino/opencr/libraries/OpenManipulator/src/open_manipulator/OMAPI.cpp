@@ -14,44 +14,381 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM*/
-
-
+/* Authors: Darby Limm, Hye-Jong KIM */
 
 #include "../../include/open_manipulator/OMAPI.h"
-#include "../../include/open_manipulator/OMManager.h"
+#if 0
 
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////Basic Function//////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 
-
-void ManipulatorInit(Manipulator* manipulator, int8_t manipulator_number, String manipulator_name, int8_t dof, int8_t number_of_joint, int8_t number_of_link, int8_t number_of_tool)
+//math
+float MATH::sign(float number)
 {
-  manipulator[manipulator_number].Init(manipulator_name, dof, number_of_joint, number_of_link, number_of_tool);
- 
-  
-
+  return OMMath::sign(number);
 }
 
-/*
-Manipulator OM;
-OM.Init("OpenManipulatorLink",3,7,5,1);//name_, dof,number of joint, number of link, number of tool
+Eigen::Vector3f MATH::makeEigenVector3(float v1, float v2, float v3)
+{
+  return OMMath::makeEigenVector3(v1, v2, v3);
+}
 
-OM.joint[0].Init("YawBase", 1, 1);
-OM.joint[1].Init("PitchJoint1", 2, 2);
-OM.joint[2].Init("PitchJoint2", 3, 3);
-OM.joint[3].Init("PissiveJoint1", 4, -1);
-OM.joint[4].Init("PissiveJoint2", 5, -1);
-OM.joint[5].Init("PissiveJoint3", 6, -1);
-OM.joint[6].Init("PissiveJoint4", 7, -1);
+Eigen::Matrix3f MATH::makeEigenMatrix3(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33)
+{
+  return OMMath::makeEigenMatrix3(m11, m12, m13, m21, m22, m23, m31, m32, m33);
+}
+  
+Eigen::Vector3f MATH::matrixLogarithm(Eigen::Matrix3f rotation_matrix)
+{
+  return OMMath::matrixLogarithm(rotation_matrix);
+}
 
-OM.link[0].Init("link1",3);
-OM.link[0].joint[0].Init(1);
-OM.link[0].joint[1].Init(2);
-OM.link[0].joint[2].Init(3);
+Eigen::Matrix3f MATH::skewSymmetricMatrix(Eigen::Vector3f v)
+{
+  return OMMath::skewSymmetricMatrix(v);
+}
 
-OM.link[1].Init("link2",2);
-OM.link[2].Init("link3",2);
-OM.link[3].Init("link4",2);
-OM.link[4].Init("link5",2);
+Eigen::Matrix3f MATH::rodriguesRotationMatrix(Eigen::Vector3f axis, float angle)
+{
+  return OMMath::rodriguesRotationMatrix(axis, angle);
+}
 
-OM.tool[0].Init("link5",2);
-*/
+Eigen::Matrix3f MATH::makeRotationMatrix(float rool, float pitch, float yaw)
+{
+  return OMMath::makeRotationMatrix(rool, pitch, yaw);
+}
+
+Eigen::Matrix3f MATH::makeRotationMatrix(Eigen::Vector3f rotation_vector)
+{
+  return OMMath::makeRotationMatrix(rotation_vector);
+}
+
+Eigen::Vector3f MATH::makeRotationVector(Eigen::Matrix3f rotation_matrix)
+{
+  return OMMath::makeRotationVector(rotation_matrix);
+}
+
+Eigen::Vector3f MATH::differentialPosition(Eigen::Vector3f desired_position, Eigen::Vector3f present_position)
+{
+  return OMMath::differentialPosition(desired_position, present_position);
+}
+
+Eigen::Vector3f MATH::differentialOrientation(Eigen::Matrix3f desired_orientation, Eigen::Matrix3f present_orientation)
+{
+  return OMMath::differentialOrientation(desired_orientation, present_orientation);
+}
+
+Eigen::VectorXf MATH::differentialPose(Eigen::Vector3f desired_position, Eigen::Vector3f present_position, Eigen::Matrix3f desired_orientation, Eigen::Matrix3f present_orientation)
+{
+  return OMMath::differentialPose(desired_position, present_position, desired_orientation, present_orientation);
+}
+
+
+//manager
+void MANAGER::addWorld(Manipulator *manipulator, Name world_name, NAME child_name, Vector3f world_position = Vector3f::Zero(), Matrix3f world_orientation = Matrix3f::Identity(3,3), bool *error = false = false)
+{
+  manipulator->addWorld(world_name, child_name, world_position, world_orientation, error);
+}
+
+void MANAGER::addComponent(Manipulator *manipulator, Name me_name, Name parent_name, NAME child_name, Vector3f relative_position, Matrix3f relative_orientation, int8_t actuator_id = -1, Vector3f axis_of_rotation = Vector3f::Zero(), float mass = 0.0, Matrix3f inertia_tensor = Matrix3f::Identity(3,3), Vector3f center_of_mass = Vector3f::Zero(), bool *error = false)
+{
+  manipulator->addComponent(me_name, parent_name, child_name, relative_position, relative_orientation, actuator_id, axis_of_rotation, mass, inertia_tensor, center_of_mass, *error);
+}
+
+void MANAGER::addTool(Manipulator *manipulator, Name me_name, Name parent_name, Vector3f relative_position, Matrix3f relative_orientation, int8_t tool_id = -1,
+            float mass = 0.0, Matrix3f inertia_tensor = Matrix3f::Identity(3,3), Vector3f center_of_mass = Vector3f::Zero(), bool *error = false)
+{
+  manipulator->addTool(me_name, parent_name, relative_position, relative_orientation, tool_id, mass, inertia_tensor, center_of_mass, error);
+}
+
+void MANAGER::addComponentChild(Manipulator *manipulator, Name me_name, NAME child_name, bool *error = false)
+{
+  manipulator->addComponentChild(me_name, child_name, error);
+}
+
+void MANAGER::checkManipulatorSetting(Manipulator *manipulator, bool *error = false)
+{
+  manipulator->checkManipulatorSetting(error);
+}
+
+void MANAGER::setWorldPose(Manipulator *manipulator, Pose world_pose, bool *error = false)
+{
+  manipulator->setWorldPose();
+}
+
+void MANAGER::setWorldPosition(Manipulator *manipulator, Vector3f world_position, bool *error = false)
+{
+  manipulator->setWorldPosition(world_position, error);
+}
+
+void MANAGER::setWorldOrientation(Manipulator *manipulator, Matrix3f world_orientation, bool *error = false)
+{
+  manipulator->setWorldOrientation(world_orientation, error);
+}
+
+void MANAGER::setWorldState(Manipulator *manipulator, State world_state, bool *error = false)
+{
+  manipulator->setWorldState(world_state, error);
+}
+
+void MANAGER::setWorldVelocity(Manipulator *manipulator, VectorXf world_velocity, bool *error = false)
+{
+  manipulator->setWorldVelocity(world_velocity, error);
+}
+
+void MANAGER::setWorldAcceleration(Manipulator *manipulator, VectorXf world_acceleration, bool *error = false)
+{
+  manipulator->setWorldAcceleration(world_acceleration, error);
+}
+
+void MANAGER::setComponent(Manipulator *manipulator, Name name, Component component, bool *error = false)
+{
+  manipulator->setComponent(name, component, error);
+}
+
+void MANAGER::setComponentPoseToWorld(Manipulator *manipulator, Name name, Pose pose_to_world, bool *error = false)
+{
+  manipulator->setComponentPoseToWorld(name, pose_to_world, error);
+}
+
+void MANAGER::setComponentPositionToWorld(Manipulator *manipulator, Name name, Vector3f position_to_world, bool *error = false)
+{
+  manipulator->setComponentPositionToWorld(name, position_to_world, error);
+}
+
+void MANAGER::setComponentOrientationToWorld(Manipulator *manipulator, Name name, Matrix3f orientation_to_wolrd, bool *error = false)
+{
+  manipulator->setComponentOrientationToWorld(name, orientation_to_wolrd, error);
+}
+
+void MANAGER::setComponentStateToWorld(Manipulator *manipulator, Name name, State state_to_world, bool *error = false)
+{
+  manipulator->setComponentStateToWorld(name, state_to_world, error);
+}
+
+void MANAGER::setComponentVelocityToWorld(Manipulator *manipulator, Name name, VectorXf velocity, bool *error = false)
+{
+  manipulator->setComponentVelocityToWorld(name, velocity, error);
+}
+
+void MANAGER::setComponentAccelerationToWorld(Manipulator *manipulator, Name name, VectorXf accelaration, bool *error = false)
+{
+  manipulator->setComponentAccelerationToWorld(name, accelaration, error);
+}
+
+void MANAGER::setComponentJointAngle(Manipulator *manipulator, Name name, float angle, bool *error = false)
+{
+  manipulator->setComponentJointAngle(name, angle, error);
+}
+
+void MANAGER::setComponentJointVelocity(Manipulator *manipulator, Name name, float angular_velocity, bool *error = false)
+{
+  manipulator->setComponentJointVelocity(name, angular_velocity, error);
+}
+
+void MANAGER::setComponentJointAcceleration(Manipulator *manipulator, Name name, float angular_acceleration, bool *error = false)
+{
+  manipulator->setComponentJointAcceleration(name, angular_acceleration, error);
+}
+
+void MANAGER::setComponentToolOnOff(Manipulator *manipulator, Name name, bool on_off, bool *error = false)
+{
+  manipulator->setComponentToolOnOff(name, on_off, error);
+}
+
+void MANAGER::setComponentToolValue(Manipulator *manipulator, Name name, float actuator_value, bool *error = false)
+{
+  manipulator->setComponentToolValue(name, actuator_value, error);
+}
+
+int MANAGER::getDOF(Manipulator *manipulator, bool *error = false)
+{
+  return manipulator->getDOF(error);
+}
+
+int8_t MANAGER::getComponentSize(Manipulator *manipulator, bool *error = false)
+{
+  return manipulator->getComponentSize(error);
+}
+
+Name MANAGER::getWorldName((Manipulator *manipulator, bool *error = false)
+{
+  return manipulator->getWorldName(error);
+}
+
+Name MANAGER::getWorldChildName((Manipulator *manipulator, bool *error = false)
+{
+  return manipulator->getWorldChildName(error);
+}
+
+Pose MANAGER::getWorldPose((Manipulator *manipulator, bool *error = false)
+{
+  return manipulator->getWorldPose(error);
+}
+
+Vector3f MANAGER::getWorldPosition((Manipulator *manipulator, bool *error = false)
+{
+  return manipulator->getWorldPosition(error);
+}
+
+Matrix3f MANAGER::getWorldOrientation((Manipulator *manipulator, bool *error = false)
+{
+  return manipulator->getWorldOrientation(error);
+}
+
+State MANAGER::getWorldState((Manipulator *manipulator, bool *error = false)
+{
+  return manipulator->getWorldState(error);
+}
+
+VectorXf MANAGER::getWorldVelocity((Manipulator *manipulator, bool *error = false)
+{
+  return manipulator->getWorldVelocity(error);
+}
+
+VectorXf MANAGER::getWorldAcceleration((Manipulator *manipulator, bool *error = false)
+{
+  return manipulator->getWorldAcceleration(error);
+}
+
+map<Name, Component> MANAGER::getAllComponent((Manipulator *manipulator, bool *error = false)
+{
+  return manipulator->getAllComponent(error);
+}
+
+Component MANAGER::getComponent(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponent(name, error);
+}
+
+Name MANAGER::getComponentParentName(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentParentName(name, error);
+}
+
+vector<NAME> MANAGER::getComponentChildName(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentChildName(name, error);
+}
+
+Pose MANAGER::getComponentPoseToWorld(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentPoseToWorld(name, error);
+}
+
+Vector3f MANAGER::getComponentPositionToWorld(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentPositionToWorld(name, error);
+}
+
+Matrix3f MANAGER::getComponentOrientationToWorld(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentOrientationToWorld(name, error);
+}
+
+State MANAGER::getComponentStateToWorld(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentStateToWorld(name, error);
+}
+
+VectorXf MANAGER::getComponentVelocityToWorld(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentVelocityToWorld(name, error);
+}
+
+VectorXf MANAGER::getComponentAccelerationToWorld(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentAccelerationToWorld(name, error);
+}
+
+Pose MANAGER::getComponentRelativePoseToParent(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentRelativePoseToParent(name, error);
+}
+
+Vector3f MANAGER::getComponentRelativePositionToParent(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentRelativePositionToParent(name, error);
+}
+
+Matrix3f MANAGER::getComponentRelativeOrientationToParent(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentRelativeOrientationToParent(name, error);
+}
+
+Joint MANAGER::getComponentJoint(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentJoint(name, error);
+}
+
+int8_t MANAGER::getComponentJointId(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentJointId(name, error);
+}
+
+Vector3f MANAGER::getComponentJointAxis(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentJointAxis(name, error);
+}
+
+float MANAGER::getComponentJointAngle(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentJointAngle(name, error);
+}
+
+float MANAGER::getComponentJointVelocity(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentJointVelocity(name, error);
+}
+
+float MANAGER::getComponentJointAcceleration(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentJointAcceleration(name, error);
+}
+
+Tool MANAGER::getComponentTool(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentTool(name, error);
+}
+
+int8_t MANAGER::getComponentToolId(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentToolId(name, error);
+}
+
+bool MANAGER::getComponentToolOnOff(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentToolOnOff(name, error);
+}
+
+float MANAGER::getComponentToolValue(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentToolValue(name, error);
+}
+
+float MANAGER::getComponentMass(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentMass(name, error);
+}
+
+Matrix3f MANAGER::getComponentInertiaTensor(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentInertiaTensor(name, error);
+}
+
+Pose MANAGER::getComponentCenterOfMassPose(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentCenterOfMassPose(name, error);
+}
+
+Vector3f MANAGER::getComponentCenterOfMassPosition(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentCenterOfMassPosition(name, error);
+}
+
+Matrix3f MANAGER::getComponentCenterOfMassOrientation(Manipulator *manipulator, Name name, bool *error = false)
+{
+  return manipulator->getComponentCenterOfMassOrientation(name, error);
+}
+#endif

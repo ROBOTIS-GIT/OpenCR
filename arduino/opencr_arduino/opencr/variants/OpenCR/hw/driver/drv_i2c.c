@@ -9,10 +9,15 @@
 #include "variant.h"
 
 
-
+I2C_HandleTypeDef drv_i2c_handles[DRV_I2C_CNT];     // If we are doing hardware I2C
+I2C_TypeDef *i2c_instance[DRV_I2C_CNT] = {I2C1, I2C2};
 
 int drv_i2c_init()
 {
+  for (int i=0; i < DRV_I2C_CNT; i++) 
+  {
+    drv_i2c_handles[i].Instance = i2c_instance[i];
+  }
   return 0;
 }
 
@@ -46,6 +51,13 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef *hi2c)
     GPIO_InitStruct.Pin       = GPIO_PIN_7;
     GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    /* Peripheral interrupt init */
+    HAL_NVIC_SetPriority(I2C1_EV_IRQn, 8, 0);
+    HAL_NVIC_EnableIRQ  (I2C1_EV_IRQn);
+    HAL_NVIC_SetPriority(I2C1_ER_IRQn, 8, 0);
+    HAL_NVIC_EnableIRQ  (I2C1_ER_IRQn);
+
   }
   if( hi2c->Instance == I2C2 )
   {
@@ -70,6 +82,12 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef *hi2c)
     GPIO_InitStruct.Pin       = GPIO_PIN_11;
     GPIO_InitStruct.Alternate = GPIO_AF4_I2C2;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    /* Peripheral interrupt init */
+    HAL_NVIC_SetPriority(I2C2_EV_IRQn, 8, 0);
+    HAL_NVIC_EnableIRQ  (I2C2_EV_IRQn);
+    HAL_NVIC_SetPriority(I2C2_ER_IRQn, 8, 0);
+    HAL_NVIC_EnableIRQ  (I2C2_ER_IRQn);
   }
 }
 
@@ -94,6 +112,10 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef *hi2c)
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_8);
     /* Configure I2C SDA as alternate function  */
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_7);
+
+    /* Peripheral interrupt Deinit*/
+    HAL_NVIC_DisableIRQ  (I2C1_EV_IRQn);
+    HAL_NVIC_DisableIRQ  (I2C1_ER_IRQn);
   }
   if( hi2c->Instance == I2C2 )
   {
@@ -106,5 +128,25 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef *hi2c)
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_10);
     /* Configure I2C SDA as alternate function  */
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_11);
+
+    /* Peripheral interrupt Deinit*/
+    HAL_NVIC_DisableIRQ  (I2C2_EV_IRQn);
+    HAL_NVIC_DisableIRQ  (I2C2_ER_IRQn);
   }
+}
+
+void I2C1_EV_IRQHandler(void) {
+  HAL_I2C_EV_IRQHandler( &drv_i2c_handles[0]);
+}
+
+void I2C2_EV_IRQHandler(void)  {
+  HAL_I2C_EV_IRQHandler( &drv_i2c_handles[1]);
+}
+
+void I2C1_ER_IRQHandler(void) {
+  HAL_I2C_ER_IRQHandler( &drv_i2c_handles[0]);
+}
+
+void I2C2_ER_IRQHandler(void)  {
+  HAL_I2C_ER_IRQHandler( &drv_i2c_handles[1]);
 }
