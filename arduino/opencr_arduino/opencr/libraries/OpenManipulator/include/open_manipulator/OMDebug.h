@@ -37,27 +37,25 @@ void WARN(String msg);
 void ERROR(String msg);
 } // namespace LOG
 
-namespace VECTOR
+namespace PRINT
 {
 template <typename vector>
-void PRINT(vector &v)
+void VECTOR(vector &v)
 {
   uint8_t i = 0;
 
-  USB.print(" ");  
+  USB.print(" ");
   for (i = 0; i < v.size(); i++)
   {
     USB.print(v(i), 3);
     USB.print(", ");
   }
   USB.println();
+  USB.println();
 }
-} // namespace VECTOR
 
-namespace MATRIX
-{
 template <typename matrix>
-void PRINT(matrix &m)
+void MATRIX(matrix &m)
 {
   uint8_t i = 0, j = 0;
 
@@ -73,7 +71,7 @@ void PRINT(matrix &m)
   }
   USB.println();
 }
-} // namespace MATRIX
+} // namespace PRINT
 
 /*
 Manager Error
