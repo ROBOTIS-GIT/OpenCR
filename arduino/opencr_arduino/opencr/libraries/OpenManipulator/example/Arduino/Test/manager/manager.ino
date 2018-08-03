@@ -13,7 +13,6 @@ Eigen::Matrix3f makeEigenMatrix3(float m11, float m12, float m13,
 #define Y_AXIS makeEigenVector3(0.0, 1.0, 0.0)
 #define Z_AXIS makeEigenVector3(0.0, 0.0, 1.0)
 
-#define NONE -1
 #define WORLD 0
 #define COMP1 1
 #define COMP2 2
@@ -21,14 +20,17 @@ Eigen::Matrix3f makeEigenMatrix3(float m11, float m12, float m13,
 #define COMP4 4
 #define TOOL 5
 
+#define NONE -1
+
 void setup()
 {
   Serial.begin(57600);
-  while (!Serial);
+  while (!Serial)
+    ;
 
   Manipulator manipulator;
   manipulator.addWorld(WORLD, COMP1);
-  manipulator.addComponent(COMP1, WORLD, COMP2, makeEigenVector3(-0.100, 0.0, 0.0), IDENTITY_MATRIX, 1, Z_AXIS, 0.5, makeEigenMatrix3(1,1,1,1,1,1,3,1,1));
+  manipulator.addComponent(COMP1, WORLD, COMP2, makeEigenVector3(-0.100, 0.0, 0.0), IDENTITY_MATRIX, 1, Z_AXIS, 0.5, makeEigenMatrix3(1, 1, 1, 1, 1, 1, 3, 1, 1));
   manipulator.addComponent(COMP2, COMP1, COMP3, makeEigenVector3(0.0, 0.0, 0.050), IDENTITY_MATRIX, 2, Y_AXIS, 1.5);
   manipulator.addComponentChild(COMP2, COMP4);
   manipulator.addComponent(COMP3, COMP2, COMP4, makeEigenVector3(0.0, 0.050, 0.0), IDENTITY_MATRIX, NONE);
