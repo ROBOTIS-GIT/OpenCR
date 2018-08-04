@@ -281,9 +281,14 @@ std::map<Name, Component> MANAGER::getAllComponent(Manipulator *manipulator)
   return manipulator->getAllComponent();
 }
 
-std::map<Name, Component>::iterator MANAGER::getIterator(Manipulator *manipulator)
+std::map<Name, Component>::iterator MANAGER::getIteratorBegin(Manipulator *manipulator)
 {
-  return manipulator->getIterator();
+  return manipulator->getIteratorBegin();
+}
+
+std::map<Name, Component>::iterator MANAGER::getIteratorEnd(Manipulator *manipulator)
+{
+  return manipulator->getIteratorEnd();
 }
 
 Component MANAGER::getComponent(Manipulator *manipulator, Name name)
