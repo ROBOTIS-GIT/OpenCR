@@ -29,14 +29,23 @@ void setup()
   manipulator.addComponent(COMP1, WORLD, COMP2, MATH::makeVector3(-0.100, 0.0, 0.0), IDENTITY_MATRIX, 1, Z_AXIS, 0.5, MATH::makeMatrix3(1, 1, 1, 1, 1, 1, 3, 1, 1));
   manipulator.addComponent(COMP2, COMP1, COMP3, MATH::makeVector3(0.0, 0.0, 0.050), IDENTITY_MATRIX, 2, Y_AXIS, 1.5);
   manipulator.addComponentChild(COMP2, COMP4);
-  manipulator.addComponent(COMP3, COMP2, COMP4, MATH::makeVector3(0.0, 0.050, 0.0), IDENTITY_MATRIX, NONE);
-  manipulator.addComponent(COMP4, COMP2, TOOL, MATH::makeVector3(0.0, 0.0, 0.050), IDENTITY_MATRIX, 3, Y_AXIS, 2.0);
-  manipulator.addTool(TOOL, COMP4, MATH::makeVector3(0.0, 0.0, 0.025), IDENTITY_MATRIX, 4, 0.1);
-
-  // manipulator.checkManipulatorSetting();
+  manipulator.addComponent(COMP3, COMP2, TOOL, MATH::makeVector3(0.0, 0.050, 0.0), IDENTITY_MATRIX, 3, Y_AXIS, 2.0);
+  manipulator.addComponent(COMP4, COMP2, TOOL, MATH::makeVector3(0.0, 0.0, 0.050), IDENTITY_MATRIX, NONE);
+  manipulator.addTool(TOOL, COMP3, MATH::makeVector3(0.0, 0.0, 0.025), IDENTITY_MATRIX, 4, 0.1);
 
   Eigen::MatrixXf jacobian = KINEMATICS::CHAIN::jacobian(&manipulator, TOOL);
+  LOG::INFO("Jacobian : ");
   PRINT::MATRIX(jacobian);
+
+  KINEMATICS::CHAIN::forward(&manipulator, COMP1);
+  manipulator.checkManipulatorSetting();
+
+  Pose target;
+  target.position = ZERO_VECTOR;
+  target.orientation = IDENTITY_MATRIX;
+  Eigen::VectorXf joint_angle = KINEMATICS::CHAIN::inverse(&manipulator, TOOL, target);
+  LOG::INFO("Result of inverse : ");
+  PRINT::VECTOR(joint_angle);
 }
 
 void loop()
