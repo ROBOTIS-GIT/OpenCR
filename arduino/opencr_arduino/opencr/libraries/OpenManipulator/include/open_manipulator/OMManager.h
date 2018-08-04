@@ -193,7 +193,8 @@ class Manipulator
   int8_t getComponentSize();
 
   std::map<Name, Component> getAllComponent();
-  std::map<Name, Component>::iterator getIterator();
+  std::map<Name, Component>::iterator getIteratorBegin();
+  std::map<Name, Component>::iterator getIteratorEnd();
 
   Component getComponent(Name name);
   Name getComponentParentName(Name name);
