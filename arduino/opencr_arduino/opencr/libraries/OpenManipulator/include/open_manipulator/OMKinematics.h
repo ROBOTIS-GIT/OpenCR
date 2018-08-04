@@ -36,16 +36,17 @@ namespace KINEMATICS
 {
 namespace CHAIN
 {
-MatrixXf jacobian(Manipulator *manipulator, int8_t tool_name);
+MatrixXf jacobian(Manipulator *manipulator, Name tool_name);
 
-void forward(Manipulator *manipulator);
-VectorXf inverse(Manipulator *manipulator, int8_t tool_name);
+void forward(Manipulator *manipulator, Name component_name);
+VectorXf inverse(Manipulator *manipulator, Name tool_name, Pose target_pose);
 } // namespace CHAIN
 
 namespace LINK
 {
-void forward(Manipulator *manipulator);
-VectorXf inverse(Manipulator *manipulator, int8_t tool_name);
+void solveKinematicsSinglePoint(Manipulator *manipulator, Name component_name, bool *error = false);
+void forward(Manipulator *manipulator, bool *error = false);
+VectorXf inverse(Manipulator *manipulator, Name tool_number, Pose target_pose, bool *error = false); //for basic model);
 } // namespace LINK
 
 #if 0

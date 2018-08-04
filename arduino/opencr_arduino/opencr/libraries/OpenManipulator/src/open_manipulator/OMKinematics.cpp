@@ -20,11 +20,10 @@
 
 using namespace Eigen;
 using namespace OPEN_MANIPULATOR;
-using namespace KINEMATICS;
 
-MatrixXf CHAIN::jacobian(Manipulator *manipulator, int8_t tool_name)
+MatrixXf KINEMATICS::CHAIN::jacobian(Manipulator *manipulator, Name tool_name)
 {
-  MatrixXf jacobian(6, MANAGER::getDOF(manipulator));
+  MatrixXf jacobian = MatrixXf::Identity(6, MANAGER::getDOF(manipulator));
 
   Vector3f joint_axis = ZERO_VECTOR;
 
@@ -33,41 +32,123 @@ MatrixXf CHAIN::jacobian(Manipulator *manipulator, int8_t tool_name)
   VectorXf pose_changed(6);
 
   int8_t index = 0;
+  Name my_name = MANAGER::getIteratorBegin(manipulator)->first;
 
-  LOG::INFO("aa");
-
-  for (MANAGER::getIterator(manipulator) = MANAGER::getAllComponent(manipulator).begin(); MANAGER::getIterator(manipulator) != MANAGER::getAllComponent(manipulator).end(); MANAGER::getIterator(manipulator)++)
+  for (int8_t size = 0; size < MANAGER::getDOF(manipulator); size++)
   {
-    LOG::INFO(String(MANAGER::getIterator(manipulator)->first));
-    if (MANAGER::getComponentJointId(manipulator, MANAGER::getIterator(manipulator)->first) >= 0)
+    Name parent_name = MANAGER::getComponentParentName(manipulator, my_name);
+    if (parent_name == MANAGER::getWorldName(manipulator))
     {
-      LOG::INFO("cc");
-      joint_axis = MANAGER::getComponentOrientationToWorld(manipulator, MANAGER::getIterator(manipulator)->first) * MANAGER::getComponentJointAxis(manipulator, MANAGER::getIterator(manipulator)->first);
-      position_changed = MATH::skewSymmetricMatrix(joint_axis) *
-                         (MANAGER::getComponentPositionToWorld(manipulator, tool_name) - MANAGER::getComponentPositionToWorld(manipulator, MANAGER::getIterator(manipulator)->first));
-
-      orientation_changed = joint_axis;
-
-      pose_changed << position_changed(0),
-          position_changed(1),
-          position_changed(2),
-          orientation_changed(0),
-          orientation_changed(1),
-          orientation_changed(2);
-
-      jacobian.col(index) = pose_changed;
-      index++;
+      joint_axis = MANAGER::getWorldOrientation(manipulator) * MANAGER::getComponentJointAxis(manipulator, my_name);
     }
+    else
+    {
+      joint_axis = MANAGER::getComponentOrientationToWorld(manipulator, parent_name) * MANAGER::getComponentJointAxis(manipulator, my_name);
+    }
+
+    position_changed = MATH::skewSymmetricMatrix(joint_axis) *
+                       (MANAGER::getComponentPositionToWorld(manipulator, tool_name) - MANAGER::getComponentPositionToWorld(manipulator, my_name));
+    orientation_changed = joint_axis;
+
+    pose_changed << position_changed(0),
+        position_changed(1),
+        position_changed(2),
+        orientation_changed(0),
+        orientation_changed(1),
+        orientation_changed(2);
+
+    jacobian.col(index) = pose_changed;
+    index++;
+    my_name = MANAGER::getComponentChildName(manipulator, my_name).at(0);
   }
   return jacobian;
 }
 
-void CHAIN::forward(Manipulator *manipulator)
+void KINEMATICS::CHAIN::forward(Manipulator *manipulator, Name component_name)
 {
+  Name my_name = component_name;
+  Name parent_name = MANAGER::getComponentParentName(manipulator, my_name);
+  int8_t number_of_child = MANAGER::getComponentChildName(manipulator, my_name).size();
+
+  Vector3f parent_position_to_world, my_position_to_world;
+  Matrix3f parent_orientation_to_world, my_orientation_to_world;
+
+  if (parent_name == MANAGER::getWorldName(manipulator))
+  {
+    parent_position_to_world = MANAGER::getWorldPosition(manipulator);
+    parent_orientation_to_world = MANAGER::getWorldOrientation(manipulator);
+  }
+  else
+  {
+    parent_position_to_world = MANAGER::getComponentPositionToWorld(manipulator, parent_name);
+    parent_orientation_to_world = MANAGER::getComponentOrientationToWorld(manipulator, parent_name);
+  }
+
+  my_position_to_world = parent_orientation_to_world * MANAGER::getComponentRelativePositionToParent(manipulator, my_name) + parent_position_to_world;
+  my_orientation_to_world = parent_orientation_to_world * MATH::rodriguesRotationMatrix(MANAGER::getComponentJointAxis(manipulator, my_name), MANAGER::getComponentJointAngle(manipulator, my_name));
+
+  MANAGER::setComponentPositionToWorld(manipulator, my_name, my_position_to_world);
+  MANAGER::setComponentOrientationToWorld(manipulator, my_name, my_orientation_to_world);
+
+  for (int8_t index = 0; index < number_of_child; index++)
+  {
+    Name child_name = MANAGER::getComponentChildName(manipulator, my_name).at(index);
+    KINEMATICS::CHAIN::forward(manipulator, child_name);
+  }
+}
+
+VectorXf KINEMATICS::CHAIN::inverse(Manipulator *manipulator, Name tool_name, Pose target_pose)
+{
+  const float lambda = 0.7;
+  const int8_t loop_count = 10;
+  int8_t vector_element = 0;
+
+  MatrixXf jacobian = MatrixXf::Identity(6, MANAGER::getDOF(manipulator));
+  VectorXf pose_changed = VectorXf::Zero(6);
+  VectorXf angle_changed = VectorXf::Zero(MANAGER::getDOF(manipulator));
+  VectorXf result_angle = VectorXf::Zero(MANAGER::getDOF(manipulator));
+
+  KINEMATICS::CHAIN::forward(manipulator, MANAGER::getIteratorBegin(manipulator)->first);
+
+  for (int8_t loop_num = 0; loop_num < loop_count; loop_num++)
+  {
+    jacobian = KINEMATICS::CHAIN::jacobian(manipulator, tool_name);
+    pose_changed = MATH::poseDifference(target_pose.position, MANAGER::getComponentPositionToWorld(manipulator, tool_name),
+                                        target_pose.orientation, MANAGER::getComponentOrientationToWorld(manipulator, tool_name));
+    if (pose_changed.norm() < 1E-6)
+    {
+      vector_element = 0;
+      for (int8_t component_name = MANAGER::getIteratorBegin(manipulator)->first; component_name < tool_name; component_name++)
+      {
+        if (MANAGER::getComponentJointId(manipulator, component_name) != -1)
+          result_angle(vector_element++) = MANAGER::getComponentJointAngle(manipulator, component_name);
+      }  
+      return result_angle;
+    } 
+
+    Eigen::ColPivHouseholderQR<Eigen::MatrixXf> dec(jacobian);
+    angle_changed = lambda * dec.solve(pose_changed);   
+
+    vector_element = 0;
+    for (int8_t component_name = MANAGER::getIteratorBegin(manipulator)->first; component_name < tool_name; component_name++)
+    {
+      if (MANAGER::getComponentJointId(manipulator, component_name) != -1)
+        MANAGER::setComponentJointAngle(manipulator, component_name, MANAGER::getComponentJointAngle(manipulator, component_name) + angle_changed(vector_element++));
+    }    
+    KINEMATICS::CHAIN::forward(manipulator, MANAGER::getIteratorBegin(manipulator)->first);
+  }
+
+  vector_element = 0;
+  for (int8_t component_name = MANAGER::getIteratorBegin(manipulator)->first; component_name < tool_name; component_name++)
+  {
+    if (MANAGER::getComponentJointId(manipulator, component_name) != -1)
+      result_angle(vector_element++) = MANAGER::getComponentJointAngle(manipulator, component_name);
+  }  
+  return result_angle;
 }
 
 #if 0
-void OMKinematicsMethod::solveKinematicsSinglePoint(Manipulator *manipulator, Name component_name, bool *error = false)
+void KINEMATICS::LINK::solveKinematicsSinglePoint(Manipulator *manipulator, Name component_name, bool *error = false)
 {
   Pose parent_pose;
   Pose link_relative_pose;
@@ -88,7 +169,7 @@ void OMKinematicsMethod::solveKinematicsSinglePoint(Manipulator *manipulator, Na
   }
 }
 
-void OMKinematicsMethod::forward(Manipulator *manipulator, bool *error = false)
+void KINEMATICS::LINK::forward(Manipulator *manipulator, bool *error = false)
 {
   Pose pose_to_wolrd;
   Pose link_relative_pose;
@@ -110,44 +191,7 @@ void OMKinematicsMethod::forward(Manipulator *manipulator, bool *error = false)
   }
 }
 
-MatrixXf OMKinematicsMethod::jacobian(Manipulator *manipulator, int8_t tool_component_name, bool *error = false)
-{
-  MatrixXf jacobian(6, MANAGER::getDOF(manipulator, error));
-  Vector3f position_changed = Vector3f::Zero();
-  Vector3f orientation_changed = Vector3f::Zero();
-  VectorXf pose_changed(6);
-  map<Name, Component> temp_component = MANAGER::getAllComponent(manipulator, error);
-  map<Name, Component>::iterator it_component_;
-  int8_t j = 0;
-
-  for (it_component_ = temp_component.begin(); it_component_ != temp_component.end(); it_component_++)
-  {
-    if (MANAGER::getComponentJointId(it_component_->first, error) >= 0)
-    {
-      position_changed = MATH::skewSymmetricMatrix(getComponentOrientationToWorld(manipulator, it_component_->first, error) * MANAGER::getComponentJointAxis(manipulator, it_component_->first, error)) * (MANAGER::getComponentPositionToWorld(manipulator, tool_component_name, error) - MANAGER::getComponentPositionToWorld(manipulator, it_component_->first, error));
-      orientation_changed = MANAGER::getComponentOrientationToWorld(manipulator, it_component_->first, error) * MANAGER::getComponentJointAxis(manipulator, it_component_->first, error);
-
-      pose_changed << position_changed(0),
-          position_changed(1),
-          position_changed(2),
-          orientation_changed(0),
-          orientation_changed(1),
-          orientation_changed(2);
-
-      jacobian.col(j) = pose_changed;
-      j++;
-    }
-  }
-  return jacobian
-}
-
-void OMLinkKinematics::forward(Manipulator *manipulator, bool *error = false)
-{
-  // KINEMATICS::getPassiveJointAngle(manipulator, error);
-  OMKinematicsMethod::forward(manipulator, error);
-}
-
-VectorXf OMLinkKinematics::geometricInverse(Manipulator *manipulator, Name tool_number, Pose target_pose, bool *error = false) //for basic model
+VectorXf KINEMATICS::LINK::inverse(Manipulator *manipulator, Name tool_number, Pose target_pose, bool *error = false) //for basic model
 {
   VectorXf target_angle_vector(3);
   Vector3f control_position; //joint6-joint1
