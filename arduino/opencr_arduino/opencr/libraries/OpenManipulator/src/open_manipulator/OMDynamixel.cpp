@@ -14,30 +14,37 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM, Darby Lim*/
+/* Authors: Darby Lim, Hye-Jong KIM */
 
-#include "../../include/open_manipulator/OMKinematics.h"
-#if 0
+#include "../../include/open_manipulator/OMDynamixel.h"
 
-OMDynamixel::OMDynamixel()
+OMDynamixel::OMDynamixel(uint32_t baud_rate)
 {
-  dxl_info_.size          = DXL_SIZE;
-  dxl_info_.baud_rate     = BAUD_RATE;
-  dxl_info_.id_ptr        = NULL;   
-  dxl_info_.position_ptr  = NULL;
-  dxl_info_.current_ptr   = NULL;
+  dxl_info_.baud_rate = baud_rate;
 }
 
 OMDynamixel::~OMDynamixel(){};
 
 bool OMDynamixel::init()
 {
-  dxl_wb_.begin(DEVICE_NAME, dxl_info_.baud_rate);      
-    
-  if (dxl_wb_.scan(&dxl_id_[0], &dxl_info_.size, 30))
-    dxl_info_.id_ptr = &dxl_id_[0];
+  uint8_t get_dxl_id[dxl_info_.size];
+
+  dxl_wb_.begin(DEVICE_NAME, dxl_info_.baud_rate);
+
+  if (dxl_wb_.scan(&get_dxl_id[0], &dxl_info_.size, 30))
+  {
+    for (uint8_t index = 0; index < dxl_info_.size; index++)
+    {
+      dxl_id_.push_back(get_dxl_id[index]);
+      LOG::INFO("ID : " + String(get_dxl_id[index]));
+    }
+  }
   else
     return false;
+
+  dxl_id_.reserve(dxl_info_.size);
+  radian_value_.reserve(dxl_info_.size);
+  torque_value_.reserve(dxl_info_.size);
 
   dxl_wb_.addSyncWrite(GOAL_POSITION);
   if (dxl_wb_.getProtocolVersion() == 2.0)
@@ -56,9 +63,43 @@ bool OMDynamixel::setPositionControlMode(uint8_t id)
   return dxl_wb_.jointMode(id);
 }
 
-bool OMDynamixel::setCurrentBasedPositionControlMode(uint8_t id, uint8_t current=10)
+bool OMDynamixel::setCurrentBasedPositionControlMode(uint8_t id, uint8_t current)
 {
   return dxl_wb_.currentMode(id, current);
+}
+
+bool OMDynamixel::setMaxPositionLimit(uint8_t id, float radian)
+{
+  setDisable(id);
+
+  if (dxl_wb_.getProtocolVersion() == 2.0)
+    dxl_wb_.itemWrite(id, MAX_POSITION_LIMIT_ADDR, MAX_POSITION_LIMIT_LENGTH, dxl_wb_.convertRadian2Value(id, radian));
+  else
+    dxl_wb_.itemWrite(id, CW_ANGLE_LIMIT_ADDR, CW_ANGLE_LIMIT_LENGTH, dxl_wb_.convertRadian2Value(id, radian));
+
+  setEnable(id);
+}
+
+bool OMDynamixel::setMinPositionLimit(uint8_t id, float radian)
+{
+  setDisable(id);
+
+  if (dxl_wb_.getProtocolVersion() == 2.0)
+    dxl_wb_.itemWrite(id, MIN_POSITION_LIMIT_ADDR, MIN_POSITION_LIMIT_LENGTH, dxl_wb_.convertRadian2Value(id, radian));
+  else
+    dxl_wb_.itemWrite(id, CCW_ANGLE_LIMIT_ADDR, CCW_ANGLE_LIMIT_LENGTH, dxl_wb_.convertRadian2Value(id, radian));
+    
+  setEnable(id);
+}
+
+void OMDynamixel::addSyncWriteHandler(const char *table_item)
+{
+  dxl_wb_.addSyncWrite(table_item);
+}
+
+void OMDynamixel::addSyncReadHandler(const char *table_item)
+{
+  dxl_wb_.addSyncRead(table_item);
 }
 
 bool OMDynamixel::setEnable(uint8_t id)
@@ -74,7 +115,7 @@ bool OMDynamixel::setDisable(uint8_t id)
 bool OMDynamixel::enableAllDynamixel()
 {
   for (uint8_t index = 0; index < dxl_info_.size; index++)
-    dxl_wb_.itemWrite(dxl_info_.id_ptr[index], TORQUE_ENABLE, true);
+    dxl_wb_.itemWrite(dxl_id_.at(index), TORQUE_ENABLE, true);
 
   return true;
 }
@@ -82,29 +123,25 @@ bool OMDynamixel::enableAllDynamixel()
 bool OMDynamixel::disableAllDynamixel()
 {
   for (uint8_t index = 0; index < dxl_info_.size; index++)
-    dxl_wb_.itemWrite(dxl_info_.id_ptr[index], TORQUE_ENABLE, false);
-  return true;    
+    dxl_wb_.itemWrite(dxl_id_.at(index), TORQUE_ENABLE, false);
+  return true;
 }
 
-bool OMDynamixel::setAngle(float *radian)
+bool OMDynamixel::setAngle(std::vector<float> radian_vector)
 {
   int32_t set_position[dxl_info_.size] = {0, };
-  for (uint8_t index = 0; index < dxl_info_.size; index++)
-    set_position[index] = dxl_wb_.convertRadian2Value(dxl_info_.id_ptr[index], radian[index]);
 
-  return dxl_wb_.syncWrite(GOAL_POSITION, set_position);
+  for (uint8_t index = 0; index < dxl_info_.size; index++)
+    set_position[index] = dxl_wb_.convertRadian2Value(dxl_id_.at(index), radian_vector.at(index));
+
+  return dxl_wb_.syncWrite(GOAL_POSITION, &set_position[0]);
 }
 
 bool OMDynamixel::setAngle(uint8_t id, float radian)
 {
   int32_t set_position = dxl_wb_.convertRadian2Value(id, radian);
-    
-  return dxl_wb_.itemWrite(id, GOAL_POSITION, set_position);   
-}
 
-uint8_t* OMDynamixel::getID()
-{
-  return dxl_info_.id_ptr;
+  return dxl_wb_.itemWrite(id, GOAL_POSITION, set_position);
 }
 
 uint8_t OMDynamixel::getDynamixelSize()
@@ -112,9 +149,9 @@ uint8_t OMDynamixel::getDynamixelSize()
   return dxl_info_.size;
 }
 
-uint8_t* OMDynamixel::getDynamixelIds()
+std::vector<uint8_t> OMDynamixel::getDynamixelIDs()
 {
-  return dxl_info_.id_ptr;
+  return dxl_id_;
 }
 
 uint32_t OMDynamixel::getBaudRate()
@@ -122,49 +159,45 @@ uint32_t OMDynamixel::getBaudRate()
   return dxl_info_.baud_rate;
 }
 
-int32_t OMDynamixel::getData(uint8_t id, const char* table_item)
+int32_t OMDynamixel::getData(uint8_t id, uint16_t addr, uint8_t length)
 {
-  return dxl_wb_.itemRead(id, table_item);
+  return dxl_wb_.itemRead(id, addr, length);
 }
 
-float* OMDynamixel::getAngle()
+std::vector<float> OMDynamixel::getAngle()
 {
   int32_t *get_position_ptr = NULL;
+  radian_value_.clear();
+
   if (dxl_wb_.getProtocolVersion() == 2.0)
   {
-    get_position_ptr = dxl_wb_.syncRead(PRESENT_POSITION);
-    
+    get_position_ptr = dxl_wb_.syncRead(PRESENT_POSITION);    
+
     for (uint8_t index = 0; index < dxl_info_.size; index++)
-      radian_value_[index] = dxl_wb_.convertValue2Radian(dxl_info_.id_ptr[index], get_position_ptr[index]);
+      radian_value_.push_back(dxl_wb_.convertValue2Radian(dxl_id_.at(index), get_position_ptr[index]));
   }
   else
   {
     for (uint8_t index = 0; index < dxl_info_.size; index++)
-      radian_value_[index] = dxl_wb_.convertValue2Radian(dxl_info_.id_ptr[index], dxl_wb_.itemRead(dxl_info_.id_ptr[index], PRESENT_POSITION));
+      radian_value_.push_back(dxl_wb_.convertValue2Radian(dxl_id_.at(index), dxl_wb_.itemRead(dxl_id_.at(index), PRESENT_POSITION)));
   }
 
-  dxl_info_.position_ptr = &radian_value_[0];
-  return dxl_info_.position_ptr;
+  return radian_value_;
 }
 
-float* OMDynamixel::getCurrent()
+std::vector<float> OMDynamixel::getCurrent()
 {
   int32_t *get_current_ptr = NULL;
   get_current_ptr = dxl_wb_.syncRead(PRESENT_CURRENT);
 
   for (uint8_t index = 0; index < dxl_info_.size; index++)
-    torque_value_[index] = dxl_wb_.convertValue2Torque(dxl_info_.id_ptr[index], get_current_ptr[index]);
-  dxl_info_.current_ptr = &torque_value_[0];
-  return dxl_info_.current_ptr;
+    torque_value_.push_back(dxl_wb_.convertValue2Torque(dxl_id_.at(index), get_current_ptr[index]));
+
+  return torque_value_;
 }
 
-void OMDynamixel::addSyncWriteHandler(const char* table_item)
+int32_t OMDynamixel::convertRadian2Value(uint8_t id, float radian)
 {
-  dxl_wb_.addSyncWrite(table_item);
+  return dxl_wb_.convertRadian2Value(id, radian);
 }
 
-void OMDynamixel::addSyncReadHandler(const char* table_item)
-{
-  dxl_wb_.addSyncRead(table_item);
-}
-#endif
