@@ -46,7 +46,7 @@ namespace LINK
 {
 void solveKinematicsSinglePoint(Manipulator *manipulator, Name component_name);
 void forward(Manipulator *manipulator);
-VectorXf inverse(Manipulator *manipulator, Name tool_name, Pose target_pose); //for basic model);
+VectorXf geometricInverse(Manipulator *manipulator, Name tool_name, Pose target_pose); //for basic model);
 } // namespace LINK
 
 #if 0

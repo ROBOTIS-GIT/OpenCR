@@ -31,7 +31,7 @@ void setup()
     ;
   
   omlink.addWorld(WORLD, BASE);
-  omlink.addComponent(BASE, WORLD, JOINT0, MATH::makeVector3(0.0, 0, 0), Matrix3f::Identity(3,3));
+  omlink.addComponent(BASE, WORLD, JOINT0, MATH::makeVector3(-0.23867882, 0, 0), Matrix3f::Identity(3,3));
   omlink.addComponent(JOINT0, BASE, JOINT1, Vector3f::Zero(), Matrix3f::Identity(3,3), MATH::makeVector3(0,0,1), 1, -1);
   omlink.addComponentChild(JOINT0, JOINT2);
   omlink.addComponentChild(JOINT0, JOINT7);
@@ -51,11 +51,26 @@ void setup()
   //omlink.checkManipulatorSetting();
 
   omlink.setComponentJointAngle(JOINT0, 0.0);
-  omlink.setComponentJointAngle(JOINT1, -M_PI/2 + 90.0*DEG2RAD);
+  omlink.setComponentJointAngle(JOINT1, -M_PI/2 + 0.0*DEG2RAD);
   omlink.setComponentJointAngle(JOINT2, -M_PI + 0.0*DEG2RAD);
   myGetPassiveJointAngle(&omlink);
   KINEMATICS::LINK::forward(&omlink);
   omlink.checkManipulatorSetting();
+
+  VectorXf target_angle(omlink.getDOF());
+  Pose target_pose;
+  target_pose.position = MATH::makeVector3(0.05, -0.05, 0.0);
+  target_pose.orientation = Matrix3f::Identity(3,3);
+
+  target_angle = KINEMATICS::LINK::geometricInverse(&omlink, SUCTION, target_pose);
+  
+  target_angle = target_angle*RAD2DEG;
+  
+  USB.println("\nTest Inverse");
+  USB.println(" target_pose : ");
+  PRINT::VECTOR(target_pose.position);
+  USB.println(" target_angle : ");
+  PRINT::VECTOR(target_angle);
 }
 
 void loop() 
