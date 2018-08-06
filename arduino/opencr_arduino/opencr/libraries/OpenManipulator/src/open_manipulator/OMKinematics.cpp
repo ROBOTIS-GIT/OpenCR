@@ -212,9 +212,6 @@ VectorXf KINEMATICS::LINK::geometricInverse(Manipulator *manipulator, Name tool_
   control_position(1) = target_pose.position(1) - tool_relative_position(0) * sin(target_angle[0]);
   control_position(2) = target_pose.position(2) - tool_relative_position(2);
 
-  USB.println(" control_position : ");
-  PRINT::VECTOR(control_position);
-
   // temp_vector = omlink.link_[0].getRelativeJointPosition(1,0);
   temp_vector = MANAGER::getComponentRelativePositionToParent(manipulator, MANAGER::getComponentParentName(manipulator, MANAGER::getComponentParentName(manipulator, MANAGER::getComponentParentName(manipulator, tool_name))));
   link[0] = temp_vector(2);
@@ -225,19 +222,8 @@ VectorXf KINEMATICS::LINK::geometricInverse(Manipulator *manipulator, Name tool_
   temp_vector = MANAGER::getComponentRelativePositionToParent(manipulator, MANAGER::getComponentParentName(manipulator, tool_name));
   link[2] = temp_vector(0);
 
-  USB.println(" link : ");
-  USB.println(link[0],4);
-  USB.println(link[1],4);
-  USB.println(link[2],4);
-
-  
-
   temp_y = control_position(2) - base_position(2) - link[0];
   temp_x = (control_position(0) - base_position(0)) / cos(target_angle[0]);
-
-  USB.println(" temp : ");
-  USB.println(temp_y,4);
-  USB.println(temp_x,4);
 
   target_angle[1] = acos(((temp_x * temp_x + temp_y * temp_y + link[1] * link[1] - link[2] * link[2])) / (2 * link[1] * sqrt(temp_x * temp_x + temp_y * temp_y))) + atan2(temp_y, temp_x);
   target_angle[2] = acos((link[1] * link[1] + link[2] * link[2] - (temp_x * temp_x + temp_y * temp_y)) / (2 * link[1] * link[2])) + target_angle[1];
