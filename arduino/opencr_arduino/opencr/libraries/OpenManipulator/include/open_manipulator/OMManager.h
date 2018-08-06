@@ -57,7 +57,7 @@ typedef struct
   int8_t id;
   bool on_off;
   float coefficient;   //actuator value to tool value
-  float value; //m or rad
+  float value;         //m or rad
 } Tool;
 
 typedef struct

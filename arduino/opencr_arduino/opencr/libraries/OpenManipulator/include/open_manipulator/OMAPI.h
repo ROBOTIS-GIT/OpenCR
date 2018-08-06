@@ -160,11 +160,9 @@ Matrix3f getWorldOrientation(Manipulator *manipulator);
 State getWorldState(Manipulator *manipulator);
 VectorXf getWorldVelocity(Manipulator *manipulator);
 VectorXf getWorldAcceleration(Manipulator *manipulator);
-
 std::map<Name, Component> getAllComponent(Manipulator *manipulator);
 std::map<Name, Component>::iterator getIteratorBegin(Manipulator *manipulator);
 std::map<Name, Component>::iterator getIteratorEnd(Manipulator *manipulator);
-
 Component getComponent(Manipulator *manipulator, Name name);
 Name getComponentParentName(Manipulator *manipulator, Name name);
 std::vector<Name> getComponentChildName(Manipulator *manipulator, Name name);
