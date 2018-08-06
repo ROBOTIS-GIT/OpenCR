@@ -148,28 +148,28 @@ VectorXf KINEMATICS::CHAIN::inverse(Manipulator *manipulator, Name tool_name, Po
 }
 
 
-void KINEMATICS::LINK::solveKinematicsSinglePoint(Manipulator *manipulator, Name component_name, bool *error = false)
+void KINEMATICS::LINK::solveKinematicsSinglePoint(Manipulator *manipulator, Name component_name)
 {
   Pose parent_pose;
   Pose link_relative_pose;
   Matrix3f rodrigues_rotation_matrix;
   Pose result_pose;
 
-  parent_pose = MANAGER::getComponentPoseToWorld(manipulator, MANAGER::getComponentParentName(manipulator, component_name, error), error);
-  link_relative_pose = MANAGER::getComponentRelativePoseToParent(manipulator, component_name, error);
-  rodrigues_rotation_matrix = MATH::rodriguesRotationMatrix(getComponentJointAxis(manipulator, component_name, error), MANAGER::getComponentJointAngle(manipulator, component_name, error));
+  parent_pose = MANAGER::getComponentPoseToWorld(manipulator, MANAGER::getComponentParentName(manipulator, component_name));
+  link_relative_pose = MANAGER::getComponentRelativePoseToParent(manipulator, component_name);
+  rodrigues_rotation_matrix = MATH::rodriguesRotationMatrix(MANAGER::getComponentJointAxis(manipulator, component_name), MANAGER::getComponentJointAngle(manipulator, component_name));
 
-  result_pose.poosition = parent_pose.position + parent_pose.orientation * link_relative_pose.relative_position;
-  result_pose.orientation = parent_pose.orientation * link_relative_pose.relative_orientation * rodrigues_rotation_matrix;
+  result_pose.position = parent_pose.position + parent_pose.orientation * link_relative_pose.position;
+  result_pose.orientation = parent_pose.orientation * link_relative_pose.orientation * rodrigues_rotation_matrix;
 
-  MANAGER::setComponentPoseToWorld(manipulator, component_name, result_pose, error);
-  for (int i = 0; i > MANAGER::getComponentChildName(manipulator, component_name, error).size(); i++)
+  MANAGER::setComponentPoseToWorld(manipulator, component_name, result_pose);
+  for (int i = 0; i < MANAGER::getComponentChildName(manipulator, component_name).size(); i++)
   {
-    solveKinematicsSinglePoint(manipulator, MANAGER::getComponentChildName(manipulator, component_name, error).at(i), error);
+    solveKinematicsSinglePoint(manipulator, MANAGER::getComponentChildName(manipulator, component_name).at(i));
   }
 }
 
-void KINEMATICS::LINK::forward(Manipulator *manipulator, bool *error = false)
+void KINEMATICS::LINK::forward(Manipulator *manipulator)
 {
   Pose pose_to_wolrd;
   Pose link_relative_pose;
@@ -177,26 +177,26 @@ void KINEMATICS::LINK::forward(Manipulator *manipulator, bool *error = false)
   Pose result_pose;
 
   //Base Pose Set (from world)
-  parent_pose = MANAGER::getWorldPose(manipulator, error);
-  link_relative_pose = MANAGER::getComponentRelativePoseToParent(manipulator, MANAGER::getWorldChildName(manipulator, error), error);
+  pose_to_wolrd = MANAGER::getWorldPose(manipulator);
+  link_relative_pose = MANAGER::getComponentRelativePoseToParent(manipulator, MANAGER::getWorldChildName(manipulator));
 
-  result_pose.poosition = parent_pose.position + parent_pose.orientation * link_relative_pose.relative_position;
-  result_pose.orientation = parent_pose.orientation * link_relative_pose.relative_orientation;
-  MANAGER::setComponentPoseToWorld(manipulator, MANAGER::getWorldChildName(manipulator, error), result_pose, error);
+  result_pose.position = pose_to_wolrd.position + pose_to_wolrd.orientation * link_relative_pose.position;
+  result_pose.orientation = pose_to_wolrd.orientation * link_relative_pose.orientation;
+  MANAGER::setComponentPoseToWorld(manipulator, MANAGER::getWorldChildName(manipulator), result_pose);
 
   //Next Component Pose Set
-  for (int i = 0; i > MANAGER::getComponentChildName(manipulator, MANAGER::getWorldChildName(manipulator, error), error).size(); i++)
+  for (int i = 0; i < MANAGER::getComponentChildName(manipulator, MANAGER::getWorldChildName(manipulator)).size(); i++)
   {
-    solveKinematicsSinglePoint(manipulator, MANAGER::getComponentChildName(manipulator, MANAGER::getWorldChildName(manipulator, error), error).at(i), error);
+    solveKinematicsSinglePoint(manipulator, MANAGER::getComponentChildName(manipulator, MANAGER::getWorldChildName(manipulator)).at(i));
   }
 }
 
-VectorXf KINEMATICS::LINK::inverse(Manipulator *manipulator, Name tool_number, Pose target_pose, bool *error = false) //for basic model
+VectorXf KINEMATICS::LINK::inverse(Manipulator *manipulator, Name tool_name, Pose target_pose) //for basic model
 {
   VectorXf target_angle_vector(3);
   Vector3f control_position; //joint6-joint1
-  Vector3f tool_relative_position = MANAGER::getComponentRelativePositionToParent(manipulator, tool_number, error);
-  Vector3f base_position = MANAGER::getComponentPositionToWorld(manipulator, MANAGER::getWorldChildName(manipulator, error), error);
+  Vector3f tool_relative_position = MANAGER::getComponentRelativePositionToParent(manipulator, tool_name);
+  Vector3f base_position = MANAGER::getComponentPositionToWorld(manipulator, MANAGER::getWorldChildName(manipulator));
   Vector3f temp_vector;
 
   float target_angle[3];
@@ -213,13 +213,13 @@ VectorXf KINEMATICS::LINK::inverse(Manipulator *manipulator, Name tool_number, P
   control_position(2) = target_pose.position(2) - tool_relative_position(2);
 
   // temp_vector = omlink.link_[0].getRelativeJointPosition(1,0);
-  temp_vector = MANAGER::getComponentRelativePositionToParent(manipulator, MANAGER::getComponentParentName(manipulator, MANAGER::getComponentParentName(manipulator, MANAGER::getComponentParentName(manipulator, tool_number, error), error), error), error);
+  temp_vector = MANAGER::getComponentRelativePositionToParent(manipulator, MANAGER::getComponentParentName(manipulator, MANAGER::getComponentParentName(manipulator, MANAGER::getComponentParentName(manipulator, tool_name))));
   link[0] = temp_vector(2);
   // temp_vector = omlink.link_[1].getRelativeJointPosition(5,1);
-  temp_vector = MANAGER::getComponentRelativePositionToParent(manipulator, MANAGER::getComponentParentName(manipulator, MANAGER::getComponentParentName(manipulator, tool_number, error), error), error);
+  temp_vector = MANAGER::getComponentRelativePositionToParent(manipulator, MANAGER::getComponentParentName(manipulator, MANAGER::getComponentParentName(manipulator, tool_name)));
   link[1] = temp_vector(0);
   // temp_vector = omlink.link_[4].getRelativeJointPosition(6,5);
-  temp_vector = MANAGER::getComponentRelativePositionToParent(manipulator, MANAGER::getComponentParentName(manipulator, tool_number, error), error);
+  temp_vector = MANAGER::getComponentRelativePositionToParent(manipulator, MANAGER::getComponentParentName(manipulator, tool_name));
   link[2] = -temp_vector(0);
 
   temp_y = control_position(2) - base_position(2);
@@ -229,7 +229,7 @@ VectorXf KINEMATICS::LINK::inverse(Manipulator *manipulator, Name tool_number, P
   target_angle[2] = acos((link[1] * link[1] + link[2] * link[2] - (temp_x * temp_x + temp_y * temp_y)) / (2 * link[1] * link[2])) + target_angle[1];
 
   target_angle_vector << target_angle[0],
-      target_angle[1],
-      target_angle[2];
+      -target_angle[1],
+      -target_angle[2];
   return target_angle_vector;
 }

@@ -44,9 +44,9 @@ VectorXf inverse(Manipulator *manipulator, Name tool_name, Pose target_pose);
 
 namespace LINK
 {
-void solveKinematicsSinglePoint(Manipulator *manipulator, Name component_name, bool *error = false);
-void forward(Manipulator *manipulator, bool *error = false);
-VectorXf inverse(Manipulator *manipulator, Name tool_number, Pose target_pose, bool *error = false); //for basic model);
+void solveKinematicsSinglePoint(Manipulator *manipulator, Name component_name);
+void forward(Manipulator *manipulator);
+VectorXf inverse(Manipulator *manipulator, Name tool_name, Pose target_pose); //for basic model);
 } // namespace LINK
 
 #if 0
