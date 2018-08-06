@@ -147,7 +147,7 @@ VectorXf KINEMATICS::CHAIN::inverse(Manipulator *manipulator, Name tool_name, Po
   return result_angle;
 }
 
-#if 0
+
 void KINEMATICS::LINK::solveKinematicsSinglePoint(Manipulator *manipulator, Name component_name, bool *error = false)
 {
   Pose parent_pose;
@@ -233,4 +233,3 @@ VectorXf KINEMATICS::LINK::inverse(Manipulator *manipulator, Name tool_number, P
       target_angle[2];
   return target_angle_vector;
 }
-#endif

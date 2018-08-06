@@ -40,7 +40,7 @@
 #define JOINT10   12
 #define SUCTION   13
 
-Manipulator omlink(3); //(dof)
+Manipulator omlink; //(dof)
 
 void initOMLink()
 {
