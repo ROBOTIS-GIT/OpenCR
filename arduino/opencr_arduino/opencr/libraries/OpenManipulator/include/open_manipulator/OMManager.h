@@ -46,6 +46,7 @@ typedef struct
 {
   int8_t id;
   Vector3f axis;
+  float coefficient;   //actuator angle to joint angle
   float angle;
   float velocity;
   float acceleration;
@@ -55,6 +56,7 @@ typedef struct
 {
   int8_t id;
   bool on_off;
+  float coefficient;   //actuator value to tool value
   float value; //m or rad
 } Tool;
 
@@ -111,11 +113,13 @@ class Manipulator
   component_.at(name).origin.velocity
   component_.at(name).origin.acceleration
   component_.at(name).joint.id
+  component_.at(name).joint.coefficient
   component_.at(name).joint.axis
   component_.at(name).joint.angle
   component_.at(name).joint.velocity
   component_.at(name).joint.acceleration
   component_.at(name).tool.id
+  component_.at(name).tool.coefficient
   component_.at(name).tool.on_off
   component_.at(name).tool.value
   component_.at(name).inertia.mass
@@ -140,8 +144,9 @@ class Manipulator
                     Name child_name,
                     Vector3f relative_position,
                     Matrix3f relative_orientation,
-                    int8_t joint_actuator_id = -1,
                     Vector3f axis_of_rotation = Vector3f::Zero(),
+                    int8_t joint_actuator_id = -1,
+                    float coefficient = 1,
                     float mass = 0.0,
                     Matrix3f inertia_tensor = Matrix3f::Identity(3, 3),
                     Vector3f center_of_mass = Vector3f::Zero());
@@ -151,6 +156,7 @@ class Manipulator
                Vector3f relative_position,
                Matrix3f relative_orientation,
                int8_t tool_id = -1,
+               float coefficient = 1,
                float mass = 0.0,
                Matrix3f inertia_tensor = Matrix3f::Identity(3, 3),
                Vector3f center_of_mass = Vector3f::Zero());
@@ -210,12 +216,14 @@ class Manipulator
   Matrix3f getComponentRelativeOrientationToParent(Name name);
   Joint getComponentJoint(Name name);
   int8_t getComponentJointId(Name name);
+  float getComponentJointCoefficient(Name name);
   Vector3f getComponentJointAxis(Name name);
   float getComponentJointAngle(Name name);
   float getComponentJointVelocity(Name name);
   float getComponentJointAcceleration(Name name);
   Tool getComponentTool(Name name);
   int8_t getComponentToolId(Name name);
+  float getComponentToolCoefficient(Name name);
   bool getComponentToolOnOff(Name name);
   float getComponentToolValue(Name name);
   float getComponentMass(Name name);

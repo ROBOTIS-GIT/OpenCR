@@ -39,8 +39,9 @@ void Manipulator::addComponent(Name my_name,
                                Name child_name,
                                Vector3f relative_position,
                                Matrix3f relative_orientation,
-                               int8_t joint_actuator_id,
                                Vector3f axis_of_rotation,
+                               int8_t joint_actuator_id,
+                               float coefficient,
                                float mass,
                                Matrix3f inertia_tensor,
                                Vector3f center_of_mass)
@@ -59,11 +60,13 @@ void Manipulator::addComponent(Name my_name,
   temp_component.origin.velocity = VectorXf::Zero(3);
   temp_component.origin.acceleration = VectorXf::Zero(3);
   temp_component.joint.id = joint_actuator_id;
+  temp_component.joint.coefficient = coefficient;
   temp_component.joint.axis = axis_of_rotation;
   temp_component.joint.angle = 0.0;
   temp_component.joint.velocity = 0.0;
   temp_component.joint.acceleration = 0.0;
   temp_component.tool.id = -1;
+  temp_component.tool.coefficient = 0;
   temp_component.tool.on_off = false;
   temp_component.tool.value = 0.0;
   temp_component.inertia.mass = mass;
@@ -83,6 +86,7 @@ void Manipulator::addTool(Name my_name,
                           Vector3f relative_position,
                           Matrix3f relative_orientation,
                           int8_t tool_id,
+                          float coefficient,
                           float mass,
                           Matrix3f inertia_tensor,
                           Vector3f center_of_mass)
@@ -97,11 +101,13 @@ void Manipulator::addTool(Name my_name,
   temp_component.origin.velocity = VectorXf::Zero(3);
   temp_component.origin.acceleration = VectorXf::Zero(3);
   temp_component.joint.id = -1;
+  temp_component.joint.coefficient = 0;
   temp_component.joint.axis = Vector3f::Zero();
   temp_component.joint.angle = 0.0;
   temp_component.joint.velocity = 0.0;
   temp_component.joint.acceleration = 0.0;
   temp_component.tool.id = tool_id;
+  temp_component.tool.coefficient = coefficient;
   temp_component.tool.on_off = false;
   temp_component.tool.value = 0.0;
   temp_component.inertia.mass = mass;
@@ -542,6 +548,11 @@ int8_t Manipulator::getComponentJointId(Name name)
   return component_.at(name).joint.id;
 }
 
+float Manipulator::getComponentJointCoefficient(Name name)
+{
+  return component_.at(name).joint.coefficient;
+}
+
 Vector3f Manipulator::getComponentJointAxis(Name name)
 {
   return component_.at(name).joint.axis;
@@ -570,6 +581,11 @@ Tool Manipulator::getComponentTool(Name name)
 int8_t Manipulator::getComponentToolId(Name name)
 {
   return component_.at(name).tool.id;
+}
+
+float Manipulator::getComponentToolCoefficient(Name name)
+{
+  return component_.at(name).tool.coefficient;
 }
 
 bool Manipulator::getComponentToolOnOff(Name name)
