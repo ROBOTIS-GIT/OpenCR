@@ -20,29 +20,53 @@
 
 void PROCESSING::split(String data, char separator, String* temp)
 {
-	int cnt = 0;
-	int get_index = 0;
+  int cnt = 0;
+  int get_index = 0;
 
   String copy = data;
   
-	while(true)
+  while(true)
+  {
+    get_index = copy.indexOf(separator);
+
+	if(-1 != get_index)
 	{
-		get_index = copy.indexOf(separator);
-
-		if(-1 != get_index)
-		{
-			temp[cnt] = copy.substring(0, get_index);
-
-			copy = copy.substring(get_index + 1);
-		}
-		else
-		{
-      temp[cnt] = copy.substring(0, copy.length());
-			break;
-		}
-		++cnt;
+	  temp[cnt] = copy.substring(0, get_index);
+  	  copy = copy.substring(get_index + 1);
 	}
+	else
+	{
+      temp[cnt] = copy.substring(0, copy.length());
+	  break;
+	}
+	  ++cnt;
+  }
 }
 
+  void PROCESSING::initProcessing(int8_t joint_angle_vector_size)
+  {  
+    for (int i = 0; i < joint_angle_vector_size; i++)
+    {
+      Serial.print(0.0);
+      Serial.print(",");
+    }
+
+    Serial.println(0.0);
+    delay(300);
+
+    Serial.println("Init Processing");
+  }
+
+  void PROCESSING::sendAngle2Processing(std::vector<float> joint_angle_vector)
+  {
+    Serial.print("angle");
+
+    for (int i = 0; i < joint_angle_vector.size(); i++)
+    {
+      Serial.print(",");
+      Serial.print(joint_angle_vector.at(i));
+    }
+  Serial.println(" ");
+  }
 
 

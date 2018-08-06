@@ -20,14 +20,17 @@
 #define OMBRIDGE_H_
 
 #include <unistd.h>
+#include <vector>
+
 #include "OMDebug.h"
 
 namespace PROCESSING
 {
-void split(String data, char separator, String* temp);
+  void split(String data, char separator, String* temp);
+  void initProcessing(int8_t joint_angle_vector_size);
+  void sendAngle2Processing(std::vector<float> joint_angle_vector);
 
-
-} // namespace MATH
+} // namespace PROCESSING
 
 
 
