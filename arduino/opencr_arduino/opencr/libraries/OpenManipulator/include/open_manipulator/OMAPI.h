@@ -99,8 +99,8 @@ namespace MANAGER
 void addWorld(Manipulator *manipulator,
               Name world_name,
               Name child_name,
-              Vector3f world_position = ZERO_VECTOR,
-              Matrix3f world_orientation = IDENTITY_MATRIX);
+              Vector3f world_position = Vector3f::Zero(),
+              Matrix3f world_orientation = Matrix3f::Identity(3, 3));
 
 void addComponent(Manipulator *manipulator,
                   Name me_name,
@@ -108,11 +108,12 @@ void addComponent(Manipulator *manipulator,
                   Name child_name,
                   Vector3f relative_position,
                   Matrix3f relative_orientation,
+                  Vector3f axis_of_rotation = Vector3f::Zero(),
                   int8_t actuator_id = -1,
-                  Vector3f axis_of_rotation = ZERO_VECTOR,
+                  float coefficient = 1,
                   float mass = 0.0,
-                  Matrix3f inertia_tensor = IDENTITY_MATRIX,
-                  Vector3f center_of_mass = ZERO_VECTOR);
+                  Matrix3f inertia_tensor = Matrix3f::Identity(3, 3),
+                  Vector3f center_of_mass = Vector3f::Zero());
 
 void addTool(Manipulator *manipulator,
              Name me_name,
@@ -120,9 +121,10 @@ void addTool(Manipulator *manipulator,
              Vector3f relative_position,
              Matrix3f relative_orientation,
              int8_t tool_id = -1,
+             float coefficient = 1,
              float mass = 0.0,
-             Matrix3f inertia_tensor = IDENTITY_MATRIX,
-             Vector3f center_of_mass = ZERO_VECTOR);
+             Matrix3f inertia_tensor = Matrix3f::Identity(3, 3),
+             Vector3f center_of_mass = Vector3f::Zero());
 
 void addComponentChild(Manipulator *manipulator, Name me_name, Name child_name);
 void checkManipulatorSetting(Manipulator *manipulator);
@@ -177,12 +179,14 @@ Vector3f getComponentRelativePositionToParent(Manipulator *manipulator, Name nam
 Matrix3f getComponentRelativeOrientationToParent(Manipulator *manipulator, Name name);
 Joint getComponentJoint(Manipulator *manipulator, Name name);
 int8_t getComponentJointId(Manipulator *manipulator, Name name);
+float getComponentJointCoefficient(Manipulator *manipulator, Name name);
 Vector3f getComponentJointAxis(Manipulator *manipulator, Name name);
 float getComponentJointAngle(Manipulator *manipulator, Name name);
 float getComponentJointVelocity(Manipulator *manipulator, Name name);
 float getComponentJointAcceleration(Manipulator *manipulator, Name name);
 Tool getComponentTool(Manipulator *manipulator, Name name);
 int8_t getComponentToolId(Manipulator *manipulator, Name name);
+float getComponentToolCoefficient(Manipulator *manipulator, Name name);
 bool getComponentToolOnOff(Manipulator *manipulator, Name name);
 float getComponentToolValue(Manipulator *manipulator, Name name);
 float getComponentMass(Manipulator *manipulator, Name name);

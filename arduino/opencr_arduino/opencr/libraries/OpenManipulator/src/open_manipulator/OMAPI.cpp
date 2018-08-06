@@ -104,13 +104,14 @@ void MANAGER::addComponent(Manipulator *manipulator,
                            Name child_name,
                            Vector3f relative_position,
                            Matrix3f relative_orientation,
-                           int8_t actuator_id,
                            Vector3f axis_of_rotation,
+                           int8_t actuator_id,
+                           float coefficient,
                            float mass,
                            Matrix3f inertia_tensor,
                            Vector3f center_of_mass)
 {
-  manipulator->addComponent(my_name, parent_name, child_name, relative_position, relative_orientation, actuator_id, axis_of_rotation, mass, inertia_tensor, center_of_mass);
+  manipulator->addComponent(my_name, parent_name, child_name, relative_position, relative_orientation, axis_of_rotation, actuator_id, coefficient, mass, inertia_tensor, center_of_mass);
 }
 
 void MANAGER::addTool(Manipulator *manipulator,
@@ -119,11 +120,12 @@ void MANAGER::addTool(Manipulator *manipulator,
                       Vector3f relative_position,
                       Matrix3f relative_orientation,
                       int8_t tool_id,
+                      float coefficient,
                       float mass,
                       Matrix3f inertia_tensor,
                       Vector3f center_of_mass)
 {
-  manipulator->addTool(my_name, parent_name, relative_position, relative_orientation, tool_id, mass, inertia_tensor, center_of_mass);
+  manipulator->addTool(my_name, parent_name, relative_position, relative_orientation, tool_id, coefficient, mass, inertia_tensor, center_of_mass);
 }
 
 void MANAGER::addComponentChild(Manipulator *manipulator, Name my_name, Name child_name)
@@ -361,6 +363,11 @@ int8_t MANAGER::getComponentJointId(Manipulator *manipulator, Name name)
   return manipulator->getComponentJointId(name);
 }
 
+float getComponentJointCoefficient(Manipulator *manipulator, Name name)
+{
+  return manipulator->getComponentJointCoefficient(name);
+}
+
 Vector3f MANAGER::getComponentJointAxis(Manipulator *manipulator, Name name)
 {
   return manipulator->getComponentJointAxis(name);
@@ -389,6 +396,11 @@ Tool MANAGER::getComponentTool(Manipulator *manipulator, Name name)
 int8_t MANAGER::getComponentToolId(Manipulator *manipulator, Name name)
 {
   return manipulator->getComponentToolId(name);
+}
+
+float getComponentToolCoefficient(Manipulator *manipulator, Name name)
+{
+  return manipulator->getComponentToolCoefficient(name);
 }
 
 bool MANAGER::getComponentToolOnOff(Manipulator *manipulator, Name name)
