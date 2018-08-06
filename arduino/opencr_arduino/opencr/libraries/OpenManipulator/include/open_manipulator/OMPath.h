@@ -14,23 +14,41 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM, Darby Lim*/
-   
-#ifndef OMPath_H_
-#define OMPath_H_
+/* Authors: Darby Lim, Hye-Jong KIM */
 
+#ifndef OMPATH_H_
+#define OMPATH_H_
+
+#include <Eigen.h>        // Calls main Eigen matrix class library
+#include <Eigen/LU>       // Calls inverse, determinant, LU decomp., etc.
+#include <Eigen/Dense>
+
+#include "OMMath.h"
 #include "OMDebug.h"
 
+using namespace Eigen;
 
+typedef struct
+{
+  float position;
+  float velocity;
+  float acceleration;
+} Trajectory
 
+class MinimumJerk
+{
+ private:
+  MatrixXf coeffi_;
 
+ public:
+  MinimumJerk();
+  ~MinimumJerk();
 
+  void setCoeffi(Trajectory start, Trajectory end, uint8_t link_num, float mov_time, float control_period);
 
-#endif // OMPath_HPP_  
-   
-   
-   
-   
-   
-   
-  
+  float getPosition(uint8_t to, float tick);
+  float getVelocity(uint8_t to, float tick);
+  float getAcceleration(uint8_t to, float tick);
+};
+
+#endif // OMPATH_H_
