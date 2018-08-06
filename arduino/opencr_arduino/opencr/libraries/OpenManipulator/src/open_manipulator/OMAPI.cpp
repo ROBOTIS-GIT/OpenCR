@@ -208,6 +208,20 @@ void MANAGER::setComponentJointAngle(Manipulator *manipulator, Name name, float 
   manipulator->setComponentJointAngle(name, angle);
 }
 
+void MANAGER::setAllActiveJointAngle(Manipulator *manipulator, std::vector<float> angle_vector)
+{
+  std::map<Name, Component>::iterator it;
+  int8_t i = 0
+  for(it = manipulator->getIteratorBegin(); it != manipulator->getIteratorEnd(); it++)
+  {
+    if(manipulator->getComponentJointId(it->first) >= 0)
+    {
+      manipulator->setComponentJointAngle(it->first, angle_vector.at(i));
+      i++;
+    }
+  }
+}
+
 void MANAGER::setComponentJointVelocity(Manipulator *manipulator, Name name, float angular_velocity)
 {
   manipulator->setComponentJointVelocity(name, angular_velocity);
@@ -363,7 +377,7 @@ int8_t MANAGER::getComponentJointId(Manipulator *manipulator, Name name)
   return manipulator->getComponentJointId(name);
 }
 
-float getComponentJointCoefficient(Manipulator *manipulator, Name name)
+float MANAGER::getComponentJointCoefficient(Manipulator *manipulator, Name name)
 {
   return manipulator->getComponentJointCoefficient(name);
 }
@@ -376,6 +390,34 @@ Vector3f MANAGER::getComponentJointAxis(Manipulator *manipulator, Name name)
 float MANAGER::getComponentJointAngle(Manipulator *manipulator, Name name)
 {
   return manipulator->getComponentJointAngle(name);
+}
+
+std::vector<float> MANAGER::getAllJointAngle(Manipulator *manipulator)
+{
+  std::vector<float> result_vector;
+  std::map<Name, Component>::iterator it;
+  for(it = manipulator->getIteratorBegin(); it != manipulator->getIteratorEnd(); it++)
+  {
+    if(manipulator->getComponentToolId(it->first) < 0)
+    {
+      result_vector.push_back(getComponentJointAngle(it->first));
+    }
+  }
+  return result_vector;
+}
+
+std::vector<float> MANAGER::getAllActiveJointAngle(Manipulator *manipulator)
+{
+  std::vector<float> result_vector;
+  std::map<Name, Component>::iterator it;
+  for(it = manipulator->getIteratorBegin(); it != manipulator->getIteratorEnd(); it++)
+  {
+    if(manipulator->getComponentJointId(it->first) >= 0)
+    {
+      result_vector.push_back(getComponentJointAngle(it->first));
+    }
+  }
+  return result_vector;
 }
 
 float MANAGER::getComponentJointVelocity(Manipulator *manipulator, Name name)
@@ -398,7 +440,7 @@ int8_t MANAGER::getComponentToolId(Manipulator *manipulator, Name name)
   return manipulator->getComponentToolId(name);
 }
 
-float getComponentToolCoefficient(Manipulator *manipulator, Name name)
+float MANAGER::getComponentToolCoefficient(Manipulator *manipulator, Name name)
 {
   return manipulator->getComponentToolCoefficient(name);
 }

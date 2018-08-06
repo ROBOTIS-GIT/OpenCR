@@ -57,12 +57,12 @@ namespace KINEMATICS
 {
 void (*foward)(Manipulator *, bool *) = NULL;
 void (*inverse)(Manipulator *, Name, Pose, bool *) = NULL;
-void (*getPassiveJointAngle)(Manipulator *, bool *) = NULL;
+void (*SetPassiveJointAngle)(Manipulator *, bool *) = NULL;
 } // namespace KINEMATICS
 
 void connectForward(void (*fp)(Manipulator *, bool *)) { KINEMATICS::foward = fp; }
 void connectInverse(void (*fp)(Manipulator *, Name, Pose, bool *)) { KINEMATICS::inverse = fp; }
-void connectGetPassiveJointAngle(void (*fp)(Manipulator *, bool *)) { KINEMATICS::getPassiveJointAngle = fp; }
+void connectSetPassiveJointAngle(void (*fp)(Manipulator *, bool *)) { KINEMATICS::getPassiveJointAngle = fp; }
 
 namespace PATH
 {
@@ -144,6 +144,7 @@ void setComponentStateToWorld(Manipulator *manipulator, Name name, State state_t
 void setComponentVelocityToWorld(Manipulator *manipulator, Name name, VectorXf velocity);
 void setComponentAccelerationToWorld(Manipulator *manipulator, Name name, VectorXf accelaration);
 void setComponentJointAngle(Manipulator *manipulator, Name name, float angle);
+void setAllActiveJointAngle(Manipulator *manipulator, std::vector<float> angle_vector);
 void setComponentJointVelocity(Manipulator *manipulator, Name name, float angular_velocity);
 void setComponentJointAcceleration(Manipulator *manipulator, Name name, float angular_acceleration);
 void setComponentToolOnOff(Manipulator *manipulator, Name name, bool on_off);
@@ -180,6 +181,8 @@ int8_t getComponentJointId(Manipulator *manipulator, Name name);
 float getComponentJointCoefficient(Manipulator *manipulator, Name name);
 Vector3f getComponentJointAxis(Manipulator *manipulator, Name name);
 float getComponentJointAngle(Manipulator *manipulator, Name name);
+std::vector<float> getAllJointAngle(Manipulator *manipulator);
+std::vector<float> getAllActiveJointAngle(Manipulator *manipulator);
 float getComponentJointVelocity(Manipulator *manipulator, Name name);
 float getComponentJointAcceleration(Manipulator *manipulator, Name name);
 Tool getComponentTool(Manipulator *manipulator, Name name);
