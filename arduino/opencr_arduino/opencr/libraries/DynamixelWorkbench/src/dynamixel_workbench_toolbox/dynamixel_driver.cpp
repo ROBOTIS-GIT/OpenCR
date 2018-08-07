@@ -436,6 +436,39 @@ bool DynamixelDriver::writeRegister(uint8_t id, const char *item_name, int32_t d
   return true;
 }
 
+bool DynamixelDriver::writeRegister(uint8_t id, uint16_t addr, uint8_t length, int32_t data)
+{
+  uint8_t error = 0;
+  int dxl_comm_result = COMM_TX_FAIL;
+
+  if (length == BYTE)
+  {
+    dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, id, addr, (uint8_t)data, &error);
+  }
+  else if (length == WORD)
+  {
+    dxl_comm_result = packetHandler_->write2ByteTxRx(portHandler_, id, addr, (uint16_t)data, &error);
+  }
+  else if (length == DWORD)
+  {
+    dxl_comm_result = packetHandler_->write4ByteTxRx(portHandler_, id, addr, (uint32_t)data, &error);
+  }
+
+  if (dxl_comm_result == COMM_SUCCESS)
+  {
+    if (error != 0)
+    {
+      return false;
+    }
+  }
+  else
+  {
+    return false;
+  }
+
+  return true;
+}
+
 bool DynamixelDriver::readRegister(uint8_t id, const char *item_name, int32_t *data)
 {
   uint8_t error = 0;
@@ -477,6 +510,56 @@ bool DynamixelDriver::readRegister(uint8_t id, const char *item_name, int32_t *d
       *data = value_16_bit;
     }
     else if (cti->data_length == DWORD)
+    {
+      *data = value_32_bit;
+    }
+
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+bool DynamixelDriver::readRegister(uint8_t id, uint16_t addr, uint8_t length, int32_t *data)
+{
+  uint8_t error = 0;
+  int dxl_comm_result = COMM_RX_FAIL;
+
+  int8_t value_8_bit = 0;
+  int16_t value_16_bit = 0;
+  int32_t value_32_bit = 0;
+
+  if (length == BYTE)
+  {
+    dxl_comm_result = packetHandler_->read1ByteTxRx(portHandler_, id, addr, (uint8_t *)&value_8_bit, &error);
+  }
+  else if (length == WORD)
+  {
+    dxl_comm_result = packetHandler_->read2ByteTxRx(portHandler_, id, addr, (uint16_t *)&value_16_bit, &error);
+  }
+  else if (length == DWORD)
+  {
+    dxl_comm_result = packetHandler_->read4ByteTxRx(portHandler_, id, addr, (uint32_t *)&value_32_bit, &error);
+  }
+
+  if (dxl_comm_result == COMM_SUCCESS)
+  {
+    if (error != 0)
+    {
+      return false;
+    }
+
+    if (length == BYTE)
+    {
+      *data = value_8_bit;
+    }
+    else if (length == WORD)
+    {
+      *data = value_16_bit;
+    }
+    else if (length == DWORD)
     {
       *data = value_32_bit;
     }
