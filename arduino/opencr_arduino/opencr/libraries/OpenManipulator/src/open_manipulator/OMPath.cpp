@@ -14,20 +14,24 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM, Darby Lim*/
+/* Authors: Darby Lim, Hye-Jong KIM */
 
 #include "../../include/open_manipulator/OMPath.h"
 
-MinimumJerk::MinimumJerk() {}
+MinimumJerk::MinimumJerk()
+{
+  coefficient_ = VectorXf::Zero(6);
+}
 
 MinimumJerk::~MinimumJerk() {}
 
-void MinimumJerk::setCoeffi(Trajectory start, Trajectory end, uint8_t active_joint_num, float move_time, float control_period)
+void MinimumJerk::calcCoefficient(Trajectory start,
+                                  Trajectory goal,
+                                  float move_time,
+                                  float control_period)
 {
   uint16_t step_time = uint16_t(floor(move_time / control_period) + 1.0);
   move_time = float(step_time - 1) * control_period;
-
-  coeffi_.resize(6, link_num);
 
   Matrix3f A = Matrix3f::Identity(3, 3);
   Vector3f x = Vector3f::Zero();
@@ -37,61 +41,109 @@ void MinimumJerk::setCoeffi(Trajectory start, Trajectory end, uint8_t active_joi
       3 * pow(move_time, 2), 4 * pow(move_time, 3), 5 * pow(move_time, 4),
       6 * pow(move_time, 1), 12 * pow(move_time, 2), 20 * pow(move_time, 3);
 
-  for (int8_t num = 0; num < active_joint_num; num++)
+  coefficient_(0) = start.position;
+  coefficient_(1) = start.velocity;
+  coefficient_(2) = 0.5 * start.acceleration;
+
+  b << (goal.position - start.position - (start.velocity * move_time + 0.5 * start.acceleration * pow(move_time, 2))),
+      (goal.velocity - start.velocity - (start.acceleration * move_time)),
+      (goal.acceleration - start.acceleration);
+
+  ColPivHouseholderQR<Matrix3f> dec(A);
+  x = dec.solve(b);
+
+  coefficient_(3) = x(0);
+  coefficient_(4) = x(1);
+  coefficient_(5) = x(2);
+}
+
+VectorXf MinimumJerk::getCoefficient()
+{
+  return coefficient_;
+}
+
+JointTrajectory::JointTrajectory(uint8_t joint_num)
+{
+  joint_num_ = joint_num;
+  coefficient_ = MatrixXf::Identity(6, joint_num);
+  position_.reserve(joint_num);
+  velocity_.reserve(joint_num);
+  acceleration_.reserve(joint_num);
+}
+
+JointTrajectory::~JointTrajectory() {}
+
+void JointTrajectory::init(std::vector<Trajectory> start,
+                           std::vector<Trajectory> goal,
+                           float move_time,
+                           float control_period)
+{
+  for (uint8_t index = 0; index < start.size(); index++)
   {
-    VectorXf single_coeffi(6);
-
-    single_coeffi(0) = start[num].pos;
-    single_coeffi(1) = start[num].vel;
-    single_coeffi(2) = 0.5 * start[num].acc;
-
-    b << (end[num].pos - start[num].pos - (start[num].vel * move_time + 0.5 * start[num].acc * pow(move_time, 2))),
-        (end[num].vel - start[num].vel - (start[num].acc * move_time)),
-        (end[num].acc - start[num].acc);
-
-    ColPivHouseholderQR<Matrix3f> dec(A);
-    x = dec.solve(b);
-
-    single_coeffi(3) = x(0);
-    single_coeffi(4) = x(1);
-    single_coeffi(5) = x(2);
-
-    coeffi_.col(num) = single_coeffi;
+    path_generator_.calcCoefficient(start.at(index),
+                                    goal.at(index),
+                                    move_time,
+                                    control_period);
+    coefficient_.col(index) = path_generator_.getCoefficient();
   }
 }
 
-float MinimumJerk::getPosition(Trajectory *joint, uint8_t to, float tick)
+std::vector<float> JointTrajectory::getPosition(float tick)
 {
-  for (int num = 0; num <= to; num++)
+  position_.clear();
+  for (uint8_t index = 0; index < joint_num_; index++)
   {
-    joint[num].pos = coeffi_(0, num) +
-                     coeffi_(1, num) * pow(tick, 1) +
-                     coeffi_(2, num) * pow(tick, 2) +
-                     coeffi_(3, num) * pow(tick, 3) +
-                     coeffi_(4, num) * pow(tick, 4) +
-                     coeffi_(5, num) * pow(tick, 5);
+    float result = 0.0;
+    result = coefficient_(0, index) +
+             coefficient_(1, index) * pow(tick, 1) +
+             coefficient_(2, index) * pow(tick, 2) +
+             coefficient_(3, index) * pow(tick, 3) +
+             coefficient_(4, index) * pow(tick, 4) +
+             coefficient_(5, index) * pow(tick, 5);
+
+    position_.push_back(result);
   }
+
+  return position_;
 }
 
-float MinimumJerk::getVelocity(Trajectory *joint, uint8_t to, float tick)
+std::vector<float> JointTrajectory::getVelocity(float tick)
 {
-  for (int num = 0; num <= to; num++)
+  velocity_.clear();
+  for (uint8_t index = 0; index < joint_num_; index++)
   {
-    joint[num].vel = coeffi_(1, num) +
-                     2 * coeffi_(2, num) * pow(tick, 1) +
-                     3 * coeffi_(3, num) * pow(tick, 2) +
-                     4 * coeffi_(4, num) * pow(tick, 3) +
-                     5 * coeffi_(5, num) * pow(tick, 4);
+    float result = 0.0;
+    result = coefficient_(1, index) +
+             2 * coefficient_(2, index) * pow(tick, 1) +
+             3 * coefficient_(3, index) * pow(tick, 2) +
+             4 * coefficient_(4, index) * pow(tick, 3) +
+             5 * coefficient_(5, index) * pow(tick, 4);
+
+    velocity_.push_back(result);
   }
+
+  return velocity_;
 }
 
-float MinimumJerk::getAcceleration(Trajectory *joint, uint8_t to, float tick)
+std::vector<float> JointTrajectory::getAcceleration(float tick)
 {
-  for (int num = 0; num <= to; num++)
+  acceleration_.clear();
+  for (uint8_t index = 0; index < joint_num_; index++)
   {
-    joint[num].acc = 2 * coeffi_(2, num) +
-                     6 * coeffi_(3, num) * pow(tick, 1) +
-                     12 * coeffi_(4, num) * pow(tick, 2) +
-                     20 * coeffi_(5, num) * pow(tick, 3);
+    float result = 0.0;
+
+    result = 2 * coefficient_(2, index) +
+             6 * coefficient_(3, index) * pow(tick, 1) +
+             12 * coefficient_(4, index) * pow(tick, 2) +
+             20 * coefficient_(5, index) * pow(tick, 3);
+          
+    acceleration_.push_back(result);
   }
+
+  return acceleration_;
+}
+
+MatrixXf JointTrajectory::getCoefficient()
+{
+  return coefficient_;
 }
