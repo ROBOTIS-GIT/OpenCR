@@ -19,9 +19,11 @@
 #ifndef OMPATH_H_
 #define OMPATH_H_
 
-#include <Eigen.h>        // Calls main Eigen matrix class library
-#include <Eigen/LU>       // Calls inverse, determinant, LU decomp., etc.
+#include <Eigen.h>  // Calls main Eigen matrix class library
+#include <Eigen/LU> // Calls inverse, determinant, LU decomp., etc.
 #include <Eigen/Dense>
+
+#include <vector>
 
 #include "OMMath.h"
 #include "OMDebug.h"
@@ -33,22 +35,56 @@ typedef struct
   float position;
   float velocity;
   float acceleration;
-} Trajectory
+} Trajectory;
 
 class MinimumJerk
 {
- private:
-  MatrixXf coeffi_;
+private:
+  VectorXf coefficient_;
 
- public:
+public:
   MinimumJerk();
-  ~MinimumJerk();
+  virtual ~MinimumJerk();
 
-  void setCoeffi(Trajectory start, Trajectory end, uint8_t link_num, float mov_time, float control_period);
+  void calcCoefficient(Trajectory start,
+                       Trajectory goal,
+                       float move_time,
+                       float control_period);
 
-  float getPosition(uint8_t to, float tick);
-  float getVelocity(uint8_t to, float tick);
-  float getAcceleration(uint8_t to, float tick);
+  VectorXf getCoefficient();
+};
+
+class JointTrajectory
+{
+private:
+  MinimumJerk path_generator_;
+
+  uint8_t joint_num_;
+  MatrixXf coefficient_;
+  std::vector<float> position_;
+  std::vector<float> velocity_;
+  std::vector<float> acceleration_;  
+
+public:
+  JointTrajectory(uint8_t joint_num);
+  virtual ~JointTrajectory();
+
+  void init(std::vector<Trajectory> start,
+            std::vector<Trajectory> goal,
+            float move_time,
+            float control_period);
+
+  std::vector<float> getPosition(float tick);
+  std::vector<float> getVelocity(float tick);
+  std::vector<float> getAcceleration(float tick);
+
+  MatrixXf getCoefficient();
+};
+
+class Circle
+{
+private:
+  MinimumJerk path_generator_;
 };
 
 #endif // OMPATH_H_
