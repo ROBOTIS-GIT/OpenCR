@@ -211,7 +211,7 @@ void MANAGER::setComponentJointAngle(Manipulator *manipulator, Name name, float 
 void MANAGER::setAllActiveJointAngle(Manipulator *manipulator, std::vector<float> angle_vector)
 {
   std::map<Name, Component>::iterator it;
-  int8_t i = 0
+  int8_t i = 0;
   for(it = manipulator->getIteratorBegin(); it != manipulator->getIteratorEnd(); it++)
   {
     if(manipulator->getComponentJointId(it->first) >= 0)
@@ -400,7 +400,7 @@ std::vector<float> MANAGER::getAllJointAngle(Manipulator *manipulator)
   {
     if(manipulator->getComponentToolId(it->first) < 0)
     {
-      result_vector.push_back(getComponentJointAngle(it->first));
+      result_vector.push_back(manipulator->getComponentJointAngle(it->first));
     }
   }
   return result_vector;
@@ -414,7 +414,7 @@ std::vector<float> MANAGER::getAllActiveJointAngle(Manipulator *manipulator)
   {
     if(manipulator->getComponentJointId(it->first) >= 0)
     {
-      result_vector.push_back(getComponentJointAngle(it->first));
+      result_vector.push_back(manipulator->getComponentJointAngle(it->first));
     }
   }
   return result_vector;

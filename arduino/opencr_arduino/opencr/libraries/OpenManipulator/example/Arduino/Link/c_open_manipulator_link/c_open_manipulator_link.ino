@@ -16,7 +16,7 @@
 #define JOINT10   12
 #define SUCTION   13
 
-//void myGetPassiveJointAngle(Manipulator* omlink);
+//void mySetPassiveJointAngle(Manipulator* omlink);
 
 //Manipulator omlink;
 
@@ -49,7 +49,7 @@ void setup()
   omlink.setComponentJointAngle(JOINT0, target_angle(0));
   omlink.setComponentJointAngle(JOINT1, target_angle(1));
   omlink.setComponentJointAngle(JOINT2, target_angle(2));
-  myGetPassiveJointAngle(&omlink);
+  MyFunction::setPassiveJointAngle(&omlink);
   KINEMATICS::LINK::forward(&omlink);
   omlink.checkManipulatorSetting();
 
@@ -73,7 +73,7 @@ void setup()
   omlink.setComponentJointAngle(JOINT0, target_angle(0));
   omlink.setComponentJointAngle(JOINT1, target_angle(1));
   omlink.setComponentJointAngle(JOINT2, target_angle(2));
-  myGetPassiveJointAngle(&omlink);
+  MyFunction::setPassiveJointAngle(&omlink);
   KINEMATICS::LINK::forward(&omlink);
   omlink.checkManipulatorSetting();
 

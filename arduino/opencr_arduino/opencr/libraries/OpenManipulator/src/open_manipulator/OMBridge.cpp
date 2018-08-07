@@ -43,30 +43,30 @@ void PROCESSING::split(String data, char separator, String* temp)
   }
 }
 
-  void PROCESSING::initProcessing(int8_t joint_angle_vector_size)
-  {  
-    for (int i = 0; i < joint_angle_vector_size; i++)
-    {
-      Serial.print(0.0);
-      Serial.print(",");
-    }
-
-    Serial.println(0.0);
-    delay(300);
-
-    Serial.println("Init Processing");
-  }
-
-  void PROCESSING::sendAngle2Processing(std::vector<float> joint_angle_vector)
+void PROCESSING::initProcessing(int8_t joint_angle_vector_size)
+{  
+  for (int i = 0; i < joint_angle_vector_size; i++)
   {
-    Serial.print("angle");
-
-    for (int i = 0; i < joint_angle_vector.size(); i++)
-    {
-      Serial.print(",");
-      Serial.print(joint_angle_vector.at(i));
-    }
-  Serial.println(" ");
+    Serial.print(0.0);
+    Serial.print(",");
   }
+
+  Serial.println(0.0);
+  delay(300);
+
+  Serial.println("Init Processing");
+}
+
+void PROCESSING::sendAngle2Processing(std::vector<float> joint_angle_vector)
+{
+  Serial.print("angle");
+
+  for (int i = 0; i < joint_angle_vector.size(); i++)
+  {
+    Serial.print(",");
+    Serial.print(joint_angle_vector.at(i));
+  }
+  Serial.println(" ");
+}
 
 
