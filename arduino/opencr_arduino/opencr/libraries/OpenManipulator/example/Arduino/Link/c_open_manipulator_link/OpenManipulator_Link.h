@@ -23,6 +23,7 @@
 #include <OMMath.h>
 #include <OMKinematics.h>
 #include <OMDebug.h>
+#include <OMBridge.h>
 
 #define WORLD     0
 #define BASE      1
