@@ -29,7 +29,6 @@ namespace PROCESSING
   void split(String data, char separator, String* temp);
   void initProcessing(int8_t joint_angle_vector_size);
   void sendAngle2Processing(std::vector<float> joint_angle_vector);
-
 } // namespace PROCESSING
 
 
