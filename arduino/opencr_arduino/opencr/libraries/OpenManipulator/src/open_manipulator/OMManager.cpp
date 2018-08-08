@@ -164,16 +164,18 @@ void Manipulator::checkManipulatorSetting()
 
     USB.println("\nJoint");
     USB.println(" ID : " + String(component_[it->first].joint.id));
+    USB.print(" Coefficient : "); USB.println(component_[it->first].joint.coefficient);
     USB.println(" Axis : ");
     PRINT::VECTOR(component_[it->first].joint.axis);
-    USB.print(" Angle : ");+ USB.println(component_[it->first].joint.angle);
-    USB.print(" Velocity : "); + USB.println(component_[it->first].joint.velocity);
-    USB.print(" Acceleration : "); + USB.println(component_[it->first].joint.acceleration);
+    USB.print(" Angle : "); USB.println(component_[it->first].joint.angle);
+    USB.print(" Velocity : "); USB.println(component_[it->first].joint.velocity);
+    USB.print(" Acceleration : "); USB.println(component_[it->first].joint.acceleration);
 
     USB.println("\nTool");
     USB.println(" ID : " + String(component_[it->first].tool.id));
+    USB.print(" Coefficient : "); USB.println(component_[it->first].tool.coefficient);
     USB.println(" OnOff : " + String(component_[it->first].tool.on_off));
-    USB.println(" Value : "); USB.println(component_[it->first].tool.value);
+    USB.print(" Value : "); USB.println(component_[it->first].tool.value);
 
     USB.println("\nInertia");
     USB.print(" Mass : "); USB.println(component_[it->first].inertia.mass);

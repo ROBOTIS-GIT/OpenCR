@@ -129,7 +129,7 @@ class Manipulator
   /////////////////////////////////////////////////////////////////////////////
 
  public:
-  Manipulator(){};
+  Manipulator():dof_(0){};
   virtual ~Manipulator(){};
 
   ///////////////////////////initialize function/////////////////////////////
@@ -186,7 +186,7 @@ class Manipulator
   void setComponentToolValue(Name name, float value);
 
   ///////////////////////////////Get function//////////////////////////////////
-
+  Manipulator getManipulator();
   int8_t getDOF();
   Name getWorldName();
   Name getWorldChildName();
