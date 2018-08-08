@@ -1,17 +1,17 @@
 #include <OMManager.h>
 #include <Eigen.h>
 
-Eigen::Vector3f makeEigenVector3(float v1, float v2, float v3);
-Eigen::Matrix3f makeEigenMatrix3(float m11, float m12, float m13,
+Eigen::Vector3f makeVector3(float v1, float v2, float v3);
+Eigen::Matrix3f makeMatrix3(float m11, float m12, float m13,
                                  float m21, float m22, float m23,
                                  float m31, float m32, float m33);
 
 #define ZERO_VECTOR Vector3f::Zero()
 #define IDENTITY_MATRIX Matrix3f::Identity(3, 3)
 
-#define X_AXIS makeEigenVector3(1.0, 0.0, 0.0)
-#define Y_AXIS makeEigenVector3(0.0, 1.0, 0.0)
-#define Z_AXIS makeEigenVector3(0.0, 0.0, 1.0)
+#define X_AXIS makeVector3(1.0, 0.0, 0.0)
+#define Y_AXIS makeVector3(0.0, 1.0, 0.0)
+#define Z_AXIS makeVector3(0.0, 0.0, 1.0)
 
 #define WORLD 0
 #define COMP1 1
@@ -30,12 +30,12 @@ void setup()
     
   Manipulator manipulator;
   manipulator.addWorld(WORLD, COMP1);
-  manipulator.addComponent(COMP1, WORLD, COMP2, makeVector3(-0.100, 0.0, 0.0), IDENTITY_MATRIX, 1, Z_AXIS, 0.5, makeMatrix3(1, 1, 1, 1, 1, 1, 3, 1, 1));
-  manipulator.addComponent(COMP2, COMP1, COMP3, makeVector3(0.0, 0.0, 0.050), IDENTITY_MATRIX, 2, Y_AXIS, 1.5);
-  manipulator.addComponentChild(COMP2, COMP4);
-  manipulator.addComponent(COMP3, COMP2, TOOL, makeVector3(0.0, 0.050, 0.0), IDENTITY_MATRIX, 3, Y_AXIS, 2.0);
-  manipulator.addComponent(COMP4, COMP2, TOOL, makeVector3(0.0, 0.0, 0.050), IDENTITY_MATRIX, NONE);
-  manipulator.addTool(TOOL, COMP3, makeVector3(0.0, 0.0, 0.025), IDENTITY_MATRIX, 4, 0.1);
+  manipulator.addComponent(COMP1, WORLD, COMP2, makeVector3(-0.100, 0.0, 0.0), IDENTITY_MATRIX, Z_AXIS, 1, 0.5, 1.0);
+  manipulator.addComponent(COMP2, COMP1, COMP4, makeVector3(0.0, 0.0, 0.050), IDENTITY_MATRIX, Y_AXIS, 2, -1.5, 1.5);
+  manipulator.addComponentChild(COMP2, COMP3);
+  manipulator.addComponent(COMP3, COMP2, TOOL, makeVector3(0.0, 0.050, 0.0), IDENTITY_MATRIX);
+  manipulator.addComponent(COMP4, COMP2, TOOL, makeVector3(0.0, 0.0, 0.050), IDENTITY_MATRIX, Y_AXIS, 3, 2.0);  
+  manipulator.addTool(TOOL, COMP4, makeVector3(0.0, 0.0, 0.025), IDENTITY_MATRIX, 4, 1.0, 0.5);
 
   manipulator.checkManipulatorSetting();
 }
