@@ -38,14 +38,35 @@ void LOG::INFO(String msg)
   log("[INFO] ", msg);
 }
 
+void LOG::INFO(String msg, float num)
+{
+  USB.print("[INFO] ");
+  USB.print(msg);
+  USB.println(num, 3);
+}
+
 void LOG::WARN(String msg)
 {
   log("[WARN] ", msg);
 }
 
+void LOG::WARN(String msg, float num)
+{
+  USB.print("[WARN] ");
+  USB.print(msg);
+  USB.println(num, 3);
+}
+
 void LOG::ERROR(String msg)
 {
   log("[ERROR] ", msg);
+}
+
+void LOG::ERROR(String msg, float num)
+{
+  USB.print("[ERROR] ");
+  USB.print(msg);
+  USB.println(num, 3);
 }
 
 // void showJointAngle(String unit, OPMLink* link, int from, int to)
