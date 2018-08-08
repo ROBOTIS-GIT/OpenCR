@@ -21,6 +21,7 @@
 
 #include <Eigen.h>
 #include <WString.h>
+#include <vector>
 #include "variant.h"
 
 #define USB Serial
@@ -33,8 +34,13 @@ namespace LOG
 {
 void log(String form, String msg);
 void INFO(String msg);
+void INFO(String msg, float num);
+
 void WARN(String msg);
+void WARN(String msg, float num);
+
 void ERROR(String msg);
+void ERROR(String msg, float num);
 } // namespace LOG
 
 namespace PRINT
@@ -48,6 +54,20 @@ void VECTOR(vector &v)
   for (i = 0; i < v.size(); i++)
   {
     USB.print(v(i), 3);
+    USB.print(", ");
+  }
+  USB.println();
+  USB.println();
+}
+
+template <typename T>
+void VECTOR(std::vector<T> &v)
+{
+  uint8_t i = 0;
+
+  for (i = 0; i < v.size(); i++)
+  {
+    USB.print(v.at(i), 3);
     USB.print(", ");
   }
   USB.println();
