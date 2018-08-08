@@ -29,13 +29,14 @@ MatrixXf KINEMATICS::CHAIN::jacobian(Manipulator *manipulator, Name tool_name)
 
   Vector3f position_changed = ZERO_VECTOR;
   Vector3f orientation_changed = ZERO_VECTOR;
-  VectorXf pose_changed(6);
+  VectorXf pose_changed = VectorXf::Zero(6);
 
   int8_t index = 0;
   Name my_name = MANAGER::getIteratorBegin(manipulator)->first;
 
   for (int8_t size = 0; size < MANAGER::getDOF(manipulator); size++)
   {
+    LOG::WARN("my_name : "+ String(my_name));
     Name parent_name = MANAGER::getComponentParentName(manipulator, my_name);
     if (parent_name == MANAGER::getWorldName(manipulator))
     {
@@ -59,7 +60,7 @@ MatrixXf KINEMATICS::CHAIN::jacobian(Manipulator *manipulator, Name tool_name)
 
     jacobian.col(index) = pose_changed;
     index++;
-    my_name = MANAGER::getComponentChildName(manipulator, my_name).at(0);
+    my_name = MANAGER::getComponentChildName(manipulator, my_name).at(0); // Get Child name which has active joint
   }
   return jacobian;
 }
@@ -97,56 +98,53 @@ void KINEMATICS::CHAIN::forward(Manipulator *manipulator, Name component_name)
   }
 }
 
-VectorXf KINEMATICS::CHAIN::inverse(Manipulator *manipulator, Name tool_name, Pose target_pose)
+std::vector<float> KINEMATICS::CHAIN::inverse(Manipulator *manipulator, Name tool_name, Pose target_pose)
 {
   const float lambda = 0.7;
-  const int8_t loop_count = 10;
-  int8_t vector_element = 0;
+  const int8_t iteration = 10;
 
-  MatrixXf jacobian = MatrixXf::Identity(6, MANAGER::getDOF(manipulator));
+  Manipulator _manipulator = *manipulator;
+
+  MatrixXf jacobian = MatrixXf::Identity(6, MANAGER::getDOF(&_manipulator));
+
   VectorXf pose_changed = VectorXf::Zero(6);
-  VectorXf angle_changed = VectorXf::Zero(MANAGER::getDOF(manipulator));
-  VectorXf result_angle = VectorXf::Zero(MANAGER::getDOF(manipulator));
+  VectorXf angle_changed = VectorXf::Zero(MANAGER::getDOF(&_manipulator));
 
-  KINEMATICS::CHAIN::forward(manipulator, MANAGER::getIteratorBegin(manipulator)->first);
-
-  for (int8_t loop_num = 0; loop_num < loop_count; loop_num++)
+  for (int8_t count = 0; count < iteration; count++)
   {
-    jacobian = KINEMATICS::CHAIN::jacobian(manipulator, tool_name);
-    pose_changed = MATH::poseDifference(target_pose.position, MANAGER::getComponentPositionToWorld(manipulator, tool_name),
-                                        target_pose.orientation, MANAGER::getComponentOrientationToWorld(manipulator, tool_name));
+    KINEMATICS::CHAIN::forward(&_manipulator, MANAGER::getIteratorBegin(&_manipulator)->first);
+
+    jacobian = KINEMATICS::CHAIN::jacobian(&_manipulator, tool_name);
+    LOG::INFO("jacobian : ");
+    PRINT::MATRIX(jacobian);
+    LOG::INFO("orientation : ");
+    MatrixXf temp = MANAGER::getComponentOrientationToWorld(&_manipulator, tool_name);
+    PRINT::MATRIX(temp);
+    pose_changed = MATH::poseDifference(target_pose.position, MANAGER::getComponentPositionToWorld(&_manipulator, tool_name),
+                                        target_pose.orientation, MANAGER::getComponentOrientationToWorld(&_manipulator, tool_name));
+    LOG::INFO("pose_changed : ");
+    PRINT::VECTOR(pose_changed);
     if (pose_changed.norm() < 1E-6)
-    {
-      vector_element = 0;
-      for (int8_t component_name = MANAGER::getIteratorBegin(manipulator)->first; component_name < tool_name; component_name++)
-      {
-        if (MANAGER::getComponentJointId(manipulator, component_name) != -1)
-          result_angle(vector_element++) = MANAGER::getComponentJointAngle(manipulator, component_name);
-      }  
-      return result_angle;
-    } 
+      return MANAGER::getAllActiveJointAngle(&_manipulator);
 
-    Eigen::ColPivHouseholderQR<Eigen::MatrixXf> dec(jacobian);
-    angle_changed = lambda * dec.solve(pose_changed);   
+    ColPivHouseholderQR<MatrixXf> dec(jacobian);
+    angle_changed = lambda * dec.solve(pose_changed);
+    LOG::INFO("angle_changed : ");
+    PRINT::VECTOR(angle_changed);
 
-    vector_element = 0;
-    for (int8_t component_name = MANAGER::getIteratorBegin(manipulator)->first; component_name < tool_name; component_name++)
-    {
-      if (MANAGER::getComponentJointId(manipulator, component_name) != -1)
-        MANAGER::setComponentJointAngle(manipulator, component_name, MANAGER::getComponentJointAngle(manipulator, component_name) + angle_changed(vector_element++));
-    }    
-    KINEMATICS::CHAIN::forward(manipulator, MANAGER::getIteratorBegin(manipulator)->first);
+    std::vector<float> set_angle_changed;
+    LOG::INFO("getDOF : " + String(MANAGER::getDOF(&_manipulator)));
+    for (int8_t index = 0; index < MANAGER::getDOF(&_manipulator); index++)
+      set_angle_changed.push_back(MANAGER::getAllActiveJointAngle(&_manipulator).at(index) + angle_changed(index));
+
+    LOG::INFO("set_angle_changed : ");
+    PRINT::VECTOR(set_angle_changed);
+
+    MANAGER::setAllActiveJointAngle(&_manipulator, set_angle_changed);    
   }
 
-  vector_element = 0;
-  for (int8_t component_name = MANAGER::getIteratorBegin(manipulator)->first; component_name < tool_name; component_name++)
-  {
-    if (MANAGER::getComponentJointId(manipulator, component_name) != -1)
-      result_angle(vector_element++) = MANAGER::getComponentJointAngle(manipulator, component_name);
-  }  
-  return result_angle;
+  return MANAGER::getAllActiveJointAngle(&_manipulator);
 }
-
 
 void KINEMATICS::LINK::solveKinematicsSinglePoint(Manipulator *manipulator, Name component_name)
 {
@@ -191,9 +189,9 @@ void KINEMATICS::LINK::forward(Manipulator *manipulator)
   }
 }
 
-VectorXf KINEMATICS::LINK::geometricInverse(Manipulator *manipulator, Name tool_name, Pose target_pose) //for basic model
+std::vector<float> KINEMATICS::LINK::geometricInverse(Manipulator *manipulator, Name tool_name, Pose target_pose) //for basic model
 {
-  VectorXf target_angle_vector(MANAGER::getDOF(manipulator));
+  std::vector<float> target_angle_vector(MANAGER::getDOF(manipulator));
   Vector3f control_position; //joint6-joint1
   Vector3f tool_relative_position = MANAGER::getComponentRelativePositionToParent(manipulator, tool_name);
   Vector3f base_position = MANAGER::getComponentPositionToWorld(manipulator, MANAGER::getWorldChildName(manipulator));
@@ -228,8 +226,9 @@ VectorXf KINEMATICS::LINK::geometricInverse(Manipulator *manipulator, Name tool_
   target_angle[1] = acos(((temp_x * temp_x + temp_y * temp_y + link[1] * link[1] - link[2] * link[2])) / (2 * link[1] * sqrt(temp_x * temp_x + temp_y * temp_y))) + atan2(temp_y, temp_x);
   target_angle[2] = acos((link[1] * link[1] + link[2] * link[2] - (temp_x * temp_x + temp_y * temp_y)) / (2 * link[1] * link[2])) + target_angle[1];
 
-  target_angle_vector << target_angle[0],
-      -target_angle[1],
-      -target_angle[2];
+  target_angle_vector.push_back(target_angle[0]);
+  target_angle_vector.push_back(-target_angle[1]);
+  target_angle_vector.push_back(-target_angle[2]);
+
   return target_angle_vector;
 }

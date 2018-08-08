@@ -39,14 +39,14 @@ namespace CHAIN
 MatrixXf jacobian(Manipulator *manipulator, Name tool_name);
 
 void forward(Manipulator *manipulator, Name component_name);
-VectorXf inverse(Manipulator *manipulator, Name tool_name, Pose target_pose);
+std::vector<float> inverse(Manipulator *manipulator, Name tool_name, Pose target_pose);
 } // namespace CHAIN
 
 namespace LINK
 {
 void solveKinematicsSinglePoint(Manipulator *manipulator, Name component_name);
 void forward(Manipulator *manipulator);
-VectorXf geometricInverse(Manipulator *manipulator, Name tool_name, Pose target_pose); //for basic model);
+std::vector<float> geometricInverse(Manipulator *manipulator, Name tool_name, Pose target_pose); //for basic model);
 } // namespace LINK
 
 #if 0
