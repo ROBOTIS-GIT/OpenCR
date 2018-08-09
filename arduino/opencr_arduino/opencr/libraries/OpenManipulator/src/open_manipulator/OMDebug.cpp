@@ -28,9 +28,12 @@ void OpenDEBUGSerialPort()
   DEBUG.begin(57600);
 }
 
-void LOG::log(String form, String msg)
+void LOG::log(String form, String msg, String port)
 {
-  USB.println(form + msg);
+  if (port == "USB")
+    USB.println(form + msg);
+  else if (port == "DEBUG")
+    DEBUG.println(form + msg);
 }
 
 void LOG::INFO(String msg)
@@ -38,11 +41,20 @@ void LOG::INFO(String msg)
   log("[INFO] ", msg);
 }
 
-void LOG::INFO(String msg, float num, uint8_t point)
+void LOG::INFO(String msg, float num, uint8_t point, String port)
 {
-  USB.print("[INFO] ");
-  USB.print(msg);
-  USB.println(num, point);
+  if (port == "USB")
+  {
+    USB.print("[INFO] ");
+    USB.print(msg);
+    USB.println(num, point);
+  }
+  else if (port == "DEBUG")
+  {
+    DEBUG.print("[INFO] ");
+    DEBUG.print(msg);
+    DEBUG.println(num, point);
+  }
 }
 
 void LOG::WARN(String msg)
@@ -50,11 +62,20 @@ void LOG::WARN(String msg)
   log("[WARN] ", msg);
 }
 
-void LOG::WARN(String msg, float num, uint8_t point)
+void LOG::WARN(String msg, float num, uint8_t point, String port)
 {
-  USB.print("[WARN] ");
-  USB.print(msg);
-  USB.println(num, point);
+  if (port == "USB")
+  {
+    USB.print("[WARN] ");
+    USB.print(msg);
+    USB.println(num, point);
+  }
+  else if (port == "DEBUG")
+  {
+    DEBUG.print("[WARN] ");
+    DEBUG.print(msg);
+    DEBUG.println(num, point);
+  }
 }
 
 void LOG::ERROR(String msg)
@@ -62,11 +83,20 @@ void LOG::ERROR(String msg)
   log("[ERROR] ", msg);
 }
 
-void LOG::ERROR(String msg, float num, uint8_t point)
+void LOG::ERROR(String msg, float num, uint8_t point, String port)
 {
-  USB.print("[ERROR] ");
-  USB.print(msg);
-  USB.println(num, point);
+  if (port == "USB")
+  {
+    USB.print("[ERROR] ");
+    USB.print(msg);
+    USB.println(num, point);
+  }
+  else if (port == "DEBUG")
+  {
+    DEBUG.print("[ERROR] ");
+    DEBUG.print(msg);
+    DEBUG.println(num, point);
+  }
 }
 
 // void showJointAngle(String unit, OPMLink* link, int from, int to)

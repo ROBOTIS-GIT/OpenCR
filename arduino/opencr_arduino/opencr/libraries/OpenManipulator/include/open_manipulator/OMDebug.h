@@ -32,64 +32,108 @@ void OpenDebugSerialPort();
 
 namespace LOG
 {
-void log(String form, String msg);
+void log(String form, String msg, String port = "USB");
 void INFO(String msg);
-void INFO(String msg, float num, uint8_t point = 3);
+void INFO(String msg, float num, uint8_t point = 3, String port = "USB");
 
 void WARN(String msg);
-void WARN(String msg, float num, uint8_t point = 3);
+void WARN(String msg, float num, uint8_t point = 3, String port = "USB");
 
 void ERROR(String msg);
-void ERROR(String msg, float num, uint8_t point = 3);
+void ERROR(String msg, float num, uint8_t point = 3, String port = "USB");
 } // namespace LOG
 
 namespace PRINT
 {
 template <typename vector>
-void VECTOR(vector &v, uint8_t point = 3)
+void VECTOR(vector &v, uint8_t point = 3, String port = "USB")
 {
   uint8_t i = 0;
 
-  USB.print(" ");
-  for (i = 0; i < v.size(); i++)
-  {
-    USB.print(v(i), point);
-    USB.print(", ");
-  }
-  USB.println();
-  USB.println();
-}
-
-template <typename T>
-void VECTOR(std::vector<T> &v, uint8_t point = 3)
-{
-  uint8_t i = 0;
-
-  for (i = 0; i < v.size(); i++)
-  {
-    USB.print(v.at(i), point);
-    USB.print(", ");
-  }
-  USB.println();
-  USB.println();
-}
-
-template <typename matrix>
-void MATRIX(matrix &m)
-{
-  uint8_t i = 0, j = 0;
-
-  for (i = 0; i < m.rows(); i++)
+  if (port == "USB")
   {
     USB.print(" ");
-    for (j = 0; j < m.cols(); j++)
+    for (i = 0; i < v.size(); i++)
     {
-      USB.print(m(i, j), 3); // print 6 decimal places
+      USB.print(v(i), point);
       USB.print(", ");
     }
     USB.println();
+    USB.println();
   }
-  USB.println();
+  else if (port == "DEBUG")
+  {
+    DEBUG.print(" ");
+    for (i = 0; i < v.size(); i++)
+    {
+      DEBUG.print(v(i), point);
+      DEBUG.print(", ");
+    }
+    DEBUG.println();
+    DEBUG.println();
+  }
+}
+
+template <typename T>
+void VECTOR(std::vector<T> &v, uint8_t point = 3, String port = "USB")
+{
+  uint8_t i = 0;
+
+  if (port == "USB")
+  {
+    for (i = 0; i < v.size(); i++)
+    {
+      USB.print(v.at(i), point);
+      USB.print(", ");
+    }
+    USB.println();
+    USB.println();
+  }
+  else if (port == "DEBUG")
+  {
+    for (i = 0; i < v.size(); i++)
+    {
+      DEBUG.print(v.at(i), point);
+      DEBUG.print(", ");
+    }
+    DEBUG.println();
+    DEBUG.println();
+  }
+}
+
+template <typename matrix>
+void MATRIX(matrix &m, uint8_t point = 3, String port = "USB")
+{
+  uint8_t i = 0, j = 0;
+
+  if (port == "USB")
+  {
+    for (i = 0; i < m.rows(); i++)
+    {
+      USB.print(" ");
+      for (j = 0; j < m.cols(); j++)
+      {
+        USB.print(m(i, j), point);
+        USB.print(", ");
+      }
+      USB.println();
+    }
+    USB.println();
+  }
+  else if (port == "DEBUG")
+  {
+    for (i = 0; i < m.rows(); i++)
+    {
+      DEBUG.print(" ");
+      for (j = 0; j < m.cols(); j++)
+      {
+        DEBUG.print(m(i, j), point);
+        DEBUG.print(", ");
+      }
+      DEBUG.println();
+    }
+    DEBUG.println();
+  }
 }
 } // namespace PRINT
 
