@@ -20,7 +20,7 @@
 
 using namespace Eigen;
 
-float MATH::sign(float number)
+float OM_MATH::sign(float number)
 {
   if (number >= 0.0)
   {
@@ -32,14 +32,14 @@ float MATH::sign(float number)
   }
 }
 
-Vector3f MATH::makeVector3(float v1, float v2, float v3)
+Vector3f OM_MATH::makeVector3(float v1, float v2, float v3)
 {
   Vector3f temp;
   temp << v1, v2, v3;
   return temp;
 }
 
-Matrix3f MATH::makeMatrix3(float m11, float m12, float m13,
+Matrix3f OM_MATH::makeMatrix3(float m11, float m12, float m13,
                            float m21, float m22, float m23,
                            float m31, float m32, float m33)
 {
@@ -48,7 +48,7 @@ Matrix3f MATH::makeMatrix3(float m11, float m12, float m13,
   return temp;
 }
 
-Vector3f MATH::matrixLogarithm(Matrix3f rotation_matrix)
+Vector3f OM_MATH::matrixLogarithm(Matrix3f rotation_matrix)
 {
   Matrix3f R = rotation_matrix;
   Vector3f l = Vector3f::Zero();
@@ -82,7 +82,7 @@ Vector3f MATH::matrixLogarithm(Matrix3f rotation_matrix)
   return rotation_vector;
 }
 
-Matrix3f MATH::skewSymmetricMatrix(Vector3f v)
+Matrix3f OM_MATH::skewSymmetricMatrix(Vector3f v)
 {
   Matrix3f skew_symmetric_matrix = Matrix3f::Zero();
   skew_symmetric_matrix << 0, -v(2), v(1),
@@ -91,7 +91,7 @@ Matrix3f MATH::skewSymmetricMatrix(Vector3f v)
   return skew_symmetric_matrix;
 }
 
-Matrix3f MATH::rodriguesRotationMatrix(Vector3f axis, float angle)
+Matrix3f OM_MATH::rodriguesRotationMatrix(Vector3f axis, float angle)
 {
   Matrix3f skew_symmetric_matrix = Matrix3f::Zero();
   Matrix3f rotation_matrix = Matrix3f::Zero();
@@ -104,7 +104,7 @@ Matrix3f MATH::rodriguesRotationMatrix(Vector3f axis, float angle)
   return rotation_matrix;
 }
 
-Matrix3f MATH::makeRotationMatrix(float roll, float pitch, float yaw)
+Matrix3f OM_MATH::makeRotationMatrix(float roll, float pitch, float yaw)
 {
 #if 0 // Euler angle
   Eigen::Matrix3f rotation_matrix = Eigen::Matrix3f::Identity();
@@ -125,7 +125,7 @@ Matrix3f MATH::makeRotationMatrix(float roll, float pitch, float yaw)
   return makeRotationMatrix(rotation_vector);
 }
 
-Matrix3f MATH::makeRotationMatrix(Vector3f rotation_vector)
+Matrix3f OM_MATH::makeRotationMatrix(Vector3f rotation_vector)
 {
   Matrix3f rotation_matrix;
   Vector3f axis;
@@ -140,12 +140,12 @@ Matrix3f MATH::makeRotationMatrix(Vector3f rotation_vector)
   return rotation_matrix;
 }
 
-Vector3f MATH::makeRotationVector(Matrix3f rotation_matrix)
+Vector3f OM_MATH::makeRotationVector(Matrix3f rotation_matrix)
 {
   return matrixLogarithm(rotation_matrix);
 }
 
-Vector3f MATH::positionDifference(Vector3f desired_position, Vector3f present_position)
+Vector3f OM_MATH::positionDifference(Vector3f desired_position, Vector3f present_position)
 {
   Vector3f position_difference;
   position_difference = desired_position - present_position;
@@ -153,7 +153,7 @@ Vector3f MATH::positionDifference(Vector3f desired_position, Vector3f present_po
   return position_difference;
 }
 
-Vector3f MATH::orientationDifference(Matrix3f desired_orientation, Matrix3f present_orientation)
+Vector3f OM_MATH::orientationDifference(Matrix3f desired_orientation, Matrix3f present_orientation)
 {
   Vector3f orientation_difference;
   orientation_difference = present_orientation * makeRotationVector(present_orientation.transpose() * desired_orientation);                   
@@ -161,7 +161,7 @@ Vector3f MATH::orientationDifference(Matrix3f desired_orientation, Matrix3f pres
   return orientation_difference;
 }
 
-VectorXf MATH::poseDifference(Vector3f desired_position, Vector3f present_position,
+VectorXf OM_MATH::poseDifference(Vector3f desired_position, Vector3f present_position,
                               Matrix3f desired_orientation, Matrix3f present_orientation)
 {
   Vector3f position_difference;

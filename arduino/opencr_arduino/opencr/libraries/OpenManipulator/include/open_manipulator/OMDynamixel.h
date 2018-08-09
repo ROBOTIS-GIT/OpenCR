@@ -47,7 +47,9 @@ typedef struct
   uint32_t baud_rate;
 } DXL_INFO;
 
-class OMDynamixel
+namespace OM_DYNAMIXEL
+{
+class Dynamixel
 {
 private:
   DynamixelWorkbench dxl_wb_;
@@ -58,8 +60,8 @@ private:
   std::vector<float> torque_value_;
 
 public:
-  OMDynamixel(uint32_t baud_rate);
-  virtual ~OMDynamixel();
+  Dynamixel(uint32_t baud_rate);
+  virtual ~Dynamixel();
 
   bool init();
   bool setMode(uint8_t id, uint8_t mode);
@@ -85,7 +87,8 @@ public:
   std::vector<uint8_t> getDynamixelIDs();
   uint32_t getBaudRate();
   int32_t getData(uint8_t id, uint16_t addr, uint8_t length);
-  
-  int32_t convertRadian2Value(uint8_t id, float radian); 
+
+  int32_t convertRadian2Value(uint8_t id, float radian);
 };
+} // namespace OM_Dynamixel
 #endif // OMDYNAMIXEL_HPP_

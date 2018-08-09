@@ -32,7 +32,7 @@
 
 using namespace Eigen;
 
-namespace KINEMATICS
+namespace OM_KINEMATICS
 {
 namespace CHAIN
 {
@@ -51,38 +51,6 @@ void solveKinematicsSinglePoint(Manipulator *manipulator, Name component_name);
 void forward(Manipulator *manipulator);
 std::vector<float> geometricInverse(Manipulator *manipulator, Name tool_name, Pose target_pose); //for basic model);
 } // namespace LINK
-
-#if 0
-class OMKinematicsMethod
-{
-public:
-  OMKinematicsMethod(){};
-  ~OMKinematicsMethod(){};
-
-  void solveKinematicsSinglePoint(Manipulator *manipulator, Name component_name, bool *error = false);
-  void forward(Manipulator *manipulator, bool *error = false);
-  MatrixXf jacobian(Manipulator *manipulator, int8_t tool_component_name, bool *error = false);
-};
-
-class OMChainKinematics
-{
-private:
-public:
-  OMChainKinematics(){};
-  ~OMChainKinematics(){};
-};
-
-class OMLinkKinematics
-{
-private:
-public:
-  OMLinkKinematics(){};
-  ~OMLinkKinematics(){};
-
-  void forward(Manipulator *manipulator, bool *error = false);
-  VectorXf geometricInverse(Manipulator *manipulator, Name tool_number, Pose target_pose, bool *error = false); //for basic model
-};
-#endif
 } // namespace KINEMATICS
 
 #endif // OMKINEMATICS_HPP_

@@ -18,6 +18,8 @@
 
 #include "../../include/open_manipulator/OMPath.h"
 
+using namespace OM_PATH;
+
 MinimumJerk::MinimumJerk()
 {
   coefficient_ = VectorXf::Zero(6);

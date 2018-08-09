@@ -34,7 +34,7 @@ using namespace Eigen;
 #define ZERO_VECTOR Vector3f::Zero()
 #define IDENTITY_MATRIX Matrix3f::Identity(3, 3)
 
-namespace MATH
+namespace OM_MATH
 {
 float sign(float number);
 

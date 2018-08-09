@@ -20,73 +20,9 @@
 
 using namespace OPEN_MANIPULATOR;
 
-#if 0
-
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////Basic Function//////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-
-//math
-float MATH::sign(float number)
-{
-  return OMMath::sign(number);
-}
-
-Eigen::Vector3f MATH::makeEigenVector3(float v1, float v2, float v3)
-{
-  return OMMath::makeEigenVector3(v1, v2, v3);
-}
-
-Eigen::Matrix3f MATH::makeEigenMatrix3(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33)
-{
-  return OMMath::makeEigenMatrix3(m11, m12, m13, m21, m22, m23, m31, m32, m33);
-}
-  
-Eigen::Vector3f MATH::matrixLogarithm(Eigen::Matrix3f rotation_matrix)
-{
-  return OMMath::matrixLogarithm(rotation_matrix);
-}
-
-Eigen::Matrix3f MATH::skewSymmetricMatrix(Eigen::Vector3f v)
-{
-  return OMMath::skewSymmetricMatrix(v);
-}
-
-Eigen::Matrix3f MATH::rodriguesRotationMatrix(Eigen::Vector3f axis, float angle)
-{
-  return OMMath::rodriguesRotationMatrix(axis, angle);
-}
-
-Eigen::Matrix3f MATH::makeRotationMatrix(float rool, float pitch, float yaw)
-{
-  return OMMath::makeRotationMatrix(rool, pitch, yaw);
-}
-
-Eigen::Matrix3f MATH::makeRotationMatrix(Eigen::Vector3f rotation_vector)
-{
-  return OMMath::makeRotationMatrix(rotation_vector);
-}
-
-Eigen::Vector3f MATH::makeRotationVector(Eigen::Matrix3f rotation_matrix)
-{
-  return OMMath::makeRotationVector(rotation_matrix);
-}
-
-Eigen::Vector3f MATH::differentialPosition(Eigen::Vector3f desired_position, Eigen::Vector3f present_position)
-{
-  return OMMath::differentialPosition(desired_position, present_position);
-}
-
-Eigen::Vector3f MATH::differentialOrientation(Eigen::Matrix3f desired_orientation, Eigen::Matrix3f present_orientation)
-{
-  return OMMath::differentialOrientation(desired_orientation, present_orientation);
-}
-
-Eigen::VectorXf MATH::differentialPose(Eigen::Vector3f desired_position, Eigen::Vector3f present_position, Eigen::Matrix3f desired_orientation, Eigen::Matrix3f present_orientation)
-{
-  return OMMath::differentialPose(desired_position, present_position, desired_orientation, present_orientation);
-}
-#endif
 
 //manager
 void MANAGER::addWorld(Manipulator *manipulator,

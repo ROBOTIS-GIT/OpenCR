@@ -25,7 +25,7 @@
 
 #include <vector>
 
-#include "OMMath.h"
+#include "OMAPI.h"
 #include "OMDebug.h"
 
 using namespace Eigen;
@@ -37,6 +37,8 @@ typedef struct
   float acceleration;
 } Trajectory;
 
+namespace OM_PATH
+{
 class MinimumJerk
 {
 private:
@@ -63,7 +65,7 @@ private:
   MatrixXf coefficient_;
   std::vector<float> position_;
   std::vector<float> velocity_;
-  std::vector<float> acceleration_;  
+  std::vector<float> acceleration_;
 
 public:
   JointTrajectory(uint8_t joint_num);
@@ -86,5 +88,5 @@ class Circle
 private:
   MinimumJerk path_generator_;
 };
-
+} // namespace PATH
 #endif // OMPATH_H_

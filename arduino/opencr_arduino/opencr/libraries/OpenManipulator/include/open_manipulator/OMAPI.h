@@ -40,59 +40,6 @@ void release() { osMutexRelease(om_mutex_id); }
 
 namespace OPEN_MANIPULATOR
 {
-#if 0
-// Connect functions
-namespace ACTUATOR
-{
-bool (*setAllJointAngle)(float *) = NULL;
-bool (*setJointAngle)(uint8_t, float) = NULL;
-float *(*getAngle)() = NULL;
-} // namespace ACTUATOR
-
-void connectSetAllJointAngle(bool (*fp)(float *)) { ACTUATOR::setAllJointAngle = fp; }
-void connectSetJointAngle(bool (*fp)(uint8_t, float)) { ACTUATOR::setJointAngle = fp; }
-void connectGetAngle(float *(*fp)()) { ACTUATOR::getAngle = fp; }
-
-namespace KINEMATICS
-{
-void (*foward)(Manipulator *, bool *) = NULL;
-void (*inverse)(Manipulator *, Name, Pose, bool *) = NULL;
-void (*SetPassiveJointAngle)(Manipulator *, bool *) = NULL;
-} // namespace KINEMATICS
-
-void connectForward(void (*fp)(Manipulator *, bool *)) { KINEMATICS::foward = fp; }
-void connectInverse(void (*fp)(Manipulator *, Name, Pose, bool *)) { KINEMATICS::inverse = fp; }
-void connectSetPassiveJointAngle(void (*fp)(Manipulator *, bool *)) { KINEMATICS::getPassiveJointAngle = fp; }
-
-namespace PATH
-{
-void (*line)(void) = NULL;
-void (*arc)(void) = NULL;
-void (*custom)(void) = NULL;
-} // namespace PATH
-
-void connectLine(void (*fp)(void)) { PATH::line = fp; }
-void connectArc(void (*fp)(void)) { PATH::arc = fp; }
-void connectCustom(void (*fp)(void)) { PATH::custom = fp; }
-
-namespace MATH
-{
-float sign(float number);
-Eigen::Vector3f makeEigenVector3(float v1, float v2, float v3);
-Eigen::Matrix3f makeEigenMatrix3(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33);
-Eigen::Vector3f matrixLogarithm(Eigen::Matrix3f rotation_matrix);
-Eigen::Matrix3f skewSymmetricMatrix(Eigen::Vector3f v);
-Eigen::Matrix3f rodriguesRotationMatrix(Eigen::Vector3f axis, float angle);
-Eigen::Matrix3f makeRotationMatrix(float rool, float pitch, float yaw);
-Eigen::Matrix3f makeRotationMatrix(Eigen::Vector3f rotation_vector);
-Eigen::Vector3f makeRotationVector(Eigen::Matrix3f rotation_matrix);
-Eigen::Vector3f differentialPosition(Eigen::Vector3f desired_position, Eigen::Vector3f present_position);
-Eigen::Vector3f differentialOrientation(Eigen::Matrix3f desired_orientation, Eigen::Matrix3f present_orientation);
-Eigen::VectorXf differentialPose(Eigen::Vector3f desired_position, Eigen::Vector3f present_position, Eigen::Matrix3f desired_orientation, Eigen::Matrix3f present_orientation);
-} // namespace MATH
-#endif
-
-// namespace Manipulator
 namespace MANAGER
 {
 ///////////////////////////*initialize function*/////////////////////////////
@@ -194,6 +141,63 @@ float getComponentMass(Manipulator *manipulator, Name name);
 Matrix3f getComponentInertiaTensor(Manipulator *manipulator, Name name);
 Vector3f getComponentCenterOfMass(Manipulator *manipulator, Name name);
 } // namespace MANAGER
+
+namespace KINEMATICS
+{
+// void (*aaa)(Manipulator *manipulator, Name tool_name);
+// void (*forward)(Manipulator *manipulator) = NULL;
+// void (*forward)(Manipulator *manipulator, Name component_name) = NULL;
+// void (*inverse)(Manipulator *manipulator, Name tool_name, Pose target_pose) = NULL;
+
+// void connectJacobian(void (*fp)(Manipulator *manipulator, Name tool_name));
+// // void connectForward(void (*fp)(Manipulator *manipulator)) { forward = fp; }
+// void connectForward(void (*fp)(Manipulator *manipulator, Name component_name)) { forward = fp; }
+// void connectInverse(void (*fp)(Manipulator *manipulator, Name tool_name, Pose target_pose)) { inverse = fp; }
+} // namespace AAA
+
+// namespace PATH
+// {
+// void (*line)(void) = NULL;
+// void (*arc)(void) = NULL;
+// void (*custom)(void) = NULL;
+// } // namespace PATH
+
+// void connectLine(void (*fp)(void)) { PATH::line = fp; }
+// void connectArc(void (*fp)(void)) { PATH::arc = fp; }
+// void connectCustom(void (*fp)(void)) { PATH::custom = fp; }
+
+#if 0 
+namespace MATH
+{
+float sign(float number);
+Eigen::Vector3f makeVector3(float v1, float v2, float v3);
+Eigen::Matrix3f makeMatrix3(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33);
+Eigen::Vector3f matrixLogarithm(Eigen::Matrix3f rotation_matrix);
+Eigen::Matrix3f skewSymmetricMatrix(Eigen::Vector3f v);
+Eigen::Matrix3f rodriguesRotationMatrix(Eigen::Vector3f axis, float angle);
+Eigen::Matrix3f makeRotationMatrix(float rool, float pitch, float yaw);
+Eigen::Matrix3f makeRotationMatrix(Eigen::Vector3f rotation_vector);
+Eigen::Vector3f makeRotationVector(Eigen::Matrix3f rotation_matrix);
+Vector3f positionDifference(Vector3f desired_position, Vector3f present_position);
+Vector3f orientationDifference(Matrix3f desired_orientation, Matrix3f present_orientation);
+VectorXf poseDifference(Vector3f desired_position, Vector3f present_position,
+                        Matrix3f desired_orientation, Matrix3f present_orientation);
+} // namespace MATH
+#endif
+
+#if 0
+// Connect functions
+namespace ACTUATOR
+{
+bool (*setAllJointAngle)(float *) = NULL;
+bool (*setJointAngle)(uint8_t, float) = NULL;
+float *(*getAngle)() = NULL;
+} // namespace ACTUATOR
+
+void connectSetAllJointAngle(bool (*fp)(float *)) { ACTUATOR::setAllJointAngle = fp; }
+void connectSetJointAngle(bool (*fp)(uint8_t, float)) { ACTUATOR::setJointAngle = fp; }
+void connectGetAngle(float *(*fp)()) { ACTUATOR::getAngle = fp; }
+#endif
 
 #if 0
 // Thread

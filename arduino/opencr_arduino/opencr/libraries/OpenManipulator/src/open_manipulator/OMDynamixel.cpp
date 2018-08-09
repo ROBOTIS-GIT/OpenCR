@@ -18,14 +18,16 @@
 
 #include "../../include/open_manipulator/OMDynamixel.h"
 
-OMDynamixel::OMDynamixel(uint32_t baud_rate)
+using namespace OM_DYNAMIXEL;
+
+Dynamixel::Dynamixel(uint32_t baud_rate)
 {
   dxl_info_.baud_rate = baud_rate;
 }
 
-OMDynamixel::~OMDynamixel(){};
+Dynamixel::~Dynamixel(){};
 
-bool OMDynamixel::init()
+bool Dynamixel::init()
 {
   uint8_t get_dxl_id[dxl_info_.size];
 
@@ -53,22 +55,22 @@ bool OMDynamixel::init()
   return true;
 }
 
-bool OMDynamixel::setMode(uint8_t id, uint8_t mode)
+bool Dynamixel::setMode(uint8_t id, uint8_t mode)
 {
   return dxl_wb_.itemWrite(id, OPERATING_MODE, mode);
 }
 
-bool OMDynamixel::setPositionControlMode(uint8_t id)
+bool Dynamixel::setPositionControlMode(uint8_t id)
 {
   return dxl_wb_.jointMode(id);
 }
 
-bool OMDynamixel::setCurrentBasedPositionControlMode(uint8_t id, uint8_t current)
+bool Dynamixel::setCurrentBasedPositionControlMode(uint8_t id, uint8_t current)
 {
   return dxl_wb_.currentMode(id, current);
 }
 
-bool OMDynamixel::setMaxPositionLimit(uint8_t id, float radian)
+bool Dynamixel::setMaxPositionLimit(uint8_t id, float radian)
 {
   setDisable(id);
 
@@ -80,7 +82,7 @@ bool OMDynamixel::setMaxPositionLimit(uint8_t id, float radian)
   setEnable(id);
 }
 
-bool OMDynamixel::setMinPositionLimit(uint8_t id, float radian)
+bool Dynamixel::setMinPositionLimit(uint8_t id, float radian)
 {
   setDisable(id);
 
@@ -92,27 +94,27 @@ bool OMDynamixel::setMinPositionLimit(uint8_t id, float radian)
   setEnable(id);
 }
 
-void OMDynamixel::addSyncWriteHandler(const char *table_item)
+void Dynamixel::addSyncWriteHandler(const char *table_item)
 {
   dxl_wb_.addSyncWrite(table_item);
 }
 
-void OMDynamixel::addSyncReadHandler(const char *table_item)
+void Dynamixel::addSyncReadHandler(const char *table_item)
 {
   dxl_wb_.addSyncRead(table_item);
 }
 
-bool OMDynamixel::setEnable(uint8_t id)
+bool Dynamixel::setEnable(uint8_t id)
 {
   return dxl_wb_.itemWrite(id, TORQUE_ENABLE, true);
 }
 
-bool OMDynamixel::setDisable(uint8_t id)
+bool Dynamixel::setDisable(uint8_t id)
 {
   return dxl_wb_.itemWrite(id, TORQUE_ENABLE, false);
 }
 
-bool OMDynamixel::enableAllDynamixel()
+bool Dynamixel::enableAllDynamixel()
 {
   for (uint8_t index = 0; index < dxl_info_.size; index++)
     dxl_wb_.itemWrite(dxl_id_.at(index), TORQUE_ENABLE, true);
@@ -120,14 +122,14 @@ bool OMDynamixel::enableAllDynamixel()
   return true;
 }
 
-bool OMDynamixel::disableAllDynamixel()
+bool Dynamixel::disableAllDynamixel()
 {
   for (uint8_t index = 0; index < dxl_info_.size; index++)
     dxl_wb_.itemWrite(dxl_id_.at(index), TORQUE_ENABLE, false);
   return true;
 }
 
-bool OMDynamixel::setAngle(std::vector<float> radian_vector)
+bool Dynamixel::setAngle(std::vector<float> radian_vector)
 {
   int32_t set_position[dxl_info_.size] = {0, };
 
@@ -137,34 +139,34 @@ bool OMDynamixel::setAngle(std::vector<float> radian_vector)
   return dxl_wb_.syncWrite(GOAL_POSITION, &set_position[0]);
 }
 
-bool OMDynamixel::setAngle(uint8_t id, float radian)
+bool Dynamixel::setAngle(uint8_t id, float radian)
 {
   int32_t set_position = dxl_wb_.convertRadian2Value(id, radian);
 
   return dxl_wb_.itemWrite(id, GOAL_POSITION, set_position);
 }
 
-uint8_t OMDynamixel::getDynamixelSize()
+uint8_t Dynamixel::getDynamixelSize()
 {
   return dxl_info_.size;
 }
 
-std::vector<uint8_t> OMDynamixel::getDynamixelIDs()
+std::vector<uint8_t> Dynamixel::getDynamixelIDs()
 {
   return dxl_id_;
 }
 
-uint32_t OMDynamixel::getBaudRate()
+uint32_t Dynamixel::getBaudRate()
 {
   return dxl_info_.baud_rate;
 }
 
-int32_t OMDynamixel::getData(uint8_t id, uint16_t addr, uint8_t length)
+int32_t Dynamixel::getData(uint8_t id, uint16_t addr, uint8_t length)
 {
   return dxl_wb_.itemRead(id, addr, length);
 }
 
-std::vector<float> OMDynamixel::getAngle()
+std::vector<float> Dynamixel::getAngle()
 {
   int32_t *get_position_ptr = NULL;
   radian_value_.clear();
@@ -185,7 +187,7 @@ std::vector<float> OMDynamixel::getAngle()
   return radian_value_;
 }
 
-std::vector<float> OMDynamixel::getCurrent()
+std::vector<float> Dynamixel::getCurrent()
 {
   int32_t *get_current_ptr = NULL;
   get_current_ptr = dxl_wb_.syncRead(PRESENT_CURRENT);
@@ -196,7 +198,7 @@ std::vector<float> OMDynamixel::getCurrent()
   return torque_value_;
 }
 
-int32_t OMDynamixel::convertRadian2Value(uint8_t id, float radian)
+int32_t Dynamixel::convertRadian2Value(uint8_t id, float radian)
 {
   return dxl_wb_.convertRadian2Value(id, radian);
 }
