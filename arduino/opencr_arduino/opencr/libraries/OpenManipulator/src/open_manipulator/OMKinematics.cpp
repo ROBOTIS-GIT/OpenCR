@@ -21,7 +21,7 @@
 using namespace Eigen;
 using namespace OPEN_MANIPULATOR;
 
-MatrixXf OM_KINEMATICS::CHAIN::jacobian(Manipulator *manipulator, Name tool_name)
+MatrixXf OM_KINEMATICS::CHAIN::jacobian(OM_MANAGER::Manipulator *manipulator, Name tool_name)
 {
   MatrixXf jacobian = MatrixXf::Identity(6, MANAGER::getDOF(manipulator));
 
@@ -64,7 +64,7 @@ MatrixXf OM_KINEMATICS::CHAIN::jacobian(Manipulator *manipulator, Name tool_name
   return jacobian;
 }
 
-void OM_KINEMATICS::CHAIN::forward(Manipulator *manipulator, Name component_name)
+void OM_KINEMATICS::CHAIN::forward(OM_MANAGER::Manipulator *manipulator, Name component_name)
 {
   Name my_name = component_name;
   Name parent_name = MANAGER::getComponentParentName(manipulator, my_name);
@@ -97,12 +97,12 @@ void OM_KINEMATICS::CHAIN::forward(Manipulator *manipulator, Name component_name
   }
 }
 
-std::vector<float> OM_KINEMATICS::CHAIN::inverse(Manipulator *manipulator, Name tool_name, Pose target_pose)
+std::vector<float> OM_KINEMATICS::CHAIN::inverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose)
 {
   const float lambda = 0.7;
   const int8_t iteration = 10;
 
-  Manipulator _manipulator = *manipulator;
+  OM_MANAGER::Manipulator _manipulator = *manipulator;
 
   MatrixXf jacobian = MatrixXf::Identity(6, MANAGER::getDOF(&_manipulator));
 
@@ -133,13 +133,13 @@ std::vector<float> OM_KINEMATICS::CHAIN::inverse(Manipulator *manipulator, Name 
   return MANAGER::getAllActiveJointAngle(&_manipulator);
 }
 
-std::vector<float> OM_KINEMATICS::CHAIN::sr_inverse(Manipulator *manipulator, Name tool_name, Pose target_pose)
+std::vector<float> OM_KINEMATICS::CHAIN::sr_inverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose)
 {
   float lambda = 0.0;
   const float param = 0.002;
   const int8_t iteration = 50;
 
-  Manipulator _manipulator = *manipulator;
+  OM_MANAGER::Manipulator _manipulator = *manipulator;
 
   MatrixXf jacobian = MatrixXf::Identity(6, MANAGER::getDOF(&_manipulator));
   MatrixXf updated_jacobian = MatrixXf::Identity(MANAGER::getDOF(&_manipulator), MANAGER::getDOF(&_manipulator));
@@ -213,13 +213,13 @@ std::vector<float> OM_KINEMATICS::CHAIN::sr_inverse(Manipulator *manipulator, Na
   return MANAGER::getAllActiveJointAngle(&_manipulator);
 }
 
-std::vector<float> OM_KINEMATICS::CHAIN::position_only_inverse(Manipulator *manipulator, Name tool_name, Pose target_pose)
+std::vector<float> OM_KINEMATICS::CHAIN::position_only_inverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose)
 {
   float lambda = 0.0;
   const float param = 0.002;
   const int8_t iteration = 10;
 
-  Manipulator _manipulator = *manipulator;
+  OM_MANAGER::Manipulator _manipulator = *manipulator;
 
   MatrixXf jacobian = MatrixXf::Identity(6, MANAGER::getDOF(&_manipulator));
   MatrixXf position_jacobian = MatrixXf::Identity(3, MANAGER::getDOF(&_manipulator));
@@ -292,7 +292,7 @@ std::vector<float> OM_KINEMATICS::CHAIN::position_only_inverse(Manipulator *mani
   return MANAGER::getAllActiveJointAngle(&_manipulator);
 }
 
-void OM_KINEMATICS::LINK::solveKinematicsSinglePoint(Manipulator *manipulator, Name component_name)
+void OM_KINEMATICS::LINK::solveKinematicsSinglePoint(OM_MANAGER::Manipulator *manipulator, Name component_name)
 {
   Pose parent_pose;
   Pose link_relative_pose;
@@ -313,7 +313,7 @@ void OM_KINEMATICS::LINK::solveKinematicsSinglePoint(Manipulator *manipulator, N
   }
 }
 
-void OM_KINEMATICS::LINK::forward(Manipulator *manipulator)
+void OM_KINEMATICS::LINK::forward(OM_MANAGER::Manipulator *manipulator)
 {
   Pose pose_to_wolrd;
   Pose link_relative_pose;
@@ -335,7 +335,7 @@ void OM_KINEMATICS::LINK::forward(Manipulator *manipulator)
   }
 }
 
-std::vector<float> OM_KINEMATICS::LINK::geometricInverse(Manipulator *manipulator, Name tool_name, Pose target_pose) //for basic model
+std::vector<float> OM_KINEMATICS::LINK::geometricInverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose) //for basic model
 {
   std::vector<float> target_angle_vector(MANAGER::getDOF(manipulator));
   Vector3f control_position; //joint6-joint1

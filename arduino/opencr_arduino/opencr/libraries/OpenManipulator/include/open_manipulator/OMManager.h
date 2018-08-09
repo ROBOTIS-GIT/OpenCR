@@ -46,7 +46,7 @@ typedef struct
 {
   int8_t id;
   Vector3f axis;
-  float coefficient;   //actuator angle to joint angle
+  float coefficient; //actuator angle to joint angle
   float angle;
   float velocity;
   float acceleration;
@@ -56,8 +56,8 @@ typedef struct
 {
   int8_t id;
   bool on_off;
-  float coefficient;   //actuator value to tool value
-  float value;         //m or rad
+  float coefficient; //actuator value to tool value
+  float value;       //m or rad
 } Tool;
 
 typedef struct
@@ -87,9 +87,11 @@ typedef struct
   Inertia inertia;
 } Component;
 
+namespace OM_MANAGER
+{
 class Manipulator
 {
- private:
+private:
   int8_t dof_;
   World world_;
   std::map<Name, Component> component_;
@@ -128,8 +130,8 @@ class Manipulator
   */
   /////////////////////////////////////////////////////////////////////////////
 
- public:
-  Manipulator():dof_(0){};
+public:
+  Manipulator() : dof_(0){};
   virtual ~Manipulator(){};
 
   ///////////////////////////initialize function/////////////////////////////
@@ -228,5 +230,6 @@ class Manipulator
   Matrix3f getComponentInertiaTensor(Name name);
   Vector3f getComponentCenterOfMass(Name name);
 };
+} // namespace OM_MANAGER
 
 #endif // OMMANAGER_HPP_

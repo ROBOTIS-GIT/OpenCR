@@ -132,34 +132,3 @@ void log()
   }
   Serial.println("]");
 }
-
-// void swap()
-// {
-//   static bool flag = true;
-//   goal_position.clear();
-//   start_trajectory.clear();
-//   goal_trajectory.clear();
-
-//   if (flag == true)
-//   {
-//     start_trajectory.push_back(goal);
-//     start_trajectory.push_back(goal);
-//     start_trajectory.push_back(goal);
-
-//     goal_trajectory.push_back(start);
-//     goal_trajectory.push_back(start);
-//     goal_trajectory.push_back(start);
-//   }
-//   else
-//   {
-//     start_trajectory.push_back(start);
-//     start_trajectory.push_back(start);
-//     start_trajectory.push_back(start);
-
-//     goal_trajectory.push_back(goal);
-//     goal_trajectory.push_back(goal);
-//     goal_trajectory.push_back(goal);
-//   }
-
-//   flag = !flag;
-// }

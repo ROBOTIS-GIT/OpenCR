@@ -10,7 +10,7 @@
 std::vector<float> goal_position;
 std::vector<float> present_position;
 
-OMDynamixel dxl(BAUD_RATE);
+OM_DYNAMIXEL::Dynamixel dxl(BAUD_RATE);
 
 void setup()
 {

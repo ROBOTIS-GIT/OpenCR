@@ -28,7 +28,7 @@ void setup()
   while (!Serial)
     ;
     
-  Manipulator manipulator;
+  OM_MANAGER::Manipulator manipulator;
   manipulator.addWorld(WORLD, COMP1);
   manipulator.addComponent(COMP1, WORLD, COMP2, makeVector3(-0.100, 0.0, 0.0), IDENTITY_MATRIX, Z_AXIS, 1, 0.5, 1.0);
   manipulator.addComponent(COMP2, COMP1, COMP4, makeVector3(0.0, 0.0, 0.050), IDENTITY_MATRIX, Y_AXIS, 2, -1.5, 1.5);

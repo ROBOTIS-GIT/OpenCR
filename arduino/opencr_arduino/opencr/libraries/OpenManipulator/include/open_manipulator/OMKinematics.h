@@ -36,20 +36,20 @@ namespace OM_KINEMATICS
 {
 namespace CHAIN
 {
-MatrixXf jacobian(Manipulator *manipulator, Name tool_name);
+MatrixXf jacobian(OM_MANAGER::Manipulator *manipulator, Name tool_name);
 
-void forward(Manipulator *manipulator, Name component_name);
+void forward(OM_MANAGER::Manipulator *manipulator, Name component_name);
 
-std::vector<float> inverse(Manipulator *manipulator, Name tool_name, Pose target_pose);
-std::vector<float> sr_inverse(Manipulator *manipulator, Name tool_name, Pose target_pose);
-std::vector<float> position_only_inverse(Manipulator *manipulator, Name tool_name, Pose target_pose);
+std::vector<float> inverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose);
+std::vector<float> sr_inverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose);
+std::vector<float> position_only_inverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose);
 } // namespace CHAIN
 
 namespace LINK
 {
-void solveKinematicsSinglePoint(Manipulator *manipulator, Name component_name);
-void forward(Manipulator *manipulator);
-std::vector<float> geometricInverse(Manipulator *manipulator, Name tool_name, Pose target_pose); //for basic model);
+void solveKinematicsSinglePoint(OM_MANAGER::Manipulator *manipulator, Name component_name);
+void forward(OM_MANAGER::Manipulator *manipulator);
+std::vector<float> geometricInverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose); //for basic model);
 } // namespace LINK
 } // namespace KINEMATICS
 

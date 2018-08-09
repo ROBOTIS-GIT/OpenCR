@@ -43,13 +43,13 @@ namespace OPEN_MANIPULATOR
 namespace MANAGER
 {
 ///////////////////////////*initialize function*/////////////////////////////
-void addWorld(Manipulator *manipulator,
+void addWorld(OM_MANAGER::Manipulator *manipulator,
               Name world_name,
               Name child_name,
               Vector3f world_position = Vector3f::Zero(),
               Matrix3f world_orientation = Matrix3f::Identity(3, 3));
 
-void addComponent(Manipulator *manipulator,
+void addComponent(OM_MANAGER::Manipulator *manipulator,
                   Name me_name,
                   Name parent_name,
                   Name child_name,
@@ -62,7 +62,7 @@ void addComponent(Manipulator *manipulator,
                   Matrix3f inertia_tensor = Matrix3f::Identity(3, 3),
                   Vector3f center_of_mass = Vector3f::Zero());
 
-void addTool(Manipulator *manipulator,
+void addTool(OM_MANAGER::Manipulator *manipulator,
              Name me_name,
              Name parent_name,
              Vector3f relative_position,
@@ -73,87 +73,91 @@ void addTool(Manipulator *manipulator,
              Matrix3f inertia_tensor = Matrix3f::Identity(3, 3),
              Vector3f center_of_mass = Vector3f::Zero());
 
-void addComponentChild(Manipulator *manipulator, Name me_name, Name child_name);
-void checkManipulatorSetting(Manipulator *manipulator);
+void addComponentChild(OM_MANAGER::Manipulator *manipulator, Name me_name, Name child_name);
+void checkManipulatorSetting(OM_MANAGER::Manipulator *manipulator);
 
 ///////////////////////////////Set function//////////////////////////////////
-void setWorldPose(Manipulator *manipulator, Pose world_pose);
-void setWorldPosition(Manipulator *manipulator, Vector3f world_position);
-void setWorldOrientation(Manipulator *manipulator, Matrix3f world_orientation);
-void setWorldState(Manipulator *manipulator, State world_state);
-void setWorldVelocity(Manipulator *manipulator, VectorXf world_velocity);
-void setWorldAcceleration(Manipulator *manipulator, VectorXf world_acceleration);
-void setComponent(Manipulator *manipulator, Name name, Component component);
-void setComponentPoseToWorld(Manipulator *manipulator, Name name, Pose pose_to_world);
-void setComponentPositionToWorld(Manipulator *manipulator, Name name, Vector3f position_to_world);
-void setComponentOrientationToWorld(Manipulator *manipulator, Name name, Matrix3f orientation_to_wolrd);
-void setComponentStateToWorld(Manipulator *manipulator, Name name, State state_to_world);
-void setComponentVelocityToWorld(Manipulator *manipulator, Name name, VectorXf velocity);
-void setComponentAccelerationToWorld(Manipulator *manipulator, Name name, VectorXf accelaration);
-void setComponentJointAngle(Manipulator *manipulator, Name name, float angle);
-void setAllActiveJointAngle(Manipulator *manipulator, std::vector<float> angle_vector);
-void setComponentJointVelocity(Manipulator *manipulator, Name name, float angular_velocity);
-void setComponentJointAcceleration(Manipulator *manipulator, Name name, float angular_acceleration);
-void setComponentToolOnOff(Manipulator *manipulator, Name name, bool on_off);
-void setComponentToolValue(Manipulator *manipulator, Name name, float actuator_value);
+void setWorldPose(OM_MANAGER::Manipulator *manipulator, Pose world_pose);
+void setWorldPosition(OM_MANAGER::Manipulator *manipulator, Vector3f world_position);
+void setWorldOrientation(OM_MANAGER::Manipulator *manipulator, Matrix3f world_orientation);
+void setWorldState(OM_MANAGER::Manipulator *manipulator, State world_state);
+void setWorldVelocity(OM_MANAGER::Manipulator *manipulator, VectorXf world_velocity);
+void setWorldAcceleration(OM_MANAGER::Manipulator *manipulator, VectorXf world_acceleration);
+void setComponent(OM_MANAGER::Manipulator *manipulator, Name name, Component component);
+void setComponentPoseToWorld(OM_MANAGER::Manipulator *manipulator, Name name, Pose pose_to_world);
+void setComponentPositionToWorld(OM_MANAGER::Manipulator *manipulator, Name name, Vector3f position_to_world);
+void setComponentOrientationToWorld(OM_MANAGER::Manipulator *manipulator, Name name, Matrix3f orientation_to_wolrd);
+void setComponentStateToWorld(OM_MANAGER::Manipulator *manipulator, Name name, State state_to_world);
+void setComponentVelocityToWorld(OM_MANAGER::Manipulator *manipulator, Name name, VectorXf velocity);
+void setComponentAccelerationToWorld(OM_MANAGER::Manipulator *manipulator, Name name, VectorXf accelaration);
+void setComponentJointAngle(OM_MANAGER::Manipulator *manipulator, Name name, float angle);
+void setAllActiveJointAngle(OM_MANAGER::Manipulator *manipulator, std::vector<float> angle_vector);
+void setComponentJointVelocity(OM_MANAGER::Manipulator *manipulator, Name name, float angular_velocity);
+void setComponentJointAcceleration(OM_MANAGER::Manipulator *manipulator, Name name, float angular_acceleration);
+void setComponentToolOnOff(OM_MANAGER::Manipulator *manipulator, Name name, bool on_off);
+void setComponentToolValue(OM_MANAGER::Manipulator *manipulator, Name name, float actuator_value);
 
 ///////////////////////////////Get function//////////////////////////////////
-int8_t getDOF(Manipulator *manipulator);
-int8_t getComponentSize(Manipulator *manipulator);
-Name getWorldName(Manipulator *manipulator);
-Name getWorldChildName(Manipulator *manipulator);
-Pose getWorldPose(Manipulator *manipulator);
-Vector3f getWorldPosition(Manipulator *manipulator);
-Matrix3f getWorldOrientation(Manipulator *manipulator);
-State getWorldState(Manipulator *manipulator);
-VectorXf getWorldVelocity(Manipulator *manipulator);
-VectorXf getWorldAcceleration(Manipulator *manipulator);
-std::map<Name, Component> getAllComponent(Manipulator *manipulator);
-std::map<Name, Component>::iterator getIteratorBegin(Manipulator *manipulator);
-std::map<Name, Component>::iterator getIteratorEnd(Manipulator *manipulator);
-Component getComponent(Manipulator *manipulator, Name name);
-Name getComponentParentName(Manipulator *manipulator, Name name);
-std::vector<Name> getComponentChildName(Manipulator *manipulator, Name name);
-Pose getComponentPoseToWorld(Manipulator *manipulator, Name name);
-Vector3f getComponentPositionToWorld(Manipulator *manipulator, Name name);
-Matrix3f getComponentOrientationToWorld(Manipulator *manipulator, Name name);
-State getComponentStateToWorld(Manipulator *manipulator, Name name);
-VectorXf getComponentVelocityToWorld(Manipulator *manipulator, Name name);
-VectorXf getComponentAccelerationToWorld(Manipulator *manipulator, Name name);
-Pose getComponentRelativePoseToParent(Manipulator *manipulator, Name name);
-Vector3f getComponentRelativePositionToParent(Manipulator *manipulator, Name name);
-Matrix3f getComponentRelativeOrientationToParent(Manipulator *manipulator, Name name);
-Joint getComponentJoint(Manipulator *manipulator, Name name);
-int8_t getComponentJointId(Manipulator *manipulator, Name name);
-float getComponentJointCoefficient(Manipulator *manipulator, Name name);
-Vector3f getComponentJointAxis(Manipulator *manipulator, Name name);
-float getComponentJointAngle(Manipulator *manipulator, Name name);
-std::vector<float> getAllJointAngle(Manipulator *manipulator);
-std::vector<float> getAllActiveJointAngle(Manipulator *manipulator);
-float getComponentJointVelocity(Manipulator *manipulator, Name name);
-float getComponentJointAcceleration(Manipulator *manipulator, Name name);
-Tool getComponentTool(Manipulator *manipulator, Name name);
-int8_t getComponentToolId(Manipulator *manipulator, Name name);
-float getComponentToolCoefficient(Manipulator *manipulator, Name name);
-bool getComponentToolOnOff(Manipulator *manipulator, Name name);
-float getComponentToolValue(Manipulator *manipulator, Name name);
-float getComponentMass(Manipulator *manipulator, Name name);
-Matrix3f getComponentInertiaTensor(Manipulator *manipulator, Name name);
-Vector3f getComponentCenterOfMass(Manipulator *manipulator, Name name);
+int8_t getDOF(OM_MANAGER::Manipulator *manipulator);
+int8_t getComponentSize(OM_MANAGER::Manipulator *manipulator);
+Name getWorldName(OM_MANAGER::Manipulator *manipulator);
+Name getWorldChildName(OM_MANAGER::Manipulator *manipulator);
+Pose getWorldPose(OM_MANAGER::Manipulator *manipulator);
+Vector3f getWorldPosition(OM_MANAGER::Manipulator *manipulator);
+Matrix3f getWorldOrientation(OM_MANAGER::Manipulator *manipulator);
+State getWorldState(OM_MANAGER::Manipulator *manipulator);
+VectorXf getWorldVelocity(OM_MANAGER::Manipulator *manipulator);
+VectorXf getWorldAcceleration(OM_MANAGER::Manipulator *manipulator);
+std::map<Name, Component> getAllComponent(OM_MANAGER::Manipulator *manipulator);
+std::map<Name, Component>::iterator getIteratorBegin(OM_MANAGER::Manipulator *manipulator);
+std::map<Name, Component>::iterator getIteratorEnd(OM_MANAGER::Manipulator *manipulator);
+Component getComponent(OM_MANAGER::Manipulator *manipulator, Name name);
+Name getComponentParentName(OM_MANAGER::Manipulator *manipulator, Name name);
+std::vector<Name> getComponentChildName(OM_MANAGER::Manipulator *manipulator, Name name);
+Pose getComponentPoseToWorld(OM_MANAGER::Manipulator *manipulator, Name name);
+Vector3f getComponentPositionToWorld(OM_MANAGER::Manipulator *manipulator, Name name);
+Matrix3f getComponentOrientationToWorld(OM_MANAGER::Manipulator *manipulator, Name name);
+State getComponentStateToWorld(OM_MANAGER::Manipulator *manipulator, Name name);
+VectorXf getComponentVelocityToWorld(OM_MANAGER::Manipulator *manipulator, Name name);
+VectorXf getComponentAccelerationToWorld(OM_MANAGER::Manipulator *manipulator, Name name);
+Pose getComponentRelativePoseToParent(OM_MANAGER::Manipulator *manipulator, Name name);
+Vector3f getComponentRelativePositionToParent(OM_MANAGER::Manipulator *manipulator, Name name);
+Matrix3f getComponentRelativeOrientationToParent(OM_MANAGER::Manipulator *manipulator, Name name);
+Joint getComponentJoint(OM_MANAGER::Manipulator *manipulator, Name name);
+int8_t getComponentJointId(OM_MANAGER::Manipulator *manipulator, Name name);
+float getComponentJointCoefficient(OM_MANAGER::Manipulator *manipulator, Name name);
+Vector3f getComponentJointAxis(OM_MANAGER::Manipulator *manipulator, Name name);
+float getComponentJointAngle(OM_MANAGER::Manipulator *manipulator, Name name);
+std::vector<float> getAllJointAngle(OM_MANAGER::Manipulator *manipulator);
+std::vector<float> getAllActiveJointAngle(OM_MANAGER::Manipulator *manipulator);
+float getComponentJointVelocity(OM_MANAGER::Manipulator *manipulator, Name name);
+float getComponentJointAcceleration(OM_MANAGER::Manipulator *manipulator, Name name);
+Tool getComponentTool(OM_MANAGER::Manipulator *manipulator, Name name);
+int8_t getComponentToolId(OM_MANAGER::Manipulator *manipulator, Name name);
+float getComponentToolCoefficient(OM_MANAGER::Manipulator *manipulator, Name name);
+bool getComponentToolOnOff(OM_MANAGER::Manipulator *manipulator, Name name);
+float getComponentToolValue(OM_MANAGER::Manipulator *manipulator, Name name);
+float getComponentMass(OM_MANAGER::Manipulator *manipulator, Name name);
+Matrix3f getComponentInertiaTensor(OM_MANAGER::Manipulator *manipulator, Name name);
+Vector3f getComponentCenterOfMass(OM_MANAGER::Manipulator *manipulator, Name name);
 } // namespace MANAGER
 
 namespace KINEMATICS
 {
-// void (*aaa)(Manipulator *manipulator, Name tool_name);
-// void (*forward)(Manipulator *manipulator) = NULL;
-// void (*forward)(Manipulator *manipulator, Name component_name) = NULL;
-// void (*inverse)(Manipulator *manipulator, Name tool_name, Pose target_pose) = NULL;
+extern MatrixXf (*jacobian)(OM_MANAGER::Manipulator *, Name);
+// extern void (*forward)(OM_MANAGER::Manipulator) = NULL;
+extern void (*forward)(OM_MANAGER::Manipulator *, Name);
+extern std::vector<float> (*inverse)(OM_MANAGER::Manipulator *, Name, Pose);
 
-// void connectJacobian(void (*fp)(Manipulator *manipulator, Name tool_name));
-// // void connectForward(void (*fp)(Manipulator *manipulator)) { forward = fp; }
-// void connectForward(void (*fp)(Manipulator *manipulator, Name component_name)) { forward = fp; }
-// void connectInverse(void (*fp)(Manipulator *manipulator, Name tool_name, Pose target_pose)) { inverse = fp; }
-} // namespace AAA
+void connectJacobian(MatrixXf (*fp)(OM_MANAGER::Manipulator *, Name));
+// void connectForward(void (*fp)(OM_MANAGER::Manipulator *manipulator));
+void connectForward(void (*fp)(OM_MANAGER::Manipulator *, Name));
+void connectInverse(std::vector<float> (*fp)(OM_MANAGER::Manipulator *, Name, Pose));
+
+MatrixXf getJacobian(OM_MANAGER::Manipulator *manipulator, Name tool_name);
+void solveForward(OM_MANAGER::Manipulator *manipulator, Name component_name);
+std::vector<float> solveInverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose);
+} // namespace KINEMATICS
 
 // namespace PATH
 // {
