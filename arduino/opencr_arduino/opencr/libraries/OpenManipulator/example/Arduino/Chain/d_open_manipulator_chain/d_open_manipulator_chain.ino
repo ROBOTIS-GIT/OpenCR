@@ -16,11 +16,7 @@
 
 /* Authors: Darby Lim */
 
-#include <RTOS.h>
 #include "OpenManipulator_Chain.h"
-
-#define ACTUATOR_ENABLE  true
-#define ACTUATOR_DISABLE false
 
 namespace THREAD
 {
@@ -34,72 +30,43 @@ void setup()
   while(!Serial);
 
   initManipulator();
-  initActuator(ACTUATOR_ENABLE);
-  initKinematics();
-  initPath();  
 
-  OPEN_MANIPULATOR::connectSetAllJointAngle(setAllJointAngle);
-  OPEN_MANIPULATOR::connectSetJointAngle(setJointAngle);
-  OPEN_MANIPULATOR::connectSetGetAngle(getAngle);
-
-  OPEN_MANIPULATOR::connectForward(forward);
-  OPEN_MANIPULATOR::connectInverse(inverse);
-
-  OPEN_MANIPULATOR::connectLine(line);
-  OPEN_MANIPULATOR::connectArc(arc);
-  OPEN_MANIPULATOR::connectCustom(heart);
-
-  initThread();
-  startThread();
+  // initThread();
+  // startThread();
 }
 
 void loop() 
 {
-  // static int loop_cnt = 0;
-  // if (loop_cnt%10 == 0)
-  // {
-  //   MUTEX::wait();
-  //   setJointAngle(1, -2.0);
-  //   MUTEX::release();
-  //   Serial.println("order -2.0");
-  // }
-  // else if (loop_cnt%10 == 5)
-  // {
-  //   MUTEX::wait();
-  //   setJointAngle(1, 2.0);
-  //   MUTEX::release();
-  //   Serial.println("order 2.0");
-  // }
-  // loop_cnt++;
-  osDelay(100);    
+
+  // osDelay(100);    
 }
 
 /// DON'T TOUCH ///
 
-void initThread()
-{
-  // define thread
-  osThreadDef(THREAD_NAME_LOOP,         Thread_Loop,                           osPriorityNormal, 0, 1024*10);
-  osThreadDef(THREAD_NAME_ROBOT_STATE,  OPEN_MANIPULATOR::Thread_Robot_State,  osPriorityNormal, 0, 1024*20);
+// void initThread()
+// {
+//   // define thread
+//   osThreadDef(THREAD_NAME_LOOP,         Thread_Loop,                           osPriorityNormal, 0, 1024*10);
+//   osThreadDef(THREAD_NAME_ROBOT_STATE,  OPEN_MANIPULATOR::Thread_Robot_State,  osPriorityNormal, 0, 1024*20);
 
-  // create thread
-  THREAD::loop         = osThreadCreate(osThread(THREAD_NAME_LOOP), NULL);
-  THREAD::robot_state  = osThreadCreate(osThread(THREAD_NAME_ROBOT_STATE), NULL);
-}
+//   // create thread
+//   THREAD::loop         = osThreadCreate(osThread(THREAD_NAME_LOOP), NULL);
+//   THREAD::robot_state  = osThreadCreate(osThread(THREAD_NAME_ROBOT_STATE), NULL);
+// }
 
-void startThread()
-{
-  // start kernel
-  Serial.println("Thread Start");
-  osKernelStart();
-}
+// void startThread()
+// {
+//   // start kernel
+//   Serial.println("Thread Start");
+//   osKernelStart();
+// }
 
-static void Thread_Loop(void const *argument)
-{
-  (void) argument;
+// static void Thread_Loop(void const *argument)
+// {
+//   (void) argument;
 
-  for(;;)
-  {
-    loop();
-  }
-}
+//   for(;;)
+//   {
+//     loop();
+//   }
+// }
