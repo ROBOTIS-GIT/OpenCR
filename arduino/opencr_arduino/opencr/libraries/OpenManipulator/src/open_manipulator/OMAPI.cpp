@@ -218,7 +218,6 @@ void MANAGER::setAllActiveJointAngle(Manipulator *manipulator, std::vector<float
     if(manipulator->getComponentJointId(it->first) != -1)
     {
       manipulator->setComponentJointAngle(it->first, angle_vector.at(index));
-      LOG::INFO("",angle_vector.at(index));
       index++;
     }
   }
