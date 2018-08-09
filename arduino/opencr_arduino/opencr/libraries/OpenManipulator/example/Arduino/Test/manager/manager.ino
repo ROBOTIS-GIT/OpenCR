@@ -34,8 +34,8 @@ void setup()
   manipulator.addComponent(COMP2, COMP1, COMP4, makeVector3(0.0, 0.0, 0.050), IDENTITY_MATRIX, Y_AXIS, 2, -1.5, 1.5);
   manipulator.addComponentChild(COMP2, COMP3);
   manipulator.addComponent(COMP3, COMP2, TOOL, makeVector3(0.0, 0.050, 0.0), IDENTITY_MATRIX);
-  manipulator.addComponent(COMP4, COMP2, TOOL, makeVector3(0.0, 0.0, 0.050), IDENTITY_MATRIX, Y_AXIS, 3, 2.0);  
-  manipulator.addTool(TOOL, COMP4, makeVector3(0.0, 0.0, 0.025), IDENTITY_MATRIX, 4, 1.0, 0.5);
+  manipulator.addComponent(COMP4, COMP2, TOOL, makeVector3(0.050, 0.0, 0.0), IDENTITY_MATRIX, Y_AXIS, 3, 2.0);  
+  manipulator.addTool(TOOL, COMP4, makeVector3(0.025, 0.0, 0.0), IDENTITY_MATRIX, 4, 1.0, 0.5);
 
   manipulator.checkManipulatorSetting();
 }
