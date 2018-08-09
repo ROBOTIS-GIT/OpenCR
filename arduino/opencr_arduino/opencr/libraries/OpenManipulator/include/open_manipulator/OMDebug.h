@@ -34,26 +34,26 @@ namespace LOG
 {
 void log(String form, String msg);
 void INFO(String msg);
-void INFO(String msg, float num);
+void INFO(String msg, float num, uint8_t point = 3);
 
 void WARN(String msg);
-void WARN(String msg, float num);
+void WARN(String msg, float num, uint8_t point = 3);
 
 void ERROR(String msg);
-void ERROR(String msg, float num);
+void ERROR(String msg, float num, uint8_t point = 3);
 } // namespace LOG
 
 namespace PRINT
 {
 template <typename vector>
-void VECTOR(vector &v)
+void VECTOR(vector &v, uint8_t point = 3)
 {
   uint8_t i = 0;
 
   USB.print(" ");
   for (i = 0; i < v.size(); i++)
   {
-    USB.print(v(i), 3);
+    USB.print(v(i), point);
     USB.print(", ");
   }
   USB.println();
@@ -61,13 +61,13 @@ void VECTOR(vector &v)
 }
 
 template <typename T>
-void VECTOR(std::vector<T> &v)
+void VECTOR(std::vector<T> &v, uint8_t point = 3)
 {
   uint8_t i = 0;
 
   for (i = 0; i < v.size(); i++)
   {
-    USB.print(v.at(i), 3);
+    USB.print(v.at(i), point);
     USB.print(", ");
   }
   USB.println();

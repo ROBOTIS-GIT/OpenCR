@@ -38,11 +38,11 @@ void LOG::INFO(String msg)
   log("[INFO] ", msg);
 }
 
-void LOG::INFO(String msg, float num)
+void LOG::INFO(String msg, float num, uint8_t point)
 {
   USB.print("[INFO] ");
   USB.print(msg);
-  USB.println(num, 3);
+  USB.println(num, point);
 }
 
 void LOG::WARN(String msg)
@@ -50,11 +50,11 @@ void LOG::WARN(String msg)
   log("[WARN] ", msg);
 }
 
-void LOG::WARN(String msg, float num)
+void LOG::WARN(String msg, float num, uint8_t point)
 {
   USB.print("[WARN] ");
   USB.print(msg);
-  USB.println(num, 3);
+  USB.println(num, point);
 }
 
 void LOG::ERROR(String msg)
@@ -62,11 +62,11 @@ void LOG::ERROR(String msg)
   log("[ERROR] ", msg);
 }
 
-void LOG::ERROR(String msg, float num)
+void LOG::ERROR(String msg, float num, uint8_t point)
 {
   USB.print("[ERROR] ");
   USB.print(msg);
-  USB.println(num, 3);
+  USB.println(num, point);
 }
 
 // void showJointAngle(String unit, OPMLink* link, int from, int to)
