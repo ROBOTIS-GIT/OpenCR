@@ -24,6 +24,7 @@
 #include <Eigen/LU> // Calls inverse, determinant, LU decomp., etc.
 
 #include <math.h>
+#include "OMDebug.h"
 
 using namespace Eigen;
 

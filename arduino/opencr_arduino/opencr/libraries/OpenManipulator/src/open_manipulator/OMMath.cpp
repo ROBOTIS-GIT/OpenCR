@@ -56,32 +56,21 @@ Vector3f MATH::matrixLogarithm(Matrix3f rotation_matrix)
 
   float theta = 0.0;
   float diag = 0.0;
-  bool diagonal_matrix = true;
+  bool diagonal_matrix = R.isDiagonal();
 
   l << R(2, 1) - R(1, 2),
       R(0, 2) - R(2, 0),
       R(1, 0) - R(0, 1);
   theta = atan2(l.norm(), R(0, 0) + R(1, 1) + R(2, 2) - 1);
-  diag = R(0, 0) + R(1, 1) + R(2, 2);
+  diag = R.determinant();
 
-  for (int8_t i = 0; i < 3; i++)
+  if (R.isIdentity())
   {
-    for (int8_t j = 0; j < 3; j++)
-    {
-      if (i != j)
-      {
-        if (R(i, j) != 0)
-        {
-          diagonal_matrix = false;
-        }
-      }
-    }
+    rotation_vector.setZero();
+    return rotation_vector;
   }
-  if (R == Matrix3f::Identity())
-  {
-    rotation_vector = Vector3f::Zero();
-  }
-  else if (diagonal_matrix == true)
+  
+  if (diagonal_matrix == true)
   {
     rotation_vector << R(0, 0) + 1, R(1, 1) + 1, R(2, 2) + 1;
     rotation_vector = rotation_vector * M_PI_2;
@@ -167,7 +156,7 @@ Vector3f MATH::positionDifference(Vector3f desired_position, Vector3f present_po
 Vector3f MATH::orientationDifference(Matrix3f desired_orientation, Matrix3f present_orientation)
 {
   Vector3f orientation_difference;
-  orientation_difference = present_orientation * makeRotationVector(present_orientation.transpose() * desired_orientation);
+  orientation_difference = present_orientation * makeRotationVector(present_orientation.transpose() * desired_orientation);                   
 
   return orientation_difference;
 }
