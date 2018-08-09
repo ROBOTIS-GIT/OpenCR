@@ -11,12 +11,12 @@
 #define CONTROL_PERIOD 0.008f
 #define MOVE_TIME 3.0f
 
-JointTrajectory joint_trajectory(DXL_SIZE);
+OM_PATH::JointTrajectory joint_trajectory(DXL_SIZE);
 std::vector<Trajectory> start_trajectory;
 std::vector<Trajectory> goal_trajectory;
 Trajectory start, goal;
 
-OMDynamixel dxl(BAUD_RATE);
+OM_DYNAMIXEL::Dynamixel dxl(BAUD_RATE);
 std::vector<float> goal_position;
 std::vector<float> goal_velocity;
 std::vector<float> goal_acceleration;
