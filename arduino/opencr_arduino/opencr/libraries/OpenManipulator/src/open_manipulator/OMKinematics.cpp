@@ -36,7 +36,6 @@ MatrixXf KINEMATICS::CHAIN::jacobian(Manipulator *manipulator, Name tool_name)
 
   for (int8_t size = 0; size < MANAGER::getDOF(manipulator); size++)
   {
-    LOG::WARN("my_name : "+ String(my_name));
     Name parent_name = MANAGER::getComponentParentName(manipulator, my_name);
     if (parent_name == MANAGER::getWorldName(manipulator))
     {
@@ -115,32 +114,179 @@ std::vector<float> KINEMATICS::CHAIN::inverse(Manipulator *manipulator, Name too
     KINEMATICS::CHAIN::forward(&_manipulator, MANAGER::getIteratorBegin(&_manipulator)->first);
 
     jacobian = KINEMATICS::CHAIN::jacobian(&_manipulator, tool_name);
-    LOG::INFO("jacobian : ");
-    PRINT::MATRIX(jacobian);
-    LOG::INFO("orientation : ");
-    MatrixXf temp = MANAGER::getComponentOrientationToWorld(&_manipulator, tool_name);
-    PRINT::MATRIX(temp);
+
     pose_changed = MATH::poseDifference(target_pose.position, MANAGER::getComponentPositionToWorld(&_manipulator, tool_name),
                                         target_pose.orientation, MANAGER::getComponentOrientationToWorld(&_manipulator, tool_name));
-    LOG::INFO("pose_changed : ");
-    PRINT::VECTOR(pose_changed);
     if (pose_changed.norm() < 1E-6)
       return MANAGER::getAllActiveJointAngle(&_manipulator);
 
     ColPivHouseholderQR<MatrixXf> dec(jacobian);
     angle_changed = lambda * dec.solve(pose_changed);
-    LOG::INFO("angle_changed : ");
-    PRINT::VECTOR(angle_changed);
 
     std::vector<float> set_angle_changed;
-    LOG::INFO("getDOF : " + String(MANAGER::getDOF(&_manipulator)));
     for (int8_t index = 0; index < MANAGER::getDOF(&_manipulator); index++)
       set_angle_changed.push_back(MANAGER::getAllActiveJointAngle(&_manipulator).at(index) + angle_changed(index));
 
-    LOG::INFO("set_angle_changed : ");
-    PRINT::VECTOR(set_angle_changed);
+    MANAGER::setAllActiveJointAngle(&_manipulator, set_angle_changed);
+  }
 
-    MANAGER::setAllActiveJointAngle(&_manipulator, set_angle_changed);    
+  return MANAGER::getAllActiveJointAngle(&_manipulator);
+}
+
+std::vector<float> KINEMATICS::CHAIN::sr_inverse(Manipulator *manipulator, Name tool_name, Pose target_pose)
+{
+  float lambda = 0.0;
+  const float param = 0.002;
+  const int8_t iteration = 50;
+
+  Manipulator _manipulator = *manipulator;
+
+  MatrixXf jacobian = MatrixXf::Identity(6, MANAGER::getDOF(&_manipulator));
+  MatrixXf updated_jacobian = MatrixXf::Identity(MANAGER::getDOF(&_manipulator), MANAGER::getDOF(&_manipulator));
+  VectorXf pose_changed = VectorXf::Zero(MANAGER::getDOF(&_manipulator));
+  VectorXf angle_changed = VectorXf::Zero(MANAGER::getDOF(&_manipulator));
+  VectorXf gerr(MANAGER::getDOF(&_manipulator));  
+
+  float wn_pos = 1 / 0.3;
+  float wn_ang = 1 / (2 * M_PI);
+  float Ek = 0.0;
+  float Ek2 = 0.0;
+
+  MatrixXf We(6, 6);
+  We << wn_pos, 0, 0, 0, 0, 0,
+      0, wn_pos, 0, 0, 0, 0,
+      0, 0, wn_pos, 0, 0, 0,
+      0, 0, 0, wn_ang, 0, 0,
+      0, 0, 0, 0, wn_ang, 0,
+      0, 0, 0, 0, 0, wn_ang;
+
+  MatrixXf Wn = MatrixXf::Identity(MANAGER::getDOF(&_manipulator), MANAGER::getDOF(&_manipulator));
+
+  KINEMATICS::CHAIN::forward(&_manipulator, MANAGER::getIteratorBegin(&_manipulator)->first);
+  pose_changed = MATH::poseDifference(target_pose.position, MANAGER::getComponentPositionToWorld(&_manipulator, tool_name),
+                                      target_pose.orientation, MANAGER::getComponentOrientationToWorld(&_manipulator, tool_name));
+  Ek = pose_changed.transpose() * We * pose_changed;
+
+  for (int8_t count = 0; count < iteration; count++)
+  {
+    jacobian = KINEMATICS::CHAIN::jacobian(&_manipulator, tool_name);
+    lambda = Ek + param;
+
+    updated_jacobian = (jacobian.transpose() * We * jacobian) + (lambda * Wn);
+    gerr = jacobian.transpose() * We * pose_changed;
+
+    ColPivHouseholderQR<MatrixXf> dec(updated_jacobian);
+    angle_changed = dec.solve(gerr);
+
+    std::vector<float> set_angle_changed;
+    for (int8_t index = 0; index < MANAGER::getDOF(&_manipulator); index++)
+      set_angle_changed.push_back(MANAGER::getAllActiveJointAngle(&_manipulator).at(index) + angle_changed(index));
+
+    MANAGER::setAllActiveJointAngle(&_manipulator, set_angle_changed);
+
+    KINEMATICS::CHAIN::forward(&_manipulator, MANAGER::getIteratorBegin(&_manipulator)->first);
+    pose_changed = MATH::poseDifference(target_pose.position, MANAGER::getComponentPositionToWorld(&_manipulator, tool_name),
+                                        target_pose.orientation, MANAGER::getComponentOrientationToWorld(&_manipulator, tool_name));
+
+    Ek2 = pose_changed.transpose() * We * pose_changed;
+
+    if (Ek2 < 1E-12)
+    {
+      return MANAGER::getAllActiveJointAngle(&_manipulator);
+    }
+    else if (Ek2 < Ek)
+    {
+      Ek = Ek2;
+    }
+    else
+    {
+      std::vector<float> set_angle_changed;
+      for (int8_t index = 0; index < MANAGER::getDOF(&_manipulator); index++)
+        set_angle_changed.push_back(MANAGER::getAllActiveJointAngle(&_manipulator).at(index) - angle_changed(index));
+
+      MANAGER::setAllActiveJointAngle(&_manipulator, set_angle_changed);
+
+      KINEMATICS::CHAIN::forward(&_manipulator, MANAGER::getIteratorBegin(&_manipulator)->first);
+    }
+  }
+
+  return MANAGER::getAllActiveJointAngle(&_manipulator);
+}
+
+std::vector<float> KINEMATICS::CHAIN::position_only_inverse(Manipulator *manipulator, Name tool_name, Pose target_pose)
+{
+  float lambda = 0.0;
+  const float param = 0.002;
+  const int8_t iteration = 10;
+
+  Manipulator _manipulator = *manipulator;
+
+  MatrixXf jacobian = MatrixXf::Identity(6, MANAGER::getDOF(&_manipulator));
+  MatrixXf position_jacobian = MatrixXf::Identity(3, MANAGER::getDOF(&_manipulator));
+  MatrixXf updated_jacobian = MatrixXf::Identity(MANAGER::getDOF(&_manipulator), MANAGER::getDOF(&_manipulator));
+  VectorXf position_changed = VectorXf::Zero(3);
+  VectorXf angle_changed = VectorXf::Zero(MANAGER::getDOF(&_manipulator));
+  VectorXf gerr(MANAGER::getDOF(&_manipulator));  
+
+  float wn_pos = 1 / 0.3;
+  float wn_ang = 1 / (2 * M_PI);
+  float Ek = 0.0;
+  float Ek2 = 0.0;
+
+  MatrixXf We(3, 3);
+  We << wn_pos, 0,      0,
+        0,      wn_pos, 0,
+        0,      0,      wn_pos;
+
+  MatrixXf Wn = MatrixXf::Identity(MANAGER::getDOF(&_manipulator), MANAGER::getDOF(&_manipulator));
+
+  KINEMATICS::CHAIN::forward(&_manipulator, MANAGER::getIteratorBegin(&_manipulator)->first);
+  position_changed = MATH::positionDifference(target_pose.position, MANAGER::getComponentPositionToWorld(&_manipulator, tool_name));
+  Ek = position_changed.transpose() * We * position_changed;
+
+  for (int8_t count = 0; count < iteration; count++)
+  {
+    jacobian = KINEMATICS::CHAIN::jacobian(&_manipulator, tool_name);
+    position_jacobian.row(0) = jacobian.row(0);
+    position_jacobian.row(1) = jacobian.row(1);
+    position_jacobian.row(2) = jacobian.row(2);
+    lambda = Ek + param;
+
+    updated_jacobian = (position_jacobian.transpose() * We * jacobian) + (lambda * Wn);
+    gerr = position_jacobian.transpose() * We * position_changed;
+
+    ColPivHouseholderQR<MatrixXf> dec(updated_jacobian);
+    angle_changed = dec.solve(gerr);
+
+    std::vector<float> set_angle_changed;
+    for (int8_t index = 0; index < MANAGER::getDOF(&_manipulator); index++)
+      set_angle_changed.push_back(MANAGER::getAllActiveJointAngle(&_manipulator).at(index) + angle_changed(index));
+
+    MANAGER::setAllActiveJointAngle(&_manipulator, set_angle_changed);
+
+    KINEMATICS::CHAIN::forward(&_manipulator, MANAGER::getIteratorBegin(&_manipulator)->first);
+    position_changed = MATH::positionDifference(target_pose.position, MANAGER::getComponentPositionToWorld(&_manipulator, tool_name));
+
+    Ek2 = position_changed.transpose() * We * position_changed;
+
+    if (Ek2 < 1E-12)
+    {
+      return MANAGER::getAllActiveJointAngle(&_manipulator);
+    }
+    else if (Ek2 < Ek)
+    {
+      Ek = Ek2;
+    }
+    else
+    {
+      std::vector<float> set_angle_changed;
+      for (int8_t index = 0; index < MANAGER::getDOF(&_manipulator); index++)
+        set_angle_changed.push_back(MANAGER::getAllActiveJointAngle(&_manipulator).at(index) - angle_changed(index));
+
+      MANAGER::setAllActiveJointAngle(&_manipulator, set_angle_changed);
+
+      KINEMATICS::CHAIN::forward(&_manipulator, MANAGER::getIteratorBegin(&_manipulator)->first);
+    }
   }
 
   return MANAGER::getAllActiveJointAngle(&_manipulator);
