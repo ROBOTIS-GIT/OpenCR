@@ -40,11 +40,13 @@
 #define Y_AXIS OM_MATH::makeVector3(0.0, 1.0, 0.0)
 #define Z_AXIS OM_MATH::makeVector3(0.0, 0.0, 1.0)
 
-Manipulator chain;
+OM_MANAGER::Manipulator chain;
 
 void initConnect()
 {
-
+  OPEN_MANIPULATOR::KINEMATICS::connectJacobian(OM_KINEMATICS::CHAIN::jacobian);
+  OPEN_MANIPULATOR::KINEMATICS::connectForward(OM_KINEMATICS::CHAIN::forward);
+  OPEN_MANIPULATOR::KINEMATICS::connectInverse(OM_KINEMATICS::CHAIN::inverse);
 }
 
 void initManipulator()
@@ -96,7 +98,7 @@ void initManipulator()
                                      5,
                                      0.001); // Change unit to `mm`
 
-  OM_KINEMATICS::CHAIN::forward(&chain, COMP1);
+  OPEN_MANIPULATOR::KINEMATICS::solveForward(&chain, COMP1);
   OPEN_MANIPULATOR::MANAGER::checkManipulatorSetting(&chain);
 }
 
