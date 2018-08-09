@@ -34,16 +34,32 @@ void setup()
   manipulator.addTool(TOOL, COMP4, MATH::makeVector3(0.025, 0.0, 0.0), IDENTITY_MATRIX, 4, 1.0, 0.5);
 
   Eigen::MatrixXf jacobian = KINEMATICS::CHAIN::jacobian(&manipulator, TOOL);
-  LOG::INFO("Jacobian : ");
-  PRINT::MATRIX(jacobian);
 
   KINEMATICS::CHAIN::forward(&manipulator, COMP1);
   manipulator.checkManipulatorSetting();
 
   Pose target;
-  target.position = MATH::makeVector3(-0.043, 0.0, 0.086);
+  target.position = MATH::makeVector3(-0.035, 0.0, 0.0875);
+
   target.orientation = IDENTITY_MATRIX;
   std::vector<float> joint_angle = KINEMATICS::CHAIN::inverse(&manipulator, TOOL, target);
+  // std::vector<float> joint_angle = KINEMATICS::CHAIN::sr_inverse(&manipulator, TOOL, target);
+  // std::vector<float> joint_angle = KINEMATICS::CHAIN::position_only_inverse(&manipulator, TOOL, target);
+
+  int8_t index = 0;
+  std::map<Name, Component>::iterator it;
+  for(it = manipulator.getIteratorBegin(); it != manipulator.getIteratorEnd(); it++)
+  {
+    if(manipulator.getComponentJointId(it->first) != -1)
+    {
+      manipulator.setComponentJointAngle(it->first, joint_angle.at(index));
+      index++;
+    }
+  }
+  
+  KINEMATICS::CHAIN::forward(&manipulator, COMP1);
+  manipulator.checkManipulatorSetting();
+
   LOG::INFO("Result of inverse : ");
   PRINT::VECTOR(joint_angle);
 }
