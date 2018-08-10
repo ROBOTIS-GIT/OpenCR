@@ -60,7 +60,7 @@ void setup()
   initShape();
   initView();
 
-  //connectOpenCR(0); // It is depend on laptop enviroments.
+  connectOpenCR(0); // It is depend on laptop enviroments.
 }
 
 /*******************************************************************************
@@ -97,19 +97,37 @@ void serialEvent(Serial opencr_port)
   opencr_string = trim(opencr_string);
 
   String[] cmd = split(opencr_string, ',');
-
+  
+  float[] joint_angle_temp = new float[11];
+  
   if (cmd[0].equals("angle"))
   {
-    for (int cmd_cnt = 1; cmd_cnt < cmd.length; cmd_cnt++)
+    print("joint ");
+    for (int cmd_cnt = 2; cmd_cnt < cmd.length; cmd_cnt++)
     {
-      joint_angle[cmd_cnt-1] = float(cmd[cmd_cnt]);
-      print("joint " + cmd_cnt + ": " + cmd[cmd_cnt] + "  ");
+      joint_angle_temp[cmd_cnt-2] = float(cmd[cmd_cnt]);
+      if(cmd_cnt<5)
+        print(cmd_cnt + ": " + cmd[cmd_cnt] + "  ");
     }
+    println("");
   }
   else
   {
-    println("Error");
+    //println("Other Serial");
   }
+  
+  joint_angle[0] = joint_angle_temp[0];
+  joint_angle[1] = -joint_angle_temp[1];
+  joint_angle[2] = -joint_angle_temp[2];
+  joint_angle[3] = joint_angle_temp[3];
+  joint_angle[4] = -joint_angle_temp[4];
+  joint_angle[5] = -joint_angle_temp[5];
+  joint_angle[6] = -joint_angle_temp[6];
+  joint_angle[7] = -joint_angle_temp[7];
+  joint_angle[8] = -joint_angle_temp[8];
+  joint_angle[9] = joint_angle_temp[9];
+  joint_angle[10] = -joint_angle_temp[10];
+  
 }
 
 /*******************************************************************************
@@ -288,6 +306,7 @@ void drawManipulator()
   rotateY(40*PI/180);
   
   rotateY(-joint_angle[9]);
+  rotateY(30*PI/180);
   shape(link7);
   drawLocalFrame();
   popMatrix();
@@ -713,38 +732,38 @@ class ChildApplet extends PApplet
 
   void joint0(float angle)
   {
-    joint_angle[0] = angle;
-    //set_joint_angle[0] = angle;    
+    //joint_angle[0] = angle;
+    set_joint_angle[0] = angle;    
   }
 
   void joint1(float angle)
   {
-    joint_angle[1] = angle;
-    //set_joint_angle[1] = angle;    
+    //joint_angle[1] = angle;
+    set_joint_angle[1] = angle;    
     
-    joint_angle[3] = joint_angle[1] - joint_angle[2];
-    joint_angle[4] = -PI-(joint_angle[1]-joint_angle[2]);
-    joint_angle[5] = -PI-(joint_angle[1]-joint_angle[2]);
-    joint_angle[6] = -180*PI/180-joint_angle[2];
-    joint_angle[7] = joint_angle[1];
-    joint_angle[8] = 15*PI/180-joint_angle[1];
-    joint_angle[9] = joint_angle[2]-195*PI/180;
-    joint_angle[10] = 90*PI/180-joint_angle[2];
+    //joint_angle[3] = joint_angle[1] - joint_angle[2];
+    //joint_angle[4] = -PI-(joint_angle[1]-joint_angle[2]);
+    //joint_angle[5] = -PI-(joint_angle[1]-joint_angle[2]);
+    //joint_angle[6] = -180*PI/180-joint_angle[2];
+    //joint_angle[7] = joint_angle[1];
+    //joint_angle[8] = 15*PI/180-joint_angle[1];
+    //joint_angle[9] = joint_angle[2]-195*PI/180;
+    //joint_angle[10] = 90*PI/180-joint_angle[2];
   }
 
   void joint2(float angle)
   {
-    joint_angle[2] = angle;
-    //set_joint_angle[2] = angle;    
+    //joint_angle[2] = angle;
+    set_joint_angle[2] = angle;    
     
-    joint_angle[3] = joint_angle[1] - joint_angle[2];
-    joint_angle[4] = -PI-(joint_angle[1]-joint_angle[2]);
-    joint_angle[5] = -PI-(joint_angle[1]-joint_angle[2]);
-    joint_angle[6] = -180*PI/180-joint_angle[2];
-    joint_angle[7] = joint_angle[1];
-    joint_angle[8] = 15*PI/180-joint_angle[1];
-    joint_angle[9] = joint_angle[2]-195*PI/180;
-    joint_angle[10] = 90*PI/180-joint_angle[2];
+    //joint_angle[3] = joint_angle[1] - joint_angle[2];
+    //joint_angle[4] = -PI-(joint_angle[1]-joint_angle[2]);
+    //joint_angle[5] = -PI-(joint_angle[1]-joint_angle[2]);
+    //joint_angle[6] = -180*PI/180-joint_angle[2];
+    //joint_angle[7] = joint_angle[1];
+    //joint_angle[8] = 15*PI/180-joint_angle[1];
+    //joint_angle[9] = joint_angle[2]-195*PI/180;
+    //joint_angle[10] = 90*PI/180-joint_angle[2];
   }
 
   public void Origin(int theValue)
@@ -759,6 +778,7 @@ class ChildApplet extends PApplet
                         set_joint_angle[0] + ',' +
                         set_joint_angle[1] + ',' +
                         set_joint_angle[2] + '\n');
+      println("joint " + set_joint_angle[0] + ", " + set_joint_angle[1]  + ", " + set_joint_angle[2]  + "  ");                    
     }
     else
     {
@@ -778,6 +798,7 @@ class ChildApplet extends PApplet
                         set_joint_angle[0] + ',' +
                         set_joint_angle[1] + ',' +
                         set_joint_angle[2] + '\n');
+      println("joint " + set_joint_angle[0] + ", " + set_joint_angle[1]  + ", " + set_joint_angle[2]  + "  ");  
     }
     else
     {
@@ -793,6 +814,7 @@ class ChildApplet extends PApplet
                         set_joint_angle[0] + ',' +
                         set_joint_angle[1] + ',' +
                         set_joint_angle[2] + '\n');
+      println("joint " + set_joint_angle[0] + ", " + set_joint_angle[1]  + ", " + set_joint_angle[2]  + "  ");  
     }
     else
     {
@@ -808,11 +830,13 @@ class ChildApplet extends PApplet
       {
         opencr_port.write("suction"  + ',' +
                           "on" + '\n');
+        println("suction on");
       }
       else
       {
         opencr_port.write("suction"  + ',' +
                           "off" + '\n');
+        println("suction off");
       }
     }
     else
@@ -914,12 +938,13 @@ class ChildApplet extends PApplet
     {
       set_joint_angle[0] = 0.0;
       set_joint_angle[1] = 90.0  * PI/180.0;
-      set_joint_angle[2] = 135.0 * PI/180.0;
+      set_joint_angle[2] = 180.0 * PI/180.0;
 
       opencr_port.write("joint"            + ',' +
                         set_joint_angle[0] + ',' +
                         set_joint_angle[1] + ',' +
                         set_joint_angle[2] + '\n');
+      println("joint " + set_joint_angle[0] + ", " + set_joint_angle[1]  + ", " + set_joint_angle[2]  + "  ");  
     }
     else
     {
@@ -935,11 +960,13 @@ class ChildApplet extends PApplet
       {
         opencr_port.write("suction"  + ',' +
                           "on" + '\n');
+        println("suction on");
       }
       else
       {
         opencr_port.write("suction"  + ',' +
                           "off" + '\n');
+        println("suction on");
       }
     }
     else
@@ -959,11 +986,13 @@ class ChildApplet extends PApplet
       {
         opencr_port.write("motor"  + ',' +
                           "disable"     + '\n');
+        println("motor disable");
       }
       else
       {
         opencr_port.write("motor"  + ',' +
                           "enable"      + '\n');
+        println("motor enable");
       }
     }
     else
@@ -978,6 +1007,7 @@ class ChildApplet extends PApplet
     {
       opencr_port.write("get" + ',' +
                         "clear"  + '\n');
+      println("get clear");
     }
     else
     {
@@ -992,7 +1022,7 @@ class ChildApplet extends PApplet
       opencr_port.write("get"      + ',' +
                         "pose"     + ',' +
                         motion_num + '\n');
-
+      println("get pose");
       motion_num++;
     }
     else
@@ -1025,11 +1055,13 @@ class ChildApplet extends PApplet
       {
         opencr_port.write("hand"    + ',' +
                           "repeat"  + '\n');
+        println("hand repeat");
       }
       else
       {
         opencr_port.write("hand"  + ',' +
-                          "stop"  + '\n');;
+                          "stop"  + '\n');
+        println("hand stop");
       }
     }
     else

@@ -48,8 +48,8 @@
 #define CHECK_FLAG   0
 #define WAIT_FOR_SEC 1
 
-#define PROCESSING false
-#define DYNAMIXEL  false
+#define PROCESSINGON true
+#define DYNAMIXEL  true
 #define TORQUE     true
 
 #define MOTION_NUM 20
@@ -64,7 +64,7 @@ bool motion    = false;
 bool repeat    = false;
 
 bool moving    = false;
-bool send_processing_flug = false ;
+bool send_processing_flug = true ;
 
 String cmd[20];
 
@@ -74,26 +74,26 @@ uint8_t motion_num = 0;
 
 
 const float initial_motion_set[MOTION_NUM][5] = { // time, grip, joint1, joint2, joint3,
-                                                { 2.0,  0.0,   0.0,  0.92, -0.33},
-                                                { 2.0,  1.0,   0.0,  0.92, -0.33},  
-                                                { 2.0,  0.0,   0.0,   0.0, -1.37},
-                                                { 2.0,  0.0,   0.0, -0.32, -0.81},
-                                                { 2.0, -1.0,   0.0, -0.32, -0.81},
-                                                { 2.0,  0.0,   0.0,  0.92, -0.33},
-                                                { 2.0,  0.0,   1.5,  0.75, -0.80},
-                                                { 2.0,  0.0,   0.0,  0.92, -0.33},
-                                                { 2.0,  0.0,  -1.5,  0.75, -0.80},
-                                                { 2.0,  0.0,   0.0,  0.92, -0.33},
-                                                { 2.0,  0.0,   0.0,   0.0, -1.37},
-                                                { 2.0,  0.0,   0.0, -0.32, -0.81},
-                                                { 2.0,  1.0,   0.0, -0.32, -0.81},
-                                                { 2.0,  1.0,   0.0, -0.32, -0.81},
-                                                { 2.0,  1.0,   0.0, -0.32, -0.81},
-                                                { 2.0,  1.0,   0.0, -0.32, -0.81},
-                                                { 2.0,  1.0,   0.0, -0.32, -0.81},
-                                                { 2.0,  1.0,   0.0, -0.32, -0.81},
-                                                { 2.0,  1.0,   0.0, -0.32, -0.81},
-                                                { 2.0,  0.0,   0.0,   0.0, -1.37}
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0},  
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
+                                                { 0.0,  0.0,   0.0,  0.0,  0.0}
                                                 };
 
 JointTrajectory joint_trajectory(DXL_SIZE);
@@ -103,7 +103,6 @@ std::vector<Trajectory> goal_trajectory_vector;
 //////////////////////////////////////////
 
 Manipulator omlink;
-Manipulator target_omlink;
 OMDynamixel dxl(BAUD_RATE);
 
 
@@ -153,154 +152,91 @@ namespace MyFunction
     return trajectory_vector;
   }
 
-  void UpdateJointTrajectory(std::vector <float> target_angle, float move_time)
+  void updateJointTrajectory(std::vector <float> target_angle, float move_time)
   {
     std::vector <float> start_angle;
     start_angle = OPEN_MANIPULATOR::MANAGER::getAllActiveJointAngle(&omlink);
     
     start_trajectory_vector = makeTrajectoryVector(start_angle);
     goal_trajectory_vector = makeTrajectoryVector(target_angle);
+
     joint_trajectory.init(start_trajectory_vector, goal_trajectory_vector, move_time, CONTROL_PERIOD);
   }
 
-  void jointMove()
+  Pose setPose(String dir)
   {
-    static uint16_t step_cnt = 0;
-    uint16_t step = uint16_t(floor(MOVE_TIME/CONTROL_PERIOD) + 1.0);
-    uint16_t tick_time;
+    Pose target_pose;
+    float step = 0.010;
 
-    std::vector<float> goal_position;
-    std::vector<float> goal_velocity;
-    std::vector<float> goal_acceleration;
+    target_pose = omlink.getComponentPoseToWorld(SUCTION);
 
-      if (step_cnt < step)
-      {
-        tick_time = CONTROL_PERIOD * step_cnt;
-        
-        goal_position = joint_trajectory.getPosition(tick_time);
-        goal_velocity = joint_trajectory.getVelocity(tick_time);
-        goal_acceleration = joint_trajectory.getAcceleration(tick_time);
-
-        dxl.setAngle(goal_position);
-        step_cnt++;
-        moving   = true; 
-      }
-      else
-      {
-        step_cnt = 0;
-        moving   = false; 
-      }
+    if (dir == "forward")
+    {
+      target_pose.position(0) += step;
     }  
-  }
-
-  void getData(uint32_t wait_time)
-  {
-    static uint8_t state = 0;
-    static uint32_t tick = 0;
-
-    bool processing_flag = false;
-    String get_processing_data = "";
-
-    if (Serial.available())
+    else if (dir == "back")
     {
-      get_processing_data = Serial.readStringUntil('\n');
-      processing_flag = true;
+      target_pose.position(0) -= step;
     }
-
-    switch (state)
+    else if (dir == "left")
     {
-      case CHECK_FLAG:
-          dataFromProcessing(get_processing_data);   
-          tick = millis();
-          state  = WAIT_FOR_SEC;
-      break;
+      target_pose.position(1) += step;
+    }
+    else if (dir == "right")
+    {
+      target_pose.position(1) -= step;
+    }
+    else if (dir == "up")
+    {
+      target_pose.position(2) += step;
+    }
+    else if (dir == "down")
+    {
+      target_pose.position(2) -= step;
+    }
       
-      case WAIT_FOR_SEC:
-        if ((millis() - tick) >= wait_time)
-        {
-          state = CHECK_FLAG;
-        }
-      break;
-      
-      default :
-      state = CHECK_FLAG;
-      break;
-    }
-  }
-
-  void setMotion()
-  {
-    if (motion)
-    {
-      if (moving)
-        return;
-
-      if (motion_cnt >= motion_num)
-      {
-        if (repeat)
-        {
-          motion_cnt = 0;
-        }
-        else
-        {
-          motion_cnt = 0;
-          motion     = false;     
-        }
-      }
-
-      if (motion_storage[motion_cnt][1] == -1.0)
-      {
-        //suction off
-
-        motion_cnt++;
-      }
-      else if (motion_storage[motion_cnt][1] == 1.0)
-      {
-        //suction on
-
-        motion_cnt++;
-      }
-      else
-      {
-        std::vector <float> target_angle;
-        for (int8_t i = 0; i < 3; i++)
-        {
-          target_angle.push_back(motion_storage[motion_cnt][i+1]);
-        }
-        UpdateJointTrajectory(target_angle, MOVE_TIME);
-
-        motion_cnt++;
-      }
-    }
-    else
-    {
-      motion_cnt = 0;
-    }
+    return target_pose;
   }
 
   void dataFromProcessing(String get)
   {
     get.trim();
-
     PROCESSING::split(get, ',', cmd);
+    DEBUG.print("get");
+    DEBUG.print(cmd[0]);
+    DEBUG.print(",");
+    DEBUG.print(cmd[1]);
+    DEBUG.print(",");
+    DEBUG.print(cmd[2]);
+    DEBUG.print(",");
+    DEBUG.print(cmd[3]);
+    DEBUG.print(",");
+    DEBUG.print(cmd[4]);
+    DEBUG.print(",");
+    DEBUG.print(cmd[5]);
+    DEBUG.print(",");
+    DEBUG.print(cmd[6]);
+    DEBUG.print(",");
+    DEBUG.print(cmd[7]);
+    DEBUG.print(",");
 
     if (cmd[0] == "om")
     {
       if (cmd[1] == "ready")
       {
+        DEBUG.print("ready");
         if (DYNAMIXEL)
         {
           dxl.enableAllDynamixel();
-          send_processing_flug = true ;
-          PROCESSING::sendAngle2Processing(getAngle()); 
         }
 
-        if (PROCESSING)
+        if (PROCESSINGON)
           send_processing_flug = true ;
-          PROCESSING::sendAngle2Processing(getState()); 
+          //PROCESSING::sendAngle2Processing(OPEN_MANIPULATOR::MANAGER::getAllJointAngle(&omlink)); 
       }
       else if (cmd[1] == "end")
       {
+        DEBUG.print("end");
         send_processing_flug = false ;
         if (DYNAMIXEL)
           dxl.disableAllDynamixel();
@@ -308,19 +244,20 @@ namespace MyFunction
     }
     else if (cmd[0] == "joint")
     {
-      std::Vector<float> target_angle;
+      std::vector<float> target_angle;
 
       for (uint8_t i = 0; i < 3; i++)
         target_angle.push_back(cmd[i].toFloat());
-
-      UpdateJointTrajectory(target_angle, MOVE_TIME);
+      DEBUG.print("joint");
+      updateJointTrajectory(target_angle, MOVE_TIME);
     }
     else if (cmd[0] == "suction")
     {
-      if (cmd[1] == "on")
-        //suction on
-      else if (cmd[1] == "off")
-        //suction off
+      if (cmd[1] == "on"){}//suction on
+        
+      else if (cmd[1] == "off"){}//suction off
+        
+      else{}
     }
     else if (cmd[0] == "task")
     {
@@ -330,7 +267,7 @@ namespace MyFunction
       target_pose = setPose(cmd[1]);
       target_angle = KINEMATICS::LINK::geometricInverse(&omlink, SUCTION, target_pose);
 
-      UpdateJointTrajectory(target_angle, MOVE_TIME);
+      updateJointTrajectory(target_angle, MOVE_TIME);
     }
     else if (cmd[0] == "motor")
     {
@@ -375,10 +312,10 @@ namespace MyFunction
       {
         if (cmd[2].toInt() < MOTION_NUM)
         {
-          std::Vector<float> target_angle = OPEN_MANIPULATOR::MANAGER::getAllJointAngle(&omlink);
+          std::vector<float> target_angle = OPEN_MANIPULATOR::MANAGER::getAllJointAngle(&omlink);
 
           if (DYNAMIXEL)
-            PROCESSING::sendAngle2Processing(target_angle); 
+            //PROCESSING::sendAngle2Processing(target_angle); 
 
           for (uint8_t i = 0; i < 5; i++)
           {
@@ -396,7 +333,7 @@ namespace MyFunction
         if (DYNAMIXEL)
         {
           dxl.enableAllDynamixel();
-          PROCESSING::sendAngle2Processing(OPEN_MANIPULATOR::MANAGER::getAllJointAngle(&omlink)); 
+          //PROCESSING::sendAngle2Processing(OPEN_MANIPULATOR::MANAGER::getAllJointAngle(&omlink)); 
         }
 
         motion_cnt = 0;
@@ -407,7 +344,7 @@ namespace MyFunction
         if (DYNAMIXEL)
         {
           dxl.enableAllDynamixel();
-          PROCESSING::sendAngle2Processing(OPEN_MANIPULATOR::MANAGER::getAllJointAngle(&omlink)); 
+          //PROCESSING::sendAngle2Processing(OPEN_MANIPULATOR::MANAGER::getAllJointAngle(&omlink)); 
         }
 
         motion_cnt = 0;
@@ -434,16 +371,16 @@ namespace MyFunction
       if (cmd[1] == "start")
       {
         if (DYNAMIXEL)
-          PROCESSING::sendAngle2Processing(OPEN_MANIPULATOR::MANAGER::getAllJointAngle(omlink));
+          ///PROCESSING::sendAngle2Processing(OPEN_MANIPULATOR::MANAGER::getAllJointAngle(&omlink));
 
-        if (PROCESSING)
-          PROCESSING::sendAngle2Processing(OPEN_MANIPULATOR::MANAGER::getAllJointAngle(omlink));
+        if (PROCESSINGON)
+          //PROCESSING::sendAngle2Processing(OPEN_MANIPULATOR::MANAGER::getAllJointAngle(&omlink));
 
         for (uint8_t i = 0; i < MOTION_NUM; i++)
         {
           for (uint8_t j = 0; j < 5; j++)
           {
-            motion_storage[i][j] = motion_set[i][j];
+            motion_storage[i][j] = initial_motion_set[i][j];
           }
         }
 
@@ -461,42 +398,134 @@ namespace MyFunction
     }
   }
 
-  Pose setPose(String dir)
+  void getData(uint32_t wait_time)
   {
-    Pose target_pose;
-    float step = 0.010;
+    static uint8_t state = 0;
+    static uint32_t tick = 0;
 
-    target_pose = omlink.getComponentPoseToWorld(SUCTION);
+    static bool processing_flag = false;
+    String get_processing_data = "";
 
-    if (dir == "forward")
+    if (Serial.available())
     {
-      target_pose.position(0) += step;
-    }  
-    else if (dir == "back")
-    {
-      target_pose.position(0) -= step;
+      get_processing_data = Serial.readStringUntil('\n');
+      processing_flag = true;
     }
-    else if (dir == "left")
+
+    if(processing_flag)
     {
-      target_pose.position(1) += step;
+      switch (state)
+      {
+        case CHECK_FLAG:
+            dataFromProcessing(get_processing_data);   
+            tick = millis();
+            state  = WAIT_FOR_SEC;
+        break;
+        
+        case WAIT_FOR_SEC:
+          if ((millis() - tick) >= wait_time)
+          {
+            state = CHECK_FLAG;
+          }
+        break;
+        
+        default :
+        state = CHECK_FLAG;
+        break;
+      }
+      processing_flag = false;
     }
-    else if (dir == "right")
-    {
-      target_pose.position(1) -= step;
-    }
-    else if (dir == "up")
-    {
-      target_pose.position(2) += step;
-    }
-    else if (dir == "down")
-    {
-      target_pose.position(2) -= step;
-    }
-      
-    return target_pose;
+    
   }
 
+  void setMotion()
+  {
+    if (motion)
+    {
+      if (moving)
+        return;
 
+      if (motion_cnt >= motion_num)
+      {
+        if (repeat)
+        {
+          motion_cnt = 0;
+        }
+        else
+        {
+          motion_cnt = 0;
+          motion     = false;     
+        }
+      }
+
+      if (motion_storage[motion_cnt][1] == -1.0)
+      {
+        //suction off
+
+        motion_cnt++;
+      }
+      else if (motion_storage[motion_cnt][1] == 1.0)
+      {
+        //suction on
+
+        motion_cnt++;
+      }
+      else
+      {
+        std::vector <float> target_angle;
+        for (int8_t i = 0; i < 3; i++)
+        {
+          target_angle.push_back(motion_storage[motion_cnt][i+1]);
+        }
+        updateJointTrajectory(target_angle, MOVE_TIME);
+        
+        motion_cnt++;
+      }
+    }
+    else
+    {
+      motion_cnt = 0;
+    }
+  }
+
+  void jointMove()
+  {
+    static uint16_t step_cnt = 0;
+    uint16_t step = uint16_t(floor(MOVE_TIME/CONTROL_PERIOD) + 1.0);
+    uint16_t tick_time;
+
+    std::vector<float> goal_position;
+    std::vector<float> goal_velocity;
+    std::vector<float> goal_acceleration;
+      if (step_cnt < step-1)
+      {
+        tick_time = CONTROL_PERIOD * step_cnt;
+
+        goal_position = joint_trajectory.getPosition(tick_time);
+        goal_velocity = joint_trajectory.getVelocity(tick_time);
+        goal_acceleration = joint_trajectory.getAcceleration(tick_time);
+        dxl.setAngle(goal_position);
+        step_cnt++;
+        moving   = true; 
+      }
+      else if(step_cnt < step)
+      {
+        tick_time = CONTROL_PERIOD * step_cnt;
+
+        goal_position = joint_trajectory.getPosition(tick_time);
+        goal_velocity = joint_trajectory.getVelocity(tick_time);
+        goal_acceleration = joint_trajectory.getAcceleration(tick_time);
+        dxl.setAngle(goal_position);
+        updateJointTrajectory(OPEN_MANIPULATOR::MANAGER::getAllActiveJointAngle(&omlink), MOVE_TIME);
+        step_cnt++;
+        moving   = true; 
+      }
+      else
+      {
+        step_cnt = 0;
+        moving   = false;
+      } 
+  }
 }
 
 void initOMLink()

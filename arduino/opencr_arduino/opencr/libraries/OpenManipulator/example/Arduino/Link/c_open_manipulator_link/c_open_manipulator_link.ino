@@ -2,95 +2,88 @@
 #include "OpenManipulator_Link.h"
 
 uint32_t present_time = 0;
-uint32_t previous_time = 0;
+uint32_t previous_time[2] = {0, 0};
+
+// std::vector<float> ac_angle_temp;
+// std::vector<float> ac_angle_min;
+// std::vector<float> ac_angle_max;
+// bool test_flug[3];
+// int8_t ias = 0;
 
 void setup() 
 {
   Serial.begin(57600);
-  while (!Serial)
-    ;
-  
+  DEBUG.begin(57600);
+  // while (!Serial)
+  //   ;
+
   dxl.init();
-  dxl.setMaxPositionLimit(1, 180*DEG2RAD);
-  dxl.setMinPositionLimit(1, -180*DEG2RAD);
-  dxl.setMaxPositionLimit(2, 180*DEG2RAD);
-  dxl.setMinPositionLimit(2, -180*DEG2RAD);
-  dxl.setMaxPositionLimit(3, 180*DEG2RAD);
-  dxl.setMinPositionLimit(3, -180*DEG2RAD);
+  PROCESSING::initProcessing(12);
 
   initOMLink();
-  dxl.setAngle(getAllActiveJointAngle(&oimlink));
-//   USB.println("///////////////////////////////////////////////////////////////////////////////////////");
-//   USB.println("///////////////////////////////////Test Inverse////////////////////////////////////////");
-//   USB.println("///////////////////////////////////////////////////////////////////////////////////////");
+  MyFunction::updateJointTrajectory(OPEN_MANIPULATOR::MANAGER::getAllActiveJointAngle(&omlink) ,MOVE_TIME);
+  // while (true)
+  //   ;
+  previous_time[0] = millis();
+  previous_time[1] = millis();
 
-//   VectorXf target_angle(omlink.getDOF());
-//   Pose target_pose;
-//   target_pose.position = MATH::makeVector3(0.05, -0.05, 0.0);
-//   target_pose.orientation = Matrix3f::Identity(3,3);
-
-//   target_angle = KINEMATICS::LINK::geometricInverse(&omlink, SUCTION, target_pose);
-  
-//   target_angle = target_angle*RAD2DEG;
-//   USB.println("\nTest Inverse");
-//   USB.println(" target_pose : ");
-//   PRINT::VECTOR(target_pose.position);
-//   USB.println(" target_angle : ");
-//   PRINT::VECTOR(target_angle);
-//   target_angle = target_angle*DEG2RAD;
-
-//   omlink.setComponentJointAngle(JOINT0, target_angle(0));
-//   omlink.setComponentJointAngle(JOINT1, target_angle(1));
-//   omlink.setComponentJointAngle(JOINT2, target_angle(2));
-//   MyFunction::setPassiveJointAngle(&omlink);
-//   KINEMATICS::LINK::forward(&omlink);
-//   omlink.checkManipulatorSetting();
-
-// ///////////////////////////////////////////////////////////////////////////////////////
-//   USB.println("///////////////////////////////////////////////////////////////////////////////////////");
-//   USB.println("///////////////////////////////////Test Inverse////////////////////////////////////////");
-//   USB.println("///////////////////////////////////////////////////////////////////////////////////////");
-//   target_pose.position = MATH::makeVector3(0.0, 0.0, 0.229);
-//   target_pose.orientation = Matrix3f::Identity(3,3);
-
-//   target_angle = KINEMATICS::LINK::geometricInverse(&omlink, SUCTION, target_pose);
-  
-//   target_angle = target_angle*RAD2DEG;
-//   USB.println("\nTest Inverse");
-//   USB.println(" target_pose : ");
-//   PRINT::VECTOR(target_pose.position);
-//   USB.println(" target_angle : ");
-//   PRINT::VECTOR(target_angle);
-//   target_angle = target_angle*DEG2RAD;
-
-//   omlink.setComponentJointAngle(JOINT0, target_angle(0));
-//   omlink.setComponentJointAngle(JOINT1, target_angle(1));
-//   omlink.setComponentJointAngle(JOINT2, target_angle(2));
-//   MyFunction::setPassiveJointAngle(&omlink);
-//   KINEMATICS::LINK::forward(&omlink);
-//   omlink.checkManipulatorSetting();
-
+  // ac_angle_temp.push_back(0.0);
+  // ac_angle_temp.push_back(-90.0*DEG2RAD);
+  // ac_angle_temp.push_back(-180.0*DEG2RAD);
+  // ac_angle_min.push_back(-90.0*DEG2RAD);
+  // ac_angle_min.push_back(-90.0*DEG2RAD);
+  // ac_angle_min.push_back(-180.0*DEG2RAD);
+  // ac_angle_max.push_back(90.0*DEG2RAD);
+  // ac_angle_max.push_back(0.0*DEG2RAD);
+  // ac_angle_max.push_back(-130.0*DEG2RAD);
+  // test_flug[0] = true;
+  // test_flug[1] = true;
+  // test_flug[2] = true;
 }
 
 void loop() 
 {
-  present_time = millis();
-  
-  MyFunction::getData(100);
-  MyFunction::setMotion();
-
-  if(present_time-previous_time >= CONTROL_PERIOD)
+   present_time = millis();
+  MyFunction::getData(8);
+  //MyFunction::setMotion();
+  if(present_time-previous_time[0] >= CONTROL_PERIOD*1000)
   {
-    MyFunction::jointMove();
-    previous_time = millis();
+    //MyFunction::jointMove();
+    // for(ias = 0; ias < 3; ias++)
+    // {
+    //   if(test_flug[ias])
+    //   {
+    //     ac_angle_temp.at(ias) += 0.1*DEG2RAD;
+    //     if(ac_angle_temp.at(ias) > ac_angle_max[ias])
+    //     {
+    //       test_flug[ias] = false;
+    //     }
+    //   }
+    //   else
+    //   {
+    //     ac_angle_temp.at(ias) -= 0.1*DEG2RAD;
+    //     if(ac_angle_temp.at(ias) < ac_angle_min[ias])
+    //     {
+    //       test_flug[ias] = true;
+    //     }
+    //   }
+    // }
+    previous_time[0] = millis();
   }
-
-  MANAGER::setAllActiveJointAngle(&omlink, dxl.getAngle());
+  //forward
+  // OPEN_MANIPULATOR::MANAGER::setAllActiveJointAngle(&omlink, ac_angle_temp);
+  OPEN_MANIPULATOR::MANAGER::setAllActiveJointAngle(&omlink, dxl.getAngle());
   MyFunction::setPassiveJointAngle();
   KINEMATICS::LINK::forward(&omlink);
-  if(send_processing_flug)
+  
+  
+  if(present_time-previous_time[1] >= 8)
   {
-    PROCESSING::sendAngle2Processing(getAllJointAngle(&omlink));
+    if(send_processing_flug)
+      {
+        PROCESSING::sendAngle2Processing(OPEN_MANIPULATOR::MANAGER::getAllJointAngle(&omlink));
+      }
+    previous_time[1] = millis();
   }
 
   
