@@ -40,13 +40,21 @@
 #define Y_AXIS OM_MATH::makeVector3(0.0, 1.0, 0.0)
 #define Z_AXIS OM_MATH::makeVector3(0.0, 0.0, 1.0)
 
+#define BAUD_RATE 57600
+
 OM_MANAGER::Manipulator chain;
+OM_DYNAMIXEL::Dynamixel dxl(BAUD_RATE);
 
 void initConnect()
 {
-  OPEN_MANIPULATOR::KINEMATICS::connectJacobian(OM_KINEMATICS::CHAIN::jacobian);
-  OPEN_MANIPULATOR::KINEMATICS::connectForward(OM_KINEMATICS::CHAIN::forward);
-  OPEN_MANIPULATOR::KINEMATICS::connectInverse(OM_KINEMATICS::CHAIN::inverse);
+  OPEN_MANIPULATOR::KINEMATICS::connectGetJacobianFunction(OM_KINEMATICS::CHAIN::jacobian);
+  OPEN_MANIPULATOR::KINEMATICS::connectSolveForwardFunction(OM_KINEMATICS::CHAIN::forward);
+  OPEN_MANIPULATOR::KINEMATICS::connectSolveInverseFunction(OM_KINEMATICS::CHAIN::inverse);
+
+  // OPEN_MANIPULATOR::ACTUATOR::connectSendAllActuatorAngleFunction(dxl.setAngle);
+  // OPEN_MANIPULATOR::ACTUATOR::connectSendActuatorAngleFunction(dxl.setAngle);
+  // OPEN_MANIPULATOR::ACTUATOR::connectReceiveAllActuatorAngleFunction();
+ 
 }
 
 void initManipulator()

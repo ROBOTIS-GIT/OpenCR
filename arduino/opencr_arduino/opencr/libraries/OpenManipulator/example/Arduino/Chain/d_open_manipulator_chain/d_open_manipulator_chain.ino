@@ -29,6 +29,7 @@ void setup()
   Serial.begin(57600);
   while(!Serial);
 
+  initConnect();
   initManipulator();
 
   // initThread();
