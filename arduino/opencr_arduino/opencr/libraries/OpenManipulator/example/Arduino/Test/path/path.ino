@@ -8,7 +8,7 @@
 #define DEG2RAD (M_PI / 180.0)
 #define RAD2DEG (180.0 / M_PI)
 
-#define CONTROL_PERIOD 0.008f
+#define CONTROL_TIME 0.008f
 #define MOVE_TIME 3.0f
 
 OM_PATH::JointTrajectory joint_trajectory(DXL_SIZE);
@@ -22,7 +22,7 @@ std::vector<float> goal_velocity;
 std::vector<float> goal_acceleration;
 std::vector<float> present_position;
 
-static uint32_t tTime[2] = {0.0, 0.0};
+static float tTime[2] = {0.0, 0.0};
 
 void setup()
 {
@@ -62,23 +62,24 @@ void setup()
   goal_trajectory.push_back(goal);
   goal_trajectory.push_back(goal);
 
-  joint_trajectory.init(start_trajectory, goal_trajectory, MOVE_TIME, CONTROL_PERIOD);
+  joint_trajectory.init(start_trajectory, goal_trajectory, MOVE_TIME, CONTROL_TIME);
 }
 
 void loop() 
 {
-  uint32_t t = millis();
+  float t = (float)(millis() / 1000.0f);
 
-  if ((t-tTime[0]) >= CONTROL_PERIOD)
+  if ((t-tTime[0]) >= CONTROL_TIME)
   {
-    present_position = dxl.getAngle();
+    // present_position = dxl.getAngle();
 
     tTime[0] = t;
   }
 
-  if ((t-tTime[1]) >= CONTROL_PERIOD)
+  if ((t-tTime[1]) >= CONTROL_TIME)
   {
     jointControl();
+    LOG::INFO("TIME : ", t-tTime[1]);
     
     tTime[1] = t;
   }
@@ -86,7 +87,7 @@ void loop()
 
 void jointControl()
 {
-  uint16_t step_time = uint16_t(floor(MOVE_TIME/CONTROL_PERIOD) + 1.0);
+  uint16_t step_time = uint16_t(floor(MOVE_TIME/CONTROL_TIME) + 1.0);
   float tick_time = 0;
   static uint16_t step_cnt = 0;
   static float moving = true;
@@ -99,7 +100,7 @@ void jointControl()
   {
     if (step_cnt < step_time)
     {
-      tick_time = CONTROL_PERIOD * step_cnt;
+      tick_time = CONTROL_TIME * step_cnt;
       
       goal_position = joint_trajectory.getPosition(tick_time);
       goal_velocity = joint_trajectory.getVelocity(tick_time);
