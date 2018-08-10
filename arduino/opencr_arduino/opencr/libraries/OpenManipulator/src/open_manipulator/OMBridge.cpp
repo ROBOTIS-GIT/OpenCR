@@ -18,7 +18,7 @@
 
 #include "../../include/open_manipulator/OMBridge.h"
 
-void PROCESSING::split(String data, char separator, String* temp)
+void OM_PROCESSING::split(String data, char separator, String* temp)
 {
   int cnt = 0;
   int get_index = 0;
@@ -43,7 +43,7 @@ void PROCESSING::split(String data, char separator, String* temp)
   }
 }
 
-void PROCESSING::initProcessing(int8_t joint_angle_vector_size)
+void OM_PROCESSING::initProcessing(int8_t joint_angle_vector_size)
 {  
   for (int i = 0; i < joint_angle_vector_size; i++)
   {
@@ -57,7 +57,7 @@ void PROCESSING::initProcessing(int8_t joint_angle_vector_size)
   Serial.println("Init Processing");
 }
 
-void PROCESSING::sendAngle2Processing(std::vector<float> joint_angle_vector)
+void OM_PROCESSING::sendAngle2Processing(std::vector<float> joint_angle_vector)
 {
   Serial.print("angle");
 
@@ -66,7 +66,7 @@ void PROCESSING::sendAngle2Processing(std::vector<float> joint_angle_vector)
     Serial.print(",");
     Serial.print(joint_angle_vector.at(i));
   }
-  Serial.println(" ");
+  Serial.print("\n");
 }
 
 

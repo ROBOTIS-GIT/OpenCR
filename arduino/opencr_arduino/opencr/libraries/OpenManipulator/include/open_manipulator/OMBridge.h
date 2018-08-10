@@ -24,7 +24,7 @@
 
 #include "OMDebug.h"
 
-namespace PROCESSING
+namespace OM_PROCESSING
 {
   void split(String data, char separator, String* temp);
   void initProcessing(int8_t joint_angle_vector_size);
