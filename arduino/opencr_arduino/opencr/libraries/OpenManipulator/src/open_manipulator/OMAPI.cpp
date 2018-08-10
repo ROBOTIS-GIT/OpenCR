@@ -408,11 +408,71 @@ Vector3f MANAGER::getComponentCenterOfMass(OM_MANAGER::Manipulator *manipulator,
   return manipulator->getComponentCenterOfMass(name);  
 }
 
-void KINEMATICS::connectJacobian(MatrixXf (*fp)(OM_MANAGER::Manipulator *, Name)){ KINEMATICS::jacobian = fp; }
-// void KINEMATICS::connectForward(void (*fp)(OM_MANAGER::Manipulator *manipulator)) { forward = fp; }
-void KINEMATICS::connectForward(void (*fp)(OM_MANAGER::Manipulator *, Name)) { KINEMATICS::forward = fp; }
-void KINEMATICS::connectInverse(std::vector<float> (*fp)(OM_MANAGER::Manipulator *, Name, Pose)) { KINEMATICS::inverse = fp; }
+MatrixXf (*jacobian)(OM_MANAGER::Manipulator *, Name) = NULL;
+// void (*forward)(OM_MANAGER::Manipulator) = NULL;
+void (*forwardKinematics)(OM_MANAGER::Manipulator *, Name) = NULL;
+std::vector<float> (*inverseKinematics)(OM_MANAGER::Manipulator *, Name, Pose) = NULL;
 
-MatrixXf KINEMATICS::getJacobian(OM_MANAGER::Manipulator *manipulator, Name tool_name){ KINEMATICS::jacobian(manipulator, tool_name); }
-void KINEMATICS::solveForward(OM_MANAGER::Manipulator *manipulator, Name component_name){ KINEMATICS::forward(manipulator, component_name); }
-std::vector<float> KINEMATICS::solveInverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose){ KINEMATICS::inverse(manipulator, tool_name, target_pose); }
+void KINEMATICS::connectGetJacobianFunction(MatrixXf (*fp)(OM_MANAGER::Manipulator *, Name))
+{
+  jacobian = fp; 
+}
+// void KINEMATICS::connectForward(void (*fp)(OM_MANAGER::Manipulator *manipulator)) { forward = fp; }
+void KINEMATICS::connectSolveForwardFunction(void (*fp)(OM_MANAGER::Manipulator *, Name))
+{
+  forwardKinematics = fp;
+}
+
+void KINEMATICS::connectSolveInverseFunction(std::vector<float> (*fp)(OM_MANAGER::Manipulator *, Name, Pose))
+{
+  inverseKinematics = fp;
+}
+
+MatrixXf KINEMATICS::getJacobian(OM_MANAGER::Manipulator *manipulator, Name tool_name)
+{
+  jacobian(manipulator, tool_name);
+}
+
+void KINEMATICS::solveForward(OM_MANAGER::Manipulator *manipulator, Name component_name)
+{ 
+  forwardKinematics(manipulator, component_name);
+}
+
+std::vector<float> KINEMATICS::solveInverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose)
+{
+  inverseKinematics(manipulator, tool_name, target_pose);
+}
+
+bool (*setAllActuatorAngle)(std::vector<float>) = NULL;
+bool (*setActuatorAngle)(uint8_t, float) = NULL;
+std::vector<float> (*getAllActuatorAngle)(void) = NULL;
+
+void ACTUATOR::connectSendAllActuatorAngleFunction(bool (*fp)(std::vector<float>))
+{
+  setAllActuatorAngle = fp;
+}
+
+void ACTUATOR::connectSendActuatorAngleFunction(bool (*fp)(uint8_t, float))
+{
+  setActuatorAngle = fp;
+}
+
+void ACTUATOR::connectReceiveAllActuatorAngleFunction(std::vector<float> (*fp)(void))
+{
+  getAllActuatorAngle = fp;
+}
+
+bool ACTUATOR::sendAllActuatorAngle(std::vector<float> radian_vector)
+{
+  return setAllActuatorAngle(radian_vector);
+}
+
+bool ACTUATOR::sendActuatorAngle(uint8_t actuator_id, float radian)
+{
+  return setActuatorAngle(actuator_id, radian);
+}
+
+std::vector<float> ACTUATOR::receiveAllActuatorAngle(void)
+{
+  return getAllActuatorAngle();
+}

@@ -144,20 +144,26 @@ Vector3f getComponentCenterOfMass(OM_MANAGER::Manipulator *manipulator, Name nam
 
 namespace KINEMATICS
 {
-extern MatrixXf (*jacobian)(OM_MANAGER::Manipulator *, Name);
-// extern void (*forward)(OM_MANAGER::Manipulator) = NULL;
-extern void (*forward)(OM_MANAGER::Manipulator *, Name);
-extern std::vector<float> (*inverse)(OM_MANAGER::Manipulator *, Name, Pose);
-
-void connectJacobian(MatrixXf (*fp)(OM_MANAGER::Manipulator *, Name));
+void connectGetJacobianFunction(MatrixXf (*fp)(OM_MANAGER::Manipulator *, Name));
 // void connectForward(void (*fp)(OM_MANAGER::Manipulator *manipulator));
-void connectForward(void (*fp)(OM_MANAGER::Manipulator *, Name));
-void connectInverse(std::vector<float> (*fp)(OM_MANAGER::Manipulator *, Name, Pose));
+void connectSolveForwardFunction(void (*fp)(OM_MANAGER::Manipulator *, Name));
+void connectSolveInverseFunction(std::vector<float> (*fp)(OM_MANAGER::Manipulator *, Name, Pose));
 
 MatrixXf getJacobian(OM_MANAGER::Manipulator *manipulator, Name tool_name);
 void solveForward(OM_MANAGER::Manipulator *manipulator, Name component_name);
 std::vector<float> solveInverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose);
 } // namespace KINEMATICS
+
+namespace ACTUATOR
+{
+void connectSendAllActuatorAngleFunction(bool (*fp)(std::vector<float>));
+void connectSendActuatorAngleFunction(bool (*fp)(uint8_t, float));
+void connectReceiveAllActuatorAngleFunction(std::vector<float> (*fp)(void));
+
+bool sendAllActuatorAngle(std::vector<float> radian_vector);
+bool sendActuatorAngle(uint8_t actuator_id, float radian);
+std::vector<float> receiveAllActuatorAngle(void);
+} // namespace ACTUATOR
 
 // namespace PATH
 // {
@@ -187,20 +193,6 @@ Vector3f orientationDifference(Matrix3f desired_orientation, Matrix3f present_or
 VectorXf poseDifference(Vector3f desired_position, Vector3f present_position,
                         Matrix3f desired_orientation, Matrix3f present_orientation);
 } // namespace MATH
-#endif
-
-#if 0
-// Connect functions
-namespace ACTUATOR
-{
-bool (*setAllJointAngle)(float *) = NULL;
-bool (*setJointAngle)(uint8_t, float) = NULL;
-float *(*getAngle)() = NULL;
-} // namespace ACTUATOR
-
-void connectSetAllJointAngle(bool (*fp)(float *)) { ACTUATOR::setAllJointAngle = fp; }
-void connectSetJointAngle(bool (*fp)(uint8_t, float)) { ACTUATOR::setJointAngle = fp; }
-void connectGetAngle(float *(*fp)()) { ACTUATOR::getAngle = fp; }
 #endif
 
 #if 0
