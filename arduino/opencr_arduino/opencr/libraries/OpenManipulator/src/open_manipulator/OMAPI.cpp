@@ -20,6 +20,408 @@
 
 using namespace OPEN_MANIPULATOR;
 
+void OpenManipulator::addManipulator(Name manipulator_name)
+{
+  OM_MANAGER::Manipulator manipulator;
+
+  manipulator_.insert(std::make_pair(manipulator_name, manipulator));
+}
+
+void OpenManipulator::addWorld(Name manipulator_name,
+                               Name world_name,
+                               Name child_name,
+                               Vector3f world_position,
+                               Matrix3f world_orientation)
+{
+  manipulator_[manipulator_name].addWorld(world_name, child_name, world_position, world_orientation);
+}
+
+void OpenManipulator::addComponent(Name manipulator_name,
+                           Name my_name,
+                           Name parent_name,
+                           Name child_name,
+                           Vector3f relative_position,
+                           Matrix3f relative_orientation,
+                           Vector3f axis_of_rotation,
+                           int8_t actuator_id,
+                           float coefficient,
+                           float mass,
+                           Matrix3f inertia_tensor,
+                           Vector3f center_of_mass)
+{
+  manipulator_[manipulator_name].addComponent(my_name, parent_name, child_name, relative_position, relative_orientation, axis_of_rotation, actuator_id, coefficient, mass, inertia_tensor, center_of_mass);
+}
+
+void OpenManipulator::addTool(Name manipulator_name,
+                      Name my_name,
+                      Name parent_name,
+                      Vector3f relative_position,
+                      Matrix3f relative_orientation,
+                      int8_t tool_id,
+                      float coefficient,
+                      float mass,
+                      Matrix3f inertia_tensor,
+                      Vector3f center_of_mass)
+{
+  manipulator_[manipulator_name].addTool(my_name, parent_name, relative_position, relative_orientation, tool_id, coefficient, mass, inertia_tensor, center_of_mass);
+}
+
+void OpenManipulator::addComponentChild(Name manipulator_name, Name my_name, Name child_name)
+{
+  manipulator_[manipulator_name].addComponentChild(my_name, child_name);
+}
+
+void OpenManipulator::checkManipulatorSetting(Name manipulator_name)
+{
+  manipulator_[manipulator_name].checkManipulatorSetting();
+}
+
+void OpenManipulator::setWorldPose(Name manipulator_name, Pose world_pose)
+{
+  manipulator_[manipulator_name].setWorldPose(world_pose);
+}
+
+void OpenManipulator::setWorldPosition(Name manipulator_name, Vector3f world_position)
+{
+  manipulator_[manipulator_name].setWorldPosition(world_position);
+}
+
+void OpenManipulator::setWorldOrientation(Name manipulator_name, Matrix3f world_orientation)
+{
+  manipulator_[manipulator_name].setWorldOrientation(world_orientation);
+}
+
+void OpenManipulator::setWorldState(Name manipulator_name, State world_state)
+{
+  manipulator_[manipulator_name].setWorldState(world_state);
+}
+
+void OpenManipulator::setWorldVelocity(Name manipulator_name, VectorXf world_velocity)
+{
+  manipulator_[manipulator_name].setWorldVelocity(world_velocity);
+}
+
+void OpenManipulator::setWorldAcceleration(Name manipulator_name, VectorXf world_acceleration)
+{
+  manipulator_[manipulator_name].setWorldAcceleration(world_acceleration);
+}
+
+void OpenManipulator::setComponent(Name manipulator_name, Name name, Component component)
+{
+  manipulator_[manipulator_name].setComponent(name, component);
+}
+
+void OpenManipulator::setComponentPoseToWorld(Name manipulator_name, Name name, Pose pose_to_world)
+{
+  manipulator_[manipulator_name].setComponentPoseToWorld(name, pose_to_world);
+}
+
+void OpenManipulator::setComponentPositionToWorld(Name manipulator_name, Name name, Vector3f position_to_world)
+{
+  manipulator_[manipulator_name].setComponentPositionToWorld(name, position_to_world);
+}
+
+void OpenManipulator::setComponentOrientationToWorld(Name manipulator_name, Name name, Matrix3f orientation_to_wolrd)
+{
+  manipulator_[manipulator_name].setComponentOrientationToWorld(name, orientation_to_wolrd);
+}
+
+void OpenManipulator::setComponentStateToWorld(Name manipulator_name, Name name, State state_to_world)
+{
+  manipulator_[manipulator_name].setComponentStateToWorld(name, state_to_world);
+}
+
+void OpenManipulator::setComponentVelocityToWorld(Name manipulator_name, Name name, VectorXf velocity)
+{
+  manipulator_[manipulator_name].setComponentVelocityToWorld(name, velocity);
+}
+
+void OpenManipulator::setComponentAccelerationToWorld(Name manipulator_name, Name name, VectorXf accelaration)
+{
+  manipulator_[manipulator_name].setComponentAccelerationToWorld(name, accelaration);
+}
+
+void OpenManipulator::setComponentJointAngle(Name manipulator_name, Name name, float angle)
+{
+  manipulator_[manipulator_name].setComponentJointAngle(name, angle);
+}
+
+void OpenManipulator::setAllActiveJointAngle(Name manipulator_name, std::vector<float> angle_vector)
+{
+  std::map<Name, Component>::iterator it;
+  int8_t index = 0;
+
+  for(it = manipulator_[manipulator_name].getIteratorBegin(); it != manipulator_[manipulator_name].getIteratorEnd(); it++)
+  {
+    if(manipulator_[manipulator_name].getComponentJointId(it->first) != -1)
+    {
+      manipulator_[manipulator_name].setComponentJointAngle(it->first, angle_vector.at(index));
+      index++;
+    }
+  }
+}
+
+void OpenManipulator::setComponentJointVelocity(Name manipulator_name, Name name, float angular_velocity)
+{
+  manipulator_[manipulator_name].setComponentJointVelocity(name, angular_velocity);
+}
+
+void OpenManipulator::setComponentJointAcceleration(Name manipulator_name, Name name, float angular_acceleration)
+{
+  manipulator_[manipulator_name].setComponentJointAcceleration(name, angular_acceleration);
+}
+
+void OpenManipulator::setComponentToolOnOff(Name manipulator_name, Name name, bool on_off)
+{
+  manipulator_[manipulator_name].setComponentToolOnOff(name, on_off);
+}
+
+void OpenManipulator::setComponentToolValue(Name manipulator_name, Name name, float actuator_value)
+{
+  manipulator_[manipulator_name].setComponentToolValue(name, actuator_value);
+}
+
+std::map<Name, OM_MANAGER::Manipulator> OpenManipulator::getManipulator()
+{
+  return manipulator_;
+}
+
+OM_MANAGER::Manipulator* OpenManipulator::getManipulator(Name manipulator_name)
+{
+  return &manipulator_[manipulator_name];
+}
+
+int8_t OpenManipulator::getDOF(Name manipulator_name)
+{
+  return manipulator_[manipulator_name].getDOF();
+}
+
+int8_t OpenManipulator::getComponentSize(Name manipulator_name)
+{
+  return manipulator_[manipulator_name].getComponentSize();
+}
+
+Name OpenManipulator::getWorldName(Name manipulator_name)
+{
+  return manipulator_[manipulator_name].getWorldName();
+}
+
+Name OpenManipulator::getWorldChildName(Name manipulator_name)
+{
+  return manipulator_[manipulator_name].getWorldChildName();
+}
+
+Pose OpenManipulator::getWorldPose(Name manipulator_name)
+{
+  return manipulator_[manipulator_name].getWorldPose();
+}
+
+Vector3f OpenManipulator::getWorldPosition(Name manipulator_name)
+{
+  return manipulator_[manipulator_name].getWorldPosition();
+}
+
+Matrix3f OpenManipulator::getWorldOrientation(Name manipulator_name)
+{
+  return manipulator_[manipulator_name].getWorldOrientation();
+}
+
+State OpenManipulator::getWorldState(Name manipulator_name)
+{
+  return manipulator_[manipulator_name].getWorldState();
+}
+
+VectorXf OpenManipulator::getWorldVelocity(Name manipulator_name)
+{
+  return manipulator_[manipulator_name].getWorldVelocity();
+}
+
+VectorXf OpenManipulator::getWorldAcceleration(Name manipulator_name)
+{
+  return manipulator_[manipulator_name].getWorldAcceleration();
+}
+
+std::map<Name, Component> OpenManipulator::getAllComponent(Name manipulator_name)
+{
+  return manipulator_[manipulator_name].getAllComponent();
+}
+
+std::map<Name, Component>::iterator OpenManipulator::getIteratorBegin(Name manipulator_name)
+{
+  return manipulator_[manipulator_name].getIteratorBegin();
+}
+
+std::map<Name, Component>::iterator OpenManipulator::getIteratorEnd(Name manipulator_name)
+{
+  return manipulator_[manipulator_name].getIteratorEnd();
+}
+
+Component OpenManipulator::getComponent(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponent(name);
+}
+
+Name OpenManipulator::getComponentParentName(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentParentName(name);
+}
+
+std::vector<Name> OpenManipulator::getComponentChildName(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentChildName(name);
+}
+
+Pose OpenManipulator::getComponentPoseToWorld(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentPoseToWorld(name);
+}
+
+Vector3f OpenManipulator::getComponentPositionToWorld(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentPositionToWorld(name);
+}
+
+Matrix3f OpenManipulator::getComponentOrientationToWorld(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentOrientationToWorld(name);
+}
+
+State OpenManipulator::getComponentStateToWorld(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentStateToWorld(name);
+}
+
+VectorXf OpenManipulator::getComponentVelocityToWorld(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentVelocityToWorld(name);
+}
+
+VectorXf OpenManipulator::getComponentAccelerationToWorld(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentAccelerationToWorld(name);
+}
+
+Pose OpenManipulator::getComponentRelativePoseToParent(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentRelativePoseToParent(name);
+}
+
+Vector3f OpenManipulator::getComponentRelativePositionToParent(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentRelativePositionToParent(name);
+}
+
+Matrix3f OpenManipulator::getComponentRelativeOrientationToParent(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentRelativeOrientationToParent(name);
+}
+
+Joint OpenManipulator::getComponentJoint(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentJoint(name);
+}
+
+int8_t OpenManipulator::getComponentJointId(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentJointId(name);
+}
+
+float OpenManipulator::getComponentJointCoefficient(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentJointCoefficient(name);
+}
+
+Vector3f OpenManipulator::getComponentJointAxis(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentJointAxis(name);
+}
+
+float OpenManipulator::getComponentJointAngle(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentJointAngle(name);
+}
+
+std::vector<float> OpenManipulator::getAllJointAngle(Name manipulator_name)
+{
+  std::vector<float> result_vector;
+  std::map<Name, Component>::iterator it;
+  for(it = manipulator_[manipulator_name].getIteratorBegin(); it != manipulator_[manipulator_name].getIteratorEnd(); it++)
+  {
+    if(manipulator_[manipulator_name].getComponentToolId(it->first) < 0)
+    {
+      result_vector.push_back(manipulator_[manipulator_name].getComponentJointAngle(it->first));
+    }
+  }
+  return result_vector;
+}
+
+std::vector<float> OpenManipulator::getAllActiveJointAngle(Name manipulator_name)
+{
+  std::vector<float> result_vector;
+  std::map<Name, Component>::iterator it;
+
+  for(it = manipulator_[manipulator_name].getIteratorBegin(); it != manipulator_[manipulator_name].getIteratorEnd(); it++)
+  {
+    if(manipulator_[manipulator_name].getComponentJointId(it->first) != -1)
+    {
+      result_vector.push_back(manipulator_[manipulator_name].getComponentJointAngle(it->first));
+    }
+  }
+  return result_vector;
+}
+
+float OpenManipulator::getComponentJointVelocity(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentJointVelocity(name);
+}
+
+float OpenManipulator::getComponentJointAcceleration(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentJointAcceleration(name);
+}
+
+Tool OpenManipulator::getComponentTool(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentTool(name);
+}
+
+int8_t OpenManipulator::getComponentToolId(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentToolId(name);
+}
+
+float OpenManipulator::getComponentToolCoefficient(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentToolCoefficient(name);
+}
+
+bool OpenManipulator::getComponentToolOnOff(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentToolOnOff(name);
+}
+
+float OpenManipulator::getComponentToolValue(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentToolValue(name);
+}
+
+float OpenManipulator::getComponentMass(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentMass(name);
+}
+
+Matrix3f OpenManipulator::getComponentInertiaTensor(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentInertiaTensor(name);
+}
+
+Vector3f OpenManipulator::getComponentCenterOfMass(Name manipulator_name, Name name)
+{
+  return manipulator_[manipulator_name].getComponentCenterOfMass(name);  
+}
+
+#if 0
+
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////Basic Function//////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -476,3 +878,5 @@ std::vector<float> ACTUATOR::receiveAllActuatorAngle(void)
 {
   return getAllActuatorAngle();
 }
+
+#endif
