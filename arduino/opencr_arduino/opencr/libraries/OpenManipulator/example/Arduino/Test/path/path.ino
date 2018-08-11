@@ -16,7 +16,7 @@ std::vector<Trajectory> start_trajectory;
 std::vector<Trajectory> goal_trajectory;
 Trajectory start, goal;
 
-OM_DYNAMIXEL::Dynamixel dxl(BAUD_RATE);
+OM_DYNAMIXEL::Dynamixel dxl;
 std::vector<float> goal_position;
 std::vector<float> goal_velocity;
 std::vector<float> goal_acceleration;
@@ -29,7 +29,7 @@ void setup()
   Serial.begin(57600);
   while(!Serial);
 
-  dxl.init();
+  dxl.init(BAUD_RATE);
   dxl.setMaxPositionLimit(1, 180*DEG2RAD);
   dxl.setMinPositionLimit(1, -180*DEG2RAD);
 

@@ -10,14 +10,14 @@
 std::vector<float> goal_position;
 std::vector<float> present_position;
 
-OM_DYNAMIXEL::Dynamixel dxl(BAUD_RATE);
+OM_DYNAMIXEL::Dynamixel dxl;
 
 void setup()
 {
   Serial.begin(57600);
   while(!Serial);
 
-  dxl.init();
+  dxl.init(BAUD_RATE);
   dxl.setMaxPositionLimit(1, 180*DEG2RAD);
   dxl.setMinPositionLimit(1, -180*DEG2RAD);
 
