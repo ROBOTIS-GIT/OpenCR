@@ -43,71 +43,61 @@
 #define BAUD_RATE 57600
 
 OM_MANAGER::Manipulator chain;
-OM_DYNAMIXEL::Dynamixel dxl(BAUD_RATE);
-
-void initConnect()
-{
-  OPEN_MANIPULATOR::KINEMATICS::connectGetJacobianFunction(OM_KINEMATICS::CHAIN::jacobian);
-  OPEN_MANIPULATOR::KINEMATICS::connectSolveForwardFunction(OM_KINEMATICS::CHAIN::forward);
-  OPEN_MANIPULATOR::KINEMATICS::connectSolveInverseFunction(OM_KINEMATICS::CHAIN::inverse);
-
-  // OPEN_MANIPULATOR::ACTUATOR::connectSendAllActuatorAngleFunction(dxl.setAngle);
-  // OPEN_MANIPULATOR::ACTUATOR::connectSendActuatorAngleFunction(dxl.setAngle);
-  // OPEN_MANIPULATOR::ACTUATOR::connectReceiveAllActuatorAngleFunction();
- 
-}
+OPEN_MANIPULATOR::OpenManipulator *open_manipulator = new OPEN_MANIPULATOR::OpenManipulator();
+OPEN_MANIPULATOR::Kinematics *kinematics = new OM_KINEMATICS::Chain();
+OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
 
 void initManipulator()
 {
-  OPEN_MANIPULATOR::MANAGER::addWorld(&chain,
-                                      WORLD,
-                                      COMP1);
+  open_manipulator->addWorld(&chain,
+                             WORLD,
+                             COMP1);
 
-  OPEN_MANIPULATOR::MANAGER::addComponent(&chain,
-                                          COMP1,
-                                          WORLD,
-                                          COMP2,
-                                          OM_MATH::makeVector3(-0.2016, 0.0, 0.017),
-                                          Eigen::Matrix3f::Identity(3, 3),
-                                          Z_AXIS,
-                                          1);
+  open_manipulator->addComponent(&chain,
+                                 COMP1,
+                                 WORLD,
+                                 COMP2,
+                                 OM_MATH::makeVector3(-0.2016, 0.0, 0.017),
+                                 Eigen::Matrix3f::Identity(3, 3),
+                                 Z_AXIS,
+                                 1);
 
-  OPEN_MANIPULATOR::MANAGER::addComponent(&chain,
-                                          COMP2,
-                                          COMP1,
-                                          COMP3,
-                                          OM_MATH::makeVector3(0.0, 0.0, 0.058),
-                                          Eigen::Matrix3f::Identity(3, 3),
-                                          Y_AXIS,
-                                          2);
+  open_manipulator->addComponent(&chain,
+                                 COMP2,
+                                 COMP1,
+                                 COMP3,
+                                 OM_MATH::makeVector3(0.0, 0.0, 0.058),
+                                 Eigen::Matrix3f::Identity(3, 3),
+                                 Y_AXIS,
+                                 2);
 
-  OPEN_MANIPULATOR::MANAGER::addComponent(&chain,
-                                          COMP3,
-                                          COMP2,
-                                          COMP4,
-                                          OM_MATH::makeVector3(0.024, 0.0, 0.128),
-                                          Eigen::Matrix3f::Identity(3, 3),
-                                          Y_AXIS,
-                                          3);
+  open_manipulator->addComponent(&chain,
+                                 COMP3,
+                                 COMP2,
+                                 COMP4,
+                                 OM_MATH::makeVector3(0.024, 0.0, 0.128),
+                                 Eigen::Matrix3f::Identity(3, 3),
+                                 Y_AXIS,
+                                 3);
 
-  OPEN_MANIPULATOR::MANAGER::addComponent(&chain,
-                                          COMP4,
-                                          COMP3,
-                                          TOOL,
-                                          OM_MATH::makeVector3(0.124, 0.0, 0.0),
-                                          Eigen::Matrix3f::Identity(3, 3),
-                                          Y_AXIS,
-                                          4);
-  OPEN_MANIPULATOR::MANAGER::addTool(&chain,
-                                     TOOL,
-                                     COMP4,
-                                     OM_MATH::makeVector3(0.0536, 0.0, 0.0),
-                                     Eigen::Matrix3f::Identity(3, 3),
-                                     5,
-                                     0.001); // Change unit to `mm`
+  open_manipulator->addComponent(&chain,
+                                 COMP4,
+                                 COMP3,
+                                 TOOL,
+                                 OM_MATH::makeVector3(0.124, 0.0, 0.0),
+                                 Eigen::Matrix3f::Identity(3, 3),
+                                 Y_AXIS,
+                                 4);
+  open_manipulator->addTool(&chain,
+                            TOOL,
+                            COMP4,
+                            OM_MATH::makeVector3(0.0536, 0.0, 0.0),
+                            Eigen::Matrix3f::Identity(3, 3),
+                            5,
+                            0.001); // Change unit to `mm`
 
-  OPEN_MANIPULATOR::KINEMATICS::solveForward(&chain, COMP1);
-  OPEN_MANIPULATOR::MANAGER::checkManipulatorSetting(&chain);
+  kinematics->forward(&chain, COMP1);
+  open_manipulator->checkManipulatorSetting(&chain);
 }
 
 #endif //OPEN_MANIPULATOR_CHAIN_H_
