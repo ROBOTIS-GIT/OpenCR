@@ -34,23 +34,42 @@ using namespace Eigen;
 
 namespace OM_KINEMATICS
 {
-namespace CHAIN
+class Chain : public OPEN_MANIPULATOR::Kinematics
 {
-MatrixXf jacobian(OM_MANAGER::Manipulator *manipulator, Name tool_name);
+public:
+  Chain(){};
+  virtual ~Chain(){};
 
-void forward(OM_MANAGER::Manipulator *manipulator, Name component_name);
+  virtual MatrixXf jacobian(OM_MANAGER::Manipulator *manipulator, Name tool_name);
 
-std::vector<float> inverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose);
-std::vector<float> sr_inverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose);
-std::vector<float> position_only_inverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose);
-} // namespace CHAIN
+  virtual void forward(OM_MANAGER::Manipulator *manipulator, Name component_name);
+  virtual void forward(OM_MANAGER::Manipulator *manipulator);
 
-namespace LINK
+  virtual std::vector<float> inverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose);
+
+private:
+  std::vector<float> inverseKinematics(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose);
+  std::vector<float> srInverseKinematics(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose);
+  std::vector<float> positionOnlyInverseKinematics(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose);
+};
+
+class Link : public OPEN_MANIPULATOR::Kinematics
 {
-void solveKinematicsSinglePoint(OM_MANAGER::Manipulator *manipulator, Name component_name);
-void forward(OM_MANAGER::Manipulator *manipulator);
-std::vector<float> geometricInverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose); //for basic model);
-} // namespace LINK
-} // namespace KINEMATICS
+public:
+  Link(){};
+  virtual ~Link(){};
+
+  virtual MatrixXf jacobian(OM_MANAGER::Manipulator *manipulator, Name tool_name);
+
+  virtual void forward(OM_MANAGER::Manipulator *manipulator, Name component_name);
+  virtual void forward(OM_MANAGER::Manipulator *manipulator);
+
+  virtual std::vector<float> inverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose);
+
+private:
+  void solveKinematicsSinglePoint(OM_MANAGER::Manipulator *manipulator, Name component_name);
+  std::vector<float> geometricInverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose); //for basic model);
+};
+} // namespace OM_KINEMATICS
 
 #endif // OMKINEMATICS_HPP_

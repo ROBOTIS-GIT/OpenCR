@@ -22,6 +22,7 @@
 #include <DynamixelWorkbench.h>
 #include <vector>
 
+#include "OMAPI.h"
 #include "OMDebug.h"
 
 #define DEVICE_NAME ""
@@ -49,7 +50,7 @@ typedef struct
 
 namespace OM_DYNAMIXEL
 {
-class Dynamixel
+class Dynamixel : public OPEN_MANIPULATOR::Actuator
 {
 private:
   DynamixelWorkbench dxl_wb_;
@@ -60,10 +61,10 @@ private:
   std::vector<float> torque_value_;
 
 public:
-  Dynamixel(uint32_t baud_rate);
-  virtual ~Dynamixel();
+  Dynamixel(){};
+  virtual ~Dynamixel(){};
 
-  bool init();
+  bool init(uint32_t baud_rate);
   bool setMode(uint8_t id, uint8_t mode);
   bool setPositionControlMode(uint8_t id);
   bool setCurrentBasedPositionControlMode(uint8_t id, uint8_t current = 10);
@@ -89,6 +90,10 @@ public:
   int32_t getData(uint8_t id, uint16_t addr, uint8_t length);
 
   int32_t convertRadian2Value(uint8_t id, float radian);
+
+  virtual bool sendAllActuatorAngle(std::vector<float> radian_vector);
+  virtual bool sendActuatorAngle(uint8_t actuator_id, float radian);
+  virtual std::vector<float> receiveAllActuatorAngle(void);
 };
 } // namespace OM_Dynamixel
 #endif // OMDYNAMIXEL_HPP_

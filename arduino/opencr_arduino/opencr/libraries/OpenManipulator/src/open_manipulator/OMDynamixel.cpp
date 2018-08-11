@@ -20,15 +20,9 @@
 
 using namespace OM_DYNAMIXEL;
 
-Dynamixel::Dynamixel(uint32_t baud_rate)
+bool Dynamixel::init(uint32_t baud_rate)
 {
   dxl_info_.baud_rate = baud_rate;
-}
-
-Dynamixel::~Dynamixel(){};
-
-bool Dynamixel::init()
-{
   uint8_t get_dxl_id[dxl_info_.size];
 
   dxl_wb_.begin(DEVICE_NAME, dxl_info_.baud_rate);
@@ -203,3 +197,17 @@ int32_t Dynamixel::convertRadian2Value(uint8_t id, float radian)
   return dxl_wb_.convertRadian2Value(id, radian);
 }
 
+bool Dynamixel::sendAllActuatorAngle(std::vector<float> radian_vector)
+{
+  return setAngle(radian_vector);
+}
+
+bool Dynamixel::sendActuatorAngle(uint8_t actuator_id, float radian)
+{
+  return setAngle(actuator_id, radian);
+}
+
+std::vector<float> Dynamixel::receiveAllActuatorAngle(void)
+{
+  return getAngle();
+}
