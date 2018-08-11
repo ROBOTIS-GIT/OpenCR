@@ -22,52 +22,51 @@ namespace THREAD
 {
 osThreadId loop;
 osThreadId robot_state;
-}
+} // namespace THREAD
 
-void setup() 
+void setup()
 {
   Serial.begin(57600);
-  while(!Serial);
+  while (!Serial);
 
-  initConnect();
   initManipulator();
 
-  // initThread();
-  // startThread();
+  initThread();
+  startThread();
 }
 
-void loop() 
+void loop()
 {
-
-  // osDelay(100);    
+  Serial.println("loop");
+  osDelay(500);
 }
 
 /// DON'T TOUCH ///
 
-// void initThread()
-// {
-//   // define thread
-//   osThreadDef(THREAD_NAME_LOOP,         Thread_Loop,                           osPriorityNormal, 0, 1024*10);
-//   osThreadDef(THREAD_NAME_ROBOT_STATE,  OPEN_MANIPULATOR::Thread_Robot_State,  osPriorityNormal, 0, 1024*20);
+void initThread()
+{
+  // define thread
+  osThreadDef(THREAD_NAME_LOOP, Thread_Loop, osPriorityNormal, 0, 1024 * 10);
+  osThreadDef(THREAD_NAME_ROBOT_STATE, OPEN_MANIPULATOR::Thread_Robot_State, osPriorityNormal, 0, 1024 * 10);
 
-//   // create thread
-//   THREAD::loop         = osThreadCreate(osThread(THREAD_NAME_LOOP), NULL);
-//   THREAD::robot_state  = osThreadCreate(osThread(THREAD_NAME_ROBOT_STATE), NULL);
-// }
+  // create thread
+  THREAD::loop = osThreadCreate(osThread(THREAD_NAME_LOOP), NULL);
+  THREAD::robot_state = osThreadCreate(osThread(THREAD_NAME_ROBOT_STATE), NULL);
+}
 
-// void startThread()
-// {
-//   // start kernel
-//   Serial.println("Thread Start");
-//   osKernelStart();
-// }
+void startThread()
+{
+  // start kernel
+  Serial.println("Thread Start");
+  osKernelStart();
+}
 
-// static void Thread_Loop(void const *argument)
-// {
-//   (void) argument;
+static void Thread_Loop(void const *argument)
+{
+  (void)argument;
 
-//   for(;;)
-//   {
-//     loop();
-//   }
-// }
+  for (;;)
+  {
+    loop();
+  }
+}
