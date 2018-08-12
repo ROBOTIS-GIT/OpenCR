@@ -20,45 +20,85 @@
 
 using namespace OPEN_MANIPULATOR;
 
+osMutexDef(om_mutex);
+osMutexId(om_mutex_id);
+
+void MUTEX::create() { om_mutex_id = osMutexCreate(osMutex(om_mutex)); }
+void MUTEX::wait() { osMutexWait(om_mutex_id, osWaitForever); }
+void MUTEX::release() { osMutexRelease(om_mutex_id); }
+
+void THREAD::Robot_State(void const *argument)
+{
+  (void)argument;
+
+  MUTEX::create();
+
+  for (;;)
+  {
+    // fp;
+    Serial.println("robot_state");
+    // kinematics->forward(&chain, COMP1);
+
+    // MUTEX::wait();
+    //   float* angle_ptr = ACTUATOR::getAngle();
+    // MUTEX::release();
+    //   LOG::INFO("angle : " + String(angle_ptr[0]));
+
+    osDelay(100);
+  }
+}
+
+void THREAD::Motor_Control(void const *argument)
+{
+  (void)argument;
+
+  for (;;)
+  {
+    Serial.println("motor_control");
+
+    osDelay(1000);
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////Basic Function//////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
 void OpenManipulator::addWorld(OM_MANAGER::Manipulator *manipulator,
-                       Name world_name,
-                       Name child_name,
-                       Vector3f world_position,
-                       Matrix3f world_orientation)
+                               Name world_name,
+                               Name child_name,
+                               Vector3f world_position,
+                               Matrix3f world_orientation)
 {
   manipulator->addWorld(world_name, child_name, world_position, world_orientation);
 }
 
 void OpenManipulator::addComponent(OM_MANAGER::Manipulator *manipulator,
-                           Name my_name,
-                           Name parent_name,
-                           Name child_name,
-                           Vector3f relative_position,
-                           Matrix3f relative_orientation,
-                           Vector3f axis_of_rotation,
-                           int8_t actuator_id,
-                           float coefficient,
-                           float mass,
-                           Matrix3f inertia_tensor,
-                           Vector3f center_of_mass)
+                                   Name my_name,
+                                   Name parent_name,
+                                   Name child_name,
+                                   Vector3f relative_position,
+                                   Matrix3f relative_orientation,
+                                   Vector3f axis_of_rotation,
+                                   int8_t actuator_id,
+                                   float coefficient,
+                                   float mass,
+                                   Matrix3f inertia_tensor,
+                                   Vector3f center_of_mass)
 {
   manipulator->addComponent(my_name, parent_name, child_name, relative_position, relative_orientation, axis_of_rotation, actuator_id, coefficient, mass, inertia_tensor, center_of_mass);
 }
 
 void OpenManipulator::addTool(OM_MANAGER::Manipulator *manipulator,
-                      Name my_name,
-                      Name parent_name,
-                      Vector3f relative_position,
-                      Matrix3f relative_orientation,
-                      int8_t tool_id,
-                      float coefficient,
-                      float mass,
-                      Matrix3f inertia_tensor,
-                      Vector3f center_of_mass)
+                              Name my_name,
+                              Name parent_name,
+                              Vector3f relative_position,
+                              Matrix3f relative_orientation,
+                              int8_t tool_id,
+                              float coefficient,
+                              float mass,
+                              Matrix3f inertia_tensor,
+                              Vector3f center_of_mass)
 {
   manipulator->addTool(my_name, parent_name, relative_position, relative_orientation, tool_id, coefficient, mass, inertia_tensor, center_of_mass);
 }
@@ -148,9 +188,9 @@ void OpenManipulator::setAllActiveJointAngle(OM_MANAGER::Manipulator *manipulato
   std::map<Name, Component>::iterator it;
   int8_t index = 0;
 
-  for(it = manipulator->getIteratorBegin(); it != manipulator->getIteratorEnd(); it++)
+  for (it = manipulator->getIteratorBegin(); it != manipulator->getIteratorEnd(); it++)
   {
-    if(manipulator->getComponentJointId(it->first) != -1)
+    if (manipulator->getComponentJointId(it->first) != -1)
     {
       manipulator->setComponentJointAngle(it->first, angle_vector.at(index));
       index++;
@@ -332,9 +372,9 @@ std::vector<float> OpenManipulator::getAllJointAngle(OM_MANAGER::Manipulator *ma
 {
   std::vector<float> result_vector;
   std::map<Name, Component>::iterator it;
-  for(it = manipulator->getIteratorBegin(); it != manipulator->getIteratorEnd(); it++)
+  for (it = manipulator->getIteratorBegin(); it != manipulator->getIteratorEnd(); it++)
   {
-    if(manipulator->getComponentToolId(it->first) < 0)
+    if (manipulator->getComponentToolId(it->first) < 0)
     {
       result_vector.push_back(manipulator->getComponentJointAngle(it->first));
     }
@@ -347,9 +387,9 @@ std::vector<float> OpenManipulator::getAllActiveJointAngle(OM_MANAGER::Manipulat
   std::vector<float> result_vector;
   std::map<Name, Component>::iterator it;
 
-  for(it = manipulator->getIteratorBegin(); it != manipulator->getIteratorEnd(); it++)
+  for (it = manipulator->getIteratorBegin(); it != manipulator->getIteratorEnd(); it++)
   {
-    if(manipulator->getComponentJointId(it->first) != -1)
+    if (manipulator->getComponentJointId(it->first) != -1)
     {
       result_vector.push_back(manipulator->getComponentJointAngle(it->first));
     }
@@ -404,5 +444,5 @@ Matrix3f OpenManipulator::getComponentInertiaTensor(OM_MANAGER::Manipulator *man
 
 Vector3f OpenManipulator::getComponentCenterOfMass(OM_MANAGER::Manipulator *manipulator, Name name)
 {
-  return manipulator->getComponentCenterOfMass(name);  
+  return manipulator->getComponentCenterOfMass(name);
 }

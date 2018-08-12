@@ -25,7 +25,6 @@
 // User-defined library
 #include <OMKinematics.h>
 #include <OMDynamixel.h>
-#include <OMPath.h>
 
 #define WORLD 0
 #define COMP1 1
@@ -88,6 +87,7 @@ void initManipulator()
                                  Eigen::Matrix3f::Identity(3, 3),
                                  Y_AXIS,
                                  4);
+
   open_manipulator->addTool(&chain,
                             TOOL,
                             COMP4,
@@ -96,8 +96,8 @@ void initManipulator()
                             5,
                             0.001); // Change unit to `mm`
 
-  kinematics->forward(&chain, COMP1);
-  open_manipulator->checkManipulatorSetting(&chain);
+  // kinematics->forward(&chain, COMP1);
+  // open_manipulator->checkManipulatorSetting(&chain);
 }
 
 #endif //OPEN_MANIPULATOR_CHAIN_H_

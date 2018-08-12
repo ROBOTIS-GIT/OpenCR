@@ -30,38 +30,21 @@
 // #include "OMPath.h"
 #include "OMDebug.h"
 
-// osMutexDef(om_mutex);
-// osMutexId(om_mutex_id);
+namespace MUTEX
+{
+void create();
+void wait();
+void release();
+} // namespace MUTEX
 
-// namespace MUTEX
-// {
-// void create() { om_mutex_id = osMutexCreate(osMutex(om_mutex)); }
-// void wait() { osMutexWait(om_mutex_id, osWaitForever); }
-// void release() { osMutexRelease(om_mutex_id); }
-// } // namespace MUTEX
+namespace THREAD
+{
+void Robot_State(void const *argument);
+void Motor_Control(void const *argument);
+} // namespace THREAD
 
 namespace OPEN_MANIPULATOR
 {
-// Thread
-static void Thread_Robot_State(void const *argument)
-{
-  (void)argument;
-
-  // MUTEX::create();
-
-  for (;;)
-  {
-    LOG::INFO("robot state");
-
-    // MUTEX::wait();
-    //   float* angle_ptr = ACTUATOR::getAngle();
-    // MUTEX::release();
-    //   LOG::INFO("angle : " + String(angle_ptr[0]));
-
-    osDelay(100);
-  }
-}
-
 class OpenManipulator
 {
 public:
