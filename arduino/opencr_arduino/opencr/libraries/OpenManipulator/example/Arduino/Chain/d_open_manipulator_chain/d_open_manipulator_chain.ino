@@ -43,9 +43,13 @@ osThreadId loop;
 osThreadId robot_state;
 osThreadId motor_control;
 }
+  char c1 = 'a';
+  void *ptr = &c1;
 
 void initThread()
 {
+
+
   // define thread
   osThreadDef(THREAD_NAME_LOOP, Loop, osPriorityNormal, 0, 1024 * 10);
   osThreadDef(THREAD_NAME_ROBOT_STATE, THREAD::Robot_State, osPriorityNormal, 0, 1024 * 10);
@@ -53,7 +57,7 @@ void initThread()
 
   // create thread
   THREAD::loop = osThreadCreate(osThread(THREAD_NAME_LOOP), NULL);
-  THREAD::robot_state = osThreadCreate(osThread(THREAD_NAME_ROBOT_STATE), NULL);
+  THREAD::robot_state = osThreadCreate(osThread(THREAD_NAME_ROBOT_STATE), ptr);
   THREAD::motor_control = osThreadCreate(osThread(THREAD_NAME_MOTOR_CONTROL), NULL);
 }
 

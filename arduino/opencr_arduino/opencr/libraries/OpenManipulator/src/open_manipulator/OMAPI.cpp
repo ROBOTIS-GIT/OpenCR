@@ -29,7 +29,7 @@ void MUTEX::release() { osMutexRelease(om_mutex_id); }
 
 void THREAD::Robot_State(void const *argument)
 {
-  (void)argument;
+  Serial.println(*(char *)argument);
 
   MUTEX::create();
 
