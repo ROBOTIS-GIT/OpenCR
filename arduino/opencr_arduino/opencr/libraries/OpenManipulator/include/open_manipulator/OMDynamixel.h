@@ -66,7 +66,7 @@ public:
 
   bool init(uint32_t baud_rate);
   bool setMode(uint8_t id, uint8_t mode);
-  bool setPositionControlMode(uint8_t id);
+  bool setPositionControlMode(uint8_t id, uint16_t profile_velocity = 0, uint16_t profile_acceleration = 0);
   bool setCurrentBasedPositionControlMode(uint8_t id, uint8_t current = 10);
   bool setMaxPositionLimit(uint8_t id, float radian);
   bool setMinPositionLimit(uint8_t id, float radian);
@@ -80,6 +80,7 @@ public:
   bool disableAllDynamixel();
 
   bool setAngle(std::vector<float> radian_vector);
+  bool setAngle(std::vector<uint8_t> id, std::vector<float> radian_vector);
   bool setAngle(uint8_t id, float radian);
   std::vector<float> getAngle();
   std::vector<float> getCurrent();
@@ -91,6 +92,10 @@ public:
 
   int32_t convertRadian2Value(uint8_t id, float radian);
 
+  virtual void initActuator(const void *arg);
+  virtual void Enable();
+  virtual void Disable();
+  virtual bool sendMultipleActuatorAngle(std::vector<uint8_t> id, std::vector<float> radian_vector);
   virtual bool sendAllActuatorAngle(std::vector<float> radian_vector);
   virtual bool sendActuatorAngle(uint8_t actuator_id, float radian);
   virtual std::vector<float> receiveAllActuatorAngle(void);
