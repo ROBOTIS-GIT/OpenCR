@@ -60,11 +60,11 @@ void initManipulator()
   chain.initKinematics(kinematics);
   chain.initActuator(actuator);
 
-  uint32_t baud_rate = BAUD_RATE;
-  void *p_baud_rate = &baud_rate;
+  // uint32_t baud_rate = BAUD_RATE;
+  // void *p_baud_rate = &baud_rate;
 
-  chain.actuatorInit(p_baud_rate);
-  chain.actuatorDisable();
+  // chain.actuatorInit(p_baud_rate);
+  // chain.actuatorDisable();
 
   chain.setControlTime(ACTUATOR_CONTROL_TIME);
 
@@ -154,11 +154,19 @@ void THREAD::Motor_Control(void const *argument)
 {
   (void)argument;
 
+  static uint16_t last_time = 0;
+
   for (;;)
   {
-    Serial.println("motor_control");
+    uint16_t t = millis();
+
+    Serial.println(t-last_time);
+    // MUTEX::wait();
+
+    chain.jointControl(CHAIN); 
     
-    chain.jointControl(); 
+    // MUTEX::release();
+    last_time = t;
 
     osDelay(ACTUATOR_CONTROL_TIME * 1000);
   }

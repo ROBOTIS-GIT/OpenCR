@@ -18,9 +18,6 @@
 
 #include "OpenManipulator_Chain.h"
 
-std::vector<Trajectory> start_trajectory_;
-std::vector<Trajectory> goal_trajectory_;
-
 void setup()
 {
   Serial.begin(57600);
@@ -29,50 +26,35 @@ void setup()
 
   initManipulator();
 
-  chain.setAllActiveJointAngle(CHAIN, chain.receiveAllActuatorAngle());
-  chain.forward(CHAIN, COMP1);
+  // chain.setAllActiveJointAngle(CHAIN, chain.receiveAllActuatorAngle());
+  // chain.forward(CHAIN, COMP1);
 
-  std::vector<float> present_position = chain.getAllActiveJointAngle(CHAIN);
+  // std::vector<float> present_position = chain.getAllActiveJointAngle(CHAIN);
 
   for (uint8_t index = 0; index < chain.getNumberOfActiveJoint(CHAIN); index++)
   {
     Trajectory start;
     Trajectory goal;
 
-    start.position = present_position.at(index);
-    Serial.println(start.position);
+    start.position = 0.0f;//present_position.at(index);
     start.velocity = 0.0f;
     start.acceleration = 0.0f;
 
-    start_trajectory_.push_back(start);
+    chain.setStartTrajectory(start);
 
-    goal.position = 0.0f * DEG2RAD;
+    goal.position = 90.0f * DEG2RAD;
     goal.velocity = 0.0f;
     goal.acceleration = 0.0f;
 
-    goal_trajectory_.push_back(goal);
+    chain.setGoalTrajectory(goal);
   }
 
-  Serial.println("fuck");
   chain.setMoveTime(3.0f);
-  Serial.println(chain.getMoveTime());
-  Serial.println(chain.getControlTime(),4);
-  Serial.println(start_trajectory_.size());
-  Serial.println(goal_trajectory_.size());
-  Serial.println(goal_trajectory_.at(0).position);
-  Serial.println(goal_trajectory_.at(1).position);
-  Serial.println(goal_trajectory_.at(2).position);
-  Serial.println(goal_trajectory_.at(3).position);
-  chain.makeTrajectory(start_trajectory_, goal_trajectory_);
-  Serial.println("fuck");
-  
-  // chain.move();
+  chain.makeTrajectory(chain.getStartTrajectory(), chain.getGoalTrajectory());  
+  chain.move();
 
-  // Eigen::MatrixXf coeffi = chain.getTrajectoryCoefficient();
-  // PRINT::MATRIX(coeffi);
-
-  // initThread();
-  // startThread();
+  initThread();
+  startThread();
 }
 
 void loop()
