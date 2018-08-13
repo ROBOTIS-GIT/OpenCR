@@ -19,37 +19,23 @@
 #ifndef OMAPI_H_
 #define OMAPI_H_
 
-#include <RTOS.h>
 #include <Eigen.h>
 
 #include <vector>
 #include <map>
 
 #include "OMManager.h"
+#include "OMPath.h"
 #include "OMMath.h"
-// #include "OMPath.h"
 #include "OMDebug.h"
-
-namespace MUTEX
-{
-void create();
-void wait();
-void release();
-} // namespace MUTEX
-
-namespace THREAD
-{
-void Robot_State(void const *argument);
-void Motor_Control(void const *argument);
-} // namespace THREAD
 
 namespace OPEN_MANIPULATOR
 {
-class OpenManipulator
+class Manager 
 {
 public:
-  OpenManipulator(){};
-  virtual ~OpenManipulator(){};
+  Manager(){};
+  virtual ~Manager(){};
 
   ///////////////////////////*initialize function*/////////////////////////////
   void addWorld(OM_MANAGER::Manipulator *manipulator,
@@ -151,7 +137,7 @@ public:
   Vector3f getComponentCenterOfMass(OM_MANAGER::Manipulator *manipulator, Name name);
 };
 
-class Kinematics : public OpenManipulator
+class Kinematics : public Manager
 {
 public:
   Kinematics(){};
@@ -169,30 +155,27 @@ public:
   Actuator(){};
   virtual ~Actuator(){};
 
+  virtual void initActuator(const void *arg) = 0;
+
+  virtual void Enable() = 0;
+  virtual void Disable() = 0;
+
   virtual bool sendAllActuatorAngle(std::vector<float> radian_vector) = 0;
+  virtual bool sendMultipleActuatorAngle(std::vector<uint8_t> id, std::vector<float> radian_vector) = 0;
   virtual bool sendActuatorAngle(uint8_t actuator_id, float radian) = 0;
   virtual std::vector<float> receiveAllActuatorAngle(void) = 0;
 };
 
+// class Path
+// {
+// public:
+//   Path(){};
+//   virtual ~Path(){};
+
+//   virtual bool drawFunction()) = 0;
+// };
+
 #if 0
-namespace OM_PATH
-{
-class JointTrajectory
-{
-  JointTrajectory(uint8_t joint_num);
-  virtual ~JointTrajectory();
-
-  void init(std::vector<Trajectory> start,
-            std::vector<Trajectory> goal,
-            float move_time,
-            float control_period);
-
-  std::vector<float> getPosition(float tick);
-  std::vector<float> getVelocity(float tick);
-  std::vector<float> getAcceleration(float tick);
-};
-}
-
 namespace OM_MATH
 {
 float sign(float number);
