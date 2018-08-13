@@ -400,6 +400,21 @@ std::vector<float> OpenManipulator::getAllActiveJointAngle(Name manipulator_name
   return result_vector;
 }
 
+std::vector<uint8_t> OpenManipulator::getAllActiveJointID(Name manipulator_name)
+{
+  std::vector<uint8_t> active_joint_id;
+  std::map<Name, Component>::iterator it;
+
+  for (it = manipulator_.at(manipulator_name).getIteratorBegin(); it != manipulator_.at(manipulator_name).getIteratorEnd(); it++)
+  {
+    if (manipulator_.at(manipulator_name).getComponentJointId(it->first) != -1)
+    {
+      active_joint_id.push_back(manipulator_.at(manipulator_name).getComponentJointId(it->first));
+    }
+  }
+  return active_joint_id;
+}
+
 uint8_t OpenManipulator::getNumberOfActiveJoint(Name manipulator_name)
 {
   uint8_t active_joint_num = 0;
@@ -490,9 +505,66 @@ bool OpenManipulator::sendAllActuatorAngle(std::vector<float> radian_vector)
   return actuator_->sendAllActuatorAngle(radian_vector);
 }
 
+bool OpenManipulator::sendAllActuatorAngle(Name manipulator_name, std::vector<float> radian_vector)
+{
+  std::vector<float> calc_angle;
+  std::map<Name, Component>::iterator it;
+
+  uint8_t index = 0;
+  for (it = manipulator_.at(manipulator_name).getIteratorBegin(); it != manipulator_.at(manipulator_name).getIteratorEnd(); it++)
+  {
+    if (manipulator_.at(manipulator_name).getComponentJointId(it->first) != -1)
+    {
+      calc_angle.push_back(radian_vector.at(index++) * manipulator_.at(manipulator_name).getComponentJointCoefficient(it->first));
+    }
+  }
+
+  return actuator_->sendAllActuatorAngle(calc_angle);
+}
+
+bool OpenManipulator::sendMultipleActuatorAngle(std::vector<uint8_t> id, std::vector<float> radian_vector)
+{
+  return actuator_->sendMultipleActuatorAngle(id, radian_vector);
+}
+
+bool OpenManipulator::sendMultipleActuatorAngle(Name manipulator_name, std::vector<uint8_t> id, std::vector<float> radian_vector)
+{
+  std::vector<float> calc_angle;
+  std::map<Name, Component>::iterator it;
+
+  for (uint8_t index = 0; index < id.size(); index++)
+  {
+    for (it = manipulator_.at(manipulator_name).getIteratorBegin(); it != manipulator_.at(manipulator_name).getIteratorEnd(); it++)
+    {
+      if (id.at(index) == manipulator_.at(manipulator_name).getComponentJointId(it->first))
+      {
+        calc_angle.push_back(radian_vector.at(index) * manipulator_.at(manipulator_name).getComponentJointCoefficient(it->first));
+      }
+    }
+  }
+
+  return actuator_->sendMultipleActuatorAngle(id, calc_angle);
+}
+
 bool OpenManipulator::sendActuatorAngle(uint8_t actuator_id, float radian)
 {
   return actuator_->sendActuatorAngle(actuator_id, radian);
+}
+
+bool OpenManipulator::sendActuatorAngle(Name manipulator_name, uint8_t actuator_id, float radian)
+{
+  float calc_angle;
+  std::map<Name, Component>::iterator it;
+
+  for (it = manipulator_.at(manipulator_name).getIteratorBegin(); it != manipulator_.at(manipulator_name).getIteratorEnd(); it++)
+  {
+    if (manipulator_.at(manipulator_name).getComponentJointId(it->first) == actuator_id)
+    {
+      calc_angle = radian * manipulator_.at(manipulator_name).getComponentJointCoefficient(it->first);
+    }
+  }
+
+  return actuator_->sendActuatorAngle(actuator_id, calc_angle);
 }
 
 std::vector<float> OpenManipulator::receiveAllActuatorAngle(void)
@@ -543,7 +615,7 @@ void OpenManipulator::makeTrajectory(std::vector<Trajectory> start,
 
 MatrixXf OpenManipulator::getTrajectoryCoefficient()
 {
-  joint_trajectory_->getCoefficient();
+  return joint_trajectory_->getCoefficient();
 }
 
 void OpenManipulator::move()
@@ -581,7 +653,7 @@ std::vector<Trajectory> OpenManipulator::getGoalTrajectory()
   return goal_trajectory_;
 }
 
-void OpenManipulator::jointControl()
+void OpenManipulator::jointControl(Name manipulator_name)
 {
   uint16_t step_time = uint16_t(floor(move_time_ / control_time_) + 1.0);
   float tick_time = 0;
@@ -603,7 +675,7 @@ void OpenManipulator::jointControl()
 
       LOG::INFO("path : ", goal_position_.at(0));
 
-      // dxl.setAngle(goal_position);
+      // sendMultipleActuatorAngle(manipulator_name, getAllActiveJointID(manipulator_name), goal_position_);
 
       step_cnt++;
     }

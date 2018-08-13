@@ -156,6 +156,7 @@ public:
   float getComponentJointAngle(Name manipulator_name, Name name);
   std::vector<float> getAllJointAngle(Name manipulator_name);
   std::vector<float> getAllActiveJointAngle(Name manipulator_name);
+  std::vector<uint8_t> getAllActiveJointID(Name manipulator_name);
   uint8_t getNumberOfActiveJoint(Name manipulator_name);
   float getComponentJointVelocity(Name manipulator_name, Name name);
   float getComponentJointAcceleration(Name manipulator_name, Name name);
@@ -177,7 +178,11 @@ public:
   void actuatorEnable();
   void actuatorDisable();
   bool sendAllActuatorAngle(std::vector<float> radian_vector);
+  bool sendAllActuatorAngle(Name manipulator_name, std::vector<float> radian_vector);
+  bool sendMultipleActuatorAngle(std::vector<uint8_t> id, std::vector<float> radian_vector);
+  bool sendMultipleActuatorAngle(Name manipulator_name, std::vector<uint8_t> id, std::vector<float> radian_vector);
   bool sendActuatorAngle(uint8_t actuator_id, float radian);
+  bool sendActuatorAngle(Name manipulator_name, uint8_t actuator_id, float radian);
   std::vector<float> receiveAllActuatorAngle(void);
 
   void setMoveTime(float move_time);
@@ -190,7 +195,7 @@ public:
                       std::vector<Trajectory> goal);
   MatrixXf getTrajectoryCoefficient();
   void move();
-  void jointControl();
+  void jointControl(Name manipulator_name);
 
   void setStartTrajectory(Trajectory trajectory);
   void clearStartTrajectory();
