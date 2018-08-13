@@ -21,7 +21,7 @@
 
 #include <Eigen.h>  // Calls main Eigen matrix class library
 #include <Eigen/LU> // Calls inverse, determinant, LU decomp., etc.
-#include <Eigen/Dense>
+#include <Eigen/QR>
 
 #include <math.h>
 #include <vector>
