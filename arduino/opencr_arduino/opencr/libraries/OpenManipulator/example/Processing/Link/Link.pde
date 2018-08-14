@@ -40,6 +40,8 @@ Serial opencr_port;
 
 // Angle variable
 float[] joint_angle = new float[11];
+float[] current_joint_angle = new float[11];
+float[] joint_angle_coefficient = new float[11];
 
 /*******************************************************************************
 * Setting window size
@@ -59,6 +61,8 @@ void setup()
 
   initShape();
   initView();
+  initAngleCoefficient();
+
 
   connectOpenCR(0); // It is depend on laptop enviroments.
 }
@@ -74,6 +78,7 @@ void draw()
   drawWorldFrame();
 
   drawManipulator();
+  drawCurrentManipulator();
 }
 
 /*******************************************************************************
@@ -84,7 +89,7 @@ void connectOpenCR(int port_num)
   printArray(Serial.list());
 
   String port_name = Serial.list()[port_num];
-  opencr_port = new Serial(this, port_name, 57600);
+  opencr_port = new Serial(this, port_name, 1000000);
   opencr_port.bufferUntil('\n');
 }
 
@@ -98,15 +103,15 @@ void serialEvent(Serial opencr_port)
 
   String[] cmd = split(opencr_string, ',');
   
-  float[] joint_angle_temp = new float[11];
+  float[] received_joint_angle = new float[11];
   
   if (cmd[0].equals("angle"))
   {
     print("joint ");
-    for (int cmd_cnt = 2; cmd_cnt < cmd.length; cmd_cnt++)
+    for (int cmd_cnt = 2; cmd_cnt < cmd.length-1; cmd_cnt++)
     {
-      joint_angle_temp[cmd_cnt-2] = float(cmd[cmd_cnt]);
-      if(cmd_cnt<5)
+      received_joint_angle[cmd_cnt-2] = float(cmd[cmd_cnt]);
+      if(cmd_cnt < 5)
         print(cmd_cnt + ": " + cmd[cmd_cnt] + "  ");
     }
     println("");
@@ -116,18 +121,10 @@ void serialEvent(Serial opencr_port)
     //println("Other Serial");
   }
   
-  joint_angle[0] = joint_angle_temp[0];
-  joint_angle[1] = -joint_angle_temp[1];
-  joint_angle[2] = -joint_angle_temp[2];
-  joint_angle[3] = joint_angle_temp[3];
-  joint_angle[4] = -joint_angle_temp[4];
-  joint_angle[5] = -joint_angle_temp[5];
-  joint_angle[6] = -joint_angle_temp[6];
-  joint_angle[7] = -joint_angle_temp[7];
-  joint_angle[8] = -joint_angle_temp[8];
-  joint_angle[9] = joint_angle_temp[9];
-  joint_angle[10] = -joint_angle_temp[10];
-  
+  for(int i=0; i < 11; i++)
+  {
+    current_joint_angle[i] = joint_angle_coefficient[i] * received_joint_angle[i];
+  }
 }
 
 /*******************************************************************************
@@ -166,7 +163,45 @@ void initShape()
   link7       = loadShape("meshes/link7.obj");
   tool        = loadShape("meshes/tool.obj");
 
-  setJointAngle(0, 90*PI/180, PI, -90*PI/180, -90*PI/180, -90*PI/180, 0, 90*PI/180, -75*PI/180, -15*PI/180, -90*PI/180);
+  joint_angle[0] = 0*PI/180;
+  joint_angle[1] = -90.0*PI/180;
+  joint_angle[2] = -160*PI/180;
+  passiveJointSet();
+}
+
+/*******************************************************************************
+* passiveJointSet
+*******************************************************************************/
+
+void passiveJointSet()
+{
+  joint_angle[3] = (joint_angle[1] - joint_angle[2]);
+  joint_angle[4] = -PI - (joint_angle[1] - joint_angle[2]);
+  joint_angle[5] = -PI - (joint_angle[1] - joint_angle[2]);
+  joint_angle[6] = -180*PI/180 - joint_angle[2];
+  joint_angle[7] = joint_angle[1];
+  joint_angle[8] = -15*PI/180 - joint_angle[1];
+  joint_angle[9] = joint_angle[2] - 195*PI/180;
+  joint_angle[10] = +90*PI/180 - joint_angle[2];  
+}
+
+/*******************************************************************************
+* initAngleCoefficient
+*******************************************************************************/
+
+void initAngleCoefficient()
+{
+  joint_angle_coefficient[0] = 1.0;
+  joint_angle_coefficient[1] = 1.0;
+  joint_angle_coefficient[2] = 1.0;
+  joint_angle_coefficient[3] = 1.0;
+  joint_angle_coefficient[4] = 1.0;
+  joint_angle_coefficient[5] = 1.0;
+  joint_angle_coefficient[6] = 1.0;
+  joint_angle_coefficient[7] = 1.0;
+  joint_angle_coefficient[8] = 1.0;
+  joint_angle_coefficient[9] = 1.0;
+  joint_angle_coefficient[10] = 1.0;
 }
 
 /*******************************************************************************
@@ -230,12 +265,12 @@ void drawManipulator()
   drawLocalFrame();
   translate(0, 0, 6.79972);
   
-  rotateZ(joint_angle[0]);
+  rotateZ(-joint_angle[0]);
   shape(link0);
   drawLocalFrame();
   translate(0, 0, 44.99960);
   
-  rotateY(-joint_angle[1]);
+  rotateY(joint_angle[1]);
   shape(link1);
   drawLocalFrame();
   popMatrix();
@@ -250,26 +285,26 @@ void drawManipulator()
   //shape(base);
   translate(0, 0, 6.79972);
   
-  rotateZ(joint_angle[0]);
+  rotateZ(-joint_angle[0]);
   //shape(link0);
   translate(0, 0, 44.99960);
   
-  rotateY(-joint_angle[2]);
+  rotateY(joint_angle[2]);
   shape(link2);
   drawLocalFrame();
   translate(50, 0, 0);
   
-  rotateY(-joint_angle[3]);
+  rotateY(joint_angle[3]);
   shape(link3);
   drawLocalFrame();
   translate(200, 0, 0);
   
-  rotateY(-joint_angle[4]);
+  rotateY(joint_angle[4]);
   shape(link4);
   drawLocalFrame();
   translate(250, 0, 0);
   
-  rotateY(-joint_angle[6]);
+  rotateY(joint_angle[6]);
   shape(tool);
   drawLocalFrame();
   popMatrix();
@@ -284,19 +319,19 @@ void drawManipulator()
   //shape(base);
   translate(0, 0, 6.79972);
   
-  rotateZ(joint_angle[0]);
+  rotateZ(-joint_angle[0]);
   //shape(link0);
   translate(0, 0, 44.99960);
   rotateY(25*PI/180);
   translate(-50, 0, 0);
   rotateY(-25*PI/180);
   
-  rotateY(-joint_angle[7]);  
+  rotateY(joint_angle[7]);  
   shape(link5);
   drawLocalFrame();
   translate(200, 0, 0);
     
-  rotateY(-joint_angle[8]);
+  rotateY(joint_angle[8]);
   shape(link6);
   drawLocalFrame();
   rotateY(40*PI/180);
@@ -305,7 +340,102 @@ void drawManipulator()
   translate(50, 0, 0);
   rotateY(40*PI/180);
   
-  rotateY(-joint_angle[9]);
+  rotateY(joint_angle[9]);
+  rotateY(30*PI/180);
+  shape(link7);
+  drawLocalFrame();
+  popMatrix();
+}
+
+void drawCurrentManipulator()
+{
+////////////////////////Current manipulator///////////////////////////////
+
+  pushMatrix();
+  translate(-model_trans_x, -model_trans_y, 0);
+  rotateX(model_rot_x);
+  rotateZ(model_rot_z);
+  
+  shape(base);
+  drawLocalFrame();
+  translate(0, 0, 6.79972);
+  
+  rotateZ(-current_joint_angle[0]);
+  shape(link0);
+  drawLocalFrame();
+  translate(0, 0, 44.99960);
+  
+  rotateY(current_joint_angle[1]);
+  shape(link1);
+  drawLocalFrame();
+  popMatrix();
+
+///////////////////////////////////////////
+
+  pushMatrix();
+  translate(-model_trans_x, -model_trans_y, 0);
+  rotateX(model_rot_x);
+  rotateZ(model_rot_z);
+  
+  //shape(base);
+  translate(0, 0, 6.79972);
+  
+  rotateZ(-current_joint_angle[0]);
+  //shape(link0);
+  translate(0, 0, 44.99960);
+  
+  rotateY(current_joint_angle[2]);
+  shape(link2);
+  drawLocalFrame();
+  translate(50, 0, 0);
+  
+  rotateY(current_joint_angle[3]);
+  shape(link3);
+  drawLocalFrame();
+  translate(200, 0, 0);
+  
+  rotateY(current_joint_angle[4]);
+  shape(link4);
+  drawLocalFrame();
+  translate(250, 0, 0);
+  
+  rotateY(current_joint_angle[6]);
+  shape(tool);
+  drawLocalFrame();
+  popMatrix();
+
+///////////////////////////////////////////
+  
+  pushMatrix();
+  translate(-model_trans_x, -model_trans_y, 0);
+  rotateX(model_rot_x);
+  rotateZ(model_rot_z);
+  
+  //shape(base);
+  translate(0, 0, 6.79972);
+  
+  rotateZ(-current_joint_angle[0]);
+  //shape(link0);
+  translate(0, 0, 44.99960);
+  rotateY(25*PI/180);
+  translate(-50, 0, 0);
+  rotateY(-25*PI/180);
+  
+  rotateY(current_joint_angle[7]);  
+  shape(link5);
+  drawLocalFrame();
+  translate(200, 0, 0);
+    
+  rotateY(current_joint_angle[8]);
+  shape(link6);
+  drawLocalFrame();
+  rotateY(40*PI/180);
+  translate(50, 0, 0);
+  rotateY(-80*PI/180);
+  translate(50, 0, 0);
+  rotateY(40*PI/180);
+  
+  rotateY(current_joint_angle[9]);
   rotateY(30*PI/180);
   shape(link7);
   drawLocalFrame();
@@ -323,7 +453,7 @@ void drawWorldFrame()
 
   strokeWeight(5);
   stroke(0, 255, 0, 100);
-  line(0, 0, 0, 0, 100, 0);
+  line(0, 0, 0, 0, -100, 0);
 
   stroke(0, 0, 255, 100);
   strokeWeight(5);
@@ -341,29 +471,11 @@ void drawLocalFrame()
 
   strokeWeight(5);
   stroke(0, 255, 0, 100);
-  line(0, 0, 0, 0, 50, 0);
+  line(0, 0, 0, 0, -50, 0);
 
   stroke(0, 0, 255, 100);
   strokeWeight(5);
   line(0, 0, 0, 0, 0, 50);
-}
-
-/*******************************************************************************
-* Set joint angle
-*******************************************************************************/
-void setJointAngle(float angle0, float angle1, float angle2, float angle3, float angle4, float angle5, float angle6, float angle7, float angle8, float angle9, float angle10)
-{
-  joint_angle[0] = angle0;
-  joint_angle[1] = angle1;
-  joint_angle[2] = angle2;
-  joint_angle[3] = angle3;
-  joint_angle[4] = angle4;
-  joint_angle[5] = angle5;
-  joint_angle[6] = angle6;
-  joint_angle[7] = angle7;
-  joint_angle[8] = angle8;
-  joint_angle[9] = angle9;
-  joint_angle[10] = angle10;
 }
 
 
@@ -373,7 +485,7 @@ void setJointAngle(float angle0, float angle1, float angle2, float angle3, float
 void mouseDragged()
 {
   model_rot_z -= (mouseX - pmouseX) * 0.01;
-  model_rot_x -= (mouseY - pmouseY) * 0.01;
+  //model_rot_x -= (mouseY - pmouseY) * 0.01;
 }
 
 /*******************************************************************************
@@ -401,7 +513,7 @@ class ChildApplet extends PApplet
 
   Knob joint0, joint1, joint2;
 
-  float[] set_joint_angle = new float[3];
+  float[] send_joint_angle = new float[3];
   int set_suction = 0;
   
   boolean onoff_flag = false;
@@ -486,7 +598,7 @@ class ChildApplet extends PApplet
        ;
 
     joint0 = cp5.addKnob("joint0")
-             .setRange(-3.14,3.14)
+             .setRange(-169.0*PI/180 , 169.0*PI/180)
              .setValue(0)
              .setPosition(30,140)
              .setRadius(50)
@@ -498,7 +610,7 @@ class ChildApplet extends PApplet
              ;
 
     joint1 = cp5.addKnob("joint1")
-             .setRange(0,3.14*3/4)
+             .setRange(-119.0*PI/180 , -1.0*PI/180)
              .setValue(3.14/2)
              .setPosition(150,140)
              .setRadius(50)
@@ -510,7 +622,7 @@ class ChildApplet extends PApplet
              ;
 
     joint2 = cp5.addKnob("joint2")
-             .setRange(3.14/2,3.14)
+             .setRange(-169.0*PI/180 , -91.0*PI/180)
              .setValue(3.14)
              .setPosition(270,140)
              .setRadius(50)
@@ -714,9 +826,9 @@ class ChildApplet extends PApplet
     onoff_flag = flag;
     if (onoff_flag)
     {
-      joint0.setValue(joint_angle[0]);
-      joint1.setValue(joint_angle[1]);
-      joint2.setValue(joint_angle[2]);
+      joint0.setValue(current_joint_angle[0]/joint_angle_coefficient[0]);
+      joint1.setValue(current_joint_angle[1]/joint_angle_coefficient[1]);
+      joint2.setValue(current_joint_angle[2]/joint_angle_coefficient[2]);
 
       opencr_port.write("om"   + ',' +
                         "ready" + '\n');
@@ -732,53 +844,41 @@ class ChildApplet extends PApplet
 
   void joint0(float angle)
   {
-    //joint_angle[0] = angle;
-    set_joint_angle[0] = angle;    
+    joint_angle[0] = angle * joint_angle_coefficient[0];   
+    passiveJointSet();
   }
 
   void joint1(float angle)
   {
-    //joint_angle[1] = angle;
-    set_joint_angle[1] = angle;    
-    
-    //joint_angle[3] = joint_angle[1] - joint_angle[2];
-    //joint_angle[4] = -PI-(joint_angle[1]-joint_angle[2]);
-    //joint_angle[5] = -PI-(joint_angle[1]-joint_angle[2]);
-    //joint_angle[6] = -180*PI/180-joint_angle[2];
-    //joint_angle[7] = joint_angle[1];
-    //joint_angle[8] = 15*PI/180-joint_angle[1];
-    //joint_angle[9] = joint_angle[2]-195*PI/180;
-    //joint_angle[10] = 90*PI/180-joint_angle[2];
+    joint_angle[1] = angle * joint_angle_coefficient[1];
+    passiveJointSet();
   }
 
   void joint2(float angle)
   {
-    //joint_angle[2] = angle;
-    set_joint_angle[2] = angle;    
-    
-    //joint_angle[3] = joint_angle[1] - joint_angle[2];
-    //joint_angle[4] = -PI-(joint_angle[1]-joint_angle[2]);
-    //joint_angle[5] = -PI-(joint_angle[1]-joint_angle[2]);
-    //joint_angle[6] = -180*PI/180-joint_angle[2];
-    //joint_angle[7] = joint_angle[1];
-    //joint_angle[8] = 15*PI/180-joint_angle[1];
-    //joint_angle[9] = joint_angle[2]-195*PI/180;
-    //joint_angle[10] = 90*PI/180-joint_angle[2];
+    joint_angle[2] = angle * joint_angle_coefficient[2];
+    passiveJointSet();
   }
 
   public void Origin(int theValue)
   {
     if (onoff_flag)
     {
-      set_joint_angle[0] = 0.0;
-      set_joint_angle[1] = 90.0*PI/180.0;
-      set_joint_angle[2] = 180.0*PI/180.0;
+      send_joint_angle[0] = 0.0;
+      send_joint_angle[1] = -90.0*PI/180.0;
+      send_joint_angle[2] = -160.0*PI/180.0;
       
+      for(int i=0; i<3; i++)
+      {
+        joint_angle[i] = send_joint_angle[i] * joint_angle_coefficient[i];
+      }
+      passiveJointSet();
+            
       opencr_port.write("joint"            + ',' +
-                        set_joint_angle[0] + ',' +
-                        set_joint_angle[1] + ',' +
-                        set_joint_angle[2] + '\n');
-      println("joint " + set_joint_angle[0] + ", " + set_joint_angle[1]  + ", " + set_joint_angle[2]  + "  ");                    
+                        send_joint_angle[0] + ',' +
+                        send_joint_angle[1] + ',' +
+                        send_joint_angle[2] + '\n');
+      println("joint " + send_joint_angle[0] + ", " + send_joint_angle[1]  + ", " + send_joint_angle[2]  + "  ");                    
     }
     else
     {
@@ -790,15 +890,21 @@ class ChildApplet extends PApplet
   {
     if (onoff_flag)
     {
-      set_joint_angle[0] = 0.0;
-      set_joint_angle[1] = 90.0*PI/180.0;
-      set_joint_angle[2] = 135.0*PI/180.0;
+      send_joint_angle[0] = 0.0;
+      send_joint_angle[1] = -90.0*PI/180.0;
+      send_joint_angle[2] = -135.0*PI/180.0;
+      
+      for(int i=0; i<3; i++)
+      {
+        joint_angle[i] = send_joint_angle[i] * joint_angle_coefficient[i];
+      }
+      passiveJointSet();
       
       opencr_port.write("joint"            + ',' +
-                        set_joint_angle[0] + ',' +
-                        set_joint_angle[1] + ',' +
-                        set_joint_angle[2] + '\n');
-      println("joint " + set_joint_angle[0] + ", " + set_joint_angle[1]  + ", " + set_joint_angle[2]  + "  ");  
+                        send_joint_angle[0] + ',' +
+                        send_joint_angle[1] + ',' +
+                        send_joint_angle[2] + '\n');
+      println("joint " + send_joint_angle[0] + ", " + send_joint_angle[1]  + ", " + send_joint_angle[2]  + "  ");  
     }
     else
     {
@@ -810,11 +916,16 @@ class ChildApplet extends PApplet
   {
     if (onoff_flag)
     {
+      for(int i=0; i<3; i++)
+      {
+      send_joint_angle[i] = joint_angle[i] / joint_angle_coefficient[i];
+      }
+
       opencr_port.write("joint"            + ',' +
-                        set_joint_angle[0] + ',' +
-                        set_joint_angle[1] + ',' +
-                        set_joint_angle[2] + '\n');
-      println("joint " + set_joint_angle[0] + ", " + set_joint_angle[1]  + ", " + set_joint_angle[2]  + "  ");  
+                        send_joint_angle[0] + ',' +
+                        send_joint_angle[1] + ',' +
+                        send_joint_angle[2] + '\n');
+      println("joint " + send_joint_angle[0] + ", " + send_joint_angle[1]  + ", " + send_joint_angle[2]  + "  ");  
     }
     else
     {
@@ -936,15 +1047,21 @@ class ChildApplet extends PApplet
   {
     if (onoff_flag)
     {
-      set_joint_angle[0] = 0.0;
-      set_joint_angle[1] = 90.0  * PI/180.0;
-      set_joint_angle[2] = 180.0 * PI/180.0;
+      send_joint_angle[0] = 0.0;
+      send_joint_angle[1] = -90.0  * PI/180.0;
+      send_joint_angle[2] = -160.0 * PI/180.0;
+      
+      for(int i=0; i<3; i++)
+      {
+        current_joint_angle[i] = send_joint_angle[i] * joint_angle_coefficient[i];
+      }
+      passiveJointSet();
 
       opencr_port.write("joint"            + ',' +
-                        set_joint_angle[0] + ',' +
-                        set_joint_angle[1] + ',' +
-                        set_joint_angle[2] + '\n');
-      println("joint " + set_joint_angle[0] + ", " + set_joint_angle[1]  + ", " + set_joint_angle[2]  + "  ");  
+                        send_joint_angle[0] + ',' +
+                        send_joint_angle[1] + ',' +
+                        send_joint_angle[2] + '\n');
+      println("joint " + send_joint_angle[0] + ", " + send_joint_angle[1]  + ", " + send_joint_angle[2]  + "  ");  
     }
     else
     {
