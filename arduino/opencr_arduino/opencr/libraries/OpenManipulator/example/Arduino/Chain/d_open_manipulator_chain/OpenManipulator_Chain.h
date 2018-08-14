@@ -60,11 +60,11 @@ void initManipulator()
   chain.initKinematics(kinematics);
   chain.initActuator(actuator);
 
-  // uint32_t baud_rate = BAUD_RATE;
-  // void *p_baud_rate = &baud_rate;
+  uint32_t baud_rate = BAUD_RATE;
+  void *p_baud_rate = &baud_rate;
 
-  // chain.actuatorInit(p_baud_rate);
-  // chain.actuatorDisable();
+  chain.actuatorInit(p_baud_rate);
+  chain.actuatorDisable();
 
   chain.setControlTime(ACTUATOR_CONTROL_TIME);
 

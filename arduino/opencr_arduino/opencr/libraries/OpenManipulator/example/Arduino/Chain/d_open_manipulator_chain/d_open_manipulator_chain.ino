@@ -26,17 +26,17 @@ void setup()
 
   initManipulator();
 
-  // chain.setAllActiveJointAngle(CHAIN, chain.receiveAllActuatorAngle());
-  // chain.forward(CHAIN, COMP1);
+  chain.setAllActiveJointAngle(CHAIN, chain.receiveAllActuatorAngle());
+  chain.forward(CHAIN, COMP1);
 
-  // std::vector<float> present_position = chain.getAllActiveJointAngle(CHAIN);
+  std::vector<float> present_position = chain.getAllActiveJointAngle(CHAIN);
 
   for (uint8_t index = 0; index < chain.getNumberOfActiveJoint(CHAIN); index++)
   {
     Trajectory start;
     Trajectory goal;
 
-    start.position = 0.0f;//present_position.at(index);
+    start.position = present_position.at(index);
     start.velocity = 0.0f;
     start.acceleration = 0.0f;
 
