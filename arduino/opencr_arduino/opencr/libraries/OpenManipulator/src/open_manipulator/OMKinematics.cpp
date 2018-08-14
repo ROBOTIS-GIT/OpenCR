@@ -360,7 +360,7 @@ void Link::solveKinematicsSinglePoint(OM_MANAGER::Manipulator *manipulator, Name
 
 std::vector<float> Link::geometricInverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose) //for basic model
 {
-  std::vector<float> target_angle_vector(getDOF(manipulator));
+  std::vector<float> target_angle_vector;
   Vector3f control_position; //joint6-joint1
   Vector3f tool_relative_position = getComponentRelativePositionToParent(manipulator, tool_name);
   Vector3f base_position = getComponentPositionToWorld(manipulator, getWorldChildName(manipulator));

@@ -143,21 +143,6 @@ void Manager::setComponentJointAngle(OM_MANAGER::Manipulator *manipulator, Name 
   manipulator->setComponentJointAngle(name, angle);
 }
 
-void Manager::setAllActiveJointAngle(OM_MANAGER::Manipulator *manipulator, std::vector<float> angle_vector)
-{
-  std::map<Name, Component>::iterator it;
-  int8_t index = 0;
-
-  for (it = manipulator->getIteratorBegin(); it != manipulator->getIteratorEnd(); it++)
-  {
-    if (manipulator->getComponentJointId(it->first) != -1)
-    {
-      manipulator->setComponentJointAngle(it->first, angle_vector.at(index));
-      index++;
-    }
-  }
-}
-
 void Manager::setComponentJointVelocity(OM_MANAGER::Manipulator *manipulator, Name name, float angular_velocity)
 {
   manipulator->setComponentJointVelocity(name, angular_velocity);
@@ -176,6 +161,11 @@ void Manager::setComponentToolOnOff(OM_MANAGER::Manipulator *manipulator, Name n
 void Manager::setComponentToolValue(OM_MANAGER::Manipulator *manipulator, Name name, float actuator_value)
 {
   manipulator->setComponentToolValue(name, actuator_value);
+}
+
+void Manager::setAllActiveJointAngle(OM_MANAGER::Manipulator *manipulator, std::vector<float> angle_vector)
+{
+  manipulator->setAllActiveJointAngle(angle_vector);
 }
 
 int8_t Manager::getDOF(OM_MANAGER::Manipulator *manipulator)
@@ -330,31 +320,16 @@ float Manager::getComponentJointAngle(OM_MANAGER::Manipulator *manipulator, Name
 
 std::vector<float> Manager::getAllJointAngle(OM_MANAGER::Manipulator *manipulator)
 {
-  std::vector<float> result_vector;
-  std::map<Name, Component>::iterator it;
-  for (it = manipulator->getIteratorBegin(); it != manipulator->getIteratorEnd(); it++)
-  {
-    if (manipulator->getComponentToolId(it->first) < 0)
-    {
-      result_vector.push_back(manipulator->getComponentJointAngle(it->first));
-    }
-  }
-  return result_vector;
+  std::vector<float> joint_angle = manipulator->getAllJointAngle();
+
+  return joint_angle;
 }
 
 std::vector<float> Manager::getAllActiveJointAngle(OM_MANAGER::Manipulator *manipulator)
 {
-  std::vector<float> result_vector;
-  std::map<Name, Component>::iterator it;
-
-  for (it = manipulator->getIteratorBegin(); it != manipulator->getIteratorEnd(); it++)
-  {
-    if (manipulator->getComponentJointId(it->first) != -1)
-    {
-      result_vector.push_back(manipulator->getComponentJointAngle(it->first));
-    }
-  }
-  return result_vector;
+  std::vector<float> joint_angle = manipulator->getAllActiveJointAngle();
+  
+  return joint_angle;
 }
 
 float Manager::getComponentJointVelocity(OM_MANAGER::Manipulator *manipulator, Name name)
@@ -405,4 +380,9 @@ Matrix3f Manager::getComponentInertiaTensor(OM_MANAGER::Manipulator *manipulator
 Vector3f Manager::getComponentCenterOfMass(OM_MANAGER::Manipulator *manipulator, Name name)
 {
   return manipulator->getComponentCenterOfMass(name);
+}
+
+std::vector<uint8_t> Manager::getAllActiveJointID(OM_MANAGER::Manipulator *manipulator)
+{
+  return manipulator->getAllActiveJointID();
 }

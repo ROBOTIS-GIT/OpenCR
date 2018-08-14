@@ -186,21 +186,6 @@ void OpenManipulator::setComponentJointAngle(Name manipulator_name, Name name, f
   manipulator_.at(manipulator_name).setComponentJointAngle(name, angle);
 }
 
-void OpenManipulator::setAllActiveJointAngle(Name manipulator_name, std::vector<float> angle_vector)
-{
-  std::map<Name, Component>::iterator it;
-  int8_t index = 0;
-
-  for (it = manipulator_.at(manipulator_name).getIteratorBegin(); it != manipulator_.at(manipulator_name).getIteratorEnd(); it++)
-  {
-    if (manipulator_.at(manipulator_name).getComponentJointId(it->first) != -1)
-    {
-      manipulator_.at(manipulator_name).setComponentJointAngle(it->first, angle_vector.at(index));
-      index++;
-    }
-  }
-}
-
 void OpenManipulator::setComponentJointVelocity(Name manipulator_name, Name name, float angular_velocity)
 {
   manipulator_.at(manipulator_name).setComponentJointVelocity(name, angular_velocity);
@@ -219,6 +204,16 @@ void OpenManipulator::setComponentToolOnOff(Name manipulator_name, Name name, bo
 void OpenManipulator::setComponentToolValue(Name manipulator_name, Name name, float actuator_value)
 {
   manipulator_.at(manipulator_name).setComponentToolValue(name, actuator_value);
+}
+
+void OpenManipulator::setAllActiveJointAngle(Name manipulator_name, std::vector<float> angle_vector)
+{
+  manipulator_.at(manipulator_name).setAllActiveJointAngle(angle_vector);
+}
+
+OM_MANAGER::Manipulator OpenManipulator::getManipulator(Name manipulator_name)
+{
+  return manipulator_.at(manipulator_name);
 }
 
 int8_t OpenManipulator::getDOF(Name manipulator_name)
@@ -269,6 +264,11 @@ VectorXf OpenManipulator::getWorldVelocity(Name manipulator_name)
 VectorXf OpenManipulator::getWorldAcceleration(Name manipulator_name)
 {
   return manipulator_.at(manipulator_name).getWorldAcceleration();
+}
+
+int8_t OpenManipulator::getComponentSize(Name manipulator_name)
+{
+  return manipulator_.at(manipulator_name).getComponentSize();
 }
 
 std::map<Name, Component> OpenManipulator::getAllComponent(Name manipulator_name)
@@ -371,65 +371,6 @@ float OpenManipulator::getComponentJointAngle(Name manipulator_name, Name name)
   return manipulator_.at(manipulator_name).getComponentJointAngle(name);
 }
 
-std::vector<float> OpenManipulator::getAllJointAngle(Name manipulator_name)
-{
-  std::vector<float> result_vector;
-  std::map<Name, Component>::iterator it;
-  for (it = manipulator_.at(manipulator_name).getIteratorBegin(); it != manipulator_.at(manipulator_name).getIteratorEnd(); it++)
-  {
-    if (manipulator_.at(manipulator_name).getComponentToolId(it->first) < 0)
-    {
-      result_vector.push_back(manipulator_.at(manipulator_name).getComponentJointAngle(it->first));
-    }
-  }
-  return result_vector;
-}
-
-std::vector<float> OpenManipulator::getAllActiveJointAngle(Name manipulator_name)
-{
-  std::vector<float> result_vector;
-  std::map<Name, Component>::iterator it;
-
-  for (it = manipulator_.at(manipulator_name).getIteratorBegin(); it != manipulator_.at(manipulator_name).getIteratorEnd(); it++)
-  {
-    if (manipulator_.at(manipulator_name).getComponentJointId(it->first) != -1)
-    {
-      result_vector.push_back(manipulator_.at(manipulator_name).getComponentJointAngle(it->first));
-    }
-  }
-  return result_vector;
-}
-
-std::vector<uint8_t> OpenManipulator::getAllActiveJointID(Name manipulator_name)
-{
-  std::vector<uint8_t> active_joint_id;
-  std::map<Name, Component>::iterator it;
-
-  for (it = manipulator_.at(manipulator_name).getIteratorBegin(); it != manipulator_.at(manipulator_name).getIteratorEnd(); it++)
-  {
-    if (manipulator_.at(manipulator_name).getComponentJointId(it->first) != -1)
-    {
-      active_joint_id.push_back(manipulator_.at(manipulator_name).getComponentJointId(it->first));
-    }
-  }
-  return active_joint_id;
-}
-
-uint8_t OpenManipulator::getNumberOfActiveJoint(Name manipulator_name)
-{
-  uint8_t active_joint_num = 0;
-  std::map<Name, Component>::iterator it;
-
-  for (it = manipulator_.at(manipulator_name).getIteratorBegin(); it != manipulator_.at(manipulator_name).getIteratorEnd(); it++)
-  {
-    if (manipulator_.at(manipulator_name).getComponentJointId(it->first) != -1)
-    {
-      active_joint_num++;
-    }
-  }
-  return active_joint_num;
-}
-
 float OpenManipulator::getComponentJointVelocity(Name manipulator_name, Name name)
 {
   return manipulator_.at(manipulator_name).getComponentJointVelocity(name);
@@ -480,6 +421,24 @@ Vector3f OpenManipulator::getComponentCenterOfMass(Name manipulator_name, Name n
   return manipulator_.at(manipulator_name).getComponentCenterOfMass(name);
 }
 
+std::vector<float> OpenManipulator::getAllJointAngle(Name manipulator_name)
+{
+  return manipulator_.at(manipulator_name).getAllJointAngle();
+}
+
+std::vector<float> OpenManipulator::getAllActiveJointAngle(Name manipulator_name)
+{
+  return manipulator_.at(manipulator_name).getAllActiveJointAngle();
+}
+
+std::vector<uint8_t> OpenManipulator::getAllActiveJointID(Name manipulator_name)
+{
+  return manipulator_.at(manipulator_name).getAllActiveJointID();
+}
+
+
+// KINEMATICS
+
 MatrixXf OpenManipulator::jacobian(Name manipulator_name, Name tool_name)
 {
   return kinematics_->jacobian(&manipulator_.at(manipulator_name), tool_name);
@@ -500,6 +459,8 @@ std::vector<float> OpenManipulator::inverse(Name manipulator_name, Name tool_nam
   return kinematics_->inverse(&manipulator_.at(manipulator_name), tool_name, target_pose);
 }
 
+// ACTUATOR
+
 bool OpenManipulator::sendAllActuatorAngle(std::vector<float> radian_vector)
 {
   return actuator_->sendAllActuatorAngle(radian_vector);
@@ -519,7 +480,7 @@ bool OpenManipulator::sendAllActuatorAngle(Name manipulator_name, std::vector<fl
     }
   }
 
-  return actuator_->sendAllActuatorAngle(calc_angle);
+  return sendAllActuatorAngle(calc_angle);
 }
 
 bool OpenManipulator::sendMultipleActuatorAngle(std::vector<uint8_t> id, std::vector<float> radian_vector)
@@ -539,11 +500,14 @@ bool OpenManipulator::sendMultipleActuatorAngle(Name manipulator_name, std::vect
       if (id.at(index) == manipulator_.at(manipulator_name).getComponentJointId(it->first))
       {
         calc_angle.push_back(radian_vector.at(index) * manipulator_.at(manipulator_name).getComponentJointCoefficient(it->first));
+        Serial.println(calc_angle.at(index));
       }
     }
   }
 
-  return actuator_->sendMultipleActuatorAngle(id, calc_angle);
+  // Add 오름차순 
+
+  return sendMultipleActuatorAngle(id, calc_angle);
 }
 
 bool OpenManipulator::sendActuatorAngle(uint8_t actuator_id, float radian)
@@ -564,11 +528,18 @@ bool OpenManipulator::sendActuatorAngle(Name manipulator_name, uint8_t actuator_
     }
   }
 
-  return actuator_->sendActuatorAngle(actuator_id, calc_angle);
+  return sendActuatorAngle(actuator_id, calc_angle);
 }
 
 std::vector<float> OpenManipulator::receiveAllActuatorAngle(void)
 {
+  return actuator_->receiveAllActuatorAngle();
+}
+
+std::vector<float> OpenManipulator::receiveAllActuatorAngle(std::vector<uint8_t> id)
+{
+  // 정렬
+
   return actuator_->receiveAllActuatorAngle();
 }
 
@@ -586,6 +557,8 @@ void OpenManipulator::actuatorDisable()
 {
   return actuator_->Disable();
 }
+
+// JOINT TRAJECTORY
 
 void OpenManipulator::setMoveTime(float move_time)
 {
@@ -673,9 +646,9 @@ void OpenManipulator::jointControl(Name manipulator_name)
       goal_velocity_ = joint_trajectory_->getVelocity(tick_time);
       goal_acceleration_ = joint_trajectory_->getAcceleration(tick_time);
 
-      LOG::INFO("path : ", goal_position_.at(0));
+      // LOG::INFO("path : ", goal_position_.at(0));
 
-      // sendMultipleActuatorAngle(manipulator_name, getAllActiveJointID(manipulator_name), goal_position_);
+      sendMultipleActuatorAngle(manipulator_name, getAllActiveJointID(manipulator_name), goal_position_);
 
       step_cnt++;
     }

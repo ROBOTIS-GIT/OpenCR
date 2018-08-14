@@ -78,6 +78,7 @@ public:
   void setWorldState(OM_MANAGER::Manipulator *manipulator, State world_state);
   void setWorldVelocity(OM_MANAGER::Manipulator *manipulator, VectorXf world_velocity);
   void setWorldAcceleration(OM_MANAGER::Manipulator *manipulator, VectorXf world_acceleration);
+
   void setComponent(OM_MANAGER::Manipulator *manipulator, Name name, Component component);
   void setComponentPoseToWorld(OM_MANAGER::Manipulator *manipulator, Name name, Pose pose_to_world);
   void setComponentPositionToWorld(OM_MANAGER::Manipulator *manipulator, Name name, Vector3f position_to_world);
@@ -86,15 +87,17 @@ public:
   void setComponentVelocityToWorld(OM_MANAGER::Manipulator *manipulator, Name name, VectorXf velocity);
   void setComponentAccelerationToWorld(OM_MANAGER::Manipulator *manipulator, Name name, VectorXf accelaration);
   void setComponentJointAngle(OM_MANAGER::Manipulator *manipulator, Name name, float angle);
-  void setAllActiveJointAngle(OM_MANAGER::Manipulator *manipulator, std::vector<float> angle_vector);
   void setComponentJointVelocity(OM_MANAGER::Manipulator *manipulator, Name name, float angular_velocity);
   void setComponentJointAcceleration(OM_MANAGER::Manipulator *manipulator, Name name, float angular_acceleration);
   void setComponentToolOnOff(OM_MANAGER::Manipulator *manipulator, Name name, bool on_off);
   void setComponentToolValue(OM_MANAGER::Manipulator *manipulator, Name name, float actuator_value);
 
+  void setAllActiveJointAngle(OM_MANAGER::Manipulator *manipulator, std::vector<float> angle_vector);
+
   ///////////////////////////////Get function//////////////////////////////////
+
   int8_t getDOF(OM_MANAGER::Manipulator *manipulator);
-  int8_t getComponentSize(OM_MANAGER::Manipulator *manipulator);
+
   Name getWorldName(OM_MANAGER::Manipulator *manipulator);
   Name getWorldChildName(OM_MANAGER::Manipulator *manipulator);
   Pose getWorldPose(OM_MANAGER::Manipulator *manipulator);
@@ -103,6 +106,8 @@ public:
   State getWorldState(OM_MANAGER::Manipulator *manipulator);
   VectorXf getWorldVelocity(OM_MANAGER::Manipulator *manipulator);
   VectorXf getWorldAcceleration(OM_MANAGER::Manipulator *manipulator);
+
+  int8_t getComponentSize(OM_MANAGER::Manipulator *manipulator);
   std::map<Name, Component> getAllComponent(OM_MANAGER::Manipulator *manipulator);
   std::map<Name, Component>::iterator getIteratorBegin(OM_MANAGER::Manipulator *manipulator);
   std::map<Name, Component>::iterator getIteratorEnd(OM_MANAGER::Manipulator *manipulator);
@@ -123,8 +128,6 @@ public:
   float getComponentJointCoefficient(OM_MANAGER::Manipulator *manipulator, Name name);
   Vector3f getComponentJointAxis(OM_MANAGER::Manipulator *manipulator, Name name);
   float getComponentJointAngle(OM_MANAGER::Manipulator *manipulator, Name name);
-  std::vector<float> getAllJointAngle(OM_MANAGER::Manipulator *manipulator);
-  std::vector<float> getAllActiveJointAngle(OM_MANAGER::Manipulator *manipulator);
   float getComponentJointVelocity(OM_MANAGER::Manipulator *manipulator, Name name);
   float getComponentJointAcceleration(OM_MANAGER::Manipulator *manipulator, Name name);
   Tool getComponentTool(OM_MANAGER::Manipulator *manipulator, Name name);
@@ -135,6 +138,10 @@ public:
   float getComponentMass(OM_MANAGER::Manipulator *manipulator, Name name);
   Matrix3f getComponentInertiaTensor(OM_MANAGER::Manipulator *manipulator, Name name);
   Vector3f getComponentCenterOfMass(OM_MANAGER::Manipulator *manipulator, Name name);
+
+  std::vector<float> getAllJointAngle(OM_MANAGER::Manipulator *manipulator);
+  std::vector<float> getAllActiveJointAngle(OM_MANAGER::Manipulator *manipulator);
+  std::vector<uint8_t> getAllActiveJointID(OM_MANAGER::Manipulator *manipulator);
 };
 
 class Kinematics : public Manager
@@ -174,25 +181,6 @@ public:
 
 //   virtual bool drawFunction()) = 0;
 // };
-
-#if 0
-namespace OM_MATH
-{
-float sign(float number);
-Eigen::Vector3f makeVector3(float v1, float v2, float v3);
-Eigen::Matrix3f makeMatrix3(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33);
-Eigen::Vector3f matrixLogarithm(Eigen::Matrix3f rotation_matrix);
-Eigen::Matrix3f skewSymmetricMatrix(Eigen::Vector3f v);
-Eigen::Matrix3f rodriguesRotationMatrix(Eigen::Vector3f axis, float angle);
-Eigen::Matrix3f makeRotationMatrix(float rool, float pitch, float yaw);
-Eigen::Matrix3f makeRotationMatrix(Eigen::Vector3f rotation_vector);
-Eigen::Vector3f makeRotationVector(Eigen::Matrix3f rotation_matrix);
-Vector3f positionDifference(Vector3f desired_position, Vector3f present_position);
-Vector3f orientationDifference(Matrix3f desired_orientation, Matrix3f present_orientation);
-VectorXf poseDifference(Vector3f desired_position, Vector3f present_position,
-                        Matrix3f desired_orientation, Matrix3f present_orientation);
-} // namespace MATH
-#endif
 
 } // namespace OPEN_MANIPULATOR
 #endif

@@ -413,6 +413,21 @@ void OM_MANAGER::Manipulator::setComponentToolValue(Name name, float value)
   }
 }
 
+void OM_MANAGER::Manipulator::setAllActiveJointAngle(std::vector<float> angle_vector)
+{
+  std::map<Name, Component>::iterator it;
+  int8_t index = 0;
+
+  for (it = component_.begin(); it != component_.end(); it++)
+  {
+    if (component_.at(it->first).joint.id != -1)
+    {
+      component_.at(it->first).joint.angle = angle_vector.at(index);
+      index++;
+    }
+  }
+}
+
 ///////////////////////////////Get function//////////////////////////////////
 
 int8_t OM_MANAGER::Manipulator::getDOF()
@@ -614,3 +629,50 @@ Vector3f OM_MANAGER::Manipulator::getComponentCenterOfMass(Name name)
 {
   return component_.at(name).inertia.center_of_mass;
 }
+
+std::vector<float> OM_MANAGER::Manipulator::getAllJointAngle()
+{
+  std::vector<float> result_vector;
+  std::map<Name, Component>::iterator it;
+
+  for (it = component_.begin(); it != component_.end(); it++)
+  {
+    if (component_.at(it->first).tool.id != -1) // Check whether Tool or not
+    {
+      // This is not Tool -> This is Joint
+      result_vector.push_back(component_.at(it->first).joint.angle);
+    }
+  }
+  return result_vector;
+}
+
+std::vector<float> OM_MANAGER::Manipulator::getAllActiveJointAngle()
+{
+  std::vector<float> result_vector;
+  std::map<Name, Component>::iterator it;
+
+  for (it = component_.begin(); it != component_.end(); it++)
+  {
+    if (component_.at(it->first).joint.id != -1) 
+    {
+      result_vector.push_back(component_.at(it->first).joint.angle);
+    }
+  }
+  return result_vector;
+}
+
+std::vector<uint8_t> OM_MANAGER::Manipulator::getAllActiveJointID()
+{
+  std::vector<uint8_t> active_joint_id;
+  std::map<Name, Component>::iterator it;
+
+  for (it = component_.begin(); it != component_.end(); it++)
+  {
+    if (component_.at(it->first).joint.id != -1)
+    {
+      active_joint_id.push_back(component_.at(it->first).joint.id);
+    }
+  }
+  return active_joint_id;
+}
+
