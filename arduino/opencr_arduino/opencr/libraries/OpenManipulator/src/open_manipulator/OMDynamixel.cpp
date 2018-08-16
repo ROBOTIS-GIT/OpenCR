@@ -136,12 +136,16 @@ bool Dynamixel::setAngle(std::vector<float> radian_vector)
 
 bool Dynamixel::setAngle(std::vector<uint8_t> id, std::vector<float> radian_vector)
 {
+  uint8_t _id[id.size()] = {0, };
   int32_t set_position[id.size()] = {0, };
 
   for (uint8_t index = 0; index < id.size(); index++)
-    set_position[index] = dxl_wb_.convertRadian2Value(id.at(index), radian_vector.at(index));
+  {
+    _id[index] = id.at(index);
+    set_position[index] = dxl_wb_.convertRadian2Value(_id[index] , radian_vector.at(index));
+  }
 
-  return dxl_wb_.syncWrite(GOAL_POSITION, &set_position[0]);
+  return dxl_wb_.syncWrite(&_id[0], id.size(), GOAL_POSITION, &set_position[0]);
 }
 
 bool Dynamixel::setAngle(uint8_t id, float radian)
@@ -237,14 +241,26 @@ bool Dynamixel::sendAllActuatorAngle(std::vector<float> radian_vector)
   return setAngle(radian_vector);
 }
 
-bool Dynamixel::sendMultipleActuatorAngle(std::vector<uint8_t> id, std::vector<float> radian_vector)
+bool Dynamixel::sendMultipleActuatorAngle(std::vector<uint8_t> actuator_id, std::vector<float> radian_vector)
 {
-  return setAngle(id, radian_vector);
+  return setAngle(actuator_id, radian_vector);
 }
 
 bool Dynamixel::sendActuatorAngle(uint8_t actuator_id, float radian)
 {
   return setAngle(actuator_id, radian);
+}
+
+bool Dynamixel::sendActuatorSignal(uint8_t actuator_id, bool onoff)
+{
+  if (onoff)
+  {
+    return setAngle(actuator_id, 0.0f);
+  }
+  else
+  {
+    return setAngle(actuator_id, -20.0f * DEG2RAD);
+  }
 }
 
 std::vector<float> Dynamixel::receiveAllActuatorAngle(void)

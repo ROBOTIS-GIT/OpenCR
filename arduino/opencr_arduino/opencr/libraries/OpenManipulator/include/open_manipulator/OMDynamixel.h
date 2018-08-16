@@ -95,9 +95,10 @@ public:
   virtual void initActuator(const void *arg);
   virtual void Enable();
   virtual void Disable();
-  virtual bool sendMultipleActuatorAngle(std::vector<uint8_t> id, std::vector<float> radian_vector);
+  virtual bool sendMultipleActuatorAngle(std::vector<uint8_t> actuator_id, std::vector<float> radian_vector);
   virtual bool sendAllActuatorAngle(std::vector<float> radian_vector);
   virtual bool sendActuatorAngle(uint8_t actuator_id, float radian);
+  virtual bool sendActuatorSignal(uint8_t actuator_id, bool onoff);
   virtual std::vector<float> receiveAllActuatorAngle(void);
 };
 } // namespace OM_Dynamixel
