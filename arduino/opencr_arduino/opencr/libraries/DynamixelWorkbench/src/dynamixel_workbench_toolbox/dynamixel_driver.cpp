@@ -785,6 +785,7 @@ bool DynamixelDriver::syncWrite(uint8_t *id, uint8_t id_num, const char *item_na
     {
       return false;
     }
+    cnt++;
   }
 
   dxl_comm_result = swh.groupSyncWrite->txPacket();
