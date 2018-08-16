@@ -116,7 +116,7 @@ void initManipulator()
                 OM_MATH::makeVector3(0.0536, 0.0, 0.0),
                 Eigen::Matrix3f::Identity(3, 3),
                 5,
-                -25); // Change unit from `meter` to `radian`
+                1.0f); // Change unit from `meter` to `radian`
 
   chain.setAllActiveJointAngle(CHAIN, chain.receiveAllActuatorAngle(CHAIN));
   chain.forward(CHAIN, COMP1);
