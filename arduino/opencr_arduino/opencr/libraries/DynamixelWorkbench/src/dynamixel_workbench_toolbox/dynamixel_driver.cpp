@@ -755,6 +755,47 @@ bool DynamixelDriver::syncWrite(const char *item_name, int32_t *data)
   return true;
 }
 
+bool DynamixelDriver::syncWrite(uint8_t *id, uint8_t id_num, const char *item_name, int32_t *data)
+{
+  bool dxl_addparam_result = false;
+  int dxl_comm_result = COMM_TX_FAIL;
+
+  uint8_t data_byte[4] = {0, };
+  uint8_t cnt = 0;
+
+  SyncWriteHandler swh;
+
+  for (int index = 0; index < sync_write_handler_cnt_; index++)
+  {
+    if (!strncmp(syncWriteHandler_[index].cti->item_name, item_name, strlen(item_name)))
+    {
+      swh = syncWriteHandler_[index];
+    }
+  }
+
+  for (int i = 0; i < id_num; i++)
+  {
+    data_byte[0] = DXL_LOBYTE(DXL_LOWORD(data[cnt]));
+    data_byte[1] = DXL_HIBYTE(DXL_LOWORD(data[cnt]));
+    data_byte[2] = DXL_LOBYTE(DXL_HIWORD(data[cnt]));
+    data_byte[3] = DXL_HIBYTE(DXL_HIWORD(data[cnt]));
+
+    dxl_addparam_result = swh.groupSyncWrite->addParam(id[i], (uint8_t *)&data_byte);
+    if (dxl_addparam_result != true)
+    {
+      return false;
+    }
+  }
+
+  dxl_comm_result = swh.groupSyncWrite->txPacket();
+  if (dxl_comm_result != COMM_SUCCESS)
+  {
+    return false;
+  }
+  swh.groupSyncWrite->clearParam();
+  return true;
+}
+
 void DynamixelDriver::addSyncRead(const char *item_name)
 {
   ControlTableItem *cti;
