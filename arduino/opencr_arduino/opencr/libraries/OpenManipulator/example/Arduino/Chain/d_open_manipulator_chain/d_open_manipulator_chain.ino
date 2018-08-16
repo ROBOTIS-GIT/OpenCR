@@ -23,6 +23,11 @@ Pose goal_pose;
 
 bool loop_flag = true;
 
+float fmap(float x, float in_min, float in_max, float out_min, float out_max)
+{
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
 void setup()
 {
   Serial.begin(57600);
@@ -45,8 +50,9 @@ void loop()
   if (loop_flag)
   {
     // chain.jointMove(CHAIN, goal_position, 2.0f);
-    // chain.toolMove(CHAIN, TOOL, true);
-    chain.toolMove(CHAIN, TOOL, 0.060f);
+    // chain.toolMove(CHAIN, TOOL, false);
+    // Serial.println(fmap(0.060, 0.040, 0.070, -0.785, 0.0));
+    chain.toolMove(CHAIN, TOOL, fmap(0.060, 0.040, 0.070, -2.09, 0.0));
     loop_flag = false;
   }
 
