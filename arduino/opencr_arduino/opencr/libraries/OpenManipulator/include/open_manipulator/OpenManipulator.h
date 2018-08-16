@@ -20,6 +20,7 @@
 #define OPEN_MANIPULATOR_H_
 
 #include "OMAPI.h"
+#include <algorithm>
 #include <RTOS.h>
 
 namespace MUTEX
@@ -32,7 +33,7 @@ void release();
 namespace THREAD
 {
 void Robot_State(void const *argument);
-void Motor_Control(void const *argument);
+void Actuator_Control(void const *argument);
 } // namespace THREAD
 
 namespace OPEN_MANIPULATOR
@@ -140,7 +141,6 @@ public:
   VectorXf getWorldVelocity(Name manipulator_name);
   VectorXf getWorldAcceleration(Name manipulator_name);
 
-  int8_t getComponentSize(Name manipulator_name);
   std::map<Name, Component> getAllComponent(Name manipulator_name);
   std::map<Name, Component>::iterator getIteratorBegin(Name manipulator_name);
   std::map<Name, Component>::iterator getIteratorEnd(Name manipulator_name);
@@ -176,23 +176,21 @@ public:
   std::vector<float> getAllActiveJointAngle(Name manipulator_name);
   std::vector<uint8_t> getAllActiveJointID(Name manipulator_name);
 
-  // KINEMATICS (VIRTUAL)
+  // KINEMATICS (INCLUDES VIRTUAL)
   MatrixXf jacobian(Name manipulator_name, Name tool_name);
   void forward(Name manipulator_name);
   void forward(Name manipulator_name, Name component_name);
   std::vector<float> inverse(Name manipulator_name, Name tool_name, Pose target_pose);
 
-  // ACTUATOR (VIRTUAL)
+  // ACTUATOR (INCLUDES VIRTUAL)
   void actuatorInit(const void *arg);
   void actuatorEnable();
   void actuatorDisable();
-  bool sendAllActuatorAngle(std::vector<float> radian_vector);
   bool sendAllActuatorAngle(Name manipulator_name, std::vector<float> radian_vector);
-  bool sendMultipleActuatorAngle(std::vector<uint8_t> id, std::vector<float> radian_vector);
-  bool sendMultipleActuatorAngle(Name manipulator_name, std::vector<uint8_t> id, std::vector<float> radian_vector);
-  bool sendActuatorAngle(uint8_t actuator_id, float radian);
-  bool sendActuatorAngle(Name manipulator_name, uint8_t actuator_id, float radian);
-  std::vector<float> receiveAllActuatorAngle(void);
+  bool sendMultipleActuatorAngle(Name manipulator_name, std::vector<uint8_t> active_joint_id, std::vector<float> radian_vector);
+  bool sendActuatorAngle(Name manipulator_name, uint8_t active_joint_id, float radian);
+  bool sendActuatorSignal(uint8_t active_joint_id, bool onoff);
+  std::vector<float> receiveAllActuatorAngle(Name manipulator_name);
 
   // PATH
   void setMoveTime(float move_time);
@@ -214,6 +212,15 @@ public:
   void setGoalTrajectory(Trajectory trajectory);
   void clearGoalTrajectory();
   std::vector<Trajectory> getGoalTrajectory();
+
+  // Additional Functions
+  void jointMove(Name manipulator_name, std::vector<float> goal_position, float move_time = 1.0f);
+  void jointMove(Name manipulator_name, std::vector<Name> joint_name, std::vector<float> goal_position, float move_time = 1.0f);
+  bool toolMove(Name manipulator_name, Name tool_name, bool onoff);
+  bool toolMove(Name manipulator_name, Name tool_name, float tool_value);
+
+  void setPose(Name manipulator_name, Pose goal_pose, float move_time = 1.0f);
+  void setMove(Name manipulator_name, Vector3f axis, float meter, float move_time = 1.0f);
 };
 } // namespace OPEN_MANIPULATOR
 

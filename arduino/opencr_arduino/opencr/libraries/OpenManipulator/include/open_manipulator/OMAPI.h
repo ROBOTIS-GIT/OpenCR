@@ -170,6 +170,7 @@ public:
   virtual bool sendAllActuatorAngle(std::vector<float> radian_vector) = 0;
   virtual bool sendMultipleActuatorAngle(std::vector<uint8_t> id, std::vector<float> radian_vector) = 0;
   virtual bool sendActuatorAngle(uint8_t actuator_id, float radian) = 0;
+  virtual bool sendActuatorSignal(uint8_t actuator_id, bool onoff) = 0;
   virtual std::vector<float> receiveAllActuatorAngle(void) = 0;
 };
 

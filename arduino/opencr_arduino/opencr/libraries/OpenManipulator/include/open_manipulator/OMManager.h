@@ -148,8 +148,8 @@ public:
                     Matrix3f relative_orientation,
                     Vector3f axis_of_rotation = Vector3f::Zero(),
                     int8_t joint_actuator_id = -1,
-                    float coefficient = 1,
-                    float mass = 0.0,
+                    float coefficient = 1.0f,
+                    float mass = 0.0f,
                     Matrix3f inertia_tensor = Matrix3f::Identity(3, 3),
                     Vector3f center_of_mass = Vector3f::Zero());
 
@@ -158,8 +158,8 @@ public:
                Vector3f relative_position,
                Matrix3f relative_orientation,
                int8_t tool_id = -1,
-               float coefficient = 1,
-               float mass = 0.0,
+               float coefficient = 1.0f,
+               float mass = 0.0f,
                Matrix3f inertia_tensor = Matrix3f::Identity(3, 3),
                Vector3f center_of_mass = Vector3f::Zero());
 
