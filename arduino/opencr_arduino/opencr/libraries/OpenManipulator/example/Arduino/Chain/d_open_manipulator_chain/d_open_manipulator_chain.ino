@@ -18,6 +18,11 @@
 
 #include "OpenManipulator_Chain.h"
 
+std::vector<float> goal_position;
+Pose goal_pose;
+
+bool loop_flag = true;
+
 void setup()
 {
   Serial.begin(57600);
@@ -26,32 +31,10 @@ void setup()
 
   initManipulator();
 
-  chain.setAllActiveJointAngle(CHAIN, chain.receiveAllActuatorAngle());
-  chain.forward(CHAIN, COMP1);
-
-  std::vector<float> present_position = chain.getAllActiveJointAngle(CHAIN);
-
-  for (uint8_t index = 0; index < chain.getNumberOfActiveJoint(CHAIN); index++)
-  {
-    Trajectory start;
-    Trajectory goal;
-
-    start.position = present_position.at(index);
-    start.velocity = 0.0f;
-    start.acceleration = 0.0f;
-
-    chain.setStartTrajectory(start);
-
-    goal.position = 90.0f * DEG2RAD;
-    goal.velocity = 0.0f;
-    goal.acceleration = 0.0f;
-
-    chain.setGoalTrajectory(goal);
-  }
-
-  chain.setMoveTime(3.0f);
-  chain.makeTrajectory(chain.getStartTrajectory(), chain.getGoalTrajectory());  
-  chain.move();
+  goal_position.push_back(0.0);
+  goal_position.push_back(0.0);
+  goal_position.push_back(0.0);
+  goal_position.push_back(0.0);
 
   initThread();
   startThread();
@@ -59,7 +42,15 @@ void setup()
 
 void loop()
 {
-  Serial.println("loop");
+  if (loop_flag)
+  {
+    // chain.jointMove(CHAIN, goal_position, 2.0f);
+    // chain.toolMove(CHAIN, TOOL, true);
+    chain.toolMove(CHAIN, TOOL, 0.060f);
+    loop_flag = false;
+  }
+
+  // LOG::INFO("LOOP"); 
   osDelay(LOOP_TIME * 1000);
 }
 
@@ -69,7 +60,7 @@ namespace THREAD
 {
 osThreadId loop;
 osThreadId robot_state;
-osThreadId motor_control;
+osThreadId actuator_control;
 } // namespace THREAD
 
 void initThread()
@@ -79,12 +70,12 @@ void initThread()
   // define thread
   osThreadDef(THREAD_NAME_LOOP, Loop, osPriorityNormal, 0, 1024 * 10);
   osThreadDef(THREAD_NAME_ROBOT_STATE, THREAD::Robot_State, osPriorityNormal, 0, 1024 * 10);
-  osThreadDef(THREAD_NAME_MOTOR_CONTROL, THREAD::Motor_Control, osPriorityNormal, 0, 1024 * 10);
+  osThreadDef(THREAD_NAME_ACTUATOR_CONTROL, THREAD::Actuator_Control, osPriorityNormal, 0, 1024 * 10);
 
   // create thread
   THREAD::loop = osThreadCreate(osThread(THREAD_NAME_LOOP), NULL);
   THREAD::robot_state = osThreadCreate(osThread(THREAD_NAME_ROBOT_STATE), NULL);
-  THREAD::motor_control = osThreadCreate(osThread(THREAD_NAME_MOTOR_CONTROL), NULL);
+  THREAD::actuator_control = osThreadCreate(osThread(THREAD_NAME_ACTUATOR_CONTROL), NULL);
 }
 
 void startThread()

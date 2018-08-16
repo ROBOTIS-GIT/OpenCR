@@ -64,7 +64,7 @@ void initManipulator()
   void *p_baud_rate = &baud_rate;
 
   chain.actuatorInit(p_baud_rate);
-  chain.actuatorDisable();
+  // chain.actuatorDisable();
 
   chain.setControlTime(ACTUATOR_CONTROL_TIME);
 
@@ -116,41 +116,39 @@ void initManipulator()
                 OM_MATH::makeVector3(0.0536, 0.0, 0.0),
                 Eigen::Matrix3f::Identity(3, 3),
                 5,
-                0.001); // Change unit to `mm`
+                -25); // Change unit from `meter` to `radian`
 
-    // chain.setAllActiveJointAngle(CHAIN, chain.receiveAllActuatorAngle());
-    // chain.forward(CHAIN, COMP1);
-    // chain.checkManipulatorSetting(CHAIN);
+  chain.setAllActiveJointAngle(CHAIN, chain.receiveAllActuatorAngle(CHAIN));
+  chain.forward(CHAIN, COMP1);
 }
 
 void updateAllJointAngle()
 {
-  chain.setAllActiveJointAngle(CHAIN, chain.receiveAllActuatorAngle());
+  chain.setAllActiveJointAngle(CHAIN, chain.receiveAllActuatorAngle(CHAIN));
   // Add passive joint function
 }
 
 void THREAD::Robot_State(void const *argument)
 {
   (void)argument;
-  // Eigen::Vector3f pose_to_world;
+  Eigen::Vector3f pose_to_world;
 
   for (;;)
   {
-    Serial.println("robot_state");
-    // MUTEX::wait();
+    MUTEX::wait();
 
-    // updateAllJointAngle();    
-    // chain.forward(CHAIN, COMP1);
+    updateAllJointAngle();    
+    chain.forward(CHAIN, COMP1);
 
-    // MUTEX::release();
-    // pose_to_world = chain.getComponentPositionToWorld(CHAIN, TOOL);
-    // LOG::INFO("POSITION TO WORLD : ", pose_to_world(0));
+    MUTEX::release();
+    pose_to_world = chain.getComponentPositionToWorld(CHAIN, TOOL);
+    // LOG::INFO("Forward : ", pose_to_world(2);
 
     osDelay(ROBOT_STATE_UPDATE_TIME * 1000);
   }
 }
 
-void THREAD::Motor_Control(void const *argument)
+void THREAD::Actuator_Control(void const *argument)
 {
   (void)argument;
 
@@ -160,12 +158,12 @@ void THREAD::Motor_Control(void const *argument)
   {
     uint16_t t = millis();
 
-    Serial.println(t-last_time);
-    // MUTEX::wait();
+    LOG::INFO("Control Time : " + String(t-last_time));
+    MUTEX::wait();
 
     chain.jointControl(CHAIN); 
     
-    // MUTEX::release();
+    MUTEX::release();
     last_time = t;
 
     osDelay(ACTUATOR_CONTROL_TIME * 1000);
