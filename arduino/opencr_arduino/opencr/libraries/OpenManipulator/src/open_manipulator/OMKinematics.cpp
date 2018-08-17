@@ -104,7 +104,8 @@ void Chain::forward(OM_MANAGER::Manipulator *manipulator, Name component_name)
 
 std::vector<float> Chain::inverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose)
 {
-  return positionOnlyInverseKinematics(manipulator, tool_name, target_pose);
+  // return positionOnlyInverseKinematics(manipulator, tool_name, target_pose);
+  return srInverseKinematics(manipulator, tool_name, target_pose);
 }
 
 std::vector<float> Chain::inverseKinematics(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose)
