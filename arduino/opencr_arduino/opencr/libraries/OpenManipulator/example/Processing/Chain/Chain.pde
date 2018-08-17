@@ -64,7 +64,7 @@ void setup()
   initShape();
   initView();
 
-  //connectOpenCR(0); // It is depend on laptop enviroments.
+  connectOpenCR(0); // It is depend on laptop enviroments.
 }
 
 /*******************************************************************************
@@ -226,17 +226,17 @@ void drawManipulator()
   drawLocalFrame(); 
 
   translate(0.0, 0.0, 0.040*1000);
-  rotateY(-joint_angle[1]);
+  rotateY(joint_angle[1]);
   shape(link3);
   drawLocalFrame();
 
   translate(0.024*1000, 0.0, 0.128*1000);
-  rotateY(-joint_angle[2]);
+  rotateY(joint_angle[2]);
   shape(link4);
   drawLocalFrame();
 
   translate(0.124*1000, 0.0, 0.0);
-  rotateY(-joint_angle[3]);
+  rotateY(joint_angle[3]);
   shape(link5);
   drawLocalFrame();
 
