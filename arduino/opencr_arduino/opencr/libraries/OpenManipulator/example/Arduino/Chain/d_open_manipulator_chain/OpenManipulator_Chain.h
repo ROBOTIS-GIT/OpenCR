@@ -142,7 +142,7 @@ void THREAD::Robot_State(void const *argument)
 
     MUTEX::release();
     pose_to_world = chain.getComponentPositionToWorld(CHAIN, TOOL);
-    PRINT::VECTOR(pose_to_world);
+    // PRINT::VECTOR(pose_to_world);
 
     osDelay(ROBOT_STATE_UPDATE_TIME * 1000);
   }
