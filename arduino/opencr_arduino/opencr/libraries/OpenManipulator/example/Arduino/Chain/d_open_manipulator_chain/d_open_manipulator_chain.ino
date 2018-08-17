@@ -65,13 +65,19 @@ void loop()
       }
      break;
 
-     case 2:
+    case 2:
       if (chain.moving() == false)
       {
         chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.050), 1.0f);
 
         seq = 3;
       }
+     break;
+
+    case 3:
+      chain.toolMove(CHAIN, TOOL, OM_MATH::map(0.060f, 0.020f, 0.070f, 0.907f, -1.13f));
+      seq = 4;
+     break;
 
     default:
      break;
