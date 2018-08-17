@@ -21,12 +21,7 @@
 std::vector<float> goal_position;
 Pose goal_pose;
 
-bool loop_flag = true;
-
-float fmap(float x, float in_min, float in_max, float out_min, float out_max)
-{
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
+uint8_t seq = 0;
 
 void setup()
 {
@@ -41,19 +36,45 @@ void setup()
   goal_position.push_back(0.0);
   goal_position.push_back(0.0);
 
+  goal_pose.position = OM_MATH::makeVector3(-0.050, 0.0, 0.203);
+  goal_pose.orientation = Eigen::Matrix3f::Identity();
+
   initThread();
   startThread();
 }
 
 void loop()
 {
-  if (loop_flag)
+  switch(seq)
   {
-    // chain.jointMove(CHAIN, goal_position, 2.0f);
-    // chain.toolMove(CHAIN, TOOL, false);
-    // Serial.println(fmap(0.060, 0.040, 0.070, -0.785, 0.0));
-    chain.toolMove(CHAIN, TOOL, fmap(0.060, 0.040, 0.070, -2.09, 0.0));
-    loop_flag = false;
+    case 0:
+      if (chain.moving() == false)
+      {
+        chain.jointMove(CHAIN, goal_position, 1.0f);
+
+        seq = 1;
+      }
+     break;
+
+    case 1:
+      if (chain.moving() == false)
+      {
+        chain.setPose(CHAIN, TOOL, goal_pose, 1.0f);
+      
+        seq = 2;
+      }
+     break;
+
+     case 2:
+      if (chain.moving() == false)
+      {
+        chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.050), 1.0f);
+
+        seq = 3;
+      }
+
+    default:
+     break;
   }
 
   // LOG::INFO("LOOP"); 

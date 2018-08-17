@@ -78,7 +78,7 @@ void initManipulator()
                      COMP1,
                      WORLD,
                      COMP2,
-                     OM_MATH::makeVector3(-0.2016, 0.0, 0.017),
+                     OM_MATH::makeVector3(-0.278, 0.0, 0.017),
                      Eigen::Matrix3f::Identity(3, 3),
                      Z_AXIS,
                      1);
@@ -113,7 +113,7 @@ void initManipulator()
   chain.addTool(CHAIN,
                 TOOL,
                 COMP4,
-                OM_MATH::makeVector3(0.0536, 0.0, 0.0),
+                OM_MATH::makeVector3(0.130, 0.0, 0.0),
                 Eigen::Matrix3f::Identity(3, 3),
                 5,
                 1.0f); // Change unit from `meter` to `radian`
@@ -142,7 +142,7 @@ void THREAD::Robot_State(void const *argument)
 
     MUTEX::release();
     pose_to_world = chain.getComponentPositionToWorld(CHAIN, TOOL);
-    // LOG::INFO("Forward : ", pose_to_world(2);
+    PRINT::VECTOR(pose_to_world);
 
     osDelay(ROBOT_STATE_UPDATE_TIME * 1000);
   }
@@ -158,7 +158,7 @@ void THREAD::Actuator_Control(void const *argument)
   {
     uint16_t t = millis();
 
-    LOG::INFO("Control Time : " + String(t-last_time));
+    // LOG::INFO("Control Time : " + String(t-last_time));
     MUTEX::wait();
 
     chain.jointControl(CHAIN); 
