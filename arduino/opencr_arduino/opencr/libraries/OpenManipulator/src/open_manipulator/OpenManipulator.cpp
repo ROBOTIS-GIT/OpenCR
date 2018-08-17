@@ -59,6 +59,13 @@ void OpenManipulator::initKinematics(Kinematics *kinematics)
 void OpenManipulator::initActuator(Actuator *actuator)
 {
   actuator_ = actuator;
+  platform_ = true;
+}
+
+void OpenManipulator::connectProcessing(uint8_t actuator_num)
+{
+  OM_PROCESSING::initProcessing((int8_t)(actuator_num));
+  processing_ = true;
 }
 
 void OpenManipulator::addManipulator(Name manipulator_name)
@@ -652,7 +659,11 @@ void OpenManipulator::jointControl(Name manipulator_name)
       goal_velocity_ = joint_trajectory_->getVelocity(tick_time);
       goal_acceleration_ = joint_trajectory_->getAcceleration(tick_time);
 
+    if (platform_)
       sendMultipleActuatorAngle(manipulator_name, manipulator_.at(manipulator_name).getAllActiveJointID(), goal_position_);
+
+    if (processing_)
+      OM_PROCESSING::sendAngle2Processing(goal_position_);
 
       step_cnt++;
     }

@@ -31,6 +31,8 @@ void setup()
 
   initManipulator();
 
+  chain.connectProcessing(DXL_SIZE);
+
   goal_position.push_back(0.0);
   goal_position.push_back(0.0);
   goal_position.push_back(0.0);

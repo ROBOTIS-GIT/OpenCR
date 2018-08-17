@@ -20,7 +20,9 @@
 #define OPEN_MANIPULATOR_H_
 
 #include "OMAPI.h"
-#include <algorithm>
+#include "OMBridge.h"
+
+#include <algorithm> // for sort()
 #include <RTOS.h>
 
 using namespace Eigen;
@@ -62,12 +64,17 @@ private:
 
   bool moving_;
 
+  bool platform_;
+  bool processing_;
+
 public:
   OpenManipulator(uint8_t active_joint_num);
   virtual ~OpenManipulator();
 
   void initKinematics(Kinematics *kinematics);
   void initActuator(Actuator *actuator);
+
+  void connectProcessing(uint8_t actuator_num);
 
   void addManipulator(Name manipulator_name);
 
