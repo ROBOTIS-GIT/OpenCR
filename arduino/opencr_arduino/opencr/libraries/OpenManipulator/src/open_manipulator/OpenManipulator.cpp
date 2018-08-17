@@ -19,6 +19,7 @@
 #include "../../include/open_manipulator/OpenManipulator.h"
 
 using namespace OPEN_MANIPULATOR;
+using namespace Eigen;
 
 osMutexDef(om_mutex);
 osMutexId(om_mutex_id);
@@ -449,9 +450,9 @@ void OpenManipulator::forward(Name manipulator_name, Name component_name)
   return kinematics_->forward(&manipulator_.at(manipulator_name), component_name);
 }
 
-std::vector<float> OpenManipulator::inverse(Name manipulator_name, Name tool_name, Pose target_pose)
+std::vector<float> OpenManipulator::inverse(Name manipulator_name, Name tool_name, Pose goal_pose)
 {
-  return kinematics_->inverse(&manipulator_.at(manipulator_name), tool_name, target_pose);
+  return kinematics_->inverse(&manipulator_.at(manipulator_name), tool_name, goal_pose);
 }
 
 // ACTUATOR
@@ -596,6 +597,11 @@ void OpenManipulator::move()
   moving_ = true;
 }
 
+bool OpenManipulator::moving()
+{
+  return moving_;
+}
+
 void OpenManipulator::setStartTrajectory(Trajectory trajectory)
 {
   start_trajectory_.push_back(trajectory);
@@ -663,6 +669,9 @@ void OpenManipulator::jointMove(Name manipulator_name, std::vector<float> goal_p
   Trajectory start;
   Trajectory goal;
 
+  start_trajectory_.clear();
+  goal_trajectory_.clear();
+
   std::vector<float> present_position = manipulator_.at(manipulator_name).getAllActiveJointAngle();
 
   for (uint8_t index = 0; index < manipulator_.at(manipulator_name).getDOF(); index++)
@@ -685,11 +694,6 @@ void OpenManipulator::jointMove(Name manipulator_name, std::vector<float> goal_p
   move();
 }
 
-void OpenManipulator::jointMove(Name manipulator_name, std::vector<Name> joint_name, std::vector<float> goal_position, float move_time)
-{
-
-}
-
 bool OpenManipulator::toolMove(Name manipulator_name, Name tool_name, bool onoff)
 {
   return actuator_->sendActuatorSignal(manipulator_.at(manipulator_name).getComponentToolId(tool_name), onoff);
@@ -702,13 +706,23 @@ bool OpenManipulator::toolMove(Name manipulator_name, Name tool_name, float tool
   return actuator_->sendActuatorAngle(manipulator_.at(manipulator_name).getComponentToolId(tool_name), calc_value);
 }
 
-void OpenManipulator::setPose(Name manipulator_name, Pose goal_pose, float move_time)
+void OpenManipulator::setPose(Name manipulator_name, Name tool_name, Pose goal_pose, float move_time)
 {
-
+  std::vector<float> goal_position = kinematics_->inverse(&manipulator_.at(manipulator_name), tool_name, goal_pose);
+  
+  jointMove(manipulator_name, goal_position, move_time);
 }
 
-void OpenManipulator::setMove(Name manipulator_name, Vector3f axis, float meter, float move_time)
+void OpenManipulator::setMove(Name manipulator_name, Name tool_name, Vector3f meter, float move_time)
 {
+  Vector3f present_position_to_world = manipulator_.at(manipulator_name).getComponentPositionToWorld(tool_name);
+  Matrix3f present_orientation_to_world = manipulator_.at(manipulator_name).getComponentOrientationToWorld(tool_name);
 
+  Vector3f goal_position_to_world = present_position_to_world + meter;
+
+  Pose goal_pose;
+  goal_pose.position = goal_position_to_world;
+  goal_pose.orientation = present_orientation_to_world;
+
+  setPose(manipulator_name, tool_name, goal_pose, move_time);  
 }
-

@@ -23,6 +23,8 @@
 #include <algorithm>
 #include <RTOS.h>
 
+using namespace Eigen;
+
 namespace MUTEX
 {
 void create();
@@ -180,7 +182,7 @@ public:
   MatrixXf jacobian(Name manipulator_name, Name tool_name);
   void forward(Name manipulator_name);
   void forward(Name manipulator_name, Name component_name);
-  std::vector<float> inverse(Name manipulator_name, Name tool_name, Pose target_pose);
+  std::vector<float> inverse(Name manipulator_name, Name tool_name, Pose goal_pose);
 
   // ACTUATOR (INCLUDES VIRTUAL)
   void actuatorInit(const void *arg);
@@ -203,6 +205,7 @@ public:
                       std::vector<Trajectory> goal);
   MatrixXf getTrajectoryCoefficient();
   void move();
+  bool moving();
   void jointControl(Name manipulator_name);
 
   void setStartTrajectory(Trajectory trajectory);
@@ -215,12 +218,11 @@ public:
 
   // Additional Functions
   void jointMove(Name manipulator_name, std::vector<float> goal_position, float move_time = 1.0f);
-  void jointMove(Name manipulator_name, std::vector<Name> joint_name, std::vector<float> goal_position, float move_time = 1.0f);
   bool toolMove(Name manipulator_name, Name tool_name, bool onoff);
   bool toolMove(Name manipulator_name, Name tool_name, float tool_value);
 
-  void setPose(Name manipulator_name, Pose goal_pose, float move_time = 1.0f);
-  void setMove(Name manipulator_name, Vector3f axis, float meter, float move_time = 1.0f);
+  void setPose(Name manipulator_name, Name tool_name, Pose goal_pose, float move_time = 1.0f);
+  void setMove(Name manipulator_name, Name tool_name, Vector3f meter, float move_time = 1.0f);
 };
 } // namespace OPEN_MANIPULATOR
 
