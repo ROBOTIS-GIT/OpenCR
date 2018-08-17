@@ -17,7 +17,7 @@
 /* Authors: Darby Lim */
 
 /**
- * this code is compatible with d_open_manipulator_chain.ino
+ * this code is compatible with open_manipulator_chain.ino
 **/
 
 // Multiple Window
@@ -30,13 +30,10 @@ import controlP5.*;
 import processing.serial.*;
 
 // Shape variables
-PShape link1, link2, link3, link4, link5, left_palm, right_palm;
+PShape link1, link2, link3, link4, link5, gripper, gripper_sub;
 
 // Model pose
-float model_trans_x, model_trans_y, model_trans_z, model_scale_factor;
-
-// World pose
-float world_rot_x, world_rot_y;
+float model_rot_x, model_rot_z, model_trans_x, model_trans_y, model_scale_factor;
 
 // Serial variable
 Serial opencr_port;
@@ -149,13 +146,13 @@ void initView()
 *******************************************************************************/
 void initShape()
 {
-  link1       = loadShape("meshes/chain_link1.obj");
-  link2       = loadShape("meshes/chain_link2.obj");
-  link3       = loadShape("meshes/chain_link3.obj");
-  link4       = loadShape("meshes/chain_link4.obj");
-  link5       = loadShape("meshes/chain_link5.obj");
-  left_palm   = loadShape("meshes/chain_link_grip_l.obj");
-  right_palm  = loadShape("meshes/chain_link_grip_r.obj");
+  link1       = loadShape("meshes/link1.obj");
+  link2       = loadShape("meshes/link2.obj");
+  link3       = loadShape("meshes/link3.obj");
+  link4       = loadShape("meshes/link4.obj");
+  link5       = loadShape("meshes/link5.obj");
+  gripper     = loadShape("meshes/link6_l.obj");
+  gripper_sub = loadShape("meshes/link6_r.obj");
 
   setJointAngle(0, 0, 0, 0);
   gripperOff();
@@ -201,8 +198,8 @@ void drawTitle()
   text("OpenManipulator Chain", -450,75,0);
   textSize(20);
   fill(102,255,255);
-  text("Move manipulator 'Q,A','W,S','E,D'", -450,120,0);
-  text("Initial view 'I'", -450,150,0);
+  text("Press 'A','D','W','S'", -450,120,0);
+  text("And   'Q','E'",         -450,150,0);
   popMatrix();
 }
 
@@ -214,41 +211,41 @@ void drawManipulator()
   scale(1 + model_scale_factor);
 
   pushMatrix();
-  translate(-model_trans_x, -model_trans_y, -model_trans_z);
-  rotateX(0.0);
-  rotateZ(0.0);
+  translate(-model_trans_x, -model_trans_y, 0);
+  rotateX(model_rot_x);
+  rotateZ(model_rot_z);
   shape(link1);
   drawLocalFrame();
 
-  translate(0.0, 0.0, 0.036*1000);
+  translate(12, 0, 36);
   rotateZ(-joint_angle[0]);
   shape(link2);
-  drawLocalFrame(); 
+  drawLocalFrame();
 
-  translate(0.0, 0.0, 0.040*1000);
+  translate(0, 2, 40);
   rotateY(-joint_angle[1]);
   shape(link3);
   drawLocalFrame();
 
-  translate(0.024*1000, 0.0, 0.128*1000);
+  translate(22, 0, 122);
   rotateY(-joint_angle[2]);
   shape(link4);
   drawLocalFrame();
 
-  translate(0.124*1000, 0.0, 0.0);
+  translate(124, 0, 0);
   rotateY(-joint_angle[3]);
   shape(link5);
   drawLocalFrame();
 
-  translate(0.130*1000, 0.007*1000, 0);
-  drawSphere(0, -7, 0, 100, 100, 100, 10);
+  translate(69, 0, 0);
+  drawSphere(50,0,0,100,100,100,10);
   translate(0, gripper_pos[0], 0);
-  shape(right_palm);
+  shape(gripper);
   drawLocalFrame();
 
-  translate(0, -0.014*1000, 0);
+  translate(0, 0, 0);
   translate(0, gripper_pos[1], 0);
-  shape(left_palm);
+  shape(gripper_sub);
   drawLocalFrame();
   popMatrix();
 }
@@ -260,11 +257,11 @@ void drawWorldFrame()
 {
   strokeWeight(10);
   stroke(255, 0, 0, 100);
-  line(0, 0, 0, 200, 0, 0);
+  line(0, 0 ,0 , 200, 0, 0);
 
   strokeWeight(10);
   stroke(0, 255, 0, 100);
-  line(0, 0, 0, 0, -200, 0);
+  line(0, 0, 0, 0, 200, 0);
 
   stroke(0, 0, 255, 100);
   strokeWeight(10);
@@ -278,15 +275,15 @@ void drawLocalFrame()
 {
   strokeWeight(10);
   stroke(255, 0, 0, 100);
-  line(0, 0 ,0 , 60, 0, 0);
+  line(0, 0 ,0 , 100, 0, 0);
 
   strokeWeight(10);
   stroke(0, 255, 0, 100);
-  line(0, 0, 0, 0, -60, 0);
+  line(0, 0, 0, 0, 100, 0);
 
   stroke(0, 0, 255, 100);
   strokeWeight(10);
-  line(0, 0, 0, 0, 0, 60);
+  line(0, 0, 0, 0, 0, 100);
 }
 
 /*******************************************************************************
@@ -305,8 +302,8 @@ void setJointAngle(float angle1, float angle2, float angle3, float angle4)
 *******************************************************************************/
 void gripperOn()
 {
-  gripper_pos[0] = 0.020 * 1000;
-  gripper_pos[1] = gripper_pos[0] * (-2);
+  gripper_pos[0] = -25;
+  gripper_pos[1] = -gripper_pos[0] - gripper_pos[0];
 }
 
 /*******************************************************************************
@@ -314,8 +311,8 @@ void gripperOn()
 *******************************************************************************/
 void gripperOff()
 {
-  gripper_pos[0] = 0.030 * 1000;
-  gripper_pos[1] = gripper_pos[0] * (-2);
+  gripper_pos[0] = -45;
+  gripper_pos[1] = -gripper_pos[0] - gripper_pos[0];
 }
 
 /*******************************************************************************
@@ -323,10 +320,9 @@ void gripperOff()
 *******************************************************************************/
 void gripperAngle2Pos(float angle)
 {
-  float angle2pos = map(angle, 0.907, -1.13, 0.010*1000, 0.035 * 1000);
-
+  float angle2pos = map(angle, 0.0, 3.5, -45.0, 0.0);
   gripper_pos[0] = angle2pos;
-  gripper_pos[1] = gripper_pos[0] * (-2);
+  gripper_pos[1] = -gripper_pos[0] - angle2pos;
 }
 
 /*******************************************************************************
@@ -334,15 +330,8 @@ void gripperAngle2Pos(float angle)
 *******************************************************************************/
 void mouseDragged()
 {
-  world_rot_x -= (mouseX - pmouseX) * 2.0;
-  world_rot_y -= (mouseY - pmouseY) * 2.0;
-
-  // Eye position
-  // Scene center
-  // Upwards axis
-  camera(width/2.0 + world_rot_x, height/2.0-500 + world_rot_y, height/2.0 * 4,
-         width/2-100, height/2, 0,
-         0, 1, 0);
+  model_rot_z -= (mouseX - pmouseX) * 0.01;
+  model_rot_x -= (mouseY - pmouseY) * 0.01;
 }
 
 /*******************************************************************************
@@ -350,21 +339,13 @@ void mouseDragged()
 *******************************************************************************/
 void keyPressed()
 {
-  if      (key == 'q') model_trans_x      -= 0.050 * 1000;
-  else if (key == 'a') model_trans_x      += 0.050 * 1000;
-  else if (key == 'w') model_trans_y      += 0.050 * 1000;
-  else if (key == 's') model_trans_y      -= 0.050 * 1000;
-  else if (key == 'e') model_trans_z      -= 0.050 * 1000;
-  else if (key == 'd') model_trans_z      += 0.050 * 1000;
-  else if (key == 'r') model_scale_factor += 0.5;
-  else if (key == 'f') model_scale_factor -= 0.5;
-  else if (key == 'i') 
-  {
-    model_trans_x = model_trans_y = model_scale_factor = world_rot_x = world_rot_y = 0.0;
-    camera(width/2.0, height/2.0-500, height/2.0 * 4,
-           width/2-100, height/2, 0,
-           0, 1, 0);
-  }
+  if      (key == 'a') model_trans_x      -= 50;
+  else if (key == 'd') model_trans_x      += 50;
+  else if (key == 's') model_trans_y      += 50;
+  else if (key == 'w') model_trans_y      -= 50;
+  else if (key == 'q') model_scale_factor += 0.5;
+  else if (key == 'e') model_scale_factor -= 0.5;
+  else if (key == 'i') model_trans_x = model_trans_y = model_scale_factor = model_rot_z = model_rot_x = 0;
 }
 
 /*******************************************************************************
@@ -512,7 +493,7 @@ class ChildApplet extends PApplet
              ;
 
     gripper = cp5.addKnob("gripper")
-                .setRange(-1.13, 0.907)
+                .setRange(-1.0, 0.7)
                 .setValue(0.0)
                 .setPosition(210,260)
                 .setRadius(50)
