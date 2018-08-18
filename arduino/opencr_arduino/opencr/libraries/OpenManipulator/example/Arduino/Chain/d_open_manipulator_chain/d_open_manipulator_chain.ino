@@ -16,7 +16,8 @@
 
 /* Authors: Darby Lim */
 
-#include "OpenManipulator_Chain.h"
+#include "Chain.h"
+#include "Processing.h"
 
 std::vector<float> goal_position;
 Pose goal_pose;
@@ -31,15 +32,15 @@ void setup()
 
   initManipulator();
 
-  chain.connectProcessing(DXL_SIZE);
+  connectProcessing();
 
-  goal_position.push_back(0.0);
-  goal_position.push_back(0.0);
-  goal_position.push_back(0.0);
-  goal_position.push_back(0.0);
+  // goal_position.push_back(0.0);
+  // goal_position.push_back(0.0);
+  // goal_position.push_back(0.0);
+  // goal_position.push_back(0.0);
 
-  goal_pose.position = OM_MATH::makeVector3(-0.050, 0.0, 0.203);
-  goal_pose.orientation = Eigen::Matrix3f::Identity();
+  // goal_pose.position = OM_MATH::makeVector3(-0.050, 0.0, 0.203);
+  // goal_pose.orientation = Eigen::Matrix3f::Identity();
 
   initThread();
   startThread();
@@ -47,46 +48,51 @@ void setup()
 
 void loop()
 {
-  switch(seq)
+  if (Serial.available())
   {
-    case 0:
-      if (chain.moving() == false)
-      {
-        chain.jointMove(CHAIN, goal_position, 1.0f);
-
-        seq = 1;
-      }
-     break;
-
-    case 1:
-      if (chain.moving() == false)
-      {
-        chain.setPose(CHAIN, TOOL, goal_pose, 1.0f);
-      
-        seq = 2;
-      }
-     break;
-
-    case 2:
-      if (chain.moving() == false)
-      {
-        chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.050), 1.0f);
-
-        seq = 3;
-      }
-     break;
-
-    case 3:
-      chain.toolMove(CHAIN, TOOL, OM_MATH::map(0.060f, 0.020f, 0.070f, 0.907f, -1.13f));
-      seq = 4;
-     break;
-
-    default:
-     break;
+    //  Serial.println(Serial.readStringUntil('\n'));
+    fromProcessing(Serial.readStringUntil('\n'));
   }
+  // switch(seq)
+  // {
+  //   case 0:
+  //     if (chain.moving() == false)
+  //     {
+  //       chain.jointMove(CHAIN, goal_position, 1.0f);
+
+  //       seq = 1;
+  //     }
+  //    break;
+
+  //   case 1:
+  //     if (chain.moving() == false)
+  //     {
+  //       chain.setPose(CHAIN, TOOL, goal_pose, 1.0f);
+      
+  //       seq = 2;
+  //     }
+  //    break;
+
+  //   case 2:
+  //     if (chain.moving() == false)
+  //     {
+  //       chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.050), 1.0f);
+
+  //       seq = 3;
+  //     }
+  //    break;
+
+  //   case 3:
+  //     chain.toolMove(CHAIN, TOOL, OM_MATH::map(0.060f, 0.020f, 0.070f, 0.907f, -1.13f));
+  //     seq = 4;
+  //    break;
+
+  //   default:
+  //    break;
+  // }
 
   // LOG::INFO("LOOP"); 
-  osDelay(LOOP_TIME * 1000);
+  // osDelay(LOOP_TIME * 1000);
 }
 
 /// DON'T TOUCH BELOW CODE///

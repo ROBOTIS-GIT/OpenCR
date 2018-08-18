@@ -32,9 +32,11 @@ void MUTEX::release() { osMutexRelease(om_mutex_id); }
 ////////////////////////////////Basic Function//////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
-OpenManipulator::OpenManipulator(uint8_t active_joint_num) : move_time_(1.0),
-                                                             control_time_(0.010),
-                                                             moving_(false)
+OpenManipulator::OpenManipulator(uint8_t active_joint_num) : move_time_(1.0f),
+                                                             control_time_(0.010f),
+                                                             moving_(false),
+                                                             platform_(false),
+                                                             processing_(false)
 {
   manager_ = new Manager();
   joint_trajectory_ = new OM_PATH::JointTrajectory(active_joint_num);
@@ -66,6 +68,19 @@ void OpenManipulator::connectProcessing(uint8_t actuator_num)
 {
   OM_PROCESSING::initProcessing((int8_t)(actuator_num));
   processing_ = true;
+}
+
+void OpenManipulator::sendAngleToProcessing(std::vector<float> joint_angle)
+{
+  OM_PROCESSING::sendAngle2Processing(joint_angle);
+}
+
+String* OpenManipulator::parseDataFromProcessing(String get)
+{
+  get.trim();
+  OM_PROCESSING::split(get, ',', cmd_);
+
+  return cmd_;
 }
 
 void OpenManipulator::addManipulator(Name manipulator_name)

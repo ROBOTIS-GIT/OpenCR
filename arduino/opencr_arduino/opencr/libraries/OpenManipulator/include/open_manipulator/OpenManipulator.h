@@ -67,6 +67,8 @@ private:
   bool platform_;
   bool processing_;
 
+  String cmd_[50];
+
 public:
   OpenManipulator(uint8_t active_joint_num);
   virtual ~OpenManipulator();
@@ -75,6 +77,8 @@ public:
   void initActuator(Actuator *actuator);
 
   void connectProcessing(uint8_t actuator_num);
+  void sendAngleToProcessing(std::vector<float> joint_angle);
+  String* parseDataFromProcessing(String get);
 
   void addManipulator(Name manipulator_name);
 
