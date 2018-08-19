@@ -137,6 +137,9 @@ void MATRIX(matrix &m, uint8_t point = 3, String port = "USB")
 }
 } // namespace PRINT
 
+void updateRxTxLed(void);
+void showLedStatus(void);
+
 /*
 Manager Error
 

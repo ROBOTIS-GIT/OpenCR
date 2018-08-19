@@ -18,6 +18,7 @@
 
 #include "../../../include/open_manipulator/OPM/OPMDebug.h"
 
+#if 0
 void showLedStatus(void)
 {
   static uint32_t t_time = millis();
@@ -181,3 +182,5 @@ void showFKResult(OPMLink* link, int from, int to)
     Serial.println("R_ : "); print_mt3f(link[num].R_);
   }
 }
+
+#endif
