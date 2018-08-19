@@ -50,21 +50,27 @@
 
 #define ACTIVE_JOINT_SIZE 4
 
+// #define PLATFORM
+
 OPEN_MANIPULATOR::OpenManipulator chain(ACTIVE_JOINT_SIZE);
 
 OPEN_MANIPULATOR::Kinematics *kinematics = new OM_KINEMATICS::Chain();
-// OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
+#ifdef PLATFORM
+  OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
+#endif
 
 void initManipulator()
 {
   chain.initKinematics(kinematics);
-  // chain.initActuator(actuator);
+#ifdef PLATFORM
+  chain.initActuator(actuator);
 
-  // uint32_t baud_rate = BAUD_RATE;
-  // void *p_baud_rate = &baud_rate;
+  uint32_t baud_rate = BAUD_RATE;
+  void *p_baud_rate = &baud_rate;
 
-  // chain.actuatorInit(p_baud_rate);
-  // chain.actuatorDisable();
+  chain.actuatorInit(p_baud_rate);
+  chain.actuatorDisable();
+#endif
 
 
   chain.setControlTime(ACTUATOR_CONTROL_TIME);
@@ -119,13 +125,17 @@ void initManipulator()
                 5,
                 1.0f); // Change unit from `meter` to `radian`
 
-  // chain.setAllActiveJointAngle(CHAIN, chain.receiveAllActuatorAngle(CHAIN));
+#ifdef PLATFORM
+  chain.setAllActiveJointAngle(CHAIN, chain.receiveAllActuatorAngle(CHAIN));
+#endif
   chain.forward(CHAIN, COMP1);
 }
 
 void updateAllJointAngle()
 {
-  // chain.setAllActiveJointAngle(CHAIN, chain.receiveAllActuatorAngle(CHAIN));
+#ifdef PLATFORM
+  chain.setAllActiveJointAngle(CHAIN, chain.receiveAllActuatorAngle(CHAIN));
+#endif
   // Add passive joint function
 }
 
@@ -138,7 +148,7 @@ void THREAD::Robot_State(void const *argument)
   {
     MUTEX::wait();
 
-    // updateAllJointAngle();    
+    updateAllJointAngle();    
     chain.forward(CHAIN, COMP1);
 
     MUTEX::release();
