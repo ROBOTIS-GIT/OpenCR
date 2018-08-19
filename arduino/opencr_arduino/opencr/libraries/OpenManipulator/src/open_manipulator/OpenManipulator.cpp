@@ -678,7 +678,10 @@ void OpenManipulator::jointControl(Name manipulator_name)
       sendMultipleActuatorAngle(manipulator_name, manipulator_.at(manipulator_name).getAllActiveJointID(), goal_position_);
 
     if (processing_)
+    {
       OM_PROCESSING::sendAngle2Processing(goal_position_);
+      manipulator_.at(manipulator_name).setAllActiveJointAngle(goal_position_);
+    }
 
       step_cnt++;
     }
@@ -722,14 +725,24 @@ void OpenManipulator::jointMove(Name manipulator_name, std::vector<float> goal_p
 
 bool OpenManipulator::toolMove(Name manipulator_name, Name tool_name, bool onoff)
 {
-  return actuator_->sendActuatorSignal(manipulator_.at(manipulator_name).getComponentToolId(tool_name), onoff);
+  manipulator_.at(manipulator_name).setComponentToolOnOff(tool_name, onoff);
+
+  if (platform_)
+    return actuator_->sendActuatorSignal(manipulator_.at(manipulator_name).getComponentToolId(tool_name), onoff);
+  else
+    return true; // send2processing()
 }
 
 bool OpenManipulator::toolMove(Name manipulator_name, Name tool_name, float tool_value)
 {
   float calc_value = tool_value * manipulator_.at(manipulator_name).getComponentToolCoefficient(tool_name);
 
-  return actuator_->sendActuatorAngle(manipulator_.at(manipulator_name).getComponentToolId(tool_name), calc_value);
+  manipulator_.at(manipulator_name).setComponentToolValue(tool_name, calc_value);
+
+  if (platform_)
+    return actuator_->sendActuatorAngle(manipulator_.at(manipulator_name).getComponentToolId(tool_name), calc_value);
+  else
+    return true; // send2processing()
 }
 
 void OpenManipulator::setPose(Name manipulator_name, Name tool_name, Pose goal_pose, float move_time)
