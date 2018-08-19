@@ -18,6 +18,7 @@
 
 #include "Chain.h"
 #include "Processing.h"
+#include "RemoteController.h"
 
 std::vector<float> goal_position;
 Pose goal_pose;
@@ -48,11 +49,12 @@ void setup()
 
 void loop()
 {
+  fromRC100();
+
   if (Serial.available())
-  {
-    //  Serial.println(Serial.readStringUntil('\n'));
     fromProcessing(Serial.readStringUntil('\n'));
-  }
+
+
   // switch(seq)
   // {
   //   case 0:
@@ -133,5 +135,6 @@ static void Loop(void const *argument)
   for (;;)
   {
     loop();
+    showLedStatus();
   }
 }
