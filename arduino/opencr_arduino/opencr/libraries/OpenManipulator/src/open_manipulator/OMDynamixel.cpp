@@ -255,11 +255,11 @@ bool Dynamixel::sendActuatorSignal(uint8_t actuator_id, bool onoff)
 {
   if (onoff)
   {
-    return setAngle(actuator_id, 0.0f);
+    return setAngle(actuator_id, OM_MATH::map(0.040f, 0.020f, 0.070f, 0.907f, -1.13f));
   }
   else
   {
-    return setAngle(actuator_id, -20.0f * DEG2RAD);
+    return setAngle(actuator_id, OM_MATH::map(0.065f, 0.020f, 0.070f, 0.907f, -1.13f));
   }
 }
 
