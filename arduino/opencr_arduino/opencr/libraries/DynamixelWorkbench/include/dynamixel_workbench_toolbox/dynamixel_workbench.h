@@ -71,6 +71,7 @@ class DynamixelWorkbench
   bool itemWrite(uint8_t id, const char* item_name, int32_t value);  // write value to item
   bool itemWrite(uint8_t id, uint16_t addr, uint8_t length, int32_t data);
   bool syncWrite(const char *item_name, int32_t* value);             // sync write
+  bool syncWrite(uint8_t *id, uint8_t id_num, const char *item_name, int32_t *data);
   bool bulkWrite(void);                                              // bulk write
 
   int32_t  itemRead(uint8_t id, const char* item_name);  // read value from item

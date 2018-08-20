@@ -16,57 +16,125 @@
 
 /* Authors: Darby Lim */
 
-#include "OpenManipulator_Chain.h"
+#include "Chain.h"
+#include "Processing.h"
+#include "RemoteController.h"
+
+std::vector<float> goal_position;
+Pose goal_pose;
+
+uint8_t seq = 0;
+
+void setup()
+{
+  Serial.begin(57600);
+  while (!Serial)
+    ;
+
+  initManipulator();
+
+  connectProcessing();
+
+  // goal_position.push_back(0.0);
+  // goal_position.push_back(0.0);
+  // goal_position.push_back(0.0);
+  // goal_position.push_back(0.0);
+
+  // goal_pose.position = OM_MATH::makeVector3(-0.050, 0.0, 0.203);
+  // goal_pose.orientation = Eigen::Matrix3f::Identity();
+
+  initThread();
+  startThread();
+}
+
+void loop()
+{
+  fromRC100();
+
+  if (Serial.available())
+    fromProcessing(Serial.readStringUntil('\n'));
+
+
+  // switch(seq)
+  // {
+  //   case 0:
+  //     if (chain.moving() == false)
+  //     {
+  //       chain.jointMove(CHAIN, goal_position, 1.0f);
+
+  //       seq = 1;
+  //     }
+  //    break;
+
+  //   case 1:
+  //     if (chain.moving() == false)
+  //     {
+  //       chain.setPose(CHAIN, TOOL, goal_pose, 1.0f);
+      
+  //       seq = 2;
+  //     }
+  //    break;
+
+  //   case 2:
+  //     if (chain.moving() == false)
+  //     {
+  //       chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.050), 1.0f);
+
+  //       seq = 3;
+  //     }
+  //    break;
+
+  //   case 3:
+  //     chain.toolMove(CHAIN, TOOL, OM_MATH::map(0.060f, 0.020f, 0.070f, 0.907f, -1.13f));
+  //     seq = 4;
+  //    break;
+
+  //   default:
+  //    break;
+  // }
+
+  // LOG::INFO("LOOP"); 
+  // osDelay(LOOP_TIME * 1000);
+}
+
+/// DON'T TOUCH BELOW CODE///
 
 namespace THREAD
 {
 osThreadId loop;
 osThreadId robot_state;
-}
+osThreadId actuator_control;
+} // namespace THREAD
 
-void setup() 
+void initThread()
 {
-  Serial.begin(57600);
-  while(!Serial);
+  MUTEX::create();
 
-  initManipulator();
+  // define thread
+  osThreadDef(THREAD_NAME_LOOP, Loop, osPriorityNormal, 0, 1024 * 10);
+  osThreadDef(THREAD_NAME_ROBOT_STATE, THREAD::Robot_State, osPriorityNormal, 0, 1024 * 10);
+  osThreadDef(THREAD_NAME_ACTUATOR_CONTROL, THREAD::Actuator_Control, osPriorityNormal, 0, 1024 * 10);
 
-  // initThread();
-  // startThread();
+  // create thread
+  THREAD::loop = osThreadCreate(osThread(THREAD_NAME_LOOP), NULL);
+  THREAD::robot_state = osThreadCreate(osThread(THREAD_NAME_ROBOT_STATE), NULL);
+  THREAD::actuator_control = osThreadCreate(osThread(THREAD_NAME_ACTUATOR_CONTROL), NULL);
 }
 
-void loop() 
+void startThread()
 {
-
-  // osDelay(100);    
+  // start kernel
+  Serial.println("Thread Start");
+  osKernelStart();
 }
 
-/// DON'T TOUCH ///
+static void Loop(void const *argument)
+{
+  (void)argument;
 
-// void initThread()
-// {
-//   // define thread
-//   osThreadDef(THREAD_NAME_LOOP,         Thread_Loop,                           osPriorityNormal, 0, 1024*10);
-//   osThreadDef(THREAD_NAME_ROBOT_STATE,  OPEN_MANIPULATOR::Thread_Robot_State,  osPriorityNormal, 0, 1024*20);
-
-//   // create thread
-//   THREAD::loop         = osThreadCreate(osThread(THREAD_NAME_LOOP), NULL);
-//   THREAD::robot_state  = osThreadCreate(osThread(THREAD_NAME_ROBOT_STATE), NULL);
-// }
-
-// void startThread()
-// {
-//   // start kernel
-//   Serial.println("Thread Start");
-//   osKernelStart();
-// }
-
-// static void Thread_Loop(void const *argument)
-// {
-//   (void) argument;
-
-//   for(;;)
-//   {
-//     loop();
-//   }
-// }
+  for (;;)
+  {
+    loop();
+    showLedStatus();
+  }
+}

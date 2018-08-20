@@ -21,11 +21,11 @@
 
 #include <Eigen.h>  // Calls main Eigen matrix class library
 #include <Eigen/LU> // Calls inverse, determinant, LU decomp., etc.
-#include <Eigen/Dense>
+#include <Eigen/QR>
 
+#include <math.h>
 #include <vector>
 
-#include "OMAPI.h"
 #include "OMDebug.h"
 
 using namespace Eigen;
@@ -51,7 +51,7 @@ public:
   void calcCoefficient(Trajectory start,
                        Trajectory goal,
                        float move_time,
-                       float control_period);
+                       float control_time);
 
   VectorXf getCoefficient();
 };
@@ -74,7 +74,7 @@ public:
   void init(std::vector<Trajectory> start,
             std::vector<Trajectory> goal,
             float move_time,
-            float control_period);
+            float control_time);
 
   std::vector<float> getPosition(float tick);
   std::vector<float> getVelocity(float tick);
@@ -83,10 +83,10 @@ public:
   MatrixXf getCoefficient();
 };
 
-class Circle
-{
-private:
-  MinimumJerk path_generator_;
-};
+// class Circle
+// {
+// private:
+//   MinimumJerk path_generator_;
+// };
 } // namespace PATH
 #endif // OMPATH_H_

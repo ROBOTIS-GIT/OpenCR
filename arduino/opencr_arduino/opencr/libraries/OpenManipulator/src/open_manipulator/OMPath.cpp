@@ -19,6 +19,7 @@
 #include "../../include/open_manipulator/OMPath.h"
 
 using namespace OM_PATH;
+using namespace Eigen;
 
 MinimumJerk::MinimumJerk()
 {
@@ -30,10 +31,10 @@ MinimumJerk::~MinimumJerk() {}
 void MinimumJerk::calcCoefficient(Trajectory start,
                                   Trajectory goal,
                                   float move_time,
-                                  float control_period)
+                                  float control_time)
 {
-  uint16_t step_time = uint16_t(floor(move_time / control_period) + 1.0);
-  move_time = float(step_time - 1) * control_period;
+  uint16_t step_time = uint16_t(floor(move_time / control_time) + 1.0);
+  move_time = float(step_time - 1) * control_time;
 
   Matrix3f A = Matrix3f::Identity(3, 3);
   Vector3f x = Vector3f::Zero();
@@ -78,14 +79,15 @@ JointTrajectory::~JointTrajectory() {}
 void JointTrajectory::init(std::vector<Trajectory> start,
                            std::vector<Trajectory> goal,
                            float move_time,
-                           float control_period)
+                           float control_time)
 {
   for (uint8_t index = 0; index < start.size(); index++)
   {
     path_generator_.calcCoefficient(start.at(index),
                                     goal.at(index),
                                     move_time,
-                                    control_period);
+                                    control_time);
+
     coefficient_.col(index) = path_generator_.getCoefficient();
   }
 }

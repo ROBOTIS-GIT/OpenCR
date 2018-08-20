@@ -28,8 +28,8 @@
 
 using namespace Eigen;
 
-#define DEG2RAD (M_PI / 180.0)
-#define RAD2DEG (180.0 / M_PI)
+#define DEG2RAD 0.01745329252f //(M_PI / 180.0)
+#define RAD2DEG 57.2957795131f //(180.0 / M_PI)
 
 #define ZERO_VECTOR Vector3f::Zero()
 #define IDENTITY_MATRIX Matrix3f::Identity(3, 3)
@@ -55,6 +55,12 @@ Vector3f positionDifference(Vector3f desired_position, Vector3f present_position
 Vector3f orientationDifference(Matrix3f desired_orientation, Matrix3f present_orientation);
 VectorXf poseDifference(Vector3f desired_position, Vector3f present_position,
                         Matrix3f desired_orientation, Matrix3f present_orientation);
+
+template <typename T>
+T map(T x, T in_min, T in_max, T out_min, T out_max)
+{
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
 } // namespace MATH
 
 #endif // OMMATH_HPP_

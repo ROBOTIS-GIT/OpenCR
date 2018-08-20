@@ -364,6 +364,15 @@ bool DynamixelWorkbench::syncWrite(const char *item_name, int32_t* value)
   return isOK;
 }
 
+bool DynamixelWorkbench::syncWrite(uint8_t *id, uint8_t id_num, const char *item_name, int32_t *data)
+{
+  bool isOK = false;
+
+  isOK =  driver_.syncWrite(id, id_num, item_name, data);
+
+  return isOK;
+}
+
 bool DynamixelWorkbench::bulkWrite()
 {
   bool isOK = false;

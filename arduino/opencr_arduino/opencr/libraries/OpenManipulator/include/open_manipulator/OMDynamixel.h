@@ -22,6 +22,7 @@
 #include <DynamixelWorkbench.h>
 #include <vector>
 
+#include "OMAPI.h"
 #include "OMDebug.h"
 
 #define DEVICE_NAME ""
@@ -49,7 +50,7 @@ typedef struct
 
 namespace OM_DYNAMIXEL
 {
-class Dynamixel
+class Dynamixel : public OPEN_MANIPULATOR::Actuator
 {
 private:
   DynamixelWorkbench dxl_wb_;
@@ -60,12 +61,12 @@ private:
   std::vector<float> torque_value_;
 
 public:
-  Dynamixel(uint32_t baud_rate);
-  virtual ~Dynamixel();
+  Dynamixel(){};
+  virtual ~Dynamixel(){};
 
-  bool init();
+  bool init(uint32_t baud_rate);
   bool setMode(uint8_t id, uint8_t mode);
-  bool setPositionControlMode(uint8_t id);
+  bool setPositionControlMode(uint8_t id, uint16_t profile_velocity = 0, uint16_t profile_acceleration = 0);
   bool setCurrentBasedPositionControlMode(uint8_t id, uint8_t current = 10);
   bool setMaxPositionLimit(uint8_t id, float radian);
   bool setMinPositionLimit(uint8_t id, float radian);
@@ -79,6 +80,7 @@ public:
   bool disableAllDynamixel();
 
   bool setAngle(std::vector<float> radian_vector);
+  bool setAngle(std::vector<uint8_t> id, std::vector<float> radian_vector);
   bool setAngle(uint8_t id, float radian);
   std::vector<float> getAngle();
   std::vector<float> getCurrent();
@@ -89,6 +91,15 @@ public:
   int32_t getData(uint8_t id, uint16_t addr, uint8_t length);
 
   int32_t convertRadian2Value(uint8_t id, float radian);
+
+  virtual void initActuator(const void *arg);
+  virtual void Enable();
+  virtual void Disable();
+  virtual bool sendMultipleActuatorAngle(std::vector<uint8_t> actuator_id, std::vector<float> radian_vector);
+  virtual bool sendAllActuatorAngle(std::vector<float> radian_vector);
+  virtual bool sendActuatorAngle(uint8_t actuator_id, float radian);
+  virtual bool sendActuatorSignal(uint8_t actuator_id, bool onoff);
+  virtual std::vector<float> receiveAllActuatorAngle(void);
 };
 } // namespace OM_Dynamixel
 #endif // OMDYNAMIXEL_HPP_

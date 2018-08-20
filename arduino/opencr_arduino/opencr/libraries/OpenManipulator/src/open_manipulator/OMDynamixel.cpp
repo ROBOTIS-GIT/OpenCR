@@ -20,16 +20,10 @@
 
 using namespace OM_DYNAMIXEL;
 
-Dynamixel::Dynamixel(uint32_t baud_rate)
+bool Dynamixel::init(uint32_t baud_rate)
 {
   dxl_info_.baud_rate = baud_rate;
-}
-
-Dynamixel::~Dynamixel(){};
-
-bool Dynamixel::init()
-{
-  uint8_t get_dxl_id[dxl_info_.size];
+  uint8_t get_dxl_id[20];
 
   dxl_wb_.begin(DEVICE_NAME, dxl_info_.baud_rate);
 
@@ -38,13 +32,13 @@ bool Dynamixel::init()
     for (uint8_t index = 0; index < dxl_info_.size; index++)
     {
       dxl_id_.push_back(get_dxl_id[index]);
-      LOG::INFO("ID : " + String(get_dxl_id[index]));
+      LOG::INFO("ID : " + String(dxl_id_.at(index)));
     }
   }
   else
     return false;
 
-  dxl_id_.reserve(dxl_info_.size);
+  // dxl_id_.reserve(dxl_info_.size);
   radian_value_.reserve(dxl_info_.size);
   torque_value_.reserve(dxl_info_.size);
 
@@ -60,9 +54,9 @@ bool Dynamixel::setMode(uint8_t id, uint8_t mode)
   return dxl_wb_.itemWrite(id, OPERATING_MODE, mode);
 }
 
-bool Dynamixel::setPositionControlMode(uint8_t id)
+bool Dynamixel::setPositionControlMode(uint8_t id, uint16_t profile_velocity, uint16_t profile_acceleration)
 {
-  return dxl_wb_.jointMode(id);
+  return dxl_wb_.jointMode(id, profile_velocity, profile_acceleration);
 }
 
 bool Dynamixel::setCurrentBasedPositionControlMode(uint8_t id, uint8_t current)
@@ -126,6 +120,7 @@ bool Dynamixel::disableAllDynamixel()
 {
   for (uint8_t index = 0; index < dxl_info_.size; index++)
     dxl_wb_.itemWrite(dxl_id_.at(index), TORQUE_ENABLE, false);
+
   return true;
 }
 
@@ -137,6 +132,20 @@ bool Dynamixel::setAngle(std::vector<float> radian_vector)
     set_position[index] = dxl_wb_.convertRadian2Value(dxl_id_.at(index), radian_vector.at(index));
 
   return dxl_wb_.syncWrite(GOAL_POSITION, &set_position[0]);
+}
+
+bool Dynamixel::setAngle(std::vector<uint8_t> id, std::vector<float> radian_vector)
+{
+  uint8_t _id[id.size()] = {0, };
+  int32_t set_position[id.size()] = {0, };
+
+  for (uint8_t index = 0; index < id.size(); index++)
+  {
+    _id[index] = id.at(index);
+    set_position[index] = dxl_wb_.convertRadian2Value(_id[index] , radian_vector.at(index));
+  }
+
+  return dxl_wb_.syncWrite(&_id[0], id.size(), GOAL_POSITION, &set_position[0]);
 }
 
 bool Dynamixel::setAngle(uint8_t id, float radian)
@@ -203,3 +212,58 @@ int32_t Dynamixel::convertRadian2Value(uint8_t id, float radian)
   return dxl_wb_.convertRadian2Value(id, radian);
 }
 
+void Dynamixel::initActuator(const void *arg)
+{
+  init(*(uint32_t *)arg); // baud_rate
+
+  setPositionControlMode(5, 200, 50); //CHAIN GRIPPER
+
+  // if (dxl_wb_.getProtocolVersion() == 2.0)
+  //   dxl_wb_.itemWrite(id, MAX_POSITION_LIMIT_ADDR, MAX_POSITION_LIMIT_LENGTH, dxl_wb_.convertRadian2Value(id, radian));
+  // else
+  //   dxl_wb_.itemWrite(id, CW_ANGLE_LIMIT_ADDR, CW_ANGLE_LIMIT_LENGTH, dxl_wb_.convertRadian2Value(id, radian));
+
+  enableAllDynamixel();
+}
+
+void Dynamixel::Enable()
+{
+  enableAllDynamixel();
+}
+
+void Dynamixel::Disable()
+{
+  disableAllDynamixel();
+}
+
+bool Dynamixel::sendAllActuatorAngle(std::vector<float> radian_vector)
+{
+  return setAngle(radian_vector);
+}
+
+bool Dynamixel::sendMultipleActuatorAngle(std::vector<uint8_t> actuator_id, std::vector<float> radian_vector)
+{
+  return setAngle(actuator_id, radian_vector);
+}
+
+bool Dynamixel::sendActuatorAngle(uint8_t actuator_id, float radian)
+{
+  return setAngle(actuator_id, radian);
+}
+
+bool Dynamixel::sendActuatorSignal(uint8_t actuator_id, bool onoff)
+{
+  if (onoff)
+  {
+    return setAngle(actuator_id, 0.0f);
+  }
+  else
+  {
+    return setAngle(actuator_id, -20.0f * DEG2RAD);
+  }
+}
+
+std::vector<float> Dynamixel::receiveAllActuatorAngle(void)
+{
+  return getAngle();
+}

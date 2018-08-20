@@ -148,8 +148,8 @@ public:
                     Matrix3f relative_orientation,
                     Vector3f axis_of_rotation = Vector3f::Zero(),
                     int8_t joint_actuator_id = -1,
-                    float coefficient = 1,
-                    float mass = 0.0,
+                    float coefficient = 1.0f,
+                    float mass = 0.0f,
                     Matrix3f inertia_tensor = Matrix3f::Identity(3, 3),
                     Vector3f center_of_mass = Vector3f::Zero());
 
@@ -158,8 +158,8 @@ public:
                Vector3f relative_position,
                Matrix3f relative_orientation,
                int8_t tool_id = -1,
-               float coefficient = 1,
-               float mass = 0.0,
+               float coefficient = 1.0f,
+               float mass = 0.0f,
                Matrix3f inertia_tensor = Matrix3f::Identity(3, 3),
                Vector3f center_of_mass = Vector3f::Zero());
 
@@ -174,6 +174,7 @@ public:
   void setWorldState(State world_state);
   void setWorldVelocity(VectorXf world_velocity);
   void setWorldAcceleration(VectorXf world_acceleration);
+
   void setComponent(Name name, Component component, bool *error = NULL);
   void setComponentPoseToWorld(Name name, Pose pose_to_world);
   void setComponentPositionToWorld(Name name, Vector3f position_to_world);
@@ -187,9 +188,12 @@ public:
   void setComponentToolOnOff(Name name, bool on_off);
   void setComponentToolValue(Name name, float value);
 
+  void setAllActiveJointAngle(std::vector<float> angle_vector);
+
   ///////////////////////////////Get function//////////////////////////////////
-  Manipulator getManipulator();
+
   int8_t getDOF();
+
   Name getWorldName();
   Name getWorldChildName();
   Pose getWorldPose();
@@ -198,6 +202,7 @@ public:
   State getWorldState();
   VectorXf getWorldVelocity();
   VectorXf getWorldAcceleration();
+
   int8_t getComponentSize();
   std::map<Name, Component> getAllComponent();
   std::map<Name, Component>::iterator getIteratorBegin();
@@ -229,6 +234,10 @@ public:
   float getComponentMass(Name name);
   Matrix3f getComponentInertiaTensor(Name name);
   Vector3f getComponentCenterOfMass(Name name);
+
+  std::vector<float> getAllJointAngle();
+  std::vector<float> getAllActiveJointAngle();
+  std::vector<uint8_t> getAllActiveJointID();
 };
 } // namespace OM_MANAGER
 

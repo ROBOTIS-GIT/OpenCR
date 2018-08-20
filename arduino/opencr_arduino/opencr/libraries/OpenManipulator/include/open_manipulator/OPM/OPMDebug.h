@@ -19,6 +19,8 @@
 #ifndef OPMDEBUG_H_
 #define OPMDEBUG_H_
 
+#if 0
+
 #include <Arduino.h>
 #include <Eigen.h>
 
@@ -35,5 +37,7 @@ void print_vtXf(const Eigen::VectorXf& v);
 
 void showJointAngle(String unit, OPMLink* link, int from, int to);
 void showFKResult(OPMLink* link, int from, int to);
+
+#endif
 
 #endif // OPMDEBUG_H_
