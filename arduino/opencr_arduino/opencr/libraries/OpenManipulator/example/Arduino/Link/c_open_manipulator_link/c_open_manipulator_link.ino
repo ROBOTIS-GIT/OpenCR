@@ -32,16 +32,7 @@ void setup()
   init_joint_angle.push_back(0.0*DEG2RAD);
   init_joint_angle.push_back(-90.0*DEG2RAD);
   init_joint_angle.push_back(-160.0*DEG2RAD);
-
-  dxl_angle.push_back(init_joint_angle.at(0));
-  dxl_angle.push_back(-init_joint_angle.at(1));
-  dxl_angle.push_back(init_joint_angle.at(2));
-
-  manipulator.sendAllActuatorAngle(OMLINK, dxl_angle);
-
-  dxl_angle.clear();
-
-  //manipulator.sendAllActuatorAngle(OMLINK, init_joint_angle);
+  manipulator.sendAllActuatorAngle(OMLINK, init_joint_angle);
 
   initOMLink();
   previous_time[0] = (float)(millis()/1000.0f);
