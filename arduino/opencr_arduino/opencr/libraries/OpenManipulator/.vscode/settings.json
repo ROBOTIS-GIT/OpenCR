@@ -42,6 +42,7 @@
         "type_traits": "cpp",
         "tuple": "cpp",
         "utility": "cpp",
-        "core": "cpp"
+        "core": "cpp",
+        "map": "cpp"
     }
 }
