@@ -68,7 +68,7 @@ void setup()
   initShape();
   initView();
 
-  connectOpenCR(13); // It is depend on laptop enviroments.
+  connectOpenCR(0); // It is depend on laptop enviroments.
 }
 
 /*******************************************************************************
@@ -106,22 +106,6 @@ void serialEvent(Serial opencr_port)
 
   String[] cmd = split(opencr_string, ',');
 
-  //if (cmd[0].equals("angle"))
-  //{
-  //  for (int cmd_cnt = 1; cmd_cnt < cmd.length; cmd_cnt++)
-  //  {
-  //    if (cmd_cnt == cmd.length-1)
-  //    {
-  //      gripperAngle2Pos(float(cmd[cmd_cnt]));
-  //      println("gripper : " + cmd[cmd_cnt]);
-  //    }
-  //    else
-  //    {
-  //      joint_angle[cmd_cnt-1] = float(cmd[cmd_cnt]);
-  //      print("joint " + cmd_cnt + ": " + cmd[cmd_cnt] + "  ");
-  //    }
-  //  }
-  //}
   if (cmd[0].equals("angle"))
   {
     for (int cmd_cnt = 1; cmd_cnt < cmd.length; cmd_cnt++)
@@ -129,6 +113,15 @@ void serialEvent(Serial opencr_port)
       receive_joint_angle[cmd_cnt-1] = float(cmd[cmd_cnt]);
       print("joint " + cmd_cnt + ": " + cmd[cmd_cnt] + "  ");
     }
+    println("");
+  }
+  else if (cmd[0].equals("tool"))
+  {
+    float angle2pos = map(float(cmd[1]), 0.907, -1.13, 0.010*1000, 0.035 * 1000);
+    receive_gripper_pos[0] = angle2pos;
+    receive_gripper_pos[1] = ctrl_gripper_pos[0] * (-2);
+    
+    print("tool : " + cmd[1]);
     println("");
   }
   else

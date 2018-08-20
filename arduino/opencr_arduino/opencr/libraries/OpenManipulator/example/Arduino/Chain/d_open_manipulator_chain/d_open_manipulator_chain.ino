@@ -35,13 +35,13 @@ void setup()
 
   connectProcessing();
 
-  // goal_position.push_back(0.0);
-  // goal_position.push_back(0.0);
-  // goal_position.push_back(0.0);
-  // goal_position.push_back(0.0);
+  goal_position.push_back(0.0);
+  goal_position.push_back(0.0);
+  goal_position.push_back(0.0);
+  goal_position.push_back(0.0);
 
-  // goal_pose.position = OM_MATH::makeVector3(-0.050, 0.0, 0.203);
-  // goal_pose.orientation = Eigen::Matrix3f::Identity();
+  goal_pose.position = OM_MATH::makeVector3(-0.050, 0.0, 0.203);
+  goal_pose.orientation = Eigen::Matrix3f::Identity();
 
   initThread();
   startThread();
@@ -49,43 +49,45 @@ void setup()
 
 void loop()
 {
-  fromRC100();
+  // fromRC100();
 
   if (Serial.available())
+  {
+    MUTEX::wait();
     fromProcessing(Serial.readStringUntil('\n'));
-
+    MUTEX::release();
+  }
 
   // switch(seq)
   // {
   //   case 0:
-  //     if (chain.moving() == false)
+  //     if (manipulator.moving() == false)
   //     {
-  //       chain.jointMove(CHAIN, goal_position, 1.0f);
-
+  //       manipulator.jointMove(CHAIN, goal_position, 1.0f);
   //       seq = 1;
   //     }
   //    break;
 
   //   case 1:
-  //     if (chain.moving() == false)
+  //     if (manipulator.moving() == false)
   //     {
-  //       chain.setPose(CHAIN, TOOL, goal_pose, 1.0f);
-      
+  //       manipulator.setPose(CHAIN, TOOL, goal_pose, 1.0f);
+
   //       seq = 2;
   //     }
   //    break;
 
   //   case 2:
-  //     if (chain.moving() == false)
+  //     if (manipulator.moving() == false)
   //     {
-  //       chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.050), 1.0f);
+  //       manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.050), 1.0f);
 
   //       seq = 3;
   //     }
   //    break;
 
   //   case 3:
-  //     chain.toolMove(CHAIN, TOOL, OM_MATH::map(0.060f, 0.020f, 0.070f, 0.907f, -1.13f));
+  //     manipulator.toolMove(CHAIN, TOOL, OM_MATH::map(0.060f, 0.020f, 0.070f, 0.907f, -1.13f));
   //     seq = 4;
   //    break;
 
@@ -93,8 +95,8 @@ void loop()
   //    break;
   // }
 
-  // LOG::INFO("LOOP"); 
-  // osDelay(LOOP_TIME * 1000);
+  // LOG::INFO("LOOP");
+  osDelay(LOOP_TIME * 1000);
 }
 
 /// DON'T TOUCH BELOW CODE///
