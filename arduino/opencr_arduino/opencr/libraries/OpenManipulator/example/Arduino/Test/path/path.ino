@@ -3,7 +3,7 @@
 #include <vector>
 
 #define DXL_SIZE 3
-#define BAUD_RATE 57600
+#define BAUD_RATE 1000000
 
 #define DEG2RAD (M_PI / 180.0)
 #define RAD2DEG (180.0 / M_PI)
@@ -30,8 +30,8 @@ void setup()
   while(!Serial);
 
   dxl.init(BAUD_RATE);
-  dxl.setMaxPositionLimit(1, 180*DEG2RAD);
-  dxl.setMinPositionLimit(1, -180*DEG2RAD);
+  //dxl.setMaxPositionLimit(1, 180*DEG2RAD);
+  //dxl.setMinPositionLimit(1, -180*DEG2RAD);
 
   dxl.enableAllDynamixel();
 
