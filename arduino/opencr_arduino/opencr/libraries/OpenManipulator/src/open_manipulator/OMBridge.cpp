@@ -69,4 +69,19 @@ void OM_PROCESSING::sendAngle2Processing(std::vector<float> joint_angle_vector)
   Serial.print("\n");
 }
 
+void OM_PROCESSING::sendToolData2Processing(bool onoff)
+{
+  Serial.print("tool");
+  Serial.print(",");
+  Serial.print(onoff);
+  Serial.print("\n");
+}
+
+void OM_PROCESSING::sendToolData2Processing(float value)
+{
+  Serial.print("tool");
+  Serial.print(",");
+  Serial.print(value);
+  Serial.print("\n");
+}
 

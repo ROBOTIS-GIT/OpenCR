@@ -36,29 +36,29 @@ void fromRC100()
     uint16_t data = rc100.readData();
 
     if (data & RC100_BTN_U)
-      chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.005, 0.0, 0.0), 0.1f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.01, 0.0, 0.0), 0.1f);
     else if (data & RC100_BTN_D)
-      chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(-0.005, 0.0, 0.0), 0.1f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(-0.01, 0.0, 0.0), 0.1f);
     else if (data & RC100_BTN_L)
-      chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, -0.005, 0.0), 0.1f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.01, 0.0), 0.1f);
     else if (data & RC100_BTN_R)
-      chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.005, 0.0), 0.1f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, -0.01, 0.0), 0.1f);
     else if (data & RC100_BTN_1)
-      chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.005), 0.1f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.01), 0.1f);
     else if (data & RC100_BTN_3)
-      chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.005), 0.1f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.01), 0.1f);
     else if (data & RC100_BTN_2)
     {
-      float grip_pose = chain.getComponentToolValue(CHAIN, TOOL) + 0.010;
-      chain.toolMove(CHAIN, TOOL, OM_MATH::map(grip_pose, 0.020f, 0.070f, 0.907f, -1.13f));
+      float grip_pose = manipulator.getComponentToolValue(CHAIN, TOOL) + 0.010;
+      manipulator.toolMove(CHAIN, TOOL, OM_MATH::map(grip_pose, 0.020f, 0.070f, 0.907f, -1.13f));
     }
     else if (data & RC100_BTN_4)
     {
-      float grip_pose = chain.getComponentToolValue(CHAIN, TOOL) - 0.010;
-      chain.toolMove(CHAIN, TOOL, OM_MATH::map(grip_pose, 0.020f, 0.070f, 0.907f, -1.13f));
+      float grip_pose = manipulator.getComponentToolValue(CHAIN, TOOL) - 0.010;
+      manipulator.toolMove(CHAIN, TOOL, OM_MATH::map(grip_pose, 0.020f, 0.070f, 0.907f, -1.13f));
     }
     else
-      chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.0), 0.1f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.0), 0.1f);
 
     // else if (receive_data & RC100_BTN_5)
     // {
@@ -85,10 +85,10 @@ void fromRC100()
     //   // move();
 
     //   if (DYNAMIXEL)
-    //       sendAngle2Processing(getAngle()); 
+    //       sendAngle2Processing(getAngle());
 
     //   if (PROCESSING)
-    //     sendAngle2Processing(getState()); 
+    //     sendAngle2Processing(getState());
 
     //   for (int i = 0; i < MOTION_NUM; i++)
     //   {
@@ -98,8 +98,8 @@ void fromRC100()
     //     }
     //   }
 
-    //   motion_num = MOTION_NUM;  
-    //   motion_cnt = 0;          
+    //   motion_num = MOTION_NUM;
+    //   motion_cnt = 0;
     //   motion = true;
     //   repeat = true;
     // }

@@ -32,21 +32,13 @@ void MUTEX::release() { osMutexRelease(om_mutex_id); }
 ////////////////////////////////Basic Function//////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
-OpenManipulator::OpenManipulator(uint8_t active_joint_num) : move_time_(1.0f),
-                                                             control_time_(0.010f),
-                                                             moving_(false),
-                                                             platform_(false),
-                                                             processing_(false)
+OpenManipulator::OpenManipulator() : move_time_(1.0f),
+                                     control_time_(0.010f),
+                                     moving_(false),
+                                     platform_(false),
+                                     processing_(false)
 {
   manager_ = new Manager();
-  joint_trajectory_ = new OM_PATH::JointTrajectory(active_joint_num);
-
-  goal_position_.reserve(active_joint_num);
-  goal_velocity_.reserve(active_joint_num);
-  goal_acceleration_.reserve(active_joint_num);
-
-  start_trajectory_.reserve(active_joint_num);
-  goal_trajectory_.reserve(active_joint_num);
 }
 
 OpenManipulator::~OpenManipulator()
@@ -64,6 +56,22 @@ void OpenManipulator::initActuator(Actuator *actuator)
   platform_ = true;
 }
 
+void OpenManipulator::initJointTrajectory(Name manipulator_name)
+{ 
+  OM_PATH::JointTrajectory joint_trajectory(manipulator_.at(manipulator_name).getDOF());
+  joint_trajectory_.insert(std::make_pair(manipulator_name, joint_trajectory));
+
+  goal_position_.reserve(manipulator_.at(manipulator_name).getDOF());
+  goal_velocity_.reserve(manipulator_.at(manipulator_name).getDOF());
+  goal_acceleration_.reserve(manipulator_.at(manipulator_name).getDOF());
+
+  start_position_.reserve(manipulator_.at(manipulator_name).getDOF());
+  start_position_ = receiveAllActuatorAngle(manipulator_name);
+
+  start_trajectory_.reserve(manipulator_.at(manipulator_name).getDOF());
+  goal_trajectory_.reserve(manipulator_.at(manipulator_name).getDOF());
+}
+
 void OpenManipulator::connectProcessing(uint8_t actuator_num)
 {
   OM_PROCESSING::initProcessing((int8_t)(actuator_num));
@@ -75,7 +83,7 @@ void OpenManipulator::sendAngleToProcessing(std::vector<float> joint_angle)
   OM_PROCESSING::sendAngle2Processing(joint_angle);
 }
 
-String* OpenManipulator::parseDataFromProcessing(String get)
+String *OpenManipulator::parseDataFromProcessing(String get)
 {
   get.trim();
   OM_PROCESSING::split(get, ',', cmd_);
@@ -454,7 +462,6 @@ std::vector<uint8_t> OpenManipulator::getAllActiveJointID(Name manipulator_name)
   return manipulator_.at(manipulator_name).getAllActiveJointID();
 }
 
-
 // KINEMATICS
 
 MatrixXf OpenManipulator::jacobian(Name manipulator_name, Name tool_name)
@@ -538,12 +545,12 @@ bool OpenManipulator::sendActuatorSignal(uint8_t active_joint_id, bool onoff)
 
 std::vector<float> OpenManipulator::receiveAllActuatorAngle(Name manipulator_name)
 {
-  std::vector<float> angles = actuator_->receiveAllActuatorAngle();  
+  std::vector<float> angles = actuator_->receiveAllActuatorAngle();
   std::vector<uint8_t> active_joint_id = manipulator_.at(manipulator_name).getAllActiveJointID();
   std::vector<uint8_t> sorted_id = active_joint_id;
 
   std::vector<float> sorted_angle_vector;
-  sorted_angle_vector.reserve(angles.size());
+  sorted_angle_vector.reserve(active_joint_id.size());
 
   float sorted_angle_array[angles.size()];
 
@@ -560,7 +567,7 @@ std::vector<float> OpenManipulator::receiveAllActuatorAngle(Name manipulator_nam
     }
   }
 
-  for (uint8_t index = 0; index < angles.size(); index++)
+  for (uint8_t index = 0; index < active_joint_id.size(); index++)
     sorted_angle_vector.push_back(sorted_angle_array[index]);
 
   return sorted_angle_vector;
@@ -603,15 +610,16 @@ float OpenManipulator::getControlTime()
   return control_time_;
 }
 
-void OpenManipulator::makeTrajectory(std::vector<Trajectory> start,
+void OpenManipulator::makeTrajectory(Name manipulator_name,
+                                     std::vector<Trajectory> start,
                                      std::vector<Trajectory> goal)
 {
-  joint_trajectory_->init(start, goal, move_time_, control_time_);
+  joint_trajectory_.at(manipulator_name).init(start, goal, move_time_, control_time_);
 }
 
-MatrixXf OpenManipulator::getTrajectoryCoefficient()
+MatrixXf OpenManipulator::getTrajectoryCoefficient(Name manipulator_name)
 {
-  return joint_trajectory_->getCoefficient();
+  return joint_trajectory_.at(manipulator_name).getCoefficient();
 }
 
 void OpenManipulator::move()
@@ -670,19 +678,21 @@ void OpenManipulator::jointControl(Name manipulator_name)
     {
       tick_time = control_time_ * step_cnt;
 
-      goal_position_ = joint_trajectory_->getPosition(tick_time);
-      goal_velocity_ = joint_trajectory_->getVelocity(tick_time);
-      goal_acceleration_ = joint_trajectory_->getAcceleration(tick_time);
+      goal_position_ = joint_trajectory_.at(manipulator_name).getPosition(tick_time);
+      goal_velocity_ = joint_trajectory_.at(manipulator_name).getVelocity(tick_time);
+      goal_acceleration_ = joint_trajectory_.at(manipulator_name).getAcceleration(tick_time);
 
-    if (platform_)
-      sendMultipleActuatorAngle(manipulator_name, manipulator_.at(manipulator_name).getAllActiveJointID(), goal_position_);
+      if (platform_)
+        sendMultipleActuatorAngle(manipulator_name, manipulator_.at(manipulator_name).getAllActiveJointID(), goal_position_);
 
-    if (processing_)
-    {
-      OM_PROCESSING::sendAngle2Processing(goal_position_);
-      manipulator_.at(manipulator_name).setAllActiveJointAngle(goal_position_);
-    }
+      if (processing_)
+      {
+        OM_PROCESSING::sendAngle2Processing(goal_position_);
+        if (platform_ == false)
+          manipulator_.at(manipulator_name).setAllActiveJointAngle(goal_position_);
+      }
 
+      start_position_ = goal_position_;
       step_cnt++;
     }
     else
@@ -698,10 +708,10 @@ void OpenManipulator::jointMove(Name manipulator_name, std::vector<float> goal_p
   Trajectory start;
   Trajectory goal;
 
+  std::vector<float> present_position = start_position_;
+
   start_trajectory_.clear();
   goal_trajectory_.clear();
-
-  std::vector<float> present_position = manipulator_.at(manipulator_name).getAllActiveJointAngle();
 
   for (uint8_t index = 0; index < manipulator_.at(manipulator_name).getDOF(); index++)
   {
@@ -710,7 +720,7 @@ void OpenManipulator::jointMove(Name manipulator_name, std::vector<float> goal_p
     start.acceleration = 0.0f;
 
     start_trajectory_.push_back(start);
-
+  
     goal.position = goal_position.at(index);
     goal.velocity = 0.0f;
     goal.acceleration = 0.0f;
@@ -719,7 +729,7 @@ void OpenManipulator::jointMove(Name manipulator_name, std::vector<float> goal_p
   }
 
   setMoveTime(move_time);
-  makeTrajectory(start_trajectory_, goal_trajectory_);  
+  makeTrajectory(manipulator_name, start_trajectory_, goal_trajectory_);
   move();
 }
 
@@ -728,9 +738,12 @@ bool OpenManipulator::toolMove(Name manipulator_name, Name tool_name, bool onoff
   manipulator_.at(manipulator_name).setComponentToolOnOff(tool_name, onoff);
 
   if (platform_)
-    return actuator_->sendActuatorSignal(manipulator_.at(manipulator_name).getComponentToolId(tool_name), onoff);
-  else
-    return true; // send2processing()
+    actuator_->sendActuatorSignal(manipulator_.at(manipulator_name).getComponentToolId(tool_name), onoff);
+
+  if (processing_)
+    OM_PROCESSING::sendToolData2Processing(onoff);
+
+  return true;
 }
 
 bool OpenManipulator::toolMove(Name manipulator_name, Name tool_name, float tool_value)
@@ -740,15 +753,18 @@ bool OpenManipulator::toolMove(Name manipulator_name, Name tool_name, float tool
   manipulator_.at(manipulator_name).setComponentToolValue(tool_name, calc_value);
 
   if (platform_)
-    return actuator_->sendActuatorAngle(manipulator_.at(manipulator_name).getComponentToolId(tool_name), calc_value);
-  else
-    return true; // send2processing()
+    actuator_->sendActuatorAngle(manipulator_.at(manipulator_name).getComponentToolId(tool_name), calc_value);
+
+  if (processing_)
+    OM_PROCESSING::sendToolData2Processing(tool_value);
+
+  return true;
 }
 
 void OpenManipulator::setPose(Name manipulator_name, Name tool_name, Pose goal_pose, float move_time)
 {
   std::vector<float> goal_position = kinematics_->inverse(&manipulator_.at(manipulator_name), tool_name, goal_pose);
-  
+
   jointMove(manipulator_name, goal_position, move_time);
 }
 
@@ -763,5 +779,5 @@ void OpenManipulator::setMove(Name manipulator_name, Name tool_name, Vector3f me
   goal_pose.position = goal_position_to_world;
   goal_pose.orientation = present_orientation_to_world;
 
-  setPose(manipulator_name, tool_name, goal_pose, move_time);  
+  setPose(manipulator_name, tool_name, goal_pose, move_time);
 }

@@ -82,11 +82,5 @@ public:
 
   MatrixXf getCoefficient();
 };
-
-// class Circle
-// {
-// private:
-//   MinimumJerk path_generator_;
-// };
 } // namespace PATH
 #endif // OMPATH_H_

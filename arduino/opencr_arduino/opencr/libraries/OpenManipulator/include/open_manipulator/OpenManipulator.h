@@ -46,15 +46,17 @@ class OpenManipulator
 {
 private:
   std::map<Name, OM_MANAGER::Manipulator> manipulator_;
+  std::map<Name, OM_PATH::JointTrajectory> joint_trajectory_;
 
   Manager *manager_;
   Kinematics *kinematics_;
-  Actuator *actuator_;
-  OM_PATH::JointTrajectory *joint_trajectory_;
+  Actuator *actuator_;  
 
   std::vector<float> goal_position_;
   std::vector<float> goal_velocity_;
   std::vector<float> goal_acceleration_;
+
+  std::vector<float> start_position_;
 
   std::vector<Trajectory> start_trajectory_;
   std::vector<Trajectory> goal_trajectory_;
@@ -70,11 +72,12 @@ private:
   String cmd_[50];
 
 public:
-  OpenManipulator(uint8_t active_joint_num);
+  OpenManipulator();
   virtual ~OpenManipulator();
 
   void initKinematics(Kinematics *kinematics);
   void initActuator(Actuator *actuator);
+  void initJointTrajectory(Name manipulator_name);
 
   void connectProcessing(uint8_t actuator_num);
   void sendAngleToProcessing(std::vector<float> joint_angle);
@@ -212,9 +215,10 @@ public:
   float getMoveTime();
   float getControlTime();
 
-  void makeTrajectory(std::vector<Trajectory> start,
+  void makeTrajectory(Name manipulator_name,
+                      std::vector<Trajectory> start,
                       std::vector<Trajectory> goal);
-  MatrixXf getTrajectoryCoefficient();
+  MatrixXf getTrajectoryCoefficient(Name manipulator_name);
   void move();
   bool moving();
   void jointControl(Name manipulator_name);

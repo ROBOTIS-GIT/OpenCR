@@ -50,38 +50,25 @@
 
 #define ACTIVE_JOINT_SIZE 4
 
-// #define PLATFORM
+#define PLATFORM
 
-OPEN_MANIPULATOR::OpenManipulator chain(ACTIVE_JOINT_SIZE);
+OPEN_MANIPULATOR::OpenManipulator manipulator;
 
 OPEN_MANIPULATOR::Kinematics *kinematics = new OM_KINEMATICS::Chain();
-#ifdef PLATFORM
-  OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
-#endif
+#ifdef PLATFORM////////////////////////////////////Actuator init
+OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
+#endif/////////////////////////////////////////////
+//  OPEN_MANIPULATOR::Path *path = new MY_PATH::Circle();
 
 void initManipulator()
 {
-  chain.initKinematics(kinematics);
-#ifdef PLATFORM
-  chain.initActuator(actuator);
+  manipulator.addManipulator(CHAIN);
 
-  uint32_t baud_rate = BAUD_RATE;
-  void *p_baud_rate = &baud_rate;
-
-  chain.actuatorInit(p_baud_rate);
-  chain.actuatorDisable();
-#endif
-
-
-  chain.setControlTime(ACTUATOR_CONTROL_TIME);
-
-  chain.addManipulator(CHAIN);
-
-  chain.addWorld(CHAIN,
+  manipulator.addWorld(CHAIN,
                  WORLD,
                  COMP1);
 
-  chain.addComponent(CHAIN,
+  manipulator.addComponent(CHAIN,
                      COMP1,
                      WORLD,
                      COMP2,
@@ -90,7 +77,7 @@ void initManipulator()
                      Z_AXIS,
                      1);
 
-  chain.addComponent(CHAIN,
+  manipulator.addComponent(CHAIN,
                      COMP2,
                      COMP1,
                      COMP3,
@@ -99,7 +86,7 @@ void initManipulator()
                      Y_AXIS,
                      2);
 
-  chain.addComponent(CHAIN,
+  manipulator.addComponent(CHAIN,
                      COMP3,
                      COMP2,
                      COMP4,
@@ -108,7 +95,7 @@ void initManipulator()
                      Y_AXIS,
                      3);
 
-  chain.addComponent(CHAIN,
+  manipulator.addComponent(CHAIN,
                      COMP4,
                      COMP3,
                      TOOL,
@@ -117,7 +104,7 @@ void initManipulator()
                      Y_AXIS,
                      4);
 
-  chain.addTool(CHAIN,
+  manipulator.addTool(CHAIN,
                 TOOL,
                 COMP4,
                 OM_MATH::makeVector3(0.130, 0.0, 0.0),
@@ -125,16 +112,29 @@ void initManipulator()
                 5,
                 1.0f); // Change unit from `meter` to `radian`
 
-#ifdef PLATFORM
-  chain.setAllActiveJointAngle(CHAIN, chain.receiveAllActuatorAngle(CHAIN));
-#endif
-  chain.forward(CHAIN, COMP1);
+  manipulator.initKinematics(kinematics);
+#ifdef PLATFORM////////////////////////////////////Actuator init
+  manipulator.initActuator(actuator);
+
+  uint32_t baud_rate = BAUD_RATE;
+  void *p_baud_rate = &baud_rate;
+
+  manipulator.actuatorInit(p_baud_rate);
+  manipulator.actuatorEnable();
+#endif/////////////////////////////////////////////
+  manipulator.initJointTrajectory(CHAIN);
+  manipulator.setControlTime(ACTUATOR_CONTROL_TIME);
+
+#ifdef PLATFORM////////////////////////////////////Actuator init
+  manipulator.setAllActiveJointAngle(CHAIN, manipulator.receiveAllActuatorAngle(CHAIN));
+#endif/////////////////////////////////////////////
+  manipulator.forward(CHAIN, COMP1);
 }
 
 void updateAllJointAngle()
 {
 #ifdef PLATFORM
-  chain.setAllActiveJointAngle(CHAIN, chain.receiveAllActuatorAngle(CHAIN));
+  manipulator.setAllActiveJointAngle(CHAIN, manipulator.receiveAllActuatorAngle(CHAIN));
 #endif
   // Add passive joint function
 }
@@ -149,10 +149,10 @@ void THREAD::Robot_State(void const *argument)
     MUTEX::wait();
 
     updateAllJointAngle();    
-    chain.forward(CHAIN, COMP1);
+    manipulator.forward(CHAIN, COMP1);
 
     MUTEX::release();
-    // pose_to_world = chain.getComponentPositionToWorld(CHAIN, TOOL);
+    // pose_to_world = manipulator.getComponentPositionToWorld(CHAIN, TOOL);
     // PRINT::VECTOR(pose_to_world);
 
     osDelay(ROBOT_STATE_UPDATE_TIME * 1000);
@@ -163,16 +163,16 @@ void THREAD::Actuator_Control(void const *argument)
 {
   (void)argument;
 
-  // static uint16_t last_time = 0;
+  static uint16_t last_time = 0;
 
   for (;;)
   {
-    uint16_t t = millis();
+    // uint16_t t = millis();
 
     // LOG::INFO("Control Time : " + String(t-last_time));
     MUTEX::wait();
 
-    chain.jointControl(CHAIN); 
+    manipulator.jointControl(CHAIN); 
     
     MUTEX::release();
     // last_time = t;
