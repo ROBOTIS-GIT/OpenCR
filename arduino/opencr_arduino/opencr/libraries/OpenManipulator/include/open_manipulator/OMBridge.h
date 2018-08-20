@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM, Darby Lim*/
+/* Authors: Hye-Jong KIM, Darby Lim */
 
 #ifndef OMBRIDGE_H_
 #define OMBRIDGE_H_
@@ -29,13 +29,7 @@ namespace OM_PROCESSING
   void split(String data, char separator, String* temp);
   void initProcessing(int8_t joint_angle_vector_size);
   void sendAngle2Processing(std::vector<float> joint_angle_vector);
+  void sendToolData2Processing(bool onoff);
+  void sendToolData2Processing(float value);
 } // namespace PROCESSING
-
-
-
-
-
-
-
-
 #endif
