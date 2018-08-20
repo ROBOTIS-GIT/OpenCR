@@ -23,26 +23,26 @@
 
 void connectProcessing()
 {
-  chain.connectProcessing(DXL_SIZE);
+  manipulator.connectProcessing(DXL_SIZE);
 }
 
 void fromProcessing(String data)
 {
-  String *cmd = chain.parseDataFromProcessing(data);
+  String *cmd = manipulator.parseDataFromProcessing(data);
 
   if (cmd[0] == "opm")
   {
     if (cmd[1] == "ready")
     {
 #ifdef PLATFORM
-      chain.sendAngleToProcessing(chain.receiveAllActuatorAngle(CHAIN));
-      chain.actuatorEnable();
+      manipulator.actuatorEnable();
+      manipulator.sendAngleToProcessing(manipulator.receiveAllActuatorAngle(CHAIN));      
 #endif
     }
     else if (cmd[1] == "end")
     {
 #ifdef PLATFORM
-      chain.actuatorDisable();
+      manipulator.actuatorDisable();
 #endif
     }
   }
@@ -55,43 +55,43 @@ void fromProcessing(String data)
       goal_position.push_back(cmd[index+1].toFloat());
     }
 
-    chain.jointMove(CHAIN, goal_position, 1.0f); // FIX TIME PARAM
+    manipulator.jointMove(CHAIN, goal_position, 1.0f); // FIX TIME PARAM
   }
   else if (cmd[0] == "gripper")
   {
-    chain.toolMove(CHAIN, TOOL, OM_MATH::map(cmd[1].toFloat(), 0.020f, 0.070f, 0.907f, -1.13f));
+    manipulator.toolMove(CHAIN, TOOL, cmd[1].toFloat());
   }
   else if (cmd[0] == "grip")
   {
     if (cmd[1] == "on")
-      chain.toolMove(CHAIN, TOOL, true);
+      manipulator.toolMove(CHAIN, TOOL, true);
     else if (cmd[1] == "off")
-      chain.toolMove(CHAIN, TOOL, false);
+      manipulator.toolMove(CHAIN, TOOL, false);
   }
   else if (cmd[0] == "task")
   {
     if (cmd[1] == "forward")
-      chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.005, 0.0, 0.0), 0.1f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.030, 0.0, 0.0), 0.5f);
     else if (cmd[1] == "back")
-      chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(-0.005, 0.0, 0.0), 0.1f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(-0.030, 0.0, 0.0), 0.5f);
     else if (cmd[1] == "left")
-      chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, -0.005, 0.0), 0.1f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.030, 0.0), 0.5f);
     else if (cmd[1] == "right")
-      chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.005, 0.0), 0.1f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, -0.030, 0.0), 0.5f);
     else if (cmd[1] == "up")
-      chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.005), 0.1f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.030), 0.5f);
     else if (cmd[1] == "down")
-      chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.005), 0.1f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.030), 0.5f);
     else
-      chain.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.0), 0.1f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.0), 0.5f);
   }
   else if (cmd[0] == "torque")
   {
 #ifdef PLATFORM
-      if (cmd[1] == "on")
-        chain.actuatorEnable();
-      else if (cmd[1] == "off")
-        chain.actuatorDisable();
+    if (cmd[1] == "on")
+      manipulator.actuatorEnable();
+    else if (cmd[1] == "off")
+      manipulator.actuatorDisable();
 #endif
   }
   // else if (cmd[0] == "get")
