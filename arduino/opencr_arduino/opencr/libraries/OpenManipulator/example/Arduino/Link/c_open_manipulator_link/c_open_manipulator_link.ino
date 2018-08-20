@@ -1,14 +1,11 @@
 //#include <OpenManipulator.h>
-#include "OpenManipulator_Link.h"
+#include "Link.h"
 
 float present_time = 0.0;
 float previous_time[3] = {0.0, 0.0, 0.0};
 
 std::vector<float> init_joint_angle;
 std::vector<float> target_angle;
-
-std::vector<float> dxl_angle;
-std::vector<float> OMlink_angle;
 
 std::vector<float> ac_angle_temp;
 std::vector<float> ac_angle_min;
@@ -23,9 +20,13 @@ void setup()
   // while (!Serial)
   //   ;
 
-  dxl.init();
+  manipulator.initActuator(actuator);
 
-  dxl.enableAllDynamixel();
+  uint32_t baud_rate = BAUD_RATE;
+  void *p_baud_rate = &baud_rate;
+  manipulator.actuatorInit(p_baud_rate);
+  manipulator.actuatorEnable();
+
   OM_PROCESSING::initProcessing(12);
 
   init_joint_angle.push_back(0.0*DEG2RAD);
@@ -35,15 +36,18 @@ void setup()
   dxl_angle.push_back(init_joint_angle.at(0));
   dxl_angle.push_back(-init_joint_angle.at(1));
   dxl_angle.push_back(init_joint_angle.at(2));
-  dxl.setAngle(dxl_angle);
+
+  manipulator.sendAllActuatorAngle(OMLINK, dxl_angle);
+
   dxl_angle.clear();
 
-  //dxl.setAngle(init_joint_angle);
+  //manipulator.sendAllActuatorAngle(OMLINK, init_joint_angle);
 
   initOMLink();
   previous_time[0] = (float)(millis()/1000.0f);
   previous_time[1] = (float)(millis()/1000.0f);
   previous_time[2] = (float)(millis()/1000.0f);
+  DEBUG.println("Setup done");
 }
 
 void loop() 
@@ -64,28 +68,22 @@ void loop()
 
   if(present_time-previous_time[0] >= CONTROL_PERIOD)
   {
-    dxl_angle = dxl.getAngle();
-    OMlink_angle.push_back(dxl_angle.at(0));
-    OMlink_angle.push_back(-dxl_angle.at(1));
-    OMlink_angle.push_back(dxl_angle.at(2));
-    OPEN_MANIPULATOR::MANAGER::setAllActiveJointAngle(&omlink, OMlink_angle);
-    dxl_angle.clear();
-    OMlink_angle.clear();
+    manipulator.setAllActiveJointAngle(OMLINK, manipulator.receiveAllActuatorAngle(OMLINK));
 
     MyFunction::setPassiveJointAngle();
-    OM_KINEMATICS::LINK::forward(&omlink);
+    manipulator.forward(OMLINK);
 
     if(send_processing_flug)
       {
-        OM_PROCESSING::sendAngle2Processing(OPEN_MANIPULATOR::MANAGER::getAllJointAngle(&omlink));
+        OM_PROCESSING::sendAngle2Processing(manipulator.getAllJointAngle(OMLINK));
         DEBUG.print(" angle : ");
         for(i_check=0; i_check < 3; i_check++)
         {
-          if(OPEN_MANIPULATOR::MANAGER::getAllJointAngle(&omlink).at(i_check)<-2*M_PI)
+          if(manipulator.getAllJointAngle(OMLINK).at(i_check)<-2*M_PI)
           {
             error_flug[0] = false;
           }
-          else if(OPEN_MANIPULATOR::MANAGER::getAllJointAngle(&omlink).at(i_check)>2*M_PI)
+          else if(manipulator.getAllJointAngle(OMLINK).at(i_check)>2*M_PI)
           {
             error_flug[0] = false;
           }
@@ -93,7 +91,7 @@ void loop()
           {
             error_flug[0] = true;
           }
-          DEBUG.print(OPEN_MANIPULATOR::MANAGER::getAllJointAngle(&omlink).at(i_check+1));
+          DEBUG.print(manipulator.getAllJointAngle(OMLINK).at(i_check+1));
           DEBUG.print(" , ");
         }
         DEBUG.println(" ");
