@@ -28,6 +28,7 @@ uint8_t seq = 0;
 void setup()
 {
   Serial.begin(57600);
+  DEBUG.begin(57600);
   while (!Serial)
     ;
 
@@ -50,16 +51,7 @@ void setup()
 
 void loop()
 {
-  getData(0.100f);
-
-
-  // if (Serial.available())
-  // {
-  //   MUTEX::wait();
-  //   fromProcessing(Serial.readStringUntil('\n'));
-  //   MUTEX::release();
-  // }
-
+  getData(100);
   // switch(seq)
   // {
   //   case 0:
@@ -148,21 +140,21 @@ void getData(uint32_t wait_time)
   static uint8_t state = 0;
   static uint32_t tick = 0;
 
-  bool rc100_flag      = false;
+  bool rc100_flag = false;
   bool processing_flag = false;
 
-  uint16_t get_rc100_data     = 0;
+  uint16_t get_rc100_data = 0;
   String get_processing_data = "";
 
   if (availableRC100())
   {
-    get_rc100_data = rc100.readData();
+    get_rc100_data = readRC100Data();
     rc100_flag = true;
   }
 
   if (availableProcessing())
   {
-    get_processing_data = Serial.readStringUntil('\n');
+    get_processing_data = readProcessingData();
     processing_flag = true;
   }
 
@@ -172,32 +164,32 @@ void getData(uint32_t wait_time)
       if (rc100_flag)
       {
         MUTEX::wait();
-        fromRC100(get_rc100_data);   
+        fromRC100(get_rc100_data);
         MUTEX::release();
 
         tick = millis();
-        state  = 1;
+        state = 1;
       }
       else if (processing_flag)
       {
         MUTEX::wait();
-        fromProcessing(get_processing_data); 
+        fromProcessing(get_processing_data);
         MUTEX::release();
 
         tick = millis();
-        state  = 1;
+        state = 1;
       }
      break;
-    
+
     case 1:
       if ((millis() - tick) >= wait_time)
       {
         state = 0;
       }
      break;
-    
-    default :
-     state = 0;
+
+    default:
+      state = 0;
      break;
   }
 }
