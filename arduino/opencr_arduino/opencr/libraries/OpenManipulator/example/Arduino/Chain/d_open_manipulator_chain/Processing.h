@@ -26,6 +26,11 @@ void connectProcessing()
   manipulator.connectProcessing(DXL_SIZE);
 }
 
+int availableProcessing()
+{
+  return Serial.available();
+}
+
 void fromProcessing(String data)
 {
   String *cmd = manipulator.parseDataFromProcessing(data);
@@ -36,7 +41,8 @@ void fromProcessing(String data)
     {
 #ifdef PLATFORM
       manipulator.actuatorEnable();
-      manipulator.sendAngleToProcessing(manipulator.receiveAllActuatorAngle(CHAIN));      
+      manipulator.sendAngleToProcessing(manipulator.receiveAllActuatorAngle(CHAIN));  
+      manipulator.sendToolData2Processing(manipulator.getComponentToolValue(CHAIN, TOOL));
 #endif
     }
     else if (cmd[1] == "end")
@@ -64,26 +70,26 @@ void fromProcessing(String data)
   else if (cmd[0] == "grip")
   {
     if (cmd[1] == "on")
-      manipulator.toolMove(CHAIN, TOOL, true);
+      manipulator.toolMove(CHAIN, TOOL, 0.0f);
     else if (cmd[1] == "off")
-      manipulator.toolMove(CHAIN, TOOL, false);
+      manipulator.toolMove(CHAIN, TOOL, -1.0f);
   }
   else if (cmd[0] == "task")
   {
     if (cmd[1] == "forward")
-      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.030, 0.0, 0.0), 0.5f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.010, 0.0, 0.0), 0.2f);
     else if (cmd[1] == "back")
-      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(-0.030, 0.0, 0.0), 0.5f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(-0.010, 0.0, 0.0), 0.2f);
     else if (cmd[1] == "left")
-      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.030, 0.0), 0.5f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.010, 0.0), 0.2f);
     else if (cmd[1] == "right")
-      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, -0.030, 0.0), 0.5f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, -0.010, 0.0), 0.2f);
     else if (cmd[1] == "up")
-      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.030), 0.5f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.010), 0.2f);
     else if (cmd[1] == "down")
-      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.030), 0.5f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.010), 0.2f);
     else
-      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.0), 0.5f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.0), 0.2f);
   }
   else if (cmd[0] == "torque")
   {
