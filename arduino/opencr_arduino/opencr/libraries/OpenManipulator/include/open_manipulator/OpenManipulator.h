@@ -42,24 +42,25 @@ void Actuator_Control(void const *argument);
 
 namespace OPEN_MANIPULATOR
 {
+typedef struct
+{
+  std::vector<float> angle;
+  Pose pose;
+} Goal;
+
 class OpenManipulator
 {
 private:
   std::map<Name, OM_MANAGER::Manipulator> manipulator_;
   std::map<Name, OM_PATH::JointTrajectory> joint_trajectory_;
-
-  Manager *manager_;
-  Kinematics *kinematics_;
-  Actuator *actuator_;  
-
-  std::vector<float> goal_position_;
-  std::vector<float> goal_velocity_;
-  std::vector<float> goal_acceleration_;
-
-  std::vector<float> start_position_;
+  std::map<Name, Goal> previous_goal_;
 
   std::vector<Trajectory> start_trajectory_;
   std::vector<Trajectory> goal_trajectory_;
+
+  Manager *manager_;
+  Kinematics *kinematics_;
+  Actuator *actuator_;    
 
   float move_time_;
   float control_time_;
