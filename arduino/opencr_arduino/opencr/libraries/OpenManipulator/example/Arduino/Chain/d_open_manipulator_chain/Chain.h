@@ -28,7 +28,7 @@
 
 #define ROBOT_STATE_UPDATE_TIME 0.010f
 #define ACTUATOR_CONTROL_TIME 0.010f
-#define LOOP_TIME 0.050f
+#define LOOP_TIME 0.020f
 
 #define CHAIN 100
 
@@ -125,7 +125,7 @@ void initManipulator()
   manipulator.initJointTrajectory(CHAIN);
   manipulator.setControlTime(ACTUATOR_CONTROL_TIME);
 
-  manipulator.toolMove(CHAIN, TOOL, false);
+  manipulator.toolMove(CHAIN, TOOL, 0.0f);
 
 #ifdef PLATFORM////////////////////////////////////Actuator init
   manipulator.setAllActiveJointAngle(CHAIN, manipulator.receiveAllActuatorAngle(CHAIN));
@@ -144,7 +144,6 @@ void updateAllJointAngle()
 void THREAD::Robot_State(void const *argument)
 {
   (void)argument;
-  // Eigen::Vector3f pose_to_world;
 
   for (;;)
   {
@@ -154,8 +153,6 @@ void THREAD::Robot_State(void const *argument)
     manipulator.forward(CHAIN, COMP1);
 
     MUTEX::release();
-    // pose_to_world = manipulator.getComponentPositionToWorld(CHAIN, TOOL);
-    // PRINT::VECTOR(pose_to_world);
 
     osDelay(ROBOT_STATE_UPDATE_TIME * 1000);
   }
@@ -165,19 +162,13 @@ void THREAD::Actuator_Control(void const *argument)
 {
   (void)argument;
 
-  // static uint16_t last_time = 0;
-
   for (;;)
   {
-    // uint16_t t = millis();
-
-    // LOG::INFO("Control Time : " + String(t-last_time));
     MUTEX::wait();
 
     manipulator.jointControl(CHAIN);
     
     MUTEX::release();
-    // last_time = t;
 
     osDelay(ACTUATOR_CONTROL_TIME * 1000);
   }
