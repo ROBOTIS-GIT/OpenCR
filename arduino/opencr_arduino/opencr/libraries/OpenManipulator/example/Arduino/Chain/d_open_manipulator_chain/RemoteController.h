@@ -42,32 +42,32 @@ uint16_t readRC100Data()
 void fromRC100(uint16_t data)
 {
   if (data & RC100_BTN_U)
-    manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.005f, 0.0, 0.0), 0.1f);
+    chain.setMove(TOOL, OM_MATH::makeVector3(0.005f, 0.0, 0.0), 0.1f);
   else if (data & RC100_BTN_D)
-    manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(-0.005f, 0.0, 0.0), 0.1f);
+    chain.setMove(TOOL, OM_MATH::makeVector3(-0.005f, 0.0, 0.0), 0.1f);
   else if (data & RC100_BTN_L)
-    manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.005f, 0.0), 0.1f);
+    chain.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.005f, 0.0), 0.1f);
   else if (data & RC100_BTN_R)
-    manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, -0.005f, 0.0), 0.1f);
+    chain.setMove(TOOL, OM_MATH::makeVector3(0.0, -0.005f, 0.0), 0.1f);
   else if (data & RC100_BTN_1)
-    manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.005f), 0.1f);
+    chain.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.005f), 0.1f);
   else if (data & RC100_BTN_3)
-    manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.005f), 0.1f);
+    chain.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.005f), 0.1f);
   else if (data & RC100_BTN_2)
   {
-    float grip_value = manipulator.getComponentToolValue(CHAIN, TOOL) + 0.030f;
+    float grip_value = chain.getComponentToolValue(TOOL) + 0.030f;
     if (grip_value >= 0.907f)
       grip_value = 0.907f;
 
-    manipulator.toolMove(CHAIN, TOOL, grip_value);
+    chain.toolMove(TOOL, grip_value);
   }
   else if (data & RC100_BTN_4)
   {
-    float grip_value = manipulator.getComponentToolValue(CHAIN, TOOL) - 0.030f;
+    float grip_value = chain.getComponentToolValue(TOOL) - 0.030f;
     if (grip_value <= -1.130f)
       grip_value = -1.130f;
 
-    manipulator.toolMove(CHAIN, TOOL, grip_value);
+    chain.toolMove(TOOL, grip_value);
   }
   else if (data & RC100_BTN_5)
   {
@@ -78,7 +78,7 @@ void fromRC100(uint16_t data)
     goal_position.push_back(20.0f * DEG2RAD);
     goal_position.push_back(40.0f * DEG2RAD);
 
-    manipulator.jointMove(CHAIN, goal_position, 1.0f);
+    chain.jointMove(goal_position, 1.0f);
   }
   else if (data & RC100_BTN_6)
   {
@@ -89,7 +89,7 @@ void fromRC100(uint16_t data)
     goal_position.push_back(0.0f);
     goal_position.push_back(0.0f);
 
-    manipulator.jointMove(CHAIN, goal_position, 1.0f);
+    chain.jointMove(goal_position, 1.0f);
   }
 
   // else if (receive_data & RC100_BTN_6)
@@ -122,5 +122,4 @@ void fromRC100(uint16_t data)
   //   repeat = true;
   // }
 }
-
 #endif

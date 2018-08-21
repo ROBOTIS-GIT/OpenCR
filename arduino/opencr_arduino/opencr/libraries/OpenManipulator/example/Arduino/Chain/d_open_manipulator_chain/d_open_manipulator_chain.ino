@@ -32,10 +32,10 @@ void setup()
   while (!Serial)
     ;
 
-  initManipulator();
-
   connectProcessing();
   connectRC100();
+  
+  initManipulator();
 
   // goal_position.push_back(0.0);
   // goal_position.push_back(0.0);
