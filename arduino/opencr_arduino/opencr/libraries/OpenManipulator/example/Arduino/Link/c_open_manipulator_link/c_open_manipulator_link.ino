@@ -1,5 +1,23 @@
-//#include <OpenManipulator.h>
-#include "Link.h"
+/*******************************************************************************
+* Copyright 2016 ROBOTIS CO., LTD.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
+
+/* Authors: Hye-Jong KIM */
+
+#include "OMLink.h"
+//#include "Processing.h"
 
 float present_time = 0.0;
 float previous_time[3] = {0.0, 0.0, 0.0};
@@ -17,37 +35,23 @@ void setup()
 {
   Serial.begin(57600);
   DEBUG.begin(57600);
-  // while (!Serial)
-  //   ;
 
-  manipulator.initActuator(actuator);
+  while (!Serial)
+    ;
 
-  uint32_t baud_rate = BAUD_RATE;
-  void *p_baud_rate = &baud_rate;
-  manipulator.actuatorInit(p_baud_rate);
-  manipulator.actuatorEnable();
+  USB.println("Setup done");
 
   OM_PROCESSING::initProcessing(12);
 
-  init_joint_angle.push_back(0.0*DEG2RAD);
-  init_joint_angle.push_back(-90.0*DEG2RAD);
-  init_joint_angle.push_back(-160.0*DEG2RAD);
-
-  dxl_angle.push_back(init_joint_angle.at(0));
-  dxl_angle.push_back(-init_joint_angle.at(1));
-  dxl_angle.push_back(init_joint_angle.at(2));
-
-  manipulator.sendAllActuatorAngle(OMLINK, dxl_angle);
-
-  dxl_angle.clear();
-
-  //manipulator.sendAllActuatorAngle(OMLINK, init_joint_angle);
-
   initOMLink();
+  USB.println("Setup done");
+  manipulator.actuatorEnable();
+  manipulator.sendAllActuatorAngle(OMLINK, manipulator.getAllActiveJointAngle(OMLINK));
+
   previous_time[0] = (float)(millis()/1000.0f);
   previous_time[1] = (float)(millis()/1000.0f);
   previous_time[2] = (float)(millis()/1000.0f);
-  DEBUG.println("Setup done");
+  USB.println("Setup done");
 }
 
 void loop() 

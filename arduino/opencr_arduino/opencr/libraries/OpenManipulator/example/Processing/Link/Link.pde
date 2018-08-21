@@ -108,10 +108,10 @@ void serialEvent(Serial opencr_port)
   if (cmd[0].equals("angle"))
   {
     print("joint ");
-    for (int cmd_cnt = 2; cmd_cnt < cmd.length-1; cmd_cnt++)
+    for (int cmd_cnt = 1; cmd_cnt < cmd.length; cmd_cnt++)
     {
-      received_joint_angle[cmd_cnt-2] = float(cmd[cmd_cnt]);
-      if(cmd_cnt < 5)
+      received_joint_angle[cmd_cnt-1] = float(cmd[cmd_cnt]);
+      if(cmd_cnt < 4)
         print(cmd_cnt + ": " + cmd[cmd_cnt] + "  ");
     }
     println("");

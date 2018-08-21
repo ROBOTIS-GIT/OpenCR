@@ -16,8 +16,8 @@
 
 /* Authors: Hye-Jong KIM */
 
-#ifndef OPENMANIPULATOR_LINK_H_
-#define OPENMANIPULATOR_LINK_H_
+#ifndef OMLINK_H_
+#define OMLINK_H_
 
 // Necessary library
 #include <OpenManipulator.h>
@@ -27,7 +27,6 @@
 #include <OMDynamixel.h>
 
 #include <OMBridge.h>
-
 
 ///////////NAME/////////////////////
 
@@ -78,7 +77,6 @@ float motion_storage[MAX_MOTION_NUM][5] = {0.0, };
 uint8_t motion_cnt = 0;
 uint8_t filled_motion_num = 0;
 
-
 const float initial_motion_set[MAX_MOTION_NUM][5] = { // time, grip, joint1, joint2, joint3,
                                                 { 0.0,  0.0,   0.0,  0.0,  0.0},
                                                 { 0.0,  0.0,   0.0,  0.0,  0.0},  
@@ -102,6 +100,7 @@ const float initial_motion_set[MAX_MOTION_NUM][5] = { // time, grip, joint1, joi
                                                 { 0.0,  0.0,   0.0,  0.0,  0.0}
                                                 };
 
+
 OM_PATH::JointTrajectory joint_trajectory(DXL_SIZE);
 std::vector<Trajectory> start_trajectory_vector;
 std::vector<Trajectory> goal_trajectory_vector;
@@ -112,7 +111,6 @@ OPEN_MANIPULATOR::OpenManipulator manipulator(3);
 
 OPEN_MANIPULATOR::Kinematics *kinematics = new OM_KINEMATICS::Link();
 OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
-
 
 namespace MyFunction
 {
@@ -169,7 +167,7 @@ namespace MyFunction
 
     joint_trajectory.init(start_trajectory_vector, goal_trajectory_vector, inner_move_time, CONTROL_PERIOD);
     move_time = inner_move_time;
-    
+
     start_angle = target_angle;
     moving   = true;
   }
@@ -598,29 +596,78 @@ void initOMLink()
 {
   manipulator.initKinematics(kinematics);
   manipulator.initActuator(actuator);
+  uint32_t baud_rate = BAUD_RATE;
+  void *p_baud_rate = &baud_rate;
+  manipulator.actuatorInit(p_baud_rate);
+  manipulator.actuatorDisable();
   manipulator.addManipulator(OMLINK);
 
   //init manipulator
-  manipulator.addWorld(OMLINK, WORLD, BASE);
-  manipulator.addComponent(OMLINK, JOINT0, WORLD, JOINT1, OM_MATH::makeVector3(-0.23867882, 0, 0), Matrix3f::Identity(3,3), OM_MATH::makeVector3(0,0,1), 1, 1);
+  manipulator.addWorld(OMLINK,
+                       WORLD,
+                       BASE);
+  manipulator.addComponent(OMLINK, JOINT0, WORLD, JOINT1,
+                           OM_MATH::makeVector3(-0.23867882, 0, 0),
+                           Matrix3f::Identity(3,3),
+                           OM_MATH::makeVector3(0,0,1),
+                           1,
+                           1);
   manipulator.addComponentChild(OMLINK, JOINT0, JOINT2);
   manipulator.addComponentChild(OMLINK, JOINT0, JOINT7);
-  manipulator.addComponent(OMLINK, JOINT1, JOINT0, JOINT5, OM_MATH::makeVector3(0, 0.022, 0.052), Matrix3f::Identity(3,3), OM_MATH::makeVector3(0,1,0), 2, -1);
-  manipulator.addComponent(OMLINK, JOINT2, JOINT0, JOINT3, OM_MATH::makeVector3(0, -0.022, 0.052), Matrix3f::Identity(3,3), OM_MATH::makeVector3(0,1,0), 3, 1);
-  manipulator.addComponent(OMLINK, JOINT3, JOINT2, JOINT4, OM_MATH::makeVector3(0.050, 0.007, 0), Matrix3f::Identity(3,3), OM_MATH::makeVector3(0,1,0));
-  manipulator.addComponent(OMLINK, JOINT4, JOINT3, JOINT5, OM_MATH::makeVector3(0.200, 0.006, 0), Matrix3f::Identity(3,3), OM_MATH::makeVector3(0,1,0));
-  manipulator.addComponent(OMLINK, JOINT5, JOINT1, JOINT6, OM_MATH::makeVector3(0.200, -0.016, 0), Matrix3f::Identity(3,3), OM_MATH::makeVector3(0,1,0));
-  manipulator.addComponent(OMLINK, JOINT6, JOINT5, SUCTION, OM_MATH::makeVector3(0.200, -0.009, 0), Matrix3f::Identity(3,3), OM_MATH::makeVector3(0,1,0));
-  manipulator.addComponent(OMLINK, JOINT7, JOINT0, JOINT8, OM_MATH::makeVector3(-0.04531539, 0.006, 0.07313091), Matrix3f::Identity(3,3), OM_MATH::makeVector3(0,1,0));
-  manipulator.addComponent(OMLINK, JOINT8, JOINT7, JOINT9, OM_MATH::makeVector3(0.200, 0.009, 0), Matrix3f::Identity(3,3), OM_MATH::makeVector3(0,1,0));
-  manipulator.addComponent(OMLINK, JOINT9, JOINT8, JOINT10, OM_MATH::makeVector3(0.07660444, -0.006, 0), Matrix3f::Identity(3,3), OM_MATH::makeVector3(0,1,0));
-  manipulator.addComponent(OMLINK, JOINT10, JOINT9, SUCTION, OM_MATH::makeVector3(0.200, -0.006, 0), Matrix3f::Identity(3,3), OM_MATH::makeVector3(0,1,0));
-  manipulator.addTool(OMLINK, SUCTION, JOINT6, OM_MATH::makeVector3(0.03867882, 0.003, -0.01337315-0.01), Matrix3f::Identity(3,3), 4, 1);
+  manipulator.addComponent(OMLINK, JOINT1, JOINT0, JOINT5, 
+                           OM_MATH::makeVector3(0, 0.022, 0.052),
+                           Matrix3f::Identity(3,3),
+                           OM_MATH::makeVector3(0,1,0),
+                           2,
+                           -1);
+  manipulator.addComponent(OMLINK, JOINT2, JOINT0, JOINT3,
+                           OM_MATH::makeVector3(0, -0.022, 0.052),
+                           Matrix3f::Identity(3,3),
+                           OM_MATH::makeVector3(0,1,0),
+                           3,
+                           1);
+  manipulator.addComponent(OMLINK, JOINT3, JOINT2, JOINT4,
+                           OM_MATH::makeVector3(0.050, 0.007, 0),
+                           Matrix3f::Identity(3,3),
+                           OM_MATH::makeVector3(0,1,0));
+  manipulator.addComponent(OMLINK, JOINT4, JOINT3, JOINT5,
+                           OM_MATH::makeVector3(0.200, 0.006, 0),
+                           Matrix3f::Identity(3,3),
+                           OM_MATH::makeVector3(0,1,0));
+  manipulator.addComponent(OMLINK, JOINT5, JOINT1, JOINT6,
+                           OM_MATH::makeVector3(0.200, -0.016, 0),
+                           Matrix3f::Identity(3,3),
+                           OM_MATH::makeVector3(0,1,0));
+  manipulator.addComponent(OMLINK, JOINT6, JOINT5, SUCTION,
+                           OM_MATH::makeVector3(0.200, -0.009, 0),
+                           Matrix3f::Identity(3,3),
+                           OM_MATH::makeVector3(0,1,0));
+  manipulator.addComponent(OMLINK, JOINT7, JOINT0, JOINT8,
+                           OM_MATH::makeVector3(-0.04531539, 0.006, 0.07313091),
+                           Matrix3f::Identity(3,3),
+                           OM_MATH::makeVector3(0,1,0));
+  manipulator.addComponent(OMLINK, JOINT8, JOINT7, JOINT9,
+                           OM_MATH::makeVector3(0.200, 0.009, 0),
+                           Matrix3f::Identity(3,3),
+                           OM_MATH::makeVector3(0,1,0));
+  manipulator.addComponent(OMLINK, JOINT9, JOINT8, JOINT10,
+                           OM_MATH::makeVector3(0.07660444, -0.006, 0),
+                           Matrix3f::Identity(3,3),
+                           OM_MATH::makeVector3(0,1,0));
+  manipulator.addComponent(OMLINK, JOINT10, JOINT9, SUCTION,
+                           OM_MATH::makeVector3(0.200, -0.006, 0),
+                           Matrix3f::Identity(3,3),
+                           OM_MATH::makeVector3(0,1,0));
+  manipulator.addTool(OMLINK, SUCTION, JOINT6,
+                      OM_MATH::makeVector3(0.03867882, 0.003, -0.01337315-0.01),
+                      Matrix3f::Identity(3,3),
+                      4,
+                      1);
 
   //initial joint angle set
-  manipulator.setComponentJointAngle(OMLINK, JOINT0, 0.0);
-  manipulator.setComponentJointAngle(OMLINK, JOINT1, -M_PI/2 + 0.0*DEG2RAD);
-  manipulator.setComponentJointAngle(OMLINK, JOINT2, -M_PI + 0.0*DEG2RAD);
+  manipulator.setComponentJointAngle(OMLINK, JOINT0, 0.0*DEG2RAD);
+  manipulator.setComponentJointAngle(OMLINK, JOINT1, -90.0*DEG2RAD);
+  manipulator.setComponentJointAngle(OMLINK, JOINT2, -160.0*DEG2RAD);
   MyFunction::setPassiveJointAngle();
 
   //solve kinematics
