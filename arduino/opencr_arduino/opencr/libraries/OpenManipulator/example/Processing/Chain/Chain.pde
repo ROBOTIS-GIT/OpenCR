@@ -117,9 +117,10 @@ void serialEvent(Serial opencr_port)
   }
   else if (cmd[0].equals("tool"))
   {
-    float angle2pos = map(float(cmd[1]), 0.907, -1.13, 0.010*1000, 0.035 * 1000);
-    receive_gripper_pos[0] = angle2pos;
-    receive_gripper_pos[1] = ctrl_gripper_pos[0] * (-2);
+    float angle2pos = map(float(cmd[1]), 0.907, -1.13, 0.010*1000, 0.035*1000);
+
+    receive_gripper_pos[0] = ctrl_gripper_pos[0] = angle2pos;
+    receive_gripper_pos[1] = ctrl_gripper_pos[1] = receive_gripper_pos[0] * (-2);
     
     print("tool : " + cmd[1]);
     println("");
@@ -378,7 +379,7 @@ void gripperOn()
 *******************************************************************************/
 void gripperOff()
 {
-  ctrl_gripper_pos[0] = 0.030 * 1000;
+  ctrl_gripper_pos[0] = 0.0 * 1000;
   ctrl_gripper_pos[1] = ctrl_gripper_pos[0] * (-2);
 }
 
@@ -410,6 +411,14 @@ void mouseDragged()
 }
 
 /*******************************************************************************
+* Mouse wheel event
+*******************************************************************************/
+void mouseWheel(MouseEvent event) {
+  float e = event.getCount() * 0.01;
+  model_scale_factor += e;
+}
+
+/*******************************************************************************
 * Key press event
 *******************************************************************************/
 void keyPressed()
@@ -420,11 +429,9 @@ void keyPressed()
   else if (key == 's') model_trans_y      -= 0.050 * 1000;
   else if (key == 'e') model_trans_z      -= 0.050 * 1000;
   else if (key == 'd') model_trans_z      += 0.050 * 1000;
-  else if (key == 'r') model_scale_factor += 0.5;
-  else if (key == 'f') model_scale_factor -= 0.5;
   else if (key == 'i') 
   {
-    model_trans_x = model_trans_y = model_scale_factor = world_rot_x = world_rot_y = 0.0;
+    model_trans_x = model_trans_y = model_trans_z = model_scale_factor = world_rot_x = world_rot_y = 0.0;
     camera(width/2.0, height/2.0-500, height/2.0 * 4,
            width/2-100, height/2, 0,
            0, 1, 0);
@@ -913,13 +920,11 @@ class ChildApplet extends PApplet
     {
       if (flag)
       {
-        // gripper.setValue(0.0);
         opencr_port.write("grip"  + ',' +
                           "on" + '\n');
       }
       else
       {
-        // gripper.setValue(0.0);
         opencr_port.write("grip"  + ',' +
                           "off" + '\n');
       }
