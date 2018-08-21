@@ -82,6 +82,7 @@ public:
 
   void connectProcessing(uint8_t actuator_num);
   void sendAngleToProcessing(std::vector<float> joint_angle);
+  void sendToolData2Processing(float value);
   String* parseDataFromProcessing(String get);
 
   void addManipulator(Name manipulator_name);

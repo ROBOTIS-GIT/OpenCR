@@ -80,6 +80,11 @@ void OpenManipulator::sendAngleToProcessing(std::vector<float> joint_angle)
   OM_PROCESSING::sendAngle2Processing(joint_angle);
 }
 
+void OpenManipulator::sendToolData2Processing(float value)
+{
+  OM_PROCESSING::sendToolData2Processing(value);
+}
+
 String *OpenManipulator::parseDataFromProcessing(String get)
 {
   get.trim();
