@@ -637,7 +637,7 @@ std::vector<float> OM_MANAGER::Manipulator::getAllJointAngle()
 
   for (it = component_.begin(); it != component_.end(); it++)
   {
-    if (component_.at(it->first).tool.id != -1) // Check whether Tool or not
+    if (component_.at(it->first).tool.id == -1) // Check whether Tool or not
     {
       // This is not Tool -> This is Joint
       result_vector.push_back(component_.at(it->first).joint.angle);
@@ -653,8 +653,9 @@ std::vector<float> OM_MANAGER::Manipulator::getAllActiveJointAngle()
 
   for (it = component_.begin(); it != component_.end(); it++)
   {
-    if (component_.at(it->first).joint.id != -1) 
+    if (component_.at(it->first).joint.id != -1) // Check whether Active or Passive
     {
+      // Active
       result_vector.push_back(component_.at(it->first).joint.angle);
     }
   }
