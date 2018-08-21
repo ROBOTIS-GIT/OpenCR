@@ -559,7 +559,7 @@ std::vector<float> OpenManipulator::receiveAllActuatorAngle(Name manipulator_nam
       if (sorted_id.at(i) == active_joint_id.at(j))
       {
         sorted_angle_array[j] = angles.at(i);
-        break
+        break;
       }
     }
   }
