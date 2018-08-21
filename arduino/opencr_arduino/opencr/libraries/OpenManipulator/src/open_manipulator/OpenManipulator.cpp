@@ -57,25 +57,26 @@ void OpenManipulator::initActuator(Actuator *actuator)
   platform_ = true;
 }
 
-void OpenManipulator::initJointTrajectory(Name manipulator_name)
-{ 
-  OM_PATH::JointTrajectory joint_trajectory(manipulator_.at(manipulator_name).getDOF());
-  joint_trajectory_.insert(std::make_pair(manipulator_name, joint_trajectory));
+void OpenManipulator::initJointTrajectory()
+{
+  joint_trajectory_ = new OM_PATH::JointTrajectory(manipulator_.getDOF());
 
   std::vector<float> empty_v;
 
-  for (uint8_t index = 0; index < manipulator_.at(manipulator_name).getDOF(); index++)
+  for (uint8_t index = 0; index < manipulator_.getDOF(); index++)
     empty_v.push_back(0.0);
 
-  Goal goal;
-  goal.position = receiveAllActuatorAngle(manipulator_name);
-  goal.velocity = empty_v;
-  goal.acceleration = empty_v;
+  if (platform_)
+    previous_goal_.position = receiveAllActuatorAngle();
+  
+  if (processing_)
+    previous_goal_.position = empty_v;
 
-  previous_goal_.insert(std::make_pair(manipulator_name, goal));
+  previous_goal_.velocity = empty_v;
+  previous_goal_.acceleration = empty_v;
 
-  start_trajectory_.reserve(manipulator_.at(manipulator_name).getDOF());
-  goal_trajectory_.reserve(manipulator_.at(manipulator_name).getDOF());
+  start_trajectory_.reserve(manipulator_.getDOF());
+  goal_trajectory_.reserve(manipulator_.getDOF());
 }
 
 void OpenManipulator::connectProcessing(uint8_t actuator_num)
@@ -102,24 +103,15 @@ String *OpenManipulator::parseDataFromProcessing(String get)
   return cmd_;
 }
 
-void OpenManipulator::addManipulator(Name manipulator_name)
-{
-  OM_MANAGER::Manipulator manipulator;
-
-  manipulator_.insert(std::make_pair(manipulator_name, manipulator));
-}
-
-void OpenManipulator::addWorld(Name manipulator_name,
-                               Name world_name,
+void OpenManipulator::addWorld(Name world_name,
                                Name child_name,
                                Vector3f world_position,
                                Matrix3f world_orientation)
 {
-  manipulator_.at(manipulator_name).addWorld(world_name, child_name, world_position, world_orientation);
+  manipulator_.addWorld(world_name, child_name, world_position, world_orientation);
 }
 
-void OpenManipulator::addComponent(Name manipulator_name,
-                                   Name my_name,
+void OpenManipulator::addComponent(Name my_name,
                                    Name parent_name,
                                    Name child_name,
                                    Vector3f relative_position,
@@ -131,11 +123,10 @@ void OpenManipulator::addComponent(Name manipulator_name,
                                    Matrix3f inertia_tensor,
                                    Vector3f center_of_mass)
 {
-  manipulator_.at(manipulator_name).addComponent(my_name, parent_name, child_name, relative_position, relative_orientation, axis_of_rotation, actuator_id, coefficient, mass, inertia_tensor, center_of_mass);
+  manipulator_.addComponent(my_name, parent_name, child_name, relative_position, relative_orientation, axis_of_rotation, actuator_id, coefficient, mass, inertia_tensor, center_of_mass);
 }
 
-void OpenManipulator::addTool(Name manipulator_name,
-                              Name my_name,
+void OpenManipulator::addTool(Name my_name,
                               Name parent_name,
                               Vector3f relative_position,
                               Matrix3f relative_orientation,
@@ -145,386 +136,381 @@ void OpenManipulator::addTool(Name manipulator_name,
                               Matrix3f inertia_tensor,
                               Vector3f center_of_mass)
 {
-  manipulator_.at(manipulator_name).addTool(my_name, parent_name, relative_position, relative_orientation, tool_id, coefficient, mass, inertia_tensor, center_of_mass);
+  manipulator_.addTool(my_name, parent_name, relative_position, relative_orientation, tool_id, coefficient, mass, inertia_tensor, center_of_mass);
 }
 
-void OpenManipulator::addComponentChild(Name manipulator_name, Name my_name, Name child_name)
+void OpenManipulator::addComponentChild(Name my_name, Name child_name)
 {
-  manipulator_.at(manipulator_name).addComponentChild(my_name, child_name);
+  manipulator_.addComponentChild(my_name, child_name);
 }
 
-void OpenManipulator::checkManipulatorSetting(Name manipulator_name)
+void OpenManipulator::checkManipulatorSetting()
 {
-  manipulator_.at(manipulator_name).checkManipulatorSetting();
+  manipulator_.checkManipulatorSetting();
 }
 
-void OpenManipulator::setWorldPose(Name manipulator_name, Pose world_pose)
+void OpenManipulator::setWorldPose(Pose world_pose)
 {
-  manipulator_.at(manipulator_name).setWorldPose(world_pose);
+  manipulator_.setWorldPose(world_pose);
 }
 
-void OpenManipulator::setWorldPosition(Name manipulator_name, Vector3f world_position)
+void OpenManipulator::setWorldPosition(Vector3f world_position)
 {
-  manipulator_.at(manipulator_name).setWorldPosition(world_position);
+  manipulator_.setWorldPosition(world_position);
 }
 
-void OpenManipulator::setWorldOrientation(Name manipulator_name, Matrix3f world_orientation)
+void OpenManipulator::setWorldOrientation(Matrix3f world_orientation)
 {
-  manipulator_.at(manipulator_name).setWorldOrientation(world_orientation);
+  manipulator_.setWorldOrientation(world_orientation);
 }
 
-void OpenManipulator::setWorldState(Name manipulator_name, State world_state)
+void OpenManipulator::setWorldState(State world_state)
 {
-  manipulator_.at(manipulator_name).setWorldState(world_state);
+  manipulator_.setWorldState(world_state);
 }
 
-void OpenManipulator::setWorldVelocity(Name manipulator_name, VectorXf world_velocity)
+void OpenManipulator::setWorldVelocity(VectorXf world_velocity)
 {
-  manipulator_.at(manipulator_name).setWorldVelocity(world_velocity);
+  manipulator_.setWorldVelocity(world_velocity);
 }
 
-void OpenManipulator::setWorldAcceleration(Name manipulator_name, VectorXf world_acceleration)
+void OpenManipulator::setWorldAcceleration(VectorXf world_acceleration)
 {
-  manipulator_.at(manipulator_name).setWorldAcceleration(world_acceleration);
+  manipulator_.setWorldAcceleration(world_acceleration);
 }
 
-void OpenManipulator::setComponent(Name manipulator_name, Name name, Component component)
+void OpenManipulator::setComponent(Name name, Component component)
 {
-  manipulator_.at(manipulator_name).setComponent(name, component);
+  manipulator_.setComponent(name, component);
 }
 
-void OpenManipulator::setComponentPoseToWorld(Name manipulator_name, Name name, Pose pose_to_world)
+void OpenManipulator::setComponentPoseToWorld(Name name, Pose pose_to_world)
 {
-  manipulator_.at(manipulator_name).setComponentPoseToWorld(name, pose_to_world);
+  manipulator_.setComponentPoseToWorld(name, pose_to_world);
 }
 
-void OpenManipulator::setComponentPositionToWorld(Name manipulator_name, Name name, Vector3f position_to_world)
+void OpenManipulator::setComponentPositionToWorld(Name name, Vector3f position_to_world)
 {
-  manipulator_.at(manipulator_name).setComponentPositionToWorld(name, position_to_world);
+  manipulator_.setComponentPositionToWorld(name, position_to_world);
 }
 
-void OpenManipulator::setComponentOrientationToWorld(Name manipulator_name, Name name, Matrix3f orientation_to_wolrd)
+void OpenManipulator::setComponentOrientationToWorld(Name name, Matrix3f orientation_to_wolrd)
 {
-  manipulator_.at(manipulator_name).setComponentOrientationToWorld(name, orientation_to_wolrd);
+  manipulator_.setComponentOrientationToWorld(name, orientation_to_wolrd);
 }
 
-void OpenManipulator::setComponentStateToWorld(Name manipulator_name, Name name, State state_to_world)
+void OpenManipulator::setComponentStateToWorld(Name name, State state_to_world)
 {
-  manipulator_.at(manipulator_name).setComponentStateToWorld(name, state_to_world);
+  manipulator_.setComponentStateToWorld(name, state_to_world);
 }
 
-void OpenManipulator::setComponentVelocityToWorld(Name manipulator_name, Name name, VectorXf velocity)
+void OpenManipulator::setComponentVelocityToWorld(Name name, VectorXf velocity)
 {
-  manipulator_.at(manipulator_name).setComponentVelocityToWorld(name, velocity);
+  manipulator_.setComponentVelocityToWorld(name, velocity);
 }
 
-void OpenManipulator::setComponentAccelerationToWorld(Name manipulator_name, Name name, VectorXf accelaration)
+void OpenManipulator::setComponentAccelerationToWorld(Name name, VectorXf accelaration)
 {
-  manipulator_.at(manipulator_name).setComponentAccelerationToWorld(name, accelaration);
+  manipulator_.setComponentAccelerationToWorld(name, accelaration);
 }
 
-void OpenManipulator::setComponentJointAngle(Name manipulator_name, Name name, float angle)
+void OpenManipulator::setComponentJointAngle(Name name, float angle)
 {
-  manipulator_.at(manipulator_name).setComponentJointAngle(name, angle);
+  manipulator_.setComponentJointAngle(name, angle);
 }
 
-void OpenManipulator::setComponentJointVelocity(Name manipulator_name, Name name, float angular_velocity)
+void OpenManipulator::setComponentJointVelocity(Name name, float angular_velocity)
 {
-  manipulator_.at(manipulator_name).setComponentJointVelocity(name, angular_velocity);
+  manipulator_.setComponentJointVelocity(name, angular_velocity);
 }
 
-void OpenManipulator::setComponentJointAcceleration(Name manipulator_name, Name name, float angular_acceleration)
+void OpenManipulator::setComponentJointAcceleration(Name name, float angular_acceleration)
 {
-  manipulator_.at(manipulator_name).setComponentJointAcceleration(name, angular_acceleration);
+  manipulator_.setComponentJointAcceleration(name, angular_acceleration);
 }
 
-void OpenManipulator::setComponentToolOnOff(Name manipulator_name, Name name, bool on_off)
+void OpenManipulator::setComponentToolOnOff(Name name, bool on_off)
 {
-  manipulator_.at(manipulator_name).setComponentToolOnOff(name, on_off);
+  manipulator_.setComponentToolOnOff(name, on_off);
 }
 
-void OpenManipulator::setComponentToolValue(Name manipulator_name, Name name, float actuator_value)
+void OpenManipulator::setComponentToolValue(Name name, float actuator_value)
 {
-  manipulator_.at(manipulator_name).setComponentToolValue(name, actuator_value);
+  manipulator_.setComponentToolValue(name, actuator_value);
 }
 
-void OpenManipulator::setAllActiveJointAngle(Name manipulator_name, std::vector<float> angle_vector)
+void OpenManipulator::setAllActiveJointAngle(std::vector<float> angle_vector)
 {
-  manipulator_.at(manipulator_name).setAllActiveJointAngle(angle_vector);
+  manipulator_.setAllActiveJointAngle(angle_vector);
 }
 
-OM_MANAGER::Manipulator OpenManipulator::getManipulator(Name manipulator_name)
+int8_t OpenManipulator::getDOF()
 {
-  return manipulator_.at(manipulator_name);
+  return manipulator_.getDOF();
 }
 
-int8_t OpenManipulator::getDOF(Name manipulator_name)
+int8_t OpenManipulator::getComponentSize()
 {
-  return manipulator_.at(manipulator_name).getDOF();
+  return manipulator_.getComponentSize();
 }
 
-int8_t OpenManipulator::getComponentSize(Name manipulator_name)
+Name OpenManipulator::getWorldName()
 {
-  return manipulator_.at(manipulator_name).getComponentSize();
+  return manipulator_.getWorldName();
 }
 
-Name OpenManipulator::getWorldName(Name manipulator_name)
+Name OpenManipulator::getWorldChildName()
 {
-  return manipulator_.at(manipulator_name).getWorldName();
+  return manipulator_.getWorldChildName();
 }
 
-Name OpenManipulator::getWorldChildName(Name manipulator_name)
+Pose OpenManipulator::getWorldPose()
 {
-  return manipulator_.at(manipulator_name).getWorldChildName();
+  return manipulator_.getWorldPose();
 }
 
-Pose OpenManipulator::getWorldPose(Name manipulator_name)
+Vector3f OpenManipulator::getWorldPosition()
 {
-  return manipulator_.at(manipulator_name).getWorldPose();
+  return manipulator_.getWorldPosition();
 }
 
-Vector3f OpenManipulator::getWorldPosition(Name manipulator_name)
+Matrix3f OpenManipulator::getWorldOrientation()
 {
-  return manipulator_.at(manipulator_name).getWorldPosition();
+  return manipulator_.getWorldOrientation();
 }
 
-Matrix3f OpenManipulator::getWorldOrientation(Name manipulator_name)
+State OpenManipulator::getWorldState()
 {
-  return manipulator_.at(manipulator_name).getWorldOrientation();
+  return manipulator_.getWorldState();
 }
 
-State OpenManipulator::getWorldState(Name manipulator_name)
+VectorXf OpenManipulator::getWorldVelocity()
 {
-  return manipulator_.at(manipulator_name).getWorldState();
+  return manipulator_.getWorldVelocity();
 }
 
-VectorXf OpenManipulator::getWorldVelocity(Name manipulator_name)
+VectorXf OpenManipulator::getWorldAcceleration()
 {
-  return manipulator_.at(manipulator_name).getWorldVelocity();
+  return manipulator_.getWorldAcceleration();
 }
 
-VectorXf OpenManipulator::getWorldAcceleration(Name manipulator_name)
+std::map<Name, Component> OpenManipulator::getAllComponent()
 {
-  return manipulator_.at(manipulator_name).getWorldAcceleration();
+  return manipulator_.getAllComponent();
 }
 
-std::map<Name, Component> OpenManipulator::getAllComponent(Name manipulator_name)
+std::map<Name, Component>::iterator OpenManipulator::getIteratorBegin()
 {
-  return manipulator_.at(manipulator_name).getAllComponent();
+  return manipulator_.getIteratorBegin();
 }
 
-std::map<Name, Component>::iterator OpenManipulator::getIteratorBegin(Name manipulator_name)
+std::map<Name, Component>::iterator OpenManipulator::getIteratorEnd()
 {
-  return manipulator_.at(manipulator_name).getIteratorBegin();
+  return manipulator_.getIteratorEnd();
 }
 
-std::map<Name, Component>::iterator OpenManipulator::getIteratorEnd(Name manipulator_name)
+Component OpenManipulator::getComponent(Name name)
 {
-  return manipulator_.at(manipulator_name).getIteratorEnd();
+  return manipulator_.getComponent(name);
 }
 
-Component OpenManipulator::getComponent(Name manipulator_name, Name name)
+Name OpenManipulator::getComponentParentName(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponent(name);
+  return manipulator_.getComponentParentName(name);
 }
 
-Name OpenManipulator::getComponentParentName(Name manipulator_name, Name name)
+std::vector<Name> OpenManipulator::getComponentChildName(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentParentName(name);
+  return manipulator_.getComponentChildName(name);
 }
 
-std::vector<Name> OpenManipulator::getComponentChildName(Name manipulator_name, Name name)
+Pose OpenManipulator::getComponentPoseToWorld(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentChildName(name);
+  return manipulator_.getComponentPoseToWorld(name);
 }
 
-Pose OpenManipulator::getComponentPoseToWorld(Name manipulator_name, Name name)
+Vector3f OpenManipulator::getComponentPositionToWorld(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentPoseToWorld(name);
+  return manipulator_.getComponentPositionToWorld(name);
 }
 
-Vector3f OpenManipulator::getComponentPositionToWorld(Name manipulator_name, Name name)
+Matrix3f OpenManipulator::getComponentOrientationToWorld(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentPositionToWorld(name);
+  return manipulator_.getComponentOrientationToWorld(name);
 }
 
-Matrix3f OpenManipulator::getComponentOrientationToWorld(Name manipulator_name, Name name)
+State OpenManipulator::getComponentStateToWorld(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentOrientationToWorld(name);
+  return manipulator_.getComponentStateToWorld(name);
 }
 
-State OpenManipulator::getComponentStateToWorld(Name manipulator_name, Name name)
+VectorXf OpenManipulator::getComponentVelocityToWorld(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentStateToWorld(name);
+  return manipulator_.getComponentVelocityToWorld(name);
 }
 
-VectorXf OpenManipulator::getComponentVelocityToWorld(Name manipulator_name, Name name)
+VectorXf OpenManipulator::getComponentAccelerationToWorld(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentVelocityToWorld(name);
+  return manipulator_.getComponentAccelerationToWorld(name);
 }
 
-VectorXf OpenManipulator::getComponentAccelerationToWorld(Name manipulator_name, Name name)
+Pose OpenManipulator::getComponentRelativePoseToParent(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentAccelerationToWorld(name);
+  return manipulator_.getComponentRelativePoseToParent(name);
 }
 
-Pose OpenManipulator::getComponentRelativePoseToParent(Name manipulator_name, Name name)
+Vector3f OpenManipulator::getComponentRelativePositionToParent(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentRelativePoseToParent(name);
+  return manipulator_.getComponentRelativePositionToParent(name);
 }
 
-Vector3f OpenManipulator::getComponentRelativePositionToParent(Name manipulator_name, Name name)
+Matrix3f OpenManipulator::getComponentRelativeOrientationToParent(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentRelativePositionToParent(name);
+  return manipulator_.getComponentRelativeOrientationToParent(name);
 }
 
-Matrix3f OpenManipulator::getComponentRelativeOrientationToParent(Name manipulator_name, Name name)
+Joint OpenManipulator::getComponentJoint(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentRelativeOrientationToParent(name);
+  return manipulator_.getComponentJoint(name);
 }
 
-Joint OpenManipulator::getComponentJoint(Name manipulator_name, Name name)
+int8_t OpenManipulator::getComponentJointId(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentJoint(name);
+  return manipulator_.getComponentJointId(name);
 }
 
-int8_t OpenManipulator::getComponentJointId(Name manipulator_name, Name name)
+float OpenManipulator::getComponentJointCoefficient(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentJointId(name);
+  return manipulator_.getComponentJointCoefficient(name);
 }
 
-float OpenManipulator::getComponentJointCoefficient(Name manipulator_name, Name name)
+Vector3f OpenManipulator::getComponentJointAxis(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentJointCoefficient(name);
+  return manipulator_.getComponentJointAxis(name);
 }
 
-Vector3f OpenManipulator::getComponentJointAxis(Name manipulator_name, Name name)
+float OpenManipulator::getComponentJointAngle(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentJointAxis(name);
+  return manipulator_.getComponentJointAngle(name);
 }
 
-float OpenManipulator::getComponentJointAngle(Name manipulator_name, Name name)
+float OpenManipulator::getComponentJointVelocity(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentJointAngle(name);
+  return manipulator_.getComponentJointVelocity(name);
 }
 
-float OpenManipulator::getComponentJointVelocity(Name manipulator_name, Name name)
+float OpenManipulator::getComponentJointAcceleration(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentJointVelocity(name);
+  return manipulator_.getComponentJointAcceleration(name);
 }
 
-float OpenManipulator::getComponentJointAcceleration(Name manipulator_name, Name name)
+Tool OpenManipulator::getComponentTool(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentJointAcceleration(name);
+  return manipulator_.getComponentTool(name);
 }
 
-Tool OpenManipulator::getComponentTool(Name manipulator_name, Name name)
+int8_t OpenManipulator::getComponentToolId(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentTool(name);
+  return manipulator_.getComponentToolId(name);
 }
 
-int8_t OpenManipulator::getComponentToolId(Name manipulator_name, Name name)
+float OpenManipulator::getComponentToolCoefficient(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentToolId(name);
+  return manipulator_.getComponentToolCoefficient(name);
 }
 
-float OpenManipulator::getComponentToolCoefficient(Name manipulator_name, Name name)
+bool OpenManipulator::getComponentToolOnOff(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentToolCoefficient(name);
+  return manipulator_.getComponentToolOnOff(name);
 }
 
-bool OpenManipulator::getComponentToolOnOff(Name manipulator_name, Name name)
+float OpenManipulator::getComponentToolValue(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentToolOnOff(name);
+  return manipulator_.getComponentToolValue(name);
 }
 
-float OpenManipulator::getComponentToolValue(Name manipulator_name, Name name)
+float OpenManipulator::getComponentMass(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentToolValue(name);
+  return manipulator_.getComponentMass(name);
 }
 
-float OpenManipulator::getComponentMass(Name manipulator_name, Name name)
+Matrix3f OpenManipulator::getComponentInertiaTensor(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentMass(name);
+  return manipulator_.getComponentInertiaTensor(name);
 }
 
-Matrix3f OpenManipulator::getComponentInertiaTensor(Name manipulator_name, Name name)
+Vector3f OpenManipulator::getComponentCenterOfMass(Name name)
 {
-  return manipulator_.at(manipulator_name).getComponentInertiaTensor(name);
+  return manipulator_.getComponentCenterOfMass(name);
 }
 
-Vector3f OpenManipulator::getComponentCenterOfMass(Name manipulator_name, Name name)
+std::vector<float> OpenManipulator::getAllJointAngle()
 {
-  return manipulator_.at(manipulator_name).getComponentCenterOfMass(name);
+  return manipulator_.getAllJointAngle();
 }
 
-std::vector<float> OpenManipulator::getAllJointAngle(Name manipulator_name)
+std::vector<float> OpenManipulator::getAllActiveJointAngle()
 {
-  return manipulator_.at(manipulator_name).getAllJointAngle();
+  return manipulator_.getAllActiveJointAngle();
 }
 
-std::vector<float> OpenManipulator::getAllActiveJointAngle(Name manipulator_name)
+std::vector<uint8_t> OpenManipulator::getAllActiveJointID()
 {
-  return manipulator_.at(manipulator_name).getAllActiveJointAngle();
-}
-
-std::vector<uint8_t> OpenManipulator::getAllActiveJointID(Name manipulator_name)
-{
-  return manipulator_.at(manipulator_name).getAllActiveJointID();
+  return manipulator_.getAllActiveJointID();
 }
 
 // KINEMATICS
 
-MatrixXf OpenManipulator::jacobian(Name manipulator_name, Name tool_name)
+MatrixXf OpenManipulator::jacobian(Name tool_name)
 {
-  return kinematics_->jacobian(&manipulator_.at(manipulator_name), tool_name);
+  return kinematics_->jacobian(&manipulator_, tool_name);
 }
 
-void OpenManipulator::forward(Name manipulator_name)
+void OpenManipulator::forward()
 {
-  return kinematics_->forward(&manipulator_.at(manipulator_name));
+  return kinematics_->forward(&manipulator_);
 }
 
-void OpenManipulator::forward(Name manipulator_name, Name component_name)
+void OpenManipulator::forward(Name first_component_name)
 {
-  return kinematics_->forward(&manipulator_.at(manipulator_name), component_name);
+  return kinematics_->forward(&manipulator_, first_component_name);
 }
 
-std::vector<float> OpenManipulator::inverse(Name manipulator_name, Name tool_name, Pose goal_pose)
+std::vector<float> OpenManipulator::inverse(Name tool_name, Pose goal_pose)
 {
-  return kinematics_->inverse(&manipulator_.at(manipulator_name), tool_name, goal_pose);
+  return kinematics_->inverse(&manipulator_, tool_name, goal_pose);
 }
 
 // ACTUATOR
-bool OpenManipulator::sendAllActuatorAngle(Name manipulator_name, std::vector<float> radian_vector)
+bool OpenManipulator::sendAllActuatorAngle(std::vector<float> radian_vector)
 {
   std::vector<float> calc_angle;
   std::map<Name, Component>::iterator it;
 
   uint8_t index = 0;
-  for (it = manipulator_.at(manipulator_name).getIteratorBegin(); it != manipulator_.at(manipulator_name).getIteratorEnd(); it++)
+  for (it = manipulator_.getIteratorBegin(); it != manipulator_.getIteratorEnd(); it++)
   {
-    if (manipulator_.at(manipulator_name).getComponentJointId(it->first) != -1)
+    if (manipulator_.getComponentJointId(it->first) != -1)
     {
-      calc_angle.push_back(radian_vector.at(index++) * manipulator_.at(manipulator_name).getComponentJointCoefficient(it->first));
+      calc_angle.push_back(radian_vector.at(index++) * manipulator_.getComponentJointCoefficient(it->first));
     }
   }
 
   return actuator_->sendAllActuatorAngle(calc_angle);
 }
 
-bool OpenManipulator::sendMultipleActuatorAngle(Name manipulator_name, std::vector<uint8_t> active_joint_id, std::vector<float> radian_vector)
+bool OpenManipulator::sendMultipleActuatorAngle(std::vector<uint8_t> active_joint_id, std::vector<float> radian_vector)
 {
   std::vector<float> calc_angle;
   std::map<Name, Component>::iterator it;
 
   for (uint8_t index = 0; index < active_joint_id.size(); index++)
   {
-    for (it = manipulator_.at(manipulator_name).getIteratorBegin(); it != manipulator_.at(manipulator_name).getIteratorEnd(); it++)
+    for (it = manipulator_.getIteratorBegin(); it != manipulator_.getIteratorEnd(); it++)
     {
-      if (active_joint_id.at(index) == manipulator_.at(manipulator_name).getComponentJointId(it->first))
+      if (active_joint_id.at(index) == manipulator_.getComponentJointId(it->first))
       {
-        calc_angle.push_back(radian_vector.at(index) * manipulator_.at(manipulator_name).getComponentJointCoefficient(it->first));
+        calc_angle.push_back(radian_vector.at(index) * manipulator_.getComponentJointCoefficient(it->first));
         break;
       }
     }
@@ -533,16 +519,16 @@ bool OpenManipulator::sendMultipleActuatorAngle(Name manipulator_name, std::vect
   return actuator_->sendMultipleActuatorAngle(active_joint_id, calc_angle);
 }
 
-bool OpenManipulator::sendActuatorAngle(Name manipulator_name, uint8_t active_joint_id, float radian)
+bool OpenManipulator::sendActuatorAngle(uint8_t active_joint_id, float radian)
 {
   float calc_angle;
   std::map<Name, Component>::iterator it;
 
-  for (it = manipulator_.at(manipulator_name).getIteratorBegin(); it != manipulator_.at(manipulator_name).getIteratorEnd(); it++)
+  for (it = manipulator_.getIteratorBegin(); it != manipulator_.getIteratorEnd(); it++)
   {
-    if (manipulator_.at(manipulator_name).getComponentJointId(it->first) == active_joint_id)
+    if (manipulator_.getComponentJointId(it->first) == active_joint_id)
     {
-      calc_angle = radian * manipulator_.at(manipulator_name).getComponentJointCoefficient(it->first);
+      calc_angle = radian * manipulator_.getComponentJointCoefficient(it->first);
     }
   }
 
@@ -554,10 +540,10 @@ bool OpenManipulator::sendActuatorSignal(uint8_t active_joint_id, bool onoff)
   return actuator_->sendActuatorSignal(active_joint_id, onoff);
 }
 
-std::vector<float> OpenManipulator::receiveAllActuatorAngle(Name manipulator_name)
+std::vector<float> OpenManipulator::receiveAllActuatorAngle()
 {
   std::vector<float> angles = actuator_->receiveAllActuatorAngle();
-  std::vector<uint8_t> active_joint_id = manipulator_.at(manipulator_name).getAllActiveJointID();
+  std::vector<uint8_t> active_joint_id = manipulator_.getAllActiveJointID();
   std::vector<uint8_t> sorted_id = active_joint_id;
 
   std::vector<float> sorted_angle_vector;
@@ -585,11 +571,11 @@ std::vector<float> OpenManipulator::receiveAllActuatorAngle(Name manipulator_nam
   std::map<Name, Component>::iterator it;
 
   uint8_t index = 0;
-  for (it = manipulator_.at(manipulator_name).getIteratorBegin(); it != manipulator_.at(manipulator_name).getIteratorEnd(); it++)
+  for (it = manipulator_.getIteratorBegin(); it != manipulator_.getIteratorEnd(); it++)
   {
-    if (manipulator_.at(manipulator_name).getComponentJointId(it->first) != -1)
+    if (manipulator_.getComponentJointId(it->first) != -1)
     {
-      calc_sorted_angle.push_back(sorted_angle_vector.at(index++) / manipulator_.at(manipulator_name).getComponentJointCoefficient(it->first));
+      calc_sorted_angle.push_back(sorted_angle_vector.at(index++) / manipulator_.getComponentJointCoefficient(it->first));
     }
   }
 
@@ -633,16 +619,15 @@ float OpenManipulator::getControlTime()
   return control_time_;
 }
 
-void OpenManipulator::makeTrajectory(Name manipulator_name,
-                                     std::vector<Trajectory> start,
+void OpenManipulator::makeTrajectory(std::vector<Trajectory> start,
                                      std::vector<Trajectory> goal)
 {
-  joint_trajectory_.at(manipulator_name).init(start, goal, move_time_, control_time_);
+  joint_trajectory_->init(start, goal, move_time_, control_time_);
 }
 
-MatrixXf OpenManipulator::getTrajectoryCoefficient(Name manipulator_name)
+MatrixXf OpenManipulator::getTrajectoryCoefficient()
 {
-  return joint_trajectory_.at(manipulator_name).getCoefficient();
+  return joint_trajectory_->getCoefficient();
 }
 
 void OpenManipulator::move()
@@ -686,7 +671,7 @@ std::vector<Trajectory> OpenManipulator::getGoalTrajectory()
   return goal_trajectory_;
 }
 
-void OpenManipulator::jointControl(Name manipulator_name)
+void OpenManipulator::jointControl()
 {
   uint16_t step_time = uint16_t(floor(move_time_ / control_time_) + 1.0);
   float tick_time = 0;
@@ -695,9 +680,9 @@ void OpenManipulator::jointControl(Name manipulator_name)
   std::vector<float> goal_velocity;
   std::vector<float> goal_acceleration;
 
-  goal_position.reserve(manipulator_.at(manipulator_name).getDOF());
-  goal_velocity.reserve(manipulator_.at(manipulator_name).getDOF());
-  goal_acceleration.reserve(manipulator_.at(manipulator_name).getDOF());
+  goal_position.reserve(manipulator_.getDOF());
+  goal_velocity.reserve(manipulator_.getDOF());
+  goal_acceleration.reserve(manipulator_.getDOF());
 
   if (moving_)
   {
@@ -705,23 +690,23 @@ void OpenManipulator::jointControl(Name manipulator_name)
     {
       tick_time = control_time_ * step_cnt_;
 
-      goal_position = joint_trajectory_.at(manipulator_name).getPosition(tick_time);
-      goal_velocity = joint_trajectory_.at(manipulator_name).getVelocity(tick_time);
-      goal_acceleration = joint_trajectory_.at(manipulator_name).getAcceleration(tick_time);
+      goal_position = joint_trajectory_->getPosition(tick_time);
+      goal_velocity = joint_trajectory_->getVelocity(tick_time);
+      goal_acceleration = joint_trajectory_->getAcceleration(tick_time);
 
       if (platform_)
-        sendMultipleActuatorAngle(manipulator_name, manipulator_.at(manipulator_name).getAllActiveJointID(), goal_position);
+        sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
 
       if (processing_)
       {
         OM_PROCESSING::sendAngle2Processing(goal_position);
         if (platform_ == false)
-          manipulator_.at(manipulator_name).setAllActiveJointAngle(goal_position);
+          manipulator_.setAllActiveJointAngle(goal_position);
       }
-        
-      previous_goal_.at(manipulator_name).position = goal_position;
-      previous_goal_.at(manipulator_name).velocity = goal_velocity;
-      previous_goal_.at(manipulator_name).acceleration = goal_acceleration;
+
+      previous_goal_.position = goal_position;
+      previous_goal_.velocity = goal_velocity;
+      previous_goal_.acceleration = goal_acceleration;
 
       step_cnt_++;
     }
@@ -733,26 +718,26 @@ void OpenManipulator::jointControl(Name manipulator_name)
   }
 }
 
-void OpenManipulator::jointMove(Name manipulator_name, std::vector<float> goal_position, float move_time)
+void OpenManipulator::jointMove(std::vector<float> goal_position, float move_time)
 {
   Trajectory start;
   Trajectory goal;
 
-  std::vector<float> present_position = previous_goal_.at(manipulator_name).position;
-  std::vector<float> present_velocity = previous_goal_.at(manipulator_name).velocity;
-  std::vector<float> present_acceleration = previous_goal_.at(manipulator_name).acceleration;
+  std::vector<float> present_position = previous_goal_.position;
+  std::vector<float> present_velocity = previous_goal_.velocity;
+  std::vector<float> present_acceleration = previous_goal_.acceleration;
 
   start_trajectory_.clear();
   goal_trajectory_.clear();
 
-  for (uint8_t index = 0; index < manipulator_.at(manipulator_name).getDOF(); index++)
+  for (uint8_t index = 0; index < manipulator_.getDOF(); index++)
   {
     start.position = present_position.at(index);
     start.velocity = present_velocity.at(index);
     start.acceleration = present_acceleration.at(index);
 
     start_trajectory_.push_back(start);
-  
+
     goal.position = goal_position.at(index);
     goal.velocity = 0.0f;
     goal.acceleration = 0.0f;
@@ -761,16 +746,16 @@ void OpenManipulator::jointMove(Name manipulator_name, std::vector<float> goal_p
   }
 
   setMoveTime(move_time);
-  makeTrajectory(manipulator_name, start_trajectory_, goal_trajectory_);
+  makeTrajectory(start_trajectory_, goal_trajectory_);
   move();
 }
 
-bool OpenManipulator::toolMove(Name manipulator_name, Name tool_name, bool onoff)
+bool OpenManipulator::toolMove(Name tool_name, bool onoff)
 {
-  manipulator_.at(manipulator_name).setComponentToolOnOff(tool_name, onoff);
+  manipulator_.setComponentToolOnOff(tool_name, onoff);
 
   if (platform_)
-    actuator_->sendActuatorSignal(manipulator_.at(manipulator_name).getComponentToolId(tool_name), onoff);
+    actuator_->sendActuatorSignal(manipulator_.getComponentToolId(tool_name), onoff);
 
   if (processing_)
     OM_PROCESSING::sendToolData2Processing(onoff);
@@ -778,14 +763,14 @@ bool OpenManipulator::toolMove(Name manipulator_name, Name tool_name, bool onoff
   return true;
 }
 
-bool OpenManipulator::toolMove(Name manipulator_name, Name tool_name, float tool_value)
+bool OpenManipulator::toolMove(Name tool_name, float tool_value)
 {
-  float calc_value = tool_value * manipulator_.at(manipulator_name).getComponentToolCoefficient(tool_name);
+  float calc_value = tool_value * manipulator_.getComponentToolCoefficient(tool_name);
 
-  manipulator_.at(manipulator_name).setComponentToolValue(tool_name, calc_value);
+  manipulator_.setComponentToolValue(tool_name, calc_value);
 
   if (platform_)
-    actuator_->sendActuatorAngle(manipulator_.at(manipulator_name).getComponentToolId(tool_name), calc_value);
+    actuator_->sendActuatorAngle(manipulator_.getComponentToolId(tool_name), calc_value);
 
   if (processing_)
     OM_PROCESSING::sendToolData2Processing(tool_value);
@@ -793,25 +778,28 @@ bool OpenManipulator::toolMove(Name manipulator_name, Name tool_name, float tool
   return true;
 }
 
-void OpenManipulator::setPose(Name manipulator_name, Name tool_name, Pose goal_pose, float move_time)
+void OpenManipulator::setPose(Name tool_name, Pose goal_pose, float move_time)
 {
-  std::vector<float> goal_position = kinematics_->inverse(&manipulator_.at(manipulator_name), tool_name, goal_pose);
+  std::vector<float> goal_position = kinematics_->inverse(&manipulator_, tool_name, goal_pose);
 
-  jointMove(manipulator_name, goal_position, move_time);
+  jointMove(goal_position, move_time);
 }
 
-void OpenManipulator::setMove(Name manipulator_name, Name tool_name, Vector3f meter, float move_time)
+void OpenManipulator::setMove(Name tool_name, Vector3f meter, float move_time)
 {
-  setAllActiveJointAngle(manipulator_name, previous_goal_.at(manipulator_name).position);
-  forward(manipulator_name, manipulator_.at(manipulator_name).getWorldChildName());
+  setAllActiveJointAngle(previous_goal_.position);
+  forward(manipulator_.getWorldChildName());
 
-  previous_goal_.at(manipulator_name).pose = manipulator_.at(manipulator_name).getComponentPoseToWorld(tool_name);
-  
-  setAllActiveJointAngle(manipulator_name, receiveAllActuatorAngle(manipulator_name));
-  forward(manipulator_name, manipulator_.at(manipulator_name).getWorldChildName());
+  previous_goal_.pose = manipulator_.getComponentPoseToWorld(tool_name);
 
-  Vector3f present_position_to_world = previous_goal_.at(manipulator_name).pose.position;
-  Matrix3f present_orientation_to_world = previous_goal_.at(manipulator_name).pose.orientation;
+  if (platform_)
+  {
+    setAllActiveJointAngle(receiveAllActuatorAngle());
+    forward(manipulator_.getWorldChildName());
+  }
+
+  Vector3f present_position_to_world = previous_goal_.pose.position;
+  Matrix3f present_orientation_to_world = previous_goal_.pose.orientation;
 
   Vector3f goal_position_to_world = present_position_to_world + meter;
 
@@ -819,5 +807,5 @@ void OpenManipulator::setMove(Name manipulator_name, Name tool_name, Vector3f me
   goal_pose.position = goal_position_to_world;
   goal_pose.orientation = present_orientation_to_world;
 
-  setPose(manipulator_name, tool_name, goal_pose, move_time);
+  setPose(tool_name, goal_pose, move_time);
 }

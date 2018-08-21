@@ -53,9 +53,9 @@ typedef struct
 class OpenManipulator
 {
 private:
-  std::map<Name, OM_MANAGER::Manipulator> manipulator_;
-  std::map<Name, OM_PATH::JointTrajectory> joint_trajectory_;
-  std::map<Name, Goal> previous_goal_;
+  OM_MANAGER::Manipulator manipulator_;
+  OM_PATH::JointTrajectory *joint_trajectory_;
+  Goal previous_goal_;
 
   std::vector<Trajectory> start_trajectory_;
   std::vector<Trajectory> goal_trajectory_;
@@ -81,24 +81,20 @@ public:
 
   void initKinematics(Kinematics *kinematics);
   void initActuator(Actuator *actuator);
-  void initJointTrajectory(Name manipulator_name);
+  void initJointTrajectory();
 
   void connectProcessing(uint8_t actuator_num);
   void sendAngleToProcessing(std::vector<float> joint_angle);
   void sendToolData2Processing(float value);
   String* parseDataFromProcessing(String get);
 
-  void addManipulator(Name manipulator_name);
-
   ///////////////////////////*initialize function*/////////////////////////////
-  void addWorld(Name manipulator_name,
-                Name world_name,
+  void addWorld(Name world_name,
                 Name child_name,
                 Vector3f world_position = Vector3f::Zero(),
                 Matrix3f world_orientation = Matrix3f::Identity(3, 3));
 
-  void addComponent(Name manipulator_name,
-                    Name me_name,
+  void addComponent(Name my_name,
                     Name parent_name,
                     Name child_name,
                     Vector3f relative_position,
@@ -110,8 +106,7 @@ public:
                     Matrix3f inertia_tensor = Matrix3f::Identity(3, 3),
                     Vector3f center_of_mass = Vector3f::Zero());
 
-  void addTool(Name manipulator_name,
-               Name me_name,
+  void addTool(Name my_name,
                Name parent_name,
                Vector3f relative_position,
                Matrix3f relative_orientation,
@@ -121,97 +116,95 @@ public:
                Matrix3f inertia_tensor = Matrix3f::Identity(3, 3),
                Vector3f center_of_mass = Vector3f::Zero());
 
-  void addComponentChild(Name manipulator_name, Name me_name, Name child_name);
-  void checkManipulatorSetting(Name manipulator_name);
+  void addComponentChild(Name my_name, Name child_name);
+  void checkManipulatorSetting();
 
   ///////////////////////////////Set function//////////////////////////////////
-  void setWorldPose(Name manipulator_name, Pose world_pose);
-  void setWorldPosition(Name manipulator_name, Vector3f world_position);
-  void setWorldOrientation(Name manipulator_name, Matrix3f world_orientation);
-  void setWorldState(Name manipulator_name, State world_state);
-  void setWorldVelocity(Name manipulator_name, VectorXf world_velocity);
-  void setWorldAcceleration(Name manipulator_name, VectorXf world_acceleration);
+  void setWorldPose(Pose world_pose);
+  void setWorldPosition(Vector3f world_position);
+  void setWorldOrientation(Matrix3f world_orientation);
+  void setWorldState(State world_state);
+  void setWorldVelocity(VectorXf world_velocity);
+  void setWorldAcceleration(VectorXf world_acceleration);
 
-  void setComponent(Name manipulator_name, Name name, Component component);
-  void setComponentPoseToWorld(Name manipulator_name, Name name, Pose pose_to_world);
-  void setComponentPositionToWorld(Name manipulator_name, Name name, Vector3f position_to_world);
-  void setComponentOrientationToWorld(Name manipulator_name, Name name, Matrix3f orientation_to_wolrd);
-  void setComponentStateToWorld(Name manipulator_name, Name name, State state_to_world);
-  void setComponentVelocityToWorld(Name manipulator_name, Name name, VectorXf velocity);
-  void setComponentAccelerationToWorld(Name manipulator_name, Name name, VectorXf accelaration);
-  void setComponentJointAngle(Name manipulator_name, Name name, float angle);
-  void setComponentJointVelocity(Name manipulator_name, Name name, float angular_velocity);
-  void setComponentJointAcceleration(Name manipulator_name, Name name, float angular_acceleration);
-  void setComponentToolOnOff(Name manipulator_name, Name name, bool on_off);
-  void setComponentToolValue(Name manipulator_name, Name name, float actuator_value);
+  void setComponent(Name name, Component component);
+  void setComponentPoseToWorld(Name name, Pose pose_to_world);
+  void setComponentPositionToWorld(Name name, Vector3f position_to_world);
+  void setComponentOrientationToWorld(Name name, Matrix3f orientation_to_wolrd);
+  void setComponentStateToWorld(Name name, State state_to_world);
+  void setComponentVelocityToWorld(Name name, VectorXf velocity);
+  void setComponentAccelerationToWorld(Name name, VectorXf accelaration);
+  void setComponentJointAngle(Name name, float angle);
+  void setComponentJointVelocity(Name name, float angular_velocity);
+  void setComponentJointAcceleration(Name name, float angular_acceleration);
+  void setComponentToolOnOff(Name name, bool on_off);
+  void setComponentToolValue(Name name, float actuator_value);
 
-  void setAllActiveJointAngle(Name manipulator_name, std::vector<float> angle_vector);
+  void setAllActiveJointAngle(std::vector<float> angle_vector);
 
   ///////////////////////////////Get function//////////////////////////////////
-  
-  OM_MANAGER::Manipulator getManipulator(Name manipulator_name);
-  int8_t getDOF(Name manipulator_name);
+  int8_t getDOF();
 
-  int8_t getComponentSize(Name manipulator_name);
-  Name getWorldName(Name manipulator_name);
-  Name getWorldChildName(Name manipulator_name);
-  Pose getWorldPose(Name manipulator_name);
-  Vector3f getWorldPosition(Name manipulator_name);
-  Matrix3f getWorldOrientation(Name manipulator_name);
-  State getWorldState(Name manipulator_name);
-  VectorXf getWorldVelocity(Name manipulator_name);
-  VectorXf getWorldAcceleration(Name manipulator_name);
+  int8_t getComponentSize();
+  Name getWorldName();
+  Name getWorldChildName();
+  Pose getWorldPose();
+  Vector3f getWorldPosition();
+  Matrix3f getWorldOrientation();
+  State getWorldState();
+  VectorXf getWorldVelocity();
+  VectorXf getWorldAcceleration();
 
-  std::map<Name, Component> getAllComponent(Name manipulator_name);
-  std::map<Name, Component>::iterator getIteratorBegin(Name manipulator_name);
-  std::map<Name, Component>::iterator getIteratorEnd(Name manipulator_name);
-  Component getComponent(Name manipulator_name, Name name);
-  Name getComponentParentName(Name manipulator_name, Name name);
-  std::vector<Name> getComponentChildName(Name manipulator_name, Name name);
-  Pose getComponentPoseToWorld(Name manipulator_name, Name name);
-  Vector3f getComponentPositionToWorld(Name manipulator_name, Name name);
-  Matrix3f getComponentOrientationToWorld(Name manipulator_name, Name name);
-  State getComponentStateToWorld(Name manipulator_name, Name name);
-  VectorXf getComponentVelocityToWorld(Name manipulator_name, Name name);
-  VectorXf getComponentAccelerationToWorld(Name manipulator_name, Name name);
-  Pose getComponentRelativePoseToParent(Name manipulator_name, Name name);
-  Vector3f getComponentRelativePositionToParent(Name manipulator_name, Name name);
-  Matrix3f getComponentRelativeOrientationToParent(Name manipulator_name, Name name);
-  Joint getComponentJoint(Name manipulator_name, Name name);
-  int8_t getComponentJointId(Name manipulator_name, Name name);
-  float getComponentJointCoefficient(Name manipulator_name, Name name);
-  Vector3f getComponentJointAxis(Name manipulator_name, Name name);
-  float getComponentJointAngle(Name manipulator_name, Name name);
-  float getComponentJointVelocity(Name manipulator_name, Name name);
-  float getComponentJointAcceleration(Name manipulator_name, Name name);
-  Tool getComponentTool(Name manipulator_name, Name name);
-  int8_t getComponentToolId(Name manipulator_name, Name name);
-  float getComponentToolCoefficient(Name manipulator_name, Name name);
-  bool getComponentToolOnOff(Name manipulator_name, Name name);
-  float getComponentToolValue(Name manipulator_name, Name name);
-  float getComponentMass(Name manipulator_name, Name name);
-  Matrix3f getComponentInertiaTensor(Name manipulator_name, Name name);
-  Vector3f getComponentCenterOfMass(Name manipulator_name, Name name);
+  std::map<Name, Component> getAllComponent();
+  std::map<Name, Component>::iterator getIteratorBegin();
+  std::map<Name, Component>::iterator getIteratorEnd();
+  Component getComponent(Name name);
+  Name getComponentParentName(Name name);
+  std::vector<Name> getComponentChildName(Name name);
+  Pose getComponentPoseToWorld(Name name);
+  Vector3f getComponentPositionToWorld(Name name);
+  Matrix3f getComponentOrientationToWorld(Name name);
+  State getComponentStateToWorld(Name name);
+  VectorXf getComponentVelocityToWorld(Name name);
+  VectorXf getComponentAccelerationToWorld(Name name);
+  Pose getComponentRelativePoseToParent(Name name);
+  Vector3f getComponentRelativePositionToParent(Name name);
+  Matrix3f getComponentRelativeOrientationToParent(Name name);
+  Joint getComponentJoint(Name name);
+  int8_t getComponentJointId(Name name);
+  float getComponentJointCoefficient(Name name);
+  Vector3f getComponentJointAxis(Name name);
+  float getComponentJointAngle(Name name);
+  float getComponentJointVelocity(Name name);
+  float getComponentJointAcceleration(Name name);
+  Tool getComponentTool(Name name);
+  int8_t getComponentToolId(Name name);
+  float getComponentToolCoefficient(Name name);
+  bool getComponentToolOnOff(Name name);
+  float getComponentToolValue(Name name);
+  float getComponentMass(Name name);
+  Matrix3f getComponentInertiaTensor(Name name);
+  Vector3f getComponentCenterOfMass(Name name);
 
-  std::vector<float> getAllJointAngle(Name manipulator_name);
-  std::vector<float> getAllActiveJointAngle(Name manipulator_name);
-  std::vector<uint8_t> getAllActiveJointID(Name manipulator_name);
+  std::vector<float> getAllJointAngle();
+  std::vector<float> getAllActiveJointAngle();
+  std::vector<uint8_t> getAllActiveJointID();
 
   // KINEMATICS (INCLUDES VIRTUAL)
-  MatrixXf jacobian(Name manipulator_name, Name tool_name);
-  void forward(Name manipulator_name);
-  void forward(Name manipulator_name, Name component_name);
-  std::vector<float> inverse(Name manipulator_name, Name tool_name, Pose goal_pose);
+  MatrixXf jacobian(Name tool_name);
+  void forward();
+  void forward(Name first_component_name);
+  std::vector<float> inverse(Name tool_name, Pose goal_pose);
 
   // ACTUATOR (INCLUDES VIRTUAL)
   void actuatorInit(const void *arg);
   void actuatorEnable();
   void actuatorDisable();
-  bool sendAllActuatorAngle(Name manipulator_name, std::vector<float> radian_vector);
-  bool sendMultipleActuatorAngle(Name manipulator_name, std::vector<uint8_t> active_joint_id, std::vector<float> radian_vector);
-  bool sendActuatorAngle(Name manipulator_name, uint8_t active_joint_id, float radian);
+  bool sendAllActuatorAngle(std::vector<float> radian_vector);
+  bool sendMultipleActuatorAngle(std::vector<uint8_t> active_joint_id, std::vector<float> radian_vector);
+  bool sendActuatorAngle(uint8_t active_joint_id, float radian);
   bool sendActuatorSignal(uint8_t active_joint_id, bool onoff);
-  std::vector<float> receiveAllActuatorAngle(Name manipulator_name);
+  std::vector<float> receiveAllActuatorAngle();
 
   // PATH
   void setMoveTime(float move_time);
@@ -220,13 +213,12 @@ public:
   float getMoveTime();
   float getControlTime();
 
-  void makeTrajectory(Name manipulator_name,
-                      std::vector<Trajectory> start,
+  void makeTrajectory(std::vector<Trajectory> start,
                       std::vector<Trajectory> goal);
-  MatrixXf getTrajectoryCoefficient(Name manipulator_name);
+  MatrixXf getTrajectoryCoefficient();
   void move();
   bool moving();
-  void jointControl(Name manipulator_name);
+  void jointControl();
 
   void setStartTrajectory(Trajectory trajectory);
   void clearStartTrajectory();
@@ -237,12 +229,12 @@ public:
   std::vector<Trajectory> getGoalTrajectory();
 
   // Additional Functions
-  void jointMove(Name manipulator_name, std::vector<float> goal_position, float move_time = 1.0f);
-  bool toolMove(Name manipulator_name, Name tool_name, bool onoff);
-  bool toolMove(Name manipulator_name, Name tool_name, float tool_value);
+  void jointMove(std::vector<float> goal_position, float move_time = 1.0f);
+  bool toolMove(Name tool_name, bool onoff);
+  bool toolMove(Name tool_name, float tool_value);
 
-  void setPose(Name manipulator_name, Name tool_name, Pose goal_pose, float move_time = 1.0f);
-  void setMove(Name manipulator_name, Name tool_name, Vector3f meter, float move_time = 1.0f);
+  void setPose(Name tool_name, Pose goal_pose, float move_time = 1.0f);
+  void setMove(Name tool_name, Vector3f meter, float move_time = 1.0f);
 };
 } // namespace OPEN_MANIPULATOR
 
