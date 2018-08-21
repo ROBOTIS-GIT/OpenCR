@@ -31,6 +31,11 @@ int availableProcessing()
   return Serial.available();
 }
 
+String readProcessingData()
+{
+  return Serial.readStringUntil('\n');
+}
+
 void fromProcessing(String data)
 {
   String *cmd = manipulator.parseDataFromProcessing(data);
@@ -77,17 +82,17 @@ void fromProcessing(String data)
   else if (cmd[0] == "task")
   {
     if (cmd[1] == "forward")
-      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.010, 0.0, 0.0), 0.2f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.010f, 0.0, 0.0), 0.2f);
     else if (cmd[1] == "back")
-      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(-0.010, 0.0, 0.0), 0.2f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(-0.010f, 0.0, 0.0), 0.2f);
     else if (cmd[1] == "left")
-      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.010, 0.0), 0.2f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.010f, 0.0), 0.2f);
     else if (cmd[1] == "right")
-      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, -0.010, 0.0), 0.2f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, -0.010f, 0.0), 0.2f);
     else if (cmd[1] == "up")
-      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.010), 0.2f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.010f), 0.2f);
     else if (cmd[1] == "down")
-      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.010), 0.2f);
+      manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.010f), 0.2f);
     else
       manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.0), 0.2f);
   }
