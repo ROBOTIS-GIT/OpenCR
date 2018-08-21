@@ -33,20 +33,20 @@ void OpenDebugSerialPort();
 namespace LOG
 {
 void log(String form, String msg, String port = "USB");
-void INFO(String msg);
-void INFO(String msg, float num, uint8_t point = 3, String port = "USB");
+void INFO(String msg, String port = "USB");
+void INFO(String msg, float num, String port = "USB", uint8_t point = 3);
 
-void WARN(String msg);
-void WARN(String msg, float num, uint8_t point = 3, String port = "USB");
+void WARN(String msg, String port = "USB");
+void WARN(String msg, float num, String port = "USB", uint8_t point = 3);
 
-void ERROR(String msg);
-void ERROR(String msg, float num, uint8_t point = 3, String port = "USB");
+void ERROR(String msg, String port = "USB");
+void ERROR(String msg, float num, String port = "USB", uint8_t point = 3);
 } // namespace LOG
 
 namespace PRINT
 {
 template <typename vector>
-void VECTOR(vector &v, uint8_t point = 3, String port = "USB")
+void VECTOR(vector &v, String port = "USB", uint8_t point = 3)
 {
   uint8_t i = 0;
 
@@ -75,7 +75,7 @@ void VECTOR(vector &v, uint8_t point = 3, String port = "USB")
 }
 
 template <typename T>
-void VECTOR(std::vector<T> &v, uint8_t point = 3, String port = "USB")
+void VECTOR(std::vector<T> &v, String port = "USB", uint8_t point = 3)
 {
   uint8_t i = 0;
 
@@ -102,7 +102,7 @@ void VECTOR(std::vector<T> &v, uint8_t point = 3, String port = "USB")
 }
 
 template <typename matrix>
-void MATRIX(matrix &m, uint8_t point = 3, String port = "USB")
+void MATRIX(matrix &m, String port = "USB", uint8_t point = 3)
 {
   uint8_t i = 0, j = 0;
 

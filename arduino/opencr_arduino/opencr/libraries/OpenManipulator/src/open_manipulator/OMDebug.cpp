@@ -36,12 +36,12 @@ void LOG::log(String form, String msg, String port)
     DEBUG.println(form + msg);
 }
 
-void LOG::INFO(String msg)
+void LOG::INFO(String msg, String port)
 {
-  log("[INFO] ", msg);
+  log("[INFO] ", msg, port);
 }
 
-void LOG::INFO(String msg, float num, uint8_t point, String port)
+void LOG::INFO(String msg, float num, String port, uint8_t point)
 {
   if (port == "USB")
   {
@@ -57,12 +57,12 @@ void LOG::INFO(String msg, float num, uint8_t point, String port)
   }
 }
 
-void LOG::WARN(String msg)
+void LOG::WARN(String msg, String port)
 {
-  log("[WARN] ", msg);
+  log("[WARN] ", msg, port);
 }
 
-void LOG::WARN(String msg, float num, uint8_t point, String port)
+void LOG::WARN(String msg, float num, String port, uint8_t point)
 {
   if (port == "USB")
   {
@@ -78,12 +78,12 @@ void LOG::WARN(String msg, float num, uint8_t point, String port)
   }
 }
 
-void LOG::ERROR(String msg)
+void LOG::ERROR(String msg, String port)
 {
-  log("[ERROR] ", msg);
+  log("[ERROR] ", msg, port);
 }
 
-void LOG::ERROR(String msg, float num, uint8_t point, String port)
+void LOG::ERROR(String msg, float num, String port, uint8_t point)
 {
   if (port == "USB")
   {
