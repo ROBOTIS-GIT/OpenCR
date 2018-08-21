@@ -34,14 +34,15 @@ void setup()
   initManipulator();
 
   connectProcessing();
+  connectRC100();
 
-  goal_position.push_back(0.0);
-  goal_position.push_back(0.0);
-  goal_position.push_back(0.0);
-  goal_position.push_back(0.0);
+  // goal_position.push_back(0.0);
+  // goal_position.push_back(0.0);
+  // goal_position.push_back(0.0);
+  // goal_position.push_back(0.0);
 
-  goal_pose.position = OM_MATH::makeVector3(-0.050, 0.0, 0.203);
-  goal_pose.orientation = Eigen::Matrix3f::Identity();
+  // goal_pose.position = OM_MATH::makeVector3(-0.050, 0.0, 0.203);
+  // goal_pose.orientation = Eigen::Matrix3f::Identity();
 
   initThread();
   startThread();
@@ -49,14 +50,15 @@ void setup()
 
 void loop()
 {
-  // fromRC100();
+  getData(0.100f);
 
-  if (Serial.available())
-  {
-    MUTEX::wait();
-    fromProcessing(Serial.readStringUntil('\n'));
-    MUTEX::release();
-  }
+
+  // if (Serial.available())
+  // {
+  //   MUTEX::wait();
+  //   fromProcessing(Serial.readStringUntil('\n'));
+  //   MUTEX::release();
+  // }
 
   // switch(seq)
   // {
@@ -138,5 +140,64 @@ static void Loop(void const *argument)
   {
     loop();
     showLedStatus();
+  }
+}
+
+void getData(uint32_t wait_time)
+{
+  static uint8_t state = 0;
+  static uint32_t tick = 0;
+
+  bool rc100_flag      = false;
+  bool processing_flag = false;
+
+  uint16_t get_rc100_data     = 0;
+  String get_processing_data = "";
+
+  if (availableRC100())
+  {
+    get_rc100_data = rc100.readData();
+    rc100_flag = true;
+  }
+
+  if (availableProcessing())
+  {
+    get_processing_data = Serial.readStringUntil('\n');
+    processing_flag = true;
+  }
+
+  switch (state)
+  {
+    case 0:
+      if (rc100_flag)
+      {
+        MUTEX::wait();
+        fromRC100(get_rc100_data);   
+        MUTEX::release();
+
+        tick = millis();
+        state  = 1;
+      }
+      else if (processing_flag)
+      {
+        MUTEX::wait();
+        fromProcessing(get_processing_data); 
+        MUTEX::release();
+
+        tick = millis();
+        state  = 1;
+      }
+     break;
+    
+    case 1:
+      if ((millis() - tick) >= wait_time)
+      {
+        state = 0;
+      }
+     break;
+    
+    default :
+     state = 0;
+     break;
   }
 }
