@@ -44,7 +44,9 @@ namespace OPEN_MANIPULATOR
 {
 typedef struct
 {
-  std::vector<float> angle;
+  std::vector<float> position;
+  std::vector<float> velocity;
+  std::vector<float> acceleration;
   Pose pose;
 } Goal;
 
@@ -66,6 +68,7 @@ private:
   float control_time_;
 
   bool moving_;
+  uint16_t step_cnt_;
 
   bool platform_;
   bool processing_;

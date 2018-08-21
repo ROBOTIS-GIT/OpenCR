@@ -34,6 +34,7 @@ void MUTEX::release() { osMutexRelease(om_mutex_id); }
 
 OpenManipulator::OpenManipulator() : move_time_(1.0f),
                                      control_time_(0.010f),
+                                     step_cnt_(0),
                                      moving_(false),
                                      platform_(false),
                                      processing_(false)
@@ -61,8 +62,16 @@ void OpenManipulator::initJointTrajectory(Name manipulator_name)
   OM_PATH::JointTrajectory joint_trajectory(manipulator_.at(manipulator_name).getDOF());
   joint_trajectory_.insert(std::make_pair(manipulator_name, joint_trajectory));
 
+  std::vector<float> empty_v;
+
+  for (uint8_t index = 0; index < manipulator_.at(manipulator_name).getDOF(); index++)
+    empty_v.push_back(0.0);
+
   Goal goal;
-  goal.angle = receiveAllActuatorAngle(manipulator_name);
+  goal.position = receiveAllActuatorAngle(manipulator_name);
+  goal.velocity = empty_v;
+  goal.acceleration = empty_v;
+
   previous_goal_.insert(std::make_pair(manipulator_name, goal));
 
   start_trajectory_.reserve(manipulator_.at(manipulator_name).getDOF());
@@ -629,14 +638,6 @@ void OpenManipulator::makeTrajectory(Name manipulator_name,
                                      std::vector<Trajectory> goal)
 {
   joint_trajectory_.at(manipulator_name).init(start, goal, move_time_, control_time_);
-
-  // Save goal informations
-  std::vector<float> goal_angle;
-
-  for (uint8_t size = 0; size < goal.size(); size++)
-    goal_angle.push_back(goal.at(size).position);
-    
-  previous_goal_.at(manipulator_name).angle = goal_angle;
 }
 
 MatrixXf OpenManipulator::getTrajectoryCoefficient(Name manipulator_name)
@@ -647,6 +648,7 @@ MatrixXf OpenManipulator::getTrajectoryCoefficient(Name manipulator_name)
 void OpenManipulator::move()
 {
   moving_ = true;
+  step_cnt_ = 0;
 }
 
 bool OpenManipulator::moving()
@@ -688,7 +690,6 @@ void OpenManipulator::jointControl(Name manipulator_name)
 {
   uint16_t step_time = uint16_t(floor(move_time_ / control_time_) + 1.0);
   float tick_time = 0;
-  static uint16_t step_cnt = 0;
 
   std::vector<float> goal_position;
   std::vector<float> goal_velocity;
@@ -700,9 +701,9 @@ void OpenManipulator::jointControl(Name manipulator_name)
 
   if (moving_)
   {
-    if (step_cnt < step_time)
+    if (step_cnt_ < step_time)
     {
-      tick_time = control_time_ * step_cnt;
+      tick_time = control_time_ * step_cnt_;
 
       goal_position = joint_trajectory_.at(manipulator_name).getPosition(tick_time);
       goal_velocity = joint_trajectory_.at(manipulator_name).getVelocity(tick_time);
@@ -717,12 +718,16 @@ void OpenManipulator::jointControl(Name manipulator_name)
         if (platform_ == false)
           manipulator_.at(manipulator_name).setAllActiveJointAngle(goal_position);
       }
+        
+      previous_goal_.at(manipulator_name).position = goal_position;
+      previous_goal_.at(manipulator_name).velocity = goal_velocity;
+      previous_goal_.at(manipulator_name).acceleration = goal_acceleration;
 
-      step_cnt++;
+      step_cnt_++;
     }
     else
     {
-      step_cnt = 0;
+      step_cnt_ = 0;
       moving_ = false;
     }
   }
@@ -733,7 +738,9 @@ void OpenManipulator::jointMove(Name manipulator_name, std::vector<float> goal_p
   Trajectory start;
   Trajectory goal;
 
-  std::vector<float> present_position = previous_goal_.at(manipulator_name).angle;
+  std::vector<float> present_position = previous_goal_.at(manipulator_name).position;
+  std::vector<float> present_velocity = previous_goal_.at(manipulator_name).velocity;
+  std::vector<float> present_acceleration = previous_goal_.at(manipulator_name).acceleration;
 
   start_trajectory_.clear();
   goal_trajectory_.clear();
@@ -741,8 +748,8 @@ void OpenManipulator::jointMove(Name manipulator_name, std::vector<float> goal_p
   for (uint8_t index = 0; index < manipulator_.at(manipulator_name).getDOF(); index++)
   {
     start.position = present_position.at(index);
-    start.velocity = 0.0f;
-    start.acceleration = 0.0f;
+    start.velocity = present_velocity.at(index);
+    start.acceleration = present_acceleration.at(index);
 
     start_trajectory_.push_back(start);
   
@@ -795,7 +802,7 @@ void OpenManipulator::setPose(Name manipulator_name, Name tool_name, Pose goal_p
 
 void OpenManipulator::setMove(Name manipulator_name, Name tool_name, Vector3f meter, float move_time)
 {
-  setAllActiveJointAngle(manipulator_name, previous_goal_.at(manipulator_name).angle);
+  setAllActiveJointAngle(manipulator_name, previous_goal_.at(manipulator_name).position);
   forward(manipulator_name, manipulator_.at(manipulator_name).getWorldChildName());
 
   previous_goal_.at(manipulator_name).pose = manipulator_.at(manipulator_name).getComponentPoseToWorld(tool_name);
