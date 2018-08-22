@@ -321,9 +321,10 @@ void Link::forward(OM_MANAGER::Manipulator *manipulator)
   //Base Pose Set (from world)
   pose_to_wolrd = getWorldPose(manipulator);
   link_relative_pose = getComponentRelativePoseToParent(manipulator, getWorldChildName(manipulator));
+  rodrigues_rotation_matrix = OM_MATH::rodriguesRotationMatrix(getComponentJointAxis(manipulator, getWorldChildName(manipulator)), getComponentJointAngle(manipulator, getWorldChildName(manipulator)));
 
   result_pose.position = pose_to_wolrd.position + pose_to_wolrd.orientation * link_relative_pose.position;
-  result_pose.orientation = pose_to_wolrd.orientation * link_relative_pose.orientation;
+  result_pose.orientation = pose_to_wolrd.orientation * link_relative_pose.orientation * rodrigues_rotation_matrix;
   setComponentPoseToWorld(manipulator, getWorldChildName(manipulator), result_pose);
 
   //Next Component Pose Set
