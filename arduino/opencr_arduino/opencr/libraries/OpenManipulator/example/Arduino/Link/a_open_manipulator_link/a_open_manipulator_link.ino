@@ -17,7 +17,6 @@
 /* Authors: Hye-Jong KIM */
 
 #include "OMLink.h"
-#include "RemoteController.h"
 //#include "Processing.h"
 
 float present_time = 0.0;
@@ -47,7 +46,6 @@ void setup()
   ac_angle_max.push_back(-90.0*DEG2RAD);
 
   OM_PROCESSING::initProcessing(12);
-  connectRC100();
   initOMLink();
 
   ///////////////first move//////////////////////
