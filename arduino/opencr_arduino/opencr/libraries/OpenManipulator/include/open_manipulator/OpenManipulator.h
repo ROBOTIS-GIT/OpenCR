@@ -69,6 +69,7 @@ private:
 
   bool moving_;
   uint16_t step_cnt_;
+  float present_time_;        //[s]
 
   bool platform_;
   bool processing_;
@@ -207,6 +208,7 @@ public:
   std::vector<float> receiveAllActuatorAngle();
 
   // PATH
+  void setPresentTime(float present_time);
   void setMoveTime(float move_time);
   void setControlTime(float control_time);
 
@@ -218,7 +220,7 @@ public:
   MatrixXf getTrajectoryCoefficient();
   void move();
   bool moving();
-  void jointControl();
+  void jointControl(bool flug_use_time = false);
 
   void setStartTrajectory(Trajectory trajectory);
   void clearStartTrajectory();

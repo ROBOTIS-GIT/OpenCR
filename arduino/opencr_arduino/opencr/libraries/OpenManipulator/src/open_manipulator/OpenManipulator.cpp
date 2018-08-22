@@ -603,6 +603,10 @@ void OpenManipulator::setMoveTime(float move_time)
 {
   move_time_ = move_time;
 }
+void OpenManipulator::setPresentTime(float present_time)
+{
+  present_time_ = present_time;
+}
 
 void OpenManipulator::setControlTime(float control_time)
 {
@@ -671,9 +675,10 @@ std::vector<Trajectory> OpenManipulator::getGoalTrajectory()
   return goal_trajectory_;
 }
 
-void OpenManipulator::jointControl()
+void OpenManipulator::jointControl(bool flug_use_time = false)
 {
-  uint16_t step_time = uint16_t(floor(move_time_ / control_time_) + 1.0);
+  static float start_time = present_time_;                                    //for use time
+  uint16_t step_time = uint16_t(floor(move_time_ / control_time_) + 1.0);     //for use step cnt
   float tick_time = 0;
 
   std::vector<float> goal_position;
@@ -684,37 +689,99 @@ void OpenManipulator::jointControl()
   goal_velocity.reserve(manipulator_.getDOF());
   goal_acceleration.reserve(manipulator_.getDOF());
 
-  if (moving_)
+
+  if(!flug_use_time)          //use step cnt
   {
-    if (step_cnt_ < step_time)
+    ////////////////////////////////////////////////////////
+    if (moving_)
     {
-      tick_time = control_time_ * step_cnt_;
+      if (step_cnt_ < step_time)
+      {
+        tick_time = control_time_ * step_cnt_;
 
-      goal_position = joint_trajectory_->getPosition(tick_time);
-      goal_velocity = joint_trajectory_->getVelocity(tick_time);
-      goal_acceleration = joint_trajectory_->getAcceleration(tick_time);
+        goal_position = joint_trajectory_->getPosition(tick_time);
+        goal_velocity = joint_trajectory_->getVelocity(tick_time);
+        goal_acceleration = joint_trajectory_->getAcceleration(tick_time);
 
-      if (platform_)
+        if (platform_)
+          sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
+
+        if (processing_)
+        {
+          OM_PROCESSING::sendAngle2Processing(goal_position);
+          if (platform_ == false)
+            manipulator_.setAllActiveJointAngle(goal_position);
+        }
+
+        previous_goal_.position = goal_position;
+        previous_goal_.velocity = goal_velocity;
+        previous_goal_.acceleration = goal_acceleration;
+
+        step_cnt_++;
+      }
+      else
+      {
+        step_cnt_ = 0;
+        moving_ = false;
+      }
+    }
+    /////////////////////////////////////////////////////////
+  }
+  else                        //use time
+  {
+    /////////////////////////////////////////////////////////
+    if(moving_)
+    {
+      tick_time = present_time_ - start_time;
+      if(tick_time < move_time_)
+      {
+        goal_position = joint_trajectory_.getPosition(tick_time);
+        goal_velocity = joint_trajectory_.getVelocity(tick_time);
+        goal_acceleration = joint_trajectory_.getAcceleration(tick_time);  
+
+        if (platform_)
         sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
 
-      if (processing_)
-      {
-        OM_PROCESSING::sendAngle2Processing(goal_position);
-        if (platform_ == false)
-          manipulator_.setAllActiveJointAngle(goal_position);
+        if (processing_)
+        {
+          OM_PROCESSING::sendAngle2Processing(goal_position);
+          if (platform_ == false)
+            manipulator_.setAllActiveJointAngle(goal_position);
+        }
+
+        previous_goal_.position = goal_position;
+        previous_goal_.velocity = goal_velocity;
+        previous_goal_.acceleration = goal_acceleration;
+
+        moving   = true; 
+
+        if(update_joint_trajectory_flug)
+          start_time = present_time_;
       }
+      else
+      {
+        goal_position = joint_trajectory_.getPosition(move_time_);
+        goal_velocity = joint_trajectory_.getVelocity(move_time_);
+        goal_acceleration = joint_trajectory_.getAcceleration(move_time_);  
 
-      previous_goal_.position = goal_position;
-      previous_goal_.velocity = goal_velocity;
-      previous_goal_.acceleration = goal_acceleration;
+        if (platform_)
+        sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
 
-      step_cnt_++;
+        if (processing_)
+        {
+          OM_PROCESSING::sendAngle2Processing(goal_position);
+          if (platform_ == false)
+            manipulator_.setAllActiveJointAngle(goal_position);
+        }
+        moving   = false; 
+        start_time = present_time_;
+      }
     }
     else
     {
-      step_cnt_ = 0;
-      moving_ = false;
+      start_time = present_time_;
     }
+    /////////////////////////////////////////////////////////
   }
 }
 
