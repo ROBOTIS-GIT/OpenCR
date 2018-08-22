@@ -50,6 +50,7 @@
 
 // #define PLATFORM
 
+OPEN_MANIPULATOR::OpenManipulator chain;
 OPEN_MANIPULATOR::OpenManipulator planar;
 
 OPEN_MANIPULATOR::Kinematics *kinematics = new OM_KINEMATICS::Chain();

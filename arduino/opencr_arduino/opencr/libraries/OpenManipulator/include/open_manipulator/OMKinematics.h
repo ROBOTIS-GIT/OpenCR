@@ -70,6 +70,26 @@ private:
   void solveKinematicsSinglePoint(OM_MANAGER::Manipulator *manipulator, Name component_name);
   std::vector<float> geometricInverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose); //for basic model);
 };
+
+class Planar : public OPEN_MANIPULATOR::Kinematics
+{
+public:
+  Planar(){};
+  virtual ~Planar(){};
+
+  virtual MatrixXf jacobian(OM_MANAGER::Manipulator *manipulator, Name tool_name);
+
+  virtual void forward(OM_MANAGER::Manipulator *manipulator, Name component_name);
+  virtual void forward(OM_MANAGER::Manipulator *manipulator);
+
+  virtual std::vector<float> inverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose);
+
+private:
+  std::vector<float> inverseKinematics(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose);
+  std::vector<float> srInverseKinematics(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose);
+  std::vector<float> positionOnlyInverseKinematics(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose);
+};
+
 } // namespace OM_KINEMATICS
 
 #endif // OMKINEMATICS_HPP_
