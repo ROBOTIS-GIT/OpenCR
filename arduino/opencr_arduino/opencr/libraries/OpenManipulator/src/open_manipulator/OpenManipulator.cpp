@@ -66,12 +66,12 @@ void OpenManipulator::initJointTrajectory()
   for (uint8_t index = 0; index < manipulator_.getDOF(); index++)
     empty_v.push_back(0.0);
 
-  if (platform_)
-    previous_goal_.position = receiveAllActuatorAngle();
-  
   if (processing_)
     previous_goal_.position = empty_v;
 
+  if (platform_)
+    previous_goal_.position = receiveAllActuatorAngle();
+  
   previous_goal_.velocity = empty_v;
   previous_goal_.acceleration = empty_v;
 

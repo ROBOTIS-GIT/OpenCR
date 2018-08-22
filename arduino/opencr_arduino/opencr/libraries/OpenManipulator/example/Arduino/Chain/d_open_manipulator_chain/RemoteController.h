@@ -42,17 +42,17 @@ uint16_t readRC100Data()
 void fromRC100(uint16_t data)
 {
   if (data & RC100_BTN_U)
-    chain.setMove(TOOL, OM_MATH::makeVector3(0.005f, 0.0, 0.0), 0.1f);
+    chain.setMove(TOOL, OM_MATH::makeVector3(0.007f, 0.0, 0.0), 0.16f);
   else if (data & RC100_BTN_D)
-    chain.setMove(TOOL, OM_MATH::makeVector3(-0.005f, 0.0, 0.0), 0.1f);
+    chain.setMove(TOOL, OM_MATH::makeVector3(-0.007f, 0.0, 0.0), 0.16f);
   else if (data & RC100_BTN_L)
-    chain.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.005f, 0.0), 0.1f);
+    chain.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.007f, 0.0), 0.16f);
   else if (data & RC100_BTN_R)
-    chain.setMove(TOOL, OM_MATH::makeVector3(0.0, -0.005f, 0.0), 0.1f);
+    chain.setMove(TOOL, OM_MATH::makeVector3(0.0, -0.007f, 0.0), 0.16f);
   else if (data & RC100_BTN_1)
-    chain.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.005f), 0.1f);
+    chain.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.007f), 0.16f);
   else if (data & RC100_BTN_3)
-    chain.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.005f), 0.1f);
+    chain.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.007f), 0.16f);
   else if (data & RC100_BTN_2)
   {
     float grip_value = chain.getComponentToolValue(TOOL) + 0.030f;

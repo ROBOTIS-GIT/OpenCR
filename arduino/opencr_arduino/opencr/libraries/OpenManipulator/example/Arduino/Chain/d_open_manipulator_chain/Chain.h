@@ -28,7 +28,7 @@
 
 #define ROBOT_STATE_UPDATE_TIME 0.010f
 #define ACTUATOR_CONTROL_TIME 0.010f
-#define LOOP_TIME 0.020f
+#define LOOP_TIME 0.010f
 
 #define WORLD 0
 #define COMP1 1
@@ -48,7 +48,7 @@
 
 #define ACTIVE_JOINT_SIZE 4
 
-// #define PLATFORM
+#define PLATFORM
 
 OPEN_MANIPULATOR::OpenManipulator chain;
 
