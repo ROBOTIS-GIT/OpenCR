@@ -25,26 +25,25 @@
 // User-defined library
 #include <OMKinematics.h>
 #include <OMDynamixel.h>
-
+#include <OMDebug.h>
 #include <OMBridge.h>
 
 ///////////NAME/////////////////////
 
 #define OMLINK    100
 #define WORLD     0
-#define BASE      1
-#define JOINT0    2
-#define JOINT1    3
-#define JOINT2    4
-#define JOINT3    5
-#define JOINT4    6
-#define JOINT5    7
-#define JOINT6    8
-#define JOINT7    9
-#define JOINT8    10
-#define JOINT9    11
-#define JOINT10   12
-#define SUCTION   13
+#define JOINT0    1
+#define JOINT1    2
+#define JOINT2    3
+#define JOINT3    4
+#define JOINT4    5
+#define JOINT5    6
+#define JOINT6    7
+#define JOINT7    8
+#define JOINT8    9
+#define JOINT9    10
+#define JOINT10   11
+#define SUCTION   12
 
 ///////////move/////////////////////
 
@@ -55,7 +54,7 @@
 #define DYNAMIXEL  true
 #define TORQUE     true
 
-#define MAX_MOTION_NUM 20
+#define MAX_MOTION_NUM 14
 
 #define DXL_SIZE 3
 #define BAUD_RATE 1000000
@@ -77,37 +76,31 @@ float motion_storage[MAX_MOTION_NUM][5] = {0.0, };
 uint8_t motion_cnt = 0;
 uint8_t filled_motion_num = 0;
 
-const float initial_motion_set[MAX_MOTION_NUM][5] = { // time, grip, joint1, joint2, joint3,
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0},  
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0},
-                                                { 0.0,  0.0,   0.0,  0.0,  0.0}
+const float initial_motion_set[MAX_MOTION_NUM][5] = { // time, joint1, joint2, joint3, grip
+                                                { 3.0, -0.92, -1.35, -2.92,  0.0},
+                                                { 3.0, -0.93, -1.13, -2.43,  0.0},
+                                                { 3.0, -0.92, -1.35, -2.92,  0.0}, 
+                                                { 3.0,  0.50, -1.90, -2.84,  0.0},
+                                                { 3.0,  0.50, -1.47, -2.15,  0.0},
+                                                { 3.0,  0.50, -1.90, -2.84,  0.0},
+                                                { 3.0,  0.0,  -1.57, -2.79,  0.0},
+                                                { 3.0,  0.50, -1.90, -2.84,  0.0},
+                                                { 3.0,  0.50, -1.47, -2.15,  0.0},
+                                                { 3.0,  0.50, -1.90, -2.84,  0.0},
+                                                { 3.0, -0.92, -1.35, -2.92,  0.0},
+                                                { 3.0, -0.93, -1.13, -2.43,  0.0},
+                                                { 3.0, -0.92, -1.35, -2.92,  0.0}, 
+                                                { 3.0,  0.0,  -1.57, -2.79,  0.0}
                                                 };
 
 
 OM_PATH::JointTrajectory joint_trajectory(DXL_SIZE);
-std::vector<Trajectory> start_trajectory_vector;
-std::vector<Trajectory> goal_trajectory_vector;
-
+bool update_joint_trajectory_flug;
+std::vector <float> previous_goal_angle;
+Pose previous_goal_pose;
 //////////////////////////////////////////
 
-OPEN_MANIPULATOR::OpenManipulator manipulator(3);
+OPEN_MANIPULATOR::OpenManipulator manipulator;
 
 OPEN_MANIPULATOR::Kinematics *kinematics = new OM_KINEMATICS::Link();
 OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
@@ -160,58 +153,67 @@ namespace MyFunction
 
   void updateJointTrajectory(std::vector <float> target_angle, float inner_move_time)
   {
-    static std::vector <float> start_angle = manipulator.getAllActiveJointAngle(OMLINK);
+    std::vector<Trajectory> start_trajectory_vector;
+    std::vector<Trajectory> goal_trajectory_vector;
 
-    start_trajectory_vector = makeTrajectoryVector(start_angle);
+    start_trajectory_vector = makeTrajectoryVector(previous_goal_angle);
     goal_trajectory_vector = makeTrajectoryVector(target_angle);
 
     joint_trajectory.init(start_trajectory_vector, goal_trajectory_vector, inner_move_time, CONTROL_PERIOD);
     move_time = inner_move_time;
 
-    start_angle = target_angle;
+    previous_goal_angle = target_angle;
+    
+    manipulator.setAllActiveJointAngle(OMLINK, previous_goal_angle);
+    MyFunction::setPassiveJointAngle();
+    manipulator.forward(OMLINK);
+    previous_goal_pose = manipulator.getComponentPoseToWorld(OMLINK, SUCTION);
+    
+    manipulator.setAllActiveJointAngle(OMLINK, manipulator.receiveAllActuatorAngle(OMLINK));
+    MyFunction::setPassiveJointAngle();
+    manipulator.forward(OMLINK);
+
+    update_joint_trajectory_flug = true;
     moving   = true;
   }
 
   Pose setPose(String dir)
   {
-    Pose target_pose;
     float step = 0.02;
-
-    target_pose = manipulator.getComponentPoseToWorld(OMLINK, SUCTION);
 
     if (dir == "forward")
     {
-      target_pose.position(0) += step;
+      previous_goal_pose.position(0) += step;
     }  
     else if (dir == "back")
     {
-      target_pose.position(0) -= step;
+      previous_goal_pose.position(0) -= step;
     }
     else if (dir == "left")
     {
-      target_pose.position(1) += step;
+      previous_goal_pose.position(1) += step;
     }
     else if (dir == "right")
     {
-      target_pose.position(1) -= step;
+      previous_goal_pose.position(1) -= step;
     }
     else if (dir == "up")
     {
-      target_pose.position(2) += step;
+      previous_goal_pose.position(2) += step;
     }
     else if (dir == "down")
     {
-      target_pose.position(2) -= step;
+      previous_goal_pose.position(2) -= step;
     }
 
-    DEBUG.print(target_pose.position(0));
+    DEBUG.print(previous_goal_pose.position(0));
     DEBUG.print(" , ");
-    DEBUG.print(target_pose.position(1));
+    DEBUG.print(previous_goal_pose.position(1));
     DEBUG.print(" , ");
-    DEBUG.print(target_pose.position(2));
+    DEBUG.print(previous_goal_pose.position(2));
     DEBUG.println(" ");
 
-    return target_pose;
+    return previous_goal_pose;
   }
 
   void dataFromProcessing(String get)
@@ -234,6 +236,8 @@ namespace MyFunction
         if (DYNAMIXEL)
         {
           manipulator.actuatorEnable();
+          previous_goal_angle = manipulator.getAllActiveJointAngle(OMLINK);
+          previous_goal_pose = manipulator.getComponentPoseToWorld(OMLINK, SUCTION);
         }
 
         if (PROCESSINGON)
@@ -303,6 +307,8 @@ namespace MyFunction
           DEBUG.print("enable");
           DEBUG.println(" ");
           manipulator.actuatorEnable();
+          previous_goal_angle = manipulator.getAllActiveJointAngle(OMLINK);
+          previous_goal_pose = manipulator.getComponentPoseToWorld(OMLINK, SUCTION);
         }
         else if (cmd[1] == "disable")
         {
@@ -384,6 +390,8 @@ namespace MyFunction
         if (DYNAMIXEL)
         {
           manipulator.actuatorEnable();
+          previous_goal_angle = manipulator.getAllActiveJointAngle(OMLINK);
+          previous_goal_pose = manipulator.getComponentPoseToWorld(OMLINK, SUCTION);
           //PROCESSING::sendAngle2Processing(manipulator.getAllJointAngle(OMLINK)); 
         }
 
@@ -398,6 +406,8 @@ namespace MyFunction
         if (DYNAMIXEL)
         {
           manipulator.actuatorEnable();
+          previous_goal_angle = manipulator.getAllActiveJointAngle(OMLINK);
+          previous_goal_pose = manipulator.getComponentPoseToWorld(OMLINK, SUCTION);
           //PROCESSING::sendAngle2Processing(manipulator.getAllJointAngle(OMLINK)); 
         }
 
@@ -537,9 +547,9 @@ namespace MyFunction
         else
         {
           std::vector <float> target_angle;
-          for (int8_t i = 0; i < 3; i++)
+          for (int8_t i = 1; i < 4; i++)
           {
-            target_angle.push_back(motion_storage[motion_cnt][i+1]);
+            target_angle.push_back(motion_storage[motion_cnt][i]);
           }
           updateJointTrajectory(target_angle, motion_storage[motion_cnt][0]);
           motion_cnt++;
@@ -554,7 +564,7 @@ namespace MyFunction
 
   void jointMove(float present_time)
   {
-    static float start_time = 0.0;
+    static float start_time = present_time;
     float tick_time;
 
     std::vector<float> goal_position;
@@ -571,6 +581,8 @@ namespace MyFunction
         goal_acceleration = joint_trajectory.getAcceleration(tick_time);  
 
         manipulator.sendAllActuatorAngle(OMLINK, goal_position);
+        if(update_joint_trajectory_flug)
+          start_time = present_time;
         moving   = true; 
       }
       else
@@ -588,6 +600,7 @@ namespace MyFunction
     {
       start_time = present_time;
     }
+    update_joint_trajectory_flug = false;
   }
 
 }// MYfunction
@@ -599,13 +612,12 @@ void initOMLink()
   uint32_t baud_rate = BAUD_RATE;
   void *p_baud_rate = &baud_rate;
   manipulator.actuatorInit(p_baud_rate);
-  manipulator.actuatorDisable();
   manipulator.addManipulator(OMLINK);
 
   //init manipulator
   manipulator.addWorld(OMLINK,
                        WORLD,
-                       BASE);
+                       JOINT0);
   manipulator.addComponent(OMLINK, JOINT0, WORLD, JOINT1,
                            OM_MATH::makeVector3(-0.23867882, 0, 0),
                            Matrix3f::Identity(3,3),
@@ -663,18 +675,12 @@ void initOMLink()
                       Matrix3f::Identity(3,3),
                       4,
                       1);
+  //USB.println("Manipulator set up");
 
   //initial joint angle set
-  manipulator.setComponentJointAngle(OMLINK, JOINT0, 0.0*DEG2RAD);
-  manipulator.setComponentJointAngle(OMLINK, JOINT1, -90.0*DEG2RAD);
-  manipulator.setComponentJointAngle(OMLINK, JOINT2, -160.0*DEG2RAD);
+  manipulator.setAllActiveJointAngle(OMLINK, manipulator.receiveAllActuatorAngle(OMLINK));
   MyFunction::setPassiveJointAngle();
-
-  //solve kinematics
   manipulator.forward(OMLINK); 
-
-  //check setting
-  //manipulator.checkManipulatorSetting();
 }
 
 
