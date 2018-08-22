@@ -61,7 +61,7 @@ void setup()
   initShape();
   initView();
 
-  connectOpenCR(0); // It is depend on laptop enviroments.
+  //connectOpenCR(0); // It is depend on laptop enviroments.
 }
 
 /*******************************************************************************
@@ -74,7 +74,7 @@ void draw()
   drawTitle();
   drawWorldFrame();
 
-  drawManipulator();
+  //drawManipulator();
 }
 
 /*******************************************************************************
@@ -150,11 +150,11 @@ void initView()
 *******************************************************************************/
 void initShape()
 {
-  link1       = loadShape("meshes/link1.obj");
-  link2       = loadShape("meshes/link2.obj");
-  link3       = loadShape("meshes/link3.obj");
-  link4       = loadShape("meshes/link4.obj");
-  link5       = loadShape("meshes/link5.obj");
+  link1       = loadShape("meshes/SCARA_link1.obj");
+  link2       = loadShape("meshes/SCARA_link2.obj");
+  link3       = loadShape("meshes/SCARA_link3.obj");
+  link4       = loadShape("meshes/SCARA_link4.obj");
+  link5       = loadShape("meshes/SCARA_grip.obj");
 
   setJointAngle(0, 0, 0);
   gripperOn();
