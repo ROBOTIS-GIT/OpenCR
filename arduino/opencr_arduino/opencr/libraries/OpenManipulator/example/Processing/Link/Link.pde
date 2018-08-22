@@ -33,7 +33,10 @@ import processing.serial.*;
 PShape base, link0, link1, link2, link3, link4, link5, link6, link7, tool;
 
 // Model pose
-float model_rot_x, model_rot_z, model_trans_x, model_trans_y, model_scale_factor;
+float model_rot_x, model_rot_z, model_trans_x, model_trans_y, model_trans_z, model_scale_factor;
+
+// World pose
+float world_rot_x, world_rot_y;
 
 // Serial variable
 Serial opencr_port;
@@ -244,8 +247,8 @@ void drawTitle()
   text("OpenManipulator Link", -450,75,0);
   textSize(10);
   fill(102,255,255);
-  text("Press 'A','D','W','S'", -450,120,0);
-  text("And   'Q','E'",         -450,150,0);
+  text("Move manipulator 'Q,A','W,S','E,D'", -450,120,0);
+  text("Initial view 'I'", -450,150,0);
   popMatrix();
 }
 
@@ -257,7 +260,7 @@ void drawManipulator()
   scale(1 + model_scale_factor);
 
   pushMatrix();
-  translate(-model_trans_x, -model_trans_y, 0);
+  translate(-model_trans_x, -model_trans_y, -model_trans_z);
   rotateX(model_rot_x);
   rotateZ(model_rot_z);
   
@@ -278,7 +281,7 @@ void drawManipulator()
 ///////////////////////////////////////////
 
   pushMatrix();
-  translate(-model_trans_x, -model_trans_y, 0);
+  translate(-model_trans_x, -model_trans_y, -model_trans_z);
   rotateX(model_rot_x);
   rotateZ(model_rot_z);
   
@@ -312,7 +315,7 @@ void drawManipulator()
 ///////////////////////////////////////////
   
   pushMatrix();
-  translate(-model_trans_x, -model_trans_y, 0);
+  translate(-model_trans_x, -model_trans_y, -model_trans_z);
   rotateX(model_rot_x);
   rotateZ(model_rot_z);
   
@@ -352,7 +355,7 @@ void drawCurrentManipulator()
 ////////////////////////Current manipulator///////////////////////////////
 
   pushMatrix();
-  translate(-model_trans_x, -model_trans_y, 0);
+  translate(-model_trans_x, -model_trans_y, -model_trans_z);
   rotateX(model_rot_x);
   rotateZ(model_rot_z);
   
@@ -373,7 +376,7 @@ void drawCurrentManipulator()
 ///////////////////////////////////////////
 
   pushMatrix();
-  translate(-model_trans_x, -model_trans_y, 0);
+  translate(-model_trans_x, -model_trans_y, -model_trans_z);
   rotateX(model_rot_x);
   rotateZ(model_rot_z);
   
@@ -407,7 +410,7 @@ void drawCurrentManipulator()
 ///////////////////////////////////////////
   
   pushMatrix();
-  translate(-model_trans_x, -model_trans_y, 0);
+  translate(-model_trans_x, -model_trans_y, -model_trans_z);
   rotateX(model_rot_x);
   rotateZ(model_rot_z);
   
@@ -484,8 +487,15 @@ void drawLocalFrame()
 *******************************************************************************/
 void mouseDragged()
 {
-  model_rot_z -= (mouseX - pmouseX) * 0.01;
-  //model_rot_x -= (mouseY - pmouseY) * 0.01;
+  world_rot_x -= (mouseX - pmouseX) * 2.0;
+  world_rot_y -= (mouseY - pmouseY) * 2.0;
+
+  // Eye position
+  // Scene center
+  // Upwards axis
+  camera(width/2.0 + world_rot_x, height/2.0-500 + world_rot_y, height/2.0 * 4,
+         width/2-100, height/2, 0,
+         0, 1, 0);
 }
 
 /*******************************************************************************
@@ -493,13 +503,21 @@ void mouseDragged()
 *******************************************************************************/
 void keyPressed()
 {
-  if      (key == 'a') model_trans_x      -= 50;
-  else if (key == 'd') model_trans_x      += 50;
-  else if (key == 's') model_trans_y      += 50;
-  else if (key == 'w') model_trans_y      -= 50;
-  else if (key == 'q') model_scale_factor += 0.5;
-  else if (key == 'e') model_scale_factor -= 0.5;
-  else if (key == 'i') model_trans_x = model_trans_y = model_scale_factor = model_rot_z = model_rot_x = 0;
+  if      (key == 'q') model_trans_x      -= 0.050 * 1000;
+  else if (key == 'a') model_trans_x      += 0.050 * 1000;
+  else if (key == 'w') model_trans_y      += 0.050 * 1000;
+  else if (key == 's') model_trans_y      -= 0.050 * 1000;
+  else if (key == 'e') model_trans_z      -= 0.050 * 1000;
+  else if (key == 'd') model_trans_z      += 0.050 * 1000;
+  else if (key == 'r') model_scale_factor += 0.5;
+  else if (key == 'f') model_scale_factor -= 0.5;
+  else if (key == 'i') 
+  {
+    model_trans_x = model_trans_y = model_scale_factor = world_rot_x = world_rot_y = 0.0;
+    camera(width/2.0, height/2.0-500, height/2.0 * 4,
+           width/2-100, height/2, 0,
+           0, 1, 0);
+  }
 }
 
 /*******************************************************************************
@@ -840,6 +858,7 @@ class ChildApplet extends PApplet
                         "end"  + '\n');
       println("OpenManipulator Link End...");
     }
+    println(onoff_flag);
   }
 
   void joint0(float angle)
