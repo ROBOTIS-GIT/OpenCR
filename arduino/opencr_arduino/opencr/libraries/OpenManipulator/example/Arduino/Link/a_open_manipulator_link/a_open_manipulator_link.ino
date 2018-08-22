@@ -17,6 +17,7 @@
 /* Authors: Hye-Jong KIM */
 
 #include "OMLink.h"
+#include "RemoteController.h"
 //#include "Processing.h"
 
 float present_time = 0.0;
@@ -37,12 +38,6 @@ void setup()
 
   // while (!Serial)
   //   ;
-
-  // while (true)
-  // {
-  //   DEBUG.println("debug");
-  //   USB.println("debug");
-  // }
   
   ac_angle_min.push_back(-180.0*DEG2RAD);
   ac_angle_max.push_back(180.0*DEG2RAD);
@@ -52,7 +47,7 @@ void setup()
   ac_angle_max.push_back(-90.0*DEG2RAD);
 
   OM_PROCESSING::initProcessing(12);
-
+  connectRC100();
   initOMLink();
 
   ///////////////first move//////////////////////
@@ -60,7 +55,7 @@ void setup()
   init_joint_angle.push_back(-90.0*DEG2RAD);
   init_joint_angle.push_back(-160.0*DEG2RAD);
 
-  previous_goal_angle = manipulator.getAllActiveJointAngle(OMLINK);
+  previous_goal_angle = manipulator.getAllActiveJointAngle();
   MyFunction::updateJointTrajectory(init_joint_angle, 3.0f);
   init_joint_angle.clear();
 
@@ -101,23 +96,23 @@ void loop()
   
   if(present_time-previous_time[0] >= CONTROL_PERIOD)
   {
-    manipulator.setAllActiveJointAngle(OMLINK, manipulator.receiveAllActuatorAngle(OMLINK));
+    manipulator.setAllActiveJointAngle(manipulator.receiveAllActuatorAngle());
     MyFunction::setPassiveJointAngle();
-    manipulator.forward(OMLINK);
+    manipulator.forward();
 
     if(send_processing_flug)
       {
-        OM_PROCESSING::sendAngle2Processing(manipulator.getAllJointAngle(OMLINK));
+        OM_PROCESSING::sendAngle2Processing(manipulator.getAllJointAngle());
         //DEBUG.print(" angle : ");
         for(i_check=0; i_check < 3; i_check++)
         {
-          if(manipulator.getAllActiveJointAngle(OMLINK).at(i_check)<ac_angle_min.at(i_check))
+          if(manipulator.getAllActiveJointAngle().at(i_check)<ac_angle_min.at(i_check))
           {
             error_flug[i_check] = false;
             DEBUG.print(i_check);
             DEBUG.print(" : range over");
           }
-          else if(manipulator.getAllActiveJointAngle(OMLINK).at(i_check)>ac_angle_max.at(i_check))
+          else if(manipulator.getAllActiveJointAngle().at(i_check)>ac_angle_max.at(i_check))
           {
             error_flug[i_check] = false;
             DEBUG.print(i_check);
