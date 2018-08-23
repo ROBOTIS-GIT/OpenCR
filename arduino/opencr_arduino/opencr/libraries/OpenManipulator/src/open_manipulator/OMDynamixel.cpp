@@ -216,7 +216,7 @@ void Dynamixel::initActuator(const void *arg)
 {
   init(*(uint32_t *)arg); // baud_rate
 
-  setPositionControlMode(5, 200, 50); //CHAIN GRIPPER
+  // setPositionControlMode(5, 200, 50); //CHAIN GRIPPER
 
   // if (dxl_wb_.getProtocolVersion() == 2.0)
   //   dxl_wb_.itemWrite(id, MAX_POSITION_LIMIT_ADDR, MAX_POSITION_LIMIT_LENGTH, dxl_wb_.convertRadian2Value(id, radian));
@@ -225,6 +225,13 @@ void Dynamixel::initActuator(const void *arg)
 
   enableAllDynamixel();
 }
+
+void Dynamixel::setActuatorPositionControlMode(uint8_t actuator_id, uint16_t profile_velocity, uint16_t profile_acceleration)
+{
+  setPositionControlMode(actuator_id, profile_velocity, profile_acceleration); //CHAIN GRIPPER
+  enableAllDynamixel();
+}
+
 
 void Dynamixel::Enable()
 {

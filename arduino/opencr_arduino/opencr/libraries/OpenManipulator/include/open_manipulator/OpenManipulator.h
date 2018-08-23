@@ -82,6 +82,7 @@ public:
 
   void initKinematics(Kinematics *kinematics);
   void initActuator(Actuator *actuator);
+
   void initJointTrajectory();
 
   void connectProcessing(uint8_t actuator_num);
@@ -199,6 +200,7 @@ public:
 
   // ACTUATOR (INCLUDES VIRTUAL)
   void actuatorInit(const void *arg);
+  void setActuatorPositionControlMode(uint8_t actuator_id, uint16_t profile_velocity, uint16_t profile_acceleration);
   void actuatorEnable();
   void actuatorDisable();
   bool sendAllActuatorAngle(std::vector<float> radian_vector);
