@@ -76,7 +76,7 @@ void setup()
 void loop() 
 {
   present_time = (float)(millis()/1000.0f);
-  MyFunction::getData(8);
+  MyFunction::getData(10);
   MyFunction::setMotion();
   
   if(!error_flug[0]){manipulator.actuatorDisable();}
@@ -94,12 +94,17 @@ void loop()
   
   if(present_time-previous_time[0] >= CONTROL_PERIOD)
   {
-    manipulator.setAllActiveJointAngle(manipulator.receiveAllActuatorAngle());
-    MyFunction::setPassiveJointAngle();
-    manipulator.forward();
+    //manipulator.setAllActiveJointAngle(manipulator.receiveAllActuatorAngle());
+    //MyFunction::setPassiveJointAngle();
+    //manipulator.forward();
 
     if(send_processing_flug)
       {
+
+        DEBUG.print(" ang : " );
+        DEBUG.print(manipulator.getAllJointAngle().at(0));
+        DEBUG.println();
+
         OM_PROCESSING::sendAngle2Processing(manipulator.getAllJointAngle());
         //DEBUG.print(" angle : ");
         for(i_check=0; i_check < 3; i_check++)
@@ -107,14 +112,10 @@ void loop()
           if(manipulator.getAllActiveJointAngle().at(i_check)<ac_angle_min.at(i_check))
           {
             error_flug[i_check] = false;
-            DEBUG.print(i_check);
-            DEBUG.print(" : range over");
           }
           else if(manipulator.getAllActiveJointAngle().at(i_check)>ac_angle_max.at(i_check))
           {
             error_flug[i_check] = false;
-            DEBUG.print(i_check);
-            DEBUG.print(" : range over");
           }
           else
           {

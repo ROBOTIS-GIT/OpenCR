@@ -55,7 +55,7 @@
 #define TORQUE     true
 
 //Motion
-#define MAX_MOTION_NUM 14
+#define MAX_MOTION_NUM 32
 
 //Dynamixel
 #define DXL_SIZE 3
@@ -83,20 +83,49 @@ String cmd[20];
 //motion storage
 float motion_storage[MAX_MOTION_NUM][5] = {0.0, };
 const float initial_motion_set[MAX_MOTION_NUM][5] = { // time, joint1, joint2, joint3, grip
-                                                { 3.0, -0.92, -1.35, -2.92,  0.0},
-                                                { 3.0, -0.93, -1.13, -2.43,  0.0},
-                                                { 3.0, -0.92, -1.35, -2.92,  0.0}, 
-                                                { 3.0,  0.50, -1.90, -2.84,  0.0},
-                                                { 3.0,  0.50, -1.47, -2.15,  0.0},
-                                                { 3.0,  0.50, -1.90, -2.84,  0.0},
-                                                { 3.0,  0.0,  -1.57, -2.79,  0.0},
-                                                { 3.0,  0.50, -1.90, -2.84,  0.0},
-                                                { 3.0,  0.50, -1.47, -2.15,  0.0},
-                                                { 3.0,  0.50, -1.90, -2.84,  0.0},
-                                                { 3.0, -0.92, -1.35, -2.92,  0.0},
-                                                { 3.0, -0.93, -1.13, -2.43,  0.0},
-                                                { 3.0, -0.92, -1.35, -2.92,  0.0}, 
-                                                { 3.0,  0.0,  -1.57, -2.79,  0.0}
+////////////////////////////////////STEP1///////////////////////////////////////////
+                                                { 2.0,  1.04, -1.99, -2.87,  0.0},    //move
+                                                { 1.0,  1.04, -1.74, -2.39,  0.0},    //down
+                                                { 0.5,  0.00,  0.00,  0.00,  1.0},    //pick
+                                                { 1.0,  1.04, -1.99, -2.87,  0.0},    //up
+                                                { 2.0,  0.20, -2.04, -3.10,  0.0},    //move
+                                                { 1.0,  0.20, -1.55, -2.13,  0.0},    //down
+                                                { 2.0,  0.00,  0.00,  0.00, -1.0},    //place
+                                                { 1.0,  0.20, -2.04, -3.10,  0.0},    //up
+/////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////STEP2///////////////////////////////////////////
+                                                { 2.0,  1.04, -1.99, -2.87,  0.0},    //move
+                                                { 1.0,  1.04, -1.74, -2.39,  0.0},    //down
+                                                { 0.5,  0.00,  0.00,  0.00,  1.0},    //pick
+                                                { 1.0,  1.04, -1.99, -2.87,  0.0},    //up
+                                                { 2.0, -0.20, -2.04, -3.10,  0.0},    //move
+                                                { 1.0, -0.20, -1.55, -2.13,  0.0},    //down
+                                                { 2.0,  0.00,  0.00,  0.00, -1.0},    //place
+                                                { 1.0, -0.20, -2.04, -3.10,  0.0},    //up
+/////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////STEP3///////////////////////////////////////////
+                                                { 2.0,  1.04, -1.99, -2.87,  0.0},    //move
+                                                { 1.0,  1.03, -1.69, -2.31,  0.0},    //down
+                                                { 0.5,  0.00,  0.00,  0.00,  1.0},    //pick
+                                                { 1.0,  1.04, -1.99, -2.87,  0.0},    //up
+                                                { 2.0,  0.15, -1.71, -2.79,  0.0},    //move
+                                                { 1.0,  0.14, -1.34, -2.18,  0.0},    //down
+                                                { 2.0,  0.00,  0.00,  0.00, -1.0},    //place
+                                                { 1.0,  0.15, -1.71, -2.79,  0.0},    //up
+/////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////STEP4///////////////////////////////////////////
+                                                { 2.0,  1.04, -1.99, -2.87,  0.0},    //move
+                                                { 1.0,  1.03, -1.62, -2.22,  0.0},    //down
+                                                { 0.5,  0.00,  0.00,  0.00,  1.0},    //pick
+                                                { 1.0,  1.04, -1.99, -2.87,  0.0},    //up
+                                                { 2.0, -0.15, -1.71, -2.80,  0.0},    //move
+                                                { 1.0, -0.15, -1.34, -2.19,  0.0},    //down
+                                                { 2.0,  0.00,  0.00,  0.00, -1.0},    //place
+                                                { 1.0, -0.15, -1.71, -2.80,  0.0}     //up
+/////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////STEP5///////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////////
                                                 };
 uint8_t motion_cnt = 0;
 uint8_t filled_motion_num = 0;
@@ -190,7 +219,7 @@ namespace MyFunction
 
   Pose setPose(String dir)
   {
-    float step = 0.02;
+    float step = 0.01;
 
     if (dir == "forward")
     {
@@ -339,7 +368,7 @@ namespace MyFunction
         DEBUG.print("suction on");
         DEBUG.println(" ");
         motion_storage[filled_motion_num][0] = MOVE_TIME;  //mov_time
-        motion_storage[filled_motion_num][4] = -1.0;
+        motion_storage[filled_motion_num][4] = 1.0;
         for (uint8_t j = 1; j < 4; j++)
         {
           motion_storage[filled_motion_num][j] = 0.0;
@@ -351,7 +380,7 @@ namespace MyFunction
         DEBUG.print("suction off");
         DEBUG.println(" ");
         motion_storage[filled_motion_num][0] = MOVE_TIME;  //mov_time
-        motion_storage[filled_motion_num][4] = 1.0;
+        motion_storage[filled_motion_num][4] = -1.0;
         for (uint8_t j = 1; j < 4; j++)
         {
           motion_storage[filled_motion_num][j] = 0.0;
@@ -547,19 +576,23 @@ namespace MyFunction
         }
 
         //motion make
-        if (motion_storage[motion_cnt][4] == -1.0)
+        static std::vector <float> target_angle;
+
+        if (motion_storage[motion_cnt][4] == 1.0)
         {
-          digitalWrite(RELAY_PIN, HIGH);      //suction off
+          digitalWrite(RELAY_PIN, HIGH);      //suction on
+          updateJointTrajectory(target_angle, motion_storage[motion_cnt][0]);          
           motion_cnt++;
         }
-        else if (motion_storage[motion_cnt][4] == 1.0)
+        else if (motion_storage[motion_cnt][4] == -1.0)
         {
-          digitalWrite(RELAY_PIN, LOW);      //suction on
+          digitalWrite(RELAY_PIN, LOW);      //suction off
+          updateJointTrajectory(target_angle, motion_storage[motion_cnt][0]); 
           motion_cnt++;
         }
         else
         {
-          std::vector <float> target_angle;
+          target_angle.clear();
           for (int8_t i = 1; i < 4; i++)
           {
             target_angle.push_back(motion_storage[motion_cnt][i]);
