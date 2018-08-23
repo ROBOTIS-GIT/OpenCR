@@ -105,7 +105,7 @@ void initManipulator()
   chain.initKinematics(kinematics);
 #ifdef PLATFORM ////////////////////////////////////Actuator init
   chain.initActuator(actuator);
-  chain.setActuatorPositionControlMode(5, 200, 50);
+  chain.setActuatorControlMode();
   uint32_t baud_rate = BAUD_RATE;
   void *p_baud_rate = &baud_rate;
 
