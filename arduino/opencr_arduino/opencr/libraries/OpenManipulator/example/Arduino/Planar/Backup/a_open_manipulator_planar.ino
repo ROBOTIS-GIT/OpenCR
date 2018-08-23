@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright 2018 ROBOTIS CO., LTD.
+* Copyright 2016 ROBOTIS CO., LTD.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 /* Authors: Darby Lim */
 
-#include "Planar.h"
+#include "OMPlanar.h"
 #include "Processing.h"
 #include "RemoteController.h"
 
@@ -29,15 +29,13 @@ void setup()
 {
   Serial.begin(57600);
   DEBUG.begin(57600);
-  while (!Serial)
-    ;
+  while (!Serial);
 
   connectProcessing();
   connectRC100();
   
   initManipulator();
 
-  // goal_position.push_back(0.0);
   // goal_position.push_back(0.0);
   // goal_position.push_back(0.0);
   // goal_position.push_back(0.0);
@@ -51,49 +49,49 @@ void setup()
 
 void loop()
 {
-  getData(100);
-  // switch(seq)
-  // {
-  //   case 0:
-  //     if (manipulator.moving() == false)
-  //     {
-  //       manipulator.jointMove(CHAIN, goal_position, 1.0f);
-  //       seq = 1;
-  //     }
-  //    break;
+  // getData(100);
+  switch(seq)
+  {
+    case 0:
+      if (manipulator.moving() == false)
+      {
 
-  //   case 1:
-  //     if (manipulator.moving() == false)
-  //     {
-  //       manipulator.setPose(CHAIN, TOOL, goal_pose, 1.0f);
+        goal_position.push_back(0.0);
+        goal_position.push_back(0.0);
+        goal_position.push_back(0.0);
+  
+          manipulator.jointMove(CHAIN, goal_position, 1.0f);
+        seq = 4;
+      }
+     break;
 
-  //       seq = 2;
-  //     }
-  //    break;
+    case 1:
+      if (manipulator.moving() == false)
+      {
+        manipulator.setPose(CHAIN, TOOL, goal_pose, 1.0f);
 
-  //   case 2:
-  //     if (manipulator.moving() == false)
-  //     {
-  //       manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.050), 1.0f);
+        seq = 2;
+      }
+     break;
 
-  //       seq = 3;
-  //     }
-  //    break;
+    case 2:
+      if (manipulator.moving() == false)
+      {
+        manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.050), 1.0f);
 
-  //   case 3:
-  //     manipulator.toolMove(CHAIN, TOOL, OM_MATH::map(0.060f, 0.020f, 0.070f, 0.907f, -1.13f));
-  //     seq = 4;
-  //    break;
+        seq = 3;
+      }
+     break;
 
-  //   default:
-  //    break;
-  // }
+    default:
+     break;
+  }
 
   // LOG::INFO("LOOP");
   osDelay(LOOP_TIME * 1000);
 }
 
-//--------------------------------------------------//
+/// DO NOT MODIFY THE BELOW ///
 /// DON'T TOUCH BELOW CODE///
 
 namespace THREAD

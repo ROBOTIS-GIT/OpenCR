@@ -16,8 +16,8 @@
 
 /* Authors: Darby Lim */
 
-#ifndef OPEN_MANIPULATOR_PLANAR_H_
-#define OPEN_MANIPULATOR_PLANAR_H_
+#ifndef OPEN_MANIPULATOR_CHAIN_H_
+#define OPEN_MANIPULATOR_CHAIN_H_
 
 // Necessary library
 #include <OpenManipulator.h>
@@ -28,7 +28,7 @@
 
 #define ROBOT_STATE_UPDATE_TIME 0.010f
 #define ACTUATOR_CONTROL_TIME 0.010f
-#define LOOP_TIME 0.020f
+#define LOOP_TIME 0.010f
 
 #define WORLD 0
 #define COMP1 1
@@ -48,10 +48,9 @@
 
 #define ACTIVE_JOINT_SIZE 4
 
-// #define PLATFORM
+#define PLATFORM
 
 OPEN_MANIPULATOR::OpenManipulator chain;
-OPEN_MANIPULATOR::OpenManipulator planar;
 
 OPEN_MANIPULATOR::Kinematics *kinematics = new OM_KINEMATICS::Chain();
 #ifdef PLATFORM ////////////////////////////////////Actuator init
@@ -61,10 +60,10 @@ OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
 
 void initManipulator()
 {
-  planar.addWorld(WORLD,
+  chain.addWorld(WORLD,
                  COMP1);
 
-  planar.addComponent(COMP1,
+  chain.addComponent(COMP1,
                      WORLD,
                      COMP2,
                      OM_MATH::makeVector3(-0.278, 0.0, 0.017),
@@ -72,7 +71,7 @@ void initManipulator()
                      Z_AXIS,
                      1);
 
-  planar.addComponent(COMP2,
+  chain.addComponent(COMP2,
                      COMP1,
                      COMP3,
                      OM_MATH::makeVector3(0.0, 0.0, 0.058),
@@ -80,7 +79,7 @@ void initManipulator()
                      Y_AXIS,
                      2);
 
-  planar.addComponent(COMP3,
+  chain.addComponent(COMP3,
                      COMP2,
                      COMP4,
                      OM_MATH::makeVector3(0.024, 0.0, 0.128),
@@ -88,7 +87,7 @@ void initManipulator()
                      Y_AXIS,
                      3);
 
-  planar.addComponent(COMP4,
+  chain.addComponent(COMP4,
                      COMP3,
                      TOOL,
                      OM_MATH::makeVector3(0.124, 0.0, 0.0),
@@ -96,37 +95,38 @@ void initManipulator()
                      Y_AXIS,
                      4);
 
-  planar.addTool(TOOL,
+  chain.addTool(TOOL,
                 COMP4,
                 OM_MATH::makeVector3(0.130, 0.0, 0.0),
                 Eigen::Matrix3f::Identity(3, 3),
                 5,
                 1.0f); // Change unit from `meter` to `radian`
 
-  planar.initKinematics(kinematics);
+  chain.initKinematics(kinematics);
 #ifdef PLATFORM ////////////////////////////////////Actuator init
-  planar.initActuator(actuator);
-
+  chain.initActuator(actuator);
+  chain.setActuatorControlMode();
   uint32_t baud_rate = BAUD_RATE;
   void *p_baud_rate = &baud_rate;
 
-  planar.actuatorInit(p_baud_rate);
-  planar.actuatorEnable();
+  chain.actuatorInit(p_baud_rate);
+
+  chain.actuatorEnable();
 #endif /////////////////////////////////////////////
-  planar.initJointTrajectory();
-  planar.setControlTime(ACTUATOR_CONTROL_TIME);
+  chain.initJointTrajectory();
+  chain.setControlTime(ACTUATOR_CONTROL_TIME);
 
 #ifdef PLATFORM ////////////////////////////////////Actuator init
-  planar.toolMove(TOOL, 0.0f);
-  planar.setAllActiveJointAngle(planar.receiveAllActuatorAngle());
+  chain.toolMove(TOOL, 0.0f);
+  chain.setAllActiveJointAngle(chain.receiveAllActuatorAngle());
 #endif /////////////////////////////////////////////
-  planar.forward(COMP1);
+  chain.forward(COMP1);
 }
 
 void updateAllJointAngle()
 {
 #ifdef PLATFORM
-  planar.setAllActiveJointAngle(planar.receiveAllActuatorAngle());
+  chain.setAllActiveJointAngle(chain.receiveAllActuatorAngle());
 #endif
   // Add passive joint function
 }
@@ -140,7 +140,7 @@ void THREAD::Robot_State(void const *argument)
     MUTEX::wait();
 
     updateAllJointAngle();
-    planar.forward(COMP1);
+    chain.forward(COMP1);
 
     MUTEX::release();
 
@@ -156,11 +156,11 @@ void THREAD::Actuator_Control(void const *argument)
   {
     MUTEX::wait();
 
-    planar.jointControl();
+    chain.jointControl();
 
     MUTEX::release();
 
     osDelay(ACTUATOR_CONTROL_TIME * 1000);
   }
 }
-#endif //OPEN_MANIPULATOR_PLANAR_H_
+#endif //OPEN_MANIPULATOR_CHAIN_H_
