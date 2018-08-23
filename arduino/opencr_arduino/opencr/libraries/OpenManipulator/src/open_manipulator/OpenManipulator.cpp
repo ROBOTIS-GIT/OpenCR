@@ -759,9 +759,6 @@ void OpenManipulator::jointControl(bool flug_use_time)
         previous_goal_.acceleration = goal_acceleration;
 
         moving_  = true; 
-
-//        if(update_joint_trajectory_flug)
-//          start_time = present_time_;
       }
       else
       {

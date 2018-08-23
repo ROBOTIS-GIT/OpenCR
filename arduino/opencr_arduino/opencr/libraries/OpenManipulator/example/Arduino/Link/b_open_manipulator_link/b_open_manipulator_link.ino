@@ -17,120 +17,147 @@
 /* Authors: Hye-Jong KIM */
 
 #include "OMLink.h"
+#include "Processing.h"
+#include "Motion.h"
 #include "RemoteController.h"
-//#include "Processing.h"
-
-float present_time = 0.0;
-float previous_time[3] = {0.0, 0.0, 0.0};
 
 std::vector<float> init_joint_angle;
 
-std::vector<float> ac_angle_temp;
-std::vector<float> ac_angle_min;
-std::vector<float> ac_angle_max;
-bool error_flug[3] = {true, true, true};
-int8_t i_check = 0;
-
-void setup() 
+void setup()
 {
   Serial.begin(57600);
   DEBUG.begin(57600);
-
   // while (!Serial)
   //   ;
+
+  connectProcessing();
+  //connectRC100();
   
-  ac_angle_min.push_back(-180.0*DEG2RAD);
-  ac_angle_max.push_back(180.0*DEG2RAD);
-  ac_angle_min.push_back(-135.0*DEG2RAD);
-  ac_angle_max.push_back(0.0*DEG2RAD);
-  ac_angle_min.push_back(-180.0*DEG2RAD);
-  ac_angle_max.push_back(-90.0*DEG2RAD);
-
-  OM_PROCESSING::initProcessing(12);
-  connectRC100();
   initOMLink();
+  suctionInit();              //suction pin set 
 
-  ///////////////first move//////////////////////
   init_joint_angle.push_back(0.0*DEG2RAD);
   init_joint_angle.push_back(-90.0*DEG2RAD);
   init_joint_angle.push_back(-160.0*DEG2RAD);
-
-  previous_goal_angle = manipulator.getAllActiveJointAngle();
-  MyFunction::updateJointTrajectory(init_joint_angle, 3.0f);
+  omlink.jointMove(init_joint_angle, MOVETIME);
   init_joint_angle.clear();
 
-  manipulator.actuatorEnable();
-  present_time = (float)(millis()/1000.0f);
-  previous_time[0] = (float)(millis()/1000.0f);
-  previous_time[1] = (float)(millis()/1000.0f);
-  previous_time[2] = (float)(millis()/1000.0f);
+  initThread();
+  startThread();
 
-  
-
-  while(present_time-previous_time[2]<3.0f)
-  {
-    present_time = (float)(millis()/1000.0f);
-    MyFunction::jointMove(present_time); 
-  }
-  ///////////////////////////////////////////////
+#ifdef DEBUGFLUG
+  DEBUG.print("start");
+  DEBUG.println();
+#endif
 }
 
-void loop() 
+void loop()
 {
-  present_time = (float)(millis()/1000.0f);
-  MyFunction::getData(8);
-  MyFunction::setMotion();
+  getData(10);
+  setMotion();
   
-  if(!error_flug[0]){manipulator.actuatorDisable();}
-  else if(!error_flug[1]){manipulator.actuatorDisable();}
-  else if(!error_flug[2]){manipulator.actuatorDisable();}
-  else
-  {
-    if(present_time-previous_time[1] >= CONTROL_PERIOD)
-    {
-      MyFunction::jointMove(present_time);  
-      previous_time[1] = (float)(millis()/1000.0f);
-    }
-    // DEBUG.println("jointMove");
-  }  
-  
-  if(present_time-previous_time[0] >= CONTROL_PERIOD)
-  {
-    manipulator.setAllActiveJointAngle(manipulator.receiveAllActuatorAngle());
-    MyFunction::setPassiveJointAngle();
-    manipulator.forward();
+  osDelay(LOOP_TIME * 1000);
+}
+////////////////////////////////////THREAD///////////////////////////////////////////
+/// DON'T TOUCH BELOW CODE///
 
-    if(send_processing_flug)
-      {
-        OM_PROCESSING::sendAngle2Processing(manipulator.getAllJointAngle());
-        //DEBUG.print(" angle : ");
-        for(i_check=0; i_check < 3; i_check++)
-        {
-          if(manipulator.getAllActiveJointAngle().at(i_check)<ac_angle_min.at(i_check))
-          {
-            error_flug[i_check] = false;
-            DEBUG.print(i_check);
-            DEBUG.print(" : range over");
-          }
-          else if(manipulator.getAllActiveJointAngle().at(i_check)>ac_angle_max.at(i_check))
-          {
-            error_flug[i_check] = false;
-            DEBUG.print(i_check);
-            DEBUG.print(" : range over");
-          }
-          else
-          {
-            error_flug[i_check] = true;
-            // DEBUG.print(i_check);
-            // DEBUG.println(" : move flug");
-          }
-          //DEBUG.print(manipulator.getAllActiveJointAngle(OMLINK).at(i_check));
-          //DEBUG.print(" , ");
-        }
-        //DEBUG.println(" ");
-      }
-    previous_time[0] = (float)(millis()/1000.0f);
+namespace THREAD
+{
+osThreadId loop;
+osThreadId robot_state;
+osThreadId actuator_control;
+} // namespace THREAD
+
+void initThread()
+{
+  MUTEX::create();
+
+  // define thread
+  osThreadDef(THREAD_NAME_LOOP, Loop, osPriorityNormal, 0, 1024 * 10);
+  osThreadDef(THREAD_NAME_ROBOT_STATE, THREAD::Robot_State, osPriorityNormal, 0, 1024 * 10);
+  osThreadDef(THREAD_NAME_ACTUATOR_CONTROL, THREAD::Actuator_Control, osPriorityNormal, 0, 1024 * 10);
+
+  // create thread
+  THREAD::loop = osThreadCreate(osThread(THREAD_NAME_LOOP), NULL);
+  THREAD::robot_state = osThreadCreate(osThread(THREAD_NAME_ROBOT_STATE), NULL);
+  THREAD::actuator_control = osThreadCreate(osThread(THREAD_NAME_ACTUATOR_CONTROL), NULL);
+}
+
+void startThread()
+{
+  // start kernel
+  //Serial.println("Thread Start");
+  osKernelStart();
+}
+
+static void Loop(void const *argument)
+{
+  (void)argument;
+
+  for (;;)
+  {
+    loop();
+    showLedStatus();
   }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////
 
+void getData(uint32_t wait_time)
+{
+  static uint8_t state = 0;
+  static uint32_t tick = 0;
+
+  bool rc100_flag = false;
+  bool processing_flag = false;
+
+  uint16_t get_rc100_data = 0;
+  String get_processing_data = "";
+
+  // if (availableRC100())
+  // {
+  //   get_rc100_data = readRC100Data();
+  //   rc100_flag = true;
+  // }
+
+  if (availableProcessing())
+  {
+    get_processing_data = readProcessingData();
+    processing_flag = true;
+  }
+
+  switch (state)
+  {
+    case 0:
+      if (rc100_flag)
+      {
+      //   MUTEX::wait();
+      //   fromRC100(get_rc100_data);
+      //   MUTEX::release();
+
+      //   tick = millis();
+      //   state = 1;
+      }
+      else if (processing_flag)
+      {
+        MUTEX::wait();
+        fromProcessing(get_processing_data);
+        MUTEX::release();
+
+        tick = millis();
+        state = 1;
+      }
+     break;
+
+    case 1:
+      if ((millis() - tick) >= wait_time)
+      {
+        state = 0;
+      }
+     break;
+
+    default:
+      state = 0;
+     break;
+  }
+}

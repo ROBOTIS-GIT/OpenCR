@@ -44,7 +44,6 @@ Serial opencr_port;
 // Angle variable
 float[] joint_angle = new float[11];
 float[] current_joint_angle = new float[11];
-float[] joint_angle_coefficient = new float[11];
 
 /*******************************************************************************
 * Setting window size
@@ -64,8 +63,6 @@ void setup()
 
   initShape();
   initView();
-  initAngleCoefficient();
-
 
   connectOpenCR(0); // It is depend on laptop enviroments.
 }
@@ -124,10 +121,18 @@ void serialEvent(Serial opencr_port)
     //println("Other Serial");
   }
   
-  for(int i=0; i < 11; i++)
+  for(int i=0; i < 3; i++)
   {
-    current_joint_angle[i] = joint_angle_coefficient[i] * received_joint_angle[i];
+    current_joint_angle[i] = received_joint_angle[i];
   }
+  current_joint_angle[3] = (current_joint_angle[1] - current_joint_angle[2]);
+  current_joint_angle[4] = -PI - (current_joint_angle[1] - current_joint_angle[2]);
+  current_joint_angle[5] = -PI - (current_joint_angle[1] - current_joint_angle[2]);
+  current_joint_angle[6] = -180*PI/180 - current_joint_angle[2];
+  current_joint_angle[7] = current_joint_angle[1];
+  current_joint_angle[8] = -15*PI/180 - current_joint_angle[1];
+  current_joint_angle[9] = current_joint_angle[2] - 195*PI/180;
+  current_joint_angle[10] = +90*PI/180 - current_joint_angle[2];  
 }
 
 /*******************************************************************************
@@ -191,21 +196,6 @@ void passiveJointSet()
 /*******************************************************************************
 * initAngleCoefficient
 *******************************************************************************/
-
-void initAngleCoefficient()
-{
-  joint_angle_coefficient[0] = 1.0;
-  joint_angle_coefficient[1] = 1.0;
-  joint_angle_coefficient[2] = 1.0;
-  joint_angle_coefficient[3] = 1.0;
-  joint_angle_coefficient[4] = 1.0;
-  joint_angle_coefficient[5] = 1.0;
-  joint_angle_coefficient[6] = 1.0;
-  joint_angle_coefficient[7] = 1.0;
-  joint_angle_coefficient[8] = 1.0;
-  joint_angle_coefficient[9] = 1.0;
-  joint_angle_coefficient[10] = 1.0;
-}
 
 /*******************************************************************************
 * Set window characteristic
@@ -844,9 +834,9 @@ class ChildApplet extends PApplet
     onoff_flag = flag;
     if (onoff_flag)
     {
-      joint0.setValue(current_joint_angle[0]/joint_angle_coefficient[0]);
-      joint1.setValue(current_joint_angle[1]/joint_angle_coefficient[1]);
-      joint2.setValue(current_joint_angle[2]/joint_angle_coefficient[2]);
+      joint0.setValue(current_joint_angle[0]);
+      joint1.setValue(current_joint_angle[1]);
+      joint2.setValue(current_joint_angle[2]);
 
       opencr_port.write("om"   + ',' +
                         "ready" + '\n');
@@ -863,19 +853,19 @@ class ChildApplet extends PApplet
 
   void joint0(float angle)
   {
-    joint_angle[0] = angle * joint_angle_coefficient[0];   
+    joint_angle[0] = angle;   
     passiveJointSet();
   }
 
   void joint1(float angle)
   {
-    joint_angle[1] = angle * joint_angle_coefficient[1];
+    joint_angle[1] = angle;
     passiveJointSet();
   }
 
   void joint2(float angle)
   {
-    joint_angle[2] = angle * joint_angle_coefficient[2];
+    joint_angle[2] = angle;
     passiveJointSet();
   }
 
@@ -889,7 +879,7 @@ class ChildApplet extends PApplet
       
       for(int i=0; i<3; i++)
       {
-        joint_angle[i] = send_joint_angle[i] * joint_angle_coefficient[i];
+        joint_angle[i] = send_joint_angle[i];
       }
       passiveJointSet();
             
@@ -915,7 +905,7 @@ class ChildApplet extends PApplet
       
       for(int i=0; i<3; i++)
       {
-        joint_angle[i] = send_joint_angle[i] * joint_angle_coefficient[i];
+        joint_angle[i] = send_joint_angle[i];
       }
       passiveJointSet();
       
@@ -937,7 +927,7 @@ class ChildApplet extends PApplet
     {
       for(int i=0; i<3; i++)
       {
-      send_joint_angle[i] = joint_angle[i] / joint_angle_coefficient[i];
+      send_joint_angle[i] = joint_angle[i];
       }
 
       opencr_port.write("joint"            + ',' +
@@ -1072,7 +1062,7 @@ class ChildApplet extends PApplet
       
       for(int i=0; i<3; i++)
       {
-        current_joint_angle[i] = send_joint_angle[i] * joint_angle_coefficient[i];
+        current_joint_angle[i] = send_joint_angle[i];
       }
       passiveJointSet();
 
