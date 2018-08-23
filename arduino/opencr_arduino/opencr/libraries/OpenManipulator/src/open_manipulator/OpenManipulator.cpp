@@ -587,6 +587,11 @@ void OpenManipulator::actuatorInit(const void *arg)
   return actuator_->initActuator(arg);
 }
 
+void setActuatorPositionControlMode(uint8_t actuator_id, uint16_t profile_velocity, uint16_t profile_acceleration)
+{
+  return actuator_->setActuatorPositionControlMode(uint8_t actuator_id, uint16_t profile_velocity, uint16_t profile_acceleration);
+}
+
 void OpenManipulator::actuatorEnable()
 {
   return actuator_->Enable();
