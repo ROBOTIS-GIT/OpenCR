@@ -81,8 +81,8 @@ void initManipulator()
   omlink.link[7].setInnerJoint(8, math_.makeEigenVector3(120*cos(150), 120*sin(150), 0), math_.makeRotationMatrix(0*DEG2RAD, 0*DEG2RAD, 0*DEG2RAD));
 
 //   omlink.tool[0].init(2);    // for what?
-//   omlink.tool[0].setRelativeToolPosition(Eigen::Vector3f::Zero());
-//   omlink.tool[0].setRelativeToolOrientation(Eigen::Matrix3f::Identity(3,3));
+//   omlink.tool[0].setRelativeToolPosition(Eigen::Vecto3f::Zero());
+//   omlink.tool[0].setRelativeToolOrientation Eigen::Matrix3f::Identity(3,3));
 //   omlink.tool[0].setInnerJoint(6, math_.makeEigenVector3(-38.67882, -3, 13.37315), math_.makeRotationMatrix(0*DEG2RAD, -90*DEG2RAD, 0*DEG2RAD));
 //   omlink.tool[0].setInnerJoint(10, math_.makeEigenVector3(-10, 3, 54.33076), math_.makeRotationMatrix(0*DEG2RAD, -25*DEG2RAD, 0*DEG2RAD));
 }
