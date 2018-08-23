@@ -200,7 +200,7 @@ public:
 
   // ACTUATOR (INCLUDES VIRTUAL)
   void actuatorInit(const void *arg);
-  void setActuatorPositionControlMode(uint8_t actuator_id, uint16_t profile_velocity, uint16_t profile_acceleration);
+  void setActuatorControlMode();
   void actuatorEnable();
   void actuatorDisable();
   bool sendAllActuatorAngle(std::vector<float> radian_vector);

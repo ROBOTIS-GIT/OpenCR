@@ -223,15 +223,14 @@ void Dynamixel::initActuator(const void *arg)
   // else
   //   dxl_wb_.itemWrite(id, CW_ANGLE_LIMIT_ADDR, CW_ANGLE_LIMIT_LENGTH, dxl_wb_.convertRadian2Value(id, radian));
 
-  enableAllDynamixel();
+  //enableAllDynamixel();
 }
 
-void Dynamixel::setActuatorPositionControlMode(uint8_t actuator_id, uint16_t profile_velocity, uint16_t profile_acceleration)
+void Dynamixel::setActuatorControlMode()
 {
-  setPositionControlMode(actuator_id, profile_velocity, profile_acceleration); //CHAIN GRIPPER
-  enableAllDynamixel();
+  setPositionControlMode(5, 200, 50); //CHAIN GRIPPER
+  //enableAllDynamixel();
 }
-
 
 void Dynamixel::Enable()
 {
