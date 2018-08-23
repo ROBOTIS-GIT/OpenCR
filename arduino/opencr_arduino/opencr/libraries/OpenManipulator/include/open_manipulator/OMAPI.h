@@ -163,7 +163,7 @@ public:
   virtual ~Actuator(){};
 
   virtual void initActuator(const void *arg) = 0;
-  virtual void setActuatorPositionControlMode(uint8_t actuator_id, uint16_t profile_velocity, uint16_t profile_acceleration) = 0;
+  virtual void setActuatorControlMode() = 0;
 
   virtual void Enable() = 0;
   virtual void Disable() = 0;

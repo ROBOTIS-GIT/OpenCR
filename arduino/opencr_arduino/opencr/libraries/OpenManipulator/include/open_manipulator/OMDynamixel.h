@@ -93,7 +93,7 @@ public:
   int32_t convertRadian2Value(uint8_t id, float radian);
 
   virtual void initActuator(const void *arg);
-  virtual void setActuatorPositionControlMode(uint8_t actuator_id, uint16_t profile_velocity, uint16_t profile_acceleration) = 0;
+  virtual void setActuatorControlMode();
   virtual void Enable();
   virtual void Disable();
   virtual bool sendMultipleActuatorAngle(std::vector<uint8_t> actuator_id, std::vector<float> radian_vector);
