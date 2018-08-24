@@ -46,7 +46,7 @@ void loop()
   osDelay(LOOP_TIME * 1000);
 }
 
-/// DON'T TOUCH BELOW CODE///
+//---------------- DO NOT MODIFY THE BELOW CODE---------------------//
 
 namespace THREAD
 {
