@@ -116,6 +116,7 @@ void initManipulator()
 
   Serial.println("whyyy not working???22");
   planar.actuatorInit(p_baud_rate);
+  Serial.println("whyyy not working???221");
   planar.setActuatorControlMode();
   Serial.println("whyyy not working???23");
 
