@@ -19,7 +19,7 @@
 #ifndef REMOTE_CONTROLLER_H_
 #define REMOTE_CONTROLLER_H_
 
-#include "Chain.h"
+#include "Planar.h"
 #include <RC100.h>
 
 RC100 rc100;
@@ -91,35 +91,5 @@ void fromRC100(uint16_t data)
 
     chain.jointMove(goal_position, 1.0f);
   }
-
-  // else if (receive_data & RC100_BTN_6)
-  // {
-  //   // target_pos[1] = 0.0;
-  //   // target_pos[2] = 0.0;
-  //   // target_pos[3] = 0.0;
-  //   // target_pos[4] = 0.0;
-
-  //   // setJointAngle(target_pos);
-  //   // move();
-
-  //   if (DYNAMIXEL)
-  //       sendAngle2Processing(getAngle());
-
-  //   if (PROCESSING)
-  //     sendAngle2Processing(getState());
-
-  //   for (int i = 0; i < MOTION_NUM; i++)
-  //   {
-  //     for (int j = 0; j < 6; j++)
-  //     {
-  //       motion_storage[i][j] = motion_set[i][j];
-  //     }
-  //   }
-
-  //   motion_num = MOTION_NUM;
-  //   motion_cnt = 0;
-  //   motion = true;
-  //   repeat = true;
-  // }
 }
 #endif

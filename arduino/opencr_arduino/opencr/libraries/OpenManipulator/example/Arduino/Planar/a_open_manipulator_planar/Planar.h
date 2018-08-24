@@ -16,8 +16,8 @@
 
 /* Authors: Darby Lim */
 
-#ifndef OPEN_MANIPULATOR_CHAIN_H_
-#define OPEN_MANIPULATOR_CHAIN_H_
+#ifndef OPEN_MANIPULATOR_PLANAR_H_
+#define OPEN_MANIPULATOR_PLANAR_H_
 
 // Necessary library
 #include <OpenManipulator.h>
@@ -164,4 +164,4 @@ void THREAD::Actuator_Control(void const *argument)
     osDelay(ACTUATOR_CONTROL_TIME * 1000);
   }
 }
-#endif //OPEN_MANIPULATOR_CHAIN_H_
+#endif //OPEN_MANIPULATOR_PLANAR_H_
