@@ -42,44 +42,13 @@ uint16_t readRC100Data()
 void fromRC100(uint16_t data)
 {
   if (data & RC100_BTN_U)
-    chain.setMove(TOOL, OM_MATH::makeVector3(0.007f, 0.0, 0.0), 0.16f);
+    planar.setMove(TOOL, OM_MATH::makeVector3(0.007f, 0.0, 0.0), 0.16f);
   else if (data & RC100_BTN_D)
-    chain.setMove(TOOL, OM_MATH::makeVector3(-0.007f, 0.0, 0.0), 0.16f);
+    planar.setMove(TOOL, OM_MATH::makeVector3(-0.007f, 0.0, 0.0), 0.16f);
   else if (data & RC100_BTN_L)
-    chain.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.007f, 0.0), 0.16f);
+    planar.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.007f, 0.0), 0.16f);
   else if (data & RC100_BTN_R)
-    chain.setMove(TOOL, OM_MATH::makeVector3(0.0, -0.007f, 0.0), 0.16f);
-  else if (data & RC100_BTN_1)
-    chain.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.007f), 0.16f);
-  else if (data & RC100_BTN_3)
-    chain.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.007f), 0.16f);
-  else if (data & RC100_BTN_2)
-  {
-    float grip_value = chain.getComponentToolValue(TOOL) + 0.030f;
-    if (grip_value >= 0.907f)
-      grip_value = 0.907f;
-
-    chain.toolMove(TOOL, grip_value);
-  }
-  else if (data & RC100_BTN_4)
-  {
-    float grip_value = chain.getComponentToolValue(TOOL) - 0.030f;
-    if (grip_value <= -1.130f)
-      grip_value = -1.130f;
-
-    chain.toolMove(TOOL, grip_value);
-  }
-  else if (data & RC100_BTN_5)
-  {
-    std::vector<float> goal_position;
-
-    goal_position.push_back(0.0f);
-    goal_position.push_back(-60.0f * DEG2RAD);
-    goal_position.push_back(20.0f * DEG2RAD);
-    goal_position.push_back(40.0f * DEG2RAD);
-
-    chain.jointMove(goal_position, 1.0f);
-  }
+    planar.setMove(TOOL, OM_MATH::makeVector3(0.0, -0.007f, 0.0), 0.16f);
   else if (data & RC100_BTN_6)
   {
     std::vector<float> goal_position;
@@ -89,7 +58,7 @@ void fromRC100(uint16_t data)
     goal_position.push_back(0.0f);
     goal_position.push_back(0.0f);
 
-    chain.jointMove(goal_position, 1.0f);
+    planar.jointMove(goal_position, 1.0f);
   }
 }
 #endif

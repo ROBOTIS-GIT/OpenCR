@@ -50,9 +50,9 @@
 
 #define PLATFORM
 
-OPEN_MANIPULATOR::OpenManipulator chain;
+OPEN_MANIPULATOR::OpenManipulator planar;
 
-OPEN_MANIPULATOR::Kinematics *kinematics = new OM_KINEMATICS::Chain();
+OPEN_MANIPULATOR::Kinematics *kinematics = new OM_KINEMATICS::Planar();
 #ifdef PLATFORM ////////////////////////////////////Actuator init
 OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
 #endif /////////////////////////////////////////////
@@ -60,10 +60,10 @@ OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
 
 void initManipulator()
 {
-  chain.addWorld(WORLD,
+  planar.addWorld(WORLD,
                  COMP1);
 
-  chain.addComponent(COMP1,
+  planar.addComponent(COMP1,
                      WORLD,
                      COMP2,
                      OM_MATH::makeVector3(-0.278, 0.0, 0.017),
@@ -71,7 +71,7 @@ void initManipulator()
                      Z_AXIS,
                      1);
 
-  chain.addComponent(COMP2,
+  planar.addComponent(COMP2,
                      COMP1,
                      COMP3,
                      OM_MATH::makeVector3(0.0, 0.0, 0.058),
@@ -79,7 +79,7 @@ void initManipulator()
                      Y_AXIS,
                      2);
 
-  chain.addComponent(COMP3,
+  planar.addComponent(COMP3,
                      COMP2,
                      COMP4,
                      OM_MATH::makeVector3(0.024, 0.0, 0.128),
@@ -87,7 +87,7 @@ void initManipulator()
                      Y_AXIS,
                      3);
 
-  chain.addComponent(COMP4,
+  planar.addComponent(COMP4,
                      COMP3,
                      TOOL,
                      OM_MATH::makeVector3(0.124, 0.0, 0.0),
@@ -95,39 +95,39 @@ void initManipulator()
                      Y_AXIS,
                      4);
 
-  chain.addTool(TOOL,
+  planar.addTool(TOOL,
                 COMP4,
                 OM_MATH::makeVector3(0.130, 0.0, 0.0),
                 Eigen::Matrix3f::Identity(3, 3),
                 5,
                 1.0f); // Change unit from `meter` to `radian`
 
-  chain.initKinematics(kinematics);
+  planar.initKinematics(kinematics);
 #ifdef PLATFORM ////////////////////////////////////Actuator init
-  chain.initActuator(actuator);
+  planar.initActuator(actuator);
 
   uint32_t baud_rate = BAUD_RATE;
   void *p_baud_rate = &baud_rate;
 
-  chain.actuatorInit(p_baud_rate);
-  chain.setActuatorControlMode();
+  planar.actuatorInit(p_baud_rate);
+  planar.setActuatorControlMode();
 
-  chain.actuatorEnable();
+  planar.actuatorEnable();
 #endif /////////////////////////////////////////////
-  chain.initJointTrajectory();
-  chain.setControlTime(ACTUATOR_CONTROL_TIME);
+  planar.initJointTrajectory();
+  planar.setControlTime(ACTUATOR_CONTROL_TIME);
 
 #ifdef PLATFORM ////////////////////////////////////Actuator init
-  chain.toolMove(TOOL, 0.0f);
-  chain.setAllActiveJointAngle(chain.receiveAllActuatorAngle());
+  planar.toolMove(TOOL, 0.0f);
+  planar.setAllActiveJointAngle(planar.receiveAllActuatorAngle());
 #endif /////////////////////////////////////////////
-  chain.forward(COMP1);
+  planar.forward(COMP1);
 }
 
 void updateAllJointAngle()
 {
 #ifdef PLATFORM
-  chain.setAllActiveJointAngle(chain.receiveAllActuatorAngle());
+  planar.setAllActiveJointAngle(planar.receiveAllActuatorAngle());
 #endif
   // Add passive joint function
 }
@@ -141,7 +141,7 @@ void THREAD::Robot_State(void const *argument)
     MUTEX::wait();
 
     updateAllJointAngle();
-    chain.forward(COMP1);
+    planar.forward(COMP1);
 
     MUTEX::release();
 
@@ -157,7 +157,7 @@ void THREAD::Actuator_Control(void const *argument)
   {
     MUTEX::wait();
 
-    chain.jointControl();
+    planar.jointControl();
 
     MUTEX::release();
 
