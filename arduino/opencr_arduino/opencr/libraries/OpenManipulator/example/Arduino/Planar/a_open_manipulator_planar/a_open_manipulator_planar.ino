@@ -29,7 +29,8 @@ void setup()
 {
   Serial.begin(57600);
   DEBUG.begin(57600);
-  while (!Serial);
+  while (!Serial)
+    ;
 
   connectProcessing();
   connectRC100();
@@ -40,9 +41,7 @@ void setup()
   // goal_position.push_back(0.0);
   // goal_position.push_back(0.0);
   // goal_position.push_back(0.0);
-  // goal_position.push_back(0.0);
-  
-  // chain.jointMove(goal_position, 1.0f);
+
   // goal_pose.position = OM_MATH::makeVector3(-0.050, 0.0, 0.203);
   // goal_pose.orientation = Eigen::Matrix3f::Identity();
 
