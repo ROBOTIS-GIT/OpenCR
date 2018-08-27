@@ -56,8 +56,6 @@ void fromRC100(uint16_t data)
     goal_position.push_back(0.0f);
     goal_position.push_back(0.0f);
     goal_position.push_back(0.0f);
-    goal_position.push_back(0.0f);
-
     planar.jointMove(goal_position, 1.0f);
   }
 }
