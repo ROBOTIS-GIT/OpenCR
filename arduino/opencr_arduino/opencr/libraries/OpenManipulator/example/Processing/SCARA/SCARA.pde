@@ -161,7 +161,7 @@ void initShape()
   goal_link2_shape       = loadShape("meshes/SCARA_link2.obj");
   goal_link3_shape       = loadShape("meshes/SCARA_link3.obj");
   goal_link4_shape       = loadShape("meshes/SCARA_link4.obj");
-  goal_tool_shape       = loadShape("meshes/SCARA_grip.obj");
+  goal_tool_shape       = loadShape("meshes/SCARA_tool.obj");
 
   setJointAngle(0, 0, 0);
   gripperOn();
