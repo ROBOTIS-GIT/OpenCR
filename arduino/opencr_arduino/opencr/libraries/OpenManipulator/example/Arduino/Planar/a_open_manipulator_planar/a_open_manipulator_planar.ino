@@ -16,7 +16,7 @@
 
 /* Authors: Darby Lim */
 
-#include "Chain.h"
+#include "Planar.h"
 #include "Processing.h"
 #include "RemoteController.h"
 
@@ -36,16 +36,6 @@ void setup()
   
   initManipulator();
 
-  // goal_position.push_back(0.0);
-  // goal_position.push_back(0.0);
-  // goal_position.push_back(0.0);
-  // goal_position.push_back(0.0);
-  // goal_position.push_back(0.0);
-  
-  // chain.jointMove(goal_position, 1.0f);
-  // goal_pose.position = OM_MATH::makeVector3(-0.050, 0.0, 0.203);
-  // goal_pose.orientation = Eigen::Matrix3f::Identity();
-
   initThread();
   startThread();
 }
@@ -53,48 +43,10 @@ void setup()
 void loop()
 {
   getData(100);
-  // switch(seq)
-  // {
-  //   case 0:
-  //     if (manipulator.moving() == false)
-  //     {
-  //       manipulator.jointMove(CHAIN, goal_position, 1.0f);
-  //       seq = 1;
-  //     }
-  //    break;
-
-  //   case 1:
-  //     if (manipulator.moving() == false)
-  //     {
-  //       manipulator.setPose(CHAIN, TOOL, goal_pose, 1.0f);
-
-  //       seq = 2;
-  //     }
-  //    break;
-
-  //   case 2:
-  //     if (manipulator.moving() == false)
-  //     {
-  //       manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.050), 1.0f);
-
-  //       seq = 3;
-  //     }
-  //    break;
-
-  //   case 3:
-  //     manipulator.toolMove(CHAIN, TOOL, OM_MATH::map(0.060f, 0.020f, 0.070f, 0.907f, -1.13f));
-  //     seq = 4;
-  //    break;
-
-  //   default:
-  //    break;
-  // }
-
-  // LOG::INFO("LOOP");
   osDelay(LOOP_TIME * 1000);
 }
 
-/// DON'T TOUCH BELOW CODE///
+//---------------- DO NOT MODIFY THE BELOW CODE---------------------//
 
 namespace THREAD
 {
