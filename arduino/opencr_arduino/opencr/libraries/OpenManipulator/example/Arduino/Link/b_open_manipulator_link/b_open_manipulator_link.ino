@@ -21,7 +21,8 @@
 #include "Motion.h"
 #include "RemoteController.h"
 
-std::vector<float> init_joint_angle;
+#define BDPIN_PUSH_SW_1         34
+#define BDPIN_PUSH_SW_2         35
 
 void setup()
 {
@@ -32,10 +33,13 @@ void setup()
 
   connectProcessing();
   //connectRC100();
+
+  switchInit();
   
   initOMLink();
   suctionInit();              //suction pin set 
 
+  std::vector<float> init_joint_angle;
   init_joint_angle.push_back(0.0*DEG2RAD);
   init_joint_angle.push_back(-90.0*DEG2RAD);
   init_joint_angle.push_back(-160.0*DEG2RAD);
@@ -53,13 +57,17 @@ void setup()
 
 void loop()
 {
+  switchRead();
   getData(10);
   setMotion();
   
   osDelay(LOOP_TIME * 1000);
 }
+
+/////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////THREAD///////////////////////////////////////////
-/// DON'T TOUCH BELOW CODE///
+////////////////////////////DON'T TOUCH BELOW CODE///////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
 
 namespace THREAD
 {
@@ -159,5 +167,23 @@ void getData(uint32_t wait_time)
     default:
       state = 0;
      break;
+  }
+}
+
+void switchInit()
+{
+  pinMode(BDPIN_PUSH_SW_1, INPUT);
+  pinMode(BDPIN_PUSH_SW_2, INPUT);
+}
+
+void switchRead()
+{
+  if(digitalRead(BDPIN_PUSH_SW_1))
+  {
+    motionStart();
+  }
+  if(digitalRead(BDPIN_PUSH_SW_2))
+  {
+    motionStop();
   }
 }

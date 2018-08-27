@@ -174,6 +174,9 @@ void initShape()
   joint_angle[0] = 0*PI/180;
   joint_angle[1] = -90.0*PI/180;
   joint_angle[2] = -160*PI/180;
+  current_joint_angle[0] = 0*PI/180;
+  current_joint_angle[1] = -90.0*PI/180;
+  current_joint_angle[2] = -160*PI/180;
   passiveJointSet();
 }
 
@@ -191,6 +194,15 @@ void passiveJointSet()
   joint_angle[8] = -15*PI/180 - joint_angle[1];
   joint_angle[9] = joint_angle[2] - 195*PI/180;
   joint_angle[10] = +90*PI/180 - joint_angle[2];  
+  
+  current_joint_angle[3] = (current_joint_angle[1] - current_joint_angle[2]);
+  current_joint_angle[4] = -PI - (current_joint_angle[1] - current_joint_angle[2]);
+  current_joint_angle[5] = -PI - (current_joint_angle[1] - current_joint_angle[2]);
+  current_joint_angle[6] = -180*PI/180 - current_joint_angle[2];
+  current_joint_angle[7] = current_joint_angle[1];
+  current_joint_angle[8] = -15*PI/180 - current_joint_angle[1];
+  current_joint_angle[9] = current_joint_angle[2] - 195*PI/180;
+  current_joint_angle[10] = +90*PI/180 - current_joint_angle[2];  
 }
 
 /*******************************************************************************
