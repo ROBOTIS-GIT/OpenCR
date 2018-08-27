@@ -44,7 +44,7 @@
 #define Z_AXIS OM_MATH::makeVector3(0.0, 0.0, 1.0)
 
 #define BAUD_RATE 1000000
-#define DXL_SIZE 5
+#define DXL_SIZE 3
 
 #define ACTIVE_JOINT_SIZE 3
 
@@ -60,7 +60,6 @@ OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
 
 void initManipulator()
 {
-  Serial.println("whyyy not working???1");
   planar.addWorld(WORLD,
                  COMP1);
 
@@ -89,7 +88,6 @@ void initManipulator()
                      Y_AXIS,
                      3);
 
-  Serial.println("whyyy not working???2");
   // planar.addComponent(COMP4,
   //                    COMP3,
   //                    TOOL,
@@ -107,26 +105,20 @@ void initManipulator()
                 1.0f); // Change unit from `meter` to `radian`
 
   planar.initKinematics(kinematics);
-  Serial.println("whyyy not working???21");
 #ifdef PLATFORM ////////////////////////////////////Actuator init
   planar.initActuator(actuator);
 
   uint32_t baud_rate = BAUD_RATE;
   void *p_baud_rate = &baud_rate;
 
-  Serial.println("whyyy not working???22");
   planar.actuatorInit(p_baud_rate);
-  Serial.println("whyyy not working???221");
-  planar.setActuatorControlMode();
-  Serial.println("whyyy not working???23");
+  // planar.setActuatorControlMode();
 
   planar.actuatorEnable();
 #endif /////////////////////////////////////////////
-  Serial.println("whyyy not working???3");
   planar.initJointTrajectory();
   planar.setControlTime(ACTUATOR_CONTROL_TIME);
 
-  Serial.println("whyyy not working???4");
 #ifdef PLATFORM ////////////////////////////////////Actuator init
   planar.toolMove(TOOL, 0.0f);
   planar.setAllActiveJointAngle(planar.receiveAllActuatorAngle());
