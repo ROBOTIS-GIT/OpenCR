@@ -19,22 +19,29 @@
 #ifndef OPEN_MANIPULATOR_PLANAR_H_
 #define OPEN_MANIPULATOR_PLANAR_H_
 
-// Necessary library
+// Necessary Library
 #include <OpenManipulator.h>
 
-// User-defined library
+// User-defined Library
 #include <OMKinematics.h>
 #include <OMDynamixel.h>
 
+// Control Time Set 
 #define ROBOT_STATE_UPDATE_TIME 0.010f
 #define ACTUATOR_CONTROL_TIME 0.010f
 #define LOOP_TIME 0.010f
 
+// Define Components
 #define WORLD 0
 #define COMP1 1
 #define COMP2 2
 #define COMP3 3
-// #define COMP4 4
+#define COMP4 4
+#define COMP5 5
+#define COMP6 6
+#define COMP7 7
+#define COMP8 8
+#define COMP9 9
 #define TOOL 5
 
 #define NONE -1
@@ -43,8 +50,9 @@
 #define Y_AXIS OM_MATH::makeVector3(0.0, 1.0, 0.0)
 #define Z_AXIS OM_MATH::makeVector3(0.0, 0.0, 1.0)
 
+// Dynamixel 
 #define BAUD_RATE 1000000
-#define DXL_SIZE 5
+#define DXL_SIZE 3
 
 #define ACTIVE_JOINT_SIZE 3
 
@@ -58,9 +66,11 @@ OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
 #endif /////////////////////////////////////////////
 //  OPEN_MANIPULATOR::Path *path = new MY_PATH::Circle();
 
+// void setPassiveJointAngle()
+
+
 void initManipulator()
 {
-  Serial.println("whyyy not working???1");
   planar.addWorld(WORLD,
                  COMP1);
 
@@ -89,15 +99,6 @@ void initManipulator()
                      Y_AXIS,
                      3);
 
-  Serial.println("whyyy not working???2");
-  // planar.addComponent(COMP4,
-  //                    COMP3,
-  //                    TOOL,
-  //                    OM_MATH::makeVector3(0.124, 0.0, 0.0),
-  //                    Eigen::Matrix3f::Identity(3, 3),
-  //                    Y_AXIS,
-  //                    4);
-
   planar.addTool(TOOL,
                 // COMP4,
                 COMP3,
@@ -107,28 +108,23 @@ void initManipulator()
                 1.0f); // Change unit from `meter` to `radian`
 
   planar.initKinematics(kinematics);
-  Serial.println("whyyy not working???21");
 #ifdef PLATFORM ////////////////////////////////////Actuator init
   planar.initActuator(actuator);
-
   uint32_t baud_rate = BAUD_RATE;
   void *p_baud_rate = &baud_rate;
-
-  Serial.println("whyyy not working???22");
   planar.actuatorInit(p_baud_rate);
-  Serial.println("whyyy not working???221");
-  planar.setActuatorControlMode();
-  Serial.println("whyyy not working???23");
-
   planar.actuatorEnable();
 #endif /////////////////////////////////////////////
-  Serial.println("whyyy not working???3");
   planar.initJointTrajectory();
   planar.setControlTime(ACTUATOR_CONTROL_TIME);
 
-  Serial.println("whyyy not working???4");
-#ifdef PLATFORM ////////////////////////////////////Actuator init
-  planar.toolMove(TOOL, 0.0f);
+#ifdef PLATFORM ////////////////////////////////////Actuator init    
+  std::vector<float> goal_position_;   // rename this var name
+  goal_position_.push_back(0.0f);
+  goal_position_.push_back(0.0f);
+  goal_position_.push_back(0.0f);
+  planar.jointMove(goal_position_, 1.0f);
+
   planar.setAllActiveJointAngle(planar.receiveAllActuatorAngle());
 #endif /////////////////////////////////////////////
   // planar.forward(COMP1);
