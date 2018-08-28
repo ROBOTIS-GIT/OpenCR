@@ -156,6 +156,10 @@ void fromProcessing(String data)
     DEBUG.print(cmd[1]);
     DEBUG.println(" ");
 #endif
+#ifdef DEBUGFLUG
+    DEBUG.print(cmd[1]);
+    DEBUG.println(" ");
+#endif
   }
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////Motor onOff/////////////////////////////

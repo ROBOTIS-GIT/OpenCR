@@ -851,6 +851,14 @@ void OpenManipulator::setPose(Name tool_name, Pose goal_pose, float move_time)
 {
   std::vector<float> goal_position = kinematics_->inverse(&manipulator_, tool_name, goal_pose);
 
+  DEBUG.print("x: ");
+  DEBUG.print(goal_pose.position(0));
+  DEBUG.print(", y: ");
+  DEBUG.print(goal_pose.position(1));
+  DEBUG.print(", z: ");
+  DEBUG.print(goal_pose.position(2));
+  DEBUG.println();
+
   jointMove(goal_position, move_time);
 }
 
