@@ -69,7 +69,7 @@ void setup()
   initShape();
   initView();
 
-  //connectOpenCR(0); // It is depend on laptop enviroments.
+  connectOpenCR(0); // It is depend on laptop enviroments.
 }
 
 /*******************************************************************************
@@ -224,27 +224,27 @@ void drawManipulator()
   shape(goal_link1_shape);
   drawLocalFrame();
 
-  translate(23.0, 0.0, 57.0);
+  translate(0.023*1000, 0.0, 0.057*1000);
   rotateZ(-receive_joint_angle[0]);
   shape(goal_link2_shape);
   drawLocalFrame();
 
-  translate(67.0, 0.0, 0.0);
+  translate(0.067*1000, 0.0, 0.0);
   rotateZ(-receive_joint_angle[1]);
   shape(goal_link3_shape);
   drawLocalFrame();
 
-  translate(67.0, 0.0, 0.0);
+  translate(0.067*1000, 0.0, 0.0);
   rotateZ(-receive_joint_angle[2]);
   shape(goal_link4_shape);
   drawLocalFrame();
 
-  translate(67.0, 0.0, 0.0);
+  translate(0.067*1000, 0.0, 0.0);
   rotateY(receive_tool_pos);
   shape(goal_tool_shape);
   drawLocalFrame();
 
-  translate(40, 0, 0);
+  translate(0.040*1000, 0, 0);
 
   drawLocalFrame();
   popMatrix();
@@ -254,27 +254,27 @@ void drawManipulator()
   shape(ctrl_link1_shape);
   drawLocalFrame();
 
-  translate(23.0, 0.0, 57.0);
+  translate(0.023*1000, 0.0, 0.057*1000);
   rotateZ(-ctrl_joint_angle[0]);
   shape(ctrl_link2_shape);
   drawLocalFrame();
 
-  translate(67.0, 0.0, 0.0);
+  translate(0.067*1000, 0.0, 0.0);
   rotateZ(-ctrl_joint_angle[1]);
   shape(ctrl_link3_shape);
   drawLocalFrame();
 
-  translate(67.0, 0.0, 0.0);
+  translate(0.067*1000, 0.0, 0.0);
   rotateZ(-ctrl_joint_angle[2]);
   shape(ctrl_link4_shape);
   drawLocalFrame();
 
-  translate(67.0, 0.0, 0.0);
+  translate(0.067*1000, 0.0, 0.0);
   rotateY(ctrl_tool_pos);
   shape(ctrl_tool_shape);
   drawLocalFrame();
 
-  translate(40, 0, 0);
+  translate(0.040*1000, 0, 0);
 
   drawLocalFrame();
   popMatrix();
@@ -563,8 +563,8 @@ class ChildApplet extends PApplet
     slider2d = cp5.addSlider2D("Drawing")
                   .setPosition(70,240)
                   .setSize(260,150)
-                  .setMinMax(130,250,-130,100)
-                  .setValue(0,240)
+                  .setMinMax(-200,-250,200,250)
+                  .setValue(0,0)
                   ;
 
     cp5.addToggle("Drawing_Tool_Set")
@@ -757,8 +757,8 @@ class ChildApplet extends PApplet
   {
     float posX, posY;
 
-    posX = slider2d.getArrayValue()[0] * 0.001;
-    posY = slider2d.getArrayValue()[1] * 0.001;
+    posX = slider2d.getArrayValue()[0] * -0.001;
+    posY = slider2d.getArrayValue()[1] * -0.001;
 
     opencr_port.write("pos"     + ',' +
                       posY      + ',' +
@@ -773,13 +773,13 @@ class ChildApplet extends PApplet
     {
       if (flag)
       {
-        tool.setValue(0.0);
+        tool.setValue(-1.0);
         opencr_port.write("tool"  + ',' +
                           "off" + '\n');
       }
       else
       {
-        tool.setValue(-0.5);
+        tool.setValue(0.0);
         opencr_port.write("tool"  + ',' +
                           "on" + '\n');
       }
