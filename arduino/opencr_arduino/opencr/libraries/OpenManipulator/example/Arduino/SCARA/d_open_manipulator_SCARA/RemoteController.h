@@ -49,10 +49,10 @@ void fromRC100(uint16_t data)
     SCARA.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.007f, 0.0), 0.16f);
   else if (data & RC100_BTN_R)
     SCARA.setMove(TOOL, OM_MATH::makeVector3(0.0, -0.007f, 0.0), 0.16f);
-  else if (data & RC100_BTN_1)
-    SCARA.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.007f), 0.16f);
-  else if (data & RC100_BTN_3)
-    SCARA.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.007f), 0.16f);
+  // else if (data & RC100_BTN_1)
+  //   SCARA.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.007f), 0.16f);
+  // else if (data & RC100_BTN_3)
+  //   SCARA.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.007f), 0.16f);
   else if (data & RC100_BTN_2)
   {
     float grip_value = SCARA.getComponentToolValue(TOOL) + 0.030f;
@@ -73,7 +73,6 @@ void fromRC100(uint16_t data)
   {
     std::vector<float> goal_position;
 
-    goal_position.push_back(0.0f);
     goal_position.push_back(-60.0f * DEG2RAD);
     goal_position.push_back(20.0f * DEG2RAD);
     goal_position.push_back(40.0f * DEG2RAD);
@@ -84,7 +83,6 @@ void fromRC100(uint16_t data)
   {
     std::vector<float> goal_position;
 
-    goal_position.push_back(0.0f);
     goal_position.push_back(0.0f);
     goal_position.push_back(0.0f);
     goal_position.push_back(0.0f);
