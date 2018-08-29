@@ -152,48 +152,48 @@ MatrixXf JointTrajectory::getCoefficient()
   return coefficient_;
 }
 
-DrawCircle::DrawCircle(uint8_t joint_num)
-{
-  joint_num_ = joint_num;
-  coefficient_ = MatrixXf::Identity(6, joint_num);
-  position_.reserve(joint_num);
-  velocity_.reserve(joint_num);
-  acceleration_.reserve(joint_num);
-}
+// DrawCircle::DrawCircle(uint8_t joint_num)
+// {
+//   joint_num_ = joint_num;
+//   coefficient_ = MatrixXf::Identity(6, joint_num);
+//   position_.reserve(joint_num);
+//   velocity_.reserve(joint_num);
+//   acceleration_.reserve(joint_num);
+// }
 
-DrawCircle::~DrawCircle() {}
+// DrawCircle::~DrawCircle() {}
 
-void DrawCircle::init(std::vector<Trajectory> start,
-                           std::vector<Trajectory> goal,
-                           float move_time,
-                           float control_time)
-{
-  for (uint8_t index = 0; index < start.size(); index++)
-  {
-    path_generator_.calcCoefficient(start.at(index),
-                                    goal.at(index),
-                                    move_time,
-                                    control_time);
+// void DrawCircle::init(std::vector<Trajectory> start,
+//                            std::vector<Trajectory> goal,
+//                            float move_time,
+//                            float control_time)
+// {
+//   for (uint8_t index = 0; index < start.size(); index++)
+//   {
+//     path_generator_.calcCoefficient(start.at(index),
+//                                     goal.at(index),
+//                                     move_time,
+//                                     control_time);
 
-    coefficient_.col(index) = path_generator_.getCoefficient();
-  }
-}
+//     coefficient_.col(index) = path_generator_.getCoefficient();
+//   }
+// }
 
-std::vector<float> JointTrajectory::getPosition(float tick)
-{
-  position_.clear();
-  for (uint8_t index = 0; index < joint_num_; index++)
-  {
-    float result = 0.0;
-    result = coefficient_(0, index) +
-             coefficient_(1, index) * pow(tick, 1) +
-             coefficient_(2, index) * pow(tick, 2) +
-             coefficient_(3, index) * pow(tick, 3) +
-             coefficient_(4, index) * pow(tick, 4) +
-             coefficient_(5, index) * pow(tick, 5);
+// std::vector<float> JointTrajectory::getPosition(float tick)
+// {
+//   position_.clear();
+//   for (uint8_t index = 0; index < joint_num_; index++)
+//   {
+//     float result = 0.0;
+//     result = coefficient_(0, index) +
+//              coefficient_(1, index) * pow(tick, 1) +
+//              coefficient_(2, index) * pow(tick, 2) +
+//              coefficient_(3, index) * pow(tick, 3) +
+//              coefficient_(4, index) * pow(tick, 4) +
+//              coefficient_(5, index) * pow(tick, 5);
 
-    position_.push_back(result);
-  }
+//     position_.push_back(result);
+//   }
 
-  return position_;
-}
+//   return position_;
+// }
