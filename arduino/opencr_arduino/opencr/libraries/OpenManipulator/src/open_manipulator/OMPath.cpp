@@ -152,48 +152,121 @@ MatrixXf JointTrajectory::getCoefficient()
   return coefficient_;
 }
 
-// DrawCircle::DrawCircle(uint8_t joint_num)
-// {
-//   joint_num_ = joint_num;
-//   coefficient_ = MatrixXf::Identity(6, joint_num);
-//   position_.reserve(joint_num);
-//   velocity_.reserve(joint_num);
-//   acceleration_.reserve(joint_num);
-// }
+Line::Line(uint8_t joint_num)
+{
+  joint_num_ = joint_num;
+  coefficient_ = MatrixXf::Identity(6, joint_num);
+}
 
-// DrawCircle::~DrawCircle() {}
+Line::~Line() {}
 
-// void DrawCircle::init(std::vector<Trajectory> start,
-//                            std::vector<Trajectory> goal,
-//                            float move_time,
-//                            float control_time)
-// {
-//   for (uint8_t index = 0; index < start.size(); index++)
-//   {
-//     path_generator_.calcCoefficient(start.at(index),
-//                                     goal.at(index),
-//                                     move_time,
-//                                     control_time);
+void Line::init(float move_time, float control_time)
+{
+  Trajectory start;
+  Trajectory goal;
 
-//     coefficient_.col(index) = path_generator_.getCoefficient();
-//   }
-// }
+  start.position = 0.0;
+  start.velocity = 0.0;
+  start.acceleration = 0.0;
 
-// std::vector<float> JointTrajectory::getPosition(float tick)
-// {
-//   position_.clear();
-//   for (uint8_t index = 0; index < joint_num_; index++)
-//   {
-//     float result = 0.0;
-//     result = coefficient_(0, index) +
-//              coefficient_(1, index) * pow(tick, 1) +
-//              coefficient_(2, index) * pow(tick, 2) +
-//              coefficient_(3, index) * pow(tick, 3) +
-//              coefficient_(4, index) * pow(tick, 4) +
-//              coefficient_(5, index) * pow(tick, 5);
+  goal.position = 2*M_PI;
+  goal.velocity = 0.0;
+  goal.acceleration = 0.0;
 
-//     position_.push_back(result);
-//   }
+  path_generator_.calcCoefficient(start,
+                                  goal,
+                                  move_time,
+                                  control_time);
 
-//   return position_;
-// }
+  coefficient_ = path_generator_.getCoefficient();
+}
+
+void Line::setTwoPoints(Vector3f start, Vector3f end)
+{
+  start_ = start;
+  end_ = end;
+}
+
+Pose Line::getPose(float tick)
+{
+  Pose pose;
+  float get_time_var = 0.0;
+
+  get_time_var = coefficient_(0) +
+             coefficient_(1) * pow(tick, 1) +
+             coefficient_(2) * pow(tick, 2) +
+             coefficient_(3) * pow(tick, 3) +
+             coefficient_(4) * pow(tick, 4) +
+             coefficient_(5) * pow(tick, 5);
+
+  // Get direction of parametric equation
+  Vector3f start_to_end;
+  start_to_end(0) = end_(0) - start_(0);
+  start_to_end(1) = end_(1) - start_(1);
+  start_to_end(2) = end_(2) - start_(2);
+
+  // Get parametric equation
+  pose.position(0) = start_(0) + (start_to_end(0) * get_time_var);
+  pose.position(1) = start_(1) + (start_to_end(1) * get_time_var);
+  pose.position(2) = start_(2) + (start_to_end(2) * get_time_var);
+
+  return pose;
+}
+
+Circle::Circle(uint8_t joint_num)
+{
+  joint_num_ = joint_num;
+  coefficient_ = MatrixXf::Identity(6, joint_num);
+}
+
+Circle::~Circle() {}
+
+void Circle::init(Vector3f initial_position, float radius, float move_time, float control_time)
+{
+  initial_position_ = initial_position;
+  radius_ = radius;
+
+  Trajectory start;
+  Trajectory goal;
+
+  start.position = 0.0;
+  start.velocity = 0.0;
+  start.acceleration = 0.0;
+
+  goal.position = 2*M_PI;
+  goal.velocity = 0.0;
+  goal.acceleration = 0.0;
+
+  path_generator_.calcCoefficient(start,
+                                  goal,
+                                  move_time,
+                                  control_time);
+
+  coefficient_ = path_generator_.getCoefficient();
+}
+
+
+Pose Circle::circle(float time_var)
+{
+  Pose pose;
+
+  pose.position(0) = (initial_position_(0) - radius_) + (radius_ * cos(time_var));
+  pose.position(1) = initial_position_(1) + (radius_ * sin(time_var));
+  pose.position(2) = initial_position_(2);
+
+  return pose;
+}
+
+Pose Circle::getPose(float tick)
+{
+  float get_time_var = 0.0;
+
+  get_time_var = coefficient_(0) +
+             coefficient_(1) * pow(tick, 1) +
+             coefficient_(2) * pow(tick, 2) +
+             coefficient_(3) * pow(tick, 3) +
+             coefficient_(4) * pow(tick, 4) +
+             coefficient_(5) * pow(tick, 5);
+
+  return circle(get_time_var);;
+}
