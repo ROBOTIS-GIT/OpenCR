@@ -70,6 +70,7 @@ private:
   bool moving_;
   uint16_t step_cnt_;
   float present_time_;        //[s]
+  float start_time_; 
 
   bool platform_;
   bool processing_;

@@ -83,31 +83,31 @@ public:
   MatrixXf getCoefficient();
 };
 
-class DrawCircle
-{
-private:
-  MinimumJerk path_generator_;
+// class DrawCircle
+// {
+// private:
+//   MinimumJerk path_generator_;
 
-  uint8_t joint_num_;
-  MatrixXf coefficient_;
-  std::vector<float> position_;
-  std::vector<float> velocity_;
-  std::vector<float> acceleration_;
+//   uint8_t joint_num_;
+//   MatrixXf coefficient_;
+//   std::vector<float> position_;
+//   std::vector<float> velocity_;
+//   std::vector<float> acceleration_;
 
-public:
-  DrawCircle(uint8_t joint_num);
-  virtual ~DrawCircle();
+// public:
+//   DrawCircle(uint8_t joint_num);
+//   virtual ~DrawCircle();
 
-  void init(std::vector<Trajectory> start,
-            std::vector<Trajectory> goal,
-            float move_time,
-            float control_time);
+//   void init(std::vector<Trajectory> start,
+//             std::vector<Trajectory> goal,
+//             float move_time,
+//             float control_time);
 
-  std::vector<float> getPosition(float tick);
-  std::vector<float> getVelocity(float tick);
-  std::vector<float> getAcceleration(float tick);
+//   std::vector<float> getPosition(float tick);
+//   std::vector<float> getVelocity(float tick);
+//   std::vector<float> getAcceleration(float tick);
 
-  MatrixXf getCoefficient();
-};
+//   MatrixXf getCoefficient();
+// };
 } // namespace PATH
 #endif // OMPATH_H_

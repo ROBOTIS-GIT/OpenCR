@@ -31,7 +31,7 @@ import processing.serial.*;
 
 // Shape variables
 PShape base, link0, link1, link2, link3, link4, link5, link6, link7, tool;
-
+PShape ctrl_base, ctrl_link0, ctrl_link1, ctrl_link2, ctrl_link3, ctrl_link4, ctrl_link5, ctrl_link6, ctrl_link7, ctrl_tool;
 // Model pose
 float model_rot_x, model_rot_z, model_trans_x, model_trans_y, model_trans_z, model_scale_factor;
 
@@ -171,6 +171,28 @@ void initShape()
   link7       = loadShape("meshes/link7.obj");
   tool        = loadShape("meshes/tool.obj");
 
+  ctrl_base        = loadShape("meshes/base.obj");
+  ctrl_link0       = loadShape("meshes/link0.obj");
+  ctrl_link1       = loadShape("meshes/link1.obj");
+  ctrl_link2       = loadShape("meshes/link2.obj");
+  ctrl_link3       = loadShape("meshes/link3.obj");
+  ctrl_link4       = loadShape("meshes/link4.obj");
+  ctrl_link5       = loadShape("meshes/link5.obj");
+  ctrl_link6       = loadShape("meshes/link6.obj");
+  ctrl_link7       = loadShape("meshes/link7.obj");
+  ctrl_tool        = loadShape("meshes/tool.obj");
+
+  ctrl_base.setFill(color(200));
+  ctrl_link0.setFill(color(200));
+  ctrl_link1.setFill(color(200));
+  ctrl_link2.setFill(color(200));
+  ctrl_link3.setFill(color(200));
+  ctrl_link4.setFill(color(200));
+  ctrl_link5.setFill(color(200));
+  ctrl_link6.setFill(color(200));
+  ctrl_link7.setFill(color(200));
+  ctrl_tool.setFill(color(200));
+
   joint_angle[0] = 0*PI/180;
   joint_angle[1] = -90.0*PI/180;
   joint_angle[2] = -160*PI/180;
@@ -241,8 +263,9 @@ void drawSphere(int x, int y, int z, int r, int g, int b, int size)
 *******************************************************************************/
 void drawTitle()
 {
+  scale(1 + model_scale_factor);
   pushMatrix();
-  //rotateX(radians(60));
+  rotateX(radians(60));
   rotateZ(radians(180));
   textSize(60);
   fill(255,204,102);
@@ -361,17 +384,17 @@ void drawCurrentManipulator()
   rotateX(model_rot_x);
   rotateZ(model_rot_z);
   
-  shape(base);
+  shape(ctrl_base);
   drawLocalFrame();
   translate(0, 0, 6.79972);
   
   rotateZ(-current_joint_angle[0]);
-  shape(link0);
+  shape(ctrl_link0);
   drawLocalFrame();
   translate(0, 0, 44.99960);
   
   rotateY(current_joint_angle[1]);
-  shape(link1);
+  shape(ctrl_link1);
   drawLocalFrame();
   popMatrix();
 
@@ -390,22 +413,22 @@ void drawCurrentManipulator()
   translate(0, 0, 44.99960);
   
   rotateY(current_joint_angle[2]);
-  shape(link2);
+  shape(ctrl_link2);
   drawLocalFrame();
   translate(50, 0, 0);
   
   rotateY(current_joint_angle[3]);
-  shape(link3);
+  shape(ctrl_link3);
   drawLocalFrame();
   translate(200, 0, 0);
   
   rotateY(current_joint_angle[4]);
-  shape(link4);
+  shape(ctrl_link4);
   drawLocalFrame();
   translate(250, 0, 0);
   
   rotateY(current_joint_angle[6]);
-  shape(tool);
+  shape(ctrl_tool);
   drawLocalFrame();
   popMatrix();
 
@@ -427,12 +450,12 @@ void drawCurrentManipulator()
   rotateY(-25*PI/180);
   
   rotateY(current_joint_angle[7]);  
-  shape(link5);
+  shape(ctrl_link5);
   drawLocalFrame();
   translate(200, 0, 0);
     
   rotateY(current_joint_angle[8]);
-  shape(link6);
+  shape(ctrl_link6);
   drawLocalFrame();
   rotateY(40*PI/180);
   translate(50, 0, 0);
@@ -442,7 +465,7 @@ void drawCurrentManipulator()
   
   rotateY(current_joint_angle[9]);
   rotateY(30*PI/180);
-  shape(link7);
+  shape(ctrl_link7);
   drawLocalFrame();
   popMatrix();
 }
@@ -501,6 +524,14 @@ void mouseDragged()
 }
 
 /*******************************************************************************
+* Mouse wheel event
+*******************************************************************************/
+void mouseWheel(MouseEvent event) {
+  float e = event.getCount() * 0.01;
+  model_scale_factor += e;
+}
+
+/*******************************************************************************
 * Key press event
 *******************************************************************************/
 void keyPressed()
@@ -511,11 +542,9 @@ void keyPressed()
   else if (key == 's') model_trans_y      -= 0.050 * 1000;
   else if (key == 'e') model_trans_z      -= 0.050 * 1000;
   else if (key == 'd') model_trans_z      += 0.050 * 1000;
-  else if (key == 'r') model_scale_factor += 0.5;
-  else if (key == 'f') model_scale_factor -= 0.5;
   else if (key == 'i') 
   {
-    model_trans_x = model_trans_y = model_scale_factor = world_rot_x = world_rot_y = 0.0;
+    model_trans_x = model_trans_y = model_trans_z = model_scale_factor = world_rot_x = world_rot_y = 0.0;
     camera(width/2.0, height/2.0-500, height/2.0 * 4,
            width/2-100, height/2, 0,
            0, 1, 0);
