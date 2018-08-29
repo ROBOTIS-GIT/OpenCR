@@ -19,6 +19,7 @@
 #include "Planar.h"
 #include "Processing.h"
 #include "RemoteController.h"
+#include "test.h"
 
 std::vector<float> goal_position;
 Pose goal_pose;
@@ -42,6 +43,7 @@ void setup()
 
 void loop()
 {
+  test();
   getData(100);
   osDelay(LOOP_TIME * 1000);
 }
