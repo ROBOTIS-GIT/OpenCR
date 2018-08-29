@@ -188,6 +188,9 @@ void initOMLink()
   updateAllJointAngle();
 #endif /////////////////////////////////////////////
   omlink.forward(); 
+
+  omlink.setPresentTime((float)(millis()/1000.0f));
+  
 }
 
 void THREAD::Robot_State(void const *argument)
