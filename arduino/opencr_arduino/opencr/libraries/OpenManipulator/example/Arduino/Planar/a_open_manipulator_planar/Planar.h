@@ -68,8 +68,6 @@ OPEN_MANIPULATOR::Kinematics *kinematics = new OM_KINEMATICS::Planar();
 OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
 #endif 
 
-// OPEN_MANIPULATOR::Path *path = new MY_PATH::Circle();
-
 void setPassiveJointAngle()
 {
   float joint_angle[3];
