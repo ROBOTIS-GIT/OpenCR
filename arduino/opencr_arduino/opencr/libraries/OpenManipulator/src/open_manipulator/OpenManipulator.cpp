@@ -643,6 +643,7 @@ void OpenManipulator::move()
 {
   moving_ = true;
   step_cnt_ = 0;
+  start_time_ = present_time_;
 }
 
 bool OpenManipulator::moving()
@@ -682,7 +683,6 @@ std::vector<Trajectory> OpenManipulator::getGoalTrajectory()
 
 void OpenManipulator::jointControl(bool flug_use_time)
 {
-  static float start_time = present_time_;                                    //for use time
   uint16_t step_time = uint16_t(floor(move_time_ / control_time_) + 1.0);     //for use step cnt
   float tick_time = 0;
 
@@ -737,7 +737,7 @@ void OpenManipulator::jointControl(bool flug_use_time)
     /////////////////////////////////////////////////////////
     if(moving_)
     {
-      tick_time = present_time_ - start_time;
+      tick_time = present_time_ - start_time_;
       if(tick_time < move_time_)
       {
         goal_position = joint_trajectory_->getPosition(tick_time);
@@ -776,12 +776,12 @@ void OpenManipulator::jointControl(bool flug_use_time)
             manipulator_.setAllActiveJointAngle(goal_position);
         }
         moving_   = false; 
-        start_time = present_time_;
+        start_time_ = present_time_;
       }
     }
     else
     {
-      start_time = present_time_;
+      start_time_ = present_time_;
     }
     /////////////////////////////////////////////////////////
   }
