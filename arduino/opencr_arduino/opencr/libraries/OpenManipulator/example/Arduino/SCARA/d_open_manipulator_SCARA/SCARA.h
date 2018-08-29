@@ -16,8 +16,8 @@
 
 /* Authors: Darby Lim */
 
-#ifndef OPEN_MANIPULATOR_CHAIN_H_
-#define OPEN_MANIPULATOR_CHAIN_H_
+#ifndef OPEN_MANIPULATOR_SCARA_H_
+#define OPEN_MANIPULATOR_SCARA_H_
 
 // Necessary library
 #include <OpenManipulator.h>
@@ -28,14 +28,13 @@
 
 #define ROBOT_STATE_UPDATE_TIME 0.010f
 #define ACTUATOR_CONTROL_TIME 0.010f
-#define LOOP_TIME 0.020f
+#define LOOP_TIME 0.010f
 
 #define WORLD 0
 #define COMP1 1
 #define COMP2 2
 #define COMP3 3
-#define COMP4 4
-#define TOOL 5
+#define TOOL 4
 
 #define NONE -1
 
@@ -44,13 +43,13 @@
 #define Z_AXIS OM_MATH::makeVector3(0.0, 0.0, 1.0)
 
 #define BAUD_RATE 1000000
-#define DXL_SIZE 5
+#define DXL_SIZE 4
 
-#define ACTIVE_JOINT_SIZE 4
+#define ACTIVE_JOINT_SIZE 3
 
 // #define PLATFORM
 
-OPEN_MANIPULATOR::OpenManipulator chain;
+OPEN_MANIPULATOR::OpenManipulator SCARA;
 
 OPEN_MANIPULATOR::Kinematics *kinematics = new OM_KINEMATICS::Chain();
 #ifdef PLATFORM ////////////////////////////////////Actuator init
@@ -60,72 +59,66 @@ OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
 
 void initManipulator()
 {
-  chain.addWorld(WORLD,
+  SCARA.addWorld(WORLD,
                  COMP1);
 
-  chain.addComponent(COMP1,
+  SCARA.addComponent(COMP1,
                      WORLD,
                      COMP2,
-                     OM_MATH::makeVector3(-0.278, 0.0, 0.017),
+                     OM_MATH::makeVector3(-0.241, 0.0, 0.057),
                      Eigen::Matrix3f::Identity(3, 3),
                      Z_AXIS,
                      1);
 
-  chain.addComponent(COMP2,
+  SCARA.addComponent(COMP2,
                      COMP1,
                      COMP3,
-                     OM_MATH::makeVector3(0.0, 0.0, 0.058),
+                     OM_MATH::makeVector3(0.067, 0.0, 0.0),
                      Eigen::Matrix3f::Identity(3, 3),
-                     Y_AXIS,
+                     Z_AXIS,
                      2);
 
-  chain.addComponent(COMP3,
+  SCARA.addComponent(COMP3,
                      COMP2,
-                     COMP4,
-                     OM_MATH::makeVector3(0.024, 0.0, 0.128),
+                     TOOL,
+                     OM_MATH::makeVector3(0.067, 0.0, 0.0),
                      Eigen::Matrix3f::Identity(3, 3),
-                     Y_AXIS,
+                     Z_AXIS,
                      3);
 
-  chain.addComponent(COMP4,
-                     COMP3,
-                     TOOL,
-                     OM_MATH::makeVector3(0.124, 0.0, 0.0),
-                     Eigen::Matrix3f::Identity(3, 3),
-                     Y_AXIS,
-                     4);
-
-  chain.addTool(TOOL,
-                COMP4,
-                OM_MATH::makeVector3(0.130, 0.0, 0.0),
+  SCARA.addTool(TOOL,
+                COMP3,
+                OM_MATH::makeVector3(0.107, 0.0, 0.0),
                 Eigen::Matrix3f::Identity(3, 3),
-                5,
+                4,
                 1.0f); // Change unit from `meter` to `radian`
 
-  chain.initKinematics(kinematics);
+  SCARA.initKinematics(kinematics);
 #ifdef PLATFORM ////////////////////////////////////Actuator init
-  chain.initActuator(actuator);
+  SCARA.initActuator(actuator);
 
   uint32_t baud_rate = BAUD_RATE;
   void *p_baud_rate = &baud_rate;
 
-  chain.actuatorInit(p_baud_rate);
-  chain.actuatorEnable();
+  SCARA.actuatorInit(p_baud_rate);
+  SCARA.setActuatorControlMode();
+
+  SCARA.actuatorEnable();
 #endif /////////////////////////////////////////////
-  chain.initJointTrajectory();
-  chain.setControlTime(ACTUATOR_CONTROL_TIME);
+  SCARA.initJointTrajectory();
+  SCARA.setControlTime(ACTUATOR_CONTROL_TIME);
 
 #ifdef PLATFORM ////////////////////////////////////Actuator init
-  chain.toolMove(TOOL, 0.0f);
-  chain.setAllActiveJointAngle(chain.receiveAllActuatorAngle());
+  SCARA.toolMove(TOOL, 0.0f);
+  SCARA.setAllActiveJointAngle(SCARA.receiveAllActuatorAngle());
 #endif /////////////////////////////////////////////
-  chain.forward(COMP1);
+  SCARA.forward(COMP1);
 }
 
 void updateAllJointAngle()
 {
 #ifdef PLATFORM
-  chain.setAllActiveJointAngle(chain.receiveAllActuatorAngle());
+  SCARA.setAllActiveJointAngle(SCARA.receiveAllActuatorAngle());
 #endif
   // Add passive joint function
 }
@@ -139,7 +132,7 @@ void THREAD::Robot_State(void const *argument)
     MUTEX::wait();
 
     updateAllJointAngle();
-    chain.forward(COMP1);
+    SCARA.forward(COMP1);
 
     MUTEX::release();
 
@@ -155,11 +148,11 @@ void THREAD::Actuator_Control(void const *argument)
   {
     MUTEX::wait();
 
-    chain.jointControl();
+    SCARA.jointControl();
 
     MUTEX::release();
 
     osDelay(ACTUATOR_CONTROL_TIME * 1000);
   }
 }
-#endif //OPEN_MANIPULATOR_CHAIN_H_
+#endif //OPEN_MANIPULATOR_SCARA_H_

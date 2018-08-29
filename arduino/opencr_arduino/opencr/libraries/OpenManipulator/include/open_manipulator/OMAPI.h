@@ -175,14 +175,14 @@ public:
   virtual std::vector<float> receiveAllActuatorAngle(void) = 0;
 };
 
-// class Path
-// {
-// public:
-//   Path(){};
-//   virtual ~Path(){};
+class Path
+{
+public:
+  Path(){};
+  virtual ~Path(){};
 
-//   virtual bool drawFunction()) = 0;
-// };
+  virtual bool drawFunction()) = 0;
+};
 
 } // namespace OPEN_MANIPULATOR
 #endif

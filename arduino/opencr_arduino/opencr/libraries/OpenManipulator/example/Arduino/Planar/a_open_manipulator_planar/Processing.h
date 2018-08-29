@@ -40,7 +40,7 @@ void fromProcessing(String data)
 {
   String *cmd = planar.parseDataFromProcessing(data);
 
-  if (cmd[0] == "opm")
+  if (cmd[0] == "om")
   {
     if (cmd[1] == "ready")
     {
@@ -71,15 +71,15 @@ void fromProcessing(String data)
   else if (cmd[0] == "task")
   {
     if (cmd[1] == "forward")
-      planar.setMove(TOOL, OM_MATH::makeVector3(0.010f, 0.0, 0.0), 0.2f);
-    else if (cmd[1] == "back")
-      planar.setMove(TOOL, OM_MATH::makeVector3(-0.010f, 0.0, 0.0), 0.2f);
+      planar.setMove(TOOL, OM_MATH::makeVector3(0.020f, 0.000f, 0.0), 1.0);
+    else if (cmd[1] == "backward")
+      planar.setMove(TOOL, OM_MATH::makeVector3(-0.020f, 0.000f, 0.0), 1.0);
     else if (cmd[1] == "left")
-      planar.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.010f, 0.0), 0.2f);
+      planar.setMove(TOOL, OM_MATH::makeVector3(0.000f, 0.020f, 0.0), 1.0);
     else if (cmd[1] == "right")
-      planar.setMove(TOOL, OM_MATH::makeVector3(0.0, -0.010f, 0.0), 0.2f);
+      planar.setMove(TOOL, OM_MATH::makeVector3(0.000f, -0.020f, 0.0), 1.0);
     else
-      planar.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.0), 0.2f);
+      planar.setMove(TOOL, OM_MATH::makeVector3(0.000f, 0.000f, 0.0), 1.0);
   }
   else if (cmd[0] == "torque")
   {

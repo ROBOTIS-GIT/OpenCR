@@ -35,7 +35,7 @@ PShape ctrl_link1_shape, ctrl_link2_shape, ctrl_link3_shape, ctrl_link4_shape, c
 
 
 // Model pose
-float model_rot_x, model_rot_y, model_rot_z, model_trans_x, model_trans_y, model_trans_z, model_scale_factor;
+float model_trans_x, model_trans_y, model_trans_z, model_scale_factor;
 
 // World pose
 float world_rot_x, world_rot_y;
@@ -69,7 +69,7 @@ void setup()
   initShape();
   initView();
 
-  //connectOpenCR(0); // It is depend on laptop enviroments.
+  connectOpenCR(0); // It is depend on laptop enviroments.
 }
 
 /*******************************************************************************
@@ -147,8 +147,8 @@ void initView()
   // Eye position
   // Scene center
   // Upwards axis
-  camera(width/2.0, height/2.0-500, height/2.0 * 4,
-         width/2-100, height/2, 0,
+  camera(width/2.0, height/2.0, height/2.0 * 4,
+         width/2, height/2, 0,
          0, 1, 0);
 }
 
@@ -157,11 +157,23 @@ void initView()
 *******************************************************************************/
 void initShape()
 {
-  goal_link1_shape       = loadShape("meshes/SCARA_link1.obj");
-  goal_link2_shape       = loadShape("meshes/SCARA_link2.obj");
-  goal_link3_shape       = loadShape("meshes/SCARA_link3.obj");
-  goal_link4_shape       = loadShape("meshes/SCARA_link4.obj");
-  goal_tool_shape       = loadShape("meshes/SCARA_tool.obj");
+  goal_link1_shape = loadShape("meshes/SCARA_link1.obj");
+  goal_link2_shape = loadShape("meshes/SCARA_link2.obj");
+  goal_link3_shape = loadShape("meshes/SCARA_link3.obj");
+  goal_link4_shape = loadShape("meshes/SCARA_link4.obj");
+  goal_tool_shape  = loadShape("meshes/SCARA_tool.obj");
+
+  ctrl_link1_shape = loadShape("meshes/SCARA_link1.obj");
+  ctrl_link2_shape = loadShape("meshes/SCARA_link2.obj");
+  ctrl_link3_shape = loadShape("meshes/SCARA_link3.obj");
+  ctrl_link4_shape = loadShape("meshes/SCARA_link4.obj");
+  ctrl_tool_shape  = loadShape("meshes/SCARA_tool.obj");
+
+  ctrl_link1_shape.setFill(color(200));
+  ctrl_link2_shape.setFill(color(200));
+  ctrl_link3_shape.setFill(color(200));
+  ctrl_link4_shape.setFill(color(200));
+  ctrl_tool_shape.setFill(color(200));
 
   setJointAngle(0, 0, 0);
   gripperOn();
@@ -195,8 +207,8 @@ void drawTitle()
   text("OpenManipulator SCARA", -300,-460,0);
   textSize(20);
   fill(102,255,255);
-  text("Press 'A','D','W','S'", -300,-420,0);
-  text("And   'Q','E'",         -300,-390,0);
+  text("Move manipulator 'Q,A','W,S','E,D'", -300,-420,0);
+  text("Initial view 'I'", -300,-390,0);
   popMatrix();
 }
 
@@ -209,33 +221,60 @@ void drawManipulator()
 
   pushMatrix();
   translate(-model_trans_x, -model_trans_y, 0);
-  rotateX(model_rot_x);
-  rotateY(radians(-10));
-  rotateZ(model_rot_z);
   shape(goal_link1_shape);
   drawLocalFrame();
 
-  translate(0, 0, 66.1);
+  translate(0.023*1000, 0.0, 0.057*1000);
   rotateZ(-receive_joint_angle[0]);
   shape(goal_link2_shape);
   drawLocalFrame();
 
-  translate(30, 0, 0);
+  translate(0.067*1000, 0.0, 0.0);
   rotateZ(-receive_joint_angle[1]);
   shape(goal_link3_shape);
   drawLocalFrame();
 
-  translate(90.25, 0, 0);
+  translate(0.067*1000, 0.0, 0.0);
   rotateZ(-receive_joint_angle[2]);
   shape(goal_link4_shape);
   drawLocalFrame();
 
-  translate(74, 0, 0);
-  rotateX(-receive_tool_pos);
+  translate(0.067*1000, 0.0, 0.0);
+  rotateY(receive_tool_pos);
   shape(goal_tool_shape);
   drawLocalFrame();
 
-  translate(30, 0, 0);
+  translate(0.040*1000, 0, 0);
+
+  drawLocalFrame();
+  popMatrix();
+
+  pushMatrix();
+  translate(-model_trans_x, -model_trans_y, 0);
+  shape(ctrl_link1_shape);
+  drawLocalFrame();
+
+  translate(0.023*1000, 0.0, 0.057*1000);
+  rotateZ(-ctrl_joint_angle[0]);
+  shape(ctrl_link2_shape);
+  drawLocalFrame();
+
+  translate(0.067*1000, 0.0, 0.0);
+  rotateZ(-ctrl_joint_angle[1]);
+  shape(ctrl_link3_shape);
+  drawLocalFrame();
+
+  translate(0.067*1000, 0.0, 0.0);
+  rotateZ(-ctrl_joint_angle[2]);
+  shape(ctrl_link4_shape);
+  drawLocalFrame();
+
+  translate(0.067*1000, 0.0, 0.0);
+  rotateY(ctrl_tool_pos);
+  shape(ctrl_tool_shape);
+  drawLocalFrame();
+
+  translate(0.040*1000, 0, 0);
 
   drawLocalFrame();
   popMatrix();
@@ -248,11 +287,11 @@ void drawWorldFrame()
 {
   strokeWeight(10);
   stroke(255, 0, 0, 100);
-  line(0, 0 ,0 , 200, 0, 0);
+  line(0, 0, 0, 200, 0, 0);
 
   strokeWeight(10);
   stroke(0, 255, 0, 100);
-  line(0, 0, 0, 0, 200, 0);
+  line(0, 0, 0, 0, -200, 0);
 
   stroke(0, 0, 255, 100);
   strokeWeight(10);
@@ -266,15 +305,15 @@ void drawLocalFrame()
 {
   strokeWeight(10);
   stroke(255, 0, 0, 100);
-  line(0, 0 ,0 , 100, 0, 0);
+  line(0, 0 ,0 , 60, 0, 0);
 
   strokeWeight(10);
   stroke(0, 255, 0, 100);
-  line(0, 0, 0, 0, 100, 0);
+  line(0, 0, 0, 0, -60, 0);
 
   stroke(0, 0, 255, 100);
   strokeWeight(10);
-  line(0, 0, 0, 0, 0, 100);
+  line(0, 0, 0, 0, 0, 60);
 }
 
 /*******************************************************************************
@@ -292,7 +331,7 @@ void setJointAngle(float angle1, float angle2, float angle3)
 *******************************************************************************/
 void gripperOn()
 {
-  ctrl_tool_pos = 0.0;
+  ctrl_tool_pos = radians(0.0);
 }
 
 /*******************************************************************************
@@ -300,7 +339,7 @@ void gripperOn()
 *******************************************************************************/
 void gripperOff()
 {
-  ctrl_tool_pos = 1.0;
+  ctrl_tool_pos = radians(-1.0);
 }
 
 /*******************************************************************************
@@ -314,8 +353,8 @@ void mouseDragged()
   // Eye position
   // Scene center
   // Upwards axis
-  camera(width/2.0 + world_rot_x, height/2.0-500 + world_rot_y, height/2.0 * 4,
-         width/2-100, height/2, 0,
+  camera(width/2.0 + world_rot_x, height/2.0 + world_rot_y, height/2.0 * 4,
+         width/2, height/2, 0,
          0, 1, 0);
 }
 
@@ -341,8 +380,8 @@ void keyPressed()
   else if (key == 'i') 
   {
     model_trans_x = model_trans_y = model_trans_z = model_scale_factor = world_rot_x = world_rot_y = 0.0;
-    camera(width/2.0, height/2.0-500, height/2.0 * 4,
-           width/2-100, height/2, 0,
+    camera(width/2.0, height/2.0, height/2.0 * 4,
+           width/2, height/2, 0,
            0, 1, 0);
   }
 }
@@ -355,11 +394,11 @@ class ChildApplet extends PApplet
   ControlP5 cp5;
 
   Textlabel headLabel;
-  Knob joint1, joint2, joint3, gripper;
+  Knob joint1, joint2, joint3, tool;
   Slider2D slider2d;
 
   float[] set_joint_angle = new float[3];
-  float set_gripper_pos;
+  float set_tool_pos;
 
   boolean onoff_flag = false;
 
@@ -465,17 +504,17 @@ class ChildApplet extends PApplet
              .setColorActive(color(255,255,0))
              ;
 
-    gripper = cp5.addKnob("gripper")
-             .setRange(-3.14,3.14)
-             .setValue(0)
-             .setPosition(220,250)
-             .setRadius(50)
-             .setDragDirection(Knob.HORIZONTAL)
-             .setFont(createFont("arial",10))
-             .setColorForeground(color(255))
-             .setColorBackground(color(0, 160, 100))
-             .setColorActive(color(255,255,0))
-             ;
+    tool = cp5.addKnob("tool")
+           .setRange(-3.14,3.14)
+           .setValue(0)
+           .setPosition(220,250)
+           .setRadius(50)
+           .setDragDirection(Knob.HORIZONTAL)
+           .setFont(createFont("arial",10))
+           .setColorForeground(color(255))
+           .setColorBackground(color(0, 160, 100))
+           .setColorActive(color(255,255,0))
+           ;
 
     cp5.addButton("Origin")
        .setValue(0)
@@ -502,14 +541,14 @@ class ChildApplet extends PApplet
        .setFont(createFont("arial",15))
        ;
 
-    cp5.addButton("Set_Gripper")
+    cp5.addButton("Set_Tool")
        .setValue(0)
        .setPosition(0,460)
        .setSize(400,40)
        .setFont(createFont("arial",15))
        ;
 
-    cp5.addToggle("Gripper_OnOff")
+    cp5.addToggle("Tool_OnOff")
        .setPosition(0,520)
        .setSize(400,40)
        .setMode(Toggle.SWITCH)
@@ -524,11 +563,11 @@ class ChildApplet extends PApplet
     slider2d = cp5.addSlider2D("Drawing")
                   .setPosition(70,240)
                   .setSize(260,150)
-                  .setMinMax(130,250,-130,100)
-                  .setValue(0,240)
+                  .setMinMax(-200,-250,200,250)
+                  .setValue(0,0)
                   ;
 
-    cp5.addToggle("Drawing_Gripper_Set")
+    cp5.addToggle("Drawing_Tool_Set")
        .setPosition(0,520)
        .setSize(400,40)
        .setMode(Toggle.SWITCH)
@@ -561,7 +600,7 @@ class ChildApplet extends PApplet
     cp5.getController("Controller_OnOff").moveTo("global");
 
     cp5.getController("Drawing").moveTo("Task Space Control");
-    cp5.getController("Drawing_Gripper_Set").moveTo("Task Space Control");
+    cp5.getController("Drawing_Tool_Set").moveTo("Task Space Control");
 
     cp5.getController("Motion_Start").moveTo("Motion");
     cp5.getController("Motion_Stop").moveTo("Motion");
@@ -582,7 +621,8 @@ class ChildApplet extends PApplet
     {
       joint1.setValue(ctrl_joint_angle[0]);
       joint2.setValue(ctrl_joint_angle[1]);
-      gripper.setValue(ctrl_tool_pos);
+      joint3.setValue(ctrl_joint_angle[2]);
+      tool.setValue(ctrl_tool_pos);
 
       opencr_port.write("opm"   + ',' +
                         "ready" + '\n');
@@ -611,7 +651,7 @@ class ChildApplet extends PApplet
     ctrl_joint_angle[2] = angle;
   }
 
-  void gripper(float angle)
+  void tool(float angle)
   {
     ctrl_tool_pos = angle;
   }
@@ -627,7 +667,7 @@ class ChildApplet extends PApplet
       joint1.setValue(ctrl_joint_angle[0]);
       joint2.setValue(ctrl_joint_angle[1]);
       joint3.setValue(ctrl_joint_angle[2]);
-      gripper.setValue(ctrl_tool_pos);
+      tool.setValue(ctrl_tool_pos);
 
       opencr_port.write("joint"        + ',' +
                         ctrl_joint_angle[0] + ',' +
@@ -674,11 +714,11 @@ class ChildApplet extends PApplet
     }
   }
 
-  public void Set_Gripper(int theValue)
+  public void Set_Tool(int theValue)
   {
     if (onoff_flag)
     {
-      opencr_port.write("gripper"  + ',' +
+      opencr_port.write("tool"  + ',' +
                         ctrl_tool_pos + '\n');
     }
     else
@@ -687,20 +727,20 @@ class ChildApplet extends PApplet
     }
   }
 
-  void Gripper_OnOff(boolean flag)
+  void Tool_OnOff(boolean flag)
   {
     if (onoff_flag)
     {
       if (flag)
       {
-        gripper.setValue(0.0);
-        opencr_port.write("grip"  + ',' +
+        tool.setValue(-1.0);
+        opencr_port.write("tool"  + ',' +
                           "off" + '\n');
       }
       else
       {
-        gripper.setValue(-0.5);
-        opencr_port.write("grip"  + ',' +
+        tool.setValue(0.0);
+        opencr_port.write("tool"  + ',' +
                           "on" + '\n');
       }
     }
@@ -717,8 +757,8 @@ class ChildApplet extends PApplet
   {
     float posX, posY;
 
-    posX = slider2d.getArrayValue()[0] * 0.001;
-    posY = slider2d.getArrayValue()[1] * 0.001;
+    posX = slider2d.getArrayValue()[0] * -0.001;
+    posY = slider2d.getArrayValue()[1] * -0.001;
 
     opencr_port.write("pos"     + ',' +
                       posY      + ',' +
@@ -727,20 +767,20 @@ class ChildApplet extends PApplet
     println("x = " + posY + " y = " + posX);
   }
 
-  void Drawing_Gripper_Set(boolean flag)
+  void Drawing_Tool_Set(boolean flag)
   {
     if (onoff_flag)
     {
       if (flag)
       {
-        gripper.setValue(0.0);
-        opencr_port.write("grip"  + ',' +
+        tool.setValue(-1.0);
+        opencr_port.write("tool"  + ',' +
                           "off" + '\n');
       }
       else
       {
-        gripper.setValue(-0.5);
-        opencr_port.write("grip"  + ',' +
+        tool.setValue(0.0);
+        opencr_port.write("tool"  + ',' +
                           "on" + '\n');
       }
     }
