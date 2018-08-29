@@ -42,7 +42,7 @@
 #define COMP7 7
 #define COMP8 8
 #define COMP9 9
-#define TOOL 5
+#define TOOL 10
 
 #define NONE -1
 
@@ -50,7 +50,7 @@
 #define Y_AXIS OM_MATH::makeVector3(0.0, 1.0, 0.0)
 #define Z_AXIS OM_MATH::makeVector3(0.0, 0.0, 1.0)
 
-// Dynamixel 
+//-- Dynamixel --/
 #define BAUD_RATE 1000000
 #define DXL_SIZE 3
 
@@ -60,14 +60,30 @@
 
 OPEN_MANIPULATOR::OpenManipulator planar;
 
+//-- Kinematics Init --//
 OPEN_MANIPULATOR::Kinematics *kinematics = new OM_KINEMATICS::Planar();
-#ifdef PLATFORM ////////////////////////////////////Actuator init
+
+//-- Actuator Init --//
+#ifdef PLATFORM 
 OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
-#endif /////////////////////////////////////////////
-//  OPEN_MANIPULATOR::Path *path = new MY_PATH::Circle();
+#endif 
 
-// void setPassiveJointAngle()
+// OPEN_MANIPULATOR::Path *path = new MY_PATH::Circle();
 
+void setPassiveJointAngle()
+{
+  float joint_angle[3];
+  joint_angle[0] = planar.getComponentJointAngle(COMP1);
+  joint_angle[1] = planar.getComponentJointAngle(COMP2);
+  joint_angle[2] = planar.getComponentJointAngle(COMP3);
+
+  planar.setComponentJointAngle(COMP4, 0);
+  planar.setComponentJointAngle(COMP5, 0);
+  planar.setComponentJointAngle(COMP6, 0);
+  planar.setComponentJointAngle(COMP7, 0);
+  planar.setComponentJointAngle(COMP8, 0);
+  planar.setComponentJointAngle(COMP9, 0);
+}
 
 void initManipulator()
 {
@@ -76,36 +92,38 @@ void initManipulator()
 
   planar.addComponent(COMP1,
                      WORLD,
-                     COMP2,
-                     OM_MATH::makeVector3(-0.278, 0.0, 0.017),
+                     COMP4,
+                     OM_MATH::makeVector3(0.0849f, 0.0849f, 0.0),
                      Eigen::Matrix3f::Identity(3, 3),
                      Z_AXIS,
                      1);
 
-  planar.addComponent(COMP2,
-                     COMP1,
-                     COMP3,
-                     OM_MATH::makeVector3(0.0, 0.0, 0.058),
+ planar.addComponent(COMP2,
+                     WORLD,
+                     COMP5,
+                     OM_MATH::makeVector3(0.0849f, 0.0849f, 0.0),
                      Eigen::Matrix3f::Identity(3, 3),
-                     Y_AXIS,
+                     Z_AXIS,
                      2);
 
   planar.addComponent(COMP3,
-                     COMP2,
-                    //  COMP4,
-                     TOOL,
-                     OM_MATH::makeVector3(0.024, 0.0, 0.128),
+                     WORLD,
+                     COMP6,
+                     OM_MATH::makeVector3(0.0849f, 0.0849f, 0.0),
                      Eigen::Matrix3f::Identity(3, 3),
-                     Y_AXIS,
+                     Z_AXIS,
                      3);
 
-  planar.addTool(TOOL,
-                // COMP4,
-                COMP3,
-                OM_MATH::makeVector3(0.130, 0.0, 0.0),
-                Eigen::Matrix3f::Identity(3, 3),
-                5,
-                1.0f); // Change unit from `meter` to `radian`
+  planar.addComponent(COMP4,
+                     COMP7,
+                     TOOL,
+                     OM_MATH::makeVector3(-0.0849f, 0.049f, 0.0),
+                     Eigen::Matrix3f::Identity(3, 3));
+
+  planar.addTool(TOOL,    // why defined like this???
+                COMP7,
+                OM_MATH::makeVector3(0.0, 0.0366, 0.0),
+                Eigen::Matrix3f::Identity(3, 3));
 
   planar.initKinematics(kinematics);
 #ifdef PLATFORM ////////////////////////////////////Actuator init
