@@ -70,6 +70,11 @@
 #define RELAY_PIN 8
 ////////////////////////////////////////////
 
+//////////////motion flug///////////////
+bool setmove_motion_flug = false;
+bool IK_motion_flug = true;
+////////////////////////////////////////////
+
 ////////////////using class/////////////////
 OPEN_MANIPULATOR::OpenManipulator omlink;
 
@@ -196,11 +201,12 @@ void THREAD::Robot_State(void const *argument)
     updateAllJointAngle();
     omlink.forward();
 #ifdef DEBUGFLUG
-    for(int i =0; i < 3; i++)
-    {
-      DEBUG.print(omlink.receiveAllActuatorAngle().at(0));
-    }
-    DEBUG.println();
+    // for(int i =0; i < 3; i++)
+    // {
+    //   DEBUG.print(omlink.receiveAllActuatorAngle().at(i));
+    //   DEBUG.print(", ");
+    // }
+    // DEBUG.println();
 #endif
 
     MUTEX::release();
@@ -218,7 +224,7 @@ void THREAD::Actuator_Control(void const *argument)
     MUTEX::wait();
 
     omlink.setPresentTime((float)(millis()/1000.0f));
-    omlink.jointControl();
+    omlink.jointControl(true);
 
     MUTEX::release();
 
