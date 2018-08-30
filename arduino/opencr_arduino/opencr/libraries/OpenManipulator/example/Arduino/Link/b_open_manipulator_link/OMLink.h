@@ -51,7 +51,7 @@
 
 //////////////////Dynamixel/////////////////
 #define BAUD_RATE 1000000
-//#define PLATFORM
+#define PLATFORM
 ////////////////////////////////////////////
 
 //////////////////DebugFlug/////////////////
@@ -200,15 +200,6 @@ void THREAD::Robot_State(void const *argument)
 
     updateAllJointAngle();
     omlink.forward();
-    DEBUG.print("tool positon : ");
-    DEBUG.print(" 1: ");
-    DEBUG.print(omlink.getComponentPositionToWorld(SUCTION)[0]);
-    DEBUG.print(", 2: ");
-    DEBUG.print(omlink.getComponentPositionToWorld(SUCTION)[1]);
-    DEBUG.print(", 3: ");
-    DEBUG.print(omlink.getComponentPositionToWorld(SUCTION)[2]);
-    DEBUG.println();
-
 
 #ifdef DEBUGFLUG
     // for(int i =0; i < 3; i++)
