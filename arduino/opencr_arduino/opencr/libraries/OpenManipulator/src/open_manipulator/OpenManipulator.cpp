@@ -851,15 +851,15 @@ void OpenManipulator::setPose(Name tool_name, Pose goal_pose, float move_time)
 {
   std::vector<float> goal_position = kinematics_->inverse(&manipulator_, tool_name, goal_pose);
 
-  DEBUG.print("Inverse result : ");
-  DEBUG.print(goal_position.size());
-  DEBUG.print(" 1: ");
-  DEBUG.print(goal_position.at(0));
-  DEBUG.print(", 2: ");
-  DEBUG.print(goal_position.at(1));
-  DEBUG.print(", 3: ");
-  DEBUG.print(goal_position.at(2));
-  DEBUG.println();
+  // DEBUG.print("Inverse result : ");
+  // DEBUG.print(goal_position.size());
+  // DEBUG.print(" 1: ");
+  // DEBUG.print(goal_position.at(0));
+  // DEBUG.print(", 2: ");
+  // DEBUG.print(goal_position.at(1));
+  // DEBUG.print(", 3: ");
+  // DEBUG.print(goal_position.at(2));
+  // DEBUG.println();
 
   jointMove(goal_position, move_time);
 }
@@ -886,15 +886,16 @@ void OpenManipulator::setMove(Name tool_name, Vector3f meter, float move_time)
   goal_pose.position = goal_position_to_world;
   goal_pose.orientation = present_orientation_to_world;
 
-  DEBUG.print("GoalPos result : ");
-  DEBUG.print(goal_pose.position.size());
-  DEBUG.print(" x: ");
-  DEBUG.print(goal_pose.position(0));
-  DEBUG.print(", y: ");
-  DEBUG.print(goal_pose.position(1));
-  DEBUG.print(", z: ");
-  DEBUG.print(goal_pose.position(2));
-  DEBUG.println();
+  // DEBUG.println("-----------------------------------------------");
+  // DEBUG.print("GoalPos result : ");
+  // DEBUG.print(goal_pose.position.size());
+  // DEBUG.print(" x: ");
+  // DEBUG.print(goal_pose.position(0));
+  // DEBUG.print(", y: ");
+  // DEBUG.print(goal_pose.position(1));
+  // DEBUG.print(", z: ");
+  // DEBUG.print(goal_pose.position(2));
+  // DEBUG.println();
 
   setPose(tool_name, goal_pose, move_time);
 }

@@ -23,17 +23,26 @@
 
 void suctionInit()
 {
-  pinMode(RELAY_PIN, OUTPUT);
+#ifdef PLATFORM
+  if(suction)
+    pinMode(RELAY_PIN, OUTPUT);
+#endif
 }
 
 void suctionOn()
 {
-  digitalWrite(RELAY_PIN, HIGH);
+#ifdef PLATFORM
+  if(suction)
+    digitalWrite(RELAY_PIN, HIGH);
+#endif
 }
 
 void suctionOff()
 {
-  digitalWrite(RELAY_PIN, LOW);
+#ifdef PLATFORM
+  if(suction)
+    digitalWrite(RELAY_PIN, LOW);
+#endif
 }
 
 

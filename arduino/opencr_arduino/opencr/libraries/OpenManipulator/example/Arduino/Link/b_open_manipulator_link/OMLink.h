@@ -55,7 +55,7 @@
 ////////////////////////////////////////////
 
 //////////////////DebugFlug/////////////////
-#define DEBUGFLUG
+//#define DEBUGFLUG
 ////////////////////////////////////////////
 
 //////////////////Move step/////////////////
@@ -71,8 +71,11 @@
 ////////////////////////////////////////////
 
 //////////////motion flug///////////////
-bool setmove_motion_flug = false;
 bool IK_motion_flug = true;
+////////////////////////////////////////////
+
+//////////////suction flug///////////////
+bool suction = false;
 ////////////////////////////////////////////
 
 ////////////////using class/////////////////
@@ -105,8 +108,8 @@ void updateAllJointAngle()
 {
 #ifdef PLATFORM
   omlink.setAllActiveJointAngle(omlink.receiveAllActuatorAngle());
-  setPassiveJointAngle();
 #endif
+  setPassiveJointAngle();
   // Add passive joint function
 }
 
@@ -188,9 +191,7 @@ void initOMLink()
   updateAllJointAngle();
 #endif /////////////////////////////////////////////
   omlink.forward(); 
-
   omlink.setPresentTime((float)(millis()/1000.0f));
-  
 }
 
 void THREAD::Robot_State(void const *argument)
@@ -203,13 +204,14 @@ void THREAD::Robot_State(void const *argument)
 
     updateAllJointAngle();
     omlink.forward();
+
 #ifdef DEBUGFLUG
-    // for(int i =0; i < 3; i++)
-    // {
-    //   DEBUG.print(omlink.receiveAllActuatorAngle().at(i));
-    //   DEBUG.print(", ");
-    // }
-    // DEBUG.println();
+    for(int i =0; i < 3; i++)
+    {
+      DEBUG.print(omlink.receiveAllActuatorAngle().at(i));
+      DEBUG.print(", ");
+    }
+    DEBUG.println();
 #endif
 
     MUTEX::release();

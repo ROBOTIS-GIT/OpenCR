@@ -89,7 +89,7 @@ void connectOpenCR(int port_num)
   printArray(Serial.list());
 
   String port_name = Serial.list()[port_num];
-  opencr_port = new Serial(this, port_name, 1000000);
+  opencr_port = new Serial(this, port_name, 57600);
   opencr_port.bufferUntil('\n');
 }
 
@@ -107,7 +107,7 @@ void serialEvent(Serial opencr_port)
   
   if (cmd[0].equals("angle"))
   {
-    print("joint ");
+    print("received joint ");
     for (int cmd_cnt = 1; cmd_cnt < cmd.length; cmd_cnt++)
     {
       received_joint_angle[cmd_cnt-1] = float(cmd[cmd_cnt]);
@@ -928,7 +928,7 @@ class ChildApplet extends PApplet
                         send_joint_angle[0] + ',' +
                         send_joint_angle[1] + ',' +
                         send_joint_angle[2] + '\n');
-      println("joint " + send_joint_angle[0] + ", " + send_joint_angle[1]  + ", " + send_joint_angle[2]  + "  ");                    
+      println("send joint " + send_joint_angle[0] + ", " + send_joint_angle[1]  + ", " + send_joint_angle[2]  + "  ");                    
     }
     else
     {
@@ -954,7 +954,7 @@ class ChildApplet extends PApplet
                         send_joint_angle[0] + ',' +
                         send_joint_angle[1] + ',' +
                         send_joint_angle[2] + '\n');
-      println("joint " + send_joint_angle[0] + ", " + send_joint_angle[1]  + ", " + send_joint_angle[2]  + "  ");  
+      println("send joint " + send_joint_angle[0] + ", " + send_joint_angle[1]  + ", " + send_joint_angle[2]  + "  ");  
     }
     else
     {
@@ -975,7 +975,7 @@ class ChildApplet extends PApplet
                         send_joint_angle[0] + ',' +
                         send_joint_angle[1] + ',' +
                         send_joint_angle[2] + '\n');
-      println("joint " + send_joint_angle[0] + ", " + send_joint_angle[1]  + ", " + send_joint_angle[2]  + "  ");  
+      println("send joint " + send_joint_angle[0] + ", " + send_joint_angle[1]  + ", " + send_joint_angle[2]  + "  ");  
     }
     else
     {
@@ -991,13 +991,13 @@ class ChildApplet extends PApplet
       {
         opencr_port.write("suction"  + ',' +
                           "on" + '\n');
-        println("suction on");
+        println("send suction on");
       }
       else
       {
         opencr_port.write("suction"  + ',' +
                           "off" + '\n');
-        println("suction off");
+        println("send suction off");
       }
     }
     else
@@ -1015,7 +1015,7 @@ class ChildApplet extends PApplet
     {
       opencr_port.write("task"    + ',' +
                         "forward" + '\n');
-      println("Move Forward");
+      println("send Move Forward");
     }
     else
     {
@@ -1029,7 +1029,7 @@ class ChildApplet extends PApplet
     {
       opencr_port.write("task"    + ',' +
                         "back"    + '\n');
-      println("Move Back");
+      println("send Move Back");
     }
     else
     {
@@ -1043,7 +1043,7 @@ class ChildApplet extends PApplet
     {
       opencr_port.write("task"    + ',' +
                         "left"    + '\n');
-      println("Move Left");
+      println("send Move Left");
     }
     else
     {
@@ -1057,7 +1057,7 @@ class ChildApplet extends PApplet
     {
       opencr_port.write("task"    + ',' +
                         "right"   + '\n');
-      println("Move Right");
+      println("send Move Right");
     }
     else
     {
@@ -1071,7 +1071,7 @@ class ChildApplet extends PApplet
     {
       opencr_port.write("task"    + ',' +
                         "up"      + '\n');
-      println("Move Up");
+      println("send Move Up");
     }
     else
     {
@@ -1085,7 +1085,7 @@ class ChildApplet extends PApplet
     {
       opencr_port.write("task"    + ',' +
                         "down"    + '\n');
-      println("Move Down");
+      println("send Move Down");
     }
     else
     {
@@ -1111,7 +1111,7 @@ class ChildApplet extends PApplet
                         send_joint_angle[0] + ',' +
                         send_joint_angle[1] + ',' +
                         send_joint_angle[2] + '\n');
-      println("joint " + send_joint_angle[0] + ", " + send_joint_angle[1]  + ", " + send_joint_angle[2]  + "  ");  
+      println("send joint " + send_joint_angle[0] + ", " + send_joint_angle[1]  + ", " + send_joint_angle[2]  + "  ");  
     }
     else
     {
@@ -1127,13 +1127,13 @@ class ChildApplet extends PApplet
       {
         opencr_port.write("suction"  + ',' +
                           "on" + '\n');
-        println("suction on");
+        println("send suction on");
       }
       else
       {
         opencr_port.write("suction"  + ',' +
                           "off" + '\n');
-        println("suction on");
+        println("send suction on");
       }
     }
     else
@@ -1153,13 +1153,13 @@ class ChildApplet extends PApplet
       {
         opencr_port.write("motor"  + ',' +
                           "disable"     + '\n');
-        println("motor disable");
+        println("send motor disable");
       }
       else
       {
         opencr_port.write("motor"  + ',' +
                           "enable"      + '\n');
-        println("motor enable");
+        println("send motor enable");
       }
     }
     else
@@ -1174,7 +1174,7 @@ class ChildApplet extends PApplet
     {
       opencr_port.write("get" + ',' +
                         "clear"  + '\n');
-      println("get clear");
+      println("send get clear");
     }
     else
     {
@@ -1189,7 +1189,7 @@ class ChildApplet extends PApplet
       opencr_port.write("get"      + ',' +
                         "pose"     + ',' +
                         motion_num + '\n');
-      println("get pose");
+      println("send get pose");
       motion_num++;
     }
     else
@@ -1204,7 +1204,7 @@ class ChildApplet extends PApplet
     {
       opencr_port.write("hand"     + ',' +
                         "once"  + '\n');
-      println("Motion Start!!!");
+      println("send Motion Start!!!");
 
       motion_num = 0;
     }
@@ -1222,13 +1222,13 @@ class ChildApplet extends PApplet
       {
         opencr_port.write("hand"    + ',' +
                           "repeat"  + '\n');
-        println("hand repeat");
+        println("send hand repeat");
       }
       else
       {
         opencr_port.write("hand"  + ',' +
                           "stop"  + '\n');
-        println("hand stop");
+        println("send hand stop");
       }
     }
     else
@@ -1243,7 +1243,7 @@ class ChildApplet extends PApplet
     {
       opencr_port.write("motion"  + ',' +
                         "start"   + '\n');
-      println("Motion Start!!!");
+      println("send Motion Start!!!");
     }
     else
     {
@@ -1257,7 +1257,7 @@ class ChildApplet extends PApplet
     {
       opencr_port.write("motion"  + ',' +
                         "stop"    + '\n');
-      println("Motion Stop!!!");
+      println("send Motion Stop!!!");
     }
     else
     {

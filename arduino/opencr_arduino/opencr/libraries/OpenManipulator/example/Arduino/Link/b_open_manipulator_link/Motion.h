@@ -27,7 +27,7 @@
 
 //////////////////////flug///////////////////
 bool motion    = false;
-bool repeat    = false;
+bool repeat    = true;
 ////////////////////////////////////////////
 
 ///////////////////storage//////////////////
@@ -269,57 +269,30 @@ void setMotion()
           motion     = false;     
         }
       }
-
-    //   /////////////////////////////////////////////////////////////////////  
-    //   if(setmove_motion_flug)
-    //   {
-    //     if (setmove_motion_set[motion_cnt][4] == 1.0)
-    //     {
-    //       digitalWrite(RELAY_PIN, HIGH);      //suction on      
-    //       motion_cnt++;
-    //     }
-    //     else if (setmove_motion_set[motion_cnt][4] == -1.0)
-    //     {
-    //       digitalWrite(RELAY_PIN, LOW);      //suction off  
-    //       motion_cnt++;
-    //     }
-    //     else
-    //     {
-    //       omlink.setMove(SUCTION,
-    //                      OM_MATH::makeVector3(setmove_motion_set[motion_cnt][1], 
-    //                                           setmove_motion_set[motion_cnt][2],
-    //                                           setmove_motion_set[motion_cnt][3]),
-    //                      setmove_motion_set[motion_cnt][0]);
-    //     }
-    //     motion_cnt++;
-    //   }
-    //   /////////////////////////////////////////////////////////////////////  
-    //   else
-    //   {//motion make
-        static std::vector <float> target_angle;
-        if (motion_storage[motion_cnt][4] == 1.0)
+      
+      static std::vector <float> target_angle;
+      if (motion_storage[motion_cnt][4] == 1.0)
+      {
+        digitalWrite(RELAY_PIN, HIGH);      //suction on
+        omlink.jointMove(target_angle, motion_storage[motion_cnt][0]);         
+        motion_cnt++;
+      }
+      else if (motion_storage[motion_cnt][4] == -1.0)
+      {
+        digitalWrite(RELAY_PIN, LOW);      //suction off
+        omlink.jointMove(target_angle, motion_storage[motion_cnt][0]);   
+        motion_cnt++;
+      }
+      else
+      {
+        target_angle.clear();
+        for (int8_t i = 1; i < 4; i++)
         {
-          digitalWrite(RELAY_PIN, HIGH);      //suction on
-          omlink.jointMove(target_angle, motion_storage[motion_cnt][0]);         
-          motion_cnt++;
+          target_angle.push_back(motion_storage[motion_cnt][i]);
         }
-        else if (motion_storage[motion_cnt][4] == -1.0)
-        {
-          digitalWrite(RELAY_PIN, LOW);      //suction off
-          omlink.jointMove(target_angle, motion_storage[motion_cnt][0]);   
-          motion_cnt++;
-        }
-        else
-        {
-          target_angle.clear();
-          for (int8_t i = 1; i < 4; i++)
-          {
-            target_angle.push_back(motion_storage[motion_cnt][i]);
-          }
-          omlink.jointMove(target_angle, motion_storage[motion_cnt][0]);   
-          motion_cnt++;
-        }
-    //   }
+        omlink.jointMove(target_angle, motion_storage[motion_cnt][0]);   
+        motion_cnt++;
+      }
 ////////////////////////MOTION SETTING////////////////////////////// 
     }
   }

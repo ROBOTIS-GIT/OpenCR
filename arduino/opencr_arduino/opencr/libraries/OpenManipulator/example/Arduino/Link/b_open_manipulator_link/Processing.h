@@ -52,7 +52,7 @@ void fromProcessing(String data)
     {
 #ifdef PLATFORM
       omlink.actuatorEnable();
-      omlink.sendAngleToProcessing(omlink.getAllJointAngle());  
+      omlink.sendAngleToProcessing(omlink.getAllActiveJointAngle());  
 #endif
 #ifdef DEBUGFLUG
     DEBUG.print("ready");
@@ -61,8 +61,7 @@ void fromProcessing(String data)
     else if (cmd[1] == "end")
     {
 #ifdef PLATFORM
-      omlink.actuatorDisable();
-      omlink.sendAngleToProcessing(omlink.getAllJointAngle());  
+      omlink.actuatorDisable();  
 #endif
 #ifdef DEBUGFLUG
     DEBUG.print("end");
@@ -81,15 +80,20 @@ void fromProcessing(String data)
 #endif
     std::vector<float> target_angle;
 
-    for (uint8_t i = 1; i < 4; i++)
+    for (uint8_t i = 0; i < 3; i++)
     {
-      target_angle.push_back(cmd[i].toFloat());
-#ifdef DEBUGFLUG
-      DEBUG.print(target_angle.at(0));
-      DEBUG.print(" , ");
-#endif
+      target_angle.push_back(cmd[i+1].toFloat());
     }
+
+#ifdef DEBUGFLUG
+    for (uint8_t i = 0; i < 3; i++)
+    {
+      DEBUG.print(target_angle.at(i));
+      DEBUG.print(" , ");
+    }
+#endif
     omlink.jointMove(target_angle, MOVETIME);
+    target_angle.clear();
 #ifdef DEBUGFLUG
     DEBUG.println(" ");
 #endif
@@ -152,6 +156,11 @@ void fromProcessing(String data)
     {
       omlink.setMove(SUCTION, OM_MATH::makeVector3(0.0, 0.0, -MOVESTEP), MOVETIME);
     }
+    else
+    {
+      omlink.setMove(SUCTION, OM_MATH::makeVector3(0.0, 0.0, 0.0), MOVETIME);
+    }
+    
 #ifdef DEBUGFLUG
     DEBUG.print(cmd[1]);
     DEBUG.println(" ");
