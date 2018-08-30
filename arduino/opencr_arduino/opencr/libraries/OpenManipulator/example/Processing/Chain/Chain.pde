@@ -49,6 +49,12 @@ float[] receive_gripper_pos = new float[2];
 float[] ctrl_joint_angle = new float[4];
 float[] ctrl_gripper_pos = new float[2];
 
+int tabFlag = 1;
+
+float[] visual_target_pose_x = new float[50];
+float[] visual_target_pose_y = new float[50];
+float[] visual_target_pose_z = new float[50];
+
 /*******************************************************************************
 * Setting window size
 *******************************************************************************/
@@ -72,7 +78,7 @@ void setup()
 }
 
 /*******************************************************************************
-* Draw (loop function)
+* (loop function)
 *******************************************************************************/
 void draw()
 {
@@ -207,11 +213,39 @@ void setWindow()
 *******************************************************************************/
 void drawSphere(int x, int y, int z, int r, int g, int b, int size)
 {
-  pushMatrix();
-  translate(x,y,z);
+  translate(x, y, z);
   stroke(r,g,b);
   sphere(size);
-  popMatrix();
+}
+
+void saveSpherePose()
+{
+  for (int i=0; i< visual_target_pose_x.length - 1; i++)
+  {
+    visual_target_pose_x[i] = visual_target_pose_x[i + 1];
+    visual_target_pose_y[i] = visual_target_pose_y[i + 1];
+    visual_target_pose_z[i] = visual_target_pose_z[i + 1];
+  }
+
+  visual_target_pose_x[visual_target_pose_x.length - 1] = modelX(0,0,0);
+  visual_target_pose_y[visual_target_pose_y.length - 1] = modelY(0,0,0);
+  visual_target_pose_z[visual_target_pose_z.length - 1] = modelZ(0,0,0);
+}
+
+void drawSphereAfterEffect()
+{
+  for(int i = 0; i < visual_target_pose_x.length; i ++)
+  { 
+    pushMatrix();
+    rotateZ(radians(-140));
+    rotateX(radians(-90));
+    translate(-width/2 , -height/2, 0);
+    
+    translate(visual_target_pose_x[i], visual_target_pose_y[i], visual_target_pose_z[i]);
+    stroke(255,255,255);
+    sphere(1.5);
+    popMatrix();
+  }
 }
 
 /*******************************************************************************
@@ -265,57 +299,63 @@ void drawManipulator()
   rotateY(receive_joint_angle[3]);
   shape(goal_link5_shape);
   drawLocalFrame();
-
+  
   translate(0.130*1000, 0.007*1000, 0);
   drawSphere(0, -7, 0, 100, 100, 100, 10);
+  saveSpherePose();
   translate(0, receive_gripper_pos[0], 0);
   shape(goal_right_palm_shape);
   drawLocalFrame();
-
+      
   translate(0, -0.014*1000, 0);
   translate(0, receive_gripper_pos[1], 0);
   shape(goal_left_palm_shape);
   drawLocalFrame();
   popMatrix();
-
-  pushMatrix();
-  translate(-model_trans_x, -model_trans_y, -model_trans_z);
-  rotateX(0.0);
-  rotateZ(0.0);
-  shape(ctrl_link1_shape);
-  drawLocalFrame();
-
-  translate(0.0, 0.0, 0.036*1000);
-  rotateZ(-ctrl_joint_angle[0]);
-  shape(ctrl_link2_shape);
-  drawLocalFrame(); 
-
-  translate(0.0, 0.0, 0.040*1000);
-  rotateY(ctrl_joint_angle[1]);
-  shape(ctrl_link3_shape);
-  drawLocalFrame();
-
-  translate(0.024*1000, 0.0, 0.128*1000);
-  rotateY(ctrl_joint_angle[2]);
-  shape(ctrl_link4_shape);
-  drawLocalFrame();
-
-  translate(0.124*1000, 0.0, 0.0);
-  rotateY(ctrl_joint_angle[3]);
-  shape(ctrl_link5_shape);
-  drawLocalFrame();
-
-  translate(0.130*1000, 0.007*1000, 0);
-  drawSphere(0, -7, 0, 100, 100, 100, 10);
-  translate(0, ctrl_gripper_pos[0], 0);
-  shape(ctrl_right_palm_shape);
-  drawLocalFrame();
-
-  translate(0, -0.014*1000, 0);
-  translate(0, ctrl_gripper_pos[1], 0);
-  shape(ctrl_left_palm_shape);
-  drawLocalFrame();
-  popMatrix();
+  
+  drawSphereAfterEffect();
+  
+  if(tabFlag == 1)
+  {
+    pushMatrix();
+    translate(-model_trans_x, -model_trans_y, -model_trans_z);
+    rotateX(0.0);
+    rotateZ(0.0);
+    shape(ctrl_link1_shape);
+    drawLocalFrame();
+  
+    translate(0.0, 0.0, 0.036*1000);
+    rotateZ(-ctrl_joint_angle[0]);
+    shape(ctrl_link2_shape);
+    drawLocalFrame(); 
+  
+    translate(0.0, 0.0, 0.040*1000);
+    rotateY(ctrl_joint_angle[1]);
+    shape(ctrl_link3_shape);
+    drawLocalFrame();
+  
+    translate(0.024*1000, 0.0, 0.128*1000);
+    rotateY(ctrl_joint_angle[2]);
+    shape(ctrl_link4_shape);
+    drawLocalFrame();
+  
+    translate(0.124*1000, 0.0, 0.0);
+    rotateY(ctrl_joint_angle[3]);
+    shape(ctrl_link5_shape);
+    drawLocalFrame();
+  
+    translate(0.130*1000, 0.007*1000, 0);
+    drawSphere(0, -7, 0, 200, 200, 200, 10);
+    translate(0, ctrl_gripper_pos[0], 0);
+    shape(ctrl_right_palm_shape);
+    drawLocalFrame();
+  
+    translate(0, -0.014*1000, 0);
+    translate(0, ctrl_gripper_pos[1], 0);
+    shape(ctrl_left_palm_shape);
+    drawLocalFrame();
+    popMatrix();
+  }
 }
 
 /*******************************************************************************
@@ -791,7 +831,13 @@ class ChildApplet extends PApplet
   {
     background(0);
   }
-
+  
+  void controlEvent(ControlEvent theControlEvent) {
+    if (theControlEvent.isTab()) {
+      println("got an event from tab : "+theControlEvent.getTab().getName()+" with id "+theControlEvent.getTab().getId());
+      tabFlag = theControlEvent.getTab().getId();
+    }
+  }
 /*******************************************************************************
 * Init Function of Joint Space Controller
 *******************************************************************************/
