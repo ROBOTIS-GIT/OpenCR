@@ -34,7 +34,7 @@ void setup()
   connectProcessing();
   //connectRC100();
 
-  switchInit();
+  //switchInit();
   
   initOMLink();
   suctionInit();              //suction pin set 
@@ -57,7 +57,7 @@ void setup()
 
 void loop()
 {
-  switchRead();
+  //switchRead();
   getData(10);
   setMotion();
   
@@ -122,11 +122,11 @@ void getData(uint32_t wait_time)
   uint16_t get_rc100_data = 0;
   String get_processing_data = "";
 
-  // if (availableRC100())
-  // {
-  //   get_rc100_data = readRC100Data();
-  //   rc100_flag = true;
-  // }
+  if (availableRC100())
+  {
+    get_rc100_data = readRC100Data();
+    rc100_flag = true;
+  }
 
   if (availableProcessing())
   {
@@ -139,12 +139,12 @@ void getData(uint32_t wait_time)
     case 0:
       if (rc100_flag)
       {
-      //   MUTEX::wait();
-      //   fromRC100(get_rc100_data);
-      //   MUTEX::release();
+        MUTEX::wait();
+        fromRC100(get_rc100_data);
+        MUTEX::release();
 
-      //   tick = millis();
-      //   state = 1;
+        tick = millis();
+        state = 1;
       }
       else if (processing_flag)
       {

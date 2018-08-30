@@ -51,11 +51,11 @@
 
 //////////////////Dynamixel/////////////////
 #define BAUD_RATE 1000000
-#define PLATFORM
+//#define PLATFORM
 ////////////////////////////////////////////
 
 //////////////////DebugFlug/////////////////
-#define DEBUGFLUG
+//#define DEBUGFLUG
 ////////////////////////////////////////////
 
 //////////////////Move step/////////////////
@@ -71,7 +71,6 @@
 ////////////////////////////////////////////
 
 //////////////motion flug///////////////
-bool setmove_motion_flug = false;
 bool IK_motion_flug = true;
 ////////////////////////////////////////////
 
@@ -105,8 +104,8 @@ void updateAllJointAngle()
 {
 #ifdef PLATFORM
   omlink.setAllActiveJointAngle(omlink.receiveAllActuatorAngle());
-  setPassiveJointAngle();
 #endif
+  setPassiveJointAngle();
   // Add passive joint function
 }
 
@@ -188,9 +187,7 @@ void initOMLink()
   updateAllJointAngle();
 #endif /////////////////////////////////////////////
   omlink.forward(); 
-
   omlink.setPresentTime((float)(millis()/1000.0f));
-  
 }
 
 void THREAD::Robot_State(void const *argument)
@@ -203,6 +200,16 @@ void THREAD::Robot_State(void const *argument)
 
     updateAllJointAngle();
     omlink.forward();
+    DEBUG.print("tool positon : ");
+    DEBUG.print(" 1: ");
+    DEBUG.print(omlink.getComponentPositionToWorld(SUCTION)[0]);
+    DEBUG.print(", 2: ");
+    DEBUG.print(omlink.getComponentPositionToWorld(SUCTION)[1]);
+    DEBUG.print(", 3: ");
+    DEBUG.print(omlink.getComponentPositionToWorld(SUCTION)[2]);
+    DEBUG.println();
+
+
 #ifdef DEBUGFLUG
     // for(int i =0; i < 3; i++)
     // {
