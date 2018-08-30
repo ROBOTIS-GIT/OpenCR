@@ -34,7 +34,7 @@ void setup()
   connectProcessing();
   //connectRC100();
 
-  //switchInit();
+  switchInit();
   
   initOMLink();
   suctionInit();              //suction pin set 
@@ -57,7 +57,7 @@ void setup()
 
 void loop()
 {
-  //switchRead();
+  switchRead();
   getData(10);
   setMotion();
   
