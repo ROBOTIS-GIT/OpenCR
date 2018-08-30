@@ -160,6 +160,7 @@ void fromProcessing(String data)
     {
       omlink.setMove(SUCTION, OM_MATH::makeVector3(0.0, 0.0, 0.0), MOVETIME);
     }
+    
 #ifdef DEBUGFLUG
     DEBUG.print(cmd[1]);
     DEBUG.println(" ");

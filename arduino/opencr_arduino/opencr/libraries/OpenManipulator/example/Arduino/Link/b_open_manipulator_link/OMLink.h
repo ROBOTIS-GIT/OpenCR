@@ -202,12 +202,12 @@ void THREAD::Robot_State(void const *argument)
     omlink.forward();
 
 #ifdef DEBUGFLUG
-    // for(int i =0; i < 3; i++)
-    // {
-    //   DEBUG.print(omlink.receiveAllActuatorAngle().at(i));
-    //   DEBUG.print(", ");
-    // }
-    // DEBUG.println();
+    for(int i =0; i < 3; i++)
+    {
+      DEBUG.print(omlink.receiveAllActuatorAngle().at(i));
+      DEBUG.print(", ");
+    }
+    DEBUG.println();
 #endif
 
     MUTEX::release();
