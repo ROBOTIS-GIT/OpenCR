@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "OMDebug.h"
+#include "OMManager.h"
 
 using namespace Eigen;
 
@@ -83,31 +84,71 @@ public:
   MatrixXf getCoefficient();
 };
 
-// class DrawCircle
+class Line
+{
+private:
+  MinimumJerk path_generator_;
+  VectorXf coefficient_;
+
+  uint8_t joint_num_;
+
+  Vector3f start_;
+  Vector3f end_;
+
+public:
+  Line(uint8_t joint_num);
+  virtual ~Line();
+
+  void init(float move_time, float control_time);
+  void setTwoPoints(Vector3f start, Vector3f end);
+  Pose getPose(float tick);
+
+  MatrixXf getCoefficient();
+};
+
+// class Arc
 // {
 // private:
 //   MinimumJerk path_generator_;
+//   MatrixXf coefficient_;
 
 //   uint8_t joint_num_;
-//   MatrixXf coefficient_;
-//   std::vector<float> position_;
-//   std::vector<float> velocity_;
-//   std::vector<float> acceleration_;
 
 // public:
-//   DrawCircle(uint8_t joint_num);
-//   virtual ~DrawCircle();
+//   Arc(uint8_t joint_num);
+//   virtual ~Arc();
 
-//   void init(std::vector<Trajectory> start,
-//             std::vector<Trajectory> goal,
-//             float move_time,
-//             float control_time);
-
-//   std::vector<float> getPosition(float tick);
-//   std::vector<float> getVelocity(float tick);
-//   std::vector<float> getAcceleration(float tick);
+//   void init(float move_time, float control_time);
+//   void setFunction();
+//   Pose getPose(float tick);
 
 //   MatrixXf getCoefficient();
 // };
+
+class Circle
+{
+private:
+  MinimumJerk path_generator_;
+  MatrixXf coefficient_;
+
+  uint8_t joint_num_;
+
+  Vector3f initial_position_;
+
+  float radius_;
+
+public:
+  Circle(uint8_t joint_num);
+  virtual ~Circle();
+
+  void init(Vector3f initial_position, float radius, float move_time, float control_time);
+  Pose circle(float time_var);
+  Pose getPose(float tick);
+
+  MatrixXf getCoefficient();
+
+  // virtual init();
+  // virtual Pose getPose(float tick);
+};
 } // namespace PATH
 #endif // OMPATH_H_
