@@ -26,8 +26,8 @@
 #include <math.h>
 #include <vector>
 
+#include "OMAPI.h"
 #include "OMDebug.h"
-#include "OMManager.h"
 
 using namespace Eigen;
 
@@ -125,7 +125,7 @@ public:
 //   MatrixXf getCoefficient();
 // };
 
-class Circle
+class Circle : public OPEN_MANIPULATOR::Draw
 {
 private:
   MinimumJerk path_generator_;
@@ -133,22 +133,25 @@ private:
 
   uint8_t joint_num_;
 
-  Vector3f initial_position_;
+  Vector3f start_position_;
 
   float radius_;
 
 public:
-  Circle(uint8_t joint_num);
+  Circle();
   virtual ~Circle();
 
-  void init(Vector3f initial_position, float radius, float move_time, float control_time);
+  void init(float move_time, float control_time);
   Pose circle(float time_var);
-  Pose getPose(float tick);
 
   MatrixXf getCoefficient();
 
-  // virtual init();
-  // virtual Pose getPose(float tick);
+  virtual void initDraw(const void *arg);
+  virtual void setJointSize(uint8_t joint_num);
+  virtual void setRadius(float radius);  
+  virtual void setStartPosition(Vector3f start_position);
+  virtual Pose getPose(float tick);
 };
-} // namespace PATH
+
+} // namespace OM_PATH
 #endif // OMPATH_H_

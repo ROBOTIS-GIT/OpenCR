@@ -213,19 +213,12 @@ Pose Line::getPose(float tick)
   return pose;
 }
 
-Circle::Circle(uint8_t joint_num)
-{
-  joint_num_ = joint_num;
-  coefficient_ = MatrixXf::Identity(6, joint_num);
-}
+Circle::Circle() {}
 
 Circle::~Circle() {}
 
-void Circle::init(Vector3f initial_position, float radius, float move_time, float control_time)
+void Circle::init(float move_time, float control_time)
 {
-  initial_position_ = initial_position;
-  radius_ = radius;
-
   Trajectory start;
   Trajectory goal;
 
@@ -245,14 +238,29 @@ void Circle::init(Vector3f initial_position, float radius, float move_time, floa
   coefficient_ = path_generator_.getCoefficient();
 }
 
+void Circle::setJointSize(uint8_t joint_num)
+{
+  joint_num_ = joint_num;
+  coefficient_ = MatrixXf::Identity(6, joint_num);
+}
+
+void Circle::setStartPosition(Vector3f start_position)
+{
+  start_position_ = start_position;
+}
+
+void Circle::setRadius(float radius)
+{
+  radius_ = radius;
+}
 
 Pose Circle::circle(float time_var)
 {
   Pose pose;
 
-  pose.position(0) = (initial_position_(0) - radius_) + (radius_ * cos(time_var));
-  pose.position(1) = initial_position_(1) + (radius_ * sin(time_var));
-  pose.position(2) = initial_position_(2);
+  pose.position(0) = (start_position_(0) - radius_) + (radius_ * cos(time_var));
+  pose.position(1) = start_position_(1) + (radius_ * sin(time_var));
+  pose.position(2) = start_position_(2);
 
   return pose;
 }
@@ -269,4 +277,12 @@ Pose Circle::getPose(float tick)
              coefficient_(5) * pow(tick, 5);
 
   return circle(get_time_var);;
+}
+
+void Circle::initDraw(const void *arg)
+{
+  // *(uint32_t *)arg
+  float *get_arg = (float *)arg;
+
+  init(get_arg[0], get_arg[1]);
 }

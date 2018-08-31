@@ -20,6 +20,7 @@
 #define OPEN_MANIPULATOR_H_
 
 #include "OMAPI.h"
+#include "OMPath.h"
 #include "OMBridge.h"
 
 #include <algorithm> // for sort()
@@ -55,6 +56,7 @@ class OpenManipulator
 private:
   OM_MANAGER::Manipulator manipulator_;
   OM_PATH::JointTrajectory *joint_trajectory_;
+  OM_PATH::Line *line_;
   Goal previous_goal_;
 
   std::vector<Trajectory> start_trajectory_;
@@ -63,9 +65,11 @@ private:
   Manager *manager_;
   Kinematics *kinematics_;
   Actuator *actuator_;    
+  std::map<Name, Draw *> draw_;
 
   float move_time_;
   float control_time_;
+  float drawing_time_;
 
   bool moving_;
   uint16_t step_cnt_;
@@ -74,6 +78,9 @@ private:
 
   bool platform_;
   bool processing_;
+  bool drawing_;
+
+  uint16_t draw_cnt_;
 
   String cmd_[50];
 
@@ -83,6 +90,7 @@ public:
 
   void initKinematics(Kinematics *kinematics);
   void initActuator(Actuator *actuator);
+  void addDraw(Name name, Draw *draw);
 
   void initJointTrajectory();
 
@@ -209,6 +217,15 @@ public:
   bool sendActuatorAngle(uint8_t active_joint_id, float radian);
   bool sendActuatorSignal(uint8_t active_joint_id, bool onoff);
   std::vector<float> receiveAllActuatorAngle();
+
+  // DRAW (INCLUDES VIRTUAL)
+  void drawInit(Name name, const void *arg);
+  void setRadiusForDrawing(Name name, float radius);
+  void setTimeForDrawing(float drawing_time);
+  void setStartPositionForDrawing(Name name, Vector3f start_position);
+  Pose getPoseForDrawing(Name name, float tick);
+  void draw();
+  bool drawing();
 
   // PATH
   void setPresentTime(float present_time);
