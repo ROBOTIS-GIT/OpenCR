@@ -37,6 +37,8 @@ void setup()
   
   initManipulator();
 
+  SCARA.addDraw(CIRCLE, circle);
+
   // goal_position.push_back(0.0);
   // goal_position.push_back(0.0);
   // goal_position.push_back(0.0);
@@ -52,6 +54,7 @@ void setup()
 void loop()
 {
   getData(100);
+
   // switch(seq)
   // {
   //   case 0:

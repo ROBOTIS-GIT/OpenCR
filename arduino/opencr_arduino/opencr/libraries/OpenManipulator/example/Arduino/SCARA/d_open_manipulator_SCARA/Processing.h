@@ -185,35 +185,44 @@ void fromProcessing(String data)
   //     repeat     = false;
   //   }
   // }
-  // else if (cmd[0] == "motion")
-  // {
-  //   if (cmd[1] == "start")
-  //   {
-  //     if (DYNAMIXEL)
-  //       sendAngle2Processing(getAngle()); 
+  else if (cmd[0] == "motion")
+  {
+    if (cmd[1] == "start")
+    {
+      const float move_time = 1.0f;
+      float init_arg[2] = {move_time, ACTUATOR_CONTROL_TIME};
+      void *p_init_arg = init_arg;
 
-  //     if (PROCESSING)
-  //       sendAngle2Processing(getState()); 
+      SCARA.drawInit(CIRCLE, p_init_arg);
+      SCARA.setRadiusForDrawing(CIRCLE, 0.050);  
+      SCARA.setTimeForDrawing(move_time);
+      SCARA.setStartPositionForDrawing(CIRCLE, SCARA.getComponentPositionToWorld(TOOL));
+      SCARA.draw();
+      // if (DYNAMIXEL)
+      //   sendAngle2Processing(getAngle()); 
 
-  //     for (int i = 0; i < MOTION_NUM; i++)
-  //     {
-  //       for (int j = 0; j < 6; j++)
-  //       {
-  //         motion_storage[i][j] = motion_set[i][j];
-  //       }
-  //     }
+      // if (PROCESSING)
+      //   sendAngle2Processing(getState()); 
 
-  //     motion_num = MOTION_NUM;  
-  //     motion_cnt = 0;          
-  //     motion = true;
-  //     repeat = true;
-  //   }
-  //   else if (cmd[1] == "stop")
-  //   {
-  //     motion_cnt = 0;
-  //     motion     = false;
-  //     repeat     = false;
-  //   }
-  // }
+      // for (int i = 0; i < MOTION_NUM; i++)
+      // {
+      //   for (int j = 0; j < 6; j++)
+      //   {
+      //     motion_storage[i][j] = motion_set[i][j];
+      //   }
+      // }
+
+      // motion_num = MOTION_NUM;  
+      // motion_cnt = 0;          
+      // motion = true;
+      // repeat = true;
+    }
+    else if (cmd[1] == "stop")
+    {
+      // motion_cnt = 0;
+      // motion     = false;
+      // repeat     = false;
+    }
+  }
 }
 #endif
