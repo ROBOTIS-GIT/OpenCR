@@ -56,7 +56,6 @@ class OpenManipulator
 private:
   OM_MANAGER::Manipulator manipulator_;
   OM_PATH::JointTrajectory *joint_trajectory_;
-  OM_PATH::Line *line_;
   Goal previous_goal_;
 
   std::vector<Trajectory> start_trajectory_;
@@ -64,8 +63,11 @@ private:
 
   Manager *manager_;
   Kinematics *kinematics_;
-  Actuator *actuator_;    
+  Actuator *actuator_;
+
+  OM_PATH::Line line_;
   std::map<Name, Draw *> draw_;
+
 
   float move_time_;
   float control_time_;
@@ -78,8 +80,9 @@ private:
 
   bool platform_;
   bool processing_;
-  bool drawing_;
 
+  bool drawing_;
+  Name object_;
   uint16_t draw_cnt_;
 
   String cmd_[50];
@@ -221,12 +224,11 @@ public:
   // DRAW (INCLUDES VIRTUAL)
   void drawInit(Name name, const void *arg);
   void setRadiusForDrawing(Name name, float radius);
-  void setTimeForDrawing(float drawing_time);
   void setStartPositionForDrawing(Name name, Vector3f start_position);
   Pose getPoseForDrawing(Name name, float tick);
-  void draw();
+  void draw(Name object, float drawing_time);
   bool drawing();
-  void jointControl(Name draw_class_name, Name tool_name);
+  void jointControlForDrawing(Name tool_name, bool use_time = false);
 
   // PATH
   void setPresentTime(float present_time);
@@ -241,7 +243,7 @@ public:
   MatrixXf getTrajectoryCoefficient();
   void move();
   bool moving();
-  void jointControl(bool flug_use_time = false);
+  void jointControl(bool use_time = false);
 
   void setStartTrajectory(Trajectory trajectory);
   void clearStartTrajectory();
@@ -258,6 +260,8 @@ public:
 
   void setPose(Name tool_name, Pose goal_pose, float move_time = 1.0f);
   void setMove(Name tool_name, Vector3f meter, float move_time = 1.0f);
+
+  void 
 };
 } // namespace OPEN_MANIPULATOR
 
