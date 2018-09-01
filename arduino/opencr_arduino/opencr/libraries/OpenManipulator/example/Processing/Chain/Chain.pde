@@ -271,9 +271,10 @@ void drawTitle()
 *******************************************************************************/
 void drawManipulator()
 {
+  pushMatrix();
+
   scale(1 + model_scale_factor);
 
-  pushMatrix();
   translate(-model_trans_x, -model_trans_y, -model_trans_z);
   rotateX(0.0);
   rotateZ(0.0);
@@ -311,6 +312,7 @@ void drawManipulator()
   translate(0, receive_gripper_pos[1], 0);
   shape(goal_left_palm_shape);
   drawLocalFrame();
+
   popMatrix();
   
   drawSphereAfterEffect();
@@ -318,6 +320,9 @@ void drawManipulator()
   if(tabFlag == 1)
   {
     pushMatrix();
+
+    scale(1 + model_scale_factor);
+
     translate(-model_trans_x, -model_trans_y, -model_trans_z);
     rotateX(0.0);
     rotateZ(0.0);
@@ -354,6 +359,7 @@ void drawManipulator()
     translate(0, ctrl_gripper_pos[1], 0);
     shape(ctrl_left_palm_shape);
     drawLocalFrame();
+    
     popMatrix();
   }
 }
