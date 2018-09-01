@@ -264,9 +264,10 @@ void drawTitle()
 *******************************************************************************/
 void drawManipulator()
 {
+  pushMatrix();
+  
   scale(1.5 + model_scale_factor);
 
-  pushMatrix();
   translate(-model_trans_x, -model_trans_y, 0);
   shape(goal_link1_shape);
   drawLocalFrame();
@@ -295,6 +296,7 @@ void drawManipulator()
   drawSphere(0, 0, 0, 100, 100, 100, 5);
   saveSpherePose();
   drawLocalFrame();
+
   popMatrix();
 
   drawSphereAfterEffect();
@@ -302,6 +304,9 @@ void drawManipulator()
   if (tabFlag == 1)
   {
     pushMatrix();
+
+    scale(1.5 + model_scale_factor);
+
     translate(-model_trans_x, -model_trans_y, 0);
     shape(ctrl_link1_shape);
     drawLocalFrame();
