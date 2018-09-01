@@ -319,7 +319,7 @@ void SCARA::forward(OM_MANAGER::Manipulator *manipulator)
 
 std::vector<float> SCARA::inverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose)
 {
-  chain_.positionOnlyInverseKinematics(manipulator, tool_name, target_pose);
+  return chain_.positionOnlyInverseKinematics(manipulator, tool_name, target_pose);
 }
 
 MatrixXf Link::jacobian(OM_MANAGER::Manipulator *manipulator, Name tool_name)
