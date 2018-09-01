@@ -26,6 +26,8 @@
 #include <algorithm> // for sort()
 #include <RTOS.h>
 
+#define LINE -100
+
 using namespace Eigen;
 
 namespace MUTEX
@@ -260,7 +262,7 @@ public:
   void setPose(Name tool_name, Pose goal_pose, float move_time = 1.0f);
   void setMove(Name tool_name, Vector3f meter, float move_time = 1.0f);
 
-  // void 
+  void drawLine(Vector3f start, Vector3f end, float move_time = 1.0f);
 };
 } // namespace OPEN_MANIPULATOR
 

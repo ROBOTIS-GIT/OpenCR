@@ -615,7 +615,7 @@ void OpenManipulator::actuatorDisable()
 void OpenManipulator::drawInit(Name name, float drawing_time, const void *arg)
 {
   drawing_time_ = drawing_time;
-  
+
   draw_.at(name)->initDraw(arg);
 }
 
@@ -749,7 +749,10 @@ void OpenManipulator::jointControlForDrawing(Name tool_name, bool use_time)
       {
         tick_time = control_time_ * draw_cnt_;
 
-        goal_position = kinematics_->inverse(&manipulator_, tool_name, getPoseForDrawing(object_, tick_time));
+        if (object_ == LINE)
+          goal_position = kinematics_->inverse(&manipulator_, tool_name, line_.getPose(tick_time));
+        else
+          goal_position = kinematics_->inverse(&manipulator_, tool_name, getPoseForDrawing(object_, tick_time));
 
         if (platform_)
           sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
@@ -992,4 +995,12 @@ void OpenManipulator::setMove(Name tool_name, Vector3f meter, float move_time)
   // DEBUG.println();
 
   setPose(tool_name, goal_pose, move_time);
+}
+
+void OpenManipulator::drawLine(Vector3f start, Vector3f end, float move_time)
+{
+  line_.init(move_time, control_time_);
+  line_.setTwoPoints(start, end);
+
+  draw(LINE);
 }

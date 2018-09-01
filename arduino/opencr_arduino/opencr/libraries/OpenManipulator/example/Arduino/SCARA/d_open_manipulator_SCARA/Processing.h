@@ -189,19 +189,25 @@ void fromProcessing(String data)
   {
     if (cmd[1] == "start")
     {
+
+#if 0 // DRAW CIRCLE
       const float move_time = 1.0f;
       float init_arg[2] = {move_time, ACTUATOR_CONTROL_TIME};
       void *p_init_arg = init_arg;
 
       static float radius = 0.005f;
 
-      SCARA.drawInit(CIRCLE, p_init_arg);
+      SCARA.drawInit(CIRCLE, move_time, p_init_arg);
       SCARA.setRadiusForDrawing(CIRCLE, radius);  
-      SCARA.setTimeForDrawing(move_time);
       SCARA.setStartPositionForDrawing(CIRCLE, SCARA.getComponentPositionToWorld(TOOL));
-      SCARA.draw();
+      SCARA.draw(CIRCLE);
 
       radius += 0.005f;
+#endif
+
+      SCARA.drawLine(SCARA.getComponentPositionToWorld(TOOL), 
+              (SCARA.getComponentPositionToWorld(TOOL) - OM_MATH::makeVector3(-0.050, 0.0, 0.0)), 
+              1.0f);
 
       // if (DYNAMIXEL)
       //   sendAngle2Processing(getAngle()); 
