@@ -96,7 +96,7 @@ private:
   Vector3f end_;
 
 public:
-  Line(uint8_t joint_num);
+  Line();
   virtual ~Line();
 
   void init(float move_time, float control_time);
@@ -134,8 +134,9 @@ private:
   uint8_t joint_num_;
 
   Vector3f start_position_;
-
   float radius_;
+
+  float *get_arg_;
 
 public:
   Circle();
@@ -147,7 +148,6 @@ public:
   MatrixXf getCoefficient();
 
   virtual void initDraw(const void *arg);
-  virtual void setJointSize(uint8_t joint_num);
   virtual void setRadius(float radius);  
   virtual void setStartPosition(Vector3f start_position);
   virtual Pose getPose(float tick);

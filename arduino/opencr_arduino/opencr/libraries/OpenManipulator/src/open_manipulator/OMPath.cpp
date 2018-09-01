@@ -152,11 +152,7 @@ MatrixXf JointTrajectory::getCoefficient()
   return coefficient_;
 }
 
-Line::Line(uint8_t joint_num)
-{
-  joint_num_ = joint_num;
-  coefficient_ = MatrixXf::Identity(6, joint_num);
-}
+Line::Line(){}
 
 Line::~Line() {}
 
@@ -238,12 +234,6 @@ void Circle::init(float move_time, float control_time)
   coefficient_ = path_generator_.getCoefficient();
 }
 
-void Circle::setJointSize(uint8_t joint_num)
-{
-  joint_num_ = joint_num;
-  coefficient_ = MatrixXf::Identity(6, joint_num);
-}
-
 void Circle::setStartPosition(Vector3f start_position)
 {
   start_position_ = start_position;
@@ -276,13 +266,12 @@ Pose Circle::getPose(float tick)
              coefficient_(4) * pow(tick, 4) +
              coefficient_(5) * pow(tick, 5);
 
-  return circle(get_time_var);;
+  return circle(get_time_var);
 }
 
 void Circle::initDraw(const void *arg)
 {
-  // *(uint32_t *)arg
-  float *get_arg = (float *)arg;
+  get_arg_ = (float *)arg;
 
-  init(get_arg[0], get_arg[1]);
+  init(get_arg_[0], get_arg_[1]);
 }

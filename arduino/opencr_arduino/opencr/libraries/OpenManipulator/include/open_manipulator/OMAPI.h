@@ -181,7 +181,6 @@ public:
   virtual ~Draw(){};
 
   virtual void initDraw(const void *arg) = 0;
-  virtual void setJointSize(uint8_t joint_num) = 0;
   virtual void setRadius(float radius) = 0;
   virtual void setStartPosition(Vector3f start_position) = 0;
   virtual Pose getPose(float tick) = 0;
