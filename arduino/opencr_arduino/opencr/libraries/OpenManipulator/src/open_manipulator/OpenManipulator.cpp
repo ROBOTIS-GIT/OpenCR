@@ -612,8 +612,10 @@ void OpenManipulator::actuatorDisable()
 }
 
 // DRAW
-void OpenManipulator::drawInit(Name name, const void *arg)
+void OpenManipulator::drawInit(Name name, float drawing_time, const void *arg)
 {
+  drawing_time_ = drawing_time;
+  
   draw_.at(name)->initDraw(arg);
 }
 
@@ -633,10 +635,9 @@ Pose OpenManipulator::getPoseForDrawing(Name name, float tick)
   return draw_.at(name)->getPose(tick);
 }
 
-void OpenManipulator::draw(Name object, float drawing_time)
+void OpenManipulator::draw(Name object)
 {
   object_ = object;
-  drawing_time_ = drawing_time;
 
   drawing_ = true;
   draw_cnt_ = 0;

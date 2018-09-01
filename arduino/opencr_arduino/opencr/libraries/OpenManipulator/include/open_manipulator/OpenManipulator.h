@@ -68,7 +68,6 @@ private:
   OM_PATH::Line line_;
   std::map<Name, Draw *> draw_;
 
-
   float move_time_;
   float control_time_;
   float drawing_time_;
@@ -222,11 +221,11 @@ public:
   std::vector<float> receiveAllActuatorAngle();
 
   // DRAW (INCLUDES VIRTUAL)
-  void drawInit(Name name, const void *arg);
+  void drawInit(Name name, float move_time, const void *arg);
   void setRadiusForDrawing(Name name, float radius);
   void setStartPositionForDrawing(Name name, Vector3f start_position);
   Pose getPoseForDrawing(Name name, float tick);
-  void draw(Name object, float drawing_time);
+  void draw(Name object);
   bool drawing();
   void jointControlForDrawing(Name tool_name, bool use_time = false);
 
@@ -261,7 +260,7 @@ public:
   void setPose(Name tool_name, Pose goal_pose, float move_time = 1.0f);
   void setMove(Name tool_name, Vector3f meter, float move_time = 1.0f);
 
-  void 
+  // void 
 };
 } // namespace OPEN_MANIPULATOR
 
