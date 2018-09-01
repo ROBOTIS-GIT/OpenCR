@@ -193,11 +193,16 @@ void fromProcessing(String data)
       float init_arg[2] = {move_time, ACTUATOR_CONTROL_TIME};
       void *p_init_arg = init_arg;
 
+      static float radius = 0.005f;
+
       SCARA.drawInit(CIRCLE, p_init_arg);
-      SCARA.setRadiusForDrawing(CIRCLE, 0.050);  
+      SCARA.setRadiusForDrawing(CIRCLE, radius);  
       SCARA.setTimeForDrawing(move_time);
       SCARA.setStartPositionForDrawing(CIRCLE, SCARA.getComponentPositionToWorld(TOOL));
       SCARA.draw();
+
+      radius += 0.005f;
+
       // if (DYNAMIXEL)
       //   sendAngle2Processing(getAngle()); 
 
