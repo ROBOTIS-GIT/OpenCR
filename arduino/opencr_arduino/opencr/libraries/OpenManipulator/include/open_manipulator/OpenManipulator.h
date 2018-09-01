@@ -226,6 +226,7 @@ public:
   Pose getPoseForDrawing(Name name, float tick);
   void draw();
   bool drawing();
+  void jointControl(Name draw_class_name, Name tool_name);
 
   // PATH
   void setPresentTime(float present_time);
