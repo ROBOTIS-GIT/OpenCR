@@ -151,6 +151,7 @@ void THREAD::Actuator_Control(void const *argument)
     MUTEX::wait();
 
     SCARA.jointControl();
+    SCARA.jointControl(CIRCLE, TOOL);
 
     MUTEX::release();
 
