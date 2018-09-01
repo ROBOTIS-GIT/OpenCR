@@ -615,7 +615,6 @@ void OpenManipulator::actuatorDisable()
 void OpenManipulator::drawInit(Name name, const void *arg)
 {
   draw_.at(name)->initDraw(arg);
-  draw_.at(name)->setJointSize(manipulator_.getDOF());
 }
 
 void OpenManipulator::setRadiusForDrawing(Name name, float radius)
@@ -729,10 +728,53 @@ std::vector<Trajectory> OpenManipulator::getGoalTrajectory()
   return goal_trajectory_;
 }
 
+void OpenManipulator::jointControl(Name draw_class_name, Name tool_name)
+{
+  uint16_t step_time = uint16_t(floor(drawing_time_ / control_time_) + 1.0);     //for use step cnt
+
+  float tick_time = 0;
+
+  std::vector<float> goal_position;
+  std::vector<float> goal_velocity;
+  std::vector<float> goal_acceleration;
+
+  goal_position.reserve(manipulator_.getDOF());
+  goal_velocity.reserve(manipulator_.getDOF());
+  goal_acceleration.reserve(manipulator_.getDOF());
+
+  if (drawing_)
+  {
+    if (draw_cnt_ < step_time)
+    {
+      tick_time = control_time_ * draw_cnt_;
+
+      goal_position = kinematics_->inverse(&manipulator_, tool_name, getPoseForDrawing(draw_class_name, tick_time));
+
+      if (platform_)
+        sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
+
+      if (processing_)
+      {
+        if (platform_ == false)
+          manipulator_.setAllActiveJointAngle(goal_position);
+        sendAngleToProcessing(goal_position);
+      }
+
+      previous_goal_.position = goal_position;
+
+      draw_cnt_++;
+    }
+    else
+    {
+      draw_cnt_ = 0;
+      drawing_ = false;
+    }
+  }
+}
+
 void OpenManipulator::jointControl(bool flug_use_time)
 {
-  uint16_t step_time_for_moving = uint16_t(floor(move_time_ / control_time_) + 1.0);     //for use step cnt
-  uint16_t step_time_for_drawing = uint16_t(floor(drawing_time_ / control_time_) + 1.0);     //for use step cnt
+  uint16_t step_time = uint16_t(floor(move_time_ / control_time_) + 1.0);     //for use step cnt
   
   float tick_time = 0;
 
@@ -748,37 +790,9 @@ void OpenManipulator::jointControl(bool flug_use_time)
   if(!flug_use_time)          //use step cnt
   {
     ////////////////////////////////////////////////////////
-    if (drawing_)
+    if (moving_)
     {
-      if (draw_cnt_ < step_time_for_drawing)
-      {
-        tick_time = control_time_ * draw_cnt_;
-
-        // goal_position = kinematics_->inverse(&manipulator_, tool_name, goal_pose);
-
-        if (platform_)
-          sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
-
-        if (processing_)
-        {
-          if (platform_ == false)
-            manipulator_.setAllActiveJointAngle(goal_position);
-          sendAngleToProcessing(goal_position);
-        }
-
-        previous_goal_.position = goal_position;
-
-        draw_cnt_++;
-      }
-      else
-      {
-        draw_cnt_ = 0;
-        drawing_ = false;
-      }
-    }
-    else if (moving_)
-    {
-      if (step_cnt_ < step_time_for_moving)
+      if (step_cnt_ < step_time)
       {
         tick_time = control_time_ * step_cnt_;
 
