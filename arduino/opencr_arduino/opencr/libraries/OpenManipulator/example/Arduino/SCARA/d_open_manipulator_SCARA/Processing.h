@@ -205,9 +205,7 @@ void fromProcessing(String data)
       radius += 0.005f;
 #endif
 
-      SCARA.drawLine(SCARA.getComponentPositionToWorld(TOOL), 
-              (SCARA.getComponentPositionToWorld(TOOL) - OM_MATH::makeVector3(0.0, 0.010, 0.0)), 
-              1.0f);
+      SCARA.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.020f, 0.0), 1.0f); 
 
       // if (DYNAMIXEL)
       //   sendAngle2Processing(getAngle()); 
@@ -230,9 +228,7 @@ void fromProcessing(String data)
     }
     else if (cmd[1] == "stop")
     {
-      SCARA.drawLine(SCARA.getComponentPositionToWorld(TOOL), 
-        (SCARA.getComponentPositionToWorld(TOOL) - OM_MATH::makeVector3(0.010, 0.0, 0.0)), 
-        1.0f);
+      SCARA.drawLine(TOOL, OM_MATH::makeVector3(0.020f, 0.0, 0.0), 1.0f); 
 
       // motion_cnt = 0;
       // motion     = false;

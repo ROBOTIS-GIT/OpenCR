@@ -196,9 +196,7 @@ void fromProcessing(String data)
   {
     if (cmd[1] == "start")
     {
-      chain.drawLine(chain.getComponentPositionToWorld(TOOL),
-                     (chain.getComponentPositionToWorld(TOOL) + OM_MATH::makeVector3(0.0, 0.0, 0.010)),
-                     1.0f);
+      chain.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.020f), 1.0f);
       // if (DYNAMIXEL)
       //   sendAngle2Processing(getAngle());
 
@@ -220,9 +218,8 @@ void fromProcessing(String data)
     }
     else if (cmd[1] == "stop")
     {
-      chain.drawLine(chain.getComponentPositionToWorld(TOOL),
-                     (chain.getComponentPositionToWorld(TOOL) + OM_MATH::makeVector3(0.010, 0.0, 0.0)),
-                     1.0f);
+      chain.drawLine(TOOL, OM_MATH::makeVector3(0.020, 0.0f, 0.0), 1.0f);
+
       // motion_cnt = 0;
       // motion     = false;
       // repeat     = false;
