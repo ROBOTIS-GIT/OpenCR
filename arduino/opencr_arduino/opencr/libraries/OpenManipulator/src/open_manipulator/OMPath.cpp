@@ -140,7 +140,7 @@ std::vector<float> JointTrajectory::getAcceleration(float tick)
              6 * coefficient_(3, index) * pow(tick, 1) +
              12 * coefficient_(4, index) * pow(tick, 2) +
              20 * coefficient_(5, index) * pow(tick, 3);
-          
+
     acceleration_.push_back(result);
   }
 
@@ -152,7 +152,7 @@ MatrixXf JointTrajectory::getCoefficient()
   return coefficient_;
 }
 
-Line::Line(){}
+Line::Line() {}
 
 Line::~Line() {}
 
@@ -165,7 +165,7 @@ void Line::init(float move_time, float control_time)
   start.velocity = 0.0;
   start.acceleration = 0.0;
 
-  goal.position = 2*M_PI;
+  goal.position = 2 * M_PI;
   goal.velocity = 0.0;
   goal.acceleration = 0.0;
 
@@ -183,18 +183,8 @@ void Line::setTwoPoints(Vector3f start, Vector3f end)
   end_ = end;
 }
 
-Pose Line::getPose(float tick)
+Pose Line::line(float time_var)
 {
-  Pose pose;
-  float get_time_var = 0.0;
-
-  get_time_var = coefficient_(0) +
-             coefficient_(1) * pow(tick, 1) +
-             coefficient_(2) * pow(tick, 2) +
-             coefficient_(3) * pow(tick, 3) +
-             coefficient_(4) * pow(tick, 4) +
-             coefficient_(5) * pow(tick, 5);
-
   // Get direction of parametric equation
   Vector3f start_to_end;
   start_to_end(0) = end_(0) - start_(0);
@@ -202,11 +192,26 @@ Pose Line::getPose(float tick)
   start_to_end(2) = end_(2) - start_(2);
 
   // Get parametric equation
-  pose.position(0) = start_(0) + (start_to_end(0) * get_time_var);
-  pose.position(1) = start_(1) + (start_to_end(1) * get_time_var);
-  pose.position(2) = start_(2) + (start_to_end(2) * get_time_var);
+  Pose pose;
+  pose.position(0) = start_(0) + (start_to_end(0) * time_var);
+  pose.position(1) = start_(1) + (start_to_end(1) * time_var);
+  pose.position(2) = start_(2) + (start_to_end(2) * time_var);
 
   return pose;
+}
+
+Pose Line::getPose(float tick)
+{
+  float get_time_var = 0.0;
+
+  get_time_var = coefficient_(0) +
+                 coefficient_(1) * pow(tick, 1) +
+                 coefficient_(2) * pow(tick, 2) +
+                 coefficient_(3) * pow(tick, 3) +
+                 coefficient_(4) * pow(tick, 4) +
+                 coefficient_(5) * pow(tick, 5);
+
+  return line(get_time_var);
 }
 
 Circle::Circle() {}
@@ -222,7 +227,7 @@ void Circle::init(float move_time, float control_time)
   start.velocity = 0.0;
   start.acceleration = 0.0;
 
-  goal.position = 2*M_PI;
+  goal.position = 2 * M_PI;
   goal.velocity = 0.0;
   goal.acceleration = 0.0;
 
@@ -260,11 +265,11 @@ Pose Circle::getPose(float tick)
   float get_time_var = 0.0;
 
   get_time_var = coefficient_(0) +
-             coefficient_(1) * pow(tick, 1) +
-             coefficient_(2) * pow(tick, 2) +
-             coefficient_(3) * pow(tick, 3) +
-             coefficient_(4) * pow(tick, 4) +
-             coefficient_(5) * pow(tick, 5);
+                 coefficient_(1) * pow(tick, 1) +
+                 coefficient_(2) * pow(tick, 2) +
+                 coefficient_(3) * pow(tick, 3) +
+                 coefficient_(4) * pow(tick, 4) +
+                 coefficient_(5) * pow(tick, 5);
 
   return circle(get_time_var);
 }

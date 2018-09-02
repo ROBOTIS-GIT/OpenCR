@@ -101,6 +101,7 @@ public:
 
   void init(float move_time, float control_time);
   void setTwoPoints(Vector3f start, Vector3f end);
+  Pose line(float time_var);
   Pose getPose(float tick);
 
   MatrixXf getCoefficient();
