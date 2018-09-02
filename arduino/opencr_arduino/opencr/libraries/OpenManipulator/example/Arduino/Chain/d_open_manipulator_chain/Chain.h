@@ -48,7 +48,7 @@
 
 #define ACTIVE_JOINT_SIZE 4
 
-#define PLATFORM
+// #define PLATFORM
 
 OPEN_MANIPULATOR::OpenManipulator chain;
 
@@ -158,6 +158,7 @@ void THREAD::Actuator_Control(void const *argument)
     MUTEX::wait();
 
     chain.jointControl();
+    chain.jointControlForDrawing(TOOL);
 
     MUTEX::release();
 
