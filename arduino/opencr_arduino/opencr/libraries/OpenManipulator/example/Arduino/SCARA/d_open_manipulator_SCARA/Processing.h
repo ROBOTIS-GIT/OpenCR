@@ -206,7 +206,7 @@ void fromProcessing(String data)
 #endif
 
       SCARA.drawLine(SCARA.getComponentPositionToWorld(TOOL), 
-              (SCARA.getComponentPositionToWorld(TOOL) - OM_MATH::makeVector3(-0.050, 0.0, 0.0)), 
+              (SCARA.getComponentPositionToWorld(TOOL) - OM_MATH::makeVector3(0.0, 0.010, 0.0)), 
               1.0f);
 
       // if (DYNAMIXEL)
@@ -230,6 +230,10 @@ void fromProcessing(String data)
     }
     else if (cmd[1] == "stop")
     {
+      SCARA.drawLine(SCARA.getComponentPositionToWorld(TOOL), 
+        (SCARA.getComponentPositionToWorld(TOOL) - OM_MATH::makeVector3(0.010, 0.0, 0.0)), 
+        1.0f);
+
       // motion_cnt = 0;
       // motion     = false;
       // repeat     = false;
