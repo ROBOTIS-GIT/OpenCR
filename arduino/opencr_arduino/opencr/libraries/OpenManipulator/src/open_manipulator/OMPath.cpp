@@ -177,7 +177,7 @@ void Line::init(float move_time, float control_time)
   coefficient_ = path_generator_.getCoefficient();
 }
 
-void Line::setTwoPoints(Vector3f start, Vector3f end)
+void Line::setTwoPose(Pose start, Pose end)
 {
   start_ = start;
   end_ = end;
@@ -187,15 +187,17 @@ Pose Line::line(float time_var)
 {
   // Get direction of parametric equation
   Vector3f start_to_end;
-  start_to_end(0) = end_(0) - start_(0);
-  start_to_end(1) = end_(1) - start_(1);
-  start_to_end(2) = end_(2) - start_(2);
+  start_to_end(0) = end_.position(0) - start_.position(0);
+  start_to_end(1) = end_.position(1) - start_.position(1);
+  start_to_end(2) = end_.position(2) - start_.position(2);
 
   // Get parametric equation
   Pose pose;
-  pose.position(0) = start_(0) + (start_to_end(0) * time_var);
-  pose.position(1) = start_(1) + (start_to_end(1) * time_var);
-  pose.position(2) = start_(2) + (start_to_end(2) * time_var);
+  pose.position(0) = start_.position(0) + (start_to_end(0) * time_var);
+  pose.position(1) = start_.position(1) + (start_to_end(1) * time_var);
+  pose.position(2) = start_.position(2) + (start_to_end(2) * time_var);
+
+  pose.orientation = start_.orientation;
 
   return pose;
 }

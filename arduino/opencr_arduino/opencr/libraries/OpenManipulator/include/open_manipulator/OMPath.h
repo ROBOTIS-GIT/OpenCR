@@ -92,15 +92,15 @@ private:
 
   uint8_t joint_num_;
 
-  Vector3f start_;
-  Vector3f end_;
+  Pose start_;
+  Pose end_;
 
 public:
   Line();
   virtual ~Line();
 
   void init(float move_time, float control_time);
-  void setTwoPoints(Vector3f start, Vector3f end);
+  void setTwoPose(Pose start, Pose end);
   Pose line(float time_var);
   Pose getPose(float tick);
 

@@ -997,12 +997,35 @@ void OpenManipulator::setMove(Name tool_name, Vector3f meter, float move_time)
   setPose(tool_name, goal_pose, move_time);
 }
 
-void OpenManipulator::drawLine(Vector3f start, Vector3f end, float move_time)
+void OpenManipulator::drawLine(Name tool_name, Vector3f meter, float move_time)
 {
   drawing_time_ = move_time;
+
+  setAllActiveJointAngle(previous_goal_.position);
+  forward(manipulator_.getWorldChildName());
+
+  previous_goal_.pose = manipulator_.getComponentPoseToWorld(tool_name);
+
+  if (platform_)
+  {
+    setAllActiveJointAngle(receiveAllActuatorAngle());
+    forward(manipulator_.getWorldChildName());
+  }
+
+  Vector3f present_position_to_world = previous_goal_.pose.position;
+  Matrix3f present_orientation_to_world = previous_goal_.pose.orientation;
+
+  Vector3f goal_position_to_world = present_position_to_world + meter;
+
+  Pose start, end;
+  start.position = present_position_to_world;
+  start.orientation = present_orientation_to_world;
+
+  end.position = goal_position_to_world;
+  end.orientation = present_orientation_to_world;
   
   line_.init(move_time, control_time_);
-  line_.setTwoPoints(start, end);
+  line_.setTwoPose(start, end);
 
   draw(LINE);
 }
