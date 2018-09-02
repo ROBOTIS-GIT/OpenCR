@@ -76,7 +76,7 @@ void setup()
   initShape();
   initView();
 
-  connectOpenCR(13); // It is depend on laptop enviroments.
+  connectOpenCR(0); // It is depend on laptop enviroments.
 }
 
 /*******************************************************************************
