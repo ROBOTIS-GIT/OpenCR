@@ -999,6 +999,8 @@ void OpenManipulator::setMove(Name tool_name, Vector3f meter, float move_time)
 
 void OpenManipulator::drawLine(Vector3f start, Vector3f end, float move_time)
 {
+  drawing_time_ = move_time;
+  
   line_.init(move_time, control_time_);
   line_.setTwoPoints(start, end);
 
