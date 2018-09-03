@@ -228,7 +228,7 @@ void Dynamixel::initActuator(const void *arg)
 
 void Dynamixel::setActuatorControlMode()
 {
-  setPositionControlMode(5, 200, 50); //CHAIN GRIPPER
+  setPositionControlMode(5, 100, 10); //CHAIN GRIPPER
   //enableAllDynamixel();
 }
 

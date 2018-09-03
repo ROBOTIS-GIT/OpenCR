@@ -29,8 +29,8 @@ void setup()
 {
   Serial.begin(57600);
   DEBUG.begin(57600);
-  while (!Serial)
-    ;
+  // while (!Serial)
+  //   ;
 
   connectProcessing();
   connectRC100();
@@ -52,42 +52,190 @@ void setup()
 void loop()
 {
   getData(100);
-  // switch(seq)
-  // {
-  //   case 0:
-  //     if (manipulator.moving() == false)
-  //     {
-  //       manipulator.jointMove(CHAIN, goal_position, 1.0f);
-  //       seq = 1;
-  //     }
-  //    break;
+  
+  switch(seq)
+  {
+    case 0:
+      if (chain.moving() == false)
+      {
+        goal_position.clear();
+        goal_position.push_back(0.0);
+        goal_position.push_back(-0.92);
+        goal_position.push_back(0.33);
+        goal_position.push_back(0.69);
 
-  //   case 1:
-  //     if (manipulator.moving() == false)
-  //     {
-  //       manipulator.setPose(CHAIN, TOOL, goal_pose, 1.0f);
+        chain.jointMove(goal_position, 2.0f);
+        seq = 1;
+      }
+     break;
 
-  //       seq = 2;
-  //     }
-  //    break;
+    case 1:
+      if (chain.moving() == false)
+      {
+        chain.toolMove(TOOL, OM_MATH::map(0.065f, 0.020f, 0.070f, 0.907f, -1.13f));
+        chain.wait(2.0f);
+        seq = 2;
+      }
+     break;
 
-  //   case 2:
-  //     if (manipulator.moving() == false)
-  //     {
-  //       manipulator.setMove(CHAIN, TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.050), 1.0f);
+    case 2:
+      if (chain.moving() == false)
+      {
+        goal_position.clear();
+        goal_position.push_back(0.0);
+        goal_position.push_back(0.0);
+        goal_position.push_back(1.37);
+        goal_position.push_back(-1.48);
 
-  //       seq = 3;
-  //     }
-  //    break;
+        chain.jointMove(goal_position, 2.0f);
+        seq = 3;
+      }
+     break;
 
-  //   case 3:
-  //     manipulator.toolMove(CHAIN, TOOL, OM_MATH::map(0.060f, 0.020f, 0.070f, 0.907f, -1.13f));
-  //     seq = 4;
-  //    break;
+    case 3:
+      if (chain.moving() == false)
+      {
+        goal_position.clear();
+        goal_position.push_back(0.0);
+        goal_position.push_back(0.32);
+        goal_position.push_back(0.81);
+        goal_position.push_back(-1.20);
 
-  //   default:
-  //    break;
-  // }
+        chain.jointMove(goal_position, 2.0f);
+        seq = 4;
+      }
+     break;
+
+    case 4:
+      if (chain.moving() == false)
+      {
+        chain.toolMove(TOOL, OM_MATH::map(0.055f, 0.020f, 0.070f, 0.907f, -1.13f));
+        chain.wait(2.0f);
+        seq = 5;
+      }
+     break;
+
+    case 5:
+      if (chain.moving() == false)
+      {
+        goal_position.clear();
+        goal_position.push_back(0.0);
+        goal_position.push_back(-0.92);
+        goal_position.push_back(0.33);
+        goal_position.push_back(0.69);
+
+        chain.jointMove(goal_position, 2.0f);
+        seq = 6;
+      }
+     break;
+
+    case 6:
+      if (chain.moving() == false)
+      {
+        goal_position.clear();
+        goal_position.push_back(1.5);
+        goal_position.push_back(-0.75);
+        goal_position.push_back(0.80);
+        goal_position.push_back(-0.85);
+
+        chain.jointMove(goal_position, 2.0f);
+        seq = 7;
+      }
+     break;
+
+    case 7:
+      if (chain.moving() == false)
+      {
+        goal_position.clear();
+        goal_position.push_back(0.0);
+        goal_position.push_back(-0.92);
+        goal_position.push_back(0.33);
+        goal_position.push_back(0.69);
+
+        chain.jointMove(goal_position, 2.0f);
+        seq = 8;
+      }
+     break;
+
+    case 8:
+      if (chain.moving() == false)
+      {
+        goal_position.clear();
+        goal_position.push_back(-1.5);
+        goal_position.push_back(-0.75);
+        goal_position.push_back(0.80);
+        goal_position.push_back(-0.85);
+
+        chain.jointMove(goal_position, 2.0f);
+        seq = 9;
+      }
+     break;
+
+    case 9:
+      if (chain.moving() == false)
+      {
+        goal_position.clear();
+        goal_position.push_back(0.0);
+        goal_position.push_back(-0.92);
+        goal_position.push_back(0.33);
+        goal_position.push_back(0.69);
+
+        chain.jointMove(goal_position, 2.0f);
+        seq = 10;
+      }
+     break;
+
+    case 10:
+      if (chain.moving() == false)
+      {
+        goal_position.clear();
+        goal_position.push_back(0.0);
+        goal_position.push_back(0.0);
+        goal_position.push_back(1.37);
+        goal_position.push_back(-1.48);
+
+        chain.jointMove(goal_position, 2.0f);
+        seq = 11;
+      }
+     break;
+
+    case 11:
+        goal_position.clear();
+        goal_position.push_back(0.0);
+        goal_position.push_back(0.32);
+        goal_position.push_back(0.81);
+        goal_position.push_back(-1.20);
+
+        chain.jointMove(goal_position, 2.0f);
+        seq = 12;
+     break;
+
+    case 12:
+      if (chain.moving() == false)
+      {
+        chain.toolMove(TOOL, OM_MATH::map(0.065f, 0.020f, 0.070f, 0.907f, -1.13f));
+        chain.wait(2.0f);
+        seq = 13;
+      }
+     break;
+
+    case 13:
+      if (chain.moving() == false)
+      {
+        goal_position.clear();
+        goal_position.push_back(0.0);
+        goal_position.push_back(0.0);
+        goal_position.push_back(1.37);
+        goal_position.push_back(-1.48);
+
+        chain.jointMove(goal_position, 2.0f);
+        seq = 0;
+      }
+     break;
+
+    default:
+     break;
+  }
 
   // LOG::INFO("LOOP");
   osDelay(LOOP_TIME * 1000);

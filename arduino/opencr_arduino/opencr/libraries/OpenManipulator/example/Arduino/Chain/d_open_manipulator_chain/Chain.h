@@ -48,7 +48,7 @@
 
 #define ACTIVE_JOINT_SIZE 4
 
-// #define PLATFORM
+#define PLATFORM
 
 OPEN_MANIPULATOR::OpenManipulator chain;
 
