@@ -97,7 +97,7 @@ void loop()
       {
         goal_position.clear();
         goal_position.push_back(0.0);
-        goal_position.push_back(0.32);
+        goal_position.push_back(0.28);
         goal_position.push_back(0.81);
         goal_position.push_back(-1.20);
 
@@ -202,7 +202,7 @@ void loop()
     case 11:
         goal_position.clear();
         goal_position.push_back(0.0);
-        goal_position.push_back(0.32);
+        goal_position.push_back(0.28);
         goal_position.push_back(0.81);
         goal_position.push_back(-1.20);
 
