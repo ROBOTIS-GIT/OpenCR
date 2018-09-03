@@ -1029,3 +1029,35 @@ void OpenManipulator::drawLine(Name tool_name, Vector3f meter, float move_time)
 
   draw(LINE);
 }
+
+void OpenManipulator::wait(float wait_time)
+{
+  Trajectory start;
+  Trajectory goal;
+
+  std::vector<float> present_position = previous_goal_.position;
+  std::vector<float> present_velocity = previous_goal_.velocity;
+  std::vector<float> present_acceleration = previous_goal_.acceleration;
+
+  start_trajectory_.clear();
+  goal_trajectory_.clear();
+
+  for (uint8_t index = 0; index < manipulator_.getDOF(); index++)
+  {
+    start.position = present_position.at(index);
+    start.velocity = present_velocity.at(index);
+    start.acceleration = present_acceleration.at(index);
+
+    start_trajectory_.push_back(start);
+
+    goal.position = present_position.at(index);
+    goal.velocity = 0.0f;
+    goal.acceleration = 0.0f;
+
+    goal_trajectory_.push_back(goal);
+  }
+
+  setMoveTime(wait_time);
+  makeTrajectory(start_trajectory_, goal_trajectory_);
+  move();
+}

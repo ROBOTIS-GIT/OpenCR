@@ -255,6 +255,8 @@ public:
   std::vector<Trajectory> getGoalTrajectory();
 
   // Additional Functions
+  void wait(float wait_time = 1.0f);
+
   void jointMove(std::vector<float> goal_position, float move_time = 1.0f);
   bool toolMove(Name tool_name, bool onoff);
   bool toolMove(Name tool_name, float tool_value);
