@@ -24,6 +24,9 @@
 #define BDPIN_PUSH_SW_1         34
 #define BDPIN_PUSH_SW_2         35
 
+float present_time = 0.0;
+float previous_time[3] = {0.0, 0.0, 0.0};
+
 void setup()
 {
   Serial.begin(57600);
@@ -46,8 +49,8 @@ void setup()
   omlink.jointMove(init_joint_angle, MOVETIME);
   init_joint_angle.clear();
 
-  initThread();
-  startThread();
+  // initThread();
+  // startThread();
 
 #ifdef DEBUGFLUG
   DEBUG.print("start");
@@ -57,59 +60,43 @@ void setup()
 
 void loop()
 {
-  switchRead();
+  present_time = (float)(millis()/1000.0f);
+
+  //get Date 
   getData(10);
-  setMotion();
-  
-  osDelay(LOOP_TIME * 1000);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////THREAD///////////////////////////////////////////
-////////////////////////////DON'T TOUCH BELOW CODE///////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////
-
-namespace THREAD
-{
-osThreadId loop;
-osThreadId robot_state;
-osThreadId actuator_control;
-} // namespace THREAD
-
-void initThread()
-{
-  MUTEX::create();
-
-  // define thread
-  osThreadDef(THREAD_NAME_LOOP, Loop, osPriorityNormal, 0, 1024 * 10);
-  osThreadDef(THREAD_NAME_ROBOT_STATE, THREAD::Robot_State, osPriorityNormal, 0, 1024 * 10);
-  osThreadDef(THREAD_NAME_ACTUATOR_CONTROL, THREAD::Actuator_Control, osPriorityNormal, 0, 1024 * 10);
-
-  // create thread
-  THREAD::loop = osThreadCreate(osThread(THREAD_NAME_LOOP), NULL);
-  THREAD::robot_state = osThreadCreate(osThread(THREAD_NAME_ROBOT_STATE), NULL);
-  THREAD::actuator_control = osThreadCreate(osThread(THREAD_NAME_ACTUATOR_CONTROL), NULL);
-}
-
-void startThread()
-{
-  // start kernel
-  //Serial.println("Thread Start");
-  osKernelStart();
-}
-
-static void Loop(void const *argument)
-{
-  (void)argument;
-
-  for (;;)
+  if(present_time-previous_time[0] >= LOOP_TIME)
   {
-    loop();
-    showLedStatus();
+    switchRead();
+    setMotion();
+    previous_time[0] = (float)(millis()/1000.0f);
   }
-}
 
-/////////////////////////////////////////////////////////////////////////////////////
+  //solve Kinematics
+  if(present_time-previous_time[1] >= ROBOT_STATE_UPDATE_TIME)
+  {
+    updateAllJointAngle();
+    omlink.forward();
+    previous_time[1] = (float)(millis()/1000.0f);
+  }
+
+  //Joint Control
+  if(present_time-previous_time[2] >= ACTUATOR_CONTROL_TIME)
+  {
+    omlink.setPresentTime((float)(millis()/1000.0f));
+    omlink.jointControl(true);
+#ifdef DEBUGFLUG
+    for(int i =0; i < 3; i++)
+    {
+      DEBUG.print(omlink.receiveAllActuatorAngle().at(i));
+      DEBUG.print(", ");
+    }
+    DEBUG.println();
+#endif
+    previous_time[2] = (float)(millis()/1000.0f);
+  }
+  
+  //osDelay(LOOP_TIME * 1000);
+}
 
 void getData(uint32_t wait_time)
 {
@@ -127,7 +114,6 @@ void getData(uint32_t wait_time)
     get_rc100_data = readRC100Data();
     rc100_flag = true;
   }
-
   if (availableProcessing())
   {
     get_processing_data = readProcessingData();
@@ -137,19 +123,17 @@ void getData(uint32_t wait_time)
   switch (state)
   {
     case 0:
-      if (rc100_flag)
+      if (processing_flag)
       {
-        MUTEX::wait();
-        fromRC100(get_rc100_data);
-        MUTEX::release();
+        fromProcessing(get_processing_data);
 
         tick = millis();
         state = 1;
       }
-      else if (processing_flag)
+      else if (rc100_flag)
       {
         MUTEX::wait();
-        fromProcessing(get_processing_data);
+        fromRC100(get_rc100_data);
         MUTEX::release();
 
         tick = millis();
@@ -187,3 +171,50 @@ void switchRead()
     motionStop();
   }
 }
+
+/////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////THREAD///////////////////////////////////////////
+////////////////////////////DON'T TOUCH BELOW CODE///////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+
+// namespace THREAD
+// {
+// osThreadId loop;
+// osThreadId robot_state;
+// osThreadId actuator_control;
+// } // namespace THREAD
+
+// void initThread()
+// {
+//   MUTEX::create();
+
+//   // define thread
+//   osThreadDef(THREAD_NAME_LOOP, Loop, osPriorityNormal, 0, 1024 * 10);
+//   osThreadDef(THREAD_NAME_ROBOT_STATE, THREAD::Robot_State, osPriorityNormal, 0, 1024 * 10);
+//   osThreadDef(THREAD_NAME_ACTUATOR_CONTROL, THREAD::Actuator_Control, osPriorityNormal, 0, 1024 * 10);
+
+//   // create thread
+//   THREAD::loop = osThreadCreate(osThread(THREAD_NAME_LOOP), NULL);
+//   THREAD::robot_state = osThreadCreate(osThread(THREAD_NAME_ROBOT_STATE), NULL);
+//   THREAD::actuator_control = osThreadCreate(osThread(THREAD_NAME_ACTUATOR_CONTROL), NULL);
+// }
+
+// void startThread()
+// {
+//   // start kernel
+//   //Serial.println("Thread Start");
+//   osKernelStart();
+// }
+
+// static void Loop(void const *argument)
+// {
+//   (void)argument;
+
+//   for (;;)
+//   {
+//     loop();
+//     showLedStatus();
+//   }
+// }
+
+// /////////////////////////////////////////////////////////////////////////////////////
