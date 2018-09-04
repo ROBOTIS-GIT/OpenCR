@@ -25,7 +25,6 @@
 #include <map>
 
 #include "OMManager.h"
-#include "OMPath.h"
 #include "OMMath.h"
 #include "OMDebug.h"
 
@@ -175,14 +174,17 @@ public:
   virtual std::vector<float> receiveAllActuatorAngle(void) = 0;
 };
 
-// class Path
-// {
-// public:
-//   Path(){};
-//   virtual ~Path(){};
+class Draw
+{
+public:
+  Draw(){};
+  virtual ~Draw(){};
 
-//   virtual bool drawFunction()) = 0;
-// };
+  virtual void initDraw(const void *arg) = 0;
+  virtual void setRadius(float radius) = 0;
+  virtual void setStartPosition(Vector3f start_position) = 0;
+  virtual Pose getPose(float tick) = 0;
+};
 
 } // namespace OPEN_MANIPULATOR
 #endif

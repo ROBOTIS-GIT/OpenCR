@@ -50,6 +50,13 @@ float receive_tool_pos = 0.0;
 float[] ctrl_joint_angle = new float[3];
 float ctrl_tool_pos = 0.0;
 
+int tabFlag = 1;
+
+float[] visual_target_pose_x = new float[50];
+float[] visual_target_pose_y = new float[50];
+float[] visual_target_pose_z = new float[50];
+
+
 /*******************************************************************************
 * Setting window size
 *******************************************************************************/
@@ -195,6 +202,46 @@ void setWindow()
 }
 
 /*******************************************************************************
+* Draw sphere
+*******************************************************************************/
+void drawSphere(int x, int y, int z, int r, int g, int b, int size)
+{
+  translate(x, y, z);
+  stroke(r,g,b);
+  sphere(size);
+}
+
+void saveSpherePose()
+{
+  for (int i = 0; i < visual_target_pose_x.length - 1; i++)
+  {
+    visual_target_pose_x[i] = visual_target_pose_x[i + 1];
+    visual_target_pose_y[i] = visual_target_pose_y[i + 1];
+    visual_target_pose_z[i] = visual_target_pose_z[i + 1];
+  }
+
+  visual_target_pose_x[visual_target_pose_x.length - 1] = modelX(0,0,0);
+  visual_target_pose_y[visual_target_pose_y.length - 1] = modelY(0,0,0);
+  visual_target_pose_z[visual_target_pose_z.length - 1] = modelZ(0,0,0);
+}
+
+void drawSphereAfterEffect()
+{
+  for (int i = 0; i < visual_target_pose_x.length; i++)
+  { 
+    pushMatrix();
+    rotateZ(radians(90));
+    rotateX(radians(0));
+    translate(-width/2, -height/2-200, 0);
+    
+    translate(visual_target_pose_x[i], visual_target_pose_y[i], visual_target_pose_z[i]);
+    stroke(255,255,255);
+    sphere(1.5);
+    popMatrix();
+  }
+}
+
+/*******************************************************************************
 * Draw title
 *******************************************************************************/
 void drawTitle()
@@ -217,9 +264,10 @@ void drawTitle()
 *******************************************************************************/
 void drawManipulator()
 {
+  pushMatrix();
+  
   scale(1.5 + model_scale_factor);
 
-  pushMatrix();
   translate(-model_trans_x, -model_trans_y, 0);
   shape(goal_link1_shape);
   drawLocalFrame();
@@ -245,39 +293,49 @@ void drawManipulator()
   drawLocalFrame();
 
   translate(0.040*1000, 0, 0);
-
+  drawSphere(0, 0, 0, 100, 100, 100, 5);
+  saveSpherePose();
   drawLocalFrame();
+
   popMatrix();
 
-  pushMatrix();
-  translate(-model_trans_x, -model_trans_y, 0);
-  shape(ctrl_link1_shape);
-  drawLocalFrame();
+  drawSphereAfterEffect();
 
-  translate(0.023*1000, 0.0, 0.057*1000);
-  rotateZ(-ctrl_joint_angle[0]);
-  shape(ctrl_link2_shape);
-  drawLocalFrame();
+  if (tabFlag == 1)
+  {
+    pushMatrix();
 
-  translate(0.067*1000, 0.0, 0.0);
-  rotateZ(-ctrl_joint_angle[1]);
-  shape(ctrl_link3_shape);
-  drawLocalFrame();
+    scale(1.5 + model_scale_factor);
 
-  translate(0.067*1000, 0.0, 0.0);
-  rotateZ(-ctrl_joint_angle[2]);
-  shape(ctrl_link4_shape);
-  drawLocalFrame();
+    translate(-model_trans_x, -model_trans_y, 0);
+    shape(ctrl_link1_shape);
+    drawLocalFrame();
 
-  translate(0.067*1000, 0.0, 0.0);
-  rotateY(ctrl_tool_pos);
-  shape(ctrl_tool_shape);
-  drawLocalFrame();
+    translate(0.023*1000, 0.0, 0.057*1000);
+    rotateZ(-ctrl_joint_angle[0]);
+    shape(ctrl_link2_shape);
+    drawLocalFrame();
 
-  translate(0.040*1000, 0, 0);
+    translate(0.067*1000, 0.0, 0.0);
+    rotateZ(-ctrl_joint_angle[1]);
+    shape(ctrl_link3_shape);
+    drawLocalFrame();
 
-  drawLocalFrame();
-  popMatrix();
+    translate(0.067*1000, 0.0, 0.0);
+    rotateZ(-ctrl_joint_angle[2]);
+    shape(ctrl_link4_shape);
+    drawLocalFrame();
+
+    translate(0.067*1000, 0.0, 0.0);
+    rotateY(ctrl_tool_pos);
+    shape(ctrl_tool_shape);
+    drawLocalFrame();
+
+    translate(0.040*1000, 0, 0);
+
+    drawLocalFrame();
+    popMatrix();
+  }
 }
 
 /*******************************************************************************
@@ -609,6 +667,13 @@ class ChildApplet extends PApplet
   public void draw()
   {
     background(1,35,64);
+  }
+
+  void controlEvent(ControlEvent theControlEvent) {
+    if (theControlEvent.isTab()) {
+      println("got an event from tab : "+theControlEvent.getTab().getName()+" with id "+theControlEvent.getTab().getId());
+      tabFlag = theControlEvent.getTab().getId();
+    }
   }
 
 /*******************************************************************************

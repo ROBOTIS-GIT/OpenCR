@@ -46,7 +46,7 @@ void fromProcessing(String data)
     {
 #ifdef PLATFORM
       chain.actuatorEnable();
-      chain.sendAngleToProcessing(chain.receiveAllActuatorAngle());  
+      chain.sendAngleToProcessing(chain.receiveAllActuatorAngle());
       chain.sendToolData2Processing(chain.getComponentToolValue(TOOL));
 #endif
     }
@@ -60,10 +60,10 @@ void fromProcessing(String data)
   else if (cmd[0] == "joint")
   {
     std::vector<float> goal_position;
-    
+
     for (uint8_t index = 0; index < ACTIVE_JOINT_SIZE; index++)
     {
-      goal_position.push_back(cmd[index+1].toFloat());
+      goal_position.push_back(cmd[index + 1].toFloat());
     }
 
     chain.jointMove(goal_position, 1.0f); // FIX TIME PARAM
@@ -128,7 +128,7 @@ void fromProcessing(String data)
   //         motion_storage[i][j] = 0.0;
   //       }
   //     }
-      
+
   //     motion_num = 0;
   //     motion_cnt = 0;
   //     motion     = false;
@@ -141,7 +141,7 @@ void fromProcessing(String data)
   //       State* state = getAngle();
 
   //       if (DYNAMIXEL)
-  //         sendAngle2Processing(state); 
+  //         sendAngle2Processing(state);
 
   //       for (int i = JOINT1; i < GRIP; i++)
   //       {
@@ -159,7 +159,7 @@ void fromProcessing(String data)
   //     if (DYNAMIXEL)
   //     {
   //       setTorque(true);
-  //       sendAngle2Processing(getAngle()); 
+  //       sendAngle2Processing(getAngle());
   //     }
 
   //     motion_cnt = 0;
@@ -170,7 +170,7 @@ void fromProcessing(String data)
   //     if (DYNAMIXEL)
   //     {
   //       setTorque(true);
-  //       sendAngle2Processing(getAngle()); 
+  //       sendAngle2Processing(getAngle());
   //     }
 
   //     motion_cnt = 0;
@@ -192,35 +192,39 @@ void fromProcessing(String data)
   //     repeat     = false;
   //   }
   // }
-  // else if (cmd[0] == "motion")
-  // {
-  //   if (cmd[1] == "start")
-  //   {
-  //     if (DYNAMIXEL)
-  //       sendAngle2Processing(getAngle()); 
+  else if (cmd[0] == "motion")
+  {
+    if (cmd[1] == "start")
+    {
+      chain.drawLine(TOOL, OM_MATH::makeVector3(0.050, 0.0, 0.050f), 0.5f);
+      //chain.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.020f), 0.2f);
+      // if (DYNAMIXEL)
+      //   sendAngle2Processing(getAngle());
 
-  //     if (PROCESSING)
-  //       sendAngle2Processing(getState()); 
+      // if (PROCESSING)
+      //   sendAngle2Processing(getState());
 
-  //     for (int i = 0; i < MOTION_NUM; i++)
-  //     {
-  //       for (int j = 0; j < 6; j++)
-  //       {
-  //         motion_storage[i][j] = motion_set[i][j];
-  //       }
-  //     }
+      // for (int i = 0; i < MOTION_NUM; i++)
+      // {
+      //   for (int j = 0; j < 6; j++)
+      //   {
+      //     motion_storage[i][j] = motion_set[i][j];
+      //   }
+      // }
 
-  //     motion_num = MOTION_NUM;  
-  //     motion_cnt = 0;          
-  //     motion = true;
-  //     repeat = true;
-  //   }
-  //   else if (cmd[1] == "stop")
-  //   {
-  //     motion_cnt = 0;
-  //     motion     = false;
-  //     repeat     = false;
-  //   }
-  // }
+      // motion_num = MOTION_NUM;
+      // motion_cnt = 0;
+      // motion = true;
+      // repeat = true;
+    }
+    else if (cmd[1] == "stop")
+    {
+      chain.drawLine(TOOL, OM_MATH::makeVector3(-0.050, 0.0, -0.050f), 0.5f);
+
+      // motion_cnt = 0;
+      // motion     = false;
+      // repeat     = false;
+    }
+  }
 }
 #endif

@@ -37,7 +37,9 @@ OpenManipulator::OpenManipulator() : move_time_(1.0f),
                                      step_cnt_(0),
                                      moving_(false),
                                      platform_(false),
-                                     processing_(false)
+                                     processing_(false),
+                                     drawing_(false),
+                                     draw_cnt_(0)
 {
   manager_ = new Manager();
 }
@@ -55,6 +57,13 @@ void OpenManipulator::initActuator(Actuator *actuator)
 {
   actuator_ = actuator;
   platform_ = true;
+}
+
+void OpenManipulator::addDraw(Name name, Draw *draw)
+{
+  Draw *temp_draw = draw;
+
+  draw_.insert(std::make_pair(name, temp_draw));
 }
 
 void OpenManipulator::initJointTrajectory()
@@ -602,6 +611,44 @@ void OpenManipulator::actuatorDisable()
   return actuator_->Disable();
 }
 
+// DRAW
+void OpenManipulator::drawInit(Name name, float drawing_time, const void *arg)
+{
+  drawing_time_ = drawing_time;
+
+  draw_.at(name)->initDraw(arg);
+}
+
+void OpenManipulator::setRadiusForDrawing(Name name, float radius)
+{
+  draw_.at(name)->setRadius(radius);
+}
+
+void OpenManipulator::setStartPositionForDrawing(Name name, Vector3f start_position)
+{
+  draw_.at(name)->setStartPosition(start_position);
+  drawing_ = true;
+}
+
+Pose OpenManipulator::getPoseForDrawing(Name name, float tick)
+{
+  return draw_.at(name)->getPose(tick);
+}
+
+void OpenManipulator::draw(Name object)
+{
+  object_ = object;
+
+  drawing_ = true;
+  draw_cnt_ = 0;
+  start_time_ = present_time_;
+}
+
+bool OpenManipulator::drawing()
+{
+  return drawing_;
+}
+
 // JOINT TRAJECTORY
 
 void OpenManipulator::setMoveTime(float move_time)
@@ -681,9 +728,130 @@ std::vector<Trajectory> OpenManipulator::getGoalTrajectory()
   return goal_trajectory_;
 }
 
-void OpenManipulator::jointControl(bool flug_use_time)
+void OpenManipulator::jointControlForDrawing(Name tool_name, bool use_time)
+{
+  uint16_t step_time = uint16_t(floor(drawing_time_ / control_time_) + 1.0);     //for use step cnt
+
+  float tick_time = 0;
+
+  std::vector<float> goal_position;
+  std::vector<float> goal_velocity;
+  std::vector<float> goal_acceleration;
+
+  goal_position.reserve(manipulator_.getDOF());
+  goal_velocity.reserve(manipulator_.getDOF());
+  goal_acceleration.reserve(manipulator_.getDOF());
+
+  if (use_time == false)
+  {
+    if (drawing_)
+    {
+      if (draw_cnt_ < step_time)
+      {
+        tick_time = control_time_ * draw_cnt_;
+
+        if (object_ == LINE)
+          goal_position = kinematics_->inverse(&manipulator_, tool_name, line_.getPose(tick_time));
+        else
+          goal_position = kinematics_->inverse(&manipulator_, tool_name, getPoseForDrawing(object_, tick_time));
+
+        if (platform_)
+          sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
+
+        if (processing_)
+        {
+          if (platform_ == false)
+            manipulator_.setAllActiveJointAngle(goal_position);
+          sendAngleToProcessing(goal_position);
+        }
+
+        previous_goal_.position = goal_position;
+
+        draw_cnt_++;
+      }
+      else
+      {
+        draw_cnt_ = 0;
+        drawing_ = false;
+      }
+    }
+  }
+  else                        //use time
+  {
+    /////////////////////////////////////////////////////////
+    if(drawing_)
+    {
+      tick_time = present_time_ - start_time_;
+
+      // DEBUG.println();
+      // DEBUG.print("present time ");
+      // DEBUG.print(present_time_);
+      // DEBUG.print("start_time_ ");
+      // DEBUG.print(start_time_);
+      // DEBUG.print("tick_time ");
+      // DEBUG.print(tick_time);
+      // DEBUG.println();
+
+      if(tick_time < drawing_time_)
+      {
+        if (object_ == LINE)
+        {
+          Pose temp = line_.getPose(tick_time);
+          goal_position = kinematics_->inverse(&manipulator_, tool_name, line_.getPose(tick_time));
+        }
+        else
+          goal_position = kinematics_->inverse(&manipulator_, tool_name, getPoseForDrawing(object_, tick_time));
+
+        if (platform_)
+          sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
+
+        if (processing_)
+        {
+          if (platform_ == false)
+            manipulator_.setAllActiveJointAngle(goal_position);
+          sendAngleToProcessing(goal_position);
+        }
+
+        previous_goal_.position = goal_position;
+        previous_goal_.velocity = goal_velocity;
+        previous_goal_.acceleration = goal_acceleration;
+      }
+      else
+      {
+        if (object_ == LINE)
+        {
+          Pose temp = line_.getPose(drawing_time_);
+          goal_position = kinematics_->inverse(&manipulator_, tool_name, line_.getPose(move_time_));
+        }
+        else
+          goal_position = kinematics_->inverse(&manipulator_, tool_name, getPoseForDrawing(object_, move_time_));
+
+        if (platform_)
+          sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
+
+        if (processing_)
+        {
+          if (platform_ == false)
+            manipulator_.setAllActiveJointAngle(goal_position);
+          sendAngleToProcessing(goal_position);
+        }
+
+        drawing_ = false;
+        start_time_ = present_time_;
+      }
+    }
+    else
+    {
+      start_time_ = present_time_;
+    }
+    /////////////////////////////////////////////////////////
+  }
+}
+
+void OpenManipulator::jointControl(bool use_time)
 {
   uint16_t step_time = uint16_t(floor(move_time_ / control_time_) + 1.0);     //for use step cnt
+  
   float tick_time = 0;
 
   std::vector<float> goal_position;
@@ -695,7 +863,7 @@ void OpenManipulator::jointControl(bool flug_use_time)
   goal_acceleration.reserve(manipulator_.getDOF());
 
 
-  if(!flug_use_time)          //use step cnt
+  if(use_time == false)          //use step cnt
   {
     ////////////////////////////////////////////////////////
     if (moving_)
@@ -898,4 +1066,71 @@ void OpenManipulator::setMove(Name tool_name, Vector3f meter, float move_time)
   // DEBUG.println();
 
   setPose(tool_name, goal_pose, move_time);
+}
+
+
+void OpenManipulator::drawLine(Name tool_name, Vector3f meter, float move_time)
+{
+  drawing_time_ = move_time;
+
+  setAllActiveJointAngle(previous_goal_.position);
+  forward(manipulator_.getWorldChildName());
+
+  previous_goal_.pose = manipulator_.getComponentPoseToWorld(tool_name);
+
+  if (platform_)
+  {
+    setAllActiveJointAngle(receiveAllActuatorAngle());
+    forward(manipulator_.getWorldChildName());
+  }
+
+  Vector3f present_position_to_world = previous_goal_.pose.position;
+  Matrix3f present_orientation_to_world = previous_goal_.pose.orientation;
+
+  Vector3f goal_position_to_world = present_position_to_world + meter;
+
+  Pose start, end;
+  start.position = present_position_to_world;
+  start.orientation = present_orientation_to_world;
+
+  end.position = goal_position_to_world;
+  end.orientation = present_orientation_to_world;
+  
+  line_.init(start, end, move_time, control_time_);
+  setMoveTime(move_time);
+
+  draw(LINE);
+}
+
+
+void OpenManipulator::wait(float wait_time)
+{
+  Trajectory start;
+  Trajectory goal;
+
+  std::vector<float> present_position = previous_goal_.position;
+  std::vector<float> present_velocity = previous_goal_.velocity;
+  std::vector<float> present_acceleration = previous_goal_.acceleration;
+
+  start_trajectory_.clear();
+  goal_trajectory_.clear();
+
+  for (uint8_t index = 0; index < manipulator_.getDOF(); index++)
+  {
+    start.position = present_position.at(index);
+    start.velocity = present_velocity.at(index);
+    start.acceleration = present_acceleration.at(index);
+
+    start_trajectory_.push_back(start);
+
+    goal.position = present_position.at(index);
+    goal.velocity = 0.0f;
+    goal.acceleration = 0.0f;
+
+    goal_trajectory_.push_back(goal);
+  }
+
+  setMoveTime(wait_time);
+  makeTrajectory(start_trajectory_, goal_trajectory_);
+  move();
 }

@@ -20,10 +20,13 @@
 #define OPEN_MANIPULATOR_H_
 
 #include "OMAPI.h"
+#include "OMPath.h"
 #include "OMBridge.h"
 
 #include <algorithm> // for sort()
 #include <RTOS.h>
+
+#define LINE -100
 
 using namespace Eigen;
 
@@ -62,10 +65,14 @@ private:
 
   Manager *manager_;
   Kinematics *kinematics_;
-  Actuator *actuator_;    
+  Actuator *actuator_;
+
+  OM_PATH::Line line_;
+  std::map<Name, Draw *> draw_;
 
   float move_time_;
   float control_time_;
+  float drawing_time_;
 
   bool moving_;
   uint16_t step_cnt_;
@@ -75,6 +82,10 @@ private:
   bool platform_;
   bool processing_;
 
+  bool drawing_;
+  Name object_;
+  uint16_t draw_cnt_;
+
   String cmd_[50];
 
 public:
@@ -83,6 +94,7 @@ public:
 
   void initKinematics(Kinematics *kinematics);
   void initActuator(Actuator *actuator);
+  void addDraw(Name name, Draw *draw);
 
   void initJointTrajectory();
 
@@ -210,6 +222,15 @@ public:
   bool sendActuatorSignal(uint8_t active_joint_id, bool onoff);
   std::vector<float> receiveAllActuatorAngle();
 
+  // DRAW (INCLUDES VIRTUAL)
+  void drawInit(Name name, float move_time, const void *arg);
+  void setRadiusForDrawing(Name name, float radius);
+  void setStartPositionForDrawing(Name name, Vector3f start_position);
+  Pose getPoseForDrawing(Name name, float tick);
+  void draw(Name object);
+  bool drawing();
+  void jointControlForDrawing(Name tool_name, bool use_time = false);
+
   // PATH
   void setPresentTime(float present_time);
   void setMoveTime(float move_time);
@@ -223,7 +244,7 @@ public:
   MatrixXf getTrajectoryCoefficient();
   void move();
   bool moving();
-  void jointControl(bool flug_use_time = false);
+  void jointControl(bool use_time = false);
 
   void setStartTrajectory(Trajectory trajectory);
   void clearStartTrajectory();
@@ -234,12 +255,16 @@ public:
   std::vector<Trajectory> getGoalTrajectory();
 
   // Additional Functions
+  void wait(float wait_time = 1.0f);
+
   void jointMove(std::vector<float> goal_position, float move_time = 1.0f);
   bool toolMove(Name tool_name, bool onoff);
   bool toolMove(Name tool_name, float tool_value);
 
   void setPose(Name tool_name, Pose goal_pose, float move_time = 1.0f);
   void setMove(Name tool_name, Vector3f meter, float move_time = 1.0f);
+
+  void drawLine(Name tool_name, Vector3f meter, float move_time = 1.0f);
 };
 } // namespace OPEN_MANIPULATOR
 

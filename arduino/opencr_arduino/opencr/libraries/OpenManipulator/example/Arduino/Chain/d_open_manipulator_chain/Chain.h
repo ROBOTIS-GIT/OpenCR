@@ -158,6 +158,10 @@ void THREAD::Actuator_Control(void const *argument)
     MUTEX::wait();
 
     chain.jointControl();
+    //chain.jointControlForDrawing(TOOL);
+
+    chain.setPresentTime((float)(millis()/1000.0f));
+    chain.jointControlForDrawing(TOOL, true);
 
     MUTEX::release();
 

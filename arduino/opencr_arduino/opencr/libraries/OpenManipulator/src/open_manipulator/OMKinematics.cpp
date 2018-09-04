@@ -303,6 +303,25 @@ std::vector<float> Chain::positionOnlyInverseKinematics(OM_MANAGER::Manipulator 
   return getAllActiveJointAngle(&_manipulator);
 }
 
+MatrixXf SCARA::jacobian(OM_MANAGER::Manipulator *manipulator, Name tool_name)
+{
+  chain_.jacobian(manipulator, tool_name);
+}
+
+void SCARA::forward(OM_MANAGER::Manipulator *manipulator, Name component_name)
+{
+  chain_.forward(manipulator, component_name);
+}
+
+void SCARA::forward(OM_MANAGER::Manipulator *manipulator)
+{  
+}
+
+std::vector<float> SCARA::inverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose)
+{
+  return chain_.positionOnlyInverseKinematics(manipulator, tool_name, target_pose);
+}
+
 MatrixXf Link::jacobian(OM_MANAGER::Manipulator *manipulator, Name tool_name)
 {
 }

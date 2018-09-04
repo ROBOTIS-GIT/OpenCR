@@ -68,21 +68,6 @@ OPEN_MANIPULATOR::Kinematics *kinematics = new OM_KINEMATICS::Planar();
 OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
 #endif 
 
-void setPassiveJointAngle()
-{
-  float joint_angle[3];
-  joint_angle[0] = planar.getComponentJointAngle(COMP1);
-  joint_angle[1] = planar.getComponentJointAngle(COMP2);
-  joint_angle[2] = planar.getComponentJointAngle(COMP3);
-
-  planar.setComponentJointAngle(COMP4, 0);
-  planar.setComponentJointAngle(COMP5, 0);
-  planar.setComponentJointAngle(COMP6, 0);
-  planar.setComponentJointAngle(COMP7, 0);
-  planar.setComponentJointAngle(COMP8, 0);
-  planar.setComponentJointAngle(COMP9, 0);
-}
-
 void initManipulator()
 {
   planar.addWorld(WORLD,
@@ -146,12 +131,25 @@ void initManipulator()
   // planar.forward(COMP1);
 }
 
+//-- Compute Passive Angles --//
+void setPassiveJointAngle()
+{
+  float joint_angle[3];
+  joint_angle[0] = planar.getComponentJointAngle(COMP1);
+  joint_angle[1] = planar.getComponentJointAngle(COMP2);
+  joint_angle[2] = planar.getComponentJointAngle(COMP3);
+
+  planar.setComponentJointAngle(COMP4, (joint_angle[1] - joint_angle[2]));
+  planar.setComponentJointAngle(COMP5, -M_PI - (joint_angle[1] - joint_angle[2]));
+  planar.setComponentJointAngle(COMP6, -M_PI - (joint_angle[1] - joint_angle[2]));
+}
+
+
 void updateAllJointAngle()
 {
 #ifdef PLATFORM
   planar.setAllActiveJointAngle(planar.receiveAllActuatorAngle());
 #endif
-  // Add passive joint function
 }
 
 void THREAD::Robot_State(void const *argument)

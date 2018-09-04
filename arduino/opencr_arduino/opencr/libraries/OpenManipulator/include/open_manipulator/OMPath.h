@@ -26,8 +26,8 @@
 #include <math.h>
 #include <vector>
 
+#include "OMAPI.h"
 #include "OMDebug.h"
-#include "OMManager.h"
 
 using namespace Eigen;
 
@@ -83,24 +83,21 @@ public:
 
   MatrixXf getCoefficient();
 };
-
 class Line
 {
 private:
-  MinimumJerk path_generator_;
-  VectorXf coefficient_;
-
-  uint8_t joint_num_;
-
-  Vector3f start_;
-  Vector3f end_;
+  Pose start_;
+  Pose end_;
+  float acc_dec_time;
+  float move_time_;
+  Vector3f vel_max;
 
 public:
-  Line(uint8_t joint_num);
+  Line();
   virtual ~Line();
 
-  void init(float move_time, float control_time);
-  void setTwoPoints(Vector3f start, Vector3f end);
+  void init(Pose start, Pose end, float move_time, float control_time);
+  Pose line(float time_var);
   Pose getPose(float tick);
 
   MatrixXf getCoefficient();
@@ -125,7 +122,7 @@ public:
 //   MatrixXf getCoefficient();
 // };
 
-class Circle
+class Circle : public OPEN_MANIPULATOR::Draw
 {
 private:
   MinimumJerk path_generator_;
@@ -133,22 +130,25 @@ private:
 
   uint8_t joint_num_;
 
-  Vector3f initial_position_;
-
+  Vector3f start_position_;
   float radius_;
 
+  float *get_arg_;
+
 public:
-  Circle(uint8_t joint_num);
+  Circle();
   virtual ~Circle();
 
-  void init(Vector3f initial_position, float radius, float move_time, float control_time);
+  void init(float move_time, float control_time);
   Pose circle(float time_var);
-  Pose getPose(float tick);
 
   MatrixXf getCoefficient();
 
-  // virtual init();
-  // virtual Pose getPose(float tick);
+  virtual void initDraw(const void *arg);
+  virtual void setRadius(float radius);  
+  virtual void setStartPosition(Vector3f start_position);
+  virtual Pose getPose(float tick);
 };
-} // namespace PATH
+
+} // namespace OM_PATH
 #endif // OMPATH_H_

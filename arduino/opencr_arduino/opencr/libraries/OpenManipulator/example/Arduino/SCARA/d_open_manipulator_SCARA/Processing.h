@@ -185,35 +185,55 @@ void fromProcessing(String data)
   //     repeat     = false;
   //   }
   // }
-  // else if (cmd[0] == "motion")
-  // {
-  //   if (cmd[1] == "start")
-  //   {
-  //     if (DYNAMIXEL)
-  //       sendAngle2Processing(getAngle()); 
+  else if (cmd[0] == "motion")
+  {
+    if (cmd[1] == "start")
+    {
 
-  //     if (PROCESSING)
-  //       sendAngle2Processing(getState()); 
+#if 0 // DRAW CIRCLE
+      const float move_time = 1.0f;
+      float init_arg[2] = {move_time, ACTUATOR_CONTROL_TIME};
+      void *p_init_arg = init_arg;
 
-  //     for (int i = 0; i < MOTION_NUM; i++)
-  //     {
-  //       for (int j = 0; j < 6; j++)
-  //       {
-  //         motion_storage[i][j] = motion_set[i][j];
-  //       }
-  //     }
+      static float radius = 0.005f;
 
-  //     motion_num = MOTION_NUM;  
-  //     motion_cnt = 0;          
-  //     motion = true;
-  //     repeat = true;
-  //   }
-  //   else if (cmd[1] == "stop")
-  //   {
-  //     motion_cnt = 0;
-  //     motion     = false;
-  //     repeat     = false;
-  //   }
-  // }
+      SCARA.drawInit(CIRCLE, move_time, p_init_arg);
+      SCARA.setRadiusForDrawing(CIRCLE, radius);  
+      SCARA.setStartPositionForDrawing(CIRCLE, SCARA.getComponentPositionToWorld(TOOL));
+      SCARA.draw(CIRCLE);
+
+      radius += 0.005f;
+#endif
+
+      SCARA.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.020f, 0.0), 1.0f); 
+
+      // if (DYNAMIXEL)
+      //   sendAngle2Processing(getAngle()); 
+
+      // if (PROCESSING)
+      //   sendAngle2Processing(getState()); 
+
+      // for (int i = 0; i < MOTION_NUM; i++)
+      // {
+      //   for (int j = 0; j < 6; j++)
+      //   {
+      //     motion_storage[i][j] = motion_set[i][j];
+      //   }
+      // }
+
+      // motion_num = MOTION_NUM;  
+      // motion_cnt = 0;          
+      // motion = true;
+      // repeat = true;
+    }
+    else if (cmd[1] == "stop")
+    {
+      SCARA.drawLine(TOOL, OM_MATH::makeVector3(0.020f, 0.0, 0.0), 1.0f); 
+
+      // motion_cnt = 0;
+      // motion     = false;
+      // repeat     = false;
+    }
+  }
 }
 #endif

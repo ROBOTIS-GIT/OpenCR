@@ -47,15 +47,17 @@
 
 #define ACTIVE_JOINT_SIZE 3
 
+#define CIRCLE 10
+
 // #define PLATFORM
 
 OPEN_MANIPULATOR::OpenManipulator SCARA;
 
-OPEN_MANIPULATOR::Kinematics *kinematics = new OM_KINEMATICS::Chain();
+OPEN_MANIPULATOR::Kinematics *kinematics = new OM_KINEMATICS::SCARA();
 #ifdef PLATFORM ////////////////////////////////////Actuator init
 OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
 #endif /////////////////////////////////////////////
-//  OPEN_MANIPULATOR::Path *path = new MY_PATH::Circle();
+OPEN_MANIPULATOR::Draw *circle = new OM_PATH::Circle();
 
 void initManipulator()
 {
@@ -149,6 +151,7 @@ void THREAD::Actuator_Control(void const *argument)
     MUTEX::wait();
 
     SCARA.jointControl();
+    SCARA.jointControlForDrawing(TOOL);
 
     MUTEX::release();
 

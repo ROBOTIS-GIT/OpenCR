@@ -140,7 +140,7 @@ std::vector<float> JointTrajectory::getAcceleration(float tick)
              6 * coefficient_(3, index) * pow(tick, 1) +
              12 * coefficient_(4, index) * pow(tick, 2) +
              20 * coefficient_(5, index) * pow(tick, 3);
-          
+
     acceleration_.push_back(result);
   }
 
@@ -152,80 +152,80 @@ MatrixXf JointTrajectory::getCoefficient()
   return coefficient_;
 }
 
-Line::Line(uint8_t joint_num)
-{
-  joint_num_ = joint_num;
-  coefficient_ = MatrixXf::Identity(6, joint_num);
-}
+Line::Line() {}
 
 Line::~Line() {}
 
-void Line::init(float move_time, float control_time)
-{
-  Trajectory start;
-  Trajectory goal;
-
-  start.position = 0.0;
-  start.velocity = 0.0;
-  start.acceleration = 0.0;
-
-  goal.position = 2*M_PI;
-  goal.velocity = 0.0;
-  goal.acceleration = 0.0;
-
-  path_generator_.calcCoefficient(start,
-                                  goal,
-                                  move_time,
-                                  control_time);
-
-  coefficient_ = path_generator_.getCoefficient();
-}
-
-void Line::setTwoPoints(Vector3f start, Vector3f end)
+void Line::init(Pose start, Pose end, float move_time, float control_time)
 {
   start_ = start;
   end_ = end;
+  move_time_ = move_time;
+  acc_dec_time = move_time_ * 0.2;
+
+
+  Vector3f start_to_end;
+  start_to_end(0) = end_.position(0) - start_.position(0);
+  start_to_end(1) = end_.position(1) - start_.position(1);
+  start_to_end(2) = end_.position(2) - start_.position(2);
+
+  vel_max(0) = start_to_end(0)/(move_time_ - acc_dec_time);
+  vel_max(1) = start_to_end(1)/(move_time_ - acc_dec_time);
+  vel_max(2) = start_to_end(2)/(move_time_ - acc_dec_time);
 }
 
-Pose Line::getPose(float tick)
+Pose Line::line(float time_var)
 {
   Pose pose;
-  float get_time_var = 0.0;
 
-  get_time_var = coefficient_(0) +
-             coefficient_(1) * pow(tick, 1) +
-             coefficient_(2) * pow(tick, 2) +
-             coefficient_(3) * pow(tick, 3) +
-             coefficient_(4) * pow(tick, 4) +
-             coefficient_(5) * pow(tick, 5);
+  if(acc_dec_time >= time_var) // acc time
+  {
+    pose.position(0) = 0.5*vel_max(0)*pow(time_var, 2)/acc_dec_time + start_.position(0);
+    pose.position(1) = 0.5*vel_max(1)*pow(time_var, 2)/acc_dec_time + start_.position(1);
+    pose.position(2) = 0.5*vel_max(2)*pow(time_var, 2)/acc_dec_time + start_.position(2);
+  }
+  else if(time_var > acc_dec_time && (move_time_ - acc_dec_time) >= time_var )
+  {
+    pose.position(0) = vel_max(0)*(time_var-(acc_dec_time*0.5)) + start_.position(0);
+    pose.position(1) = vel_max(1)*(time_var-(acc_dec_time*0.5)) + start_.position(1);
+    pose.position(2) = vel_max(2)*(time_var-(acc_dec_time*0.5)) + start_.position(2);
+  }
+  else if(time_var > (move_time_ - acc_dec_time) && (time_var < move_time_))
+  {
+    pose.position(0) = end_.position(0) - vel_max(0)*0.5/acc_dec_time*(pow((move_time_-time_var),2));
+    pose.position(1) = end_.position(1) - vel_max(1)*0.5/acc_dec_time*(pow((move_time_-time_var),2));
+    pose.position(2) = end_.position(2) - vel_max(2)*0.5/acc_dec_time*(pow((move_time_-time_var),2));
+  }
+  else if(time_var <= move_time_)
+  {
+    pose.position(0) = end_.position(0);
+    pose.position(1) = end_.position(1);
+    pose.position(2) = end_.position(2);
+  }
 
-  // Get direction of parametric equation
-  Vector3f start_to_end;
-  start_to_end(0) = end_(0) - start_(0);
-  start_to_end(1) = end_(1) - start_(1);
-  start_to_end(2) = end_(2) - start_(2);
-
-  // Get parametric equation
-  pose.position(0) = start_(0) + (start_to_end(0) * get_time_var);
-  pose.position(1) = start_(1) + (start_to_end(1) * get_time_var);
-  pose.position(2) = start_(2) + (start_to_end(2) * get_time_var);
+  pose.orientation = start_.orientation;
 
   return pose;
 }
 
-Circle::Circle(uint8_t joint_num)
+Pose Line::getPose(float tick)
 {
-  joint_num_ = joint_num;
-  coefficient_ = MatrixXf::Identity(6, joint_num);
+
+/*
+  DEBUG.println();
+  DEBUG.print("------time ");
+  DEBUG.print(tick);
+  DEBUG.println();*/
+
+  return line(tick);
 }
+
+Circle::Circle() {}
 
 Circle::~Circle() {}
 
-void Circle::init(Vector3f initial_position, float radius, float move_time, float control_time)
+void Circle::init(float move_time, float control_time)
 {
-  initial_position_ = initial_position;
-  radius_ = radius;
-
   Trajectory start;
   Trajectory goal;
 
@@ -233,7 +233,7 @@ void Circle::init(Vector3f initial_position, float radius, float move_time, floa
   start.velocity = 0.0;
   start.acceleration = 0.0;
 
-  goal.position = 2*M_PI;
+  goal.position = 2 * M_PI;
   goal.velocity = 0.0;
   goal.acceleration = 0.0;
 
@@ -245,14 +245,23 @@ void Circle::init(Vector3f initial_position, float radius, float move_time, floa
   coefficient_ = path_generator_.getCoefficient();
 }
 
+void Circle::setStartPosition(Vector3f start_position)
+{
+  start_position_ = start_position;
+}
+
+void Circle::setRadius(float radius)
+{
+  radius_ = radius;
+}
 
 Pose Circle::circle(float time_var)
 {
   Pose pose;
 
-  pose.position(0) = (initial_position_(0) - radius_) + (radius_ * cos(time_var));
-  pose.position(1) = initial_position_(1) + (radius_ * sin(time_var));
-  pose.position(2) = initial_position_(2);
+  pose.position(0) = (start_position_(0) - radius_) + (radius_ * cos(time_var));
+  pose.position(1) = start_position_(1) + (radius_ * sin(time_var));
+  pose.position(2) = start_position_(2);
 
   return pose;
 }
@@ -262,11 +271,18 @@ Pose Circle::getPose(float tick)
   float get_time_var = 0.0;
 
   get_time_var = coefficient_(0) +
-             coefficient_(1) * pow(tick, 1) +
-             coefficient_(2) * pow(tick, 2) +
-             coefficient_(3) * pow(tick, 3) +
-             coefficient_(4) * pow(tick, 4) +
-             coefficient_(5) * pow(tick, 5);
+                 coefficient_(1) * pow(tick, 1) +
+                 coefficient_(2) * pow(tick, 2) +
+                 coefficient_(3) * pow(tick, 3) +
+                 coefficient_(4) * pow(tick, 4) +
+                 coefficient_(5) * pow(tick, 5);
 
-  return circle(get_time_var);;
+  return circle(get_time_var);
+}
+
+void Circle::initDraw(const void *arg)
+{
+  get_arg_ = (float *)arg;
+
+  init(get_arg_[0], get_arg_[1]);
 }
