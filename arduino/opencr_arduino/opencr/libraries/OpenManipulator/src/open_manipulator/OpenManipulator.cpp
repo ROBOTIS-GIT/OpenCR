@@ -641,6 +641,7 @@ void OpenManipulator::draw(Name object)
 
   drawing_ = true;
   draw_cnt_ = 0;
+  start_time_ = present_time_;
 }
 
 bool OpenManipulator::drawing()
@@ -774,6 +775,76 @@ void OpenManipulator::jointControlForDrawing(Name tool_name, bool use_time)
         drawing_ = false;
       }
     }
+  }
+  else                        //use time
+  {
+    /////////////////////////////////////////////////////////
+    if(drawing_)
+    {
+      tick_time = present_time_ - start_time_;
+
+      // DEBUG.println();
+      // DEBUG.print("present time ");
+      // DEBUG.print(present_time_);
+      // DEBUG.print("start_time_ ");
+      // DEBUG.print(start_time_);
+      // DEBUG.print("tick_time ");
+      // DEBUG.print(tick_time);
+      // DEBUG.println();
+
+      if(tick_time < drawing_time_)
+      {
+        if (object_ == LINE)
+        {
+          Pose temp = line_.getPose(tick_time);
+          goal_position = kinematics_->inverse(&manipulator_, tool_name, line_.getPose(tick_time));
+        }
+        else
+          goal_position = kinematics_->inverse(&manipulator_, tool_name, getPoseForDrawing(object_, tick_time));
+
+        if (platform_)
+          sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
+
+        if (processing_)
+        {
+          if (platform_ == false)
+            manipulator_.setAllActiveJointAngle(goal_position);
+          sendAngleToProcessing(goal_position);
+        }
+
+        previous_goal_.position = goal_position;
+        previous_goal_.velocity = goal_velocity;
+        previous_goal_.acceleration = goal_acceleration;
+      }
+      else
+      {
+        if (object_ == LINE)
+        {
+          Pose temp = line_.getPose(drawing_time_);
+          goal_position = kinematics_->inverse(&manipulator_, tool_name, line_.getPose(move_time_));
+        }
+        else
+          goal_position = kinematics_->inverse(&manipulator_, tool_name, getPoseForDrawing(object_, move_time_));
+
+        if (platform_)
+          sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
+
+        if (processing_)
+        {
+          if (platform_ == false)
+            manipulator_.setAllActiveJointAngle(goal_position);
+          sendAngleToProcessing(goal_position);
+        }
+
+        drawing_ = false;
+        start_time_ = present_time_;
+      }
+    }
+    else
+    {
+      start_time_ = present_time_;
+    }
+    /////////////////////////////////////////////////////////
   }
 }
 
@@ -997,6 +1068,7 @@ void OpenManipulator::setMove(Name tool_name, Vector3f meter, float move_time)
   setPose(tool_name, goal_pose, move_time);
 }
 
+
 void OpenManipulator::drawLine(Name tool_name, Vector3f meter, float move_time)
 {
   drawing_time_ = move_time;
@@ -1024,11 +1096,12 @@ void OpenManipulator::drawLine(Name tool_name, Vector3f meter, float move_time)
   end.position = goal_position_to_world;
   end.orientation = present_orientation_to_world;
   
-  line_.init(move_time, control_time_);
-  line_.setTwoPose(start, end);
+  line_.init(start, end, move_time, control_time_);
+  setMoveTime(move_time);
 
   draw(LINE);
 }
+
 
 void OpenManipulator::wait(float wait_time)
 {

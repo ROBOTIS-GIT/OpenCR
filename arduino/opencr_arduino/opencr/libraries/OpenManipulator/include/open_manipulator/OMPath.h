@@ -83,24 +83,20 @@ public:
 
   MatrixXf getCoefficient();
 };
-
 class Line
 {
 private:
-  MinimumJerk path_generator_;
-  VectorXf coefficient_;
-
-  uint8_t joint_num_;
-
   Pose start_;
   Pose end_;
+  float acc_dec_time;
+  float move_time_;
+  Vector3f vel_max;
 
 public:
   Line();
   virtual ~Line();
 
-  void init(float move_time, float control_time);
-  void setTwoPose(Pose start, Pose end);
+  void init(Pose start, Pose end, float move_time, float control_time);
   Pose line(float time_var);
   Pose getPose(float tick);
 

@@ -29,8 +29,8 @@ void setup()
 {
   Serial.begin(57600);
   DEBUG.begin(57600);
-  // while (!Serial)
-  //   ;
+   while (!Serial)
+     ;
 
   connectProcessing();
   connectRC100();
@@ -52,7 +52,7 @@ void setup()
 void loop()
 {
   getData(100);
-  
+  /*
   switch(seq)
   {
     case 0:
@@ -235,7 +235,7 @@ void loop()
 
     default:
      break;
-  }
+  }*/
 
   // LOG::INFO("LOOP");
   osDelay(LOOP_TIME * 1000);
