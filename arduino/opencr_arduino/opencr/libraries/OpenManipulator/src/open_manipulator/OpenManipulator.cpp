@@ -756,8 +756,11 @@ void OpenManipulator::jointControlForDrawing(Name tool_name, bool use_time)
           goal_position = kinematics_->inverse(&manipulator_, tool_name, getPoseForDrawing(object_, tick_time));
 
         if (platform_)
-          sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
-
+        {
+          //sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
+          manipulator_.jointMove(goal_position, control_time_);
+        }
+  
         if (processing_)
         {
           if (platform_ == false)
@@ -827,8 +830,11 @@ void OpenManipulator::jointControlForDrawing(Name tool_name, bool use_time)
           goal_position = kinematics_->inverse(&manipulator_, tool_name, getPoseForDrawing(object_, move_time_));
 
         if (platform_)
-          sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
-
+        {
+          //sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
+          manipulator_.jointMove(goal_position, control_time_);
+        }
+        
         if (processing_)
         {
           if (platform_ == false)
