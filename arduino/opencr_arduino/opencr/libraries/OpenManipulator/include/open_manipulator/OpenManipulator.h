@@ -229,7 +229,7 @@ public:
   Pose getPoseForDrawing(Name name, float tick);
   void draw(Name object);
   bool drawing();
-  void jointControlForDrawing(Name tool_name, bool use_time = false);
+  void jointControlForDrawing(Name tool_name);
 
   // PATH
   void setPresentTime(float present_time);
@@ -244,7 +244,7 @@ public:
   MatrixXf getTrajectoryCoefficient();
   void move();
   bool moving();
-  void jointControl(bool use_time = false);
+  void jointControl();
 
   void setStartTrajectory(Trajectory trajectory);
   void clearStartTrajectory();

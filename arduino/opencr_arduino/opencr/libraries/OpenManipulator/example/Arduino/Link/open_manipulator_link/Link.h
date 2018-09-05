@@ -229,7 +229,7 @@ void initOMLink()
 //     MUTEX::wait();
 
 //     omlink.setPresentTime((float)(millis()/1000.0f));
-//     omlink.jointControl(true);
+//     omlink.jointControl();
 
 //     MUTEX::release();
 
