@@ -79,7 +79,7 @@ void loop()
     
     previous_time[2] = (float)(millis()/1000.0f);
     SCARA.setPresentTime(previous_time[2]);
-    // SCARA.jointControl();
+    SCARA.jointControl();
     SCARA.jointControlForDrawing(TOOL);
   }
 }
