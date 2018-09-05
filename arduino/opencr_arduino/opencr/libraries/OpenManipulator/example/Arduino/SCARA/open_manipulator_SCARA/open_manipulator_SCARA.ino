@@ -59,7 +59,7 @@ void loop()
       // Serial.println("TEST");
 
     previous_time[0] = (float)(millis()/1000.0f);
-    // test();
+    test();
   }
 
   //solve Kinematics
@@ -69,7 +69,7 @@ void loop()
 
     previous_time[1] = (float)(millis()/1000.0f);
     updateAllJointAngle();
-    SCARA.forward();
+    // SCARA.forward();
   }
 
   //Joint Control
@@ -79,8 +79,8 @@ void loop()
     
     previous_time[2] = (float)(millis()/1000.0f);
     SCARA.setPresentTime(previous_time[2]);
-    SCARA.jointControl();
-    // SCARA.jointControlForDrawing(TOOL);
+    // SCARA.jointControl();
+    SCARA.jointControlForDrawing(TOOL);
   }
 }
 
