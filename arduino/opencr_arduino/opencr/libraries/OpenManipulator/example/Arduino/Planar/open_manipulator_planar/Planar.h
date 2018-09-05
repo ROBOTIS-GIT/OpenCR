@@ -102,6 +102,11 @@ void initManipulator()
                      TOOL,
                      OM_MATH::makeVector3(-0.0849f, 0.049f, 0.0),
                      Eigen::Matrix3f::Identity(3, 3));
+  // planar.addComponent(COMP4,
+  //                    COMP1,
+  //                    COMP7,
+  //                    OM_MATH::makeVector3(-0.0849f, 0.049f, 0.0),
+  //                    Eigen::Matrix3f::Identity(3, 3));
 
   planar.addTool(TOOL,    // why defined like this???
                 COMP7,

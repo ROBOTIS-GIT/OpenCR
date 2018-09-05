@@ -40,21 +40,15 @@ void fromProcessing(String data)
 {
   String *cmd = SCARA.parseDataFromProcessing(data);
 
-  Serial.println("working?0000");
   if (cmd[0] == "om")
   {
     if (cmd[1] == "ready")
     {
-  Serial.println("working?0001");
 #ifdef PLATFORM
-  Serial.println("working?0002");
-  Serial.flush();
       SCARA.actuatorEnable();
       SCARA.sendAngleToProcessing(SCARA.receiveAllActuatorAngle());  
       SCARA.sendToolData2Processing(SCARA.getComponentToolValue(TOOL));
 #endif
-  Serial.println("working?0003");
-  Serial.flush();
     }
     else if (cmd[1] == "end")
     {
@@ -66,8 +60,7 @@ void fromProcessing(String data)
   else if (cmd[0] == "joint")
   {
     std::vector<float> goal_position;
-    
-    for (uint8_t index = 0; index < ACTIVE_JOINT_SIZE; index++)
+    for (uint8_t index = 0; index < SCARA.getDOF(); index++)
     {
       goal_position.push_back(cmd[index+1].toFloat());
     }

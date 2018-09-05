@@ -34,7 +34,8 @@
 #define COMP1 1
 #define COMP2 2
 #define COMP3 3
-#define TOOL 4
+#define COMP4 4
+#define TOOL 5
 
 #define NONE -1
 
@@ -44,8 +45,7 @@
 
 #define BAUD_RATE 1000000
 #define DXL_SIZE 4
-
-#define ACTIVE_JOINT_SIZE 3
+#define ACTIVE_JOINT_SIZE 4
 
 #define CIRCLE 11
 #define RHOMBUS 12
@@ -86,18 +86,24 @@ void initManipulator()
 
   SCARA.addComponent(COMP3,
                      COMP2,
-                     TOOL,
+                     COMP4,
                      OM_MATH::makeVector3(0.067, 0.0, 0.0),
                      Eigen::Matrix3f::Identity(3, 3),
                      Z_AXIS,
                      3);
 
-  SCARA.addTool(TOOL,
-                COMP3,
-                OM_MATH::makeVector3(0.107, 0.0, 0.0),
-                Eigen::Matrix3f::Identity(3, 3),
-                4,
-                1.0f); // Change unit from `meter` to `radian`
+  SCARA.addComponent(COMP4,
+                     COMP3,
+                     TOOL,
+                     OM_MATH::makeVector3(0.067, 0.0, 0.0),
+                     Eigen::Matrix3f::Identity(3, 3),
+                     Z_AXIS,
+                     4);
+
+  SCARA.addTool(TOOL,    // Correct to write this way??/
+                COMP4,
+                OM_MATH::makeVector3(0.040, 0.0, 0.0),
+                Eigen::Matrix3f::Identity(3, 3)); // Change unit from `meter` to `radian`
 
   SCARA.initKinematics(kinematics);
 #ifdef PLATFORM ////////////////////////////////////Actuator init
