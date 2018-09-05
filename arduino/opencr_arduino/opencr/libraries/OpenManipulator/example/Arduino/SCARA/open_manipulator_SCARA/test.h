@@ -16,15 +16,14 @@ uint8_t motion_cnt = 0;
 
 void test()
 {
-//   if (SCARA.moving())
-//   {
-//       Serial.println("moving");
-//     return;
-//   }
-//   else
-  if (motion_cnt==100)
-    {
-      Serial.println("not moving");
+  if (SCARA.drawing())
+  {
+    Serial.println("now drawing");
+    return;
+  }
+  else
+  {      
+    Serial.println("next circle");
     // if (motion_cnt == MAX_MOTION_NUM){
     //     std::vector<float> goal_position;
     //     motion_cnt = 0;   
@@ -53,10 +52,9 @@ void test()
     //   SCARA.setRadiusForDrawing(HEART, radius);  
     //   SCARA.setStartPositionForDrawing(HEART, SCARA.getComponentPositionToWorld(TOOL));
     //   SCARA.draw(HEART);
-    }
-    motion_cnt++;
-    
-//   }
+    motion_cnt = 1;    
+  }
+  // motion_cnt++;    
 }
 
 #endif // TEST_H_
