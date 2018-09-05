@@ -83,7 +83,7 @@ void loop()
   if(present_time-previous_time[2] >= ACTUATOR_CONTROL_TIME)
   {
     omlink.setPresentTime((float)(millis()/1000.0f));
-    omlink.jointControl(true);
+    omlink.jointControl();
 #ifdef DEBUGING
     for(int i =0; i < 3; i++)
     {

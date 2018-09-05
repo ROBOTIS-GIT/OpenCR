@@ -859,7 +859,7 @@ void OpenManipulator::jointControlForDrawing(Name tool_name, bool use_time)
   }
 }
 
-void OpenManipulator::jointControl(bool use_time)
+void OpenManipulator::jointControl()
 {
   uint16_t step_time = uint16_t(floor(move_time_ / control_time_) + 1.0);     //for use step cnt
   
@@ -873,97 +873,92 @@ void OpenManipulator::jointControl(bool use_time)
   goal_velocity.reserve(manipulator_.getDOF());
   goal_acceleration.reserve(manipulator_.getDOF());
 
-
-  if(use_time == false)          //use step cnt
+  /////////////////////////////////////////////////////////
+  if(moving_)
   {
-    ////////////////////////////////////////////////////////
-    if (moving_)
+    tick_time = present_time_ - start_time_;
+    if(tick_time < move_time_)
     {
-      if (step_cnt_ < step_time)
+      goal_position = joint_trajectory_->getPosition(tick_time);
+      goal_velocity = joint_trajectory_->getVelocity(tick_time);
+      goal_acceleration = joint_trajectory_->getAcceleration(tick_time);  
+
+      if (platform_)
+        sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
+
+      if (processing_)
       {
-        tick_time = control_time_ * step_cnt_;
-
-        goal_position = joint_trajectory_->getPosition(tick_time);
-        goal_velocity = joint_trajectory_->getVelocity(tick_time);
-        goal_acceleration = joint_trajectory_->getAcceleration(tick_time);
-
-        if (platform_)
-          sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
-
-        if (processing_)
-        {
-          if (platform_ == false)
-            manipulator_.setAllActiveJointAngle(goal_position);
-          sendAngleToProcessing(goal_position);
-        }
-
-        previous_goal_.position = goal_position;
-        previous_goal_.velocity = goal_velocity;
-        previous_goal_.acceleration = goal_acceleration;
-
-        step_cnt_++;
+        if (platform_ == false)
+          manipulator_.setAllActiveJointAngle(goal_position);
+        sendAngleToProcessing(goal_position);
       }
-      else
-      {
-        step_cnt_ = 0;
-        moving_ = false;
-      }
-    }
-    /////////////////////////////////////////////////////////
-  }
-  else                        //use time
-  {
-    /////////////////////////////////////////////////////////
-    if(moving_)
-    {
-      tick_time = present_time_ - start_time_;
-      if(tick_time < move_time_)
-      {
-        goal_position = joint_trajectory_->getPosition(tick_time);
-        goal_velocity = joint_trajectory_->getVelocity(tick_time);
-        goal_acceleration = joint_trajectory_->getAcceleration(tick_time);  
 
-        if (platform_)
-          sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
+      previous_goal_.position = goal_position;
+      previous_goal_.velocity = goal_velocity;
+      previous_goal_.acceleration = goal_acceleration;
 
-        if (processing_)
-        {
-          if (platform_ == false)
-            manipulator_.setAllActiveJointAngle(goal_position);
-          sendAngleToProcessing(goal_position);
-        }
-
-        previous_goal_.position = goal_position;
-        previous_goal_.velocity = goal_velocity;
-        previous_goal_.acceleration = goal_acceleration;
-
-        moving_  = true; 
-      }
-      else
-      {
-        goal_position = joint_trajectory_->getPosition(move_time_);
-        goal_velocity = joint_trajectory_->getVelocity(move_time_);
-        goal_acceleration = joint_trajectory_->getAcceleration(move_time_);  
-
-        if (platform_)
-          sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
-
-        if (processing_)
-        {
-          if (platform_ == false)
-            manipulator_.setAllActiveJointAngle(goal_position);
-          sendAngleToProcessing(goal_position);
-        }
-        moving_   = false; 
-        start_time_ = present_time_;
-      }
+      moving_  = true; 
     }
     else
     {
+      goal_position = joint_trajectory_->getPosition(move_time_);
+      goal_velocity = joint_trajectory_->getVelocity(move_time_);
+      goal_acceleration = joint_trajectory_->getAcceleration(move_time_);  
+
+      if (platform_)
+        sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
+
+      if (processing_)
+      {
+        if (platform_ == false)
+          manipulator_.setAllActiveJointAngle(goal_position);
+        sendAngleToProcessing(goal_position);
+      }
+      moving_   = false; 
       start_time_ = present_time_;
     }
-    /////////////////////////////////////////////////////////
   }
+  else
+  {
+    start_time_ = present_time_;
+  }
+  /////////////////////////////////////////////////////////
+
+    //use step cnt
+  ////////////////////////////////////////////////////////
+  // if (moving_)
+  // {
+  //   if (step_cnt_ < step_time)
+  //   {
+  //     tick_time = control_time_ * step_cnt_;
+
+  //     goal_position = joint_trajectory_->getPosition(tick_time);
+  //     goal_velocity = joint_trajectory_->getVelocity(tick_time);
+  //     goal_acceleration = joint_trajectory_->getAcceleration(tick_time);
+
+  //     if (platform_)
+  //       sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
+
+  //     if (processing_)
+  //     {
+  //       if (platform_ == false)
+  //         manipulator_.setAllActiveJointAngle(goal_position);
+  //       sendAngleToProcessing(goal_position);
+  //     }
+
+  //     previous_goal_.position = goal_position;
+  //     previous_goal_.velocity = goal_velocity;
+  //     previous_goal_.acceleration = goal_acceleration;
+
+  //     step_cnt_++;
+  //   }
+  //   else
+  //   {
+  //     step_cnt_ = 0;
+  //     moving_ = false;
+  //   }
+  // }
+  /////////////////////////////////////////////////////////
 }
 
 void OpenManipulator::jointMove(std::vector<float> goal_position, float move_time)

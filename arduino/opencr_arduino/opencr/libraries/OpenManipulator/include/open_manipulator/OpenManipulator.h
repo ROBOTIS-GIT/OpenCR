@@ -244,7 +244,7 @@ public:
   MatrixXf getTrajectoryCoefficient();
   void move();
   bool moving();
-  void jointControl(bool use_time = false);
+  void jointControl();
 
   void setStartTrajectory(Trajectory trajectory);
   void clearStartTrajectory();
