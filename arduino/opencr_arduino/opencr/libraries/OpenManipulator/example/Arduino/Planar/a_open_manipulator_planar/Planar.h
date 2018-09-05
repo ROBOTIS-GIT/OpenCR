@@ -56,6 +56,7 @@
 
 #define ACTIVE_JOINT_SIZE 3
 
+#define DEBUG
 #define PLATFORM
 
 OPEN_MANIPULATOR::OpenManipulator planar;

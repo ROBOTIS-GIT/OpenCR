@@ -24,13 +24,14 @@
 std::vector<float> goal_position;
 Pose goal_pose;
 
-uint8_t seq = 0;
+float present_time = 0.0;
+float previous_time[3] = {0.0, 0.0, 0.0};
 
 void setup()
 {
   Serial.begin(57600);
   DEBUG.begin(57600);
-  while (!Serial);
+  // while (!Serial);
 
   connectProcessing();
   // connectRC100();
@@ -44,15 +45,44 @@ void setup()
   // Do not use thread for now...
   // initThread();
   // startThread();
+#ifdef DEBUG
+  DEBUG.println("Setup");
+#endif
 }
 
 void loop()
 {
+  present_time = (float)(millis()/1000.0f);
+
+  //get Date 
+  getData(10);
+  if(present_time-previous_time[0] >= LOOP_TIME)
+  {
+    previous_time[0] = (float)(millis()/1000.0f);
+    test();
+  }
+
+  //solve Kinematics
+  if(present_time-previous_time[1] >= ROBOT_STATE_UPDATE_TIME)
+  {
+    previous_time[1] = (float)(millis()/1000.0f);
+    updateAllJointAngle();
+    SCARA.forward();
+  }
+
+  //Joint Control
+  if(present_time-previous_time[2] >= ACTUATOR_CONTROL_TIME)
+  {
+    previous_time[2] = (float)(millis()/1000.0f);
+    SCARA.setPresentTime(previous_time[2]);
+    SCARA.jointControl(true);
+  }
+
   // test();
-  updateAllJointAngle();
-  SCARA.jointControl();
-  SCARA.jointControlForDrawing(TOOL);
-  getData(100);
+  // updateAllJointAngle();
+  // SCARA.jointControl();
+  // SCARA.jointControlForDrawing(TOOL);
+  // getData(100);
   // osDelay(LOOP_TIME * 1000);
   // osDelay(LOOP_TIME * 1000);
 }

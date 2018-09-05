@@ -73,7 +73,7 @@ void fromRC100(uint16_t data)
     goal_position.push_back(20.0f * DEG2RAD);
     goal_position.push_back(40.0f * DEG2RAD);
 
-    SCARA.jointMove(goal_position, 1.0f);
+    // SCARA.jointMove(goal_position, 1.0f);
   }
   else if (data & RC100_BTN_6)
   {
@@ -83,7 +83,7 @@ void fromRC100(uint16_t data)
     goal_position.push_back(0.0f);
     goal_position.push_back(0.0f);
 
-    SCARA.jointMove(goal_position, 1.0f);
+    // SCARA.jointMove(goal_position, 1.0f);
   }
 }
 #endif
