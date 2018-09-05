@@ -25,6 +25,7 @@
 // User-defined library
 #include <OMKinematics.h>
 #include <OMDynamixel.h>
+#include <OMDebug.h>
 
 #define ROBOT_STATE_UPDATE_TIME 0.010f
 #define ACTUATOR_CONTROL_TIME 0.010f
@@ -108,7 +109,6 @@ void initManipulator()
 
   uint32_t baud_rate = BAUD_RATE;
   void *p_baud_rate = &baud_rate;
-
   chain.actuatorInit(p_baud_rate);
   chain.setActuatorControlMode();
 
@@ -157,12 +157,9 @@ void THREAD::Actuator_Control(void const *argument)
   {
     MUTEX::wait();
 
-    chain.jointControl();
-    //chain.jointControlForDrawing(TOOL);
-
     chain.setPresentTime((float)(millis()/1000.0f));
-    chain.jointControlForDrawing(TOOL, true);
-
+    chain.jointControl();
+    chain.jointControlForDrawing(TOOL);
     MUTEX::release();
 
     osDelay(ACTUATOR_CONTROL_TIME * 1000);

@@ -33,7 +33,7 @@ void setup()
      ;
 
   connectProcessing();
-  connectRC100();
+  //connectRC100();
   
   initManipulator();
 
