@@ -16,7 +16,7 @@
 
 /* Authors: Hye-Jong KIM */
 
-#include "OMLink.h"
+#include "Link.h"
 #include "Processing.h"
 #include "Motion.h"
 #include "RemoteController.h"
@@ -52,7 +52,7 @@ void setup()
   // initThread();
   // startThread();
 
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
   DEBUG.print("start");
   DEBUG.println();
 #endif
@@ -84,7 +84,7 @@ void loop()
   {
     omlink.setPresentTime((float)(millis()/1000.0f));
     omlink.jointControl(true);
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
     for(int i =0; i < 3; i++)
     {
       DEBUG.print(omlink.receiveAllActuatorAngle().at(i));
@@ -132,9 +132,7 @@ void getData(uint32_t wait_time)
       }
       else if (rc100_flag)
       {
-        MUTEX::wait();
         fromRC100(get_rc100_data);
-        MUTEX::release();
 
         tick = millis();
         state = 1;

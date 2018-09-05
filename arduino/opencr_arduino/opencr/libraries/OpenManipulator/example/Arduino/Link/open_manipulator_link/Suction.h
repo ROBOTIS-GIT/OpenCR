@@ -19,7 +19,7 @@
 #ifndef SUCTION_H_
 #define SUCTION_H_
 
-#include "OMLink.h"
+#include "Link.h"
 
 void suctionInit()
 {

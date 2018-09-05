@@ -19,7 +19,7 @@
 #ifndef PROCESSING_H_
 #define PROCESSING_H_
 
-#include "OMLink.h"
+#include "Link.h"
 #include "Suction.h"
 #include "Motion.h"
 
@@ -45,7 +45,7 @@ void fromProcessing(String data)
 ////////////////////////Manipulator OnOff//////////////////////////
   if (cmd[0] == "om")
   {
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
     DEBUG.print("om-");
 #endif
     if (cmd[1] == "ready")
@@ -54,7 +54,7 @@ void fromProcessing(String data)
       omlink.actuatorEnable();
       omlink.sendAngleToProcessing(omlink.getAllActiveJointAngle());  
 #endif
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
     DEBUG.print("ready");
 #endif
     }
@@ -63,11 +63,11 @@ void fromProcessing(String data)
 #ifdef PLATFORM
       omlink.actuatorDisable();  
 #endif
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
     DEBUG.print("end");
 #endif
     }
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
     DEBUG.println();
 #endif
   }
@@ -75,7 +75,7 @@ void fromProcessing(String data)
 /////////////////////////////Joint Move/////////////////////////////
   else if (cmd[0] == "joint")
   {
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
     DEBUG.print("joint-");
 #endif
     std::vector<float> target_angle;
@@ -85,7 +85,7 @@ void fromProcessing(String data)
       target_angle.push_back(cmd[i+1].toFloat());
     }
 
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
     for (uint8_t i = 0; i < 3; i++)
     {
       DEBUG.print(target_angle.at(i));
@@ -94,7 +94,7 @@ void fromProcessing(String data)
 #endif
     omlink.jointMove(target_angle, MOVETIME);
     target_angle.clear();
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
     DEBUG.println(" ");
 #endif
   }
@@ -102,13 +102,13 @@ void fromProcessing(String data)
 ////////////////////////////Suction OnOff///////////////////////////
   else if (cmd[0] == "suction")
   {
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
     DEBUG.print("suction-");
 #endif
     if (cmd[1] == "on")
     {
       suctionOn();
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
       DEBUG.print("on");
       DEBUG.println();
 #endif
@@ -116,7 +116,7 @@ void fromProcessing(String data)
     else if (cmd[1] == "off")
     {
       suctionOff();
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
       DEBUG.print("off");
       DEBUG.println();
 #endif
@@ -126,7 +126,7 @@ void fromProcessing(String data)
 /////////////////////////////Task move//////////////////////////////
   else if (cmd[0] == "task")
   {
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
     DEBUG.print("task-");
 #endif
     Pose target_pose;
@@ -161,11 +161,11 @@ void fromProcessing(String data)
       omlink.setMove(SUCTION, OM_MATH::makeVector3(0.0, 0.0, 0.0), MOVETIME);
     }
     
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
     DEBUG.print(cmd[1]);
     DEBUG.println(" ");
 #endif
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
     DEBUG.print(cmd[1]);
     DEBUG.println(" ");
 #endif
@@ -174,21 +174,21 @@ void fromProcessing(String data)
 ////////////////////////////Motor onOff/////////////////////////////
   else if (cmd[0] == "motor")
   {
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
     DEBUG.print("motor-");
 #endif
 #ifdef PLATFORM
     if (cmd[1] == "enable")
       {
         omlink.actuatorEnable();
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
         DEBUG.print("enable");
 #endif
       }
       else if (cmd[1] == "disable")
       {
         omlink.actuatorDisable();
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
         DEBUG.print("disable");
 #endif
       }
@@ -312,24 +312,24 @@ void fromProcessing(String data)
 ///////////////////////////motion move//////////////////////////////
   else if (cmd[0] == "motion")
   {
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
     DEBUG.print("motion-");
 #endif  
     if (cmd[1] == "start")
     {
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
       DEBUG.print("start");
 #endif
       motionStart();
     }
     else if (cmd[1] == "stop")
     {
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
       DEBUG.print("stop");
 #endif  
       motionStop();
     }
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
     DEBUG.println(" ");
 #endif   
   }
