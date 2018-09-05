@@ -19,13 +19,13 @@
 #ifndef MOTION_H_
 #define MOTION_H_
 
-#include "OMLink.h"
+#include "Link.h"
 
 //////////////////Motion num////////////////
 #define MAX_MOTION_NUM 104
 ////////////////////////////////////////////
 
-//////////////////////flug///////////////////
+//////////////////////fleg///////////////////
 bool motion    = false;
 bool repeat    = true;
 ////////////////////////////////////////////
@@ -302,7 +302,7 @@ void setMotion()
 
 void motionStart()
 {
-  if(IK_motion_flug)
+  if(IK_motion)
   {
     Pose target_pose;
     std::vector <float> target_motion_angle;
@@ -320,12 +320,12 @@ void motionStart()
       for(uint8_t j = 0; j < 3; j++)
       {
         motion_storage[i][j+1] = target_motion_angle.at(j);
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
         DEBUG.print(motion_storage[i][j+1]);
         DEBUG.print(", ");
 #endif
       }
-#ifdef DEBUGFLUG
+#ifdef DEBUGING
       DEBUG.println();
 #endif
     }

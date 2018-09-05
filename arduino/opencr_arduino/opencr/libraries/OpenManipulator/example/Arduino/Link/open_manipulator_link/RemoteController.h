@@ -19,7 +19,7 @@
 #ifndef REMOTE_CONTROLLER_H_
 #define REMOTE_CONTROLLER_H_
 
-#include "OMLink.h"
+#include "Link.h"
 #include <RC100.h>
 
 RC100 rc100;

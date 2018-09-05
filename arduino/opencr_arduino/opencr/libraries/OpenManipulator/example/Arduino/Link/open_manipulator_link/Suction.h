@@ -14,30 +14,38 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Darby Lim */
+/* Authors: Hye-Jong KIM */
 
-#ifndef OPMDEBUG_H_
-#define OPMDEBUG_H_
+#ifndef SUCTION_H_
+#define SUCTION_H_
 
-#if 0
+#include "Link.h"
 
-#include <Arduino.h>
-#include <Eigen.h>
+void suctionInit()
+{
+#ifdef PLATFORM
+  if(suction)
+    pinMode(RELAY_PIN, OUTPUT);
+#endif
+}
 
-#include "OPMLink.h"
-#include "OPMComm.h"
+void suctionOn()
+{
+#ifdef PLATFORM
+  if(suction)
+    digitalWrite(RELAY_PIN, HIGH);
+#endif
+}
 
-void showLedStatus();
-void updateRxTxLed();
+void suctionOff()
+{
+#ifdef PLATFORM
+  if(suction)
+    digitalWrite(RELAY_PIN, LOW);
+#endif
+}
 
-void print_mt3f(const Eigen::Matrix3f& m);
-void print_vt3f(const Eigen::Vector3f& v);
-void print_mtXf(const Eigen::MatrixXf& m);
-void print_vtXf(const Eigen::VectorXf& v);
-
-void showJointAngle(String unit, OPMLink* link, int from, int to);
-void showFKResult(OPMLink* link, int from, int to);
 
 #endif
 
-#endif // OPMDEBUG_H_
+
