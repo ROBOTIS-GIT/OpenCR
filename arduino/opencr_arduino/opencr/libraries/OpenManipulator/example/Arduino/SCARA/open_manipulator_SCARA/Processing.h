@@ -40,15 +40,21 @@ void fromProcessing(String data)
 {
   String *cmd = SCARA.parseDataFromProcessing(data);
 
+  Serial.println("working?0000");
   if (cmd[0] == "om")
   {
     if (cmd[1] == "ready")
     {
+  Serial.println("working?0001");
 #ifdef PLATFORM
+  Serial.println("working?0002");
+  Serial.flush();
       SCARA.actuatorEnable();
       SCARA.sendAngleToProcessing(SCARA.receiveAllActuatorAngle());  
       SCARA.sendToolData2Processing(SCARA.getComponentToolValue(TOOL));
 #endif
+  Serial.println("working?0003");
+  Serial.flush();
     }
     else if (cmd[1] == "end")
     {
@@ -98,104 +104,17 @@ void fromProcessing(String data)
       SCARA.actuatorDisable();
 #endif
   }
-  // else if (cmd[0] == "get")
-  // {
-  //   if (cmd[1] == "on")
-  //   {
-  //     motion_storage[motion_num][0] = 3.0;  //mov_time
-  //     motion_storage[motion_num][1] = -1.0;
-  //     motion_num++;
-  //   }
-  //   else if (cmd[1] == "off")
-  //   {
-  //     motion_storage[motion_num][0] = 3.0;  //mov_time
-  //     motion_storage[motion_num][1] = 1.0;
-  //     motion_num++;
-  //   }
-  //   else if (cmd[1] == "clear")
-  //   {
-  //     for (int i = 0; i < MOTION_NUM; i++)
-  //     {
-  //       for (int j = 0; j < 6; j++)
-  //       {
-  //         motion_storage[i][j] = 0.0;
-  //       }
-  //     }
-      
-  //     motion_num = 0;
-  //     motion_cnt = 0;
-  //     motion     = false;
-  //     repeat     = false;
-  //   }
-  //   else if (cmd[1] == "pose")
-  //   {
-  //     if (cmd[2].toInt() < MOTION_NUM)
-  //     {
-  //       State* state = getAngle();
-
-  //       if (DYNAMIXEL)
-  //         sendAngle2Processing(state); 
-
-  //       for (int i = JOINT1; i < GRIP; i++)
-  //       {
-  //         motion_storage[motion_num][0]   = 3.0;  //mov_time
-  //         motion_storage[motion_num][i+1] = state[i].pos;
-  //       }
-  //       motion_num++;
-  //     }
-  //   }
-  // }
-  // else if (cmd[0] == "hand")
-  // {
-  //   if (cmd[1] == "once")
-  //   {
-  //     if (DYNAMIXEL)
-  //     {
-  //       setTorque(true);
-  //       sendAngle2Processing(getAngle()); 
-  //     }
-
-  //     motion_cnt = 0;
-  //     motion = true;
-  //   }
-  //   else if (cmd[1] == "repeat")
-  //   {
-  //     if (DYNAMIXEL)
-  //     {
-  //       setTorque(true);
-  //       sendAngle2Processing(getAngle()); 
-  //     }
-
-  //     motion_cnt = 0;
-  //     motion = true;
-  //     repeat = true;
-  //   }
-  //   else if (cmd[1] == "stop")
-  //   {
-  //     for (int i = 0; i < MOTION_NUM; i++)
-  //     {
-  //       for (int j = 0; j < 6; j++)
-  //       {
-  //         motion_storage[i][j] = 0;
-  //       }
-  //     }
-
-  //     motion_cnt = 0;
-  //     motion     = false;
-  //     repeat     = false;
-  //   }
-  // }
   else if (cmd[0] == "motion")
   {
     if (cmd[1] == "start")
     {
 
 #if 1 // DRAW CIRCLE/RHOMBUS/HEART
-      const float move_time = 3.0f;
-      float init_arg[2] = {move_time, ACTUATOR_CONTROL_TIME};
-      void *p_init_arg = init_arg;
+      // const float move_time = 3.0f;
+      // float init_arg[2] = {move_time, ACTUATOR_CONTROL_TIME};
+      // void *p_init_arg = init_arg;
 
-      static float radius = 0.015f;
+      // static float radius = 0.015f;
 
     // std::vector<float> goal_position;
     // goal_position.push_back(-1.2);
@@ -203,11 +122,10 @@ void fromProcessing(String data)
     // goal_position.push_back(1.0);
     // SCARA.jointMove(goal_position, 1.0f);
 
-
-      SCARA.drawInit(CIRCLE, move_time, p_init_arg);
-      SCARA.setRadiusForDrawing(CIRCLE, radius);  
-      SCARA.setStartPositionForDrawing(CIRCLE, SCARA.getComponentPositionToWorld(TOOL));
-      SCARA.draw(CIRCLE);
+      // SCARA.drawInit(CIRCLE, move_time, p_init_arg);
+      // SCARA.setRadiusForDrawing(CIRCLE, radius);  
+      // SCARA.setStartPositionForDrawing(CIRCLE, SCARA.getComponentPositionToWorld(TOOL));
+      // SCARA.draw(CIRCLE);
 
       // SCARA.drawInit(RHOMBUS, move_time, p_init_arg);
       // SCARA.setRadiusForDrawing(RHOMBUS, radius);  

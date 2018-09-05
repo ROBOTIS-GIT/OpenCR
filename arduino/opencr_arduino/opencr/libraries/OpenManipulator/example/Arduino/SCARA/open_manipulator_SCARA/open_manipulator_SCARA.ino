@@ -52,7 +52,7 @@ void loop()
 {
   present_time = (float)(millis()/1000.0f);
   //get Data 
-  getData(100);
+  getData(10);
 
   if(present_time-previous_time[0] >= LOOP_TIME)
   {
@@ -79,7 +79,7 @@ void loop()
     
     previous_time[2] = (float)(millis()/1000.0f);
     SCARA.setPresentTime(previous_time[2]);
-    SCARA.jointControl(true);
+    SCARA.jointControl();
     // SCARA.jointControlForDrawing(TOOL);
   }
 }
@@ -142,7 +142,6 @@ void getData(uint32_t wait_time)
     get_rc100_data = readRC100Data();
     rc100_flag = true;
   }
-
   if (availableProcessing())
   {
     get_processing_data = readProcessingData();
@@ -152,20 +151,16 @@ void getData(uint32_t wait_time)
   switch (state)
   {
     case 0:
-      if (rc100_flag)
+      if (processing_flag)
       {
-        MUTEX::wait();
-        fromRC100(get_rc100_data);
-        MUTEX::release();
+        fromProcessing(get_processing_data);
 
         tick = millis();
         state = 1;
       }
-      else if (processing_flag)
+      else if (rc100_flag)
       {
-        MUTEX::wait();
-        fromProcessing(get_processing_data);
-        MUTEX::release();
+        fromRC100(get_rc100_data);
 
         tick = millis();
         state = 1;
