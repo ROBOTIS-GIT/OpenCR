@@ -48,8 +48,10 @@
 #define ACTIVE_JOINT_SIZE 3
 
 #define CIRCLE 10
+#define RHOMBUS 11
+#define HEART 12
 
-// #define PLATFORM
+#define PLATFORM
 
 OPEN_MANIPULATOR::OpenManipulator SCARA;
 
@@ -58,6 +60,8 @@ OPEN_MANIPULATOR::Kinematics *kinematics = new OM_KINEMATICS::SCARA();
 OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
 #endif /////////////////////////////////////////////
 OPEN_MANIPULATOR::Draw *circle = new OM_PATH::Circle();
+OPEN_MANIPULATOR::Draw *rhombus = new OM_PATH::Rhombus();
+OPEN_MANIPULATOR::Draw *heart = new OM_PATH::Heart();
 
 void initManipulator()
 {
@@ -103,7 +107,7 @@ void initManipulator()
   void *p_baud_rate = &baud_rate;
 
   SCARA.actuatorInit(p_baud_rate);
-  SCARA.setActuatorControlMode();
+  // SCARA.setActuatorControlMode();
 
   SCARA.actuatorEnable();
 #endif /////////////////////////////////////////////
@@ -125,37 +129,37 @@ void updateAllJointAngle()
   // Add passive joint function
 }
 
-void THREAD::Robot_State(void const *argument)
-{
-  (void)argument;
+// void THREAD::Robot_State(void const *argument)
+// {
+//   (void)argument;
 
-  for (;;)
-  {
-    MUTEX::wait();
+//   for (;;)
+//   {
+//     MUTEX::wait();
 
-    updateAllJointAngle();
-    SCARA.forward(COMP1);
+//     updateAllJointAngle();
+//     SCARA.forward(COMP1);
 
-    MUTEX::release();
+//     MUTEX::release();
 
-    osDelay(ROBOT_STATE_UPDATE_TIME * 1000);
-  }
-}
+//     osDelay(ROBOT_STATE_UPDATE_TIME * 1000);
+//   }
+// }
 
-void THREAD::Actuator_Control(void const *argument)
-{
-  (void)argument;
+// void THREAD::Actuator_Control(void const *argument)
+// {
+//   (void)argument;
 
-  for (;;)
-  {
-    MUTEX::wait();
+//   for (;;)
+//   {
+//     MUTEX::wait();
 
-    SCARA.jointControl();
-    SCARA.jointControlForDrawing(TOOL);
+//     SCARA.jointControl();
+//     SCARA.jointControlForDrawing(TOOL);
 
-    MUTEX::release();
+//     MUTEX::release();
 
-    osDelay(ACTUATOR_CONTROL_TIME * 1000);
-  }
-}
+//     osDelay(ACTUATOR_CONTROL_TIME * 1000);
+//   }
+// }
 #endif //OPEN_MANIPULATOR_SCARA_H_

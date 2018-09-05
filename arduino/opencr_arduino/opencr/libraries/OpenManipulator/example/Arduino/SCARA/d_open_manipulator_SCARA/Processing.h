@@ -40,7 +40,7 @@ void fromProcessing(String data)
 {
   String *cmd = SCARA.parseDataFromProcessing(data);
 
-  if (cmd[0] == "opm")
+  if (cmd[0] == "om")
   {
     if (cmd[1] == "ready")
     {
@@ -190,22 +190,39 @@ void fromProcessing(String data)
     if (cmd[1] == "start")
     {
 
-#if 0 // DRAW CIRCLE
-      const float move_time = 1.0f;
+#if 1 // DRAW CIRCLE/RHOMBUS/HEART
+      const float move_time = 5.0f;
       float init_arg[2] = {move_time, ACTUATOR_CONTROL_TIME};
       void *p_init_arg = init_arg;
 
-      static float radius = 0.005f;
+      static float radius = 0.015f;
+
+    // std::vector<float> goal_position;
+    // goal_position.push_back(-1.2);
+    // goal_position.push_back(1.0);
+    // goal_position.push_back(1.0);
+    // SCARA.jointMove(goal_position, 1.0f);
+
 
       SCARA.drawInit(CIRCLE, move_time, p_init_arg);
       SCARA.setRadiusForDrawing(CIRCLE, radius);  
       SCARA.setStartPositionForDrawing(CIRCLE, SCARA.getComponentPositionToWorld(TOOL));
       SCARA.draw(CIRCLE);
 
-      radius += 0.005f;
+      // SCARA.drawInit(RHOMBUS, move_time, p_init_arg);
+      // SCARA.setRadiusForDrawing(RHOMBUS, radius);  
+      // SCARA.setStartPositionForDrawing(RHOMBUS, SCARA.getComponentPositionToWorld(TOOL));
+      // SCARA.draw(RHOMBUS);
+
+      // SCARA.drawInit(HEART, move_time, p_init_arg);
+      // SCARA.setRadiusForDrawing(HEART, radius);  
+      // SCARA.setStartPositionForDrawing(HEART, SCARA.getComponentPositionToWorld(TOOL));
+      // SCARA.draw(HEART);
+
+      // radius += 0.005f;
 #endif
 
-      SCARA.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.020f, 0.0), 1.0f); 
+      // SCARA.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.020f, 0.0), 1.0f); 
 
       // if (DYNAMIXEL)
       //   sendAngle2Processing(getAngle()); 
