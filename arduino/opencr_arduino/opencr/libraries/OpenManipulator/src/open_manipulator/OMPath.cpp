@@ -286,3 +286,182 @@ void Circle::initDraw(const void *arg)
 
   init(get_arg_[0], get_arg_[1]);
 }
+
+
+
+
+
+
+
+
+
+
+//-------------------- Rhombus --------------------//
+
+Rhombus::Rhombus() {}
+Rhombus::~Rhombus() {}   // why like this..??
+
+void Rhombus::init(float move_time, float control_time)
+{
+  Trajectory start;
+  Trajectory goal;
+
+  start.position = 0.0;     // Angular Position
+  start.velocity = 0.0;
+  start.acceleration = 0.0;
+
+  goal.position = 2 * M_PI; // Angular Position
+  goal.velocity = 0.0;
+  goal.acceleration = 0.0;
+
+  path_generator_.calcCoefficient(start,
+                                  goal,
+                                  move_time,
+                                  control_time);
+
+  coefficient_ = path_generator_.getCoefficient();
+}
+
+Pose Rhombus::rhombus(float time_var)
+{
+  Pose pose;
+
+  if (time_var >= 0 && time_var < PI/2){
+    pose.position(0) = start_position_(0) - time_var / (PI/2) * radius_;
+    pose.position(1) = start_position_(1) - time_var / (PI/2) * radius_;
+    pose.position(2) = start_position_(2);
+  } else if (time_var >= PI/2 && time_var < PI){ 
+    pose.position(0) = start_position_(0) - time_var / (PI/2) * radius_;
+    pose.position(1) = start_position_(1) + time_var / (PI/2) * radius_ - 2 * radius_;
+    pose.position(2) = start_position_(2);
+  } else if (time_var >= PI && time_var < PI*3/2){ 
+    pose.position(0) = start_position_(0) + time_var / (PI/2) * radius_ - 4 * radius_;
+    pose.position(1) = start_position_(1) + time_var / (PI/2) * radius_ - 2 * radius_;
+    pose.position(2) = start_position_(2);
+  } else {
+    pose.position(0) = start_position_(0) + time_var / (PI/2) * radius_ - 4 * radius_;
+    pose.position(1) = start_position_(1) - time_var / (PI/2) * radius_ + 4 * radius_;
+    pose.position(2) = start_position_(2);
+  }
+
+  return pose;
+}
+
+void Rhombus::initDraw(const void *arg)
+{
+  get_arg_ = (float *)arg;
+
+  init(get_arg_[0], get_arg_[1]);
+}
+
+void Rhombus::setStartPosition(Vector3f start_position)
+{
+  start_position_ = start_position;
+}
+
+void Rhombus::setRadius(float radius)
+{
+  radius_ = radius;
+}
+
+Pose Rhombus::getPose(float tick)
+{
+  float get_time_var = 0.0;
+
+  get_time_var = coefficient_(0) +
+                 coefficient_(1) * pow(tick, 1) +
+                 coefficient_(2) * pow(tick, 2) +
+                 coefficient_(3) * pow(tick, 3) +
+                 coefficient_(4) * pow(tick, 4) +
+                 coefficient_(5) * pow(tick, 5);
+
+  return rhombus(get_time_var);
+}
+
+
+
+
+
+
+
+
+//-------------------- Heart --------------------//
+
+Heart::Heart() {}
+Heart::~Heart() {}   // why like this..??
+
+void Heart::init(float move_time, float control_time)
+{
+  Trajectory start;
+  Trajectory goal;
+
+  start.position = 0.0;     // Angular Position
+  start.velocity = 0.0;
+  start.acceleration = 0.0;
+
+  goal.position = 2 * M_PI; // Angular Position
+  goal.velocity = 0.0;
+  goal.acceleration = 0.0;
+
+  path_generator_.calcCoefficient(start,
+                                  goal,
+                                  move_time,
+                                  control_time);
+
+  coefficient_ = path_generator_.getCoefficient();
+}
+
+Pose Heart::heart(float time_var)
+{
+  Pose pose;
+
+  // // pose.position(0) = start_position_(0) ;
+  // //   // + 1/17*radius_*(16*sin(time_var)*sin(time_var)*sin(time_var));
+  // // // pose.position(1) = start_position_(1);
+  // // pose.position(1) = start_position_(1) + (radius_ * sin(time_var));
+  // // pose.position(1) = start_position_(1) + 1/17*radius_*13*sin(time_var); 
+  //   // + 1/17*radius_*13*cos(time_var); //- 5*cos(2*time_var) - 2*cos(3*time_var) - cos(4*time_var));
+  // // pose.position(2) = start_position_(2);
+  // pose.position(0) = (start_position_(0));//- radius_) + (radius_ * cos(time_var));
+  // pose.position(1) = start_position_(1) + (radius_ * sin(time_var));
+
+  // Serial.println(pose.position(0));
+  // Serial.println(pose.position(1));
+  // Serial.println("pose x y");
+  // // pose.position(0) = (start_position_(0) - radius_) + (radius_ * cos(time_var));
+  // pose.position(1) = start_position_(1) + (radius_ * sin(time_var));
+  // pose.position(2) = start_position_(2);
+
+  return pose;
+}
+
+void Heart::initDraw(const void *arg)
+{
+  get_arg_ = (float *)arg;
+
+  init(get_arg_[0], get_arg_[1]);
+}
+
+void Heart::setStartPosition(Vector3f start_position)
+{
+  start_position_ = start_position;
+}
+
+void Heart::setRadius(float radius)
+{
+  radius_ = radius;
+}
+
+Pose Heart::getPose(float tick)
+{
+  float get_time_var = 0.0;
+
+  get_time_var = coefficient_(0) +
+                 coefficient_(1) * pow(tick, 1) +
+                 coefficient_(2) * pow(tick, 2) +
+                 coefficient_(3) * pow(tick, 3) +
+                 coefficient_(4) * pow(tick, 4) +
+                 coefficient_(5) * pow(tick, 5);
+
+  return heart(get_time_var);
+}

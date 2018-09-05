@@ -150,5 +150,69 @@ public:
   virtual Pose getPose(float tick);
 };
 
+
+
+
+class Rhombus : public OPEN_MANIPULATOR::Draw
+{
+private:
+  MinimumJerk path_generator_;
+  MatrixXf coefficient_;
+
+  uint8_t joint_num_;
+
+  Vector3f start_position_;
+  float radius_;
+
+  float *get_arg_;
+
+public:
+  Rhombus();
+  virtual ~Rhombus();
+
+  void init(float move_time, float control_time);
+  Pose rhombus(float time_var);
+
+  MatrixXf getCoefficient();
+
+  virtual void initDraw(const void *arg);
+  virtual void setRadius(float radius);  
+  virtual void setStartPosition(Vector3f start_position);
+  virtual Pose getPose(float tick);
+};
+
+
+class Heart : public OPEN_MANIPULATOR::Draw
+{
+private:
+  MinimumJerk path_generator_;
+  MatrixXf coefficient_;
+
+  uint8_t joint_num_;
+
+  Vector3f start_position_;
+  float radius_;
+
+  float *get_arg_;
+
+public:
+  Heart();
+  virtual ~Heart();
+
+  void init(float move_time, float control_time);
+  Pose heart(float time_var);
+
+  MatrixXf getCoefficient();
+
+  virtual void initDraw(const void *arg);
+  virtual void setRadius(float radius);  
+  virtual void setStartPosition(Vector3f start_position);
+  virtual Pose getPose(float tick);
+};
+
+
+
+
+
 } // namespace OM_PATH
 #endif // OMPATH_H_
