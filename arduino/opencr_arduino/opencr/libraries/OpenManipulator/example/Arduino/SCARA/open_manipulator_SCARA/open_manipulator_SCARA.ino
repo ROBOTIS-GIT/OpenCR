@@ -51,21 +51,21 @@ void setup()
 void loop()
 {
   present_time = (float)(millis()/1000.0f);
-  //get Date 
-  getData(10);
+  //get Data 
+  getData(100);
 
   if(present_time-previous_time[0] >= LOOP_TIME)
   {
-      Serial.println("TEST");
+      // Serial.println("TEST");
 
     previous_time[0] = (float)(millis()/1000.0f);
-    test();
+    // test();
   }
 
   //solve Kinematics
   if(present_time-previous_time[1] >= ROBOT_STATE_UPDATE_TIME)
   {
-      Serial.println("SOLVE KINEMATICS");
+      // Serial.println("SOLVE KINEMATICS");
 
     previous_time[1] = (float)(millis()/1000.0f);
     updateAllJointAngle();
@@ -75,12 +75,12 @@ void loop()
   //Joint Control
   if(present_time-previous_time[2] >= ACTUATOR_CONTROL_TIME)
   {    
-      Serial.println("Joint Control");
+      // Serial.println("Joint Control");
     
     previous_time[2] = (float)(millis()/1000.0f);
     SCARA.setPresentTime(previous_time[2]);
-    // SCARA.jointControl(true);
-    SCARA.jointControlForDrawing(TOOL);
+    SCARA.jointControl(true);
+    // SCARA.jointControlForDrawing(TOOL);
   }
 }
 
