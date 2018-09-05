@@ -640,6 +640,7 @@ void OpenManipulator::draw(Name object)
   object_ = object;
 
   drawing_ = true;
+  moving_ = false;
   draw_cnt_ = 0;
   start_time_ = present_time_;
 }
@@ -689,6 +690,7 @@ MatrixXf OpenManipulator::getTrajectoryCoefficient()
 void OpenManipulator::move()
 {
   moving_ = true;
+  drawing_ = false;
   step_cnt_ = 0;
   start_time_ = present_time_;
 }
