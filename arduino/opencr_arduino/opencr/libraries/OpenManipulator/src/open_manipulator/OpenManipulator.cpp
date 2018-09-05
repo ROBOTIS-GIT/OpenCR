@@ -732,7 +732,7 @@ std::vector<Trajectory> OpenManipulator::getGoalTrajectory()
 
 void OpenManipulator::jointControlForDrawing(Name tool_name)
 {
-  // uint16_t step_time = uint16_t(floor(drawing_time_ / control_time_) + 1.0);     //for use step cnt
+  uint16_t step_time = uint16_t(floor(drawing_time_ / control_time_) + 1.0);     //for use step cnt
 
   float tick_time = 0;
 
@@ -744,7 +744,7 @@ void OpenManipulator::jointControlForDrawing(Name tool_name)
   goal_velocity.reserve(manipulator_.getDOF());
   goal_acceleration.reserve(manipulator_.getDOF());
 
-  /////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////
   if(drawing_)
   {
     tick_time = present_time_ - start_time_;
@@ -771,7 +771,6 @@ void OpenManipulator::jointControlForDrawing(Name tool_name)
       if (platform_)
       {
         sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
-        //jointMove(goal_position, control_time_);
       }
 
       if (processing_)
@@ -798,7 +797,6 @@ void OpenManipulator::jointControlForDrawing(Name tool_name)
       if (platform_)
       {
         sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
-        //jointMove(goal_position, control_time_);
       }
       
       if (processing_)
@@ -814,9 +812,10 @@ void OpenManipulator::jointControlForDrawing(Name tool_name)
   }
   else
   {
-    start_time_ = present_time_;
+    if(!moving_)
+      start_time_ = present_time_;
   }
-  /////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////
 
   // if (drawing_)
   // {
@@ -915,7 +914,8 @@ void OpenManipulator::jointControl()
   }
   else
   {
-    start_time_ = present_time_;
+    if(!drawing_)
+      start_time_ = present_time_;
   }
   /////////////////////////////////////////////////////////
 
@@ -1019,17 +1019,6 @@ bool OpenManipulator::toolMove(Name tool_name, float tool_value)
 void OpenManipulator::setPose(Name tool_name, Pose goal_pose, float move_time)
 {
   std::vector<float> goal_position = kinematics_->inverse(&manipulator_, tool_name, goal_pose);
-
-  // DEBUG.print("Inverse result : ");
-  // DEBUG.print(goal_position.size());
-  // DEBUG.print(" 1: ");
-  // DEBUG.print(goal_position.at(0));
-  // DEBUG.print(", 2: ");
-  // DEBUG.print(goal_position.at(1));
-  // DEBUG.print(", 3: ");
-  // DEBUG.print(goal_position.at(2));
-  // DEBUG.println();
-
   jointMove(goal_position, move_time);
 }
 
@@ -1054,17 +1043,6 @@ void OpenManipulator::setMove(Name tool_name, Vector3f meter, float move_time)
   Pose goal_pose;
   goal_pose.position = goal_position_to_world;
   goal_pose.orientation = present_orientation_to_world;
-
-  // DEBUG.println("-----------------------------------------------");
-  // DEBUG.print("GoalPos result : ");
-  // DEBUG.print(goal_pose.position.size());
-  // DEBUG.print(" x: ");
-  // DEBUG.print(goal_pose.position(0));
-  // DEBUG.print(", y: ");
-  // DEBUG.print(goal_pose.position(1));
-  // DEBUG.print(", z: ");
-  // DEBUG.print(goal_pose.position(2));
-  // DEBUG.println();
 
   setPose(tool_name, goal_pose, move_time);
 }
