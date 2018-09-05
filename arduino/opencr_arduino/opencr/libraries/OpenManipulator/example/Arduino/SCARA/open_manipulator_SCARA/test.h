@@ -5,56 +5,75 @@
 
 #define MAX_MOTION_NUM 5
 
-const float tool_position[MAX_MOTION_NUM][3] = {// { x, y, z}
-                                                {0.050f,   0.050f, 0.0},  
-                                                {-0.050f,  0.050f, 0.0},  
-                                                {-0.050f, -0.050f, 0.0},  
-                                                {0.050f,  -0.050f, 0.0},  
-                                                {0.050f,  -0.050f, 0.0}};  
-uint8_t motion_cnt = 0;
+uint8_t motion_page = 11;
+uint8_t motion_repeat = 0;
+uint8_t motion_erase = 0;
 
+
+const float move_time = 5.0f;
+float init_arg[2] = {move_time, ACTUATOR_CONTROL_TIME};
+void *p_init_arg = init_arg;
+float radius = 0.015f;
 
 void test()
 {
   if (SCARA.drawing())
   {
-    Serial.println("now drawing");
     return;
   }
   else
   {      
-    Serial.println("next circle");
-    // if (motion_cnt == MAX_MOTION_NUM){
-    //     std::vector<float> goal_position;
-    //     motion_cnt = 0;   
-    //     goal_position.push_back(-1.3);
-    //     goal_position.push_back(1.0);
-    //     goal_position.push_back(1.5);
-    //     SCARA.jointMove(goal_position, 1.0f);
-    // }
+    if (motion_erase == 1){
 
-    const float move_time = 5.0f;
-    float init_arg[2] = {move_time, ACTUATOR_CONTROL_TIME};
-    void *p_init_arg = init_arg;
-    static float radius = 0.015f;
+    }
+    else if (motion_page == CIRCLE) {
+      SCARA.drawInit(CIRCLE, move_time, p_init_arg);
+      SCARA.setRadiusForDrawing(CIRCLE, radius);  
+      SCARA.setStartPositionForDrawing(CIRCLE, SCARA.getComponentPositionToWorld(TOOL));
+      SCARA.draw(CIRCLE);
 
-    SCARA.drawInit(CIRCLE, move_time, p_init_arg);
-    SCARA.setRadiusForDrawing(CIRCLE, radius);  
-    SCARA.setStartPositionForDrawing(CIRCLE, SCARA.getComponentPositionToWorld(TOOL));
-    SCARA.draw(CIRCLE);
+      radius += 0.002f;
+      motion_repeat++;
+      
+      if (motion_repeat == 4){
+        motion_page++;
+        motion_repeat = 0;
+        radius = 0.015f;
+      }
+    } 
+    else if (motion_page == RHOMBUS) {
+      SCARA.drawInit(RHOMBUS, move_time, p_init_arg);
+      SCARA.setRadiusForDrawing(RHOMBUS, radius);  
+      SCARA.setStartPositionForDrawing(RHOMBUS, SCARA.getComponentPositionToWorld(TOOL));
+      SCARA.draw(RHOMBUS);
 
-    //   SCARA.drawInit(RHOMBUS, move_time, p_init_arg);
-    //   SCARA.setRadiusForDrawing(RHOMBUS, radius);  
-    //   SCARA.setStartPositionForDrawing(RHOMBUS, SCARA.getComponentPositionToWorld(TOOL));
-    //   SCARA.draw(RHOMBUS);
+      radius += 0.002f;
+      motion_repeat++;
 
-    //   SCARA.drawInit(HEART, move_time, p_init_arg);
-    //   SCARA.setRadiusForDrawing(HEART, radius);  
-    //   SCARA.setStartPositionForDrawing(HEART, SCARA.getComponentPositionToWorld(TOOL));
-    //   SCARA.draw(HEART);
-    motion_cnt = 1;    
+      if (motion_repeat == 4){
+        motion_page++;
+        motion_repeat = 0;
+        radius = 0.015f;
+      }
+    } 
+    else if (motion_page == HEART) { 
+      SCARA.drawInit(HEART, move_time, p_init_arg);
+      SCARA.setRadiusForDrawing(HEART, radius);  
+      SCARA.setStartPositionForDrawing(HEART, SCARA.getComponentPositionToWorld(TOOL));
+      SCARA.draw(HEART);
+
+      radius += 0.002f;
+      motion_repeat++;
+
+      if (motion_repeat == 4){
+        motion_page++;
+        motion_repeat = 0;
+        radius = 0.015f;
+      }
+    } 
+    else
+      motion_page = 11;
   }
-  // motion_cnt++;    
 }
 
 #endif // TEST_H_

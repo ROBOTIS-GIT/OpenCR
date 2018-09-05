@@ -415,22 +415,11 @@ Pose Heart::heart(float time_var)
 {
   Pose pose;
 
-  // // pose.position(0) = start_position_(0) ;
-  // //   // + 1/17*radius_*(16*sin(time_var)*sin(time_var)*sin(time_var));
-  // // // pose.position(1) = start_position_(1);
-  // // pose.position(1) = start_position_(1) + (radius_ * sin(time_var));
-  // // pose.position(1) = start_position_(1) + 1/17*radius_*13*sin(time_var); 
-  //   // + 1/17*radius_*13*cos(time_var); //- 5*cos(2*time_var) - 2*cos(3*time_var) - cos(4*time_var));
-  // // pose.position(2) = start_position_(2);
-  // pose.position(0) = (start_position_(0));//- radius_) + (radius_ * cos(time_var));
-  // pose.position(1) = start_position_(1) + (radius_ * sin(time_var));
-
-  // Serial.println(pose.position(0));
-  // Serial.println(pose.position(1));
-  // Serial.println("pose x y");
-  // // pose.position(0) = (start_position_(0) - radius_) + (radius_ * cos(time_var));
-  // pose.position(1) = start_position_(1) + (radius_ * sin(time_var));
-  // pose.position(2) = start_position_(2);
+  pose.position(0) = start_position_(0) 
+    + 1.0f/17.0f*radius_*(16*sin(time_var)*sin(time_var)*sin(time_var));
+  pose.position(1) = start_position_(1) - 1.0f/17.0f*radius_*7 
+    + 1.0f/17.0f*radius_*(13*cos(time_var) - 5*cos(2*time_var) - 2*cos(3*time_var) - cos(4*time_var));
+  pose.position(2) = start_position_(2);
 
   return pose;
 }
