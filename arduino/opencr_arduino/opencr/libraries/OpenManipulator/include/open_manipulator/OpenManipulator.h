@@ -229,7 +229,7 @@ public:
   Pose getPoseForDrawing(Name name, float tick);
   void draw(Name object);
   bool drawing();
-  void jointControlForDrawing(Name tool_name, bool use_time = false);
+  void jointControlForDrawing(Name tool_name);
 
   // PATH
   void setPresentTime(float present_time);
