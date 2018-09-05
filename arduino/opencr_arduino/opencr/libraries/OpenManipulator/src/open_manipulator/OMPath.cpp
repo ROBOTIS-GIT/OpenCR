@@ -156,46 +156,52 @@ Line::Line() {}
 
 Line::~Line() {}
 
-void Line::init(float move_time, float control_time)
-{
-  Trajectory start;
-  Trajectory goal;
-
-  start.position = 0.0;
-  start.velocity = 0.0;
-  start.acceleration = 0.0;
-
-  goal.position = 2 * M_PI;
-  goal.velocity = 0.0;
-  goal.acceleration = 0.0;
-
-  path_generator_.calcCoefficient(start,
-                                  goal,
-                                  move_time,
-                                  control_time);
-
-  coefficient_ = path_generator_.getCoefficient();
-}
-
-void Line::setTwoPose(Pose start, Pose end)
+void Line::init(Pose start, Pose end, float move_time, float control_time)
 {
   start_ = start;
   end_ = end;
-}
+  move_time_ = move_time;
+  acc_dec_time = move_time_ * 0.2;
 
-Pose Line::line(float time_var)
-{
-  // Get direction of parametric equation
+
   Vector3f start_to_end;
   start_to_end(0) = end_.position(0) - start_.position(0);
   start_to_end(1) = end_.position(1) - start_.position(1);
   start_to_end(2) = end_.position(2) - start_.position(2);
 
-  // Get parametric equation
+  vel_max(0) = start_to_end(0)/(move_time_ - acc_dec_time);
+  vel_max(1) = start_to_end(1)/(move_time_ - acc_dec_time);
+  vel_max(2) = start_to_end(2)/(move_time_ - acc_dec_time);
+}
+
+Pose Line::line(float time_var)
+{
   Pose pose;
-  pose.position(0) = start_.position(0) + (start_to_end(0) * time_var);
-  pose.position(1) = start_.position(1) + (start_to_end(1) * time_var);
-  pose.position(2) = start_.position(2) + (start_to_end(2) * time_var);
+
+  if(acc_dec_time >= time_var) // acc time
+  {
+    pose.position(0) = 0.5*vel_max(0)*pow(time_var, 2)/acc_dec_time + start_.position(0);
+    pose.position(1) = 0.5*vel_max(1)*pow(time_var, 2)/acc_dec_time + start_.position(1);
+    pose.position(2) = 0.5*vel_max(2)*pow(time_var, 2)/acc_dec_time + start_.position(2);
+  }
+  else if(time_var > acc_dec_time && (move_time_ - acc_dec_time) >= time_var )
+  {
+    pose.position(0) = vel_max(0)*(time_var-(acc_dec_time*0.5)) + start_.position(0);
+    pose.position(1) = vel_max(1)*(time_var-(acc_dec_time*0.5)) + start_.position(1);
+    pose.position(2) = vel_max(2)*(time_var-(acc_dec_time*0.5)) + start_.position(2);
+  }
+  else if(time_var > (move_time_ - acc_dec_time) && (time_var < move_time_))
+  {
+    pose.position(0) = end_.position(0) - vel_max(0)*0.5/acc_dec_time*(pow((move_time_-time_var),2));
+    pose.position(1) = end_.position(1) - vel_max(1)*0.5/acc_dec_time*(pow((move_time_-time_var),2));
+    pose.position(2) = end_.position(2) - vel_max(2)*0.5/acc_dec_time*(pow((move_time_-time_var),2));
+  }
+  else if(time_var <= move_time_)
+  {
+    pose.position(0) = end_.position(0);
+    pose.position(1) = end_.position(1);
+    pose.position(2) = end_.position(2);
+  }
 
   pose.orientation = start_.orientation;
 
@@ -204,16 +210,14 @@ Pose Line::line(float time_var)
 
 Pose Line::getPose(float tick)
 {
-  float get_time_var = 0.0;
 
-  get_time_var = coefficient_(0) +
-                 coefficient_(1) * pow(tick, 1) +
-                 coefficient_(2) * pow(tick, 2) +
-                 coefficient_(3) * pow(tick, 3) +
-                 coefficient_(4) * pow(tick, 4) +
-                 coefficient_(5) * pow(tick, 5);
+/*
+  DEBUG.println();
+  DEBUG.print("------time ");
+  DEBUG.print(tick);
+  DEBUG.println();*/
 
-  return line(get_time_var);
+  return line(tick);
 }
 
 Circle::Circle() {}

@@ -55,7 +55,7 @@
 ////////////////////////////////////////////
 
 //////////////////DebugFlug/////////////////
-//#define DEBUGFLUG
+#define DEBUGFLUG
 ////////////////////////////////////////////
 
 //////////////////Move step/////////////////
@@ -75,7 +75,7 @@ bool IK_motion_flug = true;
 ////////////////////////////////////////////
 
 //////////////suction flug///////////////
-bool suction = false;
+bool suction = true;
 ////////////////////////////////////////////
 
 ////////////////using class/////////////////
@@ -194,47 +194,47 @@ void initOMLink()
   omlink.setPresentTime((float)(millis()/1000.0f));
 }
 
-void THREAD::Robot_State(void const *argument)
-{
-  (void)argument;
+// void THREAD::Robot_State(void const *argument)
+// {
+//   (void)argument;
 
-  for (;;)
-  {
-    MUTEX::wait();
+//   for (;;)
+//   {
+//     MUTEX::wait();
 
-    updateAllJointAngle();
-    omlink.forward();
+//     updateAllJointAngle();
+//     omlink.forward();
 
-#ifdef DEBUGFLUG
-    for(int i =0; i < 3; i++)
-    {
-      DEBUG.print(omlink.receiveAllActuatorAngle().at(i));
-      DEBUG.print(", ");
-    }
-    DEBUG.println();
-#endif
+// #ifdef DEBUGFLUG
+//     for(int i =0; i < 3; i++)
+//     {
+//       DEBUG.print(omlink.receiveAllActuatorAngle().at(i));
+//       DEBUG.print(", ");
+//     }
+//     DEBUG.println();
+// #endif
 
-    MUTEX::release();
+//     MUTEX::release();
 
-    osDelay(ROBOT_STATE_UPDATE_TIME * 1000);
-  }
-}
+//     osDelay(ROBOT_STATE_UPDATE_TIME * 1000);
+//   }
+// }
 
-void THREAD::Actuator_Control(void const *argument)
-{
-  (void)argument;
+// void THREAD::Actuator_Control(void const *argument)
+// {
+//   (void)argument;
 
-  for (;;)
-  {
-    MUTEX::wait();
+//   for (;;)
+//   {
+//     MUTEX::wait();
 
-    omlink.setPresentTime((float)(millis()/1000.0f));
-    omlink.jointControl(true);
+//     omlink.setPresentTime((float)(millis()/1000.0f));
+//     omlink.jointControl(true);
 
-    MUTEX::release();
+//     MUTEX::release();
 
-    osDelay(ACTUATOR_CONTROL_TIME * 1000);
-  }
-}
+//     osDelay(ACTUATOR_CONTROL_TIME * 1000);
+//   }
+// }
 
 #endif //OMLINK_H_

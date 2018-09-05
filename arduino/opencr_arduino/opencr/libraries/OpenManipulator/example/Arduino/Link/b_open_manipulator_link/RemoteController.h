@@ -63,25 +63,11 @@ void fromRC100(uint16_t data)
   }
   else if (data & RC100_BTN_5)
   {
-    // std::vector<float> goal_position;
-
-    // goal_position.push_back(0.0f);
-    // goal_position.push_back(-60.0f * DEG2RAD);
-    // goal_position.push_back(20.0f * DEG2RAD);
-    // goal_position.push_back(40.0f * DEG2RAD);
-
-    // chain.jointMove(goal_position, 1.0f);
+    motionStart();
   }
   else if (data & RC100_BTN_6)
   {
-    // std::vector<float> goal_position;
-
-    // goal_position.push_back(0.0f);
-    // goal_position.push_back(0.0f);
-    // goal_position.push_back(0.0f);
-    // goal_position.push_back(0.0f);
-
-    // chain.jointMove(goal_position, 1.0f);
+    motionStop();
   }
 }
 #endif
