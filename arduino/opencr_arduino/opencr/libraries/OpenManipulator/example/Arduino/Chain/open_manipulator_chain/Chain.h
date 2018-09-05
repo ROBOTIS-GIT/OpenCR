@@ -160,6 +160,7 @@ void THREAD::Actuator_Control(void const *argument)
     chain.setPresentTime((float)(millis()/1000.0f));
     chain.jointControl();
     chain.jointControlForDrawing(TOOL);
+    //chain.jointControlForDrawing(TOOL);
     MUTEX::release();
 
     osDelay(ACTUATOR_CONTROL_TIME * 1000);

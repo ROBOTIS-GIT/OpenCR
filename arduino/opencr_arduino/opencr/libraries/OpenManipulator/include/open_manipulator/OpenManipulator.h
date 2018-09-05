@@ -22,6 +22,7 @@
 #include "OMAPI.h"
 #include "OMPath.h"
 #include "OMBridge.h"
+#include <OMDebug.h>
 
 #include <algorithm> // for sort()
 #include <RTOS.h>
