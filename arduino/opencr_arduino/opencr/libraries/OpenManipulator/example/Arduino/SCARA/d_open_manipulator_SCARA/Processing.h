@@ -191,7 +191,7 @@ void fromProcessing(String data)
     {
 
 #if 1 // DRAW CIRCLE/RHOMBUS/HEART
-      const float move_time = 5.0f;
+      const float move_time = 3.0f;
       float init_arg[2] = {move_time, ACTUATOR_CONTROL_TIME};
       void *p_init_arg = init_arg;
 
