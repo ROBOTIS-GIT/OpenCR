@@ -69,7 +69,7 @@ void loop()
 
     previous_time[1] = (float)(millis()/1000.0f);
     updateAllJointAngle();
-    // SCARA.forward();
+    SCARA.forward();
   }
 
   //Joint Control

@@ -13,6 +13,7 @@ const float move_time = 5.0f;
 float init_arg[2] = {move_time, ACTUATOR_CONTROL_TIME};
 void *p_init_arg = init_arg;
 float radius = 0.015f;
+float angular_position = 0.0f;
 
 void test()
 {
@@ -78,7 +79,7 @@ void test()
 
         if (motion_page == CIRCLE) {
           
-          SCARA.drawInit(CIRCLE, move_time, p_init_arg);
+          SCARA.drawInit(CIRCLE, move_time, angular_position, p_init_arg);
           SCARA.setRadiusForDrawing(CIRCLE, radius);  
           SCARA.setStartPositionForDrawing(CIRCLE, SCARA.getComponentPositionToWorld(TOOL));
           SCARA.draw(CIRCLE);
@@ -94,7 +95,7 @@ void test()
         }
       } 
       else if (motion_page == RHOMBUS) {
-        SCARA.drawInit(RHOMBUS, move_time, p_init_arg);
+        SCARA.drawInit(RHOMBUS, move_time, angular_position, p_init_arg);
         SCARA.setRadiusForDrawing(RHOMBUS, radius);  
         SCARA.setStartPositionForDrawing(RHOMBUS, SCARA.getComponentPositionToWorld(TOOL));
         SCARA.draw(RHOMBUS);
@@ -110,21 +111,32 @@ void test()
         }
       } 
       else if (motion_page == HEART) { 
-        SCARA.drawInit(HEART, move_time, p_init_arg);
+        radius = 0.030f;
+        SCARA.drawInit(HEART, move_time, angular_position, p_init_arg);
         SCARA.setRadiusForDrawing(HEART, radius);  
         SCARA.setStartPositionForDrawing(HEART, SCARA.getComponentPositionToWorld(TOOL));
         SCARA.draw(HEART);
 
-        radius += 0.004f;
+        motion_erase = 1;
+        motion_page++;
+        radius = 0.015f;
+      } 
+
+      else if (motion_page == CIRCLE2) { 
+        SCARA.drawInit(CIRCLE, move_time, angular_position, p_init_arg);
+        SCARA.setRadiusForDrawing(CIRCLE, radius);  
+        SCARA.setStartPositionForDrawing(CIRCLE, SCARA.getComponentPositionToWorld(TOOL));
+        SCARA.draw(CIRCLE);
+
         motion_repeat++;
 
         if (motion_repeat == 4){
           motion_erase = 1;
           motion_page++;
           motion_repeat = 0;
-          radius = 0.015f;
         }
       } 
+
       else
         motion_page = 11;
 

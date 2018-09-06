@@ -50,6 +50,9 @@
 #define CIRCLE 11
 #define RHOMBUS 12
 #define HEART 13
+#define CIRCLE2 14
+#define RHOMBUS2 15
+#define HEART2 16
 
 #define PLATFORM
 
@@ -107,7 +110,7 @@ void initManipulator()
   void *p_baud_rate = &baud_rate;
 
   SCARA.actuatorInit(p_baud_rate);
-  // SCARA.setActuatorControlMode();
+  // SCARA.setActuatorControlMode();     // For gripper
 
   SCARA.actuatorEnable();
 #endif /////////////////////////////////////////////

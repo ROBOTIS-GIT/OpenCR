@@ -612,7 +612,7 @@ void OpenManipulator::actuatorDisable()
 }
 
 // DRAW
-void OpenManipulator::drawInit(Name name, float drawing_time, const void *arg)
+void OpenManipulator::drawInit(Name name, float drawing_time, float angular_position, const void *arg)
 {
   drawing_time_ = drawing_time;
 
@@ -997,8 +997,6 @@ bool OpenManipulator::toolMove(Name tool_name, bool onoff)
   if (processing_)
     OM_PROCESSING::sendToolData2Processing(onoff);
 
-  // move();
-
   return true;
 }
 
@@ -1013,8 +1011,6 @@ bool OpenManipulator::toolMove(Name tool_name, float tool_value)
 
   if (processing_)
     OM_PROCESSING::sendToolData2Processing(tool_value);
-
-  // move();
 
   return true;
 }

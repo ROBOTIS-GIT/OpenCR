@@ -224,7 +224,7 @@ public:
   std::vector<float> receiveAllActuatorAngle();
 
   // DRAW (INCLUDES VIRTUAL)
-  void drawInit(Name name, float move_time, const void *arg);
+  void drawInit(Name name, float move_time, float angular_position, const void *arg);
   void setRadiusForDrawing(Name name, float radius);
   void setStartPositionForDrawing(Name name, Vector3f start_position);
   Pose getPoseForDrawing(Name name, float tick);
