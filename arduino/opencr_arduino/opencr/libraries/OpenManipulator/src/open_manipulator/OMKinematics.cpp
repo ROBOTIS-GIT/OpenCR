@@ -67,6 +67,7 @@ MatrixXf Chain::jacobian(OM_MANAGER::Manipulator *manipulator, Name tool_name)
 
 void Chain::forward(OM_MANAGER::Manipulator *manipulator)
 {
+  forward(manipulator, manipulator->getWorldChildName());
 }
 
 void Chain::forward(OM_MANAGER::Manipulator *manipulator, Name component_name)
@@ -315,12 +316,90 @@ void SCARA::forward(OM_MANAGER::Manipulator *manipulator, Name component_name)
 
 void SCARA::forward(OM_MANAGER::Manipulator *manipulator)
 {  
+  chain_.forward(manipulator);
 }
 
 std::vector<float> SCARA::inverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose)
 {
   return chain_.positionOnlyInverseKinematics(manipulator, tool_name, target_pose);
 }
+
+
+
+
+// std::vector<float> SCARA::geometricInverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose)
+// {
+//   std::vector<float> target_angle_vector;
+
+//   double target_angle[3];
+//   double link[3];
+//   double temp_x[3];
+//   double temp_y[3];
+//   double target_pose_length[3];
+
+//   // Link Lengths
+//   link[0] = 0.067f;
+//   link[1] = 0.067f;
+//   link[2] = 0.107f;
+
+//   // Pose for each set of two joints
+//   temp_x[0] = target_pose.position(0);
+//   temp_y[0] = target_pose.position(1);
+
+//   temp_x[1] = cos(PI*2/3)*temp_x[0] + sin(PI*2/3)*temp_y[0];
+//   temp_y[1] = -sin(PI*2/3)*temp_x[0] + cos(PI*2/3)*temp_y[0];
+
+//   temp_x[2] = cos(PI*2/3)*temp_x[1] + sin(PI*2/3)*temp_y[1];
+//   temp_y[2] = -sin(PI*2/3)*temp_x[1] + cos(PI*2/3)*temp_y[1];
+
+//   // Length of Position Difference and Target Angle
+//   target_pose_length[0] = sqrt(temp_x[0]*temp_x[0] + (temp_y[0]+0.1339)*(temp_y[0]+0.1339));
+//   target_angle[0] = asin((-link[1]*link[1] + link[0]*link[0] + target_pose_length[0]*target_pose_length[0]) 
+//                           / (2*link[0]*target_pose_length[0]));
+
+//   target_pose_length[1] = sqrt(temp_x[1]*temp_x[1] + (temp_y[1]+0.1339)*(temp_y[1]+0.1339));
+//   target_angle[1] = asin((-link[1]*link[1] + link[0]*link[0] + target_pose_length[1]*target_pose_length[1]) 
+//                           / (2*link[0]*target_pose_length[1]));
+
+//   target_pose_length[2] = sqrt(temp_x[2]*temp_x[2] + (temp_y[2]+0.1339)*(temp_y[2]+0.1339));
+//   target_angle[2] = asin((-link[1]*link[1] + link[0]*link[0] + target_pose_length[2]*target_pose_length[2]) 
+//                           / (2*link[0]*target_pose_length[2]));
+//   // Set Joint Angle 
+//   target_angle_vector.push_back(target_angle[0] - PI/4);
+//   target_angle_vector.push_back(target_angle[1] - PI/4);
+//   target_angle_vector.push_back(target_angle[2] - PI/4);
+
+//   // For Testing..
+//   // Serial.println(target_angle[0] - PI/4, 5);
+//   // Serial.println(target_angle[1] - PI/4, 5);
+//   // Serial.println(target_angle[2] - PI/4, 5);
+
+//   // target_angle_vector.push_back(0);
+//   // target_angle_vector.push_back(0);
+//   // target_angle_vector.push_back(0);
+
+//   return target_angle_vector;
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 MatrixXf Link::jacobian(OM_MANAGER::Manipulator *manipulator, Name tool_name)
 {
