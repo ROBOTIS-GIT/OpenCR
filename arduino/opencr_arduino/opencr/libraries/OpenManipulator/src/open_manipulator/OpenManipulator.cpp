@@ -752,13 +752,13 @@ void OpenManipulator::jointControlForDrawing(Name tool_name)
   if(drawing_)
   {
     tick_time = present_time_ - start_time_;
-    DEBUG.print(" drawing : ");
-    DEBUG.print("tick_time = ");
-    DEBUG.print(tick_time);
-    DEBUG.print("present_time_ = ");
-    DEBUG.print(present_time_);
-    DEBUG.print("start_time_ = ");
-    DEBUG.print(start_time_);  
+    // DEBUG.print(" drawing : ");
+    // DEBUG.print("tick_time = ");
+    // DEBUG.print(tick_time);
+    // DEBUG.print("present_time_ = ");
+    // DEBUG.print(present_time_);
+    // DEBUG.print("start_time_ = ");
+    // DEBUG.print(start_time_);  
 
   //   if(tick_time < drawing_time_)
   //   {
@@ -877,13 +877,13 @@ void OpenManipulator::jointControl()
   if(moving_)
   {
     tick_time = present_time_ - start_time_;
-    DEBUG.print(" moving : ");
-    DEBUG.print("tick_time = ");
-    DEBUG.print(tick_time);
-    DEBUG.print("present_time_ = ");
-    DEBUG.print(present_time_);
-    DEBUG.print("start_time_ = ");
-    DEBUG.print(start_time_);  
+    // DEBUG.print(" moving : ");
+    // DEBUG.print("tick_time = ");
+    // DEBUG.print(tick_time);
+    // DEBUG.print("present_time_ = ");
+    // DEBUG.print(present_time_);
+    // DEBUG.print("start_time_ = ");
+    // DEBUG.print(start_time_);  
 
     if(tick_time < move_time_)
     {
