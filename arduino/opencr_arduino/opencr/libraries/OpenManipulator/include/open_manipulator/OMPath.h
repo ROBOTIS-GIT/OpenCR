@@ -132,6 +132,7 @@ private:
 
   Vector3f start_position_;
   float radius_;
+  float start_angular_position_;
 
   float *get_arg_;
 
@@ -147,6 +148,7 @@ public:
   virtual void initDraw(const void *arg);
   virtual void setRadius(float radius);  
   virtual void setStartPosition(Vector3f start_position);
+  virtual void setAngularStartPosition(float start_angular_position);
   virtual Pose getPose(float tick);
 };
 
@@ -163,6 +165,7 @@ private:
 
   Vector3f start_position_;
   float radius_;
+  float start_angular_position_;
 
   float *get_arg_;
 
@@ -178,6 +181,8 @@ public:
   virtual void initDraw(const void *arg);
   virtual void setRadius(float radius);  
   virtual void setStartPosition(Vector3f start_position);
+  virtual void setAngularStartPosition(float start_angular_position);
+
   virtual Pose getPose(float tick);
 };
 
@@ -192,6 +197,7 @@ private:
 
   Vector3f start_position_;
   float radius_;
+  float start_angular_position_;
 
   float *get_arg_;
 
@@ -207,6 +213,8 @@ public:
   virtual void initDraw(const void *arg);
   virtual void setRadius(float radius);  
   virtual void setStartPosition(Vector3f start_position);
+  virtual void setAngularStartPosition(float start_angular_position);
+
   virtual Pose getPose(float tick);
 };
 
@@ -222,6 +230,7 @@ private:
 
   Vector3f start_position_;
   float radius_;
+  float start_angular_position_;
 
   float *get_arg_;
 
@@ -237,6 +246,8 @@ public:
   virtual void initDraw(const void *arg);
   virtual void setRadius(float radius);  
   virtual void setStartPosition(Vector3f start_position);
+  virtual void setAngularStartPosition(float start_angular_position);
+
   virtual Pose getPose(float tick);
 };
 

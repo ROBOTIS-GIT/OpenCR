@@ -612,7 +612,7 @@ void OpenManipulator::actuatorDisable()
 }
 
 // DRAW
-void OpenManipulator::drawInit(Name name, float drawing_time, float angular_position, const void *arg)
+void OpenManipulator::drawInit(Name name, float drawing_time, const void *arg)
 {
   drawing_time_ = drawing_time;
 
@@ -627,7 +627,11 @@ void OpenManipulator::setRadiusForDrawing(Name name, float radius)
 void OpenManipulator::setStartPositionForDrawing(Name name, Vector3f start_position)
 {
   draw_.at(name)->setStartPosition(start_position);
-  drawing_ = true;
+}
+
+void OpenManipulator::setStartAngularPositionForDrawing(Name name, float start_angular_position)
+{
+  draw_.at(name)->setAngularStartPosition(start_angular_position);
 }
 
 Pose OpenManipulator::getPoseForDrawing(Name name, float tick)

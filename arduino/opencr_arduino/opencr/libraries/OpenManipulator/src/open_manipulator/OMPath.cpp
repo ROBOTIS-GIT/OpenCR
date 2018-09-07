@@ -250,6 +250,11 @@ void Circle::setStartPosition(Vector3f start_position)
   start_position_ = start_position;
 }
 
+void Circle::setAngularStartPosition(float start_angular_position)
+{
+  start_angular_position_ = start_angular_position;
+}
+
 void Circle::setRadius(float radius)
 {
   radius_ = radius;
@@ -258,9 +263,15 @@ void Circle::setRadius(float radius)
 Pose Circle::circle(float time_var)
 {
   Pose pose;
+  Pose temp_pose;
 
-  pose.position(0) = (start_position_(0) - radius_) + (radius_ * cos(time_var));
-  pose.position(1) = start_position_(1) + (radius_ * sin(time_var));
+  temp_pose.position(0) = radius_ * cos(time_var);
+  temp_pose.position(1) = radius_ * sin(time_var);
+
+  // pose.position(0) = (start_position_(0) - radius_) + cos(start_angular_position_)*temp_pose.position(0) - sin(start_angular_position_)*temp_pose.position(1);
+  // pose.position(1) = start_position_(1) + sin(start_angular_position_)*temp_pose.position(0) + cos(start_angular_position_)*temp_pose.position(1);
+  pose.position(0) = (start_position_(0) - radius_) + radius_ * cos(time_var);
+  pose.position(1) = start_position_(1) + radius_ * sin(time_var);
   pose.position(2) = start_position_(2);
 
   return pose;
@@ -287,21 +298,24 @@ void Circle::initDraw(const void *arg)
   init(get_arg_[0], get_arg_[1]);
 }
 
+
+
+
 //-------------------- Rhombus --------------------//
 
 Rhombus::Rhombus() {}
-Rhombus::~Rhombus() {}   // why like this..??
+Rhombus::~Rhombus() {}  
 
 void Rhombus::init(float move_time, float control_time)
 {
   Trajectory start;
   Trajectory goal;
 
-  start.position = 0.0;     // Angular Position
+  start.position = 0.0;    
   start.velocity = 0.0;
   start.acceleration = 0.0;
 
-  goal.position = 2 * M_PI; // Angular Position
+  goal.position = 2 * M_PI; 
   goal.velocity = 0.0;
   goal.acceleration = 0.0;
 
@@ -350,6 +364,11 @@ void Rhombus::setStartPosition(Vector3f start_position)
   start_position_ = start_position;
 }
 
+void Rhombus::setAngularStartPosition(float start_angular_position)
+{
+  start_angular_position_ = start_angular_position;
+}
+
 void Rhombus::setRadius(float radius)
 {
   radius_ = radius;
@@ -379,11 +398,11 @@ void Heart::init(float move_time, float control_time)
   Trajectory start;
   Trajectory goal;
 
-  start.position = 0.0;     // Angular Position
+  start.position = 0.0;    
   start.velocity = 0.0;
   start.acceleration = 0.0;
 
-  goal.position = 2 * M_PI; // Angular Position
+  goal.position = 2 * M_PI; 
   goal.velocity = 0.0;
   goal.acceleration = 0.0;
 
@@ -399,9 +418,9 @@ Pose Heart::heart(float time_var)
 {
   Pose pose;
 
-  pose.position(0) = start_position_(0) 
-    - (1.0f/17.0f*radius_*(13*cos(time_var) - 5*cos(2*time_var) - 2*cos(3*time_var) - cos(4*time_var)));
-  pose.position(1) = start_position_(1) - 1.0f/17.0f*radius_*7 
+  pose.position(0) = start_position_(0) - 1.0f/17.0f*radius_*7  
+    + (1.0f/17.0f*radius_*(13*cos(time_var) - 5*cos(2*time_var) - 2*cos(3*time_var) - cos(4*time_var)));
+  pose.position(1) = start_position_(1)
     + 1.0f/17.0f*radius_*(16*sin(time_var)*sin(time_var)*sin(time_var));
   pose.position(2) = start_position_(2);
 
@@ -418,6 +437,11 @@ void Heart::initDraw(const void *arg)
 void Heart::setStartPosition(Vector3f start_position)
 {
   start_position_ = start_position;
+}
+
+void Heart::setAngularStartPosition(float start_angular_position)
+{
+  start_angular_position_ = start_angular_position;
 }
 
 void Heart::setRadius(float radius)
@@ -446,11 +470,7 @@ Pose Heart::getPose(float tick)
 
 
 
-
-
-
-
-//-------------------- Rhombus --------------------//
+//-------------------- Circle2 --------------------//
 
 Circle2::Circle2() {}
 
@@ -480,6 +500,10 @@ void Circle2::init(float move_time, float control_time)
 void Circle2::setStartPosition(Vector3f start_position)
 {
   start_position_ = start_position;
+}
+void Circle2::setAngularStartPosition(float start_angular_position)
+{
+  start_angular_position_ = start_angular_position;
 }
 
 void Circle2::setRadius(float radius)

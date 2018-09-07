@@ -99,7 +99,7 @@ void initManipulator()
                 COMP3,
                 OM_MATH::makeVector3(0.107, 0.0, 0.0),
                 Eigen::Matrix3f::Identity(3, 3),
-                4,
+                5,
                 1.0f); // Change unit from `meter` to `radian`
 
   SCARA.initKinematics(kinematics);
@@ -110,7 +110,7 @@ void initManipulator()
   void *p_baud_rate = &baud_rate;
 
   SCARA.actuatorInit(p_baud_rate);
-  // SCARA.setActuatorControlMode();     // For gripper
+  SCARA.setActuatorControlMode();     // For gripper
 
   SCARA.actuatorEnable();
 #endif /////////////////////////////////////////////

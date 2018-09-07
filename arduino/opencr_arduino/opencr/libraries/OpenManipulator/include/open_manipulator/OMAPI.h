@@ -183,6 +183,7 @@ public:
   virtual void initDraw(const void *arg) = 0;
   virtual void setRadius(float radius) = 0;
   virtual void setStartPosition(Vector3f start_position) = 0;
+  virtual void setAngularStartPosition(float start_position) = 0;
   virtual Pose getPose(float tick) = 0;
 };
 
