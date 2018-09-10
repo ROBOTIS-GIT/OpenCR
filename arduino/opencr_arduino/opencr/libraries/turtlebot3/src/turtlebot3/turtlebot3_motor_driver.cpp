@@ -23,6 +23,7 @@ Turtlebot3MotorDriver::Turtlebot3MotorDriver()
   protocol_version_(PROTOCOL_VERSION),
   left_wheel_id_(DXL_LEFT_ID),
   right_wheel_id_(DXL_RIGHT_ID),
+  dynamixel_limit_max_velocity_(BURGER_DXL_LIMIT_MAX_VELOCITY),
   torque_(false)
 {
 }
@@ -32,7 +33,7 @@ Turtlebot3MotorDriver::~Turtlebot3MotorDriver()
   close();
 }
 
-bool Turtlebot3MotorDriver::init(void)
+bool Turtlebot3MotorDriver::init(String turtlebot3)
 {
   DEBUG_SERIAL.begin(57600);
   portHandler_   = dynamixel::PortHandler::getPortHandler(DEVICENAME);
@@ -58,6 +59,13 @@ bool Turtlebot3MotorDriver::init(void)
   groupSyncWriteVelocity_ = new dynamixel::GroupSyncWrite(portHandler_, packetHandler_, ADDR_X_GOAL_VELOCITY, LEN_X_GOAL_VELOCITY);
   groupSyncReadEncoder_   = new dynamixel::GroupSyncRead(portHandler_, packetHandler_, ADDR_X_PRESENT_POSITION, LEN_X_PRESENT_POSITION);
   
+  if (turtlebot3 == "Burger")
+    dynamixel_limit_max_velocity_ = BURGER_DXL_LIMIT_MAX_VELOCITY;
+  else if (turtlebot3 == "Waffle or Waffle Pi")
+    dynamixel_limit_max_velocity_ = WAFFLE_DXL_LIMIT_MAX_VELOCITY;
+  else
+    dynamixel_limit_max_velocity_ = BURGER_DXL_LIMIT_MAX_VELOCITY;
+
   DEBUG_SERIAL.println("Success to init Motor Driver");
   return true;
 }
@@ -191,8 +199,8 @@ bool Turtlebot3MotorDriver::controlMotor(const float wheel_separation, float* va
   wheel_velocity_cmd[LEFT]   = lin_vel - (ang_vel * wheel_separation / 2);
   wheel_velocity_cmd[RIGHT]  = lin_vel + (ang_vel * wheel_separation / 2);
 
-  wheel_velocity_cmd[LEFT]  = constrain(wheel_velocity_cmd[LEFT]  * VELOCITY_CONSTANT_VALUE, -LIMIT_X_MAX_VELOCITY, LIMIT_X_MAX_VELOCITY);
-  wheel_velocity_cmd[RIGHT] = constrain(wheel_velocity_cmd[RIGHT] * VELOCITY_CONSTANT_VALUE, -LIMIT_X_MAX_VELOCITY, LIMIT_X_MAX_VELOCITY);
+  wheel_velocity_cmd[LEFT]  = constrain(wheel_velocity_cmd[LEFT]  * VELOCITY_CONSTANT_VALUE, -dynamixel_limit_max_velocity_, dynamixel_limit_max_velocity_);
+  wheel_velocity_cmd[RIGHT] = constrain(wheel_velocity_cmd[RIGHT] * VELOCITY_CONSTANT_VALUE, -dynamixel_limit_max_velocity_, dynamixel_limit_max_velocity_);
 
   dxl_comm_result = writeVelocity((int64_t)wheel_velocity_cmd[LEFT], (int64_t)wheel_velocity_cmd[RIGHT]);
   if (dxl_comm_result == false)
