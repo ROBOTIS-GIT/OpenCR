@@ -1116,3 +1116,11 @@ void OpenManipulator::wait(float wait_time)
   makeTrajectory(start_trajectory_, goal_trajectory_);
   move();
 }
+
+bool OpenManipulator::checkManipulatorMoving()
+{
+  if(moving_ || drawing_)
+    return true;
+  else
+    return false;
+}

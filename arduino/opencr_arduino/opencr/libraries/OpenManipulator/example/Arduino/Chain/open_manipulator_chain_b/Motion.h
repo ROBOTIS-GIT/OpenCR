@@ -41,7 +41,7 @@ bool motion2(OpenManipulator manipulator, int index);
 
 void setMotion1()
 {
-  if(motion[0] && !chain.moving() && !chain.drawing())
+  if(motion[0] && !chain.checkManipulatorMoving())
   {
     DEBUG.print(motion_cnt[0]); DEBUG.print(", ");  DEBUG.println(sub_motion_cnt[0]);
 ////////////////////////MOTION SETTING//////////////////////////////        

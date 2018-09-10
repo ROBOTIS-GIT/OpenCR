@@ -268,6 +268,8 @@ public:
   void setMove(Name tool_name, Vector3f meter, float move_time = 1.0f);
 
   void drawLine(Name tool_name, Vector3f meter, float move_time = 1.0f);
+  
+  bool checkManipulatorMoving();
 };
 } // namespace OPEN_MANIPULATOR
 
