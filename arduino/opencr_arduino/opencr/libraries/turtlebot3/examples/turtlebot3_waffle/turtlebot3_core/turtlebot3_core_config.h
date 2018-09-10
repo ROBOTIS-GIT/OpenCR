@@ -43,7 +43,7 @@
 
 #include <math.h>
 
-#define FIRMWARE_VER "1.2.2"
+#define FIRMWARE_VER "1.2.3"
 
 #define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
 #define IMU_PUBLISH_FREQUENCY                  200  //hz
