@@ -38,6 +38,7 @@ void setup()
   //connectRC100();
   
   initManipulator();
+  //initManipulator2();
 
   pinMode(BDPIN_PUSH_SW_1, INPUT);
   pinMode(BDPIN_PUSH_SW_2, INPUT);
@@ -55,7 +56,7 @@ void loop()
   if(present_time-previous_time[0] >= LOOP_TIME)
   {
     switchRead();
-    setMotion();
+    setMotion1();
     previous_time[0] = (float)(millis()/1000.0f);
   }
 
@@ -63,14 +64,9 @@ void loop()
   if(present_time-previous_time[1] >= ROBOT_STATE_UPDATE_TIME)
   {
     updateAllJointAngle();
+    //updateAllJointAngle2();
     chain.forward(chain.getWorldChildName());
-    // Pose target_pose = chain.getComponentPoseToWorld(TOOL);
-    // DEBUG.print(target_pose.position(0));
-    // DEBUG.print(" ");
-    // DEBUG.print(target_pose.position(1));
-    // DEBUG.print(" ");
-    // DEBUG.print(target_pose.position(2));
-    // DEBUG.println();
+    //chain2.forward(chain.getWorldChildName());
     previous_time[1] = (float)(millis()/1000.0f);
   }
 
@@ -78,8 +74,11 @@ void loop()
   if(present_time-previous_time[2] >= ACTUATOR_CONTROL_TIME)
   {
     chain.setPresentTime((float)(millis()/1000.0f));
-    chain.jointControl();
     chain.jointControlForDrawing(TOOL);
+    chain.jointControl();
+    //chain2.setPresentTime((float)(millis()/1000.0f));
+    //chain2.jointControlForDrawing(TOOL);
+    //chain2.jointControl();
 #ifdef DEBUGING
     for(int i =0; i < 3; i++)
     {

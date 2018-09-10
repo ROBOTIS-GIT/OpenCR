@@ -21,69 +21,67 @@
 
 #include "Chain.h"
 
-#define MAX_MOTION_NUM 1
+using namespace OPEN_MANIPULATOR;
 
-bool motion    = false;
-uint8_t motion_cnt = 0;
-uint8_t sub_motion_cnt = 0;
+bool motion[2]    = {false, false};
+uint8_t motion_cnt[2] = {0,0};
+uint8_t sub_motion_cnt[2] = {0, 0};
 
-void gripOnOff(bool data);
-void moveJS(float j1, float j2, float j3, float j4, float t);
-bool pickStick1();
-bool pickStick2();
-bool pickStick3();
-bool placeStick1();
-bool placeStick2();
-bool placeStick3();
-bool shakeMotion1();
-bool shakeMotion2();
-bool shakeMotion3();
-bool motion1();
-bool motion2();
+bool pickStick1(OpenManipulator manipulator, int index);
+bool pickStick2(OpenManipulator manipulator, int index);
+bool pickStick3(OpenManipulator manipulator, int index);
+bool placeStick1(OpenManipulator manipulator, int index);
+bool placeStick2(OpenManipulator manipulator, int index);
+bool placeStick3(OpenManipulator manipulator, int index);
+bool shakeMotion1(OpenManipulator manipulator, int index);
+bool shakeMotion2(OpenManipulator manipulator, int index);
+bool shakeMotion3(OpenManipulator manipulator, int index);
+bool motion1(OpenManipulator manipulator, int index);
+bool motion2(OpenManipulator manipulator, int index);
 
-void setMotion()
+void setMotion1()
 {
-  if(motion && !chain.moving() && !chain.drawing())
+  if(motion[0] && !chain.moving() && !chain.drawing())
   {
-    DEBUG.print(motion_cnt); DEBUG.print(", ");  DEBUG.println(sub_motion_cnt);
+    DEBUG.print(motion_cnt[0]); DEBUG.print(", ");  DEBUG.println(sub_motion_cnt[0]);
 ////////////////////////MOTION SETTING//////////////////////////////        
-    switch(motion_cnt)
+    switch(motion_cnt[0])
     {
     case 0:
-      if(pickStick1())
-      { sub_motion_cnt = 0; motion_cnt ++; }
+      if(pickStick1(chain, 0))
+      { sub_motion_cnt[0] = 0; motion_cnt[0] ++; }
       else 
-        sub_motion_cnt ++;
+        sub_motion_cnt[0] ++;
     break;
     case 1:
-      if(placeStick2())
-      { sub_motion_cnt = 0; motion_cnt ++; }
+      if(placeStick2(chain, 0))
+      { sub_motion_cnt[0] = 0; motion_cnt[0] ++; }
       else 
-        sub_motion_cnt ++;
+        sub_motion_cnt[0] ++;
     break;
     case 2:
-      if(pickStick2())
-      { sub_motion_cnt = 0; motion_cnt ++; }
+      if(pickStick2(chain, 0))
+      { sub_motion_cnt[0] = 0; motion_cnt[0] ++; }
       else 
-        sub_motion_cnt ++;
+        sub_motion_cnt[0] ++;
     break;
     case 3:
-      if(placeStick3())
-      { sub_motion_cnt = 0; motion_cnt ++; }
+      if(placeStick3(chain, 0))
+      { sub_motion_cnt[0] = 0; motion_cnt[0] ++; }
       else 
-        sub_motion_cnt ++;
+        sub_motion_cnt[0] ++;
     break;
     case 4:
-      if(pickStick3())
-      { sub_motion_cnt = 0; motion_cnt ++; }
+      if(pickStick3(chain, 0))
+      { sub_motion_cnt[0] = 0; motion_cnt[0] ++; }
       else 
-        sub_motion_cnt ++;
+        sub_motion_cnt[0] ++;
     break;
     case 5:
-      if(placeStick1())
-      { sub_motion_cnt = 0; motion_cnt =0; }
+      if(placeStick1(chain, 0))
+      { sub_motion_cnt[0] = 0; motion_cnt[0] =0; }
       else 
-        sub_motion_cnt ++;
+        sub_motion_cnt[0] ++;
     break;
     /*case 1:
       if(shakeMotion2())
@@ -156,14 +154,14 @@ void setMotion()
   }
 }
 
-void gripOnOff(bool data)
+void gripOnOff(OpenManipulator manipulator, bool data)
 {
   if(data)
-    chain.toolMove(TOOL, -1.0f); // gripper on
+    manipulator.toolMove(TOOL, -1.0f); // gripper on
   else
-    chain.toolMove(TOOL, 0.05f); // gripper off
+    manipulator.toolMove(TOOL, 0.05f); // gripper off
 }
-void moveJS(float j1, float j2, float j3, float j4, float t)
+void moveJS(OpenManipulator manipulator, float j1, float j2, float j3, float j4, float t)
 {
   static std::vector <float> target_angle;
   target_angle.clear();
@@ -171,171 +169,177 @@ void moveJS(float j1, float j2, float j3, float j4, float t)
   target_angle.push_back(j2);
   target_angle.push_back(j3);
   target_angle.push_back(j4);
-  chain.jointMove(target_angle,t);     
+  manipulator.jointMove(target_angle,t);     
 }
-void moveCS(float x, float y, float z, float t)
+void moveCS(OpenManipulator manipulator, float x, float y, float z, float t)
 {
   Pose target_pose = chain.getComponentPoseToWorld(TOOL);
   target_pose.position(0) = x;
   target_pose.position(1) = y;
   target_pose.position(2) = z;
-  chain.setPose(TOOL, target_pose, t);
+  manipulator.setPose(TOOL, target_pose, t);
 }
 
 void motionStart()
 {
-  motion_cnt = 0;          
-  sub_motion_cnt = 0;
-  motion = true;
+  motion_cnt[0] = 0;          
+  sub_motion_cnt[0] = 0;
+  motion[0] = true;
+  motion_cnt[1] = 0;          
+  sub_motion_cnt[1] = 0;
+  motion[1] = true;
 }
 
 void motionStop()
 {
-  motion_cnt = 0;
-  sub_motion_cnt = 0;
-  motion     = false;
+  motion_cnt[0] = 0;          
+  sub_motion_cnt[0] = 0;
+  motion[0] = false;
+  motion_cnt[1] = 0;          
+  sub_motion_cnt[1] = 0;
+  motion[1] = false;
 }
 
-bool pickStick1()
+bool pickStick1(OpenManipulator manipulator, int index)
 {
-  switch(sub_motion_cnt)
+  switch(sub_motion_cnt[index])
   {
-  case 0: moveJS(0.0, -1.05, 0.35, 0.7, 2.0); gripOnOff(true); break;
-  case 1: moveCS(-0.038, -0.01, 0.15, 1.5); break;
-  case 2: chain.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.100f), 1.0f); break;
-  case 3: gripOnOff(false); chain.wait(1.5); break;
-  case 4: chain.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.050f), 0.6f);
+  case 0: moveJS(manipulator, 0.0, -1.05, 0.35, 0.7, 2.0); gripOnOff(manipulator, true); break;
+  case 1: moveCS(manipulator, -0.038, -0.01, 0.15, 1.5); break;
+  case 2: manipulator.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.100f), 1.0f); break;
+  case 3: gripOnOff(manipulator, false); manipulator.wait(1.5); break;
+  case 4: manipulator.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.050f), 0.6f);
           return 1; break;
   }
   return 0;
 }
-bool pickStick2()
+bool pickStick2(OpenManipulator manipulator, int index)
 {
-  switch(sub_motion_cnt)
+  switch(sub_motion_cnt[index])
   {
-  case 0: moveJS(-0.35, -1.05, 0.35, 0.7, 2.0); gripOnOff(true); break;
-  case 1: moveCS(-0.04, -0.08, 0.15, 1.5); break;
-  case 2: chain.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.100f), 1.0f); break;
-  case 3: gripOnOff(false); chain.wait(1.5); break;
-  case 4: chain.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.050f), 0.6f);
+  case 0: moveJS(manipulator, -0.35, -1.05, 0.35, 0.7, 2.0); gripOnOff(manipulator, true); break;
+  case 1: moveCS(manipulator, -0.04, -0.08, 0.15, 1.5); break;
+  case 2: manipulator.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.100f), 1.0f); break;
+  case 3: gripOnOff(manipulator, false); manipulator.wait(1.5); break;
+  case 4: manipulator.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.050f), 0.6f);
           return 1; break;
   }
   return 0;
 }
-bool pickStick3()
+bool pickStick3(OpenManipulator manipulator, int index)
 {
-  switch(sub_motion_cnt)
+  switch(sub_motion_cnt[index])
   {
-  case 0: moveJS(0.35, -1.05, 0.35, 0.7, 2.0); gripOnOff(true); break;
-  case 1: moveCS(-0.035, 0.0725, 0.15, 1.5); break;
-  case 2: chain.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.100f), 1.0f); break;
-  case 3: gripOnOff(false); chain.wait(1.5); break;
-  case 4: chain.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.050f), 0.6f);
+  case 0: moveJS(manipulator, 0.35, -1.05, 0.35, 0.7, 2.0); gripOnOff(manipulator, true); break;
+  case 1: moveCS(manipulator, -0.035, 0.0725, 0.15, 1.5); break;
+  case 2: manipulator.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.100f), 1.0f); break;
+  case 3: gripOnOff(manipulator, false); manipulator.wait(1.5); break;
+  case 4: manipulator.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.050f), 0.6f);
           return 1; break;
   }
   return 0;
 }
 
-bool placeStick1()
+bool placeStick1(OpenManipulator manipulator, int index)
 {
-  switch(sub_motion_cnt)
+  switch(sub_motion_cnt[index])
   {
-  case 0: moveJS(0.0, -1.05, 0.35, 0.7, 2.0); break;
-  case 1: moveCS(-0.038, -0.01, 0.15, 1.5); break;
-  case 2: chain.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.100f), 1.2f); break;
-  case 3: gripOnOff(true); chain.wait(1.0); break;
-  case 4: chain.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.100f), 1.2f);
+  case 0: moveJS(manipulator, 0.0, -1.05, 0.35, 0.7, 2.0); break;
+  case 1: moveCS(manipulator, -0.038, -0.01, 0.15, 1.5); break;
+  case 2: manipulator.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.100f), 1.2f); break;
+  case 3: gripOnOff(manipulator, true); manipulator.wait(1.0); break;
+  case 4: manipulator.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.100f), 1.2f);
           return 1; break;
   }
   return 0;
 }
-bool placeStick2()
+bool placeStick2(OpenManipulator manipulator, int index)
 {
-  switch(sub_motion_cnt)
+  switch(sub_motion_cnt[index])
   {
-  case 0: moveJS(-0.35, -1.05, 0.35, 0.7, 2.0); break;
-  case 1: moveCS(-0.04, -0.08, 0.15, 1.5); break;
-  case 2: chain.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.100f), 1.2f); break;
-  case 3: gripOnOff(true); chain.wait(1.0); break;
-  case 4: chain.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.100f), 1.2f);
+  case 0: moveJS(manipulator, -0.35, -1.05, 0.35, 0.7, 2.0); break;
+  case 1: moveCS(manipulator, -0.04, -0.08, 0.15, 1.5); break;
+  case 2: manipulator.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.100f), 1.2f); break;
+  case 3: gripOnOff(manipulator, true); manipulator.wait(1.0); break;
+  case 4: manipulator.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.100f), 1.2f);
           return 1; break;
   }
   return 0;
 }
-bool placeStick3()
+bool placeStick3(OpenManipulator manipulator, int index)
 {
-  switch(sub_motion_cnt)
+  switch(sub_motion_cnt[index])
   {
-  case 0: moveJS(0.35, -1.05, 0.35, 0.7, 2.0); break;
-  case 1: moveCS(-0.035, 0.0725, 0.15, 1.5); break;
-  case 2: chain.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.100f), 1.2f); break;
-  case 3: gripOnOff(true); chain.wait(1.0); break;
-  case 4: chain.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.100f), 1.2f);
+  case 0: moveJS(manipulator, 0.35, -1.05, 0.35, 0.7, 2.0); break;
+  case 1: moveCS(manipulator, -0.035, 0.0725, 0.15, 1.5); break;
+  case 2: manipulator.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, -0.100f), 1.2f); break;
+  case 3: gripOnOff(manipulator, true); manipulator.wait(1.0); break;
+  case 4: manipulator.drawLine(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.100f), 1.2f);
           return 1; break;
   }
   return 0;
 }
-bool shakeMotion1()
+bool shakeMotion1(OpenManipulator manipulator, int index)
 {
-  switch(sub_motion_cnt)
+  switch(sub_motion_cnt[index])
   {
-  case 0: moveJS(0.0, -1.05, 0.35,  0.7, 2.0);  break;
-  case 1: moveJS(0.0, -0.92, 0.08, -0.64, 0.8); break;
-  case 2: moveJS(0.0, -1.35, 0.81,  0.34, 0.8); break;
-  case 3: moveJS(0.0, -0.92, 0.08, -0.64, 0.8); break;
-  case 4: moveJS(0.0, -1.35, 0.81,  0.34, 0.8);
+  case 0: moveJS(manipulator, 0.0, -1.05, 0.35,  0.7, 2.0);  break;
+  case 1: moveJS(manipulator, 0.0, -0.92, 0.08, -0.64, 0.8); break;
+  case 2: moveJS(manipulator, 0.0, -1.35, 0.81,  0.34, 0.8); break;
+  case 3: moveJS(manipulator, 0.0, -0.92, 0.08, -0.64, 0.8); break;
+  case 4: moveJS(manipulator, 0.0, -1.35, 0.81,  0.34, 0.8);
           return 1; break;
   }
   return 0;
 }
-bool shakeMotion3()
+bool shakeMotion3(OpenManipulator manipulator, int index)
 {
-  switch(sub_motion_cnt)
+  switch(sub_motion_cnt[index])
   {
-  case 0: moveJS(1.57, -1.05, 0.35,  0.7, 2.0);  break;
-  case 1: moveJS(1.57, -0.92, 0.08, -0.64, 0.8); break;
-  case 2: moveJS(1.57, -1.35, 0.81,  0.34, 0.8); break;
-  case 3: moveJS(1.57, -0.92, 0.08, -0.64, 0.8); break;
-  case 4: moveJS(1.57, -1.35, 0.81,  0.34, 0.8);
+  case 0: moveJS(manipulator, 1.57, -1.05, 0.35,  0.7, 2.0);  break;
+  case 1: moveJS(manipulator, 1.57, -0.92, 0.08, -0.64, 0.8); break;
+  case 2: moveJS(manipulator, 1.57, -1.35, 0.81,  0.34, 0.8); break;
+  case 3: moveJS(manipulator, 1.57, -0.92, 0.08, -0.64, 0.8); break;
+  case 4: moveJS(manipulator, 1.57, -1.35, 0.81,  0.34, 0.8);
           return 1; break;
   }
   return 0;
 }
-bool shakeMotion2()
+bool shakeMotion2(OpenManipulator manipulator, int index)
 {
-  switch(sub_motion_cnt)
+  switch(sub_motion_cnt[index])
   {
-  case 0: moveJS(-1.57, -1.05, 0.35,  0.7, 2.0);  break;
-  case 1: moveJS(-1.57, -0.92, 0.08, -0.64, 0.8); break;
-  case 2: moveJS(-1.57, -1.35, 0.81,  0.34, 0.8); break;
-  case 3: moveJS(-1.57, -0.92, 0.08, -0.64, 0.8); break;
-  case 4: moveJS(-1.57, -1.35, 0.81,  0.34, 0.8);
+  case 0: moveJS(manipulator, -1.57, -1.05, 0.35,  0.7, 2.0);  break;
+  case 1: moveJS(manipulator, -1.57, -0.92, 0.08, -0.64, 0.8); break;
+  case 2: moveJS(manipulator, -1.57, -1.35, 0.81,  0.34, 0.8); break;
+  case 3: moveJS(manipulator, -1.57, -0.92, 0.08, -0.64, 0.8); break;
+  case 4: moveJS(manipulator, -1.57, -1.35, 0.81,  0.34, 0.8);
           return 1; break;
   }
   return 0;
 }
-bool motion1()
+bool motion1(OpenManipulator manipulator, int index)
 {
-  switch(sub_motion_cnt)
+  switch(sub_motion_cnt[index])
   {
-  case 0: moveJS( 0.00, -1.05, 0.35, 0.7, 2.0);  break;
-  case 1: moveJS(-2.00, -0.96, 1.12, -0.76, 2.0); break;
-  case 2: moveJS(-0.52, -0.82, 0.21,  1.06, 2.0); break;
-  case 3: moveJS( 0.52, -0.96, 1.12, -0.76, 2.0); break;
-  case 4: moveJS( 2.00, -0.82, 0.21,  1.06, 2.0); 
+  case 0: moveJS(manipulator,  0.00, -1.05, 0.35, 0.7, 2.0);  break;
+  case 1: moveJS(manipulator, -2.00, -0.96, 1.12, -0.76, 2.0); break;
+  case 2: moveJS(manipulator, -0.52, -0.82, 0.21,  1.06, 2.0); break;
+  case 3: moveJS(manipulator,  0.52, -0.96, 1.12, -0.76, 2.0); break;
+  case 4: moveJS(manipulator,  2.00, -0.82, 0.21,  1.06, 2.0); 
           return 1; break;
   }
   return 0;
 }
-bool motion2()
+bool motion2(OpenManipulator manipulator, int index)
 {
-  switch(sub_motion_cnt)
+  switch(sub_motion_cnt[index])
   {
-  case 0: moveJS( 0.00, -1.05, 0.35, 0.7, 2.0);  break;
-  case 1: moveJS( 2.00, -0.82, 0.21,  1.06, 2.0); break;
-  case 2: moveJS( 0.52, -0.96, 1.12, -0.76, 2.0); break;
-  case 3: moveJS(-0.52, -0.82, 0.21,  1.06, 2.0); break;
-  case 4: moveJS(-2.00, -0.96, 1.12, -0.76, 2.0); 
+  case 0: moveJS(manipulator,  0.00, -1.05, 0.35, 0.7, 2.0);  break;
+  case 1: moveJS(manipulator,  2.00, -0.82, 0.21,  1.06, 2.0); break;
+  case 2: moveJS(manipulator,  0.52, -0.96, 1.12, -0.76, 2.0); break;
+  case 3: moveJS(manipulator, -0.52, -0.82, 0.21,  1.06, 2.0); break;
+  case 4: moveJS(manipulator, -2.00, -0.96, 1.12, -0.76, 2.0); 
           return 1; break;
   }
   return 0;

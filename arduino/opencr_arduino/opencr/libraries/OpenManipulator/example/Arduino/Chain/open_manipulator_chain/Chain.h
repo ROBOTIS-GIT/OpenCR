@@ -70,7 +70,7 @@ void initManipulator()
                      OM_MATH::makeVector3(-0.278, 0.0, 0.017),
                      Eigen::Matrix3f::Identity(3, 3),
                      Z_AXIS,
-                     1);
+                     11);
 
   chain.addComponent(COMP2,
                      COMP1,
@@ -78,7 +78,7 @@ void initManipulator()
                      OM_MATH::makeVector3(0.0, 0.0, 0.058),
                      Eigen::Matrix3f::Identity(3, 3),
                      Y_AXIS,
-                     2);
+                     12);
 
   chain.addComponent(COMP3,
                      COMP2,
@@ -86,7 +86,7 @@ void initManipulator()
                      OM_MATH::makeVector3(0.024, 0.0, 0.128),
                      Eigen::Matrix3f::Identity(3, 3),
                      Y_AXIS,
-                     3);
+                     13);
 
   chain.addComponent(COMP4,
                      COMP3,
@@ -94,13 +94,13 @@ void initManipulator()
                      OM_MATH::makeVector3(0.124, 0.0, 0.0),
                      Eigen::Matrix3f::Identity(3, 3),
                      Y_AXIS,
-                     4);
+                     14);
 
   chain.addTool(TOOL,
                 COMP4,
                 OM_MATH::makeVector3(0.130, 0.0, 0.0),
                 Eigen::Matrix3f::Identity(3, 3),
-                5,
+                15,
                 1.0f); // Change unit from `meter` to `radian`
 
   chain.initKinematics(kinematics);
