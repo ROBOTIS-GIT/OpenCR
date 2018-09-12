@@ -14,15 +14,11 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM */
+/* Authors: Hye-Jong KIM, Darby Lim, Ryan Shim, Yong-Ho Na */
 
 #include "Link.h"
 #include "Processing.h"
-#include "Motion.h"
 #include "RemoteController.h"
-
-#define BDPIN_PUSH_SW_1         34
-#define BDPIN_PUSH_SW_2         35
 
 float present_time = 0.0;
 float previous_time[3] = {0.0, 0.0, 0.0};
@@ -31,31 +27,21 @@ void setup()
 {
   Serial.begin(57600);
   DEBUG.begin(57600);
-  // while (!Serial)
-  //   ;
+  while (!Serial); // Wait for openning Serial port
 
   connectProcessing();
-  //connectRC100();
-
-  switchInit();
+  connectRC100();
   
-  initOMLink();
+  initManipulator();
   suctionInit();              //suction pin set 
 
   std::vector<float> init_joint_angle;
   init_joint_angle.push_back(0.0*DEG2RAD);
   init_joint_angle.push_back(-90.0*DEG2RAD);
   init_joint_angle.push_back(-160.0*DEG2RAD);
-  omlink.jointMove(init_joint_angle, MOVETIME);
+
+  Link.jointMove(init_joint_angle, MOVETIME);
   init_joint_angle.clear();
-
-  // initThread();
-  // startThread();
-
-#ifdef DEBUGING
-  DEBUG.print("start");
-  DEBUG.println();
-#endif
 }
 
 void loop()
@@ -66,8 +52,11 @@ void loop()
   getData(10);
   if(present_time-previous_time[0] >= LOOP_TIME)
   {
-    switchRead();
-    setMotion();
+    showLedStatus();
+
+    // Add your code
+    // ...
+
     previous_time[0] = (float)(millis()/1000.0f);
   }
 
@@ -75,27 +64,18 @@ void loop()
   if(present_time-previous_time[1] >= ROBOT_STATE_UPDATE_TIME)
   {
     updateAllJointAngle();
-    omlink.forward();
+    Link.forward();
     previous_time[1] = (float)(millis()/1000.0f);
   }
 
   //Joint Control
   if(present_time-previous_time[2] >= ACTUATOR_CONTROL_TIME)
   {
-    omlink.setPresentTime((float)(millis()/1000.0f));
-    omlink.jointControl();
-#ifdef DEBUGING
-    for(int i =0; i < 3; i++)
-    {
-      DEBUG.print(omlink.receiveAllActuatorAngle().at(i));
-      DEBUG.print(", ");
-    }
-    DEBUG.println();
-#endif
+    Link.setPresentTime((float)(millis()/1000.0f));
+    Link.jointControl();
+
     previous_time[2] = (float)(millis()/1000.0f);
   }
-  
-  //osDelay(LOOP_TIME * 1000);
 }
 
 void getData(uint32_t wait_time)
@@ -151,68 +131,3 @@ void getData(uint32_t wait_time)
      break;
   }
 }
-
-void switchInit()
-{
-  pinMode(BDPIN_PUSH_SW_1, INPUT);
-  pinMode(BDPIN_PUSH_SW_2, INPUT);
-}
-
-void switchRead()
-{
-  if(digitalRead(BDPIN_PUSH_SW_1))
-  {
-    motionStart();
-  }
-  if(digitalRead(BDPIN_PUSH_SW_2))
-  {
-    motionStop();
-  }
-}
-
-/////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////THREAD///////////////////////////////////////////
-////////////////////////////DON'T TOUCH BELOW CODE///////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////
-
-// namespace THREAD
-// {
-// osThreadId loop;
-// osThreadId robot_state;
-// osThreadId actuator_control;
-// } // namespace THREAD
-
-// void initThread()
-// {
-//   MUTEX::create();
-
-//   // define thread
-//   osThreadDef(THREAD_NAME_LOOP, Loop, osPriorityNormal, 0, 1024 * 10);
-//   osThreadDef(THREAD_NAME_ROBOT_STATE, THREAD::Robot_State, osPriorityNormal, 0, 1024 * 10);
-//   osThreadDef(THREAD_NAME_ACTUATOR_CONTROL, THREAD::Actuator_Control, osPriorityNormal, 0, 1024 * 10);
-
-//   // create thread
-//   THREAD::loop = osThreadCreate(osThread(THREAD_NAME_LOOP), NULL);
-//   THREAD::robot_state = osThreadCreate(osThread(THREAD_NAME_ROBOT_STATE), NULL);
-//   THREAD::actuator_control = osThreadCreate(osThread(THREAD_NAME_ACTUATOR_CONTROL), NULL);
-// }
-
-// void startThread()
-// {
-//   // start kernel
-//   //Serial.println("Thread Start");
-//   osKernelStart();
-// }
-
-// static void Loop(void const *argument)
-// {
-//   (void)argument;
-
-//   for (;;)
-//   {
-//     loop();
-//     showLedStatus();
-//   }
-// }
-
-// /////////////////////////////////////////////////////////////////////////////////////

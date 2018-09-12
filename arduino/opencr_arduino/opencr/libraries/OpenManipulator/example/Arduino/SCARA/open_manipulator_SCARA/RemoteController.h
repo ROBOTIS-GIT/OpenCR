@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Darby Lim */
+/* Authors: Darby Lim, Ryan Shim, Hye-Jong KIM, Yong-Ho Na */
 
 #ifndef REMOTE_CONTROLLER_H_
 #define REMOTE_CONTROLLER_H_
@@ -41,49 +41,6 @@ uint16_t readRC100Data()
 
 void fromRC100(uint16_t data)
 {
-  if (data & RC100_BTN_U)
-    SCARA.setMove(TOOL, OM_MATH::makeVector3(0.007f, 0.0, 0.0), 0.16f);
-  else if (data & RC100_BTN_D)
-    SCARA.setMove(TOOL, OM_MATH::makeVector3(-0.007f, 0.0, 0.0), 0.16f);
-  else if (data & RC100_BTN_L)
-    SCARA.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.007f, 0.0), 0.16f);
-  else if (data & RC100_BTN_R)
-    SCARA.setMove(TOOL, OM_MATH::makeVector3(0.0, -0.007f, 0.0), 0.16f);
-  else if (data & RC100_BTN_2)
-  {
-    float grip_value = SCARA.getComponentToolValue(TOOL) + 0.030f;
-    if (grip_value >= 0.907f)
-      grip_value = 0.907f;
 
-    SCARA.toolMove(TOOL, grip_value);
-  }
-  else if (data & RC100_BTN_4)
-  {
-    float grip_value = SCARA.getComponentToolValue(TOOL) - 0.030f;
-    if (grip_value <= -1.130f)
-      grip_value = -1.130f;
-
-    SCARA.toolMove(TOOL, grip_value);
-  }
-  else if (data & RC100_BTN_5)
-  {
-    std::vector<float> goal_position;
-
-    goal_position.push_back(-60.0f * DEG2RAD);
-    goal_position.push_back(20.0f * DEG2RAD);
-    goal_position.push_back(40.0f * DEG2RAD);
-
-    // SCARA.jointMove(goal_position, 1.0f);
-  }
-  else if (data & RC100_BTN_6)
-  {
-    std::vector<float> goal_position;
-
-    goal_position.push_back(0.0f);
-    goal_position.push_back(0.0f);
-    goal_position.push_back(0.0f);
-
-    // SCARA.jointMove(goal_position, 1.0f);
-  }
 }
 #endif

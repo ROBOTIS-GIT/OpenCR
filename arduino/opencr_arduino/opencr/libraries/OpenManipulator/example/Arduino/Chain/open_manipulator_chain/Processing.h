@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Darby Lim */
+/* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
 #ifndef PROCESSING_H_
 #define PROCESSING_H_
@@ -105,125 +105,15 @@ void fromProcessing(String data)
       chain.actuatorDisable();
 #endif
   }
-  // else if (cmd[0] == "get")
-  // {
-  //   if (cmd[1] == "on")
-  //   {
-  //     motion_storage[motion_num][0] = 3.0;  //mov_time
-  //     motion_storage[motion_num][1] = -1.0;
-  //     motion_num++;
-  //   }
-  //   else if (cmd[1] == "off")
-  //   {
-  //     motion_storage[motion_num][0] = 3.0;  //mov_time
-  //     motion_storage[motion_num][1] = 1.0;
-  //     motion_num++;
-  //   }
-  //   else if (cmd[1] == "clear")
-  //   {
-  //     for (int i = 0; i < MOTION_NUM; i++)
-  //     {
-  //       for (int j = 0; j < 6; j++)
-  //       {
-  //         motion_storage[i][j] = 0.0;
-  //       }
-  //     }
-
-  //     motion_num = 0;
-  //     motion_cnt = 0;
-  //     motion     = false;
-  //     repeat     = false;
-  //   }
-  //   else if (cmd[1] == "pose")
-  //   {
-  //     if (cmd[2].toInt() < MOTION_NUM)
-  //     {
-  //       State* state = getAngle();
-
-  //       if (DYNAMIXEL)
-  //         sendAngle2Processing(state);
-
-  //       for (int i = JOINT1; i < GRIP; i++)
-  //       {
-  //         motion_storage[motion_num][0]   = 3.0;  //mov_time
-  //         motion_storage[motion_num][i+1] = state[i].pos;
-  //       }
-  //       motion_num++;
-  //     }
-  //   }
-  // }
-  // else if (cmd[0] == "hand")
-  // {
-  //   if (cmd[1] == "once")
-  //   {
-  //     if (DYNAMIXEL)
-  //     {
-  //       setTorque(true);
-  //       sendAngle2Processing(getAngle());
-  //     }
-
-  //     motion_cnt = 0;
-  //     motion = true;
-  //   }
-  //   else if (cmd[1] == "repeat")
-  //   {
-  //     if (DYNAMIXEL)
-  //     {
-  //       setTorque(true);
-  //       sendAngle2Processing(getAngle());
-  //     }
-
-  //     motion_cnt = 0;
-  //     motion = true;
-  //     repeat = true;
-  //   }
-  //   else if (cmd[1] == "stop")
-  //   {
-  //     for (int i = 0; i < MOTION_NUM; i++)
-  //     {
-  //       for (int j = 0; j < 6; j++)
-  //       {
-  //         motion_storage[i][j] = 0;
-  //       }
-  //     }
-
-  //     motion_cnt = 0;
-  //     motion     = false;
-  //     repeat     = false;
-  //   }
-  // }
   else if (cmd[0] == "motion")
   {
     if (cmd[1] == "start")
     {
       chain.drawLine(TOOL, OM_MATH::makeVector3(0.050, 0.0, 0.050f), 0.5f);
-      //chain.setMove(TOOL, OM_MATH::makeVector3(0.0, 0.0, 0.020f), 0.2f);
-      // if (DYNAMIXEL)
-      //   sendAngle2Processing(getAngle());
-
-      // if (PROCESSING)
-      //   sendAngle2Processing(getState());
-
-      // for (int i = 0; i < MOTION_NUM; i++)
-      // {
-      //   for (int j = 0; j < 6; j++)
-      //   {
-      //     motion_storage[i][j] = motion_set[i][j];
-      //   }
-      // }
-
-      // motion_num = MOTION_NUM;
-      // motion_cnt = 0;
-      // motion = true;
-      // repeat = true;
     }
     else if (cmd[1] == "stop")
     {
       chain.drawLine(TOOL, OM_MATH::makeVector3(-0.050, 0.0, -0.050f), 0.5f);
-
-      // motion_cnt = 0;
-      // motion     = false;
-      // repeat     = false;
     }
   }
 }

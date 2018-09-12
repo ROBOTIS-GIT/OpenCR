@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Darby Lim */
+/* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
 #ifndef OPEN_MANIPULATOR_CHAIN_H_
 #define OPEN_MANIPULATOR_CHAIN_H_
@@ -57,7 +57,6 @@ OPEN_MANIPULATOR::Kinematics *kinematics = new OM_KINEMATICS::Chain();
 #ifdef PLATFORM ////////////////////////////////////Actuator init
 OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
 #endif /////////////////////////////////////////////
-//  OPEN_MANIPULATOR::Path *path = new MY_PATH::Circle();
 
 void initManipulator()
 {

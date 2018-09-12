@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Darby Lim */
+/* Authors: Darby Lim, Ryan Shim, Hye-Jong KIM, Yong-Ho Na */
 
 #ifndef OPEN_MANIPULATOR_SCARA_H_
 #define OPEN_MANIPULATOR_SCARA_H_
@@ -34,7 +34,7 @@
 #define COMP1 1
 #define COMP2 2
 #define COMP3 3
-#define TOOL 4
+#define TOOL  4
 
 #define NONE -1
 
@@ -47,12 +47,9 @@
 
 #define ACTIVE_JOINT_SIZE 3
 
-#define CIRCLE 11
-#define RHOMBUS 13
-#define HEART 15
-#define CIRCLE2 12
-#define RHOMBUS2 14
-#define HEART2 16
+#define CIRCLE  11
+#define RHOMBUS 12
+#define HEART   13
 
 #define PLATFORM
 
@@ -99,7 +96,7 @@ void initManipulator()
                 COMP3,
                 OM_MATH::makeVector3(0.107, 0.0, 0.0),
                 Eigen::Matrix3f::Identity(3, 3),
-                5,
+                15,
                 1.0f); // Change unit from `meter` to `radian`
 
   SCARA.initKinematics(kinematics);
@@ -121,7 +118,7 @@ void initManipulator()
   SCARA.toolMove(TOOL, 0.0f);
   SCARA.setAllActiveJointAngle(SCARA.receiveAllActuatorAngle());
 #endif /////////////////////////////////////////////
-  SCARA.forward(COMP1);
+  SCARA.forward();
 }
 
 void updateAllJointAngle()
@@ -132,37 +129,4 @@ void updateAllJointAngle()
   // Add passive joint function
 }
 
-// void THREAD::Robot_State(void const *argument)
-// {
-//   (void)argument;
-
-//   for (;;)
-//   {
-//     MUTEX::wait();
-
-//     updateAllJointAngle();
-//     SCARA.forward(COMP1);
-
-//     MUTEX::release();
-
-//     osDelay(ROBOT_STATE_UPDATE_TIME * 1000);
-//   }
-// }
-
-// void THREAD::Actuator_Control(void const *argument)
-// {
-//   (void)argument;
-
-//   for (;;)
-//   {
-//     MUTEX::wait();
-
-//     SCARA.jointControl();
-//     SCARA.jointControlForDrawing(TOOL);
-
-//     MUTEX::release();
-
-//     osDelay(ACTUATOR_CONTROL_TIME * 1000);
-//   }
-// }
 #endif //OPEN_MANIPULATOR_SCARA_H_

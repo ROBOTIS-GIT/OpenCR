@@ -783,7 +783,7 @@ class ChildApplet extends PApplet
   {
     if (onoff_flag)
     {
-      opencr_port.write("tool"  + ',' +
+      opencr_port.write("move_tool"  + ',' +
                         ctrl_tool_pos + '\n');
     }
     else
@@ -798,13 +798,11 @@ class ChildApplet extends PApplet
     {
       if (flag)
       {
-        tool.setValue(-1.0);
         opencr_port.write("tool"  + ',' +
                           "off" + '\n');
       }
       else
       {
-        tool.setValue(0.0);
         opencr_port.write("tool"  + ',' +
                           "on" + '\n');
       }

@@ -17,7 +17,7 @@
 /* Authors: Darby Lim */
 
 /**
- * this code is compatible with d_open_manipulator_chain.ino
+ * this code is compatible with open_manipulator_chain.ino
 **/
 
 // Multiple Window

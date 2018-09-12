@@ -36,7 +36,7 @@ OM_DYNAMIXEL::Dynamixel dxl;
 void setup()
 {
   Serial.begin(57600);
-  // while (!Serial);
+  //while (!Serial); // Wait for openning Serial port
 
   dxl.init(BAUD_RATE);
   dxl.enableAllDynamixel();

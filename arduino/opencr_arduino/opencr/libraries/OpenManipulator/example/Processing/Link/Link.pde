@@ -17,7 +17,7 @@
 /* Authors: Hye-Jong KIM */
 
 /**
- * this code is compatible with open_manipulator_chain.ino
+ * this code is compatible with open_manipulator_link.ino
 **/
 
 // Multiple Window

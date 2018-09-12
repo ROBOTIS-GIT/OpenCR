@@ -14,10 +14,10 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM */
+/* Authors: Hye-Jong KIM, Darby Lim, Ryan Shim, Yong-Ho Na */
 
-#ifndef OMLINK_H_
-#define OMLINK_H_
+#ifndef link_H_
+#define link_H_
 
 // Necessary library
 #include <OpenManipulator.h>
@@ -79,7 +79,7 @@ bool suction = true;
 ////////////////////////////////////////////
 
 ////////////////using class/////////////////
-OPEN_MANIPULATOR::OpenManipulator omlink;
+OPEN_MANIPULATOR::OpenManipulator Link;
 
 OPEN_MANIPULATOR::Kinematics *kinematics = new OM_KINEMATICS::Link();
 #ifdef PLATFORM ////////////////////////////////////Actuator init
@@ -90,151 +90,108 @@ OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
 void setPassiveJointAngle()
 {
   float joint_angle[3];
-  joint_angle[0] = omlink.getComponentJointAngle(JOINT0);
-  joint_angle[1] = omlink.getComponentJointAngle(JOINT1);
-  joint_angle[2] = omlink.getComponentJointAngle(JOINT2);
+  joint_angle[0] = Link.getComponentJointAngle(JOINT0);
+  joint_angle[1] = Link.getComponentJointAngle(JOINT1);
+  joint_angle[2] = Link.getComponentJointAngle(JOINT2);
 
-  omlink.setComponentJointAngle(JOINT3, (joint_angle[1] - joint_angle[2]));
-  omlink.setComponentJointAngle(JOINT4, -M_PI - (joint_angle[1] - joint_angle[2]));
-  omlink.setComponentJointAngle(JOINT5, -M_PI - (joint_angle[1] - joint_angle[2]));
-  omlink.setComponentJointAngle(JOINT6, -M_PI - joint_angle[2]);
-  omlink.setComponentJointAngle(JOINT7, joint_angle[1]);
-  omlink.setComponentJointAngle(JOINT8, -(15 * DEG2RAD) - joint_angle[1]);
-  omlink.setComponentJointAngle(JOINT9, joint_angle[2] - (195 * DEG2RAD));
-  omlink.setComponentJointAngle(JOINT10, (90 * DEG2RAD) - joint_angle[2]);
+  Link.setComponentJointAngle(JOINT3, (joint_angle[1] - joint_angle[2]));
+  Link.setComponentJointAngle(JOINT4, -M_PI - (joint_angle[1] - joint_angle[2]));
+  Link.setComponentJointAngle(JOINT5, -M_PI - (joint_angle[1] - joint_angle[2]));
+  Link.setComponentJointAngle(JOINT6, -M_PI - joint_angle[2]);
+  Link.setComponentJointAngle(JOINT7, joint_angle[1]);
+  Link.setComponentJointAngle(JOINT8, -(15 * DEG2RAD) - joint_angle[1]);
+  Link.setComponentJointAngle(JOINT9, joint_angle[2] - (195 * DEG2RAD));
+  Link.setComponentJointAngle(JOINT10, (90 * DEG2RAD) - joint_angle[2]);
 }
 
 void updateAllJointAngle()
 {
 #ifdef PLATFORM
-  omlink.setAllActiveJointAngle(omlink.receiveAllActuatorAngle());
+  Link.setAllActiveJointAngle(Link.receiveAllActuatorAngle());
 #endif
   setPassiveJointAngle();
   // Add passive joint function
 }
 
-void initOMLink()
+void initManipulator()
 {
-  //init omlink
-  omlink.addWorld(WORLD, JOINT0);
-  omlink.addComponent(JOINT0, WORLD, JOINT1,
+  //init Link
+  Link.addWorld(WORLD, JOINT0);
+  Link.addComponent(JOINT0, WORLD, JOINT1,
                            OM_MATH::makeVector3(-0.23867882, 0, 0),
                            Matrix3f::Identity(3,3),
                            OM_MATH::makeVector3(0,0,1),
                            1,
                            1);
-  omlink.addComponentChild(JOINT0, JOINT2);
-  omlink.addComponentChild(JOINT0, JOINT7);
-  omlink.addComponent(JOINT1, JOINT0, JOINT5, 
+  Link.addComponentChild(JOINT0, JOINT2);
+  Link.addComponentChild(JOINT0, JOINT7);
+  Link.addComponent(JOINT1, JOINT0, JOINT5, 
                            OM_MATH::makeVector3(0, 0.022, 0.052),
                            Matrix3f::Identity(3,3),
                            OM_MATH::makeVector3(0,1,0),
                            2,
                            -1);
-  omlink.addComponent(JOINT2, JOINT0, JOINT3,
+  Link.addComponent(JOINT2, JOINT0, JOINT3,
                            OM_MATH::makeVector3(0, -0.022, 0.052),
                            Matrix3f::Identity(3,3),
                            OM_MATH::makeVector3(0,1,0),
                            3,
                            1);
-  omlink.addComponent(JOINT3, JOINT2, JOINT4,
+  Link.addComponent(JOINT3, JOINT2, JOINT4,
                            OM_MATH::makeVector3(0.050, 0.007, 0),
                            Matrix3f::Identity(3,3),
                            OM_MATH::makeVector3(0,1,0));
-  omlink.addComponent(JOINT4, JOINT3, JOINT5,
+  Link.addComponent(JOINT4, JOINT3, JOINT5,
                            OM_MATH::makeVector3(0.200, 0.006, 0),
                            Matrix3f::Identity(3,3),
                            OM_MATH::makeVector3(0,1,0));
-  omlink.addComponent(JOINT5, JOINT1, JOINT6,
+  Link.addComponent(JOINT5, JOINT1, JOINT6,
                            OM_MATH::makeVector3(0.200, -0.016, 0),
                            Matrix3f::Identity(3,3),
                            OM_MATH::makeVector3(0,1,0));
-  omlink.addComponent(JOINT6, JOINT5, SUCTION,
+  Link.addComponent(JOINT6, JOINT5, SUCTION,
                            OM_MATH::makeVector3(0.200, -0.009, 0),
                            Matrix3f::Identity(3,3),
                            OM_MATH::makeVector3(0,1,0));
-  omlink.addComponent(JOINT7, JOINT0, JOINT8,
+  Link.addComponent(JOINT7, JOINT0, JOINT8,
                            OM_MATH::makeVector3(-0.04531539, 0.006, 0.07313091),
                            Matrix3f::Identity(3,3),
                            OM_MATH::makeVector3(0,1,0));
-  omlink.addComponent(JOINT8, JOINT7, JOINT9,
+  Link.addComponent(JOINT8, JOINT7, JOINT9,
                            OM_MATH::makeVector3(0.200, 0.009, 0),
                            Matrix3f::Identity(3,3),
                            OM_MATH::makeVector3(0,1,0));
-  omlink.addComponent(JOINT9, JOINT8, JOINT10,
+  Link.addComponent(JOINT9, JOINT8, JOINT10,
                            OM_MATH::makeVector3(0.07660444, -0.006, 0),
                            Matrix3f::Identity(3,3),
                            OM_MATH::makeVector3(0,1,0));
-  omlink.addComponent(JOINT10, JOINT9, SUCTION,
+  Link.addComponent(JOINT10, JOINT9, SUCTION,
                            OM_MATH::makeVector3(0.200, -0.006, 0),
                            Matrix3f::Identity(3,3),
                            OM_MATH::makeVector3(0,1,0));
-  omlink.addTool(SUCTION, JOINT6,
+  Link.addTool(SUCTION, JOINT6,
                       OM_MATH::makeVector3(0.03867882, 0.003, -0.01337315-0.01),
                       Matrix3f::Identity(3,3),
                       4,
                       1);
 
-  omlink.initKinematics(kinematics);
+  Link.initKinematics(kinematics);
 #ifdef PLATFORM ////////////////////////////////////Actuator init
-  omlink.initActuator(actuator);
+  Link.initActuator(actuator);
   uint32_t baud_rate = BAUD_RATE;
   void *p_baud_rate = &baud_rate;
-  omlink.actuatorInit(p_baud_rate);
+  Link.actuatorInit(p_baud_rate);
 
-  omlink.actuatorEnable();
+  Link.actuatorEnable();
 #endif /////////////////////////////////////////////
-  omlink.initJointTrajectory();
-  omlink.setControlTime(ACTUATOR_CONTROL_TIME);
+  Link.initJointTrajectory();
+  Link.setControlTime(ACTUATOR_CONTROL_TIME);
 
 #ifdef PLATFORM ////////////////////////////////////Actuator init
   updateAllJointAngle();
 #endif /////////////////////////////////////////////
-  omlink.forward(); 
-  omlink.setPresentTime((float)(millis()/1000.0f));
+  Link.forward(); 
+  Link.setPresentTime((float)(millis()/1000.0f));
 }
 
-// void THREAD::Robot_State(void const *argument)
-// {
-//   (void)argument;
-
-//   for (;;)
-//   {
-//     MUTEX::wait();
-
-//     updateAllJointAngle();
-//     omlink.forward();
-
-// #ifdef DEBUGING
-//     for(int i =0; i < 3; i++)
-//     {
-//       DEBUG.print(omlink.receiveAllActuatorAngle().at(i));
-//       DEBUG.print(", ");
-//     }
-//     DEBUG.println();
-// #endif
-
-//     MUTEX::release();
-
-//     osDelay(ROBOT_STATE_UPDATE_TIME * 1000);
-//   }
-// }
-
-// void THREAD::Actuator_Control(void const *argument)
-// {
-//   (void)argument;
-
-//   for (;;)
-//   {
-//     MUTEX::wait();
-
-//     omlink.setPresentTime((float)(millis()/1000.0f));
-//     omlink.jointControl();
-
-//     MUTEX::release();
-
-//     osDelay(ACTUATOR_CONTROL_TIME * 1000);
-//   }
-// }
-
-#endif //OMLINK_H_
+#endif //link_H_

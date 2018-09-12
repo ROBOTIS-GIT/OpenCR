@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Darby Lim */
+/* Authors: Hye-Jong KIM, Darby Lim, Ryan Shim, Yong-Ho Na */
 
 #ifndef REMOTE_CONTROLLER_H_
 #define REMOTE_CONTROLLER_H_
@@ -42,17 +42,17 @@ uint16_t readRC100Data()
 void fromRC100(uint16_t data)
 {
   if (data & RC100_BTN_U)
-    omlink.setMove(SUCTION, OM_MATH::makeVector3(MOVESTEP, 0.0, 0.0), MOVETIME);
+    Link.setMove(SUCTION, OM_MATH::makeVector3(MOVESTEP, 0.0, 0.0), MOVETIME);
   else if (data & RC100_BTN_D)
-    omlink.setMove(SUCTION, OM_MATH::makeVector3(-MOVESTEP, 0.0, 0.0), MOVETIME);
+    Link.setMove(SUCTION, OM_MATH::makeVector3(-MOVESTEP, 0.0, 0.0), MOVETIME);
   else if (data & RC100_BTN_L)
-    omlink.setMove(SUCTION, OM_MATH::makeVector3(0.0, MOVESTEP, 0.0), MOVETIME);
+    Link.setMove(SUCTION, OM_MATH::makeVector3(0.0, MOVESTEP, 0.0), MOVETIME);
   else if (data & RC100_BTN_R)
-    omlink.setMove(SUCTION, OM_MATH::makeVector3(0.0, -MOVESTEP, 0.0), MOVETIME);
+    Link.setMove(SUCTION, OM_MATH::makeVector3(0.0, -MOVESTEP, 0.0), MOVETIME);
   else if (data & RC100_BTN_1)
-    omlink.setMove(SUCTION, OM_MATH::makeVector3(0.0, 0.0, MOVESTEP), MOVETIME);
+    Link.setMove(SUCTION, OM_MATH::makeVector3(0.0, 0.0, MOVESTEP), MOVETIME);
   else if (data & RC100_BTN_3)
-    omlink.setMove(SUCTION, OM_MATH::makeVector3(0.0, 0.0, -MOVESTEP), MOVETIME);
+    Link.setMove(SUCTION, OM_MATH::makeVector3(0.0, 0.0, -MOVESTEP), MOVETIME);
   else if (data & RC100_BTN_2)
   {
     suctionOn();
@@ -63,11 +63,11 @@ void fromRC100(uint16_t data)
   }
   else if (data & RC100_BTN_5)
   {
-    motionStart();
+
   }
   else if (data & RC100_BTN_6)
   {
-    motionStop();
+
   }
 }
 #endif
