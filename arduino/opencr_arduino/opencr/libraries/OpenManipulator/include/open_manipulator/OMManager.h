@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM, Darby Lim */
+/* Authors: Hye-Jong KIM, Darby Lim, Ryan Shim, Yong-Ho Na */
 
 #ifndef OMMANAGER_H_
 #define OMMANAGER_H_

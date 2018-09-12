@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM, Darby Lim */
+/* Authors: Hye-Jong KIM, Darby Lim, Ryan Shim, Yong-Ho Na */
 
 #include "../../include/open_manipulator/OMBridge.h"
 
