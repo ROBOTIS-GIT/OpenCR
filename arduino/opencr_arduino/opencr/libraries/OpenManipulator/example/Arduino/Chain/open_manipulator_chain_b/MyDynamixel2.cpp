@@ -16,9 +16,9 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM */
 
-#include "../../include/open_manipulator/OMDynamixel.h"
+#include "MyDynamixel2.h"
 
-using namespace OM_DYNAMIXEL;
+using namespace MY_DYNAMIXEL2;
 
 bool Dynamixel::init(uint32_t baud_rate)
 {
@@ -26,7 +26,7 @@ bool Dynamixel::init(uint32_t baud_rate)
   uint8_t get_dxl_id[20];
 
   dxl_wb_.begin(DEVICE_NAME, dxl_info_.baud_rate);
-
+/*
   if (dxl_wb_.scan(&get_dxl_id[0], &dxl_info_.size, 30))
   {
     for (uint8_t index = 0; index < dxl_info_.size; index++)
@@ -37,6 +37,20 @@ bool Dynamixel::init(uint32_t baud_rate)
   }
   else
     return false;
+*/
+
+  //uint16_t model_number;
+  dxl_wb_.ping(16, NULL); 
+  dxl_id_.push_back(16);
+  dxl_wb_.ping(17, NULL); 
+  dxl_id_.push_back(17);
+  dxl_wb_.ping(18, NULL); 
+  dxl_id_.push_back(18);
+  dxl_wb_.ping(19, NULL); 
+  dxl_id_.push_back(19);
+  dxl_wb_.ping(20, NULL); 
+  dxl_id_.push_back(20);
+  dxl_info_.size = 5;
 
   // dxl_id_.reserve(dxl_info_.size);
   radian_value_.reserve(dxl_info_.size);
@@ -226,7 +240,7 @@ void Dynamixel::initActuator(const void *arg)
 
 void Dynamixel::setActuatorControlMode()
 {
-  setPositionControlMode(15, 100, 10); //CHAIN GRIPPERntrolMode(5, 100, 10); //CHAIN GRIPPER
+  setPositionControlMode(20, 100, 10); //CHAIN GRIPPERntrolMode(5, 100, 10); //CHAIN GRIPPER
   //enableAllDynamixel();
 }
 

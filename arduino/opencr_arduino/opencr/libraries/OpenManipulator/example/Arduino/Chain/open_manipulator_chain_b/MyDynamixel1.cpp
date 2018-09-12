@@ -16,9 +16,9 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM */
 
-#include "../../include/open_manipulator/OMDynamixel.h"
+#include "MyDynamixel1.h"
 
-using namespace OM_DYNAMIXEL;
+using namespace MY_DYNAMIXEL1;
 
 bool Dynamixel::init(uint32_t baud_rate)
 {
@@ -26,7 +26,7 @@ bool Dynamixel::init(uint32_t baud_rate)
   uint8_t get_dxl_id[20];
 
   dxl_wb_.begin(DEVICE_NAME, dxl_info_.baud_rate);
-
+/*
   if (dxl_wb_.scan(&get_dxl_id[0], &dxl_info_.size, 30))
   {
     for (uint8_t index = 0; index < dxl_info_.size; index++)
@@ -36,7 +36,19 @@ bool Dynamixel::init(uint32_t baud_rate)
     }
   }
   else
-    return false;
+    return false;*/
+  //uint16_t model_number;
+  dxl_wb_.ping(11, NULL); 
+  dxl_id_.push_back(11);
+  dxl_wb_.ping(12, NULL); 
+  dxl_id_.push_back(12);
+  dxl_wb_.ping(13, NULL); 
+  dxl_id_.push_back(13);
+  dxl_wb_.ping(14, NULL); 
+  dxl_id_.push_back(14);
+  dxl_wb_.ping(15, NULL); 
+  dxl_id_.push_back(15);
+dxl_info_.size = 5;
 
   // dxl_id_.reserve(dxl_info_.size);
   radian_value_.reserve(dxl_info_.size);
