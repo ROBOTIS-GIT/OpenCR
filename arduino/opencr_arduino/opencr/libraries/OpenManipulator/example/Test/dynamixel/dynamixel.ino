@@ -1,3 +1,21 @@
+/*******************************************************************************
+* Copyright 2016 ROBOTIS CO., LTD.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
+
+/* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
+
 #include <OMDynamixel.h>
 #include <vector>
 
@@ -8,25 +26,19 @@
 #define RAD2DEG (180.0 / M_PI)
 
 #define POSITION1 -20.0f
-#define POSITION2 20.0f
+#define POSITION2 0.0f
 
 std::vector<float> goal_position;
 std::vector<float> present_position;
-
-std::vector<uint8_t> id;
 
 OM_DYNAMIXEL::Dynamixel dxl;
 
 void setup()
 {
   Serial.begin(57600);
-  while (!Serial)
-    ;
+  // while (!Serial);
 
   dxl.init(BAUD_RATE);
-  // dxl.setMaxPositionLimit(1, 180*DEG2RAD);
-  // dxl.setMinPositionLimit(1, -180*DEG2RAD);
-
   dxl.enableAllDynamixel();
 
   goal_position.reserve(DXL_SIZE);
@@ -36,14 +48,11 @@ void setup()
   }
 
   present_position.reserve(DXL_SIZE);
-
-  // id.push_back(2);
-  // id.push_back(3);
 }
 
 void loop()
 {
-  dxl.setAngle(id, goal_position);
+  dxl.setAngle(goal_position);
 
   do
   {

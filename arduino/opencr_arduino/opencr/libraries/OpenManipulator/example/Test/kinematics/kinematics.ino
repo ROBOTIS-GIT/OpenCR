@@ -1,3 +1,21 @@
+/*******************************************************************************
+* Copyright 2016 ROBOTIS CO., LTD.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
+
+/* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
+
 #include <OMManager.h>
 #include <OMMath.h>
 #include <OMKinematics.h>
@@ -21,8 +39,7 @@
 void setup()
 {
   Serial.begin(57600);
-  while (!Serial)
-    ;
+  while (!Serial); // Wait for openning Serial port
 
   OM_MANAGER::Manipulator manipulator;
   OM_KINEMATICS::Chain kinematics;
@@ -36,7 +53,7 @@ void setup()
 
   Eigen::MatrixXf jacobian = kinematics.jacobian(&manipulator, TOOL);
 
-  kinematics.forward(&manipulator, COMP1);
+  kinematics.forward(&manipulator);
   manipulator.checkManipulatorSetting();
 
   Pose target;
