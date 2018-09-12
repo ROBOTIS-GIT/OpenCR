@@ -210,13 +210,6 @@ Pose Line::line(float time_var)
 
 Pose Line::getPose(float tick)
 {
-
-/*
-  DEBUG.println();
-  DEBUG.print("------time ");
-  DEBUG.print(tick);
-  DEBUG.println();*/
-
   return line(tick);
 }
 
@@ -295,9 +288,6 @@ void Circle::initDraw(const void *arg)
 
   init(get_arg_[0], get_arg_[1]);
 }
-
-
-
 
 //-------------------- Rhombus --------------------//
 

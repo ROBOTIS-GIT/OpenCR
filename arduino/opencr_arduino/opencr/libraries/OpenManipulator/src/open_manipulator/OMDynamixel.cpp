@@ -38,7 +38,6 @@ bool Dynamixel::init(uint32_t baud_rate)
   else
     return false;
 
-  // dxl_id_.reserve(dxl_info_.size);
   radian_value_.reserve(dxl_info_.size);
   torque_value_.reserve(dxl_info_.size);
 
@@ -215,19 +214,11 @@ int32_t Dynamixel::convertRadian2Value(uint8_t id, float radian)
 void Dynamixel::initActuator(const void *arg)
 {
   init(*(uint32_t *)arg); // baud_rate
-
-  // if (dxl_wb_.getProtocolVersion() == 2.0)
-  //   dxl_wb_.itemWrite(id, MAX_POSITION_LIMIT_ADDR, MAX_POSITION_LIMIT_LENGTH, dxl_wb_.convertRadian2Value(id, radian));
-  // else
-  //   dxl_wb_.itemWrite(id, CW_ANGLE_LIMIT_ADDR, CW_ANGLE_LIMIT_LENGTH, dxl_wb_.convertRadian2Value(id, radian));
-
-  //enableAllDynamixel();
 }
 
 void Dynamixel::setActuatorControlMode()
 {
   setPositionControlMode(15, 100, 10); //CHAIN GRIPPERntrolMode(5, 100, 10); //CHAIN GRIPPER
-  //enableAllDynamixel();
 }
 
 void Dynamixel::Enable()

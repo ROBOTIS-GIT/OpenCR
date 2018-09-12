@@ -170,39 +170,3 @@ void showLedStatus(void)
 
   updateRxTxLed();
 }
-
-// void showJointAngle(String unit, OPMLink* link, int from, int to)
-// {
-//   int num = 0;
-
-//   if (unit == "rad")
-//   {
-//     for (num = from; num <= to; num++)
-//     {
-//       Serial.print(link[num].joint_angle_);
-//       Serial.print(" ");
-//     }
-//     Serial.println("");
-//   }
-//   else if (unit == "deg")
-//   {
-//     for (num = from; num <= to; num++)
-//     {
-//       Serial.print(link[num].joint_angle_*RAD2DEG);
-//       Serial.print(" ");
-//     }
-//     Serial.println("");
-//   }
-// }
-
-// void showFKResult(OPMLink* link, int from, int to)
-// {
-//   int num = 0;
-
-//   for (num = from; num <= to; num++)
-//   {
-//     Serial.print("link : "); Serial.println(link[num].name_);
-//     Serial.println("p_ : "); print_vt3f(link[num].p_);
-//     Serial.println("R_ : "); print_mt3f(link[num].R_);
-//   }
-// }

@@ -748,81 +748,6 @@ void OpenManipulator::jointControlForDrawing(Name tool_name)
   goal_velocity.reserve(manipulator_.getDOF());
   goal_acceleration.reserve(manipulator_.getDOF());
 
-  ///////////////////////////////////////////////////////
-  if(drawing_)
-  {
-    tick_time = present_time_ - start_time_;
-    // DEBUG.print(" drawing : ");
-    // DEBUG.print("tick_time = ");
-    // DEBUG.print(tick_time);
-    // DEBUG.print("present_time_ = ");
-    // DEBUG.print(present_time_);
-    // DEBUG.print("start_time_ = ");
-    // DEBUG.print(start_time_);  
-
-  //   if(tick_time < drawing_time_)
-  //   {
-  //     if (object_ == LINE)
-  //     {
-  //       //Pose temp = line_.getPose(tick_time);
-  //       goal_position = kinematics_->inverse(&manipulator_, tool_name, line_.getPose(tick_time));
-  //     }
-  //     else
-  //       goal_position = kinematics_->inverse(&manipulator_, tool_name, getPoseForDrawing(object_, tick_time));
-
-  //     if (platform_)
-  //     {
-  //       sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
-  //     }
-
-  //     if (processing_)
-  //     {
-  //       if (platform_ == false)
-  //         manipulator_.setAllActiveJointAngle(goal_position);
-  //       sendAngleToProcessing(goal_position);
-  //     }
-
-  //     previous_goal_.position = goal_position;
-  //     previous_goal_.velocity = goal_velocity;
-  //     previous_goal_.acceleration = goal_acceleration;
-  //   }
-  //   else
-  //   {
-  //     if (object_ == LINE)
-  //     {
-  //       //Pose temp = line_.getPose(drawing_time_);
-  //       goal_position = kinematics_->inverse(&manipulator_, tool_name, line_.getPose(drawing_time_));
-  //     }
-  //     else
-  //       goal_position = kinematics_->inverse(&manipulator_, tool_name, getPoseForDrawing(object_, drawing_time_));
-
-  //     if (platform_)
-  //     {
-  //       sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
-  //     }
-      
-  //     if (processing_)
-  //     {
-  //       if (platform_ == false)
-  //         manipulator_.setAllActiveJointAngle(goal_position);
-  //       sendAngleToProcessing(goal_position);
-  //     }
-
-  //     previous_goal_.position = goal_position;
-  //     previous_goal_.velocity = goal_velocity;
-  //     previous_goal_.acceleration = goal_acceleration;
-
-  //     drawing_ = false;
-  //     start_time_ = present_time_;
-  //   }
-  // }
-  // else
-  // {
-  //   if(!moving_)
-  //     start_time_ = present_time_;
-  }
-  ///////////////////////////////////////////////////////
-
   if (drawing_)
   {
     if (draw_cnt_ < step_time)
@@ -837,7 +762,6 @@ void OpenManipulator::jointControlForDrawing(Name tool_name)
       if (platform_)
       {
         sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
-        //jointMove(goal_position, control_time_);
       }
 
       if (processing_)
@@ -861,8 +785,6 @@ void OpenManipulator::jointControlForDrawing(Name tool_name)
 
 void OpenManipulator::jointControl()
 {
-  // uint16_t step_time = uint16_t(floor(move_time_ / control_time_) + 1.0);     //for use step cnt
-  
   float tick_time = 0;
 
   std::vector<float> goal_position;
@@ -877,13 +799,6 @@ void OpenManipulator::jointControl()
   if(moving_)
   {
     tick_time = present_time_ - start_time_;
-    // DEBUG.print(" moving : ");
-    // DEBUG.print("tick_time = ");
-    // DEBUG.print(tick_time);
-    // DEBUG.print("present_time_ = ");
-    // DEBUG.print(present_time_);
-    // DEBUG.print("start_time_ = ");
-    // DEBUG.print(start_time_);  
 
     if(tick_time < move_time_)
     {
@@ -920,43 +835,6 @@ void OpenManipulator::jointControl()
     if(!drawing_)
       start_time_ = present_time_;
   }
-  /////////////////////////////////////////////////////////
-
-    //use step cnt
-  ////////////////////////////////////////////////////////
-  // if (moving_)
-  // {
-  //   if (step_cnt_ < step_time)
-  //   {
-  //     tick_time = control_time_ * step_cnt_;
-
-  //     goal_position = joint_trajectory_->getPosition(tick_time);
-  //     goal_velocity = joint_trajectory_->getVelocity(tick_time);
-  //     goal_acceleration = joint_trajectory_->getAcceleration(tick_time);
-
-  //     if (platform_)
-  //       sendMultipleActuatorAngle(manipulator_.getAllActiveJointID(), goal_position);
-
-  //     if (processing_)
-  //     {
-  //       if (platform_ == false)
-  //         manipulator_.setAllActiveJointAngle(goal_position);
-  //       sendAngleToProcessing(goal_position);
-  //     }
-
-  //     previous_goal_.position = goal_position;
-  //     previous_goal_.velocity = goal_velocity;
-  //     previous_goal_.acceleration = goal_acceleration;
-
-  //     step_cnt_++;
-  //   }
-  //   else
-  //   {
-  //     step_cnt_ = 0;
-  //     moving_ = false;
-  //   }
-  // }
-  /////////////////////////////////////////////////////////
 }
 
 void OpenManipulator::jointMove(std::vector<float> goal_position, float move_time)

@@ -106,16 +106,6 @@ Matrix3f OM_MATH::rodriguesRotationMatrix(Vector3f axis, float angle)
 
 Matrix3f OM_MATH::makeRotationMatrix(float roll, float pitch, float yaw)
 {
-#if 0 // Euler angle
-  Eigen::Matrix3f rotation_matrix = Eigen::Matrix3f::Identity();
-
-  rotation_matrix << cos(yaw) * cos(pitch), (-1.0f) * sin(yaw) * cos(roll) + cos(yaw) * sin(pitch) * sin(roll), sin(yaw) * sin(roll) + cos(yaw) * sin(pitch) * cos(roll),
-      sin(yaw) * cos(pitch), cos(yaw) * cos(roll) + sin(yaw) * sin(pitch) * sin(roll), (-1.0f) * cos(yaw) * sin(roll) + sin(yaw) * sin(pitch) * cos(roll),
-      (-1.0f) * sin(pitch), cos(pitch) * sin(roll), cos(pitch) * cos(roll);
-
-  return rotation_matrix;
-#endif
-
   Vector3f rotation_vector;
 
   rotation_vector(0) = roll;

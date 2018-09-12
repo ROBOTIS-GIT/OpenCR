@@ -106,6 +106,7 @@ void Chain::forward(OM_MANAGER::Manipulator *manipulator, Name component_name)
 std::vector<float> Chain::inverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose)
 {
   // return positionOnlyInverseKinematics(manipulator, tool_name, target_pose);
+  // return inverseKinematics(manipulator, tool_name, target_pose);
   return srInverseKinematics(manipulator, tool_name, target_pose);
 }
 
@@ -304,10 +305,6 @@ std::vector<float> Chain::positionOnlyInverseKinematics(OM_MANAGER::Manipulator 
   return getAllActiveJointAngle(&_manipulator);
 }
 
-
-
-
-
 //--------------------------SCARA below---------------------------//
 
 MatrixXf SCARA::jacobian(OM_MANAGER::Manipulator *manipulator, Name tool_name)
@@ -373,13 +370,7 @@ std::vector<float> SCARA::geometricInverse(OM_MANAGER::Manipulator *manipulator,
                   / (-2*target_pose_length*link[2]));
     error = abs(alpha + beta - 2*theta*PI/180); 
 
-    // Serial.println("theta");
-    // Serial.println(theta * PI/180,5);
-
     if (error < temp_error){  
-      // Serial.println("error");
-      // Serial.println(error);
-      // result = theta*PI/180;
       result = theta;
       theta1 = acos(-temp_y[0]/target_pose_length) - alpha - PI/2;
       theta2 = theta*PI/180;
@@ -387,36 +378,16 @@ std::vector<float> SCARA::geometricInverse(OM_MANAGER::Manipulator *manipulator,
     }
   }
 
-  // Serial.println("theta1 and theta2");  
-  // Serial.println(theta1); 
-  // Serial.println(theta1); 
-  // Serial.println(theta2); 
-  // Serial.println(theta2);  
-
   target_angle[0] = theta1;
   target_angle[1] = theta2;
   target_angle[2] = theta2;
 
-  // Serial.println(target_angle[0],5);
-  // Serial.println(target_angle[1],5);
-  // Serial.println(target_angle[2],5);
-  // Serial.flush();
-
-  // Set Joint Angle 
-  // target_angle_vector.push_back(-1.2);
-  // target_angle_vector.push_back(0.5);
-  // target_angle_vector.push_back(1.3);
   target_angle_vector.push_back(target_angle[0]);
   target_angle_vector.push_back(target_angle[1]);
   target_angle_vector.push_back(target_angle[2]);
 
   return target_angle_vector;
 }
-
-
-
-
-
 
 //--------------------------Link below---------------------------//
 
@@ -498,13 +469,12 @@ std::vector<float> Link::geometricInverse(OM_MANAGER::Manipulator *manipulator, 
   control_position(1) = target_pose.position(1) - tool_relative_position(0) * sin(target_angle[0]);
   control_position(2) = target_pose.position(2) - tool_relative_position(2);
 
-  // temp_vector = omlink.link_[0].getRelativeJointPosition(1,0);
   temp_vector = getComponentRelativePositionToParent(manipulator, getComponentParentName(manipulator, getComponentParentName(manipulator, getComponentParentName(manipulator, tool_name))));
   link[0] = temp_vector(2);
-  // temp_vector = omlink.link_[1].getRelativeJointPosition(5,1);
+
   temp_vector = getComponentRelativePositionToParent(manipulator, getComponentParentName(manipulator, getComponentParentName(manipulator, tool_name)));
   link[1] = temp_vector(0);
-  // temp_vector = omlink.link_[4].getRelativeJointPosition(6,5);
+
   temp_vector = getComponentRelativePositionToParent(manipulator, getComponentParentName(manipulator, tool_name));
   link[2] = temp_vector(0);
 
@@ -521,10 +491,7 @@ std::vector<float> Link::geometricInverse(OM_MANAGER::Manipulator *manipulator, 
   return target_angle_vector;
 }
 
-
 //--------------------------Planar below---------------------------//
-
-
 MatrixXf Planar::jacobian(OM_MANAGER::Manipulator *manipulator, Name tool_name)
 {
 }
