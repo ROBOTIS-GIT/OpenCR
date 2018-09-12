@@ -24,7 +24,9 @@
 
 // User-defined library
 #include <OMKinematics.h>
-#include <OMDynamixel.h>
+//#include <OMDynamixel.h>
+#include "MyDynamixel1.h"
+#include "MyDynamixel2.h"
 #include <OMDebug.h>
 
 #define ROBOT_STATE_UPDATE_TIME 0.010f
@@ -45,7 +47,7 @@
 #define Z_AXIS OM_MATH::makeVector3(0.0, 0.0, 1.0)
 
 #define BAUD_RATE 1000000
-#define DXL_SIZE 5
+//#define DXL_SIZE 5
 
 #define ACTIVE_JOINT_SIZE 4
 
@@ -55,7 +57,7 @@ OPEN_MANIPULATOR::OpenManipulator chain;
 
 OPEN_MANIPULATOR::Kinematics *kinematics = new OM_KINEMATICS::Chain();
 #ifdef PLATFORM ////////////////////////////////////Actuator init
-OPEN_MANIPULATOR::Actuator *actuator = new OM_DYNAMIXEL::Dynamixel();
+OPEN_MANIPULATOR::Actuator *actuator = new MY_DYNAMIXEL1::Dynamixel();
 #endif /////////////////////////////////////////////
 //  OPEN_MANIPULATOR::Path *path = new MY_PATH::Circle();
 
@@ -70,7 +72,7 @@ void initManipulator()
                      OM_MATH::makeVector3(-0.278, 0.0, 0.017),
                      Eigen::Matrix3f::Identity(3, 3),
                      Z_AXIS,
-                     1);
+                     11);
 
   chain.addComponent(COMP2,
                      COMP1,
@@ -78,7 +80,7 @@ void initManipulator()
                      OM_MATH::makeVector3(0.0, 0.0, 0.058),
                      Eigen::Matrix3f::Identity(3, 3),
                      Y_AXIS,
-                     2);
+                     12);
 
   chain.addComponent(COMP3,
                      COMP2,
@@ -86,7 +88,7 @@ void initManipulator()
                      OM_MATH::makeVector3(0.024, 0.0, 0.128),
                      Eigen::Matrix3f::Identity(3, 3),
                      Y_AXIS,
-                     3);
+                     13);
 
   chain.addComponent(COMP4,
                      COMP3,
@@ -94,13 +96,13 @@ void initManipulator()
                      OM_MATH::makeVector3(0.124, 0.0, 0.0),
                      Eigen::Matrix3f::Identity(3, 3),
                      Y_AXIS,
-                     4);
+                     14);
 
   chain.addTool(TOOL,
                 COMP4,
                 OM_MATH::makeVector3(0.130, 0.0, 0.0),
                 Eigen::Matrix3f::Identity(3, 3),
-                5,
+                15,
                 1.0f); // Change unit from `meter` to `radian`
 
   chain.initKinematics(kinematics);
@@ -111,12 +113,10 @@ void initManipulator()
   void *p_baud_rate = &baud_rate;
   chain.actuatorInit(p_baud_rate);
   chain.setActuatorControlMode();
-
   chain.actuatorEnable();
 #endif /////////////////////////////////////////////
   chain.initJointTrajectory();
   chain.setControlTime(ACTUATOR_CONTROL_TIME);
-
 #ifdef PLATFORM ////////////////////////////////////Actuator init
   chain.toolMove(TOOL, 0.0f);
   chain.setAllActiveJointAngle(chain.receiveAllActuatorAngle());
@@ -132,99 +132,58 @@ void updateAllJointAngle()
   // Add passive joint function
 }
 
-// void THREAD::Robot_State(void const *argument)
-// {
-//   (void)argument;
-
-//   for (;;)
-//   {
-//     MUTEX::wait();
-
-//     updateAllJointAngle();
-//     chain.forward(COMP1);
-
-//     MUTEX::release();
-
-//     osDelay(ROBOT_STATE_UPDATE_TIME * 1000);
-//   }
-// }
-
-// void THREAD::Actuator_Control(void const *argument)
-// {
-//   (void)argument;
-
-//   for (;;)
-//   {
-//     MUTEX::wait();
-
-//     chain.setPresentTime((float)(millis()/1000.0f));
-//     chain.jointControl();
-//     chain.jointControlForDrawing(TOOL);
-//     //chain.jointControlForDrawing(TOOL);
-//     MUTEX::release();
-
-//     osDelay(ACTUATOR_CONTROL_TIME * 1000);
-//   }
-// }
-
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
 
 OPEN_MANIPULATOR::OpenManipulator chain2;
 
 OPEN_MANIPULATOR::Kinematics *kinematics2 = new OM_KINEMATICS::Chain();
 #ifdef PLATFORM ////////////////////////////////////Actuator init
-OPEN_MANIPULATOR::Actuator *actuator2 = new OM_DYNAMIXEL::Dynamixel();
+OPEN_MANIPULATOR::Actuator *actuator2 = new MY_DYNAMIXEL2::Dynamixel();
 #endif /////////////////////////////////////////////
 //  OPEN_MANIPULATOR::Path *path = new MY_PATH::Circle();
 
 void initManipulator2()
 {
-  DEBUG.println("1");
   chain2.addWorld(WORLD,
                  COMP1);
-  DEBUG.println("2");
   chain2.addComponent(COMP1,
                      WORLD,
                      COMP2,
                      OM_MATH::makeVector3(-0.278, 0.0, 0.017),
                      Eigen::Matrix3f::Identity(3, 3),
                      Z_AXIS,
-                     11);
-  DEBUG.println("3");
+                     16);
   chain2.addComponent(COMP2,
                      COMP1,
                      COMP3,
                      OM_MATH::makeVector3(0.0, 0.0, 0.058),
                      Eigen::Matrix3f::Identity(3, 3),
                      Y_AXIS,
-                     12);
-  DEBUG.println("4");
+                     17);
   chain2.addComponent(COMP3,
                      COMP2,
                      COMP4,
                      OM_MATH::makeVector3(0.024, 0.0, 0.128),
                      Eigen::Matrix3f::Identity(3, 3),
                      Y_AXIS,
-                     13);
-  DEBUG.println("5");
+                     18);
   chain2.addComponent(COMP4,
                      COMP3,
                      TOOL,
                      OM_MATH::makeVector3(0.124, 0.0, 0.0),
                      Eigen::Matrix3f::Identity(3, 3),
                      Y_AXIS,
-                     14);
-  DEBUG.println("6");
+                     19);
   chain2.addTool(TOOL,
                 COMP4,
                 OM_MATH::makeVector3(0.130, 0.0, 0.0),
                 Eigen::Matrix3f::Identity(3, 3),
-                15,
+                20,
                 1.0f); // Change unit from `meter` to `radian`
-  DEBUG.println("7");
   chain2.initKinematics(kinematics2);
 #ifdef PLATFORM ////////////////////////////////////Actuator init
   chain2.initActuator(actuator2);
-  DEBUG.println("");
   uint32_t baud_rate = BAUD_RATE;
   void *p_baud_rate = &baud_rate;
   chain2.actuatorInit(p_baud_rate);
@@ -237,7 +196,7 @@ void initManipulator2()
 
 #ifdef PLATFORM ////////////////////////////////////Actuator init
   chain2.toolMove(TOOL, 0.0f);
-  chain2.setAllActiveJointAngle(chain.receiveAllActuatorAngle());
+  chain2.setAllActiveJointAngle(chain2.receiveAllActuatorAngle());
 #endif /////////////////////////////////////////////
   chain2.forward(COMP1);
 }

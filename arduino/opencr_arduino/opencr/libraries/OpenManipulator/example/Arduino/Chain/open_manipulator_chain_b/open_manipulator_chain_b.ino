@@ -26,6 +26,7 @@ Pose goal_pose;
 
 float present_time = 0.0;
 float previous_time[3] = {0.0, 0.0, 0.0};
+float continue_waiting_time = 0.0;
 
 void setup()
 {
@@ -35,14 +36,17 @@ void setup()
      ;
 
   connectProcessing();
+
+
+  
   //connectRC100();
   
   initManipulator();
-  //initManipulator2();
+  initManipulator2();
+  
 
   pinMode(BDPIN_PUSH_SW_1, INPUT);
   pinMode(BDPIN_PUSH_SW_2, INPUT);
-
 
   //initThread();
   //startThread();
@@ -57,6 +61,7 @@ void loop()
   {
     switchRead();
     setMotion1();
+    setMotion2();
     previous_time[0] = (float)(millis()/1000.0f);
   }
 
@@ -64,9 +69,9 @@ void loop()
   if(present_time-previous_time[1] >= ROBOT_STATE_UPDATE_TIME)
   {
     updateAllJointAngle();
-    //updateAllJointAngle2();
+    updateAllJointAngle2();
     chain.forward(chain.getWorldChildName());
-    //chain2.forward(chain.getWorldChildName());
+    chain2.forward(chain.getWorldChildName());
     previous_time[1] = (float)(millis()/1000.0f);
   }
 
@@ -76,18 +81,21 @@ void loop()
     chain.setPresentTime((float)(millis()/1000.0f));
     chain.jointControlForDrawing(TOOL);
     chain.jointControl();
-    //chain2.setPresentTime((float)(millis()/1000.0f));
-    //chain2.jointControlForDrawing(TOOL);
-    //chain2.jointControl();
-#ifdef DEBUGING
-    for(int i =0; i < 3; i++)
-    {
-      DEBUG.print(chain.receiveAllActuatorAngle().at(i));
-      DEBUG.print(", ");
-    }
-    DEBUG.println();
-#endif
+    chain2.setPresentTime((float)(millis()/1000.0f));
+    chain2.jointControlForDrawing(TOOL);
+    chain2.jointControl();
     previous_time[2] = (float)(millis()/1000.0f);
+  }
+  if(continue_flag == true)
+  {
+    if(continue_waiting_time == 0.0)
+      continue_waiting_time = (float)(millis()/1000.0f);
+    else if(present_time - continue_waiting_time >= 7.0)
+    {
+      continue_waiting_time = 0.0;
+      continue_flag = false;
+      motionStart();      
+    }
   }
 }
 
