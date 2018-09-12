@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "complex": "cpp",
+        "array": "cpp",
+        "typeindex": "cpp",
+        "typeinfo": "cpp",
+        "core": "cpp",
+        "*.tcc": "cpp",
+        "deque": "cpp",
+        "vector": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
+}
