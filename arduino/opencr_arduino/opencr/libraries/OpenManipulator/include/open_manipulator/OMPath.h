@@ -153,8 +153,6 @@ public:
 };
 
 
-
-
 class Rhombus : public OPEN_MANIPULATOR::Draw
 {
 private:
@@ -217,41 +215,6 @@ public:
 
   virtual Pose getPose(float tick);
 };
-
-
-
-class Circle2 : public OPEN_MANIPULATOR::Draw
-{
-private:
-  MinimumJerk path_generator_;
-  MatrixXf coefficient_;
-
-  uint8_t joint_num_;
-
-  Vector3f start_position_;
-  float radius_;
-  float start_angular_position_;
-
-  float *get_arg_;
-
-public:
-  Circle2();
-  virtual ~Circle2();
-
-  void init(float move_time, float control_time);
-  Pose circle2(float time_var);
-
-  MatrixXf getCoefficient();
-
-  virtual void initDraw(const void *arg);
-  virtual void setRadius(float radius);  
-  virtual void setStartPosition(Vector3f start_position);
-  virtual void setAngularStartPosition(float start_angular_position);
-
-  virtual Pose getPose(float tick);
-};
-
-
 
 } // namespace OM_PATH
 #endif // OMPATH_H_

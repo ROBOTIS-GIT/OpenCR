@@ -54,10 +54,6 @@ public:
 
 class SCARA : public OPEN_MANIPULATOR::Kinematics
 {
-private:
-  Chain chain_;
-  // std::vector<float> SCARA::geometricInverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose)
-
 public:
   SCARA(){};
   virtual ~SCARA(){};
@@ -68,6 +64,10 @@ public:
   virtual void forward(OM_MANAGER::Manipulator *manipulator);
 
   virtual std::vector<float> inverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose);
+
+private:
+  Chain chain_;
+  std::vector<float> geometricInverse(OM_MANAGER::Manipulator *manipulator, Name tool_name, Pose target_pose);
 };
 
 class Link : public OPEN_MANIPULATOR::Kinematics

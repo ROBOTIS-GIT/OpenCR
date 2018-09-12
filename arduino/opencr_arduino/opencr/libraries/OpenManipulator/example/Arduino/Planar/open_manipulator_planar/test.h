@@ -39,9 +39,9 @@ void test()
       motion_cnt = 0;
 
     planar.setMove(TOOL, OM_MATH::makeVector3(
-        tool_position[motion_cnt][0], 
-        tool_position[motion_cnt][1], 
-        tool_position[motion_cnt][2]), 
+        tool_position[motion_cnt][0] / 2.0, 
+        tool_position[motion_cnt][1] / 2.0, 
+        tool_position[motion_cnt][2] / 2.0), 
         0.7);
     motion_cnt++;
   }

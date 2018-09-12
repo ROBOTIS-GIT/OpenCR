@@ -48,10 +48,10 @@
 #define ACTIVE_JOINT_SIZE 3
 
 #define CIRCLE 11
-#define RHOMBUS 12
-#define HEART 13
-#define CIRCLE2 14
-#define RHOMBUS2 15
+#define RHOMBUS 13
+#define HEART 15
+#define CIRCLE2 12
+#define RHOMBUS2 14
 #define HEART2 16
 
 #define PLATFORM

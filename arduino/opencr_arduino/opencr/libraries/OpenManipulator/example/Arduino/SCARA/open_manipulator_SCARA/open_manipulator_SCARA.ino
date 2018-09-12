@@ -42,16 +42,7 @@ void setup()
   SCARA.addDraw(CIRCLE, circle);
   SCARA.addDraw(HEART, heart);
 
-  // Do not use thread for now...
-  // initThread();
-  // startThread();
   Serial.println("Setup");
-
-  // std::vector<float> init_joint_angle;
-  // init_joint_angle.push_back(-0.9);
-  // init_joint_angle.push_back(0.5);
-  // init_joint_angle.push_back(1.3);
-  // SCARA.jointMove(init_joint_angle, 2.0f); 
 }
 
 void loop()
@@ -62,7 +53,6 @@ void loop()
 
   if(present_time-previous_time[0] >= LOOP_TIME)
   {
-      // Serial.println("TEST");
     test();
     previous_time[0] = (float)(millis()/1000.0f);
 
@@ -71,9 +61,8 @@ void loop()
   //solve Kinematics
   if(present_time-previous_time[1] >= ROBOT_STATE_UPDATE_TIME)
   {
-      // Serial.println("SOLVE KINEMATICS");
     updateAllJointAngle();
-    SCARA.forward();
+    SCARA.forward(SCARA.getWorldChildName());
     previous_time[1] = (float)(millis()/1000.0f);
 
   }
@@ -81,8 +70,7 @@ void loop()
   //Joint Control
   if(present_time-previous_time[2] >= ACTUATOR_CONTROL_TIME)
   {    
-      // Serial.println("Joint Control");
-    SCARA.setPresentTime(previous_time[2]);
+    SCARA.setPresentTime((float)(millis()/1000.0f));
     SCARA.jointControl();
     SCARA.jointControlForDrawing(TOOL);    
     previous_time[2] = (float)(millis()/1000.0f);

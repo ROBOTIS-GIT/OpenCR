@@ -14,7 +14,6 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Darby Lim */
 
 #ifndef PROCESSING_H_
 #define PROCESSING_H_
@@ -71,9 +70,9 @@ void fromProcessing(String data)
   else if (cmd[0] == "task")
   {
     if (cmd[1] == "forward")
-      planar.setMove(TOOL, OM_MATH::makeVector3(0.020f, 0.000f, 0.0), 1.0);
+      planar.setMove(TOOL, OM_MATH::makeVector3(0.030f, 0.000f, 0.0), 1.0);
     else if (cmd[1] == "backward")
-      planar.setMove(TOOL, OM_MATH::makeVector3(-0.020f, 0.000f, 0.0), 1.0);
+      planar.setMove(TOOL, OM_MATH::makeVector3(-0.030f, 0.000f, 0.0), 1.0);
     else if (cmd[1] == "left")
       planar.setMove(TOOL, OM_MATH::makeVector3(0.000f, 0.020f, 0.0), 1.0);
     else if (cmd[1] == "right")

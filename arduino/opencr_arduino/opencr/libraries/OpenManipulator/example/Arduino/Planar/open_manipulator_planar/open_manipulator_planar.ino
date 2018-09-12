@@ -24,28 +24,53 @@
 std::vector<float> goal_position;
 Pose goal_pose;
 
-uint8_t seq = 0;
+float present_time = 0.0;
+float previous_time[3] = {0.0, 0.0, 0.0};
 
 void setup()
 {
   Serial.begin(57600);
   DEBUG.begin(57600);
-  while (!Serial);
+  // while (!Serial);
 
   connectProcessing();
-  connectRC100();
+  // connectRC100();
   
   initManipulator();
 
-  initThread();
-  startThread();
+  Serial.println("Setup");
 }
 
 void loop()
 {
-  test();
-  getData(100);
-  osDelay(LOOP_TIME * 1000);
+  present_time = (float)(millis()/1000.0f);
+  //get Data 
+  getData(10);
+
+  if(present_time-previous_time[0] >= LOOP_TIME)
+  {
+    // test();
+    previous_time[0] = (float)(millis()/1000.0f);
+
+  }
+
+  //solve Kinematics
+  if(present_time-previous_time[1] >= ROBOT_STATE_UPDATE_TIME)
+  {
+    updateAllJointAngle();
+    // SCARA.forward(SCARA.getWorldChildName());
+    previous_time[1] = (float)(millis()/1000.0f);
+
+  }
+
+  //Joint Control
+  if(present_time-previous_time[2] >= ACTUATOR_CONTROL_TIME)
+  {    
+    planar.setPresentTime((float)(millis()/1000.0f));
+    planar.jointControl();
+    planar.jointControlForDrawing(TOOL);    
+    previous_time[2] = (float)(millis()/1000.0f);
+  }
 }
 
 //---------------- DO NOT MODIFY THE BELOW CODE---------------------//
@@ -106,7 +131,6 @@ void getData(uint32_t wait_time)
     get_rc100_data = readRC100Data();
     rc100_flag = true;
   }
-
   if (availableProcessing())
   {
     get_processing_data = readProcessingData();
@@ -116,20 +140,16 @@ void getData(uint32_t wait_time)
   switch (state)
   {
     case 0:
-      if (rc100_flag)
+      if (processing_flag)
       {
-        MUTEX::wait();
-        fromRC100(get_rc100_data);
-        MUTEX::release();
+        fromProcessing(get_processing_data);
 
         tick = millis();
         state = 1;
       }
-      else if (processing_flag)
+      else if (rc100_flag)
       {
-        MUTEX::wait();
-        fromProcessing(get_processing_data);
-        MUTEX::release();
+        fromRC100(get_rc100_data);
 
         tick = millis();
         state = 1;

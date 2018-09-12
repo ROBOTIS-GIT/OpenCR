@@ -14,7 +14,6 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Darby Lim */
 
 #ifndef OPEN_MANIPULATOR_PLANAR_H_
 #define OPEN_MANIPULATOR_PLANAR_H_
@@ -76,7 +75,7 @@ void initManipulator()
   planar.addComponent(COMP1,
                      WORLD,
                      COMP4,
-                     OM_MATH::makeVector3(0.0849f, 0.0849f, 0.0),
+                     OM_MATH::makeVector3(0.0849f, -0.0849f, 0.0),
                      Eigen::Matrix3f::Identity(3, 3),
                      Z_AXIS,
                      1);
@@ -84,7 +83,7 @@ void initManipulator()
  planar.addComponent(COMP2,
                      WORLD,
                      COMP5,
-                     OM_MATH::makeVector3(0.0849f, 0.0849f, 0.0),
+                     OM_MATH::makeVector3(0.0849f, -0.0849f, 0.0),
                      Eigen::Matrix3f::Identity(3, 3),
                      Z_AXIS,
                      2);
@@ -92,7 +91,7 @@ void initManipulator()
   planar.addComponent(COMP3,
                      WORLD,
                      COMP6,
-                     OM_MATH::makeVector3(0.0849f, 0.0849f, 0.0),
+                     OM_MATH::makeVector3(0.0849f, -0.0849f, 0.0),
                      Eigen::Matrix3f::Identity(3, 3),
                      Z_AXIS,
                      3);
@@ -100,7 +99,7 @@ void initManipulator()
   planar.addComponent(COMP4,
                      COMP7,
                      TOOL,
-                     OM_MATH::makeVector3(-0.0849f, 0.049f, 0.0),
+                     OM_MATH::makeVector3(0.049f, 0.0849f, 0.0),
                      Eigen::Matrix3f::Identity(3, 3));
   // planar.addComponent(COMP4,
   //                    COMP1,
@@ -110,7 +109,7 @@ void initManipulator()
 
   planar.addTool(TOOL,    // why defined like this???
                 COMP7,
-                OM_MATH::makeVector3(0.0, 0.0366, 0.0),
+                OM_MATH::makeVector3(0.0366, 0.0, 0.0),
                 Eigen::Matrix3f::Identity(3, 3));
 
   planar.initKinematics(kinematics);
@@ -157,36 +156,36 @@ void updateAllJointAngle()
 #endif
 }
 
-void THREAD::Robot_State(void const *argument)
-{
-  (void)argument;
+// void THREAD::Robot_State(void const *argument)
+// {
+//   (void)argument;
 
-  for (;;)
-  {
-    MUTEX::wait();
+//   for (;;)
+//   {
+//     MUTEX::wait();
 
-    updateAllJointAngle();
-    // planar.forward(COMP1);
+//     updateAllJointAngle();
+//     // planar.forward(COMP1);
 
-    MUTEX::release();
+//     MUTEX::release();
 
-    osDelay(ROBOT_STATE_UPDATE_TIME * 1000);
-  }
-}
+//     osDelay(ROBOT_STATE_UPDATE_TIME * 1000);
+//   }
+// }
 
-void THREAD::Actuator_Control(void const *argument)
-{
-  (void)argument;
+// void THREAD::Actuator_Control(void const *argument)
+// {
+//   (void)argument;
 
-  for (;;)
-  {
-    MUTEX::wait();
+//   for (;;)
+//   {
+//     MUTEX::wait();
 
-    planar.jointControl();
+//     planar.jointControl();
 
-    MUTEX::release();
+//     MUTEX::release();
 
-    osDelay(ACTUATOR_CONTROL_TIME * 1000);
-  }
-}
+//     osDelay(ACTUATOR_CONTROL_TIME * 1000);
+//   }
+// }
 #endif //OPEN_MANIPULATOR_PLANAR_H_

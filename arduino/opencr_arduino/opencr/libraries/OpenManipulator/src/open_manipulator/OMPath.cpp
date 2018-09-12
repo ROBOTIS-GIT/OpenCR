@@ -263,15 +263,13 @@ void Circle::setRadius(float radius)
 Pose Circle::circle(float time_var)
 {
   Pose pose;
-  Pose temp_pose;
+  double diff_pose[2];
 
-  temp_pose.position(0) = radius_ * cos(time_var);
-  temp_pose.position(1) = radius_ * sin(time_var);
+  diff_pose[0] = (cos(time_var)-1)*cos(start_angular_position_) - sin(time_var)*sin(start_angular_position_);
+  diff_pose[1] = (cos(time_var)-1)*sin(start_angular_position_) + sin(time_var)*cos(start_angular_position_);
 
-  // pose.position(0) = (start_position_(0) - radius_) + cos(start_angular_position_)*temp_pose.position(0) - sin(start_angular_position_)*temp_pose.position(1);
-  // pose.position(1) = start_position_(1) + sin(start_angular_position_)*temp_pose.position(0) + cos(start_angular_position_)*temp_pose.position(1);
-  pose.position(0) = (start_position_(0) - radius_) + radius_ * cos(time_var);
-  pose.position(1) = start_position_(1) + radius_ * sin(time_var);
+  pose.position(0) = start_position_(0) + radius_ * diff_pose[0];
+  pose.position(1) = start_position_(1) + radius_ * diff_pose[1];
   pose.position(2) = start_position_(2);
 
   return pose;
@@ -331,23 +329,32 @@ Pose Rhombus::rhombus(float time_var)
 {
   Pose pose;
 
+  Serial.println("time_var");
+  Serial.println(time_var);
+
+  double traj[2];
+  double diff_pose[2];
+
   if (time_var >= 0 && time_var < PI/2){
-    pose.position(0) = start_position_(0) - time_var / (PI/2) * radius_;
-    pose.position(1) = start_position_(1) - time_var / (PI/2) * radius_;
-    pose.position(2) = start_position_(2);
+    traj[0] = - time_var / (PI/2) * radius_;
+    traj[1] = - time_var / (PI/2) * radius_;
   } else if (time_var >= PI/2 && time_var < PI){ 
-    pose.position(0) = start_position_(0) - time_var / (PI/2) * radius_;
-    pose.position(1) = start_position_(1) + time_var / (PI/2) * radius_ - 2 * radius_;
-    pose.position(2) = start_position_(2);
+    traj[0] = - time_var / (PI/2) * radius_;
+    traj[1] = time_var / (PI/2) * radius_ - 2 * radius_;
   } else if (time_var >= PI && time_var < PI*3/2){ 
-    pose.position(0) = start_position_(0) + time_var / (PI/2) * radius_ - 4 * radius_;
-    pose.position(1) = start_position_(1) + time_var / (PI/2) * radius_ - 2 * radius_;
-    pose.position(2) = start_position_(2);
+    traj[0] = time_var / (PI/2) * radius_ - 4 * radius_;
+    traj[1] = time_var / (PI/2) * radius_ - 2 * radius_;
   } else {
-    pose.position(0) = start_position_(0) + time_var / (PI/2) * radius_ - 4 * radius_;
-    pose.position(1) = start_position_(1) - time_var / (PI/2) * radius_ + 4 * radius_;
-    pose.position(2) = start_position_(2);
+    traj[0] = time_var / (PI/2) * radius_ - 4 * radius_;
+    traj[1] = - time_var / (PI/2) * radius_ + 4 * radius_;
   }
+
+  diff_pose[0] = traj[0]*cos(start_angular_position_) - traj[1]*sin(start_angular_position_);
+  diff_pose[1] = traj[0]*sin(start_angular_position_) + traj[1]*cos(start_angular_position_);
+
+  pose.position(0) = start_position_(0) + diff_pose[0];
+  pose.position(1) = start_position_(1) + diff_pose[1];
+  pose.position(2) = start_position_(2);
 
   return pose;
 }
@@ -463,82 +470,3 @@ Pose Heart::getPose(float tick)
   return heart(get_time_var);
 }
 
-
-
-
-
-
-
-
-//-------------------- Circle2 --------------------//
-
-Circle2::Circle2() {}
-
-Circle2::~Circle2() {}
-
-void Circle2::init(float move_time, float control_time)
-{
-  Trajectory start;
-  Trajectory goal;
-
-  start.position = 0.0;
-  start.velocity = 0.0;
-  start.acceleration = 0.0;
-
-  goal.position = 2 * M_PI;
-  goal.velocity = 0.0;
-  goal.acceleration = 0.0;
-
-  path_generator_.calcCoefficient(start,
-                                  goal,
-                                  move_time,
-                                  control_time);
-
-  coefficient_ = path_generator_.getCoefficient();
-}
-
-void Circle2::setStartPosition(Vector3f start_position)
-{
-  start_position_ = start_position;
-}
-void Circle2::setAngularStartPosition(float start_angular_position)
-{
-  start_angular_position_ = start_angular_position;
-}
-
-void Circle2::setRadius(float radius)
-{
-  radius_ = radius;
-}
-
-Pose Circle2::circle2(float time_var)
-{
-  Pose pose;
-
-  pose.position(0) = (start_position_(0) - radius_) + (radius_ * cos(time_var));
-  pose.position(1) = start_position_(1) + (radius_ * sin(time_var));
-  pose.position(2) = start_position_(2);
-
-  return pose;
-}
-
-Pose Circle2::getPose(float tick)
-{
-  float get_time_var = 0.0;
-
-  get_time_var = coefficient_(0) +
-                 coefficient_(1) * pow(tick, 1) +
-                 coefficient_(2) * pow(tick, 2) +
-                 coefficient_(3) * pow(tick, 3) +
-                 coefficient_(4) * pow(tick, 4) +
-                 coefficient_(5) * pow(tick, 5);
-
-  return circle2(get_time_var);
-}
-
-void Circle2::initDraw(const void *arg)
-{
-  get_arg_ = (float *)arg;
-
-  init(get_arg_[0], get_arg_[1]);
-}
