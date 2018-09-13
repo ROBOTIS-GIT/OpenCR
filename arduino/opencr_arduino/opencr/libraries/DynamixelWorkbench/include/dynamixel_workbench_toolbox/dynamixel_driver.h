@@ -94,11 +94,14 @@ class DynamixelDriver
   bool reset(uint8_t id);
 
   bool writeRegister(uint8_t id, const char *item_name, int32_t data);
+  bool writeRegister(uint8_t id, uint16_t addr, uint8_t length, int32_t data);
   bool readRegister(uint8_t id, const char *item_name, int32_t *data);
+  bool readRegister(uint8_t id, uint16_t addr, uint8_t length, int32_t *data);
   bool readRegister(uint8_t id, uint16_t length, uint8_t *data);
 
   void addSyncWrite(const char *item_name);
   bool syncWrite(const char *item_name, int32_t *data);
+  bool syncWrite(uint8_t *id, uint8_t id_num, const char *item_name, int32_t *data);
 
   void addSyncRead(const char *item_name);
   bool syncRead(const char *item_name, int32_t *data);

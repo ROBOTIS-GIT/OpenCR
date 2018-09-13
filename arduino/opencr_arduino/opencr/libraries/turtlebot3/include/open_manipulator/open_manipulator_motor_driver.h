@@ -30,11 +30,11 @@
 #define TORQUE_ON                   1       // Value for enabling the torque
 #define TORQUE_OFF                  0       // Value for disabling the torque
 
-#define JOINT1    3
-#define JOINT2    4
-#define JOINT3    5
-#define JOINT4    6
-#define GRIPPER   7
+#define JOINT1    11
+#define JOINT2    12
+#define JOINT3    13
+#define JOINT4    14
+#define GRIPPER   15
 
 #define DEBUG_SERIAL  SerialBT2
 

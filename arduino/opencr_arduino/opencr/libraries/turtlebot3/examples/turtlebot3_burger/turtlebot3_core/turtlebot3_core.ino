@@ -46,7 +46,7 @@ void setup()
   tf_broadcaster.init(nh);
 
   // Setting for Dynamixel motors
-  motor_driver.init();
+  motor_driver.init(NAME);
 
   // Setting for IMU
   sensors.init();

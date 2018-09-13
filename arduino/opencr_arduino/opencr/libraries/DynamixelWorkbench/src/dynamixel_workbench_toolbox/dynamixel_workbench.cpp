@@ -346,11 +346,29 @@ bool DynamixelWorkbench::itemWrite(uint8_t id, const char* item_name, int32_t va
   return comm_result;
 }
 
+bool DynamixelWorkbench::itemWrite(uint8_t id, uint16_t addr, uint8_t length, int32_t data)
+{
+  bool comm_result = false;
+
+  comm_result = driver_.writeRegister(id, addr, length, data);
+
+  return comm_result;
+}
+
 bool DynamixelWorkbench::syncWrite(const char *item_name, int32_t* value)
 {
   bool isOK = false;
 
   isOK =  driver_.syncWrite(item_name, value);
+
+  return isOK;
+}
+
+bool DynamixelWorkbench::syncWrite(uint8_t *id, uint8_t id_num, const char *item_name, int32_t *data)
+{
+  bool isOK = false;
+
+  isOK =  driver_.syncWrite(id, id_num, item_name, data);
 
   return isOK;
 }
@@ -370,6 +388,14 @@ int32_t DynamixelWorkbench::itemRead(uint8_t id, const char* item_name)
 
   if (driver_.readRegister(id, item_name, &data))
     return data;
+}
+
+int32_t  DynamixelWorkbench::itemRead(uint8_t id, uint16_t addr, uint8_t length)
+{
+  static int32_t data = 0;
+
+  if (driver_.readRegister(id, addr, length, &data))
+    return data; 
 }
 
 int32_t* DynamixelWorkbench::syncRead(const char *item_name)
