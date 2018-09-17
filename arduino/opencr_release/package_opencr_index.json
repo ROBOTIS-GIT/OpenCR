@@ -795,8 +795,8 @@
           },
           "url": "https://github.com/ROBOTIS-GIT/OpenCR/releases/download/1.3.2/opencr_core_1.3.2.tar.bz2",
           "archiveFileName": "opencr_core_1.3.2.tar.bz2",
-          "checksum": "SHA-256:56f1105576492edf4d1380a10a1afedb0d8c206e063b7e254f832d8c468a95f0",
-          "size": "4536399",
+          "checksum": "SHA-256:cc555d926538a86d3f79f724522cbe4d91331896d103897a4b422948f263a10c",
+          "size": "3949995",
           "help": {
                     "online": "http://emanual.robotis.com/docs/en/parts/controller/opencr10/"
           },
