@@ -93,6 +93,12 @@ class WINDECLSPEC PortHandler
   virtual void    clearPort() = 0;
 
   ////////////////////////////////////////////////////////////////////////////////
+  /// @brief The function that flush the port
+  /// @description The function waits until writes complete
+  ////////////////////////////////////////////////////////////////////////////////
+  virtual void    flushPort() {}
+
+  ////////////////////////////////////////////////////////////////////////////////
   /// @brief The function that sets port name into the port handler
   /// @description The function sets port name into the port handler.
   /// @param port_name Port name

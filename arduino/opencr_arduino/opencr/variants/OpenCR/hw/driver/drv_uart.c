@@ -16,7 +16,7 @@
 
   USART3
     - RX : DMA1, Channel 4, Stream 1
-    - TX : DMA1, Channel 4, Stream 4
+    - TX : DMA1, Channel 4, Stream 3
 
   USART8
     - RX : DMA1, Channel 5, Stream 6
@@ -43,6 +43,7 @@ static BOOL is_uart_mode[DRV_UART_NUM_MAX];
 
 UART_HandleTypeDef huart[DRV_UART_NUM_MAX];
 DMA_HandleTypeDef  hdma_rx[DRV_UART_NUM_MAX];
+DMA_HandleTypeDef  hdma_tx[DRV_UART_NUM_MAX];
 USART_TypeDef     *huart_inst[DRV_UART_NUM_MAX] = { USART6, USART2, USART3, UART8 };
 
 
@@ -84,9 +85,10 @@ void drv_uart_begin(uint8_t uart_num, uint8_t uart_mode, uint32_t baudrate)
     huart[uart_num].Init.OverSampling = UART_OVERSAMPLING_16;
     huart[uart_num].AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
 
+    is_uart_mode[uart_num] = uart_mode;  // remember if we are DMA or not
+
     HAL_UART_Init(&huart[uart_num]);
 
-    is_uart_mode[uart_num] = uart_mode;
     is_init[uart_num] = TRUE;
 
     drv_uart_start_rx(uart_num);
@@ -102,6 +104,17 @@ uint32_t drv_uart_write(uint8_t uart_num, const uint8_t wr_data)
   HAL_UART_Transmit(&huart[uart_num], (uint8_t *)&wr_data, 1, 10);
   return 1;
 }
+
+HAL_StatusTypeDef drv_uart_write_it(uint8_t uart_num, const uint8_t *wr_data, uint16_t Size)
+{
+  return HAL_UART_Transmit_IT(&huart[uart_num], (uint8_t *)wr_data, Size);  
+}
+
+HAL_StatusTypeDef drv_uart_write_dma(uint8_t uart_num, const uint8_t *wr_data, uint16_t Size)
+{
+  return HAL_UART_Transmit_DMA(&huart[uart_num], (uint8_t *)wr_data, Size);  
+}
+
 
 void drv_uart_flush(uint8_t uart_num)
 {
@@ -211,11 +224,10 @@ void UART8_IRQHandler(void)
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
-  UNUSED(UartHandle);
-
-  //if( UartHandle->Instance == USART6 ) Tx1_Handler();
-  //if( UartHandle->Instance == USART2 ) Tx2_Handler();
-  //if( UartHandle->Instance == USART3 ) Tx3_Handler();
+  if( UartHandle->Instance == huart_inst[DRV_UART_NUM_1] ) Tx1_Handler();
+  if( UartHandle->Instance == huart_inst[DRV_UART_NUM_2] ) Tx2_Handler();
+  if( UartHandle->Instance == huart_inst[DRV_UART_NUM_3] ) Tx3_Handler();
+  if( UartHandle->Instance == huart_inst[DRV_UART_NUM_4] ) Rx4_Handler();
 }
 
 
@@ -252,6 +264,10 @@ void DMA1_Stream1_IRQHandler(void)
   HAL_DMA_IRQHandler(huart[DRV_UART_NUM_3].hdmarx);
 }
 
+void DMA1_Stream3_IRQHandler(void)
+{
+  HAL_DMA_IRQHandler(huart[DRV_UART_NUM_3].hdmatx);
+}
 
 void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 {
@@ -376,10 +392,31 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     __HAL_LINKDMA(huart, hdmarx, hdma_rx[DRV_UART_NUM_3]);
 
 
-    /* NVIC configuration for DMA transfer complete interrupt (USART6_RX) */
+    /* NVIC configuration for DMA transfer complete interrupt (USART3_RX) */
     HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(DMA1_Stream1_IRQn);
 
+    if(is_uart_mode[DRV_UART_NUM_3] == DRV_UART_DMA_MODE)
+    {
+      hdma_tx[DRV_UART_NUM_3].Instance                 = DMA1_Stream3;
+      hdma_tx[DRV_UART_NUM_3].Init.Channel             = DMA_CHANNEL_4;
+      hdma_tx[DRV_UART_NUM_3].Init.Direction           = DMA_MEMORY_TO_PERIPH;
+      hdma_tx[DRV_UART_NUM_3].Init.PeriphInc           = DMA_PINC_DISABLE;
+      hdma_tx[DRV_UART_NUM_3].Init.MemInc              = DMA_MINC_ENABLE;
+      hdma_tx[DRV_UART_NUM_3].Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+      hdma_tx[DRV_UART_NUM_3].Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
+      hdma_tx[DRV_UART_NUM_3].Init.Mode                = DMA_NORMAL;
+      hdma_tx[DRV_UART_NUM_3].Init.Priority            = DMA_PRIORITY_MEDIUM;
+
+      HAL_DMA_Init(&hdma_tx[DRV_UART_NUM_3]);
+
+      /* Associate the initialized DMA handle to the the UART handle */
+      __HAL_LINKDMA(huart, hdmatx, hdma_tx[DRV_UART_NUM_3]);
+
+      /* NVIC configuration for DMA transfer complete interrupt (USART3_RX) */
+      HAL_NVIC_SetPriority(DMA1_Stream3_IRQn, 0, 0);
+      HAL_NVIC_EnableIRQ(DMA1_Stream3_IRQn);
+    }
 
     /* Peripheral interrupt init */
     HAL_NVIC_SetPriority(USART3_IRQn, 0, 0);

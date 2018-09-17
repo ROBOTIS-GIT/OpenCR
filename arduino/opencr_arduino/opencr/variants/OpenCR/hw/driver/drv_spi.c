@@ -218,10 +218,12 @@ void DMA2_Stream1_IRQHandler(void)
 
 // SPIx_DMA_RX_IRQHandler(void)
 //
+#if 0
 void DMA1_Stream3_IRQHandler(void)
 {
   HAL_DMA_IRQHandler(hspi2.hdmarx);
 }
+#endif
 
 void DMA2_Stream0_IRQHandler(void)
 {
