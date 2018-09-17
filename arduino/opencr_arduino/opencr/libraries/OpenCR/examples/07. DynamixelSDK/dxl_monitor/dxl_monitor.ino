@@ -128,7 +128,10 @@ char * fgets ( char * str, int num, FILE * stream )
 
       if( index < num-1 && ch != 0x0D )
       {
-        str[index++] = ch;
+        if ( ch != 0X0A )  // Ignore line feeds
+        {
+          str[index++] = ch;
+        }
       }
       if( ch == 0x0D)
       {
