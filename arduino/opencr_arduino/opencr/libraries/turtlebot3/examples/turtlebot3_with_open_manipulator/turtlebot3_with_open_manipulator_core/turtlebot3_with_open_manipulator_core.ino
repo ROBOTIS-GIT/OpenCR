@@ -85,7 +85,7 @@ void loop()
   if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_FREQUENCY))
   {
     updateGoalVelocity();
-    motor_driver.controlMotor(WHEEL_SEPARATION, goal_velocity);
+    motor_driver.controlMotor(WHEEL_RADIUS, WHEEL_SEPARATION, goal_velocity);
     tTime[0] = t;
   }
 
