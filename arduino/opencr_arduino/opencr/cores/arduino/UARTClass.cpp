@@ -127,21 +127,11 @@ size_t UARTClass::write( const uint8_t uc_data )
 }
 void inline UARTClass::startNextTransmitDMAorIT()
 {
-    tx_write_size = (tx_buffer.iTail < tx_buffer.iHead)? tx_buffer.iHead-tx_buffer.iTail : tx_buffer.buffer_size - tx_buffer.iTail;
-    if ( _uart_mode == DRV_UART_IRQ_MODE) {
-      if (drv_uart_write_it(_uart_num, &tx_buffer.buffer[tx_buffer.iTail], tx_write_size) != HAL_OK) 
-      {
-        tx_write_size = 0;  // error so clear it out
-      }
-    }
-    else
-    {
-      if (drv_uart_write_dma(_uart_num, &tx_buffer.buffer[tx_buffer.iTail], tx_write_size) != HAL_OK)
-      {
-        Serial.println("Serial DMA write fail");
-        tx_write_size = 0;  // error so clear it out
-      }
-    }
+  tx_write_size = (tx_buffer.iTail < tx_buffer.iHead)? tx_buffer.iHead-tx_buffer.iTail : tx_buffer.buffer_size - tx_buffer.iTail;
+  if (drv_uart_write_dma_it(_uart_num, &tx_buffer.buffer[tx_buffer.iTail], tx_write_size) != HAL_OK) 
+  {
+    tx_write_size = 0;  // error so clear it out
+  }
 }
 
 size_t UARTClass::write( const uint8_t *buffer, size_t size )

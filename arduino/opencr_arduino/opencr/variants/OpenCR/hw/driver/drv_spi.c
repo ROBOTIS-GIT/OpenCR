@@ -7,6 +7,7 @@
 
 #include "drv_spi.h"
 #include "variant.h"
+#include "dma_stream_handlers.h"
 
 
 #define SPI_MAX_CH              3
@@ -205,10 +206,12 @@ void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
 
 // SPIx_DMA_TX_IRQHandler(void)
 //
+#if 0
 void DMA1_Stream4_IRQHandler(void)
 {
   HAL_DMA_IRQHandler(hspi2.hdmatx);
 }
+#endif
 
 void DMA2_Stream1_IRQHandler(void)
 {
@@ -386,6 +389,8 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
 
       /* Associate the initialized DMA handle to the the SPI handle */
       __HAL_LINKDMA(hspi, hdmatx, hdma2_tx);
+    // TELL DMA ISR handler the handle to use during ISRs...
+    SetDMA1StreamHandlerHandle(4, &hdma2_tx, true, NULL);
 
 
       HAL_NVIC_SetPriority(DMA1_Stream4_IRQn, 1, 1);
@@ -411,6 +416,8 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
       /* Associate the initialized DMA handle to the the SPI handle */
       __HAL_LINKDMA(hspi, hdmarx, hdma2_rx);
 
+    // TELL DMA ISR handler the handle to use during ISRs...
+    SetDMA1StreamHandlerHandle(3, &hdma2_rx, true, NULL);
 
       HAL_NVIC_SetPriority(DMA1_Stream3_IRQn, 1, 1);
       HAL_NVIC_EnableIRQ(DMA1_Stream3_IRQn);

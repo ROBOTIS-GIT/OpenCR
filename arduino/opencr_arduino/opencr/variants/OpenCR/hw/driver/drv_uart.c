@@ -24,6 +24,7 @@
 */
 #include "drv_uart.h"
 #include "variant.h"
+#include "dma_stream_handlers.h"
 
 
 //-- internal definition
@@ -40,6 +41,7 @@ static uint8_t  drv_uart_rx_buf[DRV_UART_NUM_MAX][DRV_UART_RX_BUF_LENGTH] __attr
 
 static BOOL is_init[DRV_UART_NUM_MAX];
 static BOOL is_uart_mode[DRV_UART_NUM_MAX];
+static BOOL is_uart_write_dma_mode[DRV_UART_NUM_MAX];
 
 UART_HandleTypeDef huart[DRV_UART_NUM_MAX];
 DMA_HandleTypeDef  hdma_rx[DRV_UART_NUM_MAX];
@@ -63,6 +65,7 @@ int drv_uart_init()
   {
     is_init[i]      = FALSE;
     is_uart_mode[i] = DRV_UART_IRQ_MODE;
+    is_uart_write_dma_mode[i] = false;  // assume IT mode
 
     drv_uart_rx_buf_head[i] = 0;
     drv_uart_rx_buf_tail[i] = 0;
@@ -93,7 +96,12 @@ void drv_uart_begin(uint8_t uart_num, uint8_t uart_mode, uint32_t baudrate)
 
     drv_uart_start_rx(uart_num);
 
-    drv_uart_rx_buf_head[uart_num] = DRV_UART_RX_BUF_LENGTH - hdma_rx[uart_num].Instance->NDTR;
+    if (hdma_rx[uart_num].Instance) 
+    {
+      // Only set if DMA instance is set, else can leave alone as tail will be set to 
+      // whatever this one is... 
+      drv_uart_rx_buf_head[uart_num] = DRV_UART_RX_BUF_LENGTH - hdma_rx[uart_num].Instance->NDTR;
+    }
     drv_uart_rx_buf_tail[uart_num] = drv_uart_rx_buf_head[uart_num];
 
   }
@@ -105,14 +113,14 @@ uint32_t drv_uart_write(uint8_t uart_num, const uint8_t wr_data)
   return 1;
 }
 
-HAL_StatusTypeDef drv_uart_write_it(uint8_t uart_num, const uint8_t *wr_data, uint16_t Size)
+HAL_StatusTypeDef drv_uart_write_dma_it(uint8_t uart_num, const uint8_t *wr_data, uint16_t Size)
 {
+  // call the DMA or IT function depending on if configured for DMA or not.
+  if (is_uart_write_dma_mode[uart_num]) 
+  {
+    return HAL_UART_Transmit_DMA(&huart[uart_num], (uint8_t *)wr_data, Size);  
+  }
   return HAL_UART_Transmit_IT(&huart[uart_num], (uint8_t *)wr_data, Size);  
-}
-
-HAL_StatusTypeDef drv_uart_write_dma(uint8_t uart_num, const uint8_t *wr_data, uint16_t Size)
-{
-  return HAL_UART_Transmit_DMA(&huart[uart_num], (uint8_t *)wr_data, Size);  
 }
 
 
@@ -227,7 +235,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
   if( UartHandle->Instance == huart_inst[DRV_UART_NUM_1] ) Tx1_Handler();
   if( UartHandle->Instance == huart_inst[DRV_UART_NUM_2] ) Tx2_Handler();
   if( UartHandle->Instance == huart_inst[DRV_UART_NUM_3] ) Tx3_Handler();
-  if( UartHandle->Instance == huart_inst[DRV_UART_NUM_4] ) Rx4_Handler();
+  if( UartHandle->Instance == huart_inst[DRV_UART_NUM_4] ) Tx4_Handler();
 }
 
 
@@ -251,7 +259,7 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
   if( UartHandle->Instance == huart_inst[DRV_UART_NUM_4] ) drv_uart_err_handler(DRV_UART_NUM_4);
 }
 
-
+#if 0
 // UART2 DMA IRQ
 void DMA1_Stream5_IRQHandler(void)
 {
@@ -267,6 +275,19 @@ void DMA1_Stream1_IRQHandler(void)
 void DMA1_Stream3_IRQHandler(void)
 {
   HAL_DMA_IRQHandler(huart[DRV_UART_NUM_3].hdmatx);
+}
+#endif
+
+// In case SPI2 wishes to use DMA and we were already
+// using it for Serial3.  Downgrade Serial3 to IT mode...
+void HAL_UART_LoseDMAHandler(uint8_t iStream)
+{
+  if (iStream == 3)
+  {
+    drv_uart_flush(DRV_UART_NUM_3); // note does not do anything currently...
+    is_uart_write_dma_mode[DRV_UART_NUM_3] = false;
+  }
+
 }
 
 void HAL_UART_MspInit(UART_HandleTypeDef* huart)
@@ -296,7 +317,6 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     GPIO_InitStruct.Pin       = GPIO_PIN_7;
     GPIO_InitStruct.Alternate = GPIO_AF8_USART6;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
     /* Peripheral interrupt init */
     HAL_NVIC_SetPriority(USART6_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ  (USART6_IRQn);
@@ -341,6 +361,9 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 
     /* Associate the initialized DMA handle to the the UART handle */
     __HAL_LINKDMA(huart, hdmarx, hdma_rx[DRV_UART_NUM_2]);
+
+    // TELL DMA ISR handler the handle to use during ISRs...
+    SetDMA1StreamHandlerHandle(5, &hdma_rx[DRV_UART_NUM_2], false, NULL);
 
     /* NVIC configuration for DMA transfer complete interrupt (USART6_RX) */
     HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 0, 0);
@@ -391,6 +414,8 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     /* Associate the initialized DMA handle to the the UART handle */
     __HAL_LINKDMA(huart, hdmarx, hdma_rx[DRV_UART_NUM_3]);
 
+    // TELL DMA ISR handler the handle to use during ISRs...
+    SetDMA1StreamHandlerHandle(1, &hdma_rx[DRV_UART_NUM_3], false, NULL);
 
     /* NVIC configuration for DMA transfer complete interrupt (USART3_RX) */
     HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 0, 0);
@@ -413,9 +438,18 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
       /* Associate the initialized DMA handle to the the UART handle */
       __HAL_LINKDMA(huart, hdmatx, hdma_tx[DRV_UART_NUM_3]);
 
-      /* NVIC configuration for DMA transfer complete interrupt (USART3_RX) */
-      HAL_NVIC_SetPriority(DMA1_Stream3_IRQn, 0, 0);
-      HAL_NVIC_EnableIRQ(DMA1_Stream3_IRQn);
+      // TELL DMA ISR handler the handle to use during ISRs...
+      is_uart_write_dma_mode[DRV_UART_NUM_3] = SetDMA1StreamHandlerHandle(3, &hdma_tx[DRV_UART_NUM_3], false, &HAL_UART_LoseDMAHandler);
+      if (is_uart_write_dma_mode[DRV_UART_NUM_3])
+      {
+        /* NVIC configuration for DMA transfer complete interrupt (USART3_RX) */
+        HAL_NVIC_SetPriority(DMA1_Stream3_IRQn, 0, 0);
+        HAL_NVIC_EnableIRQ(DMA1_Stream3_IRQn);
+      }
+      else 
+      {
+        //vcp_printf(" Serial3 TX not DMA\n");
+      }
     }
 
     /* Peripheral interrupt init */
