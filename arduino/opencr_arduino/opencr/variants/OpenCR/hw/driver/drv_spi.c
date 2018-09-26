@@ -211,7 +211,6 @@ void DMA1_Stream4_IRQHandler(void)
 {
   HAL_DMA_IRQHandler(hspi2.hdmatx);
 }
-#endif
 
 void DMA2_Stream1_IRQHandler(void)
 {
@@ -221,17 +220,16 @@ void DMA2_Stream1_IRQHandler(void)
 
 // SPIx_DMA_RX_IRQHandler(void)
 //
-#if 0
 void DMA1_Stream3_IRQHandler(void)
 {
   HAL_DMA_IRQHandler(hspi2.hdmarx);
 }
-#endif
 
 void DMA2_Stream0_IRQHandler(void)
 {
   HAL_DMA_IRQHandler(hspi4.hdmarx);
 }
+#endif
 
 //=================================================================
 // Support for DMA Transfer
@@ -474,6 +472,9 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
       /* Associate the initialized DMA handle to the the SPI handle */
       __HAL_LINKDMA(hspi, hdmatx, hdma4_tx);
 
+      // TELL DMA ISR handler the handle to use during ISRs...
+      SetDMA2StreamHandlerHandle(1, &hdma4_tx, true, NULL);
+
 
       HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 1, 1);
       HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
@@ -498,6 +499,8 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
       /* Associate the initialized DMA handle to the the SPI handle */
       __HAL_LINKDMA(hspi, hdmarx, hdma4_rx);
 
+      // TELL DMA ISR handler the handle to use during ISRs...
+      SetDMA2StreamHandlerHandle(0, &hdma4_rx, true, NULL);
 
       HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 1, 1);
       HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);

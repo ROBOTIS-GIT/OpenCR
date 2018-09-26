@@ -167,10 +167,10 @@ uint8_t serial2_tx_buffer[SERIAL_BUFFER_SIZE] __attribute__((section(".NoneCache
 uint8_t serial3_tx_buffer[SERIAL_BUFFER_SIZE] __attribute__((section(".NoneCacheableMem")));
 uint8_t serial4_tx_buffer[SERIAL_BUFFER_SIZE] __attribute__((section(".NoneCacheableMem")));
 
-UARTClass Serial1(DRV_UART_NUM_1, DRV_UART_IRQ_MODE, serial1_tx_buffer, sizeof(serial1_tx_buffer));
-UARTClass Serial2(DRV_UART_NUM_2, DRV_UART_IRQ_MODE, serial2_tx_buffer, sizeof(serial2_tx_buffer));
+UARTClass Serial1(DRV_UART_NUM_1, DRV_UART_DMA_MODE, serial1_tx_buffer, sizeof(serial1_tx_buffer));
+UARTClass Serial2(DRV_UART_NUM_2, DRV_UART_DMA_MODE, serial2_tx_buffer, sizeof(serial2_tx_buffer));
 UARTClass Serial3(DRV_UART_NUM_3, DRV_UART_DMA_MODE, serial3_tx_buffer, sizeof(serial3_tx_buffer));
-UARTClass Serial4(DRV_UART_NUM_4, DRV_UART_IRQ_MODE, serial4_tx_buffer, sizeof(serial4_tx_buffer));
+UARTClass Serial4(DRV_UART_NUM_4, DRV_UART_DMA_MODE, serial4_tx_buffer, sizeof(serial4_tx_buffer));
 
 
 void Tx1_Handler(void){ Serial1.TxHandler(); }

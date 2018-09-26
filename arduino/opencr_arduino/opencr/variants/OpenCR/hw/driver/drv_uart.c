@@ -7,7 +7,7 @@
 /*
 
   USART6
-    - RX : DMA2, Channel 5, Stream 1
+    - RX : DMA2, Channel 5, Stream 2
     - TX : DMA2, Channel 5, Stream 6
 
   USART2
@@ -287,6 +287,11 @@ void HAL_UART_LoseDMAHandler(uint8_t iStream)
     drv_uart_flush(DRV_UART_NUM_3); // note does not do anything currently...
     is_uart_write_dma_mode[DRV_UART_NUM_3] = false;
   }
+  else if (iStream == 6)
+  {
+    drv_uart_flush(DRV_UART_NUM_2); // note does not do anything currently...
+    is_uart_write_dma_mode[DRV_UART_NUM_2] = false;
+  }
 
 }
 
@@ -317,6 +322,66 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     GPIO_InitStruct.Pin       = GPIO_PIN_7;
     GPIO_InitStruct.Alternate = GPIO_AF8_USART6;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+    if(is_uart_mode[DRV_UART_NUM_1] == DRV_UART_DMA_MODE) 
+    {
+      // DMA Setup
+      /* Configure the DMA handler for reception process */
+      __HAL_RCC_DMA2_CLK_ENABLE();
+      hdma_rx[DRV_UART_NUM_1].Instance                 = DMA2_Stream2;
+      hdma_rx[DRV_UART_NUM_1].Init.Channel             = DMA_CHANNEL_5;
+      hdma_rx[DRV_UART_NUM_1].Init.Direction           = DMA_PERIPH_TO_MEMORY;
+      hdma_rx[DRV_UART_NUM_1].Init.PeriphInc           = DMA_PINC_DISABLE;
+      hdma_rx[DRV_UART_NUM_1].Init.MemInc              = DMA_MINC_ENABLE;
+      hdma_rx[DRV_UART_NUM_1].Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+      hdma_rx[DRV_UART_NUM_1].Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
+      hdma_rx[DRV_UART_NUM_1].Init.Mode                = DMA_CIRCULAR;
+      hdma_rx[DRV_UART_NUM_1].Init.Priority            = DMA_PRIORITY_HIGH;
+
+      HAL_DMA_Init(&hdma_rx[DRV_UART_NUM_1]);
+
+      /* Associate the initialized DMA handle to the the UART handle */
+      __HAL_LINKDMA(huart, hdmarx, hdma_rx[DRV_UART_NUM_1]);
+
+      // TELL DMA ISR handler the handle to use during ISRs...
+      SetDMA2StreamHandlerHandle(2, &hdma_rx[DRV_UART_NUM_1], true, NULL);
+ 
+      /* NVIC configuration for DMA transfer complete interrupt (USART6_RX) */
+      HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 0, 0);
+      HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
+
+
+      __HAL_RCC_DMA2_CLK_ENABLE();
+      hdma_tx[DRV_UART_NUM_1].Instance                 = DMA2_Stream6;
+      hdma_tx[DRV_UART_NUM_1].Init.Channel             = DMA_CHANNEL_5;
+      hdma_tx[DRV_UART_NUM_1].Init.Direction           = DMA_MEMORY_TO_PERIPH;
+      hdma_tx[DRV_UART_NUM_1].Init.PeriphInc           = DMA_PINC_DISABLE;
+      hdma_tx[DRV_UART_NUM_1].Init.MemInc              = DMA_MINC_ENABLE;
+      hdma_tx[DRV_UART_NUM_1].Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+      hdma_tx[DRV_UART_NUM_1].Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
+      hdma_tx[DRV_UART_NUM_1].Init.Mode                = DMA_NORMAL;
+      hdma_tx[DRV_UART_NUM_1].Init.Priority            = DMA_PRIORITY_MEDIUM;
+
+      HAL_DMA_Init(&hdma_tx[DRV_UART_NUM_1]);
+
+      /* Associate the initialized DMA handle to the the UART handle */
+      __HAL_LINKDMA(huart, hdmatx, hdma_tx[DRV_UART_NUM_1]);
+
+      // TELL DMA ISR handler the handle to use during ISRs...
+      is_uart_write_dma_mode[DRV_UART_NUM_1] = SetDMA2StreamHandlerHandle(6, &hdma_tx[DRV_UART_NUM_1], false, NULL);
+      if (is_uart_write_dma_mode[DRV_UART_NUM_1])
+      {
+        /* NVIC configuration for DMA transfer complete interrupt (USART8_RX) */
+        HAL_NVIC_SetPriority(DMA2_Stream6_IRQn, 0, 0);
+        HAL_NVIC_EnableIRQ(DMA2_Stream6_IRQn);
+      }
+      else 
+      {
+        vcp_printf(" Serial1 TX not DMA\n");
+      }
+
+    }
+
     /* Peripheral interrupt init */
     HAL_NVIC_SetPriority(USART6_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ  (USART6_IRQn);
@@ -369,6 +434,39 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
 
+    if(is_uart_mode[DRV_UART_NUM_2] == DRV_UART_DMA_MODE)
+    {
+      // TELL DMA ISR handler the handle to use during ISRs...
+      // If this fails, than someone else is already holding onto it... So let them keep it.
+      is_uart_write_dma_mode[DRV_UART_NUM_2] = SetDMA1StreamHandlerHandle(6, &hdma_tx[DRV_UART_NUM_2], false, &HAL_UART_LoseDMAHandler);
+
+      if (is_uart_write_dma_mode[DRV_UART_NUM_2])
+      {
+
+        hdma_tx[DRV_UART_NUM_2].Instance                 = DMA1_Stream6;
+        hdma_tx[DRV_UART_NUM_2].Init.Channel             = DMA_CHANNEL_4;
+        hdma_tx[DRV_UART_NUM_2].Init.Direction           = DMA_MEMORY_TO_PERIPH;
+        hdma_tx[DRV_UART_NUM_2].Init.PeriphInc           = DMA_PINC_DISABLE;
+        hdma_tx[DRV_UART_NUM_2].Init.MemInc              = DMA_MINC_ENABLE;
+        hdma_tx[DRV_UART_NUM_2].Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+        hdma_tx[DRV_UART_NUM_2].Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
+        hdma_tx[DRV_UART_NUM_2].Init.Mode                = DMA_NORMAL;
+        hdma_tx[DRV_UART_NUM_2].Init.Priority            = DMA_PRIORITY_MEDIUM;
+
+        HAL_DMA_Init(&hdma_tx[DRV_UART_NUM_2]);
+
+        /* Associate the initialized DMA handle to the the UART handle */
+        __HAL_LINKDMA(huart, hdmatx, hdma_tx[DRV_UART_NUM_2]);
+
+        /* NVIC configuration for DMA transfer complete interrupt (USART3_RX) */
+        HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
+        HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
+      }
+      else 
+      {
+        //vcp_printf(" Serial2 TX not DMA\n");
+      }
+    }
 
     /* Peripheral interrupt init */
     HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
@@ -476,6 +574,66 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     GPIO_InitStruct.Pin       = GPIO_PIN_0;
     GPIO_InitStruct.Alternate = GPIO_AF8_UART8;
     HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+    if(is_uart_mode[DRV_UART_NUM_4] == DRV_UART_DMA_MODE) 
+    {
+      // DMA Setup
+      /* Configure the DMA handler for reception process */
+      __HAL_RCC_DMA1_CLK_ENABLE();
+      hdma_rx[DRV_UART_NUM_4].Instance                 = DMA1_Stream6;
+      hdma_rx[DRV_UART_NUM_4].Init.Channel             = DMA_CHANNEL_5;
+      hdma_rx[DRV_UART_NUM_4].Init.Direction           = DMA_PERIPH_TO_MEMORY;
+      hdma_rx[DRV_UART_NUM_4].Init.PeriphInc           = DMA_PINC_DISABLE;
+      hdma_rx[DRV_UART_NUM_4].Init.MemInc              = DMA_MINC_ENABLE;
+      hdma_rx[DRV_UART_NUM_4].Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+      hdma_rx[DRV_UART_NUM_4].Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
+      hdma_rx[DRV_UART_NUM_4].Init.Mode                = DMA_CIRCULAR;
+      hdma_rx[DRV_UART_NUM_4].Init.Priority            = DMA_PRIORITY_HIGH;
+
+      HAL_DMA_Init(&hdma_rx[DRV_UART_NUM_4]);
+
+      /* Associate the initialized DMA handle to the the UART handle */
+      __HAL_LINKDMA(huart, hdmarx, hdma_rx[DRV_UART_NUM_4]);
+
+      // TELL DMA ISR handler the handle to use during ISRs...
+      SetDMA1StreamHandlerHandle(6, &hdma_rx[DRV_UART_NUM_4], true, NULL);
+ 
+      /* NVIC configuration for DMA transfer complete interrupt (USART3_RX) */
+      HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
+      HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
+
+
+      hdma_tx[DRV_UART_NUM_4].Instance                 = DMA1_Stream0;
+      hdma_tx[DRV_UART_NUM_4].Init.Channel             = DMA_CHANNEL_5;
+      hdma_tx[DRV_UART_NUM_4].Init.Direction           = DMA_MEMORY_TO_PERIPH;
+      hdma_tx[DRV_UART_NUM_4].Init.PeriphInc           = DMA_PINC_DISABLE;
+      hdma_tx[DRV_UART_NUM_4].Init.MemInc              = DMA_MINC_ENABLE;
+      hdma_tx[DRV_UART_NUM_4].Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+      hdma_tx[DRV_UART_NUM_4].Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
+      hdma_tx[DRV_UART_NUM_4].Init.Mode                = DMA_NORMAL;
+      hdma_tx[DRV_UART_NUM_4].Init.Priority            = DMA_PRIORITY_MEDIUM;
+
+      HAL_DMA_Init(&hdma_tx[DRV_UART_NUM_4]);
+
+      /* Associate the initialized DMA handle to the the UART handle */
+      __HAL_LINKDMA(huart, hdmatx, hdma_tx[DRV_UART_NUM_4]);
+
+      // TELL DMA ISR handler the handle to use during ISRs...
+      is_uart_write_dma_mode[DRV_UART_NUM_4] = SetDMA1StreamHandlerHandle(0, &hdma_tx[DRV_UART_NUM_4], false, &HAL_UART_LoseDMAHandler);
+      if (is_uart_write_dma_mode[DRV_UART_NUM_4])
+      {
+        /* NVIC configuration for DMA transfer complete interrupt (USART3_RX) */
+        HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 0, 0);
+        HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
+      }
+      else 
+      {
+        //vcp_printf(" Serial4 TX not DMA\n");
+      }
+
+    }
+
+
 
     /* Peripheral interrupt init */
     HAL_NVIC_SetPriority(UART8_IRQn, 0, 0);

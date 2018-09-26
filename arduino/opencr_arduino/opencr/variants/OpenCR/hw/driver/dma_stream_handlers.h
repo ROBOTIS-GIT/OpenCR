@@ -29,6 +29,8 @@
 typedef void (*DMALoseStreamHandlerCallbackFunction_t)(uint8_t iStream);  
 extern bool SetDMA1StreamHandlerHandle(uint8_t iStream, DMA_HandleTypeDef *hdma, 
         bool fOverwrite, DMALoseStreamHandlerCallbackFunction_t loseCB);
+extern bool SetDMA2StreamHandlerHandle(uint8_t iStream, DMA_HandleTypeDef *hdma, 
+        bool fOverwrite, DMALoseStreamHandlerCallbackFunction_t loseCB);
 #ifdef __cplusplus
 }
 #endif
