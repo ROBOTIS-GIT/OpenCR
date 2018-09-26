@@ -129,6 +129,16 @@ void drv_uart_flush(uint8_t uart_num)
   UNUSED(uart_num);
 }
 
+// Only called in DMA case. 
+void drv_uart_rx_flush(uint8_t uart_num, uint32_t timeout_ms)
+{
+  uint32_t pre_time_ms = millis();
+  while((drv_uart_read(uart_num) != -1) || (millis() - pre_time_ms < timeout_ms))
+  {
+  }
+}
+
+
 void drv_uart_start_rx(uint8_t uart_num)
 {
   if(is_uart_mode[uart_num] == DRV_UART_IRQ_MODE)
@@ -167,6 +177,7 @@ uint8_t drv_uart_get_mode(uint8_t uart_num)
   return is_uart_mode[uart_num];
 }
 
+// Only called in DMA mode
 uint32_t  drv_uart_available(uint8_t uart_num)
 {
   uint32_t length = 0;
@@ -180,17 +191,36 @@ uint32_t  drv_uart_available(uint8_t uart_num)
   return length;
 }
 
+// Only called in DMA mode
 int drv_uart_read(uint8_t uart_num)
 {
     int ret = -1;
     int index;
 
-    index = drv_uart_rx_buf_tail[uart_num];
+    // Need to update head like available does - DMA updates it...
+    drv_uart_rx_buf_head[uart_num] = DRV_UART_RX_BUF_LENGTH - hdma_rx[uart_num].Instance->NDTR;
+    if (drv_uart_rx_buf_head[uart_num] != drv_uart_rx_buf_tail[uart_num])
+    {
+      index = drv_uart_rx_buf_tail[uart_num];
+      ret = drv_uart_rx_buf[uart_num][index];
+      drv_uart_rx_buf_tail[uart_num] = (drv_uart_rx_buf_tail[uart_num] + 1) % DRV_UART_RX_BUF_LENGTH;
+    }
+    return ret;
+}
 
-    ret = drv_uart_rx_buf[uart_num][index];
+// Only called in DMA mode
+int drv_uart_peek(uint8_t uart_num)
+{
+    int ret = -1;
+    int index;
 
-    drv_uart_rx_buf_tail[uart_num] = (drv_uart_rx_buf_tail[uart_num] + 1) % DRV_UART_RX_BUF_LENGTH;
-
+    // Need to update head like available does - DMA updates it...
+    drv_uart_rx_buf_head[uart_num] = DRV_UART_RX_BUF_LENGTH - hdma_rx[uart_num].Instance->NDTR;
+    if (drv_uart_rx_buf_head[uart_num] != drv_uart_rx_buf_tail[uart_num])
+    {
+      index = drv_uart_rx_buf_tail[uart_num];
+      ret = drv_uart_rx_buf[uart_num][index];
+    }
     return ret;
 }
 

@@ -90,10 +90,17 @@ int UARTClass::availableForWrite(void)
 
 int UARTClass::peek( void )
 {
-  if ( rx_buffer.iHead == rx_buffer.iTail )
-    return -1;
+  if(drv_uart_get_mode(_uart_num) == DRV_UART_IRQ_MODE )
+  {
+    if ( rx_buffer.iHead == rx_buffer.iTail )
+      return -1;
 
-  return rx_buffer.buffer[rx_buffer.iTail];
+    return rx_buffer.buffer[rx_buffer.iTail];
+  }
+  else 
+  {
+    return drv_uart_peek(_uart_num);
+  }
 }
 
 int UARTClass::read( void )
@@ -111,14 +118,39 @@ int UARTClass::read( void )
   }
   else
   {
-    rx_cnt++;
-    return drv_uart_read(_uart_num);
+    int return_value = drv_uart_read(_uart_num);
+    if (return_value != -1) 
+    {
+      rx_cnt++;
+    }
+    return return_value; 
   }
 }
 
 void UARTClass::flush( void )
 {
   while (tx_write_size); //wait for transmit data to be sent
+}
+
+void UARTClass::flushRx( uint32_t timeout_ms )
+{
+  if(drv_uart_get_mode(_uart_num) == DRV_UART_IRQ_MODE )
+  {
+    // sort of hack, wait the time specified and then just clear it
+    if (timeout_ms) 
+    {
+      uint32_t pre_time_ms = millis();
+      while((millis() - pre_time_ms) < timeout_ms)
+      {
+      }
+
+    }
+    rx_buffer.iTail = rx_buffer.iHead;  // clear out buffer
+  }
+  else 
+  {
+    drv_uart_rx_flush(_uart_num, timeout_ms);
+  }
 }
 
 size_t UARTClass::write( const uint8_t uc_data )
