@@ -160,19 +160,24 @@ void serialEvent4() __attribute__((weak));
 void serialEvent4() { }
 
 USBSerial Serial;
-UARTClass Serial1(DRV_UART_NUM_1, DRV_UART_IRQ_MODE);
-UARTClass Serial2(DRV_UART_NUM_2, DRV_UART_IRQ_MODE);
-UARTClass Serial3(DRV_UART_NUM_3, DRV_UART_DMA_MODE);
-UARTClass Serial4(DRV_UART_NUM_4, DRV_UART_IRQ_MODE);
+uint8_t serial1_tx_buffer[SERIAL_BUFFER_SIZE] __attribute__((section(".NoneCacheableMem")));
+uint8_t serial2_tx_buffer[SERIAL_BUFFER_SIZE] __attribute__((section(".NoneCacheableMem")));
+uint8_t serial3_tx_buffer[SERIAL_BUFFER_SIZE] __attribute__((section(".NoneCacheableMem")));
+uint8_t serial4_tx_buffer[SERIAL_BUFFER_SIZE] __attribute__((section(".NoneCacheableMem")));
+
+UARTClass Serial1(DRV_UART_NUM_1, DRV_UART_DMA_MODE, serial1_tx_buffer, sizeof(serial1_tx_buffer));
+UARTClass Serial2(DRV_UART_NUM_2, DRV_UART_DMA_MODE, serial2_tx_buffer, sizeof(serial2_tx_buffer));
+UARTClass Serial3(DRV_UART_NUM_3, DRV_UART_DMA_MODE, serial3_tx_buffer, sizeof(serial3_tx_buffer));
+UARTClass Serial4(DRV_UART_NUM_4, DRV_UART_DMA_MODE, serial4_tx_buffer, sizeof(serial4_tx_buffer));
 
 
-//void Tx1_Handler(void){ Serial1.TxHandler(); }
+void Tx1_Handler(void){ Serial1.TxHandler(); }
 void Rx1_Handler(void){ Serial1.RxHandler(); }
-//void Tx2_Handler(void){ Serial2.TxHandler(); }
+void Tx2_Handler(void){ Serial2.TxHandler(); }
 void Rx2_Handler(void){ Serial2.RxHandler(); }
-//void Tx3_Handler(void){ Serial3.TxHandler(); }
+void Tx3_Handler(void){ Serial3.TxHandler(); }
 void Rx3_Handler(void){ Serial3.RxHandler(); }
-//void Tx4_Handler(void){ Serial4.TxHandler(); }
+void Tx4_Handler(void){ Serial4.TxHandler(); }
 void Rx4_Handler(void){ Serial4.RxHandler(); }
 
 

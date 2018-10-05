@@ -920,8 +920,7 @@ HAL_StatusTypeDef HAL_UART_Transmit_DMA(UART_HandleTypeDef *huart, uint8_t *pDat
     huart->hdmatx->XferErrorCallback = UART_DMAError;
 
     /* Enable the UART transmit DMA channel */
-    tmp = (uint32_t*)&pData;
-    HAL_DMA_Start_IT(huart->hdmatx, *(uint32_t*)tmp, (uint32_t)&huart->Instance->TDR, Size);
+    HAL_DMA_Start_IT(huart->hdmatx, (uint32_t)pData, (uint32_t)&huart->Instance->TDR, Size);
 
     /* Clear the TC flag in the SR register by writing 0 to it */
     __HAL_UART_CLEAR_IT(huart, UART_FLAG_TC);

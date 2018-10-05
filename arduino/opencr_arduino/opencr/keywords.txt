@@ -1,0 +1,14 @@
+# OpenCR specific functions
+Serial4	KEYWORD1
+printf	KEYWORD2
+flushRx	KEYWORD2
+getBaudRate	KEYWORD2
+getRxCnt	KEYWORD2
+getTxCnt	KEYWORD2
+
+# Arduino constants
+
+# advanced pin states
+OUTPUT_OPEN	LITERAL1
+INPUT_PULLDOWN	LITERAL1
+INPUT_ANALOG	LITERAL1
