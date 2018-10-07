@@ -184,7 +184,7 @@ size_t UARTClass::write( const uint8_t uc_data )
 void inline UARTClass::startNextTransmitDMAorIT()
 {
   tx_write_size = (tx_buffer.iTail < tx_buffer.iHead)? tx_buffer.iHead-tx_buffer.iTail : tx_buffer.buffer_size - tx_buffer.iTail;
-  if (drv_uart_write_dma_it(_uart_num, &tx_buffer.buffer[tx_buffer.iTail], tx_write_size) != HAL_OK) 
+  if (drv_uart_write_dma_it(_uart_num, &tx_buffer.buffer[tx_buffer.iTail], tx_write_size) != 0) 
   {
     tx_write_size = 0;  // error so clear it out
   }

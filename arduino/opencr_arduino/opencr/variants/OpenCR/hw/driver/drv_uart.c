@@ -112,14 +112,14 @@ uint32_t drv_uart_write(uint8_t uart_num, const uint8_t wr_data)
   return 1;
 }
 
-HAL_StatusTypeDef drv_uart_write_dma_it(uint8_t uart_num, const uint8_t *wr_data, uint16_t Size)
+uint32_t drv_uart_write_dma_it(uint8_t uart_num, const uint8_t *wr_data, uint16_t Size)
 {
   // call the DMA or IT function depending on if configured for DMA or not.
   if (is_uart_write_dma_mode[uart_num]) 
   {
-    return HAL_UART_Transmit_DMA(&huart[uart_num], (uint8_t *)wr_data, Size);  
+    return (uint32_t)HAL_UART_Transmit_DMA(&huart[uart_num], (uint8_t *)wr_data, Size);  
   }
-  return HAL_UART_Transmit_IT(&huart[uart_num], (uint8_t *)wr_data, Size);  
+  return (uint32_t)HAL_UART_Transmit_IT(&huart[uart_num], (uint8_t *)wr_data, Size);  
 }
 
 
