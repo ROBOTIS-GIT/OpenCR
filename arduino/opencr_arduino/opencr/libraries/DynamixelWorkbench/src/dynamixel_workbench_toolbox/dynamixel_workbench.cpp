@@ -622,3 +622,13 @@ void DynamixelWorkbench::millis(uint16_t msec)
     usleep(1000*msec);
 #endif
 }
+
+ControlTableItem* DynamixelWorkbench::getControlItemPtr(uint8_t id)
+{
+  return driver_.getControlItemPtr(id);
+}
+
+uint8_t DynamixelWorkbench::getTheNumberOfItem(uint8_t id)
+{
+  return driver_.getTheNumberOfItem(id);
+}
