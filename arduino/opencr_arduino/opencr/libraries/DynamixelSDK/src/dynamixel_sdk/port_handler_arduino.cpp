@@ -58,6 +58,10 @@ PortHandlerArduino::PortHandlerArduino(const char *port_name)
   pinMode(BDPIN_DXL_PWR_EN, OUTPUT);
 
   setPowerOff();
+
+  // Setup to use our automatic Half duplex IO pin
+  DYNAMIXEL_SERIAL.transmitterEnable(BDPIN_DXL_DIR);
+
 #elif defined(__OPENCM904__)
   if (port_name[0] == '1')
   {
@@ -112,6 +116,15 @@ void PortHandlerArduino::clearPort()
 #endif
 }
 
+void PortHandlerArduino::flushPort()
+{
+#if defined(__OPENCR__)
+  DYNAMIXEL_SERIAL.flush();
+#elif defined(__OPENCM904__)
+  p_dxl_serial->flush();   
+#endif
+}
+
 void PortHandlerArduino::setPortName(const char *port_name)
 {
   strcpy(port_name_, port_name);
@@ -157,6 +170,7 @@ int PortHandlerArduino::readPort(uint8_t *packet, int length)
   int rx_length;
 
 #if defined(__OPENCR__)
+  flushPort();  // Make sure any pending outputs had previously completed. 
   rx_length = DYNAMIXEL_SERIAL.available();
 #elif defined(__OPENCM904__)
   rx_length = p_dxl_serial->available();
@@ -290,7 +304,8 @@ void PortHandlerArduino::setPowerOff()
 void PortHandlerArduino::setTxEnable()
 {
 #if defined(__OPENCR__)
-  drv_dxl_tx_enable(TRUE);
+//  digitalWriteFast(2, HIGH);
+//  drv_dxl_tx_enable(TRUE);
 #elif defined(__OPENCM904__)
   drv_dxl_tx_enable(socket_fd_, TRUE);
 #endif
@@ -299,7 +314,9 @@ void PortHandlerArduino::setTxEnable()
 void PortHandlerArduino::setTxDisable()
 {
 #if defined(__OPENCR__)
-  drv_dxl_tx_enable(FALSE);
+  DYNAMIXEL_SERIAL.flush(); // make sure it completes before we disable... 
+//  drv_dxl_tx_enable(FALSE);
+//  digitalWriteFast(2, LOW);
 #elif defined(__OPENCM904__)
   drv_dxl_tx_enable(socket_fd_, FALSE);
 #endif

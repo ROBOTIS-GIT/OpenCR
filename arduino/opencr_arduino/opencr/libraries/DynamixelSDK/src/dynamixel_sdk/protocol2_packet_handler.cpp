@@ -466,6 +466,9 @@ int Protocol2PacketHandler::txRxPacket(PortHandler *port, uint8_t *txpacket, uin
     return result;
   }
 
+  // Make sure the writes complete before we start timeout.
+  port->flushPort();  // make sure all writes have completed first...
+
   // set packet timeout
   if (txpacket[PKT_INSTRUCTION] == INST_READ)
   {
@@ -543,6 +546,9 @@ int Protocol2PacketHandler::broadcastPing(PortHandler *port, std::vector<uint8_t
     port->is_using_ = false;
     return result;
   }
+
+  // Make sure the writes complete before we start timeout.
+  port->flushPort();  // make sure all writes have completed first...
 
   // set rx timeout
   port->setPacketTimeout((uint16_t)(wait_length * 30));

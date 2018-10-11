@@ -108,6 +108,12 @@ class PortHandlerArduino : public PortHandler
   void    clearPort();
 
   ////////////////////////////////////////////////////////////////////////////////
+  /// @brief The function that flush the port
+  /// @description The function waits until writes complete
+  ////////////////////////////////////////////////////////////////////////////////
+  void    flushPort();
+
+  ////////////////////////////////////////////////////////////////////////////////
   /// @brief The function that sets port name into the port handler
   /// @description The function sets port name into the port handler.
   /// @param port_name Port name

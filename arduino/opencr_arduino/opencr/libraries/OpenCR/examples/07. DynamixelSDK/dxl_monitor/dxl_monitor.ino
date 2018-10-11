@@ -20,6 +20,7 @@
 void setup()
 {
   CMD_SERIAL.begin(57600);
+  pinMode(2, OUTPUT);
 }
 
 void loop()
@@ -128,7 +129,10 @@ char * fgets ( char * str, int num, FILE * stream )
 
       if( index < num-1 && ch != 0x0D )
       {
-        str[index++] = ch;
+        if ( ch != 0X0A )  // Ignore line feeds
+        {
+          str[index++] = ch;
+        }
       }
       if( ch == 0x0D)
       {
@@ -488,7 +492,7 @@ void dxl_monitor_main(void)
         std::vector<unsigned char> vec;
 
         int dxl_comm_result = packetHandler2->broadcastPing(portHandler, vec);
-        if (dxl_comm_result != COMM_SUCCESS) packetHandler2->printTxRxResult(dxl_comm_result);
+        if (dxl_comm_result != COMM_SUCCESS) _fprintf(stderr, (char*) "%s\n", packetHandler2->getTxRxResult(dxl_comm_result));
 
         for (unsigned int i = 0; i < vec.size(); i++)
         {
@@ -644,7 +648,7 @@ void dxl_monitor_main(void)
         }
         else
         {
-          packetHandler2->printTxRxResult(dxl_comm_result);
+          _fprintf(stderr, (char*) "%s\n", packetHandler2->getTxRxResult(dxl_comm_result));
           _fprintf(stderr, (char*) "\n Fail to reboot! \n\n");
         }
       }
@@ -666,7 +670,7 @@ void dxl_monitor_main(void)
         }
         else
         {
-          packetHandler1->printTxRxResult(dxl_comm_result);
+          _fprintf(stderr, (char*) "%s\n", packetHandler1->getTxRxResult(dxl_comm_result));
           _fprintf(stderr, (char*) "\n Fail to reset! \n\n");
         }
       }
@@ -687,7 +691,7 @@ void dxl_monitor_main(void)
         }
         else
         {
-          packetHandler2->printTxRxResult(dxl_comm_result);
+          _fprintf(stderr, (char*) "%s\n", packetHandler2->getTxRxResult(dxl_comm_result));
           _fprintf(stderr, (char*) "\n Fail to reset! \n\n");
         }
       }
