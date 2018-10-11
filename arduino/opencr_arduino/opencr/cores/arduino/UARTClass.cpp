@@ -20,20 +20,25 @@
 #include <stdio.h>
 #include <string.h>
 #include "UARTClass.h"
-
-
+#include "wiring_digital.h"
+#include "wiring_constants.h"
+#include "variant.h"
+#include "digitalWriteFast.h"
 // Constructors ////////////////////////////////////////////////////////////////
 UARTClass::UARTClass(void){
 
 }
 
-UARTClass::UARTClass(uint8_t uart_num, uint8_t uart_mode)
+UARTClass::UARTClass(uint8_t uart_num, uint8_t uart_mode, uint8_t *txBuffer, uint16_t tx_buffer_size)
 {
   _uart_num  = uart_num;
   _uart_mode = uart_mode;
   _uart_baudrate = 0;
   rx_cnt = 0;
   tx_cnt = 0;
+  tx_write_size = 0;
+  tx_buffer.buffer = txBuffer;
+  tx_buffer.buffer_size = tx_buffer_size;
 }
 
 void UARTClass::begin(const uint32_t dwBaudRate)
@@ -45,8 +50,11 @@ void UARTClass::begin(const uint32_t dwBaudRate, const UARTModes config)
 {
   UNUSED(config);
 
+#ifdef DRV_UART_RX_DMA_ONLY
   rx_buffer.iHead = rx_buffer.iTail = 0;
-  tx_buffer.iHead = tx_buffer.iTail = 0;
+#endif
+  tx_buffer.iHead = 0;
+  tx_buffer.iTail = 0;
 
   _uart_baudrate = dwBaudRate;
 
@@ -56,14 +64,16 @@ void UARTClass::begin(const uint32_t dwBaudRate, const UARTModes config)
 void UARTClass::end( void )
 {
   // Clear any received data
+#ifdef DRV_UART_RX_DMA_ONLY
   rx_buffer.iHead = rx_buffer.iTail;
-
+#endif
   // Wait for any outstanding data to be sent
   flush();
 }
 
 int UARTClass::available( void )
 {
+#ifdef DRV_UART_RX_DMA_ONLY
   if(drv_uart_get_mode(_uart_num) == DRV_UART_IRQ_MODE )
   {
     return (uint32_t)(SERIAL_BUFFER_SIZE + rx_buffer.iHead - rx_buffer.iTail) % SERIAL_BUFFER_SIZE;
@@ -72,6 +82,9 @@ int UARTClass::available( void )
   {
     return drv_uart_available(_uart_num);
   }
+#else
+  return drv_uart_available(_uart_num);
+#endif  
 }
 
 int UARTClass::availableForWrite(void)
@@ -84,14 +97,26 @@ int UARTClass::availableForWrite(void)
 
 int UARTClass::peek( void )
 {
-  if ( rx_buffer.iHead == rx_buffer.iTail )
-    return -1;
+#ifdef DRV_UART_RX_DMA_ONLY
+  if(drv_uart_get_mode(_uart_num) == DRV_UART_IRQ_MODE )
+  {
+    if ( rx_buffer.iHead == rx_buffer.iTail )
+      return -1;
 
-  return rx_buffer.buffer[rx_buffer.iTail];
+    return rx_buffer.buffer[rx_buffer.iTail];
+  }
+  else 
+  {
+    return drv_uart_peek(_uart_num);
+  }
+#else
+  return drv_uart_peek(_uart_num);
+#endif  
 }
 
 int UARTClass::read( void )
 {
+#ifdef DRV_UART_RX_DMA_ONLY
   if(drv_uart_get_mode(_uart_num) == DRV_UART_IRQ_MODE )
   {
     // if the head isn't ahead of the tail, we don't have any characters
@@ -105,22 +130,101 @@ int UARTClass::read( void )
   }
   else
   {
-    rx_cnt++;
-    return drv_uart_read(_uart_num);
+    int return_value = drv_uart_read(_uart_num);
+    if (return_value != -1) 
+    {
+      rx_cnt++;
+    }
+    return return_value; 
   }
+#else
+  int return_value = drv_uart_read(_uart_num);
+  if (return_value != -1) 
+  {
+    rx_cnt++;
+  }
+  return return_value; 
+#endif  
 }
 
 void UARTClass::flush( void )
 {
-  while (tx_buffer.iHead != tx_buffer.iTail); //wait for transmit data to be sent
-  // Wait for transmission to complete
+  while (tx_write_size); //wait for transmit data to be sent
+}
+
+void UARTClass::flushRx( uint32_t timeout_ms )
+{
+#ifdef DRV_UART_RX_DMA_ONLY
+  if(drv_uart_get_mode(_uart_num) == DRV_UART_IRQ_MODE )
+  {
+    // sort of hack, wait the time specified and then just clear it
+    if (timeout_ms) 
+    {
+      uint32_t pre_time_ms = millis();
+      while((millis() - pre_time_ms) < timeout_ms)
+      {
+      }
+
+    }
+    rx_buffer.iTail = rx_buffer.iHead;  // clear out buffer
+  }
+  else 
+  {
+    drv_uart_rx_flush(_uart_num, timeout_ms);
+  }
+#else
+  drv_uart_rx_flush(_uart_num, timeout_ms);
+#endif  
 }
 
 size_t UARTClass::write( const uint8_t uc_data )
 {
-  tx_cnt++;
-  return drv_uart_write(_uart_num, uc_data);
+  return write(&uc_data, 1); // Lets call the buffer function to do the main work
 }
+void inline UARTClass::startNextTransmitDMAorIT()
+{
+  tx_write_size = (tx_buffer.iTail < tx_buffer.iHead)? tx_buffer.iHead-tx_buffer.iTail : tx_buffer.buffer_size - tx_buffer.iTail;
+  if (drv_uart_write_dma_it(_uart_num, &tx_buffer.buffer[tx_buffer.iTail], tx_write_size) != 0) 
+  {
+    tx_write_size = 0;  // error so clear it out
+  }
+}
+
+size_t UARTClass::write( const uint8_t *buffer, size_t size )
+{
+  tx_cnt += size;
+  size_t cbLeft = size; 
+
+  // Lets try to put as much of this data into our TX buffer as possible. 
+  while (cbLeft--) 
+  {
+    uint16_t nextWrite = (tx_buffer.iHead + 1) % tx_buffer.buffer_size;
+    if (tx_buffer.iTail == nextWrite) 
+    {
+      // See if we have an active TX or not
+      if (!tx_write_size)
+      {
+        startNextTransmitDMAorIT();
+      }
+      // right now this will wait for the entire previous write to complete before continue...
+      while (tx_buffer.iTail == nextWrite) 
+      {
+
+      }
+    }
+    tx_buffer.buffer[tx_buffer.iHead] = *buffer++;
+    tx_buffer.iHead = nextWrite;
+
+  }
+  // we finished putting stuff on queue, so see if we need to start up write
+  // or if it is already going. 
+  if (!tx_write_size)
+  {
+    startNextTransmitDMAorIT();
+  }
+  return size; 
+}
+
 
 uint32_t UARTClass::getBaudRate( void )
 {
@@ -140,8 +244,7 @@ uint32_t UARTClass::getTxCnt(void)
 
 void UARTClass::RxHandler (void)
 {
-
-
+#ifdef DRV_UART_RX_DMA_ONLY
   if( _uart_mode == DRV_UART_IRQ_MODE )
   {
 
@@ -153,19 +256,23 @@ void UARTClass::RxHandler (void)
     }
     drv_uart_start_rx(_uart_num);
   }
+#endif
 }
 
 void UARTClass::TxHandler(void)
 {
-  /*
-  if( _uart_mode == DRV_UART_IRQ_MODE )
+  // We completed previous write, so update our tail pointer by count
+  tx_buffer.iTail += tx_write_size; 
+  if (tx_buffer.iTail >= tx_buffer.buffer_size) 
+    tx_buffer.iTail = 0;  // Should only wrap to start by our other stuff...
+
+  if (tx_buffer.iHead != tx_buffer.iTail)
   {
-    if (tx_buffer.iHead != tx_buffer.iTail)
-    {
-  		unsigned char c = tx_buffer.buffer[tx_buffer.iTail];
-  		tx_buffer.iTail = (uint16_t)(tx_buffer.iTail + 1) % SERIAL_BUFFER_SIZE;
-  		HAL_UART_Transmit_IT(_pUart, (uint8_t *)&c, 1);
-    }
+    startNextTransmitDMAorIT();
   }
-  */
+  else 
+  {
+    // finished all outstanding writes so lets set count to 0
+    tx_write_size = 0;
+  }
 }

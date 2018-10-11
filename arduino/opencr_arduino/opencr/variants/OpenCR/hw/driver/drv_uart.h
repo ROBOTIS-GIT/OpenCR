@@ -30,16 +30,20 @@
 #define DRV_UART_IRQ_MODE       0
 #define DRV_UART_DMA_MODE       1
 
+//#define DRV_UART_RX_DMA_ONLY	1  
 
 int      drv_uart_init();
 void     drv_uart_begin(uint8_t uart_num, uint8_t uart_mode, uint32_t baudrate);
 uint32_t drv_uart_write(uint8_t uart_num, const uint8_t wr_data);
+uint32_t drv_uart_write_dma_it(uint8_t uart_num, const uint8_t *wr_data, uint16_t Size);
 void     drv_uart_flush(uint8_t uart_num);
+void     drv_uart_rx_flush(uint8_t uart_num, uint32_t timeout_ms);
 void     drv_uart_start_rx(uint8_t uart_num);
 uint32_t drv_uart_read_buf(uint8_t uart_num, uint8_t *p_buf, uint32_t length);
 uint8_t  drv_uart_get_mode(uint8_t uart_num);
 uint32_t drv_uart_available(uint8_t uart_num);
 int      drv_uart_read(uint8_t uart_num);
+int      drv_uart_peek(uint8_t uart_num);
 
 #ifdef __cplusplus
 }
