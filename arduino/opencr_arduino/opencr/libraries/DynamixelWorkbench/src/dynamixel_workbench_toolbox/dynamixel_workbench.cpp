@@ -623,12 +623,12 @@ void DynamixelWorkbench::millis(uint16_t msec)
 #endif
 }
 
-ControlTableItem* DynamixelWorkbench::getControlItemPtr(uint8_t id)
+const ControlTableItem* DynamixelWorkbench::getControlItemPtr(uint8_t id)
 {
   return driver_.getControlItemPtr(id);
 }
 
-uint8_t DynamixelWorkbench::getTheNumberOfItem(uint8_t id)
+uint8_t DynamixelWorkbench::getControlItemCount(uint8_t id)
 {
   return driver_.getTheNumberOfItem(id);
 }

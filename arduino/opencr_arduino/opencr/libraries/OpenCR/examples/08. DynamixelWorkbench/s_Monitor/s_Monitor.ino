@@ -111,8 +111,8 @@ void loop()
 
         // first print model number stuff
         uint16_t model_number = 0;
-        ControlTableItem *cti =  dxl_wb.getControlItemPtr(id);
-        uint8_t cti_count = dxl_wb.getTheNumberOfItem(id);
+        const ControlTableItem *cti =  dxl_wb.getControlItemPtr(id);
+        uint8_t cti_count = dxl_wb.getControlItemCount(id);
         if (cti)
         {
           if (dxl_wb.ping(id, &model_number))

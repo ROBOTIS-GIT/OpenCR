@@ -23,12 +23,6 @@
 
 #include "dynamixel_item.h"
 
-#if defined(__OPENCR__) || defined(__OPENCM904__)
-  #define ITEM_ARRAY_SIZE 14
-#else
-  #define ITEM_ARRAY_SIZE 60
-#endif
-
 typedef struct
 {
   char model_name[20];
@@ -43,14 +37,8 @@ class DynamixelTool
   uint8_t dxl_info_cnt_;
 
  private:
-  ControlTableItem* item_ptr_;
+  const ControlTableItem* item_ptr_;
   ModelInfo* info_ptr_;
-
-#if defined(__OPENCR__) || defined(__OPENCM904__)
-  ControlTableItem item_[ITEM_ARRAY_SIZE];
-#else
-  ControlTableItem item_[ITEM_ARRAY_SIZE];
-#endif
 
   ModelInfo info_;
   uint8_t the_number_of_item_;
@@ -76,8 +64,8 @@ class DynamixelTool
   float getMaxRadian(void);
 
   uint8_t getTheNumberOfItem(void);
-  ControlTableItem* getControlItem(const char *item_name);
-  ControlTableItem* getControlItemPtr(void);
+  const ControlTableItem* getControlItem(const char *item_name);
+  const ControlTableItem* getControlItemPtr(void);
   ModelInfo* getModelInfoPtr(void);
 
  private:
