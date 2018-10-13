@@ -151,6 +151,7 @@ char *DynamixelDriver::getModelName(uint8_t id)
     if (tools_[factor].dxl_info_[i].id == id)
       return tools_[factor].dxl_info_[i].model_name;
   }
+  return NULL;
 }
 
 uint16_t DynamixelDriver::getModelNum(uint8_t id)
@@ -162,6 +163,7 @@ uint16_t DynamixelDriver::getModelNum(uint8_t id)
     if (tools_[factor].dxl_info_[i].id == id)
       return tools_[factor].dxl_info_[i].model_num;
   }
+  return 0;
 }
 
 const ControlTableItem* DynamixelDriver::getControlItemPtr(uint8_t id)
@@ -398,6 +400,7 @@ bool DynamixelDriver::reset(uint8_t id)
       return false;
     }
   }
+  return false;  // should never get here.
 }
 
 bool DynamixelDriver::writeRegister(uint8_t id, const char *item_name, int32_t data)
@@ -606,6 +609,7 @@ uint8_t DynamixelDriver::getToolsFactor(uint8_t id)
       }
     }
   }
+  return 0;   // BUGBUG:: Not sure what a good last resort value is
 }
 
 const char *DynamixelDriver::findModelName(uint16_t model_num)
@@ -718,13 +722,21 @@ bool DynamixelDriver::syncWrite(const char *item_name, int32_t *data)
   uint8_t cnt = 0;
 
   SyncWriteHandler swh;
+  bool swh_found = false;
 
   for (int index = 0; index < sync_write_handler_cnt_; index++)
   {
     if (!strncmp(syncWriteHandler_[index].cti->item_name, item_name, strlen(item_name)))
     {
       swh = syncWriteHandler_[index];
+      swh_found = true;
+      break;
     }
+  }
+
+  if (!swh_found)
+  {
+    return false;
   }
 
   for (int i = 0; i < tools_cnt_; i++)
@@ -764,15 +776,23 @@ bool DynamixelDriver::syncWrite(uint8_t *id, uint8_t id_num, const char *item_na
   uint8_t cnt = 0;
 
   SyncWriteHandler swh;
+  bool swh_found = false;
 
   for (int index = 0; index < sync_write_handler_cnt_; index++)
   {
     if (!strncmp(syncWriteHandler_[index].cti->item_name, item_name, strlen(item_name)))
     {
       swh = syncWriteHandler_[index];
+      swh_found = true;
+      break;
     }
   }
 
+  if (!swh_found)
+  {
+    return false;
+  }
+  
   for (int i = 0; i < id_num; i++)
   {
     data_byte[0] = DXL_LOBYTE(DXL_LOWORD(data[cnt]));
@@ -819,15 +839,21 @@ bool DynamixelDriver::syncRead(const char *item_name, int32_t *data)
   int index = 0;
 
   SyncReadHandler srh;
+  bool srh_found = false;
   
   for (int index = 0; index < sync_read_handler_cnt_; index++)
   {
     if (!strncmp(syncReadHandler_[index].cti->item_name, item_name, strlen(item_name)))
     {
       srh = syncReadHandler_[index];
+      srh_found = true;
+      break; // Found it, don't need to continue search
     }
   }
-
+  if (!srh_found)
+  {
+    return false; // did not find item_name in list
+  }
   for (int i = 0; i < tools_cnt_; i++)
   {
     for (int j = 0; j < tools_[i].dxl_info_cnt_; j++)

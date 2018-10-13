@@ -20,7 +20,7 @@
 static uint8_t the_number_of_item = 0;
 
 
-static ModelInfo model_info = {0.0, };
+static ModelInfo model_info = {0.0, 0.0, 0, 0, 0, 0.0, 0.0};
 
 //=========================================================
 // Servo register definitions

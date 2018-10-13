@@ -397,8 +397,8 @@ const ControlTableItem* DynamixelTool::getControlItem(const char* item_name)
     getControlItem("Present_Speed");
   else if (!strncmp(item_name, "Present_Speed", strlen("Present_Speed")))
     getControlItem("Present_Velocity");
-  else 
-    return NULL;
+
+  return NULL;
 }
 
 const ControlTableItem* DynamixelTool::getControlItemPtr(void)
