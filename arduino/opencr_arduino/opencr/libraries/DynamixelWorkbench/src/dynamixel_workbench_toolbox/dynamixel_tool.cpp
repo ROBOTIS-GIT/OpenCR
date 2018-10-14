@@ -378,8 +378,7 @@ uint8_t DynamixelTool::getTheNumberOfItem(void)
 
 const ControlTableItem* DynamixelTool::getControlItem(const char* item_name)
 {
-  static const ControlTableItem* cti = item_ptr_;    // Why is this static? Not to allocate on stack?
-
+  const ControlTableItem* cti = item_ptr_;  
   for (int num = 0; num < the_number_of_item_; num++)
   {
     if (!strncmp(item_name, cti->item_name, strlen(cti->item_name)))

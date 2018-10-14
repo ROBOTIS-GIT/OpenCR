@@ -411,6 +411,11 @@ bool DynamixelDriver::writeRegister(uint8_t id, const char *item_name, int32_t d
   const ControlTableItem *cti;
   cti = tools_[getToolsFactor(id)].getControlItem(item_name);
 
+  if (cti == NULL)
+  {
+    return false;
+  }
+
   if (cti->data_length == BYTE)
   {
     dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, id, cti->address, (uint8_t)data, &error);
@@ -483,7 +488,11 @@ bool DynamixelDriver::readRegister(uint8_t id, const char *item_name, int32_t *d
 
   const ControlTableItem *cti;
   cti = tools_[getToolsFactor(id)].getControlItem(item_name);
-
+  if (cti == NULL)
+  {
+    return false;
+  }
+  
   if (cti->data_length == BYTE)
   {
     dxl_comm_result = packetHandler_->read1ByteTxRx(portHandler_, id, cti->address, (uint8_t *)&value_8_bit, &error);
@@ -705,6 +714,11 @@ void DynamixelDriver::addSyncWrite(const char *item_name)
   const ControlTableItem *cti;
   cti = tools_[0].getControlItem(item_name);
 
+  if (cti == NULL)
+  {
+    return;
+  }
+
   syncWriteHandler_[sync_write_handler_cnt_].cti = cti;
 
   syncWriteHandler_[sync_write_handler_cnt_++].groupSyncWrite = new dynamixel::GroupSyncWrite(portHandler_,
@@ -822,6 +836,10 @@ void DynamixelDriver::addSyncRead(const char *item_name)
   const ControlTableItem *cti;
   cti = tools_[0].getControlItem(item_name);
 
+  if (cti == NULL)
+  {
+    return;
+  }
   syncReadHandler_[sync_read_handler_cnt_].cti = cti;
   
   syncReadHandler_[sync_read_handler_cnt_++].groupSyncRead = new dynamixel::GroupSyncRead(portHandler_,
@@ -905,6 +923,10 @@ bool DynamixelDriver::addBulkWriteParam(uint8_t id, const char *item_name, int32
 
   const ControlTableItem *cti;
   cti = tools_[getToolsFactor(id)].getControlItem(item_name);
+  if (cti == NULL)
+  {
+    return false;
+  }
 
   data_byte[0] = DXL_LOBYTE(DXL_LOWORD(data));
   data_byte[1] = DXL_HIBYTE(DXL_LOWORD(data));
@@ -946,6 +968,10 @@ bool DynamixelDriver::addBulkReadParam(uint8_t id, const char *item_name)
 
   const ControlTableItem *cti;
   cti = tools_[getToolsFactor(id)].getControlItem(item_name);
+  if (cti == NULL)
+  {
+    return false;
+  }
 
   dxl_addparam_result = groupBulkRead_->addParam(id, cti->address, cti->data_length);
   if (dxl_addparam_result != true)
@@ -974,6 +1000,10 @@ bool DynamixelDriver::bulkRead(uint8_t id, const char *item_name, int32_t *data)
   bool dxl_getdata_result = false;
   const ControlTableItem *cti;
   cti = tools_[getToolsFactor(id)].getControlItem(item_name);
+  if (cti == NULL)
+  {
+    return false;
+  }
 
   dxl_getdata_result = groupBulkRead_->isAvailable(id, cti->address, cti->data_length);
   if (dxl_getdata_result != true)
