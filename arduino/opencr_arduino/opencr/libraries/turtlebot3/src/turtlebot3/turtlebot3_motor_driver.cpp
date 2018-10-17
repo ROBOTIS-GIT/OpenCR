@@ -187,7 +187,7 @@ bool Turtlebot3MotorDriver::writeVelocity(int64_t left_value, int64_t right_valu
   return true;
 }
 
-bool Turtlebot3MotorDriver::controlMotor(const float wheel_separation, float* value)
+bool Turtlebot3MotorDriver::controlMotor(const float wheel_radius, const float wheel_separation, float* value)
 {
   bool dxl_comm_result = false;
   
@@ -199,8 +199,8 @@ bool Turtlebot3MotorDriver::controlMotor(const float wheel_separation, float* va
   wheel_velocity_cmd[LEFT]   = lin_vel - (ang_vel * wheel_separation / 2);
   wheel_velocity_cmd[RIGHT]  = lin_vel + (ang_vel * wheel_separation / 2);
 
-  wheel_velocity_cmd[LEFT]  = constrain(wheel_velocity_cmd[LEFT]  * VELOCITY_CONSTANT_VALUE, -dynamixel_limit_max_velocity_, dynamixel_limit_max_velocity_);
-  wheel_velocity_cmd[RIGHT] = constrain(wheel_velocity_cmd[RIGHT] * VELOCITY_CONSTANT_VALUE, -dynamixel_limit_max_velocity_, dynamixel_limit_max_velocity_);
+  wheel_velocity_cmd[LEFT]  = constrain(wheel_velocity_cmd[LEFT]  * VELOCITY_CONSTANT_VALUE / wheel_radius, -dynamixel_limit_max_velocity_, dynamixel_limit_max_velocity_);
+  wheel_velocity_cmd[RIGHT] = constrain(wheel_velocity_cmd[RIGHT] * VELOCITY_CONSTANT_VALUE / wheel_radius, -dynamixel_limit_max_velocity_, dynamixel_limit_max_velocity_);
 
   dxl_comm_result = writeVelocity((int64_t)wheel_velocity_cmd[LEFT], (int64_t)wheel_velocity_cmd[RIGHT]);
   if (dxl_comm_result == false)

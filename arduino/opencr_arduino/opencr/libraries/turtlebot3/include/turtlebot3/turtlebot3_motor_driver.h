@@ -56,10 +56,10 @@
 #define LEFT                            0
 #define RIGHT                           1
 
-#define VELOCITY_CONSTANT_VALUE         1263.632956882  // V = r * w = r     *        (RPM             * 0.10472)
-                                                        //           = 0.033 * (0.229 * Goal_Velocity) * 0.10472
-                                                        //
-                                                        // Goal_Velocity = V * 1263.632956882
+#define VELOCITY_CONSTANT_VALUE         41.69988758  // V = r * w = r     *        (RPM             * 0.10472)
+                                                     //           = r     * (0.229 * Goal_Velocity) * 0.10472
+                                                     //
+                                                     // Goal_Velocity = V / r * 41.69988757710309
 
 #define DEBUG_SERIAL  SerialBT2
 
@@ -74,7 +74,7 @@ class Turtlebot3MotorDriver
   bool getTorque();
   bool readEncoder(int32_t &left_value, int32_t &right_value);
   bool writeVelocity(int64_t left_value, int64_t right_value);
-  bool controlMotor(const float wheel_separation, float* value);
+  bool controlMotor(const float wheel_radius, const float wheel_separation, float* value);
 
  private:
   uint32_t baudrate_;
