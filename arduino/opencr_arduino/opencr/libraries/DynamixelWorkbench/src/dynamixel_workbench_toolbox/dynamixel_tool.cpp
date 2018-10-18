@@ -379,9 +379,11 @@ uint8_t DynamixelTool::getTheNumberOfItem(void)
 const ControlTableItem* DynamixelTool::getControlItem(const char* item_name)
 {
   const ControlTableItem* cti = item_ptr_;  
+  uint8_t name_length = strlen(item_name);
   for (int num = 0; num < the_number_of_item_; num++)
   {
-    if (!strncmp(item_name, cti->item_name, strlen(cti->item_name)))
+    if ((name_length == cti->item_name_length) && 
+        (memcmp(item_name, cti->item_name, name_length) == 0) )
     {
       return cti;
     }
@@ -396,7 +398,6 @@ const ControlTableItem* DynamixelTool::getControlItem(const char* item_name)
     getControlItem("Present_Speed");
   else if (!strncmp(item_name, "Present_Speed", strlen("Present_Speed")))
     getControlItem("Present_Velocity");
-
   return NULL;
 }
 
