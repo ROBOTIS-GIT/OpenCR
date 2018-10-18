@@ -39,13 +39,13 @@
 
 typedef struct 
 {
-  ControlTableItem *cti; 
+  const ControlTableItem *cti; 
   dynamixel::GroupSyncWrite *groupSyncWrite;    
 } SyncWriteHandler;
 
 typedef struct 
 {
-  ControlTableItem *cti;
+  const ControlTableItem *cti;
   dynamixel::GroupSyncRead  *groupSyncRead;     
 } SyncReadHandler;
 
@@ -84,7 +84,7 @@ class DynamixelDriver
   int getBaudrate(void);
   char* getModelName(uint8_t id);
   uint16_t getModelNum(uint8_t id);
-  ControlTableItem* getControlItemPtr(uint8_t id);
+  const ControlTableItem* getControlItemPtr(uint8_t id);
   uint8_t getTheNumberOfItem(uint8_t id);
 
   bool scan(uint8_t *get_id, uint8_t *get_id_num, uint8_t range = 200);

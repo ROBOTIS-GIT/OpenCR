@@ -151,6 +151,7 @@ char *DynamixelDriver::getModelName(uint8_t id)
     if (tools_[factor].dxl_info_[i].id == id)
       return tools_[factor].dxl_info_[i].model_name;
   }
+  return NULL;
 }
 
 uint16_t DynamixelDriver::getModelNum(uint8_t id)
@@ -162,9 +163,10 @@ uint16_t DynamixelDriver::getModelNum(uint8_t id)
     if (tools_[factor].dxl_info_[i].id == id)
       return tools_[factor].dxl_info_[i].model_num;
   }
+  return 0;
 }
 
-ControlTableItem* DynamixelDriver::getControlItemPtr(uint8_t id)
+const ControlTableItem* DynamixelDriver::getControlItemPtr(uint8_t id)
 {
   uint8_t factor = getToolsFactor(id);
 
@@ -398,6 +400,7 @@ bool DynamixelDriver::reset(uint8_t id)
       return false;
     }
   }
+  return false;  // should never get here.
 }
 
 bool DynamixelDriver::writeRegister(uint8_t id, const char *item_name, int32_t data)
@@ -405,8 +408,13 @@ bool DynamixelDriver::writeRegister(uint8_t id, const char *item_name, int32_t d
   uint8_t error = 0;
   int dxl_comm_result = COMM_TX_FAIL;
 
-  ControlTableItem *cti;
+  const ControlTableItem *cti;
   cti = tools_[getToolsFactor(id)].getControlItem(item_name);
+
+  if (cti == NULL)
+  {
+    return false;
+  }
 
   if (cti->data_length == BYTE)
   {
@@ -478,9 +486,13 @@ bool DynamixelDriver::readRegister(uint8_t id, const char *item_name, int32_t *d
   int16_t value_16_bit = 0;
   int32_t value_32_bit = 0;
 
-  ControlTableItem *cti;
+  const ControlTableItem *cti;
   cti = tools_[getToolsFactor(id)].getControlItem(item_name);
-
+  if (cti == NULL)
+  {
+    return false;
+  }
+  
   if (cti->data_length == BYTE)
   {
     dxl_comm_result = packetHandler_->read1ByteTxRx(portHandler_, id, cti->address, (uint8_t *)&value_8_bit, &error);
@@ -606,6 +618,7 @@ uint8_t DynamixelDriver::getToolsFactor(uint8_t id)
       }
     }
   }
+  return 0;   // BUGBUG:: Not sure what a good last resort value is
 }
 
 const char *DynamixelDriver::findModelName(uint16_t model_num)
@@ -698,8 +711,13 @@ const char *DynamixelDriver::findModelName(uint16_t model_num)
 
 void DynamixelDriver::addSyncWrite(const char *item_name)
 {
-  ControlTableItem *cti;
+  const ControlTableItem *cti;
   cti = tools_[0].getControlItem(item_name);
+
+  if (cti == NULL)
+  {
+    return;
+  }
 
   syncWriteHandler_[sync_write_handler_cnt_].cti = cti;
 
@@ -718,13 +736,21 @@ bool DynamixelDriver::syncWrite(const char *item_name, int32_t *data)
   uint8_t cnt = 0;
 
   SyncWriteHandler swh;
+  bool swh_found = false;
 
   for (int index = 0; index < sync_write_handler_cnt_; index++)
   {
     if (!strncmp(syncWriteHandler_[index].cti->item_name, item_name, strlen(item_name)))
     {
       swh = syncWriteHandler_[index];
+      swh_found = true;
+      break;
     }
+  }
+
+  if (!swh_found)
+  {
+    return false;
   }
 
   for (int i = 0; i < tools_cnt_; i++)
@@ -764,15 +790,23 @@ bool DynamixelDriver::syncWrite(uint8_t *id, uint8_t id_num, const char *item_na
   uint8_t cnt = 0;
 
   SyncWriteHandler swh;
+  bool swh_found = false;
 
   for (int index = 0; index < sync_write_handler_cnt_; index++)
   {
     if (!strncmp(syncWriteHandler_[index].cti->item_name, item_name, strlen(item_name)))
     {
       swh = syncWriteHandler_[index];
+      swh_found = true;
+      break;
     }
   }
 
+  if (!swh_found)
+  {
+    return false;
+  }
+  
   for (int i = 0; i < id_num; i++)
   {
     data_byte[0] = DXL_LOBYTE(DXL_LOWORD(data[cnt]));
@@ -799,9 +833,13 @@ bool DynamixelDriver::syncWrite(uint8_t *id, uint8_t id_num, const char *item_na
 
 void DynamixelDriver::addSyncRead(const char *item_name)
 {
-  ControlTableItem *cti;
+  const ControlTableItem *cti;
   cti = tools_[0].getControlItem(item_name);
 
+  if (cti == NULL)
+  {
+    return;
+  }
   syncReadHandler_[sync_read_handler_cnt_].cti = cti;
   
   syncReadHandler_[sync_read_handler_cnt_++].groupSyncRead = new dynamixel::GroupSyncRead(portHandler_,
@@ -819,15 +857,21 @@ bool DynamixelDriver::syncRead(const char *item_name, int32_t *data)
   int index = 0;
 
   SyncReadHandler srh;
+  bool srh_found = false;
   
   for (int index = 0; index < sync_read_handler_cnt_; index++)
   {
     if (!strncmp(syncReadHandler_[index].cti->item_name, item_name, strlen(item_name)))
     {
       srh = syncReadHandler_[index];
+      srh_found = true;
+      break; // Found it, don't need to continue search
     }
   }
-
+  if (!srh_found)
+  {
+    return false; // did not find item_name in list
+  }
   for (int i = 0; i < tools_cnt_; i++)
   {
     for (int j = 0; j < tools_[i].dxl_info_cnt_; j++)
@@ -877,8 +921,12 @@ bool DynamixelDriver::addBulkWriteParam(uint8_t id, const char *item_name, int32
   bool dxl_addparam_result = false;
   uint8_t data_byte[4] = {0, };
 
-  ControlTableItem *cti;
+  const ControlTableItem *cti;
   cti = tools_[getToolsFactor(id)].getControlItem(item_name);
+  if (cti == NULL)
+  {
+    return false;
+  }
 
   data_byte[0] = DXL_LOBYTE(DXL_LOWORD(data));
   data_byte[1] = DXL_HIBYTE(DXL_LOWORD(data));
@@ -918,8 +966,12 @@ bool DynamixelDriver::addBulkReadParam(uint8_t id, const char *item_name)
 {
   bool dxl_addparam_result = false;
 
-  ControlTableItem *cti;
+  const ControlTableItem *cti;
   cti = tools_[getToolsFactor(id)].getControlItem(item_name);
+  if (cti == NULL)
+  {
+    return false;
+  }
 
   dxl_addparam_result = groupBulkRead_->addParam(id, cti->address, cti->data_length);
   if (dxl_addparam_result != true)
@@ -946,8 +998,12 @@ bool DynamixelDriver::sendBulkReadPacket()
 bool DynamixelDriver::bulkRead(uint8_t id, const char *item_name, int32_t *data)
 {
   bool dxl_getdata_result = false;
-  ControlTableItem *cti;
+  const ControlTableItem *cti;
   cti = tools_[getToolsFactor(id)].getControlItem(item_name);
+  if (cti == NULL)
+  {
+    return false;
+  }
 
   dxl_getdata_result = groupBulkRead_->isAvailable(id, cti->address, cti->data_length);
   if (dxl_getdata_result != true)

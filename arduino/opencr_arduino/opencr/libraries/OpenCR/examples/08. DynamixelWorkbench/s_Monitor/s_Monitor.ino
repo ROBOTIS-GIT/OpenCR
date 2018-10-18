@@ -1,17 +1,17 @@
 /*******************************************************************************
-* Copyright 2016 ROBOTIS CO., LTD.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
+  Copyright 2016 ROBOTIS CO., LTD.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
 *******************************************************************************/
 
 /* Authors: Taehun Lim (Darby) */
@@ -19,13 +19,14 @@
 #include <DynamixelWorkbench.h>
 
 #if defined(__OPENCM904__)
-  #define DEVICE_NAME "3" //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
+#define DEVICE_NAME "3" //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
 #elif defined(__OPENCR__)
-  #define DEVICE_NAME ""
-#endif   
+#define DEVICE_NAME ""
+#endif
 
 #define STRING_BUF_NUM 64
 String cmd[STRING_BUF_NUM];
+int cmd_string_cnt;
 
 DynamixelWorkbench dxl_wb;
 uint8_t get_id[16];
@@ -33,18 +34,18 @@ uint8_t scan_cnt = 0;
 uint8_t ping_cnt = 0;
 
 bool isAvailableID(uint8_t id);
-void split(String data, char separator, String* temp);
+int split(String data, char separator, String* temp);
 void printInst();
 
-void setup() 
+void setup()
 {
   Serial.begin(57600);
-  while(!Serial); // Open a Serial Monitor  
+  while (!Serial); // Open a Serial Monitor
 
   printInst();
 }
 
-void loop() 
+void loop()
 {
   if (Serial.available())
   {
@@ -53,7 +54,7 @@ void loop()
 
     read_string.trim();
 
-    split(read_string, ' ', cmd);
+    cmd_string_cnt = split(read_string, ' ', cmd);
 
     if (cmd[0] == "help")
     {
@@ -61,21 +62,19 @@ void loop()
     }
     else if (cmd[0] == "begin")
     {
-      if (cmd[1] == '\0')
-        cmd[1] = String("57600");
-
-      uint32_t baud = cmd[1].toInt();
+      uint32_t baud = 57600;
+      if (cmd_string_cnt > 1)
+        baud = cmd[1].toInt();
       if (dxl_wb.begin(DEVICE_NAME, baud))
         Serial.println("Succeed to begin(" + String(baud) + ")");
       else
         Serial.println("Failed to begin");
     }
     else if (cmd[0] == "scan")
-    { 
-      if (cmd[1] == '\0')
-        cmd[1] = String("100");
-
-      uint8_t range = cmd[1].toInt();
+    {
+      uint8_t range = 100;  // default
+      if (cmd_string_cnt > 1)
+        range = cmd[1].toInt();
       dxl_wb.scan(get_id, &scan_cnt, range);
 
       if (scan_cnt == 0)
@@ -89,10 +88,10 @@ void loop()
     }
     else if (cmd[0] == "ping")
     {
-      if (cmd[1] == '\0')
-        cmd[1] = String("1");
+      get_id[ping_cnt] = 1; // default to 1
+      if (cmd_string_cnt > 1)
+        get_id[ping_cnt] = cmd[1].toInt();
 
-      get_id[ping_cnt] = cmd[1].toInt();
       uint16_t model_number = 0;
 
       if (dxl_wb.ping(get_id[ping_cnt], &model_number))
@@ -105,7 +104,40 @@ void loop()
     }
     else if (isAvailableID(cmd[1].toInt()))
     {
-      if (cmd[0] == "id")
+      if (cmd[0] == "info")
+      {
+        // Lets loop through all of the information for this servo...
+        uint8_t id     = cmd[1].toInt();
+
+        // first print model number stuff
+        uint16_t model_number = 0;
+        const ControlTableItem *cti =  dxl_wb.getControlItemPtr(id);
+        uint8_t cti_count = dxl_wb.getControlItemCount(id);
+        if (cti)
+        {
+          if (dxl_wb.ping(id, &model_number))
+          {
+            Serial.print("Servo Info for id : ");
+            Serial.print(id, DEC);
+            Serial.print(" model_number : ");
+            Serial.print(model_number, DEC);
+            Serial.print("(");
+            Serial.print(dxl_wb.getModelName(id));
+            Serial.println(")");
+          }
+          while (cti_count--)
+          {
+            Serial.print("  ");
+            Serial.print(cti->item_name);
+            Serial.print(": ");
+            int32_t value = dxl_wb.itemRead(id, cti->item_name);
+            Serial.println(value, DEC);
+            cti++;
+          }
+        }
+      }
+
+      else if (cmd[0] == "id")
       {
         uint8_t id     = cmd[1].toInt();
         uint8_t new_id = cmd[2].toInt();
@@ -145,7 +177,7 @@ void loop()
 
         dxl_wb.jointMode(id);
         if (dxl_wb.goalPosition(id, goal))
-        Serial.println("Succeed to joint command!!");
+          Serial.println("Succeed to joint command!!");
         else
           Serial.println("Failed");
 
@@ -163,11 +195,11 @@ void loop()
       }
       else if (cmd[0] == "write")
       {
-        uint8_t id = cmd[1].toInt();      
-        int32_t value = cmd[3].toInt(); 
+        uint8_t id = cmd[1].toInt();
+        int32_t value = cmd[3].toInt();
 
         if (dxl_wb.itemWrite(id, cmd[2].c_str(), value))
-        {        
+        {
           Serial.println("Succeed to write command!!");
         }
         else
@@ -176,7 +208,7 @@ void loop()
       else if (cmd[0] == "read")
       {
         uint8_t id = cmd[1].toInt();
-              
+
         int32_t value = dxl_wb.itemRead(id, cmd[2].c_str());
 
         Serial.println("read data : " + String(value));
@@ -199,42 +231,48 @@ void loop()
         else
           Serial.println("Failed to reset");
       }
-      else 
+      else
       {
         Serial.println("Wrong command");
       }
     }
-    else 
+    else
     {
       Serial.println("Please check ID");
     }
   }
 }
 
-void split(String data, char separator, String* temp)
+int split(String data, char separator, String* temp)
 {
-	int cnt = 0;
-	int get_index = 0;
+  int cnt = 0;
+  int get_index = 0;
 
   String copy = data;
-  
-	while(true)
-	{
-		get_index = copy.indexOf(separator);
 
-		if(-1 != get_index)
-		{
-			temp[cnt] = copy.substring(0, get_index);
+  // Clear out anything in the first 4 strings...
+  temp[0] = "";
+  temp[1] = "";
+  temp[2] = "";
+  temp[3] = "";
 
-			copy = copy.substring(get_index + 1);
-		}
-		else
-		{
-      temp[cnt] = copy.substring(0, copy.length());
-			break;
-		}
-		++cnt;
-	}
+  while (true)
+  {
+    get_index = copy.indexOf(separator);
+
+    if (-1 != get_index)
+    {
+      temp[cnt++] = copy.substring(0, get_index);
+
+      copy = copy.substring(get_index + 1);
+    }
+    else
+    {
+      temp[cnt++] = copy.substring(0, copy.length());
+      break;
+    }
+  }
+  return cnt;
 }
 
 bool isAvailableID(uint8_t id)
@@ -257,6 +295,7 @@ void printInst(void)
   Serial.println("begin  (BAUD)");
   Serial.println("scan   (RANGE)");
   Serial.println("ping   (ID)");
+  Serial.println("info   (ID)");
   Serial.println("id     (ID) (NEW_ID)");
   Serial.println("baud   (ID) (NEW_BAUD)");
   Serial.println("torque (ID) (VALUE)");

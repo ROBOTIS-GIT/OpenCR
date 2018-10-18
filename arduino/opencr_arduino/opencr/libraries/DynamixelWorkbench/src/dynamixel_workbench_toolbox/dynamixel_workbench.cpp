@@ -388,6 +388,7 @@ int32_t DynamixelWorkbench::itemRead(uint8_t id, const char* item_name)
 
   if (driver_.readRegister(id, item_name, &data))
     return data;
+  return 0; // Should decide on error value
 }
 
 int32_t  DynamixelWorkbench::itemRead(uint8_t id, uint16_t addr, uint8_t length)
@@ -396,6 +397,7 @@ int32_t  DynamixelWorkbench::itemRead(uint8_t id, uint16_t addr, uint8_t length)
 
   if (driver_.readRegister(id, addr, length, &data))
     return data; 
+  return 0; // Should decide on error value
 }
 
 int32_t* DynamixelWorkbench::syncRead(const char *item_name)
@@ -403,6 +405,7 @@ int32_t* DynamixelWorkbench::syncRead(const char *item_name)
   static int32_t data[16];
   if (driver_.syncRead(item_name, data))
     return data;
+  return 0; // Should decide on error value
 }
 
 int32_t DynamixelWorkbench::bulkRead(uint8_t id, const char* item_name)
@@ -410,6 +413,7 @@ int32_t DynamixelWorkbench::bulkRead(uint8_t id, const char* item_name)
   static int32_t data;
   if (driver_.bulkRead(id, item_name, &data))
     return data;
+  return 0; // Should decide on error value
 }
 
 void DynamixelWorkbench::addSyncWrite(const char* item_name)
@@ -621,4 +625,14 @@ void DynamixelWorkbench::millis(uint16_t msec)
 #else
     usleep(1000*msec);
 #endif
+}
+
+const ControlTableItem* DynamixelWorkbench::getControlItemPtr(uint8_t id)
+{
+  return driver_.getControlItemPtr(id);
+}
+
+uint8_t DynamixelWorkbench::getControlItemCount(uint8_t id)
+{
+  return driver_.getTheNumberOfItem(id);
 }

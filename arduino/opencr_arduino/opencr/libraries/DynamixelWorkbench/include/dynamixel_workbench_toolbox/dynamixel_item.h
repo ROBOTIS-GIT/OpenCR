@@ -81,7 +81,7 @@ typedef struct
 } ModelInfo;
 
 uint8_t getTheNumberOfControlItem();
-ControlTableItem* getConrolTableItem(uint16_t model_number);
+const ControlTableItem* getConrolTableItem(uint16_t model_number);
 ModelInfo* getModelInfo(uint16_t model_number);
 
 #endif //DYNAMIXEL_H
