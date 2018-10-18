@@ -102,7 +102,6 @@ class DynamixelWorkbench
   int16_t convertTorque2Value(uint8_t id, float torque);
   float convertValue2Torque(uint8_t id, int16_t value);
 
-  // Wish List... 
   const ControlTableItem* getControlItemPtr(uint8_t id);
   uint8_t getControlItemCount(uint8_t id);
 
