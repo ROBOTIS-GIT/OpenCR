@@ -59,7 +59,6 @@ class WINDECLSPEC GroupSyncRead
 
   bool            last_result_;
   bool            is_param_changed_;
-
   uint8_t        *param_;
   uint16_t        start_address_;
   uint16_t        data_length_;
@@ -80,6 +79,30 @@ class WINDECLSPEC GroupSyncRead
   /// @brief The function that calls clearParam function to clear the parameter list for Sync Read
   ////////////////////////////////////////////////////////////////////////////////
   ~GroupSyncRead() { clearParam(); }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief Two part initialization of Sync Read
+  ///       Needed if you wish to create global objects and not use new...
+  ///       as things like PortHandler and PacketHandler are not initialized yet
+  /// @param port PortHandler instance
+  /// @param ph PacketHandler instance
+  /// @param start_address Address of the data for read
+  /// @param data_length Length of the data for read
+  ////////////////////////////////////////////////////////////////////////////////
+  GroupSyncRead(uint16_t start_address, uint16_t data_length);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief Second part of two part initialization of Sync Read
+  ///       Needed if you wish to create global objects and not use new...
+  ///       as things like PortHandler and PacketHandler are not initialized yet
+  /// @param port PortHandler instance
+  /// @param ph PacketHandler instance
+  /// @param start_address Address of the data for read
+  /// @param data_length Length of the data for read
+  ////////////////////////////////////////////////////////////////////////////////
+  void    init(PortHandler *port, PacketHandler *ph);
+
+
 
   ////////////////////////////////////////////////////////////////////////////////
   /// @brief The function that returns PortHandler instance

@@ -56,6 +56,24 @@ GroupSyncWrite::GroupSyncWrite(PortHandler *port, PacketHandler *ph, uint16_t st
   clearParam();
 }
 
+GroupSyncWrite::GroupSyncWrite(uint16_t start_address, uint16_t data_length)
+  : port_(NULL),
+    ph_(NULL),
+    is_param_changed_(false),
+    param_(0),
+    start_address_(start_address),
+    data_length_(data_length)
+{
+}
+
+void GroupSyncWrite::init(PortHandler *port, PacketHandler *ph)
+{
+  port_ = port;
+  ph_ = ph;
+  Serial.printf("GroupSyncWrite::Init called %x %x\n", (uint32_t)port_, (uint32_t)ph_); Serial.flush();
+  clearParam();
+}
+
 void GroupSyncWrite::makeParam()
 {
   if (id_list_.size() == 0) return;
@@ -81,6 +99,9 @@ void GroupSyncWrite::makeParam()
 
 bool GroupSyncWrite::addParam(uint8_t id, uint8_t *data)
 {
+  if (!ph_)
+    return false;
+
   if (std::find(id_list_.begin(), id_list_.end(), id) != id_list_.end())   // id already exist
     return false;
 
@@ -95,6 +116,9 @@ bool GroupSyncWrite::addParam(uint8_t id, uint8_t *data)
 
 void GroupSyncWrite::removeParam(uint8_t id)
 {
+  if (!ph_)
+    return;
+  
   std::vector<uint8_t>::iterator it = std::find(id_list_.begin(), id_list_.end(), id);
   if (it == id_list_.end())    // NOT exist
     return;
@@ -108,6 +132,9 @@ void GroupSyncWrite::removeParam(uint8_t id)
 
 bool GroupSyncWrite::changeParam(uint8_t id, uint8_t *data)
 {
+  if (!ph_)
+    return false;
+  
   std::vector<uint8_t>::iterator it = std::find(id_list_.begin(), id_list_.end(), id);
   if (it == id_list_.end())    // NOT exist
     return false;
@@ -123,6 +150,9 @@ bool GroupSyncWrite::changeParam(uint8_t id, uint8_t *data)
 
 void GroupSyncWrite::clearParam()
 {
+  if (!ph_)
+    return;
+  
   if (id_list_.size() == 0)
     return;
 
@@ -138,6 +168,9 @@ void GroupSyncWrite::clearParam()
 
 int GroupSyncWrite::txPacket()
 {
+  if (!ph_)
+    return COMM_NOT_AVAILABLE;
+  
   if (id_list_.size() == 0)
     return COMM_NOT_AVAILABLE;
 

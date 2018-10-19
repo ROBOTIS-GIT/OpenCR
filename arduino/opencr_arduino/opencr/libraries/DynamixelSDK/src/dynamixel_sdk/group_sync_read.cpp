@@ -57,6 +57,25 @@ GroupSyncRead::GroupSyncRead(PortHandler *port, PacketHandler *ph, uint16_t star
   clearParam();
 }
 
+GroupSyncRead::GroupSyncRead(uint16_t start_address, uint16_t data_length)
+  : port_(NULL),
+    ph_(NULL),
+    last_result_(false),
+    is_param_changed_(false),
+    param_(0),
+    start_address_(start_address),
+    data_length_(data_length)
+{
+}
+
+void GroupSyncRead::init(PortHandler *port, PacketHandler *ph) 
+{
+  port_ = port;
+  ph_ = ph;
+  Serial.printf("GroupSyncRead::Init called %x %x\n", (uint32_t)port_, (uint32_t)ph_); Serial.flush();
+  clearParam();
+}
+
 void GroupSyncRead::makeParam()
 {
   if (ph_->getProtocolVersion() == 1.0 || id_list_.size() == 0)
@@ -75,7 +94,9 @@ void GroupSyncRead::makeParam()
 
 bool GroupSyncRead::addParam(uint8_t id)
 {
-  if (ph_->getProtocolVersion() == 1.0)
+
+  // If we don't have packet handler or this is version 1 bail
+  if (!ph_ || (ph_->getProtocolVersion() == 1.0))
     return false;
 
   if (std::find(id_list_.begin(), id_list_.end(), id) != id_list_.end())   // id already exist
@@ -89,7 +110,7 @@ bool GroupSyncRead::addParam(uint8_t id)
 }
 void GroupSyncRead::removeParam(uint8_t id)
 {
-  if (ph_->getProtocolVersion() == 1.0)
+  if (!ph_ || (ph_->getProtocolVersion() == 1.0))
     return;
 
   std::vector<uint8_t>::iterator it = std::find(id_list_.begin(), id_list_.end(), id);
@@ -104,7 +125,7 @@ void GroupSyncRead::removeParam(uint8_t id)
 }
 void GroupSyncRead::clearParam()
 {
-  if (ph_->getProtocolVersion() == 1.0 || id_list_.size() == 0)
+  if (!ph_ || ph_->getProtocolVersion() == 1.0 || id_list_.size() == 0)
     return;
 
   for (unsigned int i = 0; i < id_list_.size(); i++)
@@ -119,7 +140,7 @@ void GroupSyncRead::clearParam()
 
 int GroupSyncRead::txPacket()
 {
-  if (ph_->getProtocolVersion() == 1.0 || id_list_.size() == 0)
+  if (!ph_ || ph_->getProtocolVersion() == 1.0 || id_list_.size() == 0)
     return COMM_NOT_AVAILABLE;
 
   if (is_param_changed_ == true || param_ == 0)
@@ -132,7 +153,7 @@ int GroupSyncRead::rxPacket()
 {
   last_result_ = false;
 
-  if (ph_->getProtocolVersion() == 1.0)
+  if (!ph_ || ph_->getProtocolVersion() == 1.0)
     return COMM_NOT_AVAILABLE;
 
   int cnt            = id_list_.size();
@@ -158,7 +179,7 @@ int GroupSyncRead::rxPacket()
 
 int GroupSyncRead::txRxPacket()
 {
-  if (ph_->getProtocolVersion() == 1.0)
+  if (!ph_ || ph_->getProtocolVersion() == 1.0)
     return COMM_NOT_AVAILABLE;
 
   int result         = COMM_TX_FAIL;
@@ -172,7 +193,7 @@ int GroupSyncRead::txRxPacket()
 
 bool GroupSyncRead::isAvailable(uint8_t id, uint16_t address, uint16_t data_length)
 {
-  if (ph_->getProtocolVersion() == 1.0 || last_result_ == false || data_list_.find(id) == data_list_.end())
+  if (!ph_ || ph_->getProtocolVersion() == 1.0 || last_result_ == false || data_list_.find(id) == data_list_.end())
     return false;
 
   if (address < start_address_ || start_address_ + data_length_ - data_length < address)

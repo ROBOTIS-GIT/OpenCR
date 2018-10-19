@@ -58,6 +58,7 @@ class WINDECLSPEC GroupSyncWrite
   std::map<uint8_t, uint8_t* >    data_list_; // <id, data>
 
   bool            is_param_changed_;
+  bool            is_init_;
 
   uint8_t        *param_;
   uint16_t        start_address_;
@@ -68,12 +69,28 @@ class WINDECLSPEC GroupSyncWrite
  public:
   ////////////////////////////////////////////////////////////////////////////////
   /// @brief The function that Initializes instance for Sync Write
+  ///     Warning don't use this version for global objects, it will crash!
   /// @param port PortHandler instance
   /// @param ph PacketHandler instance
   /// @param start_address Address of the data for write
   /// @param data_length Length of the data for write
   ////////////////////////////////////////////////////////////////////////////////
   GroupSyncWrite(PortHandler *port, PacketHandler *ph, uint16_t start_address, uint16_t data_length);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief constructor first part of two part initialize use for global objects
+  /// @param start_address Address of the data for write
+  /// @param data_length Length of the data for write
+  ////////////////////////////////////////////////////////////////////////////////
+  GroupSyncWrite(uint16_t start_address, uint16_t data_length);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief Init the second half of two part init
+  /// @param port PortHandler instance
+  /// @param ph PacketHandler instance
+  ////////////////////////////////////////////////////////////////////////////////
+  void    init(PortHandler *port, PacketHandler *ph);
+
 
   ////////////////////////////////////////////////////////////////////////////////
   /// @brief The function that calls clearParam function to clear the parameter list for Sync Write
