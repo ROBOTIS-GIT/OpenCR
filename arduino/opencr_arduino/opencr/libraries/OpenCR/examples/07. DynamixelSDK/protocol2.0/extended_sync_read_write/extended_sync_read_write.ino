@@ -103,9 +103,10 @@ const uint8_t servo_list[COUNT_SERVOS] = {DXL1_ID, DXL2_ID};
 
 #ifdef GLOBAL_SYNC_OBJECTS
 dynamixel::GroupSyncWrite gsw(ADDR_X_PROFILE_VELOCITY, LEN_X_PROFILE_VELOCITY + LEN_X_GOAL_POSITION);
-uint8_t gsw_buffer[(LEN_X_PROFILE_VELOCITY + LEN_X_GOAL_POSITION + 1) * COUNT_SERVOS];
+uint8_t gsw_buffer[(LEN_X_PROFILE_VELOCITY + LEN_X_GOAL_POSITION + dynamixel::GroupSyncWrite::EXTRA_BYTES_PER_ITEM) * COUNT_SERVOS];
 
 dynamixel::GroupSyncRead gsr(ADDR_X_PRESENT_LOAD, LEN_X_PRESENT_LOAD + LEN_X_PRESENT_VELOCITY + LEN_X_PRESENT_POSITION);
+uint8_t gsr_buffer[(LEN_X_PRESENT_LOAD + LEN_X_PRESENT_VELOCITY + LEN_X_PRESENT_POSITION + dynamixel::GroupSyncRead::EXTRA_BYTES_PER_ITEM) * COUNT_SERVOS];
 #endif
 
 dynamixel::GroupSyncWrite *groupSyncWrite;
@@ -148,6 +149,7 @@ void setup()
   groupSyncWrite = &gsw;
 
   gsr.init(portHandler, packetHandler);
+  gsr.setBuffer(gsr_buffer, sizeof(gsr_buffer));
   groupSyncRead = &gsr;
 #else
   groupSyncWrite = new dynamixel::GroupSyncWrite(portHandler, packetHandler, ADDR_X_GOAL_POSITION, LEN_X_GOAL_POSITION);
@@ -312,7 +314,7 @@ void quit_test ()
   int dxl_comm_result;
   uint8_t dxl_error;
 
-  Serial.println("/n/n***** Test ending ***");
+  Serial.println("\n\n***** Test ending ***");
 
   // Disable Dynamixel#1 Torque
   // Now loop through and initialize each of the servos.

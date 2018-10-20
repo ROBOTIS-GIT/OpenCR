@@ -101,7 +101,7 @@ bool GroupSyncWrite::setBuffer(uint8_t *buffer_pointer, uint16_t buffer_size)
   if (buffer_pointer)
   {
     is_user_buffer_ = true;
-    max_ids_ = buffer_size / (data_length_ + 1);  // calculate how many servos this buffer could service
+    max_ids_ = buffer_size / (data_length_ + EXTRA_BYTES_PER_ITEM);  // calculate how many servos this buffer could service
     return (max_ids_ > 0);
   }
   is_user_buffer_ = false;
@@ -109,19 +109,35 @@ bool GroupSyncWrite::setBuffer(uint8_t *buffer_pointer, uint16_t buffer_size)
 }  
 
 
-uint8_t *GroupSyncWrite::findParam(uint8_t id)
+uint8_t *GroupSyncWrite::findParam(uint8_t id, bool add_if_not_found)
 {
-  if (!param_) return NULL;
-
+  if (!param_ && add_if_not_found)
+  {
+    //Serial.println("GroupSyncRead::findParam create buffer");
+    param_ = new uint8_t[max_ids_ * (EXTRA_BYTES_PER_ITEM + data_length_)]; // ID(1) + DATA(data_length)
+    is_user_buffer_ = false;
+    if (!param_)
+      return NULL; 
+    count_ids_ = 0;
+  }
+  
   uint8_t *pb = param_;
   for (uint8_t i = 0; i < count_ids_; i++)
   {
     if (*pb == id)
       return pb + 1;  // return item in Parameter list for this ID
-    pb += (data_length_ + 1); // look at next element
+    pb += (data_length_ + EXTRA_BYTES_PER_ITEM); // look at next element
   }
-  return NULL;  // not found
 
+  // Not found, lets see if there is room for new one
+  if ((count_ids_ >= max_ids_) || !add_if_not_found)
+    return NULL;
+
+  // We should already be pointing at the start of new item
+  count_ids_++;
+  *pb++ = id;   // save away the id
+
+  return pb;  
 }
 
 
@@ -130,24 +146,10 @@ bool GroupSyncWrite::addParam(uint8_t id, uint8_t *data)
   if (!ph_)
     return false;
 
-  if (!param_) 
-  {
-    param_ = new uint8_t[max_ids_ * (1 + data_length_)]; // ID(1) + DATA(data_length)
-    is_user_buffer_ = false;
-    if (!param_)
-      return false; 
-  }
+  uint8_t *item_pointer = findParam(id, true);  
 
-  // 
-  uint8_t *item_pointer = findParam(id);  
   if (!item_pointer)
-  {
-    if (count_ids_ >= max_ids_)
-      return false;
-    item_pointer = param_ + (data_length_ + 1)*count_ids_;
-    count_ids_++;
-    *item_pointer++ = id; // save away the ID
-  }
+    return false;   // item not found and we don't have room
 
   for (uint16_t c = 0; c < data_length_; c++)
   {
@@ -166,30 +168,10 @@ bool GroupSyncWrite::setParam (uint8_t id, uint16_t address, uint16_t data_lengt
   if ((address < start_address_) || ((start_address_ + data_length_ - data_length) < address))
     return false;
 
-  if (!param_) 
-  {
-    param_ = new uint8_t[max_ids_ * (1 + data_length_)]; // ID(1) + DATA(data_length)
-    is_user_buffer_ = false;
-    if (!param_)
-      return false; 
-  }
-
-  // 
-  uint8_t *item_pointer = findParam(id);  
+  uint8_t *item_pointer = findParam(id, true);  
   
   if (!item_pointer)
-  {
-    //Serial.print(" new item ");
-    if (count_ids_ >= max_ids_)
-      return false;
-    item_pointer = param_ + (data_length_ + 1)*count_ids_;
-    count_ids_++;
-    *item_pointer++ = id; // save away the ID
-    if (data_length != data_length_) 
-    {
-      memset(item_pointer, 0, data_length_); // initialize full area
-    }
-  }
+    return false;   // item not found and no room...
 
   item_pointer += address - start_address_; // start of where we are writing
   //Serial.println((uint32_t)item_pointer, HEX);
@@ -222,7 +204,7 @@ void GroupSyncWrite::removeParam(uint8_t id)
   if (!ph_)
     return;
   
-  uint8_t *item_pointer = findParam(id);  
+  uint8_t *item_pointer = findParam(id, false);  
   if (!item_pointer)
     return;
 

@@ -65,9 +65,17 @@ class WINDECLSPEC GroupSyncWrite
   uint16_t        start_address_;
   uint16_t        data_length_;
 
-  uint8_t *findParam(uint8_t id);
+  uint8_t *findParam(uint8_t id, bool add_if_not_found);
 
  public:
+  
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief - Lets sketches know how many extra bytes per servo to allocate
+  ///  they can add this to number of bytes they write (data_length)
+  // 
+  ////////////////////////////////////////////////////////////////////////////////
+  enum {EXTRA_BYTES_PER_ITEM = 1 };
+
   ////////////////////////////////////////////////////////////////////////////////
   /// @brief The function that Initializes instance for Sync Write
   ///     Warning don't use this version for global objects, it will crash!
