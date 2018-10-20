@@ -72,7 +72,7 @@ void GroupSyncRead::init(PortHandler *port, PacketHandler *ph)
 {
   port_ = port;
   ph_ = ph;
-  Serial.printf("GroupSyncRead::Init called %x %x\n", (uint32_t)port_, (uint32_t)ph_); Serial.flush();
+  //Serial.printf("GroupSyncRead::Init called %x %x\n", (uint32_t)port_, (uint32_t)ph_); Serial.flush();
   clearParam();
 }
 
