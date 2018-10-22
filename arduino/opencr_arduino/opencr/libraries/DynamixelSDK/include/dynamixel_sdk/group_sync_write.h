@@ -54,31 +54,67 @@ class WINDECLSPEC GroupSyncWrite
   PortHandler    *port_;
   PacketHandler  *ph_;
 
-  std::vector<uint8_t>            id_list_;
-  std::map<uint8_t, uint8_t* >    data_list_; // <id, data>
+  //std::vector<uint8_t>            id_list_;
+  //std::map<uint8_t, uint8_t* >    data_list_; // <id, data>
 
-  bool            is_param_changed_;
+  bool            is_user_buffer_;  // did the user setup this buffer?
+  uint8_t         max_ids_;         // Max number of IDs we can handle
+  uint8_t         count_ids_;       // Actual count of ids 
 
-  uint8_t        *param_;
+  uint8_t        *param_;           // this will hold our buffer.
   uint16_t        start_address_;
   uint16_t        data_length_;
 
-  void    makeParam();
+  uint8_t *findParam(uint8_t id, bool add_if_not_found);
 
  public:
+  
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief - Lets sketches know how many extra bytes per servo to allocate
+  ///  they can add this to number of bytes they write (data_length)
+  // 
+  ////////////////////////////////////////////////////////////////////////////////
+  enum {EXTRA_BYTES_PER_ITEM = 1, DEFAULT_COUNT_MAX_IDS = 16 };
+
   ////////////////////////////////////////////////////////////////////////////////
   /// @brief The function that Initializes instance for Sync Write
+  ///     Warning don't use this version for global objects, it will crash!
   /// @param port PortHandler instance
   /// @param ph PacketHandler instance
   /// @param start_address Address of the data for write
   /// @param data_length Length of the data for write
+  /// @param max_ids max number of IDs we will use with this object... 
   ////////////////////////////////////////////////////////////////////////////////
-  GroupSyncWrite(PortHandler *port, PacketHandler *ph, uint16_t start_address, uint16_t data_length);
+  GroupSyncWrite(PortHandler *port, PacketHandler *ph, uint16_t start_address, uint16_t data_length, 
+      uint8_t max_ids=DEFAULT_COUNT_MAX_IDS);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief constructor first part of two part initialize use for global objects
+  /// @param start_address Address of the data for write
+  /// @param data_length Length of the data for write
+  /// @param max_ids max number of IDs we will use with this object... 
+  ////////////////////////////////////////////////////////////////////////////////
+  GroupSyncWrite(uint16_t start_address, uint16_t data_length, 
+      uint8_t max_ids=DEFAULT_COUNT_MAX_IDS);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief Init the second half of two part init
+  /// @param port PortHandler instance
+  /// @param ph PacketHandler instance
+  ////////////////////////////////////////////////////////////////////////////////
+  void    init(PortHandler *port, PacketHandler *ph);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief setBuffer allows the user to pass in the buffer to use
+  /// @param buffer pointer to data buffer to use
+  /// @param cb size of the buffer in bytes
+  ////////////////////////////////////////////////////////////////////////////////
+  bool  setBuffer(uint8_t *buffer_pointer, uint16_t buffer_size);  
 
   ////////////////////////////////////////////////////////////////////////////////
   /// @brief The function that calls clearParam function to clear the parameter list for Sync Write
   ////////////////////////////////////////////////////////////////////////////////
-  ~GroupSyncWrite() { clearParam(); }
+  ~GroupSyncWrite();
 
   ////////////////////////////////////////////////////////////////////////////////
   /// @brief The function that returns PortHandler instance
@@ -101,6 +137,18 @@ class WINDECLSPEC GroupSyncWrite
   /// @return or true
   ////////////////////////////////////////////////////////////////////////////////
   bool    addParam    (uint8_t id, uint8_t *data);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief The function that adds id, start_address, data_length to the Sync Write list
+  /// @param id Dynamixel ID
+  /// @param start_address starting register number
+  /// @param length how many bytes (1, 2, or 4)
+  /// @param data Data for write
+  /// @return false
+  /// @return   when the ID exists already in the list
+  /// @return or true
+  ////////////////////////////////////////////////////////////////////////////////
+  bool    setParam    (uint8_t id, uint16_t address, uint16_t data_length, uint32_t data);
 
   ////////////////////////////////////////////////////////////////////////////////
   /// @brief The function that removes id from the Sync Write list

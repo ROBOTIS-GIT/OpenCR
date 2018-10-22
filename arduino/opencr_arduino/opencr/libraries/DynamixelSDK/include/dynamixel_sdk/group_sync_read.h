@@ -54,19 +54,29 @@ class WINDECLSPEC GroupSyncRead
   PortHandler    *port_;
   PacketHandler  *ph_;
 
-  std::vector<uint8_t>            id_list_;
-  std::map<uint8_t, uint8_t* >    data_list_; // <id, data>
-
+  //std::vector<uint8_t>            id_list_;
+  //std::map<uint8_t, uint8_t* >    data_list_; // <id, data>
   bool            last_result_;
-  bool            is_param_changed_;
 
-  uint8_t        *param_;
+  bool            is_user_buffer_;  // did the user setup this buffer?
+  uint8_t         max_ids_;         // Max number of IDs we can handle
+  uint8_t         count_ids_;       // Actual count of ids 
+
+  uint8_t         *param_;           // this will hold our buffer.
   uint16_t        start_address_;
   uint16_t        data_length_;
 
-  void    makeParam();
+  uint8_t *findParam(uint8_t id, bool add_if_not_found);
 
  public:
+  
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief - Lets sketches know how many extra bytes per servo to allocate
+  ///  they can add this to number of bytes they write (data_length)
+  // 
+  ////////////////////////////////////////////////////////////////////////////////
+  enum {EXTRA_BYTES_PER_ITEM = 1, DEFAULT_COUNT_MAX_IDS = 16 };
+
   ////////////////////////////////////////////////////////////////////////////////
   /// @brief The function that Initializes instance for Sync Read
   /// @param port PortHandler instance
@@ -74,12 +84,43 @@ class WINDECLSPEC GroupSyncRead
   /// @param start_address Address of the data for read
   /// @param data_length Length of the data for read
   ////////////////////////////////////////////////////////////////////////////////
-  GroupSyncRead(PortHandler *port, PacketHandler *ph, uint16_t start_address, uint16_t data_length);
+  GroupSyncRead(PortHandler *port, PacketHandler *ph, uint16_t start_address, uint16_t data_length, 
+      uint8_t max_ids=DEFAULT_COUNT_MAX_IDS);
 
   ////////////////////////////////////////////////////////////////////////////////
   /// @brief The function that calls clearParam function to clear the parameter list for Sync Read
   ////////////////////////////////////////////////////////////////////////////////
-  ~GroupSyncRead() { clearParam(); }
+  ~GroupSyncRead();
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief Two part initialization of Sync Read
+  ///       Needed if you wish to create global objects and not use new...
+  ///       as things like PortHandler and PacketHandler are not initialized yet
+  /// @param port PortHandler instance
+  /// @param ph PacketHandler instance
+  /// @param start_address Address of the data for read
+  /// @param data_length Length of the data for read
+  ////////////////////////////////////////////////////////////////////////////////
+  GroupSyncRead(uint16_t start_address, uint16_t data_length, uint8_t max_ids=DEFAULT_COUNT_MAX_IDS);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief Second part of two part initialization of Sync Read
+  ///       Needed if you wish to create global objects and not use new...
+  ///       as things like PortHandler and PacketHandler are not initialized yet
+  /// @param port PortHandler instance
+  /// @param ph PacketHandler instance
+  /// @param start_address Address of the data for read
+  /// @param data_length Length of the data for read
+  ////////////////////////////////////////////////////////////////////////////////
+  void    init(PortHandler *port, PacketHandler *ph);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief setBuffer allows the user to pass in the buffer to use
+  /// @param buffer pointer to data buffer to use
+  /// @param cb size of the buffer in bytes
+  ////////////////////////////////////////////////////////////////////////////////
+  bool  setBuffer(uint8_t *buffer_pointer, uint16_t buffer_size);  
+
 
   ////////////////////////////////////////////////////////////////////////////////
   /// @brief The function that returns PortHandler instance

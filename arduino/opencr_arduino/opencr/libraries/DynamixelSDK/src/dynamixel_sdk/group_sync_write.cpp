@@ -45,10 +45,13 @@
 
 using namespace dynamixel;
 
-GroupSyncWrite::GroupSyncWrite(PortHandler *port, PacketHandler *ph, uint16_t start_address, uint16_t data_length)
+GroupSyncWrite::GroupSyncWrite(PortHandler *port, PacketHandler *ph, 
+      uint16_t start_address, uint16_t data_length, uint8_t max_ids)
   : port_(port),
     ph_(ph),
-    is_param_changed_(false),
+    is_user_buffer_(false),
+    max_ids_(max_ids),
+    count_ids_(0),
     param_(0),
     start_address_(start_address),
     data_length_(data_length)
@@ -56,93 +59,187 @@ GroupSyncWrite::GroupSyncWrite(PortHandler *port, PacketHandler *ph, uint16_t st
   clearParam();
 }
 
-void GroupSyncWrite::makeParam()
+GroupSyncWrite::GroupSyncWrite(uint16_t start_address, uint16_t data_length, uint8_t max_ids)
+  : port_(NULL),
+    ph_(NULL),
+    is_user_buffer_(false),
+    max_ids_(max_ids),
+    count_ids_(0),
+    param_(0),
+    start_address_(start_address),
+    data_length_(data_length)
 {
-  if (id_list_.size() == 0) return;
+}
 
-  if (param_ != 0)
-    delete[] param_;
-  param_ = 0;
-
-  param_ = new uint8_t[id_list_.size() * (1 + data_length_)]; // ID(1) + DATA(data_length)
-
-  int idx = 0;
-  for (unsigned int i = 0; i < id_list_.size(); i++)
+GroupSyncWrite::~GroupSyncWrite()
+{
+  if (!is_user_buffer_ && param_)
   {
-    uint8_t id = id_list_[i];
-    if (data_list_[id] == 0)
-      return;
-
-    param_[idx++] = id;
-    for (int c = 0; c < data_length_; c++)
-      param_[idx++] = (data_list_[id])[c];
+    delete[] param_;
+    param_ = NULL;  // probably not needed
   }
 }
 
+void GroupSyncWrite::init(PortHandler *port, PacketHandler *ph)
+{
+  port_ = port;
+  ph_ = ph;
+  //Serial.printf("GroupSyncWrite::Init called %x %x\n", (uint32_t)port_, (uint32_t)ph_); Serial.flush();
+  clearParam();
+}
+
+bool GroupSyncWrite::setBuffer(uint8_t *buffer_pointer, uint16_t buffer_size)
+{
+  // See if there already was a buffer 
+  if (!is_user_buffer_ && param_)
+  {
+    delete[] param_;
+  }  
+  // User passed in a buffer.
+  param_ = buffer_pointer;
+  count_ids_ = 0; 
+  if (buffer_pointer)
+  {
+    is_user_buffer_ = true;
+    max_ids_ = buffer_size / (data_length_ + EXTRA_BYTES_PER_ITEM);  // calculate how many servos this buffer could service
+    return (max_ids_ > 0);
+  }
+  is_user_buffer_ = false;
+  return true;
+}  
+
+
+uint8_t *GroupSyncWrite::findParam(uint8_t id, bool add_if_not_found)
+{
+  if (!param_ && add_if_not_found)
+  {
+    //Serial.println("GroupSyncRead::findParam create buffer");
+    param_ = new uint8_t[max_ids_ * (EXTRA_BYTES_PER_ITEM + data_length_)]; // ID(1) + DATA(data_length)
+    is_user_buffer_ = false;
+    if (!param_)
+      return NULL; 
+    count_ids_ = 0;
+  }
+  
+  uint8_t *pb = param_;
+  for (uint8_t i = 0; i < count_ids_; i++)
+  {
+    if (*pb == id)
+      return pb + 1;  // return item in Parameter list for this ID
+    pb += (data_length_ + EXTRA_BYTES_PER_ITEM); // look at next element
+  }
+
+  // Not found, lets see if there is room for new one
+  if ((count_ids_ >= max_ids_) || !add_if_not_found)
+    return NULL;
+
+  // We should already be pointing at the start of new item
+  count_ids_++;
+  *pb++ = id;   // save away the id
+
+  return pb;  
+}
+
+
 bool GroupSyncWrite::addParam(uint8_t id, uint8_t *data)
 {
-  if (std::find(id_list_.begin(), id_list_.end(), id) != id_list_.end())   // id already exist
+  if (!ph_)
     return false;
 
-  id_list_.push_back(id);
-  data_list_[id]    = new uint8_t[data_length_];
-  for (int c = 0; c < data_length_; c++)
-    data_list_[id][c] = data[c];
+  uint8_t *item_pointer = findParam(id, true);  
 
-  is_param_changed_   = true;
+  if (!item_pointer)
+    return false;   // item not found and we don't have room
+
+  for (uint16_t c = 0; c < data_length_; c++)
+  {
+    *item_pointer++ = *data++;
+  }
   return true;
 }
 
+bool GroupSyncWrite::setParam (uint8_t id, uint16_t address, uint16_t data_length, uint32_t data)
+{
+  // Like addParam, but can set a subset and knows about 1 byte 2 byte and 4 byte fields...
+  if (!ph_)
+    return false;
+  //Serial.printf("\nGroupSyncWrite(%u %d)::setParam %u %u %u %d ", start_address_, data_length_, id, address, data_length, data);
+  // make sure address is valid
+  if ((address < start_address_) || ((start_address_ + data_length_ - data_length) < address))
+    return false;
+
+  uint8_t *item_pointer = findParam(id, true);  
+  
+  if (!item_pointer)
+    return false;   // item not found and no room...
+
+  item_pointer += address - start_address_; // start of where we are writing
+  //Serial.println((uint32_t)item_pointer, HEX);
+
+  switch (data_length) 
+  {
+    case 1: 
+      *item_pointer = DXL_LOBYTE(DXL_LOWORD(data));
+      break;
+    case 2:
+      *item_pointer++ = DXL_LOBYTE(DXL_LOWORD(data));
+      *item_pointer =   DXL_HIBYTE(DXL_LOWORD(data));
+      break;
+    case 4:
+      *item_pointer++ = DXL_LOBYTE(DXL_LOWORD(data));
+      *item_pointer++ = DXL_HIBYTE(DXL_LOWORD(data));
+      *item_pointer++ = DXL_LOBYTE(DXL_HIWORD(data));
+      *item_pointer   = DXL_HIBYTE(DXL_HIWORD(data));
+      break;
+    default:
+      return false;
+    }
+
+  return true;
+}
+
+
 void GroupSyncWrite::removeParam(uint8_t id)
 {
-  std::vector<uint8_t>::iterator it = std::find(id_list_.begin(), id_list_.end(), id);
-  if (it == id_list_.end())    // NOT exist
+  if (!ph_)
+    return;
+  
+  uint8_t *item_pointer = findParam(id, false);  
+  if (!item_pointer)
     return;
 
-  id_list_.erase(it);
-  delete[] data_list_[id];
-  data_list_.erase(id);
+  // copy data down;
+  uint8_t *next_item_pointer = item_pointer += (data_length_ + 1);
 
-  is_param_changed_   = true;
+  uint8_t *end_pointer = param_ + (data_length_ + 1)*count_ids_;
+
+  while (next_item_pointer < end_pointer) 
+  {
+    *item_pointer++ = *next_item_pointer++;
+  }
+  count_ids_--; // decrement the count;
 }
 
 bool GroupSyncWrite::changeParam(uint8_t id, uint8_t *data)
 {
-  std::vector<uint8_t>::iterator it = std::find(id_list_.begin(), id_list_.end(), id);
-  if (it == id_list_.end())    // NOT exist
-    return false;
-
-  delete[] data_list_[id];
-  data_list_[id]    = new uint8_t[data_length_];
-  for (int c = 0; c < data_length_; c++)
-    data_list_[id][c] = data[c];
-
-  is_param_changed_   = true;
-  return true;
+  // in this version just use addParam
+  return addParam(id, data);
 }
 
 void GroupSyncWrite::clearParam()
 {
-  if (id_list_.size() == 0)
-    return;
+  count_ids_ = 0;
+}  
 
-  for (unsigned int i = 0; i < id_list_.size(); i++)
-    delete[] data_list_[id_list_[i]];
-
-  id_list_.clear();
-  data_list_.clear();
-  if (param_ != 0)
-    delete[] param_;
-  param_ = 0;
-}
 
 int GroupSyncWrite::txPacket()
 {
-  if (id_list_.size() == 0)
+  if (!ph_)
+    return COMM_NOT_AVAILABLE;
+  
+  if (count_ids_ == 0)
     return COMM_NOT_AVAILABLE;
 
-  if (is_param_changed_ == true || param_ == 0)
-    makeParam();
 
-  return ph_->syncWriteTxOnly(port_, start_address_, data_length_, param_, id_list_.size() * (1 + data_length_));
+  return ph_->syncWriteTxOnly(port_, start_address_, data_length_, param_, count_ids_ * (1 + data_length_));
 }
