@@ -30,6 +30,7 @@
 #define SERIAL_8S1 UARTClass::Mode_8S1
 
 #define SERIAL_BUFFER_SIZE 2048
+#define SERIAL_WRITES_NON_BLOCKING 1
 class UARTClass : public HardwareSerial
 {
   public:
