@@ -75,7 +75,7 @@ class WINDECLSPEC GroupSyncRead
   ///  they can add this to number of bytes they write (data_length)
   // 
   ////////////////////////////////////////////////////////////////////////////////
-  enum {EXTRA_BYTES_PER_ITEM = 1 };
+  enum {EXTRA_BYTES_PER_ITEM = 1, DEFAULT_COUNT_MAX_IDS = 16 };
 
   ////////////////////////////////////////////////////////////////////////////////
   /// @brief The function that Initializes instance for Sync Read
@@ -84,7 +84,8 @@ class WINDECLSPEC GroupSyncRead
   /// @param start_address Address of the data for read
   /// @param data_length Length of the data for read
   ////////////////////////////////////////////////////////////////////////////////
-  GroupSyncRead(PortHandler *port, PacketHandler *ph, uint16_t start_address, uint16_t data_length, uint8_t max_ids=16);
+  GroupSyncRead(PortHandler *port, PacketHandler *ph, uint16_t start_address, uint16_t data_length, 
+      uint8_t max_ids=DEFAULT_COUNT_MAX_IDS);
 
   ////////////////////////////////////////////////////////////////////////////////
   /// @brief The function that calls clearParam function to clear the parameter list for Sync Read
@@ -100,7 +101,7 @@ class WINDECLSPEC GroupSyncRead
   /// @param start_address Address of the data for read
   /// @param data_length Length of the data for read
   ////////////////////////////////////////////////////////////////////////////////
-  GroupSyncRead(uint16_t start_address, uint16_t data_length, uint8_t max_ids=16);
+  GroupSyncRead(uint16_t start_address, uint16_t data_length, uint8_t max_ids=DEFAULT_COUNT_MAX_IDS);
 
   ////////////////////////////////////////////////////////////////////////////////
   /// @brief Second part of two part initialization of Sync Read

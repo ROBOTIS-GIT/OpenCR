@@ -74,7 +74,7 @@ class WINDECLSPEC GroupSyncWrite
   ///  they can add this to number of bytes they write (data_length)
   // 
   ////////////////////////////////////////////////////////////////////////////////
-  enum {EXTRA_BYTES_PER_ITEM = 1 };
+  enum {EXTRA_BYTES_PER_ITEM = 1, DEFAULT_COUNT_MAX_IDS = 16 };
 
   ////////////////////////////////////////////////////////////////////////////////
   /// @brief The function that Initializes instance for Sync Write
@@ -85,7 +85,8 @@ class WINDECLSPEC GroupSyncWrite
   /// @param data_length Length of the data for write
   /// @param max_ids max number of IDs we will use with this object... 
   ////////////////////////////////////////////////////////////////////////////////
-  GroupSyncWrite(PortHandler *port, PacketHandler *ph, uint16_t start_address, uint16_t data_length, uint8_t max_ids=16);
+  GroupSyncWrite(PortHandler *port, PacketHandler *ph, uint16_t start_address, uint16_t data_length, 
+      uint8_t max_ids=DEFAULT_COUNT_MAX_IDS);
 
   ////////////////////////////////////////////////////////////////////////////////
   /// @brief constructor first part of two part initialize use for global objects
@@ -93,7 +94,8 @@ class WINDECLSPEC GroupSyncWrite
   /// @param data_length Length of the data for write
   /// @param max_ids max number of IDs we will use with this object... 
   ////////////////////////////////////////////////////////////////////////////////
-  GroupSyncWrite(uint16_t start_address, uint16_t data_length, uint8_t max_ids=16);
+  GroupSyncWrite(uint16_t start_address, uint16_t data_length, 
+      uint8_t max_ids=DEFAULT_COUNT_MAX_IDS);
 
   ////////////////////////////////////////////////////////////////////////////////
   /// @brief Init the second half of two part init
