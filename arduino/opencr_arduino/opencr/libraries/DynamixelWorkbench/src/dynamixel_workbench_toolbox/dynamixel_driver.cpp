@@ -26,7 +26,7 @@ DynamixelDriver::~DynamixelDriver()
   {
     for (int j = 0; j < tools_[i].dxl_info_cnt_; j++)
     {
-      writeRegister(tools_[i].dxl_info_[j].id, "Torque_Enable", false);
+      writeRegister(tools_[i].dxl_id_[j], "Torque_Enable", false);
     }
   }
 
@@ -43,24 +43,25 @@ void DynamixelDriver::initDXLinfo(void)
 
 void DynamixelDriver::setTools(uint16_t model_number, uint8_t id)
 {
-  if (tools_cnt_ == 0)
+    // See if we have a matching tool? 
+  for (uint8_t tool_num = 0; tool_num < tools_cnt_; tool_num++)
   {
+    if ((tools_[tool_num].model_num_ == model_number) 
+        && (tools_[tool_num].dxl_info_cnt_ < DynamixelTool::COUNT_DXL_INFO) )
+    {
+      // Found one with the right model number and it is not full
+      tools_[tool_num].addDXL(model_number, id);
+      return; 
+    }
+  }
+  // We did not find one so lets allocate a new one
+  if (tools_cnt_ < MAX_DXL_SERIES_NUM) 
+  {
+    // only do it if we still have some room...
     initDXLinfo();
     tools_[tools_cnt_].addTool(model_number, id);
+    tools_cnt_++;
   }
-  else
-  {
-    if (!strncmp(tools_[tools_cnt_-1].dxl_info_[0].model_name, findModelName(model_number), strlen(findModelName(model_number))))
-    {
-      tools_[--tools_cnt_].addDXL(model_number, id);
-    }
-    else
-    {
-      tools_[tools_cnt_].addTool(model_number, id);
-    }
-  }
-
-  tools_cnt_++;
 }
 
 bool DynamixelDriver::init(const char *device_name, uint32_t baud_rate)
@@ -142,14 +143,13 @@ int DynamixelDriver::getBaudrate(void)
   return portHandler_->getBaudRate();
 }
 
-char *DynamixelDriver::getModelName(uint8_t id)
+const char *DynamixelDriver::getModelName(uint8_t id)
 {
   uint8_t factor = getToolsFactor(id);
 
-  for (int i = 0; i < tools_[factor].dxl_info_cnt_; i++)
+  if (factor != 0xff) 
   {
-    if (tools_[factor].dxl_info_[i].id == id)
-      return tools_[factor].dxl_info_[i].model_name;
+    return tools_[factor].model_name_;
   }
   return NULL;
 }
@@ -160,8 +160,8 @@ uint16_t DynamixelDriver::getModelNum(uint8_t id)
 
   for (int i = 0; i < tools_[factor].dxl_info_cnt_; i++)
   {
-    if (tools_[factor].dxl_info_[i].id == id)
-      return tools_[factor].dxl_info_[i].model_num;
+    if (tools_[factor].dxl_id_[i] == id)
+      return tools_[factor].model_num_;
   }
   return 0;
 }
@@ -169,6 +169,7 @@ uint16_t DynamixelDriver::getModelNum(uint8_t id)
 const ControlTableItem* DynamixelDriver::getControlItemPtr(uint8_t id)
 {
   uint8_t factor = getToolsFactor(id);
+  if (factor == 0xff) return NULL;
 
   return tools_[factor].getControlItemPtr();
 }
@@ -176,6 +177,7 @@ const ControlTableItem* DynamixelDriver::getControlItemPtr(uint8_t id)
 uint8_t DynamixelDriver::getTheNumberOfItem(uint8_t id)
 {
   uint8_t factor = getToolsFactor(id);
+  if (factor == 0xff) return 0;
 
   return tools_[factor].getTheNumberOfItem();
 }
@@ -306,13 +308,14 @@ bool DynamixelDriver::reset(uint8_t id)
 
       uint8_t factor = getToolsFactor(id);
 
+      if (factor == 0xff) return false;
       for (int i = 0; i < tools_[factor].dxl_info_cnt_; i++)
       {
-        if (tools_[factor].dxl_info_[i].id == id)
-          tools_[factor].dxl_info_[i].id = new_id;
+        if (tools_[factor].dxl_id_[i] == id)
+          tools_[factor].dxl_id_[i] = new_id;
       }
 
-      char* model_name = getModelName(new_id);
+      const char* model_name = getModelName(new_id);
       if (!strncmp(model_name, "AX", strlen("AX")) ||
           !strncmp(model_name, "MX-12W", strlen("MX-12W")))
         baud = 1000000;
@@ -363,11 +366,12 @@ bool DynamixelDriver::reset(uint8_t id)
       }
 
       uint8_t factor = getToolsFactor(id);
+      if (factor == 0xff) return false;
 
       for (int i = 0; i < tools_[factor].dxl_info_cnt_; i++)
       {
-        if (tools_[factor].dxl_info_[i].id == id)
-          tools_[factor].dxl_info_[i].id = new_id;
+        if (tools_[factor].dxl_id_[i] == id)
+          tools_[factor].dxl_id_[i] = new_id;
       }
 
       if (!strncmp(getModelName(new_id), "XL-320", strlen("XL-320")))
@@ -409,7 +413,11 @@ bool DynamixelDriver::writeRegister(uint8_t id, const char *item_name, int32_t d
   int dxl_comm_result = COMM_TX_FAIL;
 
   const ControlTableItem *cti;
-  cti = tools_[getToolsFactor(id)].getControlItem(item_name);
+
+  uint8_t factor = getToolsFactor(id);
+  if (factor == 0xff) return false; 
+
+  cti = tools_[factor].getControlItem(item_name);
 
   if (cti == NULL)
   {
@@ -487,7 +495,9 @@ bool DynamixelDriver::readRegister(uint8_t id, const char *item_name, int32_t *d
   int32_t value_32_bit = 0;
 
   const ControlTableItem *cti;
-  cti = tools_[getToolsFactor(id)].getControlItem(item_name);
+  uint8_t factor = getToolsFactor(id);
+  if (factor == 0xff) return false;
+  cti = tools_[factor].getControlItem(item_name);
   if (cti == NULL)
   {
     return false;
@@ -612,13 +622,13 @@ uint8_t DynamixelDriver::getToolsFactor(uint8_t id)
   {
     for (int j = 0; j < tools_[i].dxl_info_cnt_; j++)
     {
-      if (tools_[i].dxl_info_[j].id == id)
+      if (tools_[i].dxl_id_[j] == id)
       {
         return i;
       }
     }
   }
-  return 0;   // BUGBUG:: Not sure what a good last resort value is
+  return 0xff;   // BUGBUG:: Not sure what a good last resort value is
 }
 
 const char *DynamixelDriver::findModelName(uint16_t model_num)
@@ -762,7 +772,7 @@ bool DynamixelDriver::syncWrite(const char *item_name, int32_t *data)
       data_byte[2] = DXL_LOBYTE(DXL_HIWORD(data[cnt]));
       data_byte[3] = DXL_HIBYTE(DXL_HIWORD(data[cnt]));
 
-      dxl_addparam_result = swh.groupSyncWrite->addParam(tools_[i].dxl_info_[j].id, (uint8_t *)&data_byte);
+      dxl_addparam_result = swh.groupSyncWrite->addParam(tools_[i].dxl_id_[j], (uint8_t *)&data_byte);
       if (dxl_addparam_result != true)
       {
         return false;
@@ -876,7 +886,7 @@ bool DynamixelDriver::syncRead(const char *item_name, int32_t *data)
   {
     for (int j = 0; j < tools_[i].dxl_info_cnt_; j++)
     {
-      dxl_addparam_result = srh.groupSyncRead->addParam(tools_[i].dxl_info_[j].id);
+      dxl_addparam_result = srh.groupSyncRead->addParam(tools_[i].dxl_id_[j]);
       if (dxl_addparam_result != true)
         return false;
     }
@@ -892,7 +902,7 @@ bool DynamixelDriver::syncRead(const char *item_name, int32_t *data)
   {
     for (int j = 0; j < tools_[i].dxl_info_cnt_; j++)
     {
-      uint8_t id = tools_[i].dxl_info_[j].id;
+      uint8_t id = tools_[i].dxl_id_[j];
 
       dxl_getdata_result = srh.groupSyncRead->isAvailable(id, srh.cti->address, srh.cti->data_length);
       if (dxl_getdata_result)
@@ -922,7 +932,9 @@ bool DynamixelDriver::addBulkWriteParam(uint8_t id, const char *item_name, int32
   uint8_t data_byte[4] = {0, };
 
   const ControlTableItem *cti;
-  cti = tools_[getToolsFactor(id)].getControlItem(item_name);
+  uint8_t factor = getToolsFactor(id);
+  if (factor == 0xff) return false;
+  cti = tools_[factor].getControlItem(item_name);
   if (cti == NULL)
   {
     return false;
@@ -967,7 +979,9 @@ bool DynamixelDriver::addBulkReadParam(uint8_t id, const char *item_name)
   bool dxl_addparam_result = false;
 
   const ControlTableItem *cti;
-  cti = tools_[getToolsFactor(id)].getControlItem(item_name);
+  uint8_t factor = getToolsFactor(id);
+  if (factor == 0xff) return false;
+  cti = tools_[factor].getControlItem(item_name);
   if (cti == NULL)
   {
     return false;
@@ -999,7 +1013,12 @@ bool DynamixelDriver::bulkRead(uint8_t id, const char *item_name, int32_t *data)
 {
   bool dxl_getdata_result = false;
   const ControlTableItem *cti;
-  cti = tools_[getToolsFactor(id)].getControlItem(item_name);
+  uint8_t factor = getToolsFactor(id);
+  if (factor == 0xff) 
+  {
+    return false;
+  }
+  cti = tools_[factor].getControlItem(item_name);
   if (cti == NULL)
   {
     return false;
@@ -1019,7 +1038,7 @@ bool DynamixelDriver::bulkRead(uint8_t id, const char *item_name, int32_t *data)
 int32_t DynamixelDriver::convertRadian2Value(uint8_t id, float radian)
 {
   int32_t value = 0;
-  int8_t factor = getToolsFactor(id);
+  uint8_t factor = getToolsFactor(id);
 
   if (radian > 0)
   {
@@ -1040,7 +1059,8 @@ int32_t DynamixelDriver::convertRadian2Value(uint8_t id, float radian)
 float DynamixelDriver::convertValue2Radian(uint8_t id, int32_t value)
 {
   float radian = 0.0;
-  int8_t factor = getToolsFactor(id);
+  uint8_t factor = getToolsFactor(id);
+  if (factor == 0) factor = 0;  // just use first one
 
   if (value > tools_[factor].getValueOfZeroRadianPosition())
   {
@@ -1095,7 +1115,8 @@ float DynamixelDriver::convertValue2Radian(int32_t value, int32_t max_position, 
 int32_t DynamixelDriver::convertVelocity2Value(uint8_t id, float velocity)
 {
   int32_t value = 0;
-  int8_t factor = getToolsFactor(id);
+  uint8_t factor = getToolsFactor(id);
+  if (factor == 0xff) factor = 0; 
 
   value = velocity * tools_[factor].getVelocityToValueRatio();
 
@@ -1105,7 +1126,8 @@ int32_t DynamixelDriver::convertVelocity2Value(uint8_t id, float velocity)
 float DynamixelDriver::convertValue2Velocity(uint8_t id, int32_t value)
 {
   float velocity = 0;
-  int8_t factor = getToolsFactor(id);
+  uint8_t factor = getToolsFactor(id);
+  if (factor == 0xff) factor = 0; 
 
   velocity = value / tools_[factor].getVelocityToValueRatio();
 
@@ -1115,7 +1137,8 @@ float DynamixelDriver::convertValue2Velocity(uint8_t id, int32_t value)
 int16_t DynamixelDriver::convertTorque2Value(uint8_t id, float torque)
 {
   int16_t value = 0;
-  int8_t factor = getToolsFactor(id);
+  uint8_t factor = getToolsFactor(id);
+  if (factor == 0xff) factor = 0; 
 
   value = torque * tools_[factor].getTorqueToCurrentValueRatio();
 
@@ -1125,7 +1148,8 @@ int16_t DynamixelDriver::convertTorque2Value(uint8_t id, float torque)
 float DynamixelDriver::convertValue2Torque(uint8_t id, int16_t value)
 {
   float torque = 0.0;
-  int8_t factor = getToolsFactor(id);
+  uint8_t factor = getToolsFactor(id);
+  if (factor == 0xff) factor = 0; 
 
   torque = value / tools_[factor].getTorqueToCurrentValueRatio();
 
