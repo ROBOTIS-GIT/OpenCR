@@ -56,7 +56,7 @@ class DynamixelWorkbench
   bool setPacketHandler(float protocol_version);
 
   float getProtocolVersion();
-  char* getModelName(uint8_t id);
+  const char* getModelName(uint8_t id);
 
   bool ledOn(uint8_t id);
   bool ledOff(uint8_t id);

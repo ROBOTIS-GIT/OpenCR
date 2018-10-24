@@ -82,7 +82,7 @@ class DynamixelDriver
 
   float getProtocolVersion(void);
   int getBaudrate(void);
-  char* getModelName(uint8_t id);
+  const char* getModelName(uint8_t id);
   uint16_t getModelNum(uint8_t id);
   const ControlTableItem* getControlItemPtr(uint8_t id);
   uint8_t getTheNumberOfItem(uint8_t id);

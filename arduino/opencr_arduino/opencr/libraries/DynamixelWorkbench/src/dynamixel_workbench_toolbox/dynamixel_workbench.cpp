@@ -153,7 +153,7 @@ float DynamixelWorkbench::getProtocolVersion()
   return driver_.getProtocolVersion();
 }
 
-char* DynamixelWorkbench::getModelName(uint8_t id)
+const char* DynamixelWorkbench::getModelName(uint8_t id)
 {
   return driver_.getModelName(id);
 }
