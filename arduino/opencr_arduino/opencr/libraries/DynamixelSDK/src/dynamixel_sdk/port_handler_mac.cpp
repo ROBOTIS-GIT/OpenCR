@@ -1,31 +1,17 @@
 /*******************************************************************************
-* Copyright (c) 2016, ROBOTIS CO., LTD.
-* All rights reserved.
+* Copyright 2017 ROBOTIS CO., LTD.
 *
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
 *
-* * Redistributions of source code must retain the above copyright notice, this
-*   list of conditions and the following disclaimer.
+*     http://www.apache.org/licenses/LICENSE-2.0
 *
-* * Redistributions in binary form must reproduce the above copyright notice,
-*   this list of conditions and the following disclaimer in the documentation
-*   and/or other materials provided with the distribution.
-*
-* * Neither the name of ROBOTIS nor the names of its
-*   contributors may be used to endorse or promote products derived from
-*   this software without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-* FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-* DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-* SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
 *******************************************************************************/
 
 /* Author: Ryu Woon Jung (Leon) */
@@ -41,9 +27,21 @@
 #include <sys/time.h>
 #include <sys/ioctl.h>
 
+#ifdef __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
+
 #include "port_handler_mac.h"
 
-#define LATENCY_TIMER   8  // msec (USB latency timer)
+#define LATENCY_TIMER   16  // msec (USB latency timer)
+                            // You should adjust the latency timer value.
+                            // When you are going to use sync / bulk read, the latency timer should be loosen.
+                            // the lower latency timer value, the faster communication speed.
+
+                            // Note:
+                            // You can either change its value by following:
+                            // http://www.ftdichip.com/Support/Documents/TechnicalNotes/TN_105%20Adding%20Support%20for%20New%20FTDI%20Devices%20to%20Mac%20Driver.pdf
 
 using namespace dynamixel;
 
@@ -72,7 +70,7 @@ void PortHandlerMac::closePort()
 
 void PortHandlerMac::clearPort()
 {
-  tcflush(socket_fd_, TCIOFLUSH);
+  tcflush(socket_fd_, TCIFLUSH);
 }
 
 void PortHandlerMac::setPortName(const char *port_name)
@@ -151,9 +149,19 @@ bool PortHandlerMac::isPacketTimeout()
 
 double PortHandlerMac::getCurrentTime()
 {
-	struct timespec tv;
-	clock_gettime( CLOCK_REALTIME, &tv);
-	return ((double)tv.tv_sec*1000.0 + (double)tv.tv_nsec*0.001*0.001);
+  struct timespec tv;
+#ifdef __MACH__ // OS X does not have clock_gettime, so here uses clock_get_time
+  clock_serv_t cclock;
+  mach_timespec_t mts;
+  host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+  clock_get_time(cclock, &mts);
+  mach_port_deallocate(mach_task_self(), cclock);
+  tv.tv_sec = mts.tv_sec;
+  tv.tv_nsec = mts.tv_nsec;
+#else
+  clock_gettime(CLOCK_REALTIME, &tv);
+#endif
+  return ((double)tv.tv_sec * 1000.0 + (double)tv.tv_nsec * 0.001 * 0.001);
 }
 
 double PortHandlerMac::getTimeSinceStart()

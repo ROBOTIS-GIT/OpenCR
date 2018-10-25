@@ -1,31 +1,17 @@
 /*******************************************************************************
-* Copyright (c) 2016, ROBOTIS CO., LTD.
-* All rights reserved.
+* Copyright 2017 ROBOTIS CO., LTD.
 *
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
 *
-* * Redistributions of source code must retain the above copyright notice, this
-*   list of conditions and the following disclaimer.
+*     http://www.apache.org/licenses/LICENSE-2.0
 *
-* * Redistributions in binary form must reproduce the above copyright notice,
-*   this list of conditions and the following disclaimer in the documentation
-*   and/or other materials provided with the distribution.
-*
-* * Neither the name of ROBOTIS nor the names of its
-*   contributors may be used to endorse or promote products derived from
-*   this software without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-* FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-* DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-* SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
 *******************************************************************************/
 
 /* Author: zerom, Ryu Woon Jung (Leon) */
@@ -44,7 +30,30 @@
 
 #include "port_handler_linux.h"
 
-#define LATENCY_TIMER   8  // msec (USB latency timer) [was changed from 4 due to the Ubuntu update 16.04.2]
+#define LATENCY_TIMER  16  // msec (USB latency timer)
+                           // You should adjust the latency timer value. From the version Ubuntu 16.04.2, the default latency timer of the usb serial is '16 msec'.
+                           // When you are going to use sync / bulk read, the latency timer should be loosen.
+                           // the lower latency timer value, the faster communication speed.
+
+                           // Note:
+                           // You can check its value by:
+                           // $ cat /sys/bus/usb-serial/devices/ttyUSB0/latency_timer
+                           //
+                           // If you think that the communication is too slow, type following after plugging the usb in to change the latency timer
+                           //
+                           // Method 1. Type following (you should do this everytime when the usb once was plugged out or the connection was dropped)
+                           // $ echo 1 | sudo tee /sys/bus/usb-serial/devices/ttyUSB0/latency_timer
+                           // $ cat /sys/bus/usb-serial/devices/ttyUSB0/latency_timer
+                           //
+                           // Method 2. If you want to set it as be done automatically, and don't want to do above everytime, make rules file in /etc/udev/rules.d/. For example,
+                           // $ echo ACTION==\"add\", SUBSYSTEM==\"usb-serial\", DRIVER==\"ftdi_sio\", ATTR{latency_timer}=\"1\" > 99-dynamixelsdk-usb.rules
+                           // $ sudo cp ./99-dynamixelsdk-usb.rules /etc/udev/rules.d/
+                           // $ sudo udevadm control --reload-rules
+                           // $ sudo udevadm trigger --action=add
+                           // $ cat /sys/bus/usb-serial/devices/ttyUSB0/latency_timer
+                           //
+                           // or if you have another good idea that can be an alternatives,
+                           // please give us advice via github issue https://github.com/ROBOTIS-GIT/DynamixelSDK/issues
 
 using namespace dynamixel;
 
@@ -73,7 +82,7 @@ void PortHandlerLinux::closePort()
 
 void PortHandlerLinux::clearPort()
 {
-  tcflush(socket_fd_, TCIOFLUSH);
+  tcflush(socket_fd_, TCIFLUSH);
 }
 
 void PortHandlerLinux::setPortName(const char *port_name)
@@ -153,8 +162,8 @@ bool PortHandlerLinux::isPacketTimeout()
 double PortHandlerLinux::getCurrentTime()
 {
 	struct timespec tv;
-	clock_gettime( CLOCK_REALTIME, &tv);
-	return ((double)tv.tv_sec*1000.0 + (double)tv.tv_nsec*0.001*0.001);
+	clock_gettime(CLOCK_REALTIME, &tv);
+	return ((double)tv.tv_sec * 1000.0 + (double)tv.tv_nsec * 0.001 * 0.001);
 }
 
 double PortHandlerLinux::getTimeSinceStart()
