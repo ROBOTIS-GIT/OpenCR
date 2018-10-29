@@ -27,7 +27,7 @@
 #define DYNAMIXEL_SERIAL  Serial3
 #endif
 
-#define LATENCY_TIMER     16  // msec (USB latency timer)
+#define LATENCY_TIMER     4  // msec (USB latency timer)
 
 using namespace dynamixel;
 
@@ -93,8 +93,17 @@ void PortHandlerArduino::clearPort()
 {
 #if defined(__OPENCR__)
   DYNAMIXEL_SERIAL.flush();
+  // Clear out all data from the input queue. 
+  while (DYNAMIXEL_SERIAL.available())
+  {
+    DYNAMIXEL_SERIAL.read();
+  }
 #elif defined(__OPENCM904__)
   p_dxl_serial->flush();
+  while (p_dxl_serial->available())
+  {
+    p_dxl_serial->read();
+  }
 #endif
 }
 
@@ -205,7 +214,7 @@ bool PortHandlerArduino::isPacketTimeout()
 
 double PortHandlerArduino::getCurrentTime()
 {
-	return (double)millis();
+  return (double)millis();
 }
 
 double PortHandlerArduino::getTimeSinceStart()
@@ -285,8 +294,15 @@ void PortHandlerArduino::setTxEnable()
 void PortHandlerArduino::setTxDisable()
 {
 #if defined(__OPENCR__)
+#ifdef SERIAL_WRITES_NON_BLOCKING
+  DYNAMIXEL_SERIAL.flush(); // make sure it completes before we disable... 
+#endif
   drv_dxl_tx_enable(FALSE);
+
 #elif defined(__OPENCM904__)
+#ifdef SERIAL_WRITES_NON_BLOCKING
+  p_dxl_serial->flush();
+#endif
   drv_dxl_tx_enable(socket_fd_, FALSE);
 #endif
 }
