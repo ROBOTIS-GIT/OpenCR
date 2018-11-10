@@ -6,12 +6,63 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-DynamixelSDK				KEYWORD1
+DynamixelSDK	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
-
+#port handler
+getPortHandler	KEYWORD2
+openPort	KEYWORD2
+closePort	KEYWORD2
+clearPort	KEYWORD2
+setPortName	KEYWORD2
+getPortName	KEYWORD2
+setBaudRate	KEYWORD2
+getBaudRate	KEYWORD2
+getBytesAvailable	KEYWORD2
+readPort	KEYWORD2
+writePort	KEYWORD2
+setPacketTimeout	KEYWORD2
+setPacketTimeout	KEYWORD2
+isPacketTimeout	KEYWORD2
+#PORTHANDLER
+getPacketHandler	KEYWORD2
+getProtocolVersion	KEYWORD2
+getTxRxResult	KEYWORD2
+getRxPacketError	KEYWORD2
+txPacket	KEYWORD2
+rxPacket	KEYWORD2
+txRxPacket	KEYWORD2
+ping	KEYWORD2
+broadcastPing	KEYWORD2
+action	KEYWORD2
+reboot	KEYWORD2
+factoryReset	KEYWORD2
+readTx	KEYWORD2
+readRx	KEYWORD2
+readTxRx	KEYWORD2read1ByteTx	KEYWORD2
+read1ByteRx	KEYWORD2
+read1ByteTxRx	KEYWORD2
+read2ByteTx	KEYWORD2
+read2ByteRx	KEYWORD2
+read2ByteTxRx	KEYWORD2
+read4ByteTx	KEYWORD2
+read4ByteRx	KEYWORD2
+read4ByteTxRx	KEYWORD2
+writeTxOnly	KEYWORD2
+writeTxRx	KEYWORD2write1ByteTxOnly	KEYWORD2
+write1ByteTxRx	KEYWORD2
+write2ByteTxOnly	KEYWORD2
+write2ByteTxRx	KEYWORD2
+write4ByteTxOnly	KEYWORD2
+write4ByteTxRx	KEYWORD2
+regWriteTxOnly	KEYWORD2
+regWriteTxRx	KEYWORD2
+syncReadTx	KEYWORD2
+syncWriteTxOnly	KEYWORD2
+bulkReadTx	KEYWORD2
+bulkWriteTxOnly	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
