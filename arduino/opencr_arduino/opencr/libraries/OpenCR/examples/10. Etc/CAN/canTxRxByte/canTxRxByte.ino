@@ -28,12 +28,31 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-/* Author: OpusK */
-/* For API doc, please refer to https://github.com/ROBOTIS-GIT/OpenCR/wiki/arduino_examples_can */
+/* Author: Kei */
+
+#include <CAN.h>
 
 uint32_t id;
 uint8_t data;
-
+/*
+ *  typedef struct 
+ *  {
+ *    uint32_t id      : Identifier of received message
+ *    uint32_t length  : Length of received message data
+ *    uint8_t  data[8] : Data of received message
+ *    uint8_t  format  : Type of ID
+ *  } can_message_t;
+ * 
+ * BAUDRATE :
+ *   CAN_BAUD_125K
+ *   CAN_BAUD_250K
+ *   CAN_BAUD_500K
+ *   CAN_BAUD_1000K
+ * 
+ * FORMAT :
+ *   CAN_STD_FORMAT
+ *   CAN_EXT_FORMAT
+*/
 
 void setup() 
 {
@@ -42,27 +61,27 @@ void setup()
   Serial.println("===============================");
   Serial.println("=== CAN Chat Example(Char)! ===");
 
-  if(canOpen(_DEF_CAN_BAUD_125K, _DEF_CAN_EXT) == false)
+  if(CanBus.begin(_DEF_CAN_BAUD_125K, CAN_STD_FORMAT) == false)
   {
     Serial.println("CAN open fail!!");
   }
   else
   {
     id = 0x123;
-    canConfigFilter(id, 0); // It(mask = 0) can receive message from all ID. 
+    CanBus.configFilter(id, 0); // It(mask = 0) can receive message from all ID. 
   }
 }
 
 void loop() 
 {
-  if(canAvailable())
+  if(CanBus.avaliableMessage())
   {
-    Serial.print((char)canRead());
+    Serial.print((char)CanBus.read());
   }
 
   if(Serial.available())
   {
     data = Serial.read();
-    canWrite(id, &data, 1);
+    CanBus.write(id, &data, 1);
   }
 }

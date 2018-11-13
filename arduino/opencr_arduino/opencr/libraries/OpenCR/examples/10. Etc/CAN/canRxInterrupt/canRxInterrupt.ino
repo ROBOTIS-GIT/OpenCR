@@ -28,19 +28,32 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-/* Author: OpusK */
-/* For API doc, please refer to https://github.com/ROBOTIS-GIT/OpenCR/wiki/arduino_examples_can */
+/* Author: Kei */
+
+#include <CAN.h>
 
 uint32_t id, i;
-can_msg_t rx_msg;
+can_message_t rx_msg;
 /*
  *  typedef struct 
  *  {
  *    uint32_t id      : Identifier of received message
  *    uint32_t length  : Length of received message data
  *    uint8_t  data[8] : Data of received message
- *  } can_msg_t;
+ *    uint8_t  format  : Type of ID
+ *  } can_message_t;
+ * 
+ * BAUDRATE :
+ *   CAN_BAUD_125K
+ *   CAN_BAUD_250K
+ *   CAN_BAUD_500K
+ *   CAN_BAUD_1000K
+ * 
+ * FORMAT :
+ *   CAN_STD_FORMAT
+ *   CAN_EXT_FORMAT
 */
+
 
 void setup()
 {
@@ -49,15 +62,15 @@ void setup()
   Serial.println("=================================");
   Serial.println("=== CAN RX Interrupt Example! ===");
 
-  if (canOpen(_DEF_CAN_BAUD_125K, _DEF_CAN_EXT) == false)
+  if (CanBus.begin() == false)
   {
     Serial.println("CAN open fail!!");
   }
   else
   {
     id = 0x123;
-    canConfigFilter(id, 0);
-    canAttachRxInterrupt(canRxHandlerTemplate);
+    CanBus.configFilter(id, 0);
+    CanBus.attachRxInterrupt(canRxHandlerTemplate);
   }
 }
 
@@ -65,9 +78,9 @@ void loop()
 {
 }
 
-void canRxHandlerTemplate(can_msg_t *arg)
+void canRxHandlerTemplate(can_message_t *arg)
 {
-  if(canReadMsg(&rx_msg))
+  if(CanBus.readMessage(&rx_msg))
   {
     Serial.print("ID : ");
     Serial.print(arg->id, HEX);

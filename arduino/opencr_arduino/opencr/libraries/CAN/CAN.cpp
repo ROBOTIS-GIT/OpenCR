@@ -1,11 +1,21 @@
-#include "bsp_can.h"
+#include "CAN.h"
 #include "drv_can.h"
 
 CANClass CanBus;
 
 CANClass::CANClass()
 {
+    format_ = CAN_STD_FORMAT;
+}
 
+bool CANClass::begin()
+{
+    return drvCanOpen(_DEF_CAN2, CAN_BAUD_125K, format_);
+}
+
+bool CANClass::begin(uint32_t baudrate)
+{
+    return drvCanOpen(_DEF_CAN2, baudrate, format_);
 }
 
 bool CANClass::begin(uint32_t baudrate, uint8_t format)
@@ -20,12 +30,22 @@ void CANClass::end(void)
 
  bool CANClass::configFilter(uint32_t id, uint32_t mask)
  {
-    return drvCanConfigFilter(14, id, mask);
+    return drvCanConfigFilter(14, id, mask, format_);
+ }
+
+ bool CANClass::configFilter(uint32_t id, uint32_t mask, uint8_t format)
+ {
+    return drvCanConfigFilter(14, id, mask, format);
  }
 
 uint32_t CANClass::write(uint32_t id, uint8_t *p_data, uint32_t length)
 {
-    return drvCanWrite(_DEF_CAN2, id, p_data, length);
+    return drvCanWrite(_DEF_CAN2, id, p_data, length, format_);
+}
+
+uint32_t CANClass::write(uint32_t id, uint8_t *p_data, uint32_t length, uint8_t format)
+{
+    return drvCanWrite(_DEF_CAN2, id, p_data, length, format);
 }
 
 uint8_t CANClass::read(void)  //read one byte
@@ -42,6 +62,7 @@ uint32_t CANClass::writeMessage(can_message_t *p_msg)
 {
     drv_can_msg_t msg;
     msg.id = p_msg->id;
+    msg.format = p_msg->format;
     msg.length = p_msg->length;
     memcpy(msg.data, p_msg->data, 8);
 
@@ -58,6 +79,7 @@ bool CANClass::readMessage(can_message_t *p_msg)
     if(rx_msg != NULL)
     {
         p_msg->id = rx_msg->id;
+        p_msg->format = rx_msg->format;
         p_msg->length = rx_msg->length;
 
         memcpy(p_msg->data, rx_msg->data, p_msg->length);
@@ -87,7 +109,7 @@ uint32_t CANClass::getState(void)
      return drvCanGetState(_DEF_CAN2);
 }
 
-void CANClass::attachRxInterrupt(void (*handler)(can_msg_t *arg))
+void CANClass::attachRxInterrupt(void (*handler)(can_message_t *arg))
 {
     drvCanAttachRxInterrupt(_DEF_CAN2, (void(*)(void *arg)) handler);
 }

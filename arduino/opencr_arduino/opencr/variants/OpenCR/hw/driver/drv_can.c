@@ -12,21 +12,21 @@
 
 
 /* a popular industrial application has optional settings of 125 kbps, 250 kbps, or 500 kbps  */
-#define _DRV_CAN_58MHZ_1000KBPS_PRE  18
-#define _DRV_CAN_58MHZ_1000KBPS_TS1  CAN_BS1_1TQ
-#define _DRV_CAN_58MHZ_1000KBPS_TS2  CAN_BS2_1TQ
+#define _DRV_CAN_58MHZ_1000KBPS_PRE  3
+#define _DRV_CAN_58MHZ_1000KBPS_TS1  CAN_BS1_13TQ
+#define _DRV_CAN_58MHZ_1000KBPS_TS2  CAN_BS2_4TQ
 
-#define _DRV_CAN_58MHZ_500KBPS_PRE   18
-#define _DRV_CAN_58MHZ_500KBPS_TS1   CAN_BS1_3TQ
-#define _DRV_CAN_58MHZ_500KBPS_TS2   CAN_BS2_2TQ
+#define _DRV_CAN_58MHZ_500KBPS_PRE   6
+#define _DRV_CAN_58MHZ_500KBPS_TS1   CAN_BS1_13TQ
+#define _DRV_CAN_58MHZ_500KBPS_TS2   CAN_BS2_4TQ
 
-#define _DRV_CAN_58MHZ_250KBPS_PRE   18
-#define _DRV_CAN_58MHZ_250KBPS_TS1   CAN_BS1_8TQ
-#define _DRV_CAN_58MHZ_250KBPS_TS2   CAN_BS2_3TQ
+#define _DRV_CAN_58MHZ_250KBPS_PRE   12
+#define _DRV_CAN_58MHZ_250KBPS_TS1   CAN_BS1_13TQ
+#define _DRV_CAN_58MHZ_250KBPS_TS2   CAN_BS2_4TQ
 
-#define _DRV_CAN_58MHZ_125KBPS_PRE   18
-#define _DRV_CAN_58MHZ_125KBPS_TS1   CAN_BS1_16TQ
-#define _DRV_CAN_58MHZ_125KBPS_TS2   CAN_BS2_7TQ
+#define _DRV_CAN_58MHZ_125KBPS_PRE   27
+#define _DRV_CAN_58MHZ_125KBPS_TS1   CAN_BS1_11TQ
+#define _DRV_CAN_58MHZ_125KBPS_TS2   CAN_BS2_4TQ
 
 #define CAN2_FILTER_BANK_START_NUM   14
 
@@ -55,8 +55,6 @@ static drv_can_t drv_can_tbl[DRV_CAN_MAX_CH] =
   {&hCAN2, NULL, CAN_FIFO1}
 };
 
-static uint8_t msg_format = _DEF_CAN_EXT;
-
 
 void drvCanInit(void)
 {
@@ -74,11 +72,6 @@ bool drvCanOpen(uint8_t channel, uint32_t baudrate, uint8_t format)
   if(channel > DRV_CAN_MAX_CH)
   {
     return false;
-  }
-
-  if((format != _DEF_CAN_STD)&&(format != _DEF_CAN_EXT))
-  {
-    format = _DEF_CAN_EXT;
   }
 
   CAN_HandleTypeDef *p_hCANx = drv_can_tbl[channel].p_hCANx;
@@ -104,7 +97,7 @@ bool drvCanOpen(uint8_t channel, uint32_t baudrate, uint8_t format)
       bs2      = _DRV_CAN_58MHZ_500KBPS_TS2;
       break;
 
-    case _DEF_CAN_BAUD_1M :
+    case _DEF_CAN_BAUD_1000K :
       prescale = _DRV_CAN_58MHZ_1000KBPS_PRE;
       bs1      = _DRV_CAN_58MHZ_1000KBPS_TS1;
       bs2      = _DRV_CAN_58MHZ_1000KBPS_TS2;
@@ -162,16 +155,14 @@ bool drvCanOpen(uint8_t channel, uint32_t baudrate, uint8_t format)
     return false;
   }
 
-  msg_format = format;
-
   /* Default Setup Filter */
   if(p_hCANx->Instance == CAN1)
   {
-    drvCanConfigFilter(0, 0x0, 0x0);
+    drvCanConfigFilter(0, 0x0, 0x0, format);
   }
   else
   {
-    drvCanConfigFilter(CAN2_FILTER_BANK_START_NUM, 0x0, 0x0);
+    drvCanConfigFilter(CAN2_FILTER_BANK_START_NUM, 0x0, 0x0, format);
   }
 
   HAL_CAN_Receive_IT(p_hCANx, drv_can_tbl[channel].rx_fifo);
@@ -192,7 +183,7 @@ void drvCanClose(uint8_t channel)
   HAL_CAN_MspDeInit(p_hCANx);
 }
 
-bool drvCanConfigFilter(uint8_t filter_num, uint32_t id, uint32_t mask)
+bool drvCanConfigFilter(uint8_t filter_num, uint32_t id, uint32_t mask, uint8_t format)
 {
   CAN_FilterConfTypeDef  sFilterConfig;
 
@@ -200,7 +191,7 @@ bool drvCanConfigFilter(uint8_t filter_num, uint32_t id, uint32_t mask)
   uint32_t reg_id;
   uint32_t reg_mask;
 
-  switch(msg_format)
+  switch(format)
   {
     case _DEF_CAN_STD :
       reserved = _DEF_CAN_STD | CAN_RTR_DATA;
@@ -241,7 +232,7 @@ bool drvCanConfigFilter(uint8_t filter_num, uint32_t id, uint32_t mask)
   return true;
 }
 
-uint32_t drvCanWrite(uint8_t channel, uint32_t id, uint8_t *p_data, uint32_t length)
+uint32_t drvCanWrite(uint8_t channel, uint32_t id, uint8_t *p_data, uint32_t length, uint8_t format)
 {
   if((channel > DRV_CAN_MAX_CH)||(id > 0x1FFFFFFF))
     return 0;
@@ -249,7 +240,7 @@ uint32_t drvCanWrite(uint8_t channel, uint32_t id, uint8_t *p_data, uint32_t len
   uint32_t tx_len, sent_len, i;
   CAN_HandleTypeDef *p_hCANx = drv_can_tbl[channel].p_hCANx;
 
-  switch(msg_format)
+  switch(format)
   {
     case _DEF_CAN_STD :
       p_hCANx->pTxMsg->IDE   = CAN_ID_STD;
@@ -321,7 +312,7 @@ uint32_t drvCanAvailable(uint8_t channel)
 
 uint32_t drvCanWriteMsg(uint8_t channel, drv_can_msg_t *p_msg)
 {
-  return drvCanWrite(channel, p_msg->id, p_msg->data, p_msg->length);
+  return drvCanWrite(channel, p_msg->id, p_msg->data, p_msg->length, p_msg->format);
 }
 
 drv_can_msg_t* drvCanReadMsg(uint8_t channel)
@@ -422,7 +413,16 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
       msg_idx = ringGetWriteIndex(&ring_msg[channel]);
       rx_buf  = &can_msg[channel][msg_idx];
 
-      rx_buf->id = p_RxMsg->ExtId;
+      if(p_RxMsg->IDE == CAN_ID_STD)
+      {
+        rx_buf->id = p_RxMsg->StdId;  
+        rx_buf->format = _DEF_CAN_STD;
+      }
+      else
+      {
+        rx_buf->id = p_RxMsg->ExtId;
+        rx_buf->format = _DEF_CAN_EXT;
+      }
       rx_buf->length = p_RxMsg->DLC;
       memcpy(rx_buf->data, p_RxMsg->Data, rx_buf->length);
       ringWriteUpdate(&ring_msg[channel]);

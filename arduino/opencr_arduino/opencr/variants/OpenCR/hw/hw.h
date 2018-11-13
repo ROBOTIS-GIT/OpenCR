@@ -35,7 +35,6 @@
 #include "flash.h"
 #include "vcp.h"
 #include "wdg.h"
-#include "can.h"
 
 
 

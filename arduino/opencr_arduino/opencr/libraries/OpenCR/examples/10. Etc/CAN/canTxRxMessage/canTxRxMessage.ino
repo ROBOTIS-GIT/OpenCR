@@ -28,20 +28,32 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-/* Author: OpusK */
-/* For API doc, please refer to https://github.com/ROBOTIS-GIT/OpenCR/wiki/arduino_examples_can */
+/* Author: Kei */
+
+#include <CAN.h>
 
 #define SEND_INTERVAL_MS 1000
 
 uint32_t t_time, id, i;
-can_msg_t tx_msg, rx_msg;
+can_message_t tx_msg, rx_msg;
 /*
  *  typedef struct 
  *  {
  *    uint32_t id      : Identifier of received message
  *    uint32_t length  : Length of received message data
  *    uint8_t  data[8] : Data of received message
- *  } can_msg_t;
+ *    uint8_t  format  : Type of ID
+ *  } can_message_t;
+ * 
+ * BAUDRATE :
+ *   CAN_BAUD_125K
+ *   CAN_BAUD_250K
+ *   CAN_BAUD_500K
+ *   CAN_BAUD_1000K
+ * 
+ * FORMAT :
+ *   CAN_STD_FORMAT
+ *   CAN_EXT_FORMAT
 */
 
 void setup()
@@ -51,26 +63,23 @@ void setup()
   Serial.println("============================");
   Serial.println("=== CAN Message Example! ===");
 
-  if (canOpen(_DEF_CAN_BAUD_125K, _DEF_CAN_EXT) == false)
+  if (CanBus.begin(CAN_BAUD_1000K, CAN_STD_FORMAT) == false)
   {
     Serial.println("CAN open fail!!");
   }
   else
   {
     id = 0x123;
-    canConfigFilter(id, 0);
-
-    tx_msg.id = id;
-    tx_msg.length = 8;
+    
+    CanBus.configFilter(id, 0, CAN_EXT_FORMAT);
   }
-  t_time = millis();
 }
 
 void loop()
 {
-  if (canAvailableMsg())
+  if (CanBus.avaliableMessage())
   {
-    if(canReadMsg(&rx_msg))
+    if(CanBus.readMessage(&rx_msg))
     {
       Serial.print("ID : ");
       Serial.print(rx_msg.id, HEX);
@@ -89,10 +98,15 @@ void loop()
   if (millis() - t_time >= SEND_INTERVAL_MS)
   {
     t_time = millis();
+
+    tx_msg.id = 0x123;
+    tx_msg.format = CAN_EXT_FORMAT;
     for(i = 0; i < 8; i++)
     {
       tx_msg.data[i] = (uint8_t)micros() + i;
     }
-    canWriteMsg(&tx_msg);
+    tx_msg.length = i;
+
+    CanBus.writeMessage(&tx_msg);
   }
 }
