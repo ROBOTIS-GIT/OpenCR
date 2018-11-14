@@ -23,7 +23,12 @@
 #define PROTOCOL_VERSION2               2.0
 
 // Default setting
-#define DEVICENAME                      "/dev/OpenCR"       // Check which port is being used on your controller
+#if defined(__OPENCR__) 
+#define DEVICENAME                      "/dev/OpenCR"       // Device name not used on OpenCR
+#elif defined(__OPENCM904__)
+#define DEVICENAME                      "3"                 // Default to external (OpenCM485 expansion) on OpenCM9.04
+#endif
+
 // ex) Windows: "COM1"   Linux: "/dev/ttyUSB0"
 #define CMD_SERIAL                      Serial              // USB Serial
 
@@ -236,6 +241,7 @@ bool findMotor(int id)
   {
     CMD_SERIAL.println("    ... SUCCESS");
     CMD_SERIAL.printf("    [ID: %d found at baud: %d]\n", id, tb3_baud );
+    portHandler->setBaudRate(tb3_baud);
     return true;
   }
 
