@@ -1,17 +1,17 @@
 /*******************************************************************************
-* Copyright 2016 ROBOTIS CO., LTD.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
+  Copyright 2016 ROBOTIS CO., LTD.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
 *******************************************************************************/
 
 /* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
@@ -23,8 +23,13 @@
 #define PROTOCOL_VERSION2               2.0
 
 // Default setting
-#define DEVICENAME                      "/dev/OpenCR"       // Check which port is being used on your controller
-                                                            // ex) Windows: "COM1"   Linux: "/dev/ttyUSB0"
+#if defined(__OPENCR__) 
+#define DEVICENAME                      "/dev/OpenCR"       // Device name not used on OpenCR
+#elif defined(__OPENCM904__)
+#define DEVICENAME                      "3"                 // Default to external (OpenCM485 expansion) on OpenCM9.04
+#endif
+
+// ex) Windows: "COM1"   Linux: "/dev/ttyUSB0"
 #define CMD_SERIAL                      Serial              // USB Serial
 
 
@@ -43,8 +48,8 @@ typedef union
 char *dev_name = (char*)DEVICENAME;
 
 // Initialize Packethandler2 instance
- dynamixel::PacketHandler *packetHandler2;
- dynamixel::PortHandler   *portHandler;
+dynamixel::PacketHandler *packetHandler2;
+dynamixel::PortHandler   *portHandler;
 
 
 int tb3_id = -1;
@@ -52,7 +57,7 @@ int tb3_baud = -1;
 
 
 bool requestConfirm(void);
-bool findMotor(void);
+bool findMotor(int id);
 bool setupMotorLeft(void);
 bool setupMotorRight(void);
 void testMotor(uint8_t id);
@@ -66,7 +71,7 @@ dxl_ret_t read(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler *pa
 void setup()
 {
   CMD_SERIAL.begin(57600);
-  while(!CMD_SERIAL);
+  while (!CMD_SERIAL);
 
 
   packetHandler2 = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION2);
@@ -84,7 +89,7 @@ void setup()
   {
     CMD_SERIAL.printf("Failed to open the port! [%s]\n", dev_name);
     CMD_SERIAL.printf("Press any key to terminate...\n");
-    while(1);
+    while (1);
   }
 
 
@@ -107,7 +112,7 @@ void loop()
       {
         CMD_SERIAL.println("setup.... left");
 
-        if (findMotor() == true)
+        if (findMotor(1) == true)
         {
           setupMotorLeft();
         }
@@ -120,7 +125,7 @@ void loop()
       {
         CMD_SERIAL.println("setup.... right");
 
-        if (findMotor() == true)
+        if (findMotor(2) == true)
         {
           setupMotorRight();
         }
@@ -162,7 +167,7 @@ bool requestConfirm(void)
 
   CMD_SERIAL.print("Do you really want to setup ? y/n : ");
 
-  while(1)
+  while (1)
   {
     if (CMD_SERIAL.available())
     {
@@ -187,16 +192,17 @@ void flushCmd(void)
 {
   uint8_t ch;
 
-  while(CMD_SERIAL.available())
+  while (CMD_SERIAL.available())
   {
     ch = CMD_SERIAL.read();
   }
 }
 
 
-bool findMotor(void)
+bool findMotor(int id)
 {
   uint32_t baud_tbl[2] = { 57600, 1000000 };
+#define COUNT_BAUD (sizeof(baud_tbl)/sizeof(baud_tbl[0]))
   uint32_t index;
   uint32_t baud_pre;
 
@@ -209,13 +215,45 @@ bool findMotor(void)
 
   CMD_SERIAL.println("Find Motor...");
 
-  for (index=0; index<2; index++)
+  // First try to find the specific servo ID wanted
+  for (index = 0; index < COUNT_BAUD; index++)
+  {
+    portHandler->setBaudRate(baud_tbl[index]);
+    uint16_t model_number;
+    int dxl_comm_result = packetHandler2->ping(portHandler, id, &model_number);
+    if (dxl_comm_result == COMM_SUCCESS)
+    {
+      if (tb3_id == -1)
+      {
+        tb3_id = id;
+        tb3_baud =  baud_tbl[index];
+      }
+      else
+      {
+        CMD_SERIAL.printf("Warning Servo %d found at two baud rates %d and %d using %d\n",
+                          id, tb3_baud, baud_tbl[index], baud_tbl[index]);
+        tb3_baud =  baud_tbl[index];
+      }
+    }
+  }
+
+  if (tb3_id != -1)
+  {
+    CMD_SERIAL.println("    ... SUCCESS");
+    CMD_SERIAL.printf("    [ID: %d found at baud: %d]\n", id, tb3_baud );
+    portHandler->setBaudRate(tb3_baud);
+    return true;
+  }
+
+  // Did not find the actual ID we were looking for so see if we find any servos?
+  for (index = 0; index < COUNT_BAUD; index++)
   {
     CMD_SERIAL.printf("    setbaud : %d\r\n", baud_tbl[index]);
 
     portHandler->setBaudRate(baud_tbl[index]);
     tb3_baud =  baud_tbl[index];
 
+    // Lets see if we find the actual one we want to update?
     int dxl_comm_result = packetHandler2->broadcastPing(portHandler, vec);
     if (dxl_comm_result != COMM_SUCCESS)
     {
@@ -233,6 +271,15 @@ bool findMotor(void)
     if (vec.size() > 0)
     {
       CMD_SERIAL.println("    found motor");
+      if (vec.size() > 1)
+      {
+        CMD_SERIAL.printf("    WARNING: multiple servos found, using id: %d\n", tb3_id);
+        if (!requestConfirm())
+        {
+          tb3_id = -1;  // setup to abort...
+        }
+      }
+
       break;
     }
     else
@@ -259,11 +306,11 @@ bool setupMotorLeft(void)
 
   if (tb3_id < 0)
   {
-       CMD_SERIAL.println("    no dxl motors");
+    CMD_SERIAL.println("    no dxl motors");
   }
   else
   {
-    write(portHandler, packetHandler2, tb3_id,64, 1, 0);
+    write(portHandler, packetHandler2, tb3_id, 64, 1, 0);
     write(portHandler, packetHandler2, tb3_id, 7, 1, 1);
     tb3_id = 1;
     write(portHandler, packetHandler2, tb3_id, 8, 1, 3);
@@ -281,11 +328,11 @@ bool setupMotorRight(void)
 
   if (tb3_id < 0)
   {
-       CMD_SERIAL.println("    no dxl motors");
+    CMD_SERIAL.println("    no dxl motors");
   }
   else
   {
-    write(portHandler, packetHandler2, tb3_id,64, 1, 0);
+    write(portHandler, packetHandler2, tb3_id, 64, 1, 0);
     write(portHandler, packetHandler2, tb3_id, 7, 1, 2);
     tb3_id = 2;
     write(portHandler, packetHandler2, tb3_id, 8, 1, 3);
@@ -301,21 +348,28 @@ void testMotor(uint8_t id)
   uint32_t pre_time;
   uint8_t  toggle = 0;
 
-  CMD_SERIAL.println("Test Motor Left...");
-
-
-  if (tb3_id < 0)
+  if (id == 1)
   {
-       CMD_SERIAL.println("    no dxl motors");
+    CMD_SERIAL.printf("Test Motor Left...");
   }
   else
   {
+    CMD_SERIAL.printf("Test Motor Right...");
+  }
+  // We run at 1000000
+  portHandler->setBaudRate(1000000);
+
+  uint16_t model_number;
+  int dxl_comm_result = packetHandler2->ping(portHandler, id, &model_number);
+  if (dxl_comm_result == COMM_SUCCESS)
+  {
+    CMD_SERIAL.printf(" found type: %d\n", model_number);
     write(portHandler, packetHandler2, id, 64, 1, 1);
 
     toggle = 0;
     pre_time = millis();
     write(portHandler, packetHandler2, id, 104, 4, 100);
-    while(1)
+    while (1)
     {
       if (CMD_SERIAL.available())
       {
@@ -323,7 +377,7 @@ void testMotor(uint8_t id)
         break;
       }
 
-      if (millis()-pre_time > 1000)
+      if (millis() - pre_time > 1000)
       {
         pre_time = millis();
 
@@ -340,6 +394,10 @@ void testMotor(uint8_t id)
       }
     }
     write(portHandler, packetHandler2, id, 104, 4, 0);
+  }
+  else
+  {
+    CMD_SERIAL.printf("    dxl motor ID:%d not found\n", id);
   }
 }
 
