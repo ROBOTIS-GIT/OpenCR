@@ -31,8 +31,14 @@
 #include <string.h>
 #include <stdlib.h>
 
+// Before DynamixelSDK release, it needs to apply because of OpenCM904
+#if defined(__OPENCM904__)
+#define TXPACKET_MAX_LEN    (2*1024)
+#define RXPACKET_MAX_LEN    (2*1024)
+#else
 #define TXPACKET_MAX_LEN    (4*1024)
 #define RXPACKET_MAX_LEN    (4*1024)
+#endif
 
 ///////////////// for Protocol 2.0 Packet /////////////////
 #define PKT_HEADER0             0
@@ -140,7 +146,7 @@ const char *Protocol2PacketHandler::getRxPacketError(uint8_t error)
 unsigned short Protocol2PacketHandler::updateCRC(uint16_t crc_accum, uint8_t *data_blk_ptr, uint16_t data_blk_size)
 {
   uint16_t i;
-  uint16_t crc_table[256] = {0x0000,
+  static const uint16_t crc_table[256] = {0x0000,
   0x8005, 0x800F, 0x000A, 0x801B, 0x001E, 0x0014, 0x8011,
   0x8033, 0x0036, 0x003C, 0x8039, 0x0028, 0x802D, 0x8027,
   0x0022, 0x8063, 0x0066, 0x006C, 0x8069, 0x0078, 0x807D,
@@ -190,39 +196,37 @@ unsigned short Protocol2PacketHandler::updateCRC(uint16_t crc_accum, uint8_t *da
 
 void Protocol2PacketHandler::addStuffing(uint8_t *packet)
 {
-  int i = 0, index = 0;
-  int packet_length_in = DXL_MAKEWORD(packet[PKT_LENGTH_L], packet[PKT_LENGTH_H]);
-  int packet_length_out = packet_length_in;
-  uint8_t temp[TXPACKET_MAX_LEN] = {0};
+  uint16_t packet_length_in = DXL_MAKEWORD(packet[PKT_LENGTH_L], packet[PKT_LENGTH_H]);
+  uint16_t packet_length_out = packet_length_in;
+  if (packet_length_in < 5) return; // less CRC so if not at least 3 data bytes won't be issue
 
-  for (uint16_t s = PKT_HEADER0; s <= PKT_LENGTH_H; s++)
-    temp[s] = packet[s]; // FF FF FD XX ID LEN_L LEN_H
-  //memcpy(temp, packet, PKT_LENGTH_H+1);
-  index = PKT_INSTRUCTION;
-  for (i = 0; i < packet_length_in - 2; i++)  // except CRC
+  uint16_t length_before_crc = packet_length_in - 2;
+  for (uint16_t i = 0; i < length_before_crc; i++)  // except CRC
   {
-    temp[index++] = packet[i+PKT_INSTRUCTION];
     if (packet[i+PKT_INSTRUCTION] == 0xFD && packet[i+PKT_INSTRUCTION-1] == 0xFF && packet[i+PKT_INSTRUCTION-2] == 0xFF)
-    {   // FF FF FD
-      temp[index++] = 0xFD;
-      packet_length_out++;
+    {
+      if ((i == (length_before_crc-1)) || (packet[i+PKT_INSTRUCTION+1] != 0xFD)){
+        packet_length_out++;  // check to make sure it was not already stuffed. 
+      }
     }
+  }  
+  if (packet_length_in == packet_length_out) return;  // No new padding added.
+  // BUGBUG:: using realloc which could move to new address... ?
+  packet = (uint8_t *)realloc(packet, packet_length_out + 7);
+  if (packet == NULL)   return; // we have problems!
+
+  // now lets move the data down - won't handle ff ff fd fd here as if any pre stuffed expect fullly done
+  uint8_t *packet_stuff_ptr = &packet[packet_length_out + 6];
+  uint8_t *packet_pre_stuff_ptr =  &packet[packet_length_in + 6];
+  while(packet_stuff_ptr != packet_pre_stuff_ptr)
+  {
+    if ((packet_pre_stuff_ptr[0] == 0xFD) && (packet_pre_stuff_ptr[-1] == 0xFF) && (packet_pre_stuff_ptr[-2] == 0xFF))
+    {
+      *packet_stuff_ptr-- = 0xFD; // stuff out new byte;
+    }
+    *packet_stuff_ptr-- = *packet_pre_stuff_ptr--;  // copy the byte down
   }
-  temp[index++] = packet[PKT_INSTRUCTION+packet_length_in-2];
-  temp[index++] = packet[PKT_INSTRUCTION+packet_length_in-1];
-
-
-  //////////////////////////
-  if (packet_length_in != packet_length_out)
-    packet = (uint8_t *)realloc(packet, index * sizeof(uint8_t));
-
-  ///////////////////////////
-
-  for (uint16_t s = 0; s < index; s++)
-    packet[s] = temp[s];
-  //memcpy(packet, temp, index);
-  packet[PKT_LENGTH_L] = DXL_LOBYTE(packet_length_out);
-  packet[PKT_LENGTH_H] = DXL_HIBYTE(packet_length_out);
+  return;
 }
 
 void Protocol2PacketHandler::removeStuffing(uint8_t *packet)
@@ -771,6 +775,7 @@ int Protocol2PacketHandler::writeTxOnly(PortHandler *port, uint8_t id, uint16_t 
   int result                  = COMM_TX_FAIL;
 
   uint8_t *txpacket           = (uint8_t *)malloc(length+12);
+  if (!txpacket) return result;
   //uint8_t *txpacket           = new uint8_t[length+12];
 
   txpacket[PKT_ID]            = id;
@@ -797,6 +802,7 @@ int Protocol2PacketHandler::writeTxRx(PortHandler *port, uint8_t id, uint16_t ad
   int result                  = COMM_TX_FAIL;
 
   uint8_t *txpacket           = (uint8_t *)malloc(length + 12);
+  if (!txpacket) return result;
   //uint8_t *txpacket           = new uint8_t[length+12];
   uint8_t rxpacket[11]        = {0};
 
@@ -856,6 +862,7 @@ int Protocol2PacketHandler::regWriteTxOnly(PortHandler *port, uint8_t id, uint16
   int result                 = COMM_TX_FAIL;
 
   uint8_t *txpacket           = (uint8_t *)malloc(length + 12);
+  if (!txpacket) return result;
   //uint8_t *txpacket           = new uint8_t[length+12];
 
   txpacket[PKT_ID]            = id;
@@ -882,6 +889,7 @@ int Protocol2PacketHandler::regWriteTxRx(PortHandler *port, uint8_t id, uint16_t
   int result                 = COMM_TX_FAIL;
 
   uint8_t *txpacket           = (uint8_t *)malloc(length + 12);
+  if (!txpacket) return result;
   //uint8_t *txpacket           = new uint8_t[length+12];
   uint8_t rxpacket[11]        = {0};
 
@@ -908,6 +916,7 @@ int Protocol2PacketHandler::syncReadTx(PortHandler *port, uint16_t start_address
   int result                 = COMM_TX_FAIL;
 
   uint8_t *txpacket           = (uint8_t *)malloc(param_length + 14);
+  if (!txpacket) return result;
   // 14: HEADER0 HEADER1 HEADER2 RESERVED ID LEN_L LEN_H INST START_ADDR_L START_ADDR_H DATA_LEN_L DATA_LEN_H CRC16_L CRC16_H
 
   txpacket[PKT_ID]            = BROADCAST_ID;
@@ -936,6 +945,7 @@ int Protocol2PacketHandler::syncWriteTxOnly(PortHandler *port, uint16_t start_ad
   int result                 = COMM_TX_FAIL;
 
   uint8_t *txpacket           = (uint8_t *)malloc(param_length + 14);
+  if (!txpacket) return result;
   //uint8_t *txpacket           = new uint8_t[param_length + 14];
   // 14: HEADER0 HEADER1 HEADER2 RESERVED ID LEN_L LEN_H INST START_ADDR_L START_ADDR_H DATA_LEN_L DATA_LEN_H CRC16_L CRC16_H
 
@@ -964,6 +974,7 @@ int Protocol2PacketHandler::bulkReadTx(PortHandler *port, uint8_t *param, uint16
   int result                 = COMM_TX_FAIL;
 
   uint8_t *txpacket           = (uint8_t *)malloc(param_length + 10);
+  if (!txpacket) return result;
   //uint8_t *txpacket           = new uint8_t[param_length + 10];
   // 10: HEADER0 HEADER1 HEADER2 RESERVED ID LEN_L LEN_H INST CRC16_L CRC16_H
 
@@ -995,6 +1006,7 @@ int Protocol2PacketHandler::bulkWriteTxOnly(PortHandler *port, uint8_t *param, u
   int result                 = COMM_TX_FAIL;
 
   uint8_t *txpacket           = (uint8_t *)malloc(param_length + 10);
+  if (!txpacket) return result;
   //uint8_t *txpacket           = new uint8_t[param_length + 10];
   // 10: HEADER0 HEADER1 HEADER2 RESERVED ID LEN_L LEN_H INST CRC16_L CRC16_H
 
