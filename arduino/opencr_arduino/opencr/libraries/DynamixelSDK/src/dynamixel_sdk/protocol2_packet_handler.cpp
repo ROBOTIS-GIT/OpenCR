@@ -216,16 +216,17 @@ void Protocol2PacketHandler::addStuffing(uint8_t *packet)
   if (packet == NULL)   return; // we have problems!
 
   // now lets move the data down - won't handle ff ff fd fd here as if any pre stuffed expect fullly done
-  uint8_t *packet_stuff_ptr = &packet[packet_length_out + 6];
-  uint8_t *packet_pre_stuff_ptr =  &packet[packet_length_in + 6];
-  while(packet_stuff_ptr != packet_pre_stuff_ptr)
+  uint16_t out_index = packet_length_out + 6 - 2;   // We only want to go from Instruction to before CRC
+  uint16_t in_index = packet_length_in + 6 - 2;
+  while((in_index >= 2) && (out_index != in_index)) // First part of if not needed unless something got messsed up?
   {
-    if ((packet_pre_stuff_ptr[0] == 0xFD) && (packet_pre_stuff_ptr[-1] == 0xFF) && (packet_pre_stuff_ptr[-2] == 0xFF))
+    if ((packet[in_index-0] == 0xFD) && (packet[in_index-1] == 0xFF) && (packet[in_index-2] == 0xFF))
     {
-      *packet_stuff_ptr-- = 0xFD; // stuff out new byte;
+      packet[out_index--] = 0xFD; // stuff out new byte;
     }
-    *packet_stuff_ptr-- = *packet_pre_stuff_ptr--;  // copy the byte down
+    packet[out_index--] = packet[in_index--];  // copy the byte down
   }
+
   return;
 }
 
@@ -644,6 +645,7 @@ int Protocol2PacketHandler::readRx(PortHandler *port, uint8_t id, uint16_t lengt
 {
   int result                  = COMM_TX_FAIL;
   uint8_t *rxpacket           = (uint8_t *)malloc(RXPACKET_MAX_LEN);
+  if (!rxpacket) return result;
   //(length + 11 + (length/3));  // (length/3): consider stuffing
   //uint8_t *rxpacket           = new uint8_t[length + 11 + (length/3)];    // (length/3): consider stuffing
 
@@ -674,6 +676,7 @@ int Protocol2PacketHandler::readTxRx(PortHandler *port, uint8_t id, uint16_t add
 
   uint8_t txpacket[14]        = {0};
   uint8_t *rxpacket           = (uint8_t *)malloc(RXPACKET_MAX_LEN);
+  if (!rxpacket) return result;
   //(length + 11 + (length/3));  // (length/3): consider stuffing
 
   if (id >= BROADCAST_ID)

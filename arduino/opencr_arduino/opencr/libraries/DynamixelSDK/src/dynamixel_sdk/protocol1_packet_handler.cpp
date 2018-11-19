@@ -532,6 +532,7 @@ int Protocol1PacketHandler::writeTxOnly(PortHandler *port, uint8_t id, uint16_t 
   int result                 = COMM_TX_FAIL;
 
   uint8_t *txpacket           = (uint8_t *)malloc(length+7);
+  if (!txpacket) return result;
   //uint8_t *txpacket           = new uint8_t[length+7];
 
   txpacket[PKT_ID]            = id;
@@ -613,6 +614,7 @@ int Protocol1PacketHandler::regWriteTxOnly(PortHandler *port, uint8_t id, uint16
   int result                 = COMM_TX_FAIL;
 
   uint8_t *txpacket           = (uint8_t *)malloc(length+6);
+  if (!txpacket) return result;
   //uint8_t *txpacket           = new uint8_t[length+6];
 
   txpacket[PKT_ID]            = id;
@@ -666,6 +668,7 @@ int Protocol1PacketHandler::syncWriteTxOnly(PortHandler *port, uint16_t start_ad
   int result                 = COMM_TX_FAIL;
 
   uint8_t *txpacket           = (uint8_t *)malloc(param_length+8);
+  if (!txpacket) return result;
   // 8: HEADER0 HEADER1 ID LEN INST START_ADDR DATA_LEN ... CHKSUM
   //uint8_t *txpacket           = new uint8_t[param_length + 8];
 
