@@ -33,6 +33,8 @@
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
+#include <trajectory_msgs/JointTrajectory.h>
+#include <trajectory_msgs/JointTrajectoryPoint.h>
 
 #include <turtlebot3_msgs/SensorState.h>
 #include <turtlebot3_msgs/Sound.h>
@@ -73,8 +75,8 @@
 
 // Callback function prototypes
 void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
-void goalJointPositionCallback(const sensor_msgs::JointState& goal_joint_position_msg);
-void goalGripperPositionCallback(const sensor_msgs::JointState& goal_gripper_position_msg);
+void jointTrajectoryCallback(const trajectory_msgs::JointTrajectory& joint_trajectory_msg);
+void gripperTrajectoryCallback(const trajectory_msgs::JointTrajectory& gripper_trajectory_msg);
 void soundCallback(const turtlebot3_msgs::Sound& sound_msg);
 void motorPowerCallback(const std_msgs::Bool& power_msg);
 void resetCallback(const std_msgs::Empty& reset_msg);
@@ -137,9 +139,9 @@ char joint_state_header_frame_id[30];
 *******************************************************************************/
 ros::Subscriber<geometry_msgs::Twist> cmd_vel_sub("cmd_vel", commandVelocityCallback);
 
-ros::Subscriber<sensor_msgs::JointState> joint_position_sub("open_manipulator_with_tb3/goal_joint_position", goalJointPositionCallback);
+ros::Subscriber<trajectory_msgs::JointTrajectory> joint_position_sub("open_manipulator/joint_trajectory", jointTrajectoryCallback);
 
-ros::Subscriber<sensor_msgs::JointState> gripper_position_sub("open_manipulator_with_tb3/goal_gripper_position", goalGripperPositionCallback);
+ros::Subscriber<trajectory_msgs::JointTrajectory> gripper_position_sub("open_manipulator/gripper_trajectory", gripperTrajectoryCallback);
 
 ros::Subscriber<turtlebot3_msgs::Sound> sound_sub("sound", soundCallback);
 
