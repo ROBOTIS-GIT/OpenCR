@@ -22,7 +22,7 @@
 // Necessary library
 #include <open_manipulator_libs.h>
 #include "Link_Kinematics.h"
-#include "Link_Vacuum.h"
+#include "Vacuum_Actuator.h"
 // User-defined library
 
 /////////////control time set////////////////

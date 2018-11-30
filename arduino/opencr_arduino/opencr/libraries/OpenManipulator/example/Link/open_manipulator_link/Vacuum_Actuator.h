@@ -16,8 +16,8 @@
 
 /* Authors: Hye-Jong KIM */
 
-#ifndef LINK_VACUUM_H_
-#define LINK_VACUUM_H_
+#ifndef VACUUM_ACTUATOR_H_
+#define VACUUM_ACTUATOR_H_
 
 #if defined(__OPENCR__)
   #include <RobotisManipulator.h>
