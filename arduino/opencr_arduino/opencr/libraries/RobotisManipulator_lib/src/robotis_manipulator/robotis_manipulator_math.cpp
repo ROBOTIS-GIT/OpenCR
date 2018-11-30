@@ -258,14 +258,14 @@ Eigen::Vector3d RM_MATH::matrixLogarithm(Eigen::Matrix3d rotation_matrix)
   Eigen::Vector3d rotation_vector = Eigen::Vector3d::Zero();
 
   double theta = 0.0;
-  double diag = 0.0;
+  // double diag = 0.0;
   bool diagonal_matrix = R.isDiagonal();
 
   l << R(2, 1) - R(1, 2),
       R(0, 2) - R(2, 0),
       R(1, 0) - R(0, 1);
   theta = atan2(l.norm(), R(0, 0) + R(1, 1) + R(2, 2) - 1);
-  diag = R.determinant();
+  // diag = R.determinant();
 
   if (R.isIdentity())
   {

@@ -216,7 +216,7 @@ void fromProcessing(OPEN_MANIPULATOR *open_manipulator, String data)
     {
       MotionWayPoint read_value;
       std::vector<WayPoint> present_states = open_manipulator->getAllActiveJointValue();
-      for(int i = 0; i < present_states.size(); i ++)
+      for(uint32_t i = 0; i < present_states.size(); i ++)
         read_value.angle.push_back(present_states.at(i).value);  
       read_value.path_time = 2.0;
       read_value.gripper_value = open_manipulator->getToolValue("tool");

@@ -85,6 +85,7 @@ bool Chain::inverseKinematics(Manipulator *manipulator, Name tool_name, Pose tar
   {
     RM_LOG::ERROR("Wrong inverse solver name (please change the solver)");
   }
+  return false;
 }
 
 void Chain::forwardSolverUsingChainRule(Manipulator *manipulator, Name component_name)

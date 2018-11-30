@@ -23,10 +23,10 @@ using namespace ROBOTIS_MANIPULATOR;
 bool JointActuator::findId(uint8_t actuator_id)
 {
   std::vector<uint8_t> id = getId();
-  for(int index = 0; index < id.size(); index++)
+  for(uint32_t index = 0; index < id.size(); index++)
   {
-    if(id.at(index) == actuator_id);
-    return true;
+    if(id.at(index) == actuator_id)
+      return true;
   }
   return false;
 }
@@ -39,7 +39,7 @@ bool JointActuator::isEnabled()
 
 bool ToolActuator::findId(uint8_t actuator_id)
 {
-  if(getId() == actuator_id);
+  if(getId() == actuator_id)
   {
     return true;
   }
