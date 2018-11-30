@@ -487,7 +487,7 @@ bool RobotisManipulator::sendJointActuatorValue(Name joint_component_name, WayPo
     value_vector.push_back(value);
     return joint_actuator_.at(manipulator_.getComponentActuatorName(joint_component_name))->sendJointActuatorValue(id, value_vector);
   }
-  return {};
+  return false;
 }
 
 bool RobotisManipulator::sendMultipleJointActuatorValue(std::vector<Name> joint_component_name, std::vector<WayPoint> value_vector)
@@ -526,7 +526,7 @@ bool RobotisManipulator::sendMultipleJointActuatorValue(std::vector<Name> joint_
     }
     return true;
   }
-  return {};
+  return false;
 }
 
 bool RobotisManipulator::sendAllJointActuatorValue(std::vector<WayPoint> value_vector)
@@ -568,7 +568,7 @@ bool RobotisManipulator::sendAllJointActuatorValue(std::vector<WayPoint> value_v
     }
     return true;
   }
-  return {};
+  return false;
 }
 
 
