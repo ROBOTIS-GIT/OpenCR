@@ -16,11 +16,10 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
-#ifndef OPEN_MANIPULATOR_VACUUM_H_
-#define OPEN_MANIPULATOR_VACUUM_H_
+#ifndef OPEN_MANIPULATOR_PEN_H_
+#define OPEN_MANIPULATOR_PEN_H_
 
 #include <open_manipulator_libs.h>
-#include "Actuator.h"
 
 #define NUM_OF_JOINT 4
 #define DXL_SIZE 4
@@ -31,7 +30,6 @@
 #define DRAWING_HEART "drawing_heart"
 
 #define JOINT_DYNAMIXEL "joint_dxl"
-#define TOOL_VACUUM "tool_vacuum"
 
 #define CONTROL_TIME 0.010 //s
 
@@ -39,7 +37,7 @@
 #define Y_AXIS RM_MATH::makeVector3(0.0, 1.0, 0.0)
 #define Z_AXIS RM_MATH::makeVector3(0.0, 0.0, 1.0)
 
-class OPEN_MANIPULATOR_VACUUM : public ROBOTIS_MANIPULATOR::RobotisManipulator
+class OPEN_MANIPULATOR_PEN : public ROBOTIS_MANIPULATOR::RobotisManipulator
 {
 private:
   ROBOTIS_MANIPULATOR::Kinematics *kinematics_;
@@ -54,8 +52,8 @@ private:
   bool platform_;
   std::vector<uint8_t> jointDxlId;
  public:
-  OPEN_MANIPULATOR_VACUUM() {}
-  virtual ~OPEN_MANIPULATOR_VACUUM() {}
+  OPEN_MANIPULATOR_PEN() {}
+  virtual ~OPEN_MANIPULATOR_PEN() {}
 
   void initManipulator(bool using_platform, STRING usb_port = "/dev/ttyUSB0", STRING baud_rate = "1000000")
   {
@@ -148,16 +146,9 @@ private:
       void *p_joint_dxl_mode_arg = &joint_dxl_mode_arg;
       jointActuatorSetMode(JOINT_DYNAMIXEL, jointDxlId, p_joint_dxl_mode_arg);
 
-      ////////// tool actuator init.
-      tool_ = new ACTUATOR::GripperVacuum();
-
-      uint8_t toolId = 15;
-      addToolActuator(TOOL_VACUUM, tool_, toolId, NULL);
-
       // all actuator enable
       allActuatorEnable();
       receiveAllJointActuatorValue();
-      receiveAllToolActuatorValue();
     }
     ////////// drawing path
     addDrawingTrajectory(DRAWING_LINE, &line_);
@@ -172,19 +163,15 @@ private:
   void openManipulatorProcess(double present_time)
   {
     std::vector<WayPoint> goal_value  = getJointGoalValueFromTrajectory(present_time);
-    std::vector<double> tool_value    = getToolGoalValue();
 
     if(platform_)
     {
       receiveAllJointActuatorValue();
-      receiveAllToolActuatorValue();
       if(goal_value.size() != 0) sendAllJointActuatorValue(goal_value);
-      if(tool_value.size() != 0) sendAllToolActuatorValue(tool_value);
     }
     else // visualization
     {
       if(goal_value.size() != 0) setAllActiveJointWayPoint(goal_value);
-      if(tool_value.size() != 0) setAllToolValue(tool_value);
     }
     forwardKinematics();
   }
@@ -196,7 +183,7 @@ private:
 
 };
 
-#endif // OPEN_MANIPULATOR_VACUUM_H_
+#endif // OPEN_MANIPULATOR_PEN_H_
 
 
 

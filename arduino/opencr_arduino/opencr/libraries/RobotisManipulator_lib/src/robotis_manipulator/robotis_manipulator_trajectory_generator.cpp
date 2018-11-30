@@ -300,7 +300,7 @@ void Trajectory::initTrajectoryWayPoint(double present_time, Manipulator present
   std::vector<double> joint_value_vector;
   joint_value_vector = getTrajectoryManipulator()->getAllActiveJointValue();
 
-  for(int index=0; index < joint_value_vector.size(); index++)
+  for(uint32_t index=0; index < joint_value_vector.size(); index++)
   {
     joint_way_point.value = joint_value_vector.at(index);
     joint_way_point.velocity = 0.0;
@@ -492,7 +492,7 @@ std::vector<WayPoint> Trajectory::getGoalWayPoint()
 
 std::vector<WayPoint> Trajectory::removeWayPointDynamicData(std::vector<WayPoint> value)
 {
-  for(int index =0; index < value.size(); index++)
+  for(uint32_t index =0; index < value.size(); index++)
   {
     value.at(index).velocity = 0.0;
     value.at(index).acceleration = 0.0;

@@ -180,7 +180,7 @@ void Manipulator::checkManipulatorSetting()
       RM_LOG::PRINTLN("[Component Type]\nTool");
     RM_LOG::PRINTLN("[Name]");
     RM_LOG::PRINT("Parent Name : "); RM_LOG::PRINTLN(STRING(component_.at(it_component->first).name.parent));
-    for(int index = 0; index < component_.at(it_component->first).name.child.size(); index++)
+    for(uint32_t index = 0; index < component_.at(it_component->first).name.child.size(); index++)
     {
       RM_LOG::PRINT("Child Name ",index+1,0);
       RM_LOG::PRINT(" : ");
@@ -706,6 +706,7 @@ std::vector<WayPoint> Manipulator::getAllJointWayPoint()
       result.velocity = component_.at(it_component->first).actuator_variable.velocity;
       result.acceleration = component_.at(it_component->first).actuator_variable.acceleration;
       result.effort = component_.at(it_component->first).actuator_variable.effort;
+      result_vector.push_back(result);
     }
   }
   return result_vector;
@@ -874,6 +875,7 @@ Name Manipulator::findComponentNameFromId(int8_t id)
       return it_component->first;
     }
   }
+  return {};
 }
 
 

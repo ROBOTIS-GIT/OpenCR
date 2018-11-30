@@ -16,12 +16,12 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
-#ifndef OPEN_MANIPULATOR_MOTION_H_
-#define OPEN_MANIPULATOR_MOTION_H_
+#ifndef OPEN_MANIPULATOR_PEN_MOTION_H_
+#define OPEN_MANIPULATOR_PEN_MOTION_H_
 
 #if defined(__OPENCR__)
   #include <RobotisManipulator.h>
-  #include "OpenManipulatorVacuum.h"
+  #include "OpenManipulatorPen.h"
 #else
   #include <robotis_manipulator/robotis_manipulator.h>
 #endif
@@ -32,20 +32,16 @@
 bool demo_motion_state = false;
 char demo_motion_cnt = 0;
 
-#define NUM_OF_MOTION 6
+#define NUM_OF_MOTION 2
 double demo_motion_way_point_buf[NUM_OF_MOTION][6] = 
 {
- // j1      j2      j3      j4      time    tool 
-    0.00,   0.00,   0.00,   0.00,   2.0,    0.0,
-    0.00,  -1.05,   0.35,   0.69,   2.0,    0.0,
-    0.37,   0.85,   0.35,  -1.12,   2.0,    0.0,
-    0.37,   0.85,   0.35,  -1.12,   1.0,    1.0,
-    0.00,  -1.05,   0.35,   0.69,   2.0,    1.0,
-    0.00,  -1.05,   0.35,   0.69,   1.0,    0.0
+ // j1       j2       j3       j4       time    tool 
+    0.000,   0.000,   0.000,   0.000,   2.0,    0.0, // init
+    0.000,  -1.050,   0.350,   0.690,   2.0,    0.0 // home
 };
 
 
-void playMotion(OPEN_MANIPULATOR_VACUUM *open_manipulator)
+void playMotion(OPEN_MANIPULATOR_PEN *open_manipulator)
 {
   if(!open_manipulator->isMoving() && demo_motion_state)
   {
@@ -78,7 +74,7 @@ void switchRead()
   else if(digitalRead(BDPIN_PUSH_SW_2))
     demo_motion_state = false;
 }
-#endif // OPEN_MANIPULATOR_MOTION_H_
+#endif // OPEN_MANIPULATOR_PEN_MOTION_H_
 
 
 

@@ -100,7 +100,7 @@ void sendAngle2Processing(std::vector<WayPoint> joint_states_vector)
   for (int i = 0; i < (int)joint_states_vector.size(); i++)
   {
     Serial.print(",");
-    Serial.print(joint_states_vector.at(i).value);
+    Serial.print(joint_states_vector.at(i).value, 3);
   }
   Serial.print("\n");
 }
@@ -124,7 +124,7 @@ void sendToolData2Processing(double value)
 void sendValueToProcessing(OPEN_MANIPULATOR_VACUUM *open_manipulator)
 {
   sendAngle2Processing(open_manipulator->getAllActiveJointValue());
-  sendToolData2Processing(open_manipulator->getToolValue("tool"));
+  //sendToolData2Processing(open_manipulator->getToolValue("tool"));
 }
 
 
@@ -252,7 +252,7 @@ void fromProcessing(OPEN_MANIPULATOR_VACUUM *open_manipulator, String data)
   ////////// motion tab
   else if (cmd[0] == "motion")
   {
-    if (cmd[1] == "start")
+    if (cmd[1] == "1")
     {
       Pose present_pose = open_manipulator->getPose("tool");
       WayPoint draw_goal_pose[6];
@@ -267,7 +267,7 @@ void fromProcessing(OPEN_MANIPULATOR_VACUUM *open_manipulator, String data)
       
       open_manipulator->drawingTrajectoryMove(DRAWING_LINE, "tool", p_draw_goal_pose, 1.0);
     }
-    else if (cmd[1] == "stop")
+    else if (cmd[1] == "2")
     {
       double draw_circle_arg[3];
       draw_circle_arg[0] = 0.03; // radius (m)

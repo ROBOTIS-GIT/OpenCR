@@ -19,7 +19,7 @@
 #ifndef PROCESSING_H_
 #define PROCESSING_H_
 
-#include <open_manipulator_libs.h>
+#include "OpenManipulatorPen.h"
 
 typedef struct _MotionWayPoint
 {
@@ -100,7 +100,7 @@ void sendAngle2Processing(std::vector<WayPoint> joint_states_vector)
   for (int i = 0; i < (int)joint_states_vector.size(); i++)
   {
     Serial.print(",");
-    Serial.print(joint_states_vector.at(i).value,3);
+    Serial.print(joint_states_vector.at(i).value, 3);
   }
   Serial.print("\n");
 }
@@ -121,14 +121,14 @@ void sendToolData2Processing(double value)
   Serial.print("\n");
 }
 
-void sendValueToProcessing(OPEN_MANIPULATOR *open_manipulator)
+void sendValueToProcessing(OPEN_MANIPULATOR_VACUUM *open_manipulator)
 {
   sendAngle2Processing(open_manipulator->getAllActiveJointValue());
-  sendToolData2Processing(open_manipulator->getToolValue("tool"));
+  //sendToolData2Processing(open_manipulator->getToolValue("tool"));
 }
 
 
-void fromProcessing(OPEN_MANIPULATOR *open_manipulator, String data)
+void fromProcessing(OPEN_MANIPULATOR_VACUUM *open_manipulator, String data)
 {
   String *cmd = parseDataFromProcessing(data);
 
@@ -169,9 +169,9 @@ void fromProcessing(OPEN_MANIPULATOR *open_manipulator, String data)
   else if (cmd[0] == "grip")
   {
     if (cmd[1] == "on")
-      open_manipulator->toolMove("tool", -0.01);
+      open_manipulator->toolMove("tool", 1.0);
     else if (cmd[1] == "off")
-      open_manipulator->toolMove("tool", 0.01);
+      open_manipulator->toolMove("tool", 0.0);
   }
   ////////// task space control tab
   else if (cmd[0] == "task")
@@ -216,7 +216,7 @@ void fromProcessing(OPEN_MANIPULATOR *open_manipulator, String data)
     {
       MotionWayPoint read_value;
       std::vector<WayPoint> present_states = open_manipulator->getAllActiveJointValue();
-      for(uint32_t i = 0; i < present_states.size(); i ++)
+      for(int i = 0; i < present_states.size(); i ++)
         read_value.angle.push_back(present_states.at(i).value);  
       read_value.path_time = 2.0;
       read_value.gripper_value = open_manipulator->getToolValue("tool");
@@ -225,11 +225,11 @@ void fromProcessing(OPEN_MANIPULATOR *open_manipulator, String data)
     }
     else if (cmd[1] == "on")  // save gripper on
     {
-      open_manipulator->toolMove("tool", -0.01);
+      open_manipulator->toolMove("tool", 1.0);
     }
     else if (cmd[1] == "off")  // save gripper off
     {
-      open_manipulator->toolMove("tool", 0.01);
+      open_manipulator->toolMove("tool", 0.0);
     }
   }
   else if (cmd[0] == "hand")
@@ -275,12 +275,11 @@ void fromProcessing(OPEN_MANIPULATOR *open_manipulator, String data)
       draw_circle_arg[2] = 0.0;  // start angle position (rad)
       void* p_draw_circle_arg = &draw_circle_arg;
       open_manipulator->drawingTrajectoryMove(DRAWING_CIRCLE, "tool", p_draw_circle_arg, 4.0);
-
     }
   }
 }
 
-void playProcessingMotion(OPEN_MANIPULATOR *open_manipulator)
+void playProcessingMotion(OPEN_MANIPULATOR_VACUUM *open_manipulator)
 {
   if(!open_manipulator->isMoving() && processing_motion_flag)
   {

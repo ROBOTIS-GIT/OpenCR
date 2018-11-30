@@ -16,11 +16,11 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
-#include <open_manipulator_libs.h>
+#include "OpenManipulatorPen.h"
+#include "OpenManipulatorPenMotion.h"
 #include "Processing.h"
-#include "RemoteController.h"
 
-OPEN_MANIPULATOR open_manipulator;
+OPEN_MANIPULATOR_PEN open_manipulator;
 double present_time = 0.0;
 double previous_time = 0.0;
 
@@ -28,11 +28,9 @@ void setup()
 {
   Serial.begin(57600);
   DEBUG.begin(57600);
-  while (!Serial)
-  ;
 
   connectProcessing();
-  connectRC100();
+  switchInit();
   
   open_manipulator.initManipulator(true);
   RM_LOG::PRINT("OpenManipulator Debugging Port");
@@ -42,7 +40,8 @@ void loop()
 {
   present_time = (float)(millis()/1000.0f);
   getData(100);
-  playProcessingMotion(&open_manipulator);
+  switchRead();
+  playMotion(&open_manipulator);
 
   if(present_time-previous_time >= CONTROL_TIME)
   {
@@ -57,17 +56,8 @@ void getData(uint32_t wait_time)
   static uint8_t state = 0;
   static uint32_t tick = 0;
 
-  bool rc100_flag = false;
   bool processing_flag = false;
-
-  uint16_t get_rc100_data = 0;
   String get_processing_data = "";
-
-  if (availableRC100())
-  {
-    get_rc100_data = readRC100Data();
-    rc100_flag = true;
-  }
 
   if (availableProcessing())
   {
@@ -78,13 +68,7 @@ void getData(uint32_t wait_time)
   switch (state)
   {
     case 0:
-      if (rc100_flag)
-      {
-        fromRC100(&open_manipulator, get_rc100_data);
-        tick = millis();
-        state = 1;
-      }
-      else if (processing_flag)
+      if (processing_flag)
       {
         fromProcessing(&open_manipulator, get_processing_data);
         tick = millis();
@@ -104,4 +88,3 @@ void getData(uint32_t wait_time)
      break;
   }
 }
-

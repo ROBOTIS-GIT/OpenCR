@@ -29,67 +29,8 @@
 
 namespace ACTUATOR
 {
-
-#define SYNC_WRITE_HANDLER_FOR_GOAL_POSITION 0
-#define SYNC_READ_HANDLER_FOR_PRESENT_POSITION_VELOCITY_CURRENT 0
-
-// Protocol 2.0
-#define ADDR_PRESENT_CURRENT_2 126
-#define ADDR_PRESENT_VELOCITY_2 128
-#define ADDR_PRESENT_POSITION_2 132
-
-#define LENGTH_PRESENT_CURRENT_2 2
-#define LENGTH_PRESENT_VELOCITY_2 4
-#define LENGTH_PRESENT_POSITION_2 4
-
-// Protocol 1.0
-#define ADDR_PRESENT_CURRENT_1  40;
-#define ADDR_PRESENT_VELOCITY_1  38;
-#define ADDR_PRESENT_POSITION_1  36;
-
-#define LENGTH_PRESENT_CURRENT_1  2;
-#define LENGTH_PRESENT_VELOCITY_1  2;
-#define LENGTH_PRESENT_POSITION_1  2;
-
 #define BDPIN_RELAY         8
 #define BDPIN_PUMP_MOTOR    12
-
-
-typedef struct
-{
-  std::vector<uint8_t> id;
-  uint8_t num;
-} Joint;
-
-class JointDynamixel : public ROBOTIS_MANIPULATOR::JointActuator
-{
- private:
-  DynamixelWorkbench *dynamixel_workbench_;
-  Joint dynamixel_;
-
- public:
-  JointDynamixel() {}
-  virtual ~JointDynamixel() {}
-
-  virtual void init(std::vector<uint8_t> actuator_id, const void *arg);
-  virtual void setMode(std::vector<uint8_t> actuator_id, const void *arg);
-  virtual std::vector<uint8_t> getId();
-
-  virtual void enable();
-  virtual void disable();
-
-  virtual bool sendJointActuatorValue(std::vector<uint8_t> actuator_id, std::vector<ROBOTIS_MANIPULATOR::Actuator> value_vector);
-  virtual std::vector<ROBOTIS_MANIPULATOR::Actuator> receiveJointActuatorValue(std::vector<uint8_t> actuator_id);
-
-////////////////////////////////////////////////////////////////
-
-  bool initialize(std::vector<uint8_t> actuator_id, STRING dxl_device_name, STRING dxl_baud_rate);
-  bool setOperatingMode(std::vector<uint8_t> actuator_id, STRING dynamixel_mode = "position_mode");
-  bool setSDKHandler(uint8_t actuator_id);
-  bool writeProfileValue(std::vector<uint8_t> actuator_id, STRING profile_mode, uint32_t value);
-  bool writeGoalPosition(std::vector<uint8_t> actuator_id, std::vector<double> radian_vector);
-  std::vector<ROBOTIS_MANIPULATOR::Actuator> receiveAllDynamixelValue(std::vector<uint8_t> actuator_id);
-};
 
 class GripperVacuum : public ROBOTIS_MANIPULATOR::ToolActuator
 {
@@ -101,15 +42,42 @@ class GripperVacuum : public ROBOTIS_MANIPULATOR::ToolActuator
   GripperVacuum() {}
   virtual ~GripperVacuum() {}
 
-  virtual void init(uint8_t actuator_id, const void *arg);
-  virtual void setMode(const void *arg);
-  virtual uint8_t getId();
+  virtual void init(uint8_t actuator_id, const void *arg)
+  {
+    actuator_id_ = actuator_id;
+    tool_value_ = 0.0;
+    pinMode(BDPIN_RELAY, OUTPUT);
+    pinMode(BDPIN_PUMP_MOTOR, OUTPUT);
+  }
+  virtual void setMode(const void *arg){}
+  virtual uint8_t getId()
+  {
+    return actuator_id_;
+  }
 
-  virtual void enable();
-  virtual void disable();
+  virtual void enable(){}
+  virtual void disable(){}
 
-  virtual bool sendToolActuatorValue(double value);
-  virtual double receiveToolActuatorValue();
+  virtual bool sendToolActuatorValue(double value)
+  {
+    if(value == 0.0)
+    {
+      tool_value_ = 0.0;
+      digitalWrite(BDPIN_RELAY, LOW);
+      digitalWrite(BDPIN_PUMP_MOTOR, LOW);
+    }
+    else if(value == 1.0)
+    {
+      tool_value_ = 1.0;
+      digitalWrite(BDPIN_RELAY, HIGH);
+      digitalWrite(BDPIN_PUMP_MOTOR, HIGH);
+    }
+    return true;
+  }
+  virtual double receiveToolActuatorValue()
+  {
+    return tool_value_;
+  }
 
 ////////////////////////////////////////////////////////////////
 };
