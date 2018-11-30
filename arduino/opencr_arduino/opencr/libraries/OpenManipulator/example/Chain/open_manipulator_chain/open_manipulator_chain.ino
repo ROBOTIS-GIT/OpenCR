@@ -16,7 +16,7 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
-#include <Chain.h>
+#include <open_manipulator_libs.h>
 #include "Processing.h"
 #include "RemoteController.h"
 

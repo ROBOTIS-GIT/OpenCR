@@ -19,7 +19,7 @@
 #ifndef PROCESSING_H_
 #define PROCESSING_H_
 
-#include <Chain.h>
+#include <open_manipulator_libs.h>
 
 typedef struct _MotionWayPoint
 {

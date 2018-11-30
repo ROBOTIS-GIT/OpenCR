@@ -19,7 +19,7 @@
 #ifndef REMOTE_CONTROLLER_H_
 #define REMOTE_CONTROLLER_H_
 
-#include <Chain.h>
+#include <open_manipulator_libs.h>
 #include <RC100.h>
 
 RC100 rc100;
