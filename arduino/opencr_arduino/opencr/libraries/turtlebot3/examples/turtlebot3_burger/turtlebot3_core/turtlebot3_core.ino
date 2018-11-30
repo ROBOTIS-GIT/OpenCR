@@ -450,14 +450,14 @@ void updateTF(geometry_msgs::TransformStamped& odom_tf)
 void updateMotorInfo(int32_t left_tick, int32_t right_tick)
 {
   int32_t current_tick = 0;
-  static int32_t last_tick[WHEEL_NUM] = {0.0, 0.0};
+  static int32_t last_tick[WHEEL_NUM] = {0, 0};
   
   if (init_encoder)
   {
     for (int index = 0; index < WHEEL_NUM; index++)
     {
-      last_diff_tick[index] = 0.0;
-      last_tick[index]      = 0.0;
+      last_diff_tick[index] = 0;
+      last_tick[index]      = 0;
       last_rad[index]       = 0.0;
 
       last_velocity[index]  = 0.0;

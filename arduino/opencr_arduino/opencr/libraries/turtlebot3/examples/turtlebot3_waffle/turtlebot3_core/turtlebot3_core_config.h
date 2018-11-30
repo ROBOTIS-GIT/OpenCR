@@ -195,7 +195,7 @@ Turtlebot3MotorDriver motor_driver;
 * Calculation for odometry
 *******************************************************************************/
 bool init_encoder = true;
-int32_t last_diff_tick[WHEEL_NUM] = {0.0, 0.0};
+int32_t last_diff_tick[WHEEL_NUM] = {0, 0};
 double  last_rad[WHEEL_NUM]       = {0.0, 0.0};
 
 /*******************************************************************************

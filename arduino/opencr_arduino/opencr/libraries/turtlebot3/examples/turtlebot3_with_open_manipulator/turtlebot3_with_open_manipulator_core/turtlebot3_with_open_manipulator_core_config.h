@@ -39,7 +39,6 @@
 #include <turtlebot3_msgs/VersionInfo.h>
 
 #include <TurtleBot3.h>
-#include <OpenManipulatorDriver.h>
 #include "turtlebot3_with_open_manipulator.h"
 
 #include <math.h>
@@ -199,13 +198,19 @@ static uint32_t tTime[10];
 * Declaration for motor
 *******************************************************************************/
 Turtlebot3MotorDriver motor_driver;
-OpenManipulatorMotorDriver joint_driver;
+OpenManipulatorDriver manipulator_driver;
+
+uint8_t joint_id[JOINT_CNT] = {JOINT_ID_1, JOINT_ID_2, JOINT_ID_3, JOINT_ID_4};
+uint8_t joint_cnt = JOINT_CNT;
+
+uint8_t gripper_id[GRIPPER_CNT] = {GRIPPER_ID_1};
+uint8_t gripper_cnt = GRIPPER_CNT;
 
 /*******************************************************************************
 * Calculation for odometry
 *******************************************************************************/
 bool init_encoder = true;
-int32_t last_diff_tick[WHEEL_NUM] = {0.0, 0.0};
+int32_t last_diff_tick[WHEEL_NUM] = {0, 0};
 double  last_rad[WHEEL_NUM]       = {0.0, 0.0};
 
 /*******************************************************************************
