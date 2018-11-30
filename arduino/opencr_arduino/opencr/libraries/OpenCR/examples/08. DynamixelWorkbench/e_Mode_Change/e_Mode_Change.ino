@@ -1,0 +1,178 @@
+/*******************************************************************************
+* Copyright 2016 ROBOTIS CO., LTD.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
+
+/* Authors: Taehun Lim (Darby) */
+
+#include <DynamixelWorkbench.h>
+
+#if defined(__OPENCM904__)
+  #define DEVICE_NAME "3" //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
+#elif defined(__OPENCR__)
+  #define DEVICE_NAME ""
+#endif    
+
+#define BAUDRATE  57600
+#define DXL_ID    1
+#define MODE 0
+
+// "Please insert the right number from 0 to 6 to set constrol mode 
+// "0 - current control mode
+// "1 - velocity control mode
+// "2 - position control mode
+// "3 - extended position control mode
+// "4 - current based position control mode
+// "5 - pwm control mode
+
+DynamixelWorkbench dxl_wb;
+
+void setup() 
+{
+  Serial.begin(57600);
+  while(!Serial); // Wait for Opening Serial Monitor
+
+  const char *log;
+  bool result = false;
+
+  uint8_t dxl_id = DXL_ID;
+  uint8_t mode = MODE;
+  uint16_t model_number = 0;
+
+  result = dxl_wb.init(DEVICE_NAME, BAUDRATE, &log);
+  if (result == false)
+  {
+    Serial.println(log);
+    Serial.println("Failed to init");
+  }
+  else
+  {
+    Serial.print("Succeeded to init : ");
+    Serial.println(BAUDRATE);  
+  }
+
+  result = dxl_wb.ping(dxl_id, &model_number, &log);
+  if (result == false)
+  {
+    Serial.println(log);
+    Serial.println("Failed to ping");
+  }
+  else
+  {
+    Serial.println("Succeeded to ping");
+    Serial.print("id : ");
+    Serial.print(dxl_id);
+    Serial.print(" model_number : ");
+    Serial.println(model_number);
+  }
+
+  switch (mode)
+  {
+    case 0:
+      result = dxl_wb.setCurrentControlMode(dxl_id, &log);
+      if (result == false)
+      {
+        Serial.println(log);
+        Serial.println("Failed to set mode");
+      }
+      else
+      {
+        Serial.println("Succeeded to set mode");
+      }
+     break;
+
+    case 1:
+      result = dxl_wb.setVelocityControlMode(dxl_id, &log);
+      if (result == false)
+      {
+        Serial.println(log);
+        Serial.println("Failed to set mode");
+      }
+      else
+      {
+        Serial.println("Succeeded to set mode");
+      }
+     break;
+
+    case 2:
+      result = dxl_wb.setPositionControlMode(dxl_id, &log);
+      if (result == false)
+      {
+        Serial.println(log);
+        Serial.println("Failed to set mode");
+      }
+      else
+      {
+        Serial.println("Succeeded to set mode");
+      }
+     break;
+
+    case 3:
+      result = dxl_wb.setExtendedPositionControlMode(dxl_id, &log);
+      if (result == false)
+      {
+        Serial.println(log);
+        Serial.println("Failed to set mode");
+      }
+      else
+      {
+        Serial.println("Succeeded to set mode");
+      }
+     break;
+
+    case 4:
+      result = dxl_wb.setCurrentBasedPositionControlMode(dxl_id, &log);
+      if (result == false)
+      {
+        Serial.println(log);
+        Serial.println("Failed to set mode");
+      }
+      else
+      {
+        Serial.println("Succeeded to set mode");
+      }
+     break;
+
+    case 5:
+      result = dxl_wb.setPWMControlMode(dxl_id, &log);
+      if (result == false)
+      {
+        Serial.println(log);
+        Serial.println("Failed to set mode");
+      }
+      else
+      {
+        Serial.println("Succeeded to set mode");
+      }
+     break;
+
+    default:
+      result = dxl_wb.setPositionControlMode(dxl_id, &log);
+      if (result == false)
+      {
+        Serial.println(log);
+        Serial.println("Failed to set mode");
+      }
+      else
+      {
+        Serial.println("Succeeded to set mode");
+      }
+     break;
+  }
+}
+
+void loop() 
+{
+
+}

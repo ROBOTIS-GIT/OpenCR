@@ -22,10 +22,9 @@
   #define DEVICE_NAME "3" //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
 #elif defined(__OPENCR__)
   #define DEVICE_NAME ""
-#endif  
+#endif   
 
-#define BAUDRATE  57600
-#define DXL_ID    1
+#define BAUDRATE_NUM 7
 
 DynamixelWorkbench dxl_wb;
 
@@ -37,34 +36,53 @@ void setup()
   const char *log;
   bool result = false;
 
-  uint8_t dxl_id = DXL_ID;
-  uint16_t model_number = 0;
+  uint8_t scanned_id[100];
+  uint8_t dxl_cnt = 0;
 
-  result = dxl_wb.init(DEVICE_NAME, BAUDRATE, &log);
-  if (result == false)
-  {
-    Serial.println(log);
-    Serial.println("Failed to init");
-  }
-  else
-  {
-    Serial.print("Succeeded to init : ");
-    Serial.println(BAUDRATE);  
-  }
+  uint32_t baudrate[BAUDRATE_NUM] = {9600, 57600, 115200, 1000000, 2000000, 3000000, 4000000};
+  uint8_t range = 253;
 
-  result = dxl_wb.ping(dxl_id, &model_number, &log);
-  if (result == false)
+  uint8_t index = 0;
+
+  while (index < BAUDRATE_NUM)
   {
-    Serial.println(log);
-    Serial.println("Failed to ping");
-  }
-  else
-  {
-    Serial.println("Succeeded to ping");
-    Serial.print("id : ");
-    Serial.print(dxl_id);
-    Serial.print(" model_number : ");
-    Serial.println(model_number);
+    result = dxl_wb.init(DEVICE_NAME, baudrate[index], &log);
+    if (result == false)
+    {
+      Serial.println(log);
+      Serial.println("Failed to init");
+    }
+    else
+    {
+      Serial.print("Succeed to init : ");
+      Serial.println(baudrate[index]);  
+    }
+
+    dxl_cnt = 0;
+    for (uint8_t num = 0; num < 100; num++) scanned_id[num] = 0;
+
+    result = dxl_wb.scan(scanned_id, &dxl_cnt, range, &log);
+    if (result == false)
+    {
+      Serial.println(log);
+      Serial.println("Failed to scan");
+    }
+    else
+    {
+      Serial.print("Find ");
+      Serial.print(dxl_cnt);
+      Serial.println(" Dynamixels");
+
+      for (int cnt = 0; cnt < dxl_cnt; cnt++)
+      {
+        Serial.print("id : ");
+        Serial.print(scanned_id[cnt]);
+        Serial.print(" model name : ");
+        Serial.println(dxl_wb.getModelName(scanned_id[cnt]));
+      }
+    } 
+
+    index++;
   }
 }
 

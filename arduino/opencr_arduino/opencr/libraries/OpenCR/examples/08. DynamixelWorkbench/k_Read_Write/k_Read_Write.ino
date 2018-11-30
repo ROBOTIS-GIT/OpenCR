@@ -22,7 +22,7 @@
   #define DEVICE_NAME "3" //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
 #elif defined(__OPENCR__)
   #define DEVICE_NAME ""
-#endif  
+#endif   
 
 #define BAUDRATE  57600
 #define DXL_ID    1
@@ -66,9 +66,33 @@ void setup()
     Serial.print(" model_number : ");
     Serial.println(model_number);
   }
+
+  result = dxl_wb.itemWrite(dxl_id, "LED", 1, &log);
+  if (result == false)
+  {
+    Serial.println(log);
+    Serial.println("Failed to LED On");
+  }
+  else
+  {
+    Serial.println("Succeed to LED On");
+  }
+
+  int32_t get_data = 0;
+  result = dxl_wb.itemRead(dxl_id, "Present_Position", &get_data, &log);
+  if (result == false)
+  {
+    Serial.println(log);
+    Serial.println("Failed to get present position");
+  }
+  else
+  {
+    Serial.print("Succeed to get present position(value : ");
+    Serial.print(get_data);
+    Serial.println(")");
+  }
 }
 
 void loop() 
 {
-
 }

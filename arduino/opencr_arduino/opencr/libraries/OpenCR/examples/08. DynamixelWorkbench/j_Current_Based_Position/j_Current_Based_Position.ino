@@ -22,7 +22,7 @@
   #define DEVICE_NAME "3" //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
 #elif defined(__OPENCR__)
   #define DEVICE_NAME ""
-#endif  
+#endif   
 
 #define BAUDRATE  57600
 #define DXL_ID    1
@@ -65,6 +65,27 @@ void setup()
     Serial.print(dxl_id);
     Serial.print(" model_number : ");
     Serial.println(model_number);
+  }
+
+  result = dxl_wb.currentBasedPositionMode(dxl_id, 30, &log);
+  if (result == false)
+  {
+    Serial.println(log);
+    Serial.println("Failed to change current based position mode");
+  }
+  else
+  {
+    Serial.println("Succeed to change current based position mode");
+    Serial.println("Dynamixel is moving...");
+
+    for (int count = 0; count < 3; count++)
+    {
+      dxl_wb.goalPosition(dxl_id, (int32_t)0);
+      delay(3000);
+
+      dxl_wb.goalPosition(dxl_id, (int32_t)2048);
+      delay(3000);
+    }
   }
 }
 

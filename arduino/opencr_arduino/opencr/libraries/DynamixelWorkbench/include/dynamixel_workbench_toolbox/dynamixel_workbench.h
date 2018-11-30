@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright 2016 ROBOTIS CO., LTD.
+* Copyright 2018 ROBOTIS CO., LTD.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -21,99 +21,75 @@
 
 #include "dynamixel_driver.h"
 
-#define X_SERIES_CURRENT_CONTROL_MODE                  0
-#define X_SERIES_VELOCITY_CONTROL_MODE                 1
-#define X_SERIES_POSITION_CONTROL_MODE                 3
-#define X_SERIES_EXTENDED_POSITION_CONTROL_MODE        4
-#define X_SERIES_CURRENT_BASED_POSITION_CONTROL_MODE   5
-#define X_SERIES_VOLTAGE_CONTROL_MODE                  16
-
-#define PRO_SERIES_TORQUE_CONTROL_MODE                 0
-#define PRO_SERIES_VELOCITY_CONTROL_MODE               1
-#define PRO_SERIES_POSITION_CONTROL_MODE               3
-#define PRO_SERIES_EXTENDED_POSITION_CONTROL_MODE      4
-
-class DynamixelWorkbench
+class DynamixelWorkbench : public DynamixelDriver
 {
- private:
-  DynamixelDriver driver_;
-  char dxl_[64];
-
  public:
   DynamixelWorkbench();
   ~DynamixelWorkbench();
 
-  bool begin(const char* device_name = "/dev/ttyUSB0", uint32_t baud_rate = 57600);
- 
-  bool scan(uint8_t *get_id, uint8_t *get_id_num = 0, uint8_t range = 200);
-  bool ping(uint8_t id, uint16_t *get_model_number = 0);
+  bool torque(uint8_t id, bool onoff, const char **log = NULL);
+  bool torqueOn(uint8_t id, const char **log = NULL);
+  bool torqueOff(uint8_t id, const char **log = NULL);
 
-  bool reboot(uint8_t id);
-  bool reset(uint8_t id);
+  bool changeID(uint8_t id, uint8_t new_id, const char **log = NULL);
+  bool changeBaudrate(uint8_t id, uint32_t new_baudrate, const char **log = NULL);
+  bool changeProtocolVersion(uint8_t id, uint8_t version, const char **log = NULL);
 
-  bool setID(uint8_t id, uint8_t new_id);
-  bool setBaud(uint8_t id, uint32_t new_baud);
-  bool setPacketHandler(float protocol_version);
+  bool itemWrite(uint8_t id, const char *item_name, int32_t data, const char **log = NULL);
+  bool itemRead(uint8_t id, const char *item_name, int32_t *data, const char **log = NULL);
 
-  float getProtocolVersion();
-  const char* getModelName(uint8_t id);
+  bool led(uint8_t id, bool onoff, const char **log = NULL);
+  bool ledOn(uint8_t id, const char **log = NULL);
+  bool ledOff(uint8_t id, const char **log = NULL);
 
-  bool ledOn(uint8_t id);
-  bool ledOff(uint8_t id);
+  bool setNormalDirection(uint8_t id, const char **log = NULL);
+  bool setReverseDirection(uint8_t id, const char **log = NULL);
+  
+  bool setVelocityBasedProfile(uint8_t id, const char **log = NULL);
+  bool setTimeBasedProfile(uint8_t id, const char **log = NULL);
 
-  bool jointMode(uint8_t id, uint16_t vel = 0, uint16_t acc = 0);
-  bool wheelMode(uint8_t id, uint16_t vel = 0, uint16_t acc = 0);
-  bool currentMode(uint8_t id, uint8_t cur = 50);
+  bool setSecondaryID(uint8_t id, uint8_t secondary_id, const char **log = NULL);
 
-  bool goalPosition(uint8_t id, int32_t goal);
-  bool goalSpeed(uint8_t id, int32_t goal);
+  bool setCurrentControlMode(uint8_t id, const char **log = NULL);
+  bool setTorqueControlMode(uint8_t id, const char **log = NULL);
+  bool setVelocityControlMode(uint8_t id, const char **log = NULL);  
+  bool setPositionControlMode(uint8_t id, const char **log = NULL);  
+  bool setExtendedPositionControlMode(uint8_t id, const char **log = NULL);
+  bool setMultiTurnControlMode(uint8_t id, const char **log = NULL);
+  bool setCurrentBasedPositionControlMode(uint8_t id, const char **log = NULL);
+  bool setPWMControlMode(uint8_t id, const char **log = NULL);
 
-  bool itemWrite(uint8_t id, const char* item_name, int32_t value);  // write value to item
-  bool itemWrite(uint8_t id, uint16_t addr, uint8_t length, int32_t data);
-  bool syncWrite(const char *item_name, int32_t* value);             // sync write
-  bool syncWrite(uint8_t *id, uint8_t id_num, const char *item_name, int32_t *data);
-  bool bulkWrite(void);                                              // bulk write
+  bool setOperatingMode(uint8_t id, uint8_t index, const char **log = NULL);
 
-  int32_t  itemRead(uint8_t id, const char* item_name);  // read value from item
-  int32_t  itemRead(uint8_t id, uint16_t addr, uint8_t length);
-  int32_t* syncRead(const char* item_name);              // sync read
-  int32_t  bulkRead(uint8_t id, const char* item_name);  // bulk read
+  bool jointMode(uint8_t id, int32_t velocity = 0, int32_t acceleration = 0, const char **log = NULL);
+  bool wheelMode(uint8_t id, int32_t acceleration = 0, const char **log = NULL);
+  bool currentBasedPositionMode(uint8_t id, int32_t current = 0, const char **log = NULL);
 
-  void addSyncWrite(const char* item_name);
-  void addSyncRead(const char* item_name);
+  bool goalPosition(uint8_t id, int32_t value, const char **log = NULL);
+  bool goalPosition(uint8_t id, float radian, const char **log = NULL);
 
-  void initBulkWrite();
-  void initBulkRead();
+  bool goalVelocity(uint8_t id, int32_t value, const char **log = NULL);
+  bool goalVelocity(uint8_t id, float velocity, const char **log = NULL);
 
-  bool addBulkWriteParam(uint8_t id, const char *item_name, int32_t data);
-  bool addBulkReadParam(uint8_t id, const char *item_name);
-  bool setBulkRead();
+  bool getPresentPositionData(uint8_t id, int32_t* data, const char **log = NULL);
+  bool getRadian(uint8_t id, float* radian, const char **log = NULL);
+
+  bool getPresentVelocityData(uint8_t id, int32_t* data, const char **log = NULL);
+  bool getVelocity(uint8_t id, float* velocity, const char **log = NULL);
 
   int32_t convertRadian2Value(uint8_t id, float radian);
   float convertValue2Radian(uint8_t id, int32_t value);
 
-  int32_t convertRadian2Value(float radian, int32_t max_position, int32_t min_position, float max_radian = 3.14, float min_radian = -3.14);
-  float convertValue2Radian(int32_t value, int32_t max_position, int32_t min_position, float max_radian = 3.14, float min_radian = -3.14);
-
+  int32_t convertRadian2Value(float radian, int32_t max_position, int32_t min_position, float max_radian, float min_radian);
+  float convertValue2Radian(int32_t value, int32_t max_position, int32_t min_position, float max_radian, float min_radian);
 
   int32_t convertVelocity2Value(uint8_t id, float velocity);
   float convertValue2Velocity(uint8_t id, int32_t value);
 
-  int16_t convertTorque2Value(uint8_t id, float torque);
-  float convertValue2Torque(uint8_t id, int16_t value);
+  int16_t convertCurrent2Value(float current);
+  float convertValue2Current(int16_t value);
 
-  const ControlTableItem* getControlItemPtr(uint8_t id);
-  uint8_t getControlItemCount(uint8_t id);
-
-
-
- private:
-  void millis(uint16_t msec);
-
-  bool torque(uint8_t id, bool onoff);
-  bool setPositionControlMode(uint8_t id);
-  bool setVelocityControlMode(uint8_t id);
-  bool setCurrentControlMode(uint8_t id);
+  float convertValue2Load(int16_t value);
 };
 
 #endif /*DYNAMIXEL_WORKBENCH_H_*/

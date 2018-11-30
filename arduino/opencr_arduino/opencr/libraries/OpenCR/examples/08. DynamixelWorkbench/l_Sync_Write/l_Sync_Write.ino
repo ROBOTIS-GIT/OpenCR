@@ -22,23 +22,28 @@
   #define DEVICE_NAME "3" //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
 #elif defined(__OPENCR__)
   #define DEVICE_NAME ""
-#endif  
+#endif   
 
 #define BAUDRATE  57600
-#define DXL_ID    1
+#define DXL_ID_1  1
+#define DXL_ID_2  2
 
 DynamixelWorkbench dxl_wb;
+
+int32_t goal_position[2] = {0, 1023};
+
+const uint8_t handler_index = 0;
 
 void setup() 
 {
   Serial.begin(57600);
-  while(!Serial); // Wait for Opening Serial Monitor
+  // while(!Serial); // Wait for Opening Serial Monitor
 
   const char *log;
   bool result = false;
 
-  uint8_t dxl_id = DXL_ID;
   uint16_t model_number = 0;
+  uint8_t dxl_id[2] = {DXL_ID_1, DXL_ID_2};
 
   result = dxl_wb.init(DEVICE_NAME, BAUDRATE, &log);
   if (result == false)
@@ -52,23 +57,62 @@ void setup()
     Serial.println(BAUDRATE);  
   }
 
-  result = dxl_wb.ping(dxl_id, &model_number, &log);
+  for (int cnt = 0; cnt < 2; cnt++)
+  {
+    result = dxl_wb.ping(dxl_id[cnt], &model_number, &log);
+    if (result == false)
+    {
+      Serial.println(log);
+      Serial.println("Failed to ping");
+    }
+    else
+    {
+      Serial.println("Succeeded to ping");
+      Serial.print("id : ");
+      Serial.print(dxl_id[cnt]);
+      Serial.print(" model_number : ");
+      Serial.println(model_number);
+    }
+
+    result = dxl_wb.jointMode(dxl_id[cnt], 0, 0, &log);
+    if (result == false)
+    {
+      Serial.println(log);
+      Serial.println("Failed to change joint mode");
+    }
+    else
+    {
+      Serial.println("Succeed to change joint mode");
+    }
+  } 
+
+  result = dxl_wb.addSyncWriteHandler(dxl_id[0], "Goal_Position", &log);
   if (result == false)
   {
     Serial.println(log);
-    Serial.println("Failed to ping");
-  }
-  else
-  {
-    Serial.println("Succeeded to ping");
-    Serial.print("id : ");
-    Serial.print(dxl_id);
-    Serial.print(" model_number : ");
-    Serial.println(model_number);
+    Serial.println("Failed to add sync write handler");
   }
 }
 
 void loop() 
-{
+{  
+  const char *log;
+  bool result = false;
+  result = dxl_wb.syncWrite(handler_index, &goal_position[0], &log);
+  if (result == false)
+  {
+    Serial.println(log);
+    Serial.println("Failed to sync write position");
+  }
 
+  delay(3000);
+
+  swap(goal_position);
+}
+
+void swap(int32_t *array)
+{
+  int32_t tmp = array[0];
+  array[0] = array[1];
+  array[1] = tmp;
 }

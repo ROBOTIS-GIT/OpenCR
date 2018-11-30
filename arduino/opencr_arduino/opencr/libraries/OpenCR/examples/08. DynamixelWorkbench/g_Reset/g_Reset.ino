@@ -22,10 +22,10 @@
   #define DEVICE_NAME "3" //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
 #elif defined(__OPENCR__)
   #define DEVICE_NAME ""
-#endif  
+#endif   
 
 #define BAUDRATE  57600
-#define DXL_ID    1
+#define DXL_ID    2
 
 DynamixelWorkbench dxl_wb;
 
@@ -66,9 +66,19 @@ void setup()
     Serial.print(" model_number : ");
     Serial.println(model_number);
   }
+
+  result = dxl_wb.reset(dxl_id, &log);
+  if (result == false)
+  {
+    Serial.println(log);
+    Serial.println("Failed to reset");
+  }
+  else
+  {
+    Serial.println("Succeed to reset");
+  }
 }
 
 void loop() 
 {
-
 }

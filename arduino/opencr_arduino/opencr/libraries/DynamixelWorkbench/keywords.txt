@@ -45,8 +45,6 @@ convertVelocity2Value KEYWORD2
 convertValue2Velocity KEYWORD2
 convertTorque2Value   KEYWORD2
 convertValue2Torque   KEYWORD2
-getControlItemPtr	KEYWORD2
-getControlItemCount	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

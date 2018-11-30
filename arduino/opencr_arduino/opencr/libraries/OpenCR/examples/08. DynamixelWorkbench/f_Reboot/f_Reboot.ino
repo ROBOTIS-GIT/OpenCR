@@ -22,7 +22,7 @@
   #define DEVICE_NAME "3" //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
 #elif defined(__OPENCR__)
   #define DEVICE_NAME ""
-#endif  
+#endif   
 
 #define BAUDRATE  57600
 #define DXL_ID    1
@@ -66,9 +66,19 @@ void setup()
     Serial.print(" model_number : ");
     Serial.println(model_number);
   }
+
+  result = dxl_wb.reboot(dxl_id, &log);
+  if (result == false)
+  {
+    Serial.println(log);
+    Serial.println("Failed to reboot");
+  }
+  else
+  {
+    Serial.println("Succeed to reboot");
+  }
 }
 
 void loop() 
 {
-
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright 2016 ROBOTIS CO., LTD.
+* Copyright 2018 ROBOTIS CO., LTD.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 /* Authors: Taehun Lim (Darby) */
 
-#ifndef DYNAMIXEL_H
-#define DYNAMIXEL_H
+#ifndef DYNAMIXEL_ITEM_H
+#define DYNAMIXEL_ITEM_H
 
-#include "control_table_item.h"
+#include <stdint.h>
+#include <stddef.h>
 
 #define AX_12A     12
 #define AX_12W     300
@@ -32,7 +33,7 @@
 
 #define EX_106     107
 
-#define MX_12W     360
+#define MX_12W     104
 #define MX_28      29
 #define MX_28_2    30
 #define MX_64      310
@@ -67,21 +68,41 @@
 #define PRO_H54_100_S500_R 53768
 #define PRO_H54_200_S500_R 54024
 
+#define PRO_H42P_020_S300_R  2000
+#define PRO_H54P_100_S500_R 2010
+#define PRO_H54P_200_S500_R 2020
+
+#define BYTE  1
+#define WORD  2
+#define DWORD 4
+
+typedef struct 
+{
+  const char *item_name;
+  uint16_t    address;
+  uint8_t	    item_name_length;
+  uint16_t    data_length;
+} ControlItem;
+
 typedef struct
 {
-  float velocity_to_value_ratio;
-  float torque_to_current_value_ratio;
+  float rpm;
 
-  int32_t value_of_min_radian_position;
-  int32_t value_of_0_radian_position;
-  int32_t value_of_max_radian_position;
+  int64_t value_of_min_radian_position;
+  int64_t value_of_zero_radian_position;
+  int64_t value_of_max_radian_position;
 
   float  min_radian;
   float  max_radian;
 } ModelInfo;
 
-uint8_t getTheNumberOfControlItem();
-const ControlTableItem* getConrolTableItem(uint16_t model_number);
-ModelInfo* getModelInfo(uint16_t model_number);
+// Public Functions
+namespace DynamixelItem
+{
+const ControlItem *getControlTable(uint16_t model_number);
+const ModelInfo *getModelInfo(uint16_t model_number);
 
-#endif //DYNAMIXEL_H
+uint8_t getTheNumberOfControlItem();
+}
+
+#endif //DYNAMIXEL_ITEM_H
