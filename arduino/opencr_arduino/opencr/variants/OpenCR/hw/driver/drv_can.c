@@ -398,6 +398,33 @@ void drvCanDetachRxInterrupt(uint8_t channel)
   drv_can_tbl[channel].handler = NULL;
 }
 
+volatile uint32_t dbg_can_err_cnt = 0;
+volatile uint32_t dbg_can_rxd_cnt = 0;
+
+void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
+{
+  uint8_t channel;
+
+  dbg_can_err_cnt++;
+
+  for( channel = 0; channel<DRV_CAN_MAX_CH; channel++ )
+  {
+    if( hcan->Instance == drv_can_tbl[channel].p_hCANx->Instance )
+    {
+      HAL_CAN_Receive_IT(hcan, drv_can_tbl[channel].rx_fifo);
+      
+      __HAL_CAN_ENABLE_IT(hcan, CAN_IT_EWG);
+      __HAL_CAN_ENABLE_IT(hcan, CAN_IT_EPV);
+      __HAL_CAN_ENABLE_IT(hcan, CAN_IT_BOF);
+      __HAL_CAN_ENABLE_IT(hcan, CAN_IT_LEC);
+      __HAL_CAN_ENABLE_IT(hcan, CAN_IT_ERR);
+      __HAL_UNLOCK(hcan);
+
+      __HAL_CAN_ENABLE_IT(hcan, CAN_IT_FMP0);
+      __HAL_CAN_ENABLE_IT(hcan, CAN_IT_FMP1);      
+    }
+  }
+}
 
 void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
 {
@@ -405,6 +432,8 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
   drv_can_msg_t *rx_buf;
   CanRxMsgTypeDef *p_RxMsg;
 
+  dbg_can_rxd_cnt++;
+  
   for( channel = 0; channel<DRV_CAN_MAX_CH; channel++ )
   {
     if( hcan->Instance == drv_can_tbl[channel].p_hCANx->Instance )
@@ -442,6 +471,16 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
       }
 
       HAL_CAN_Receive_IT(hcan, drv_can_tbl[channel].rx_fifo);
+      
+      __HAL_CAN_ENABLE_IT(hcan, CAN_IT_EWG);
+      __HAL_CAN_ENABLE_IT(hcan, CAN_IT_EPV);
+      __HAL_CAN_ENABLE_IT(hcan, CAN_IT_BOF);
+      __HAL_CAN_ENABLE_IT(hcan, CAN_IT_LEC);
+      __HAL_CAN_ENABLE_IT(hcan, CAN_IT_ERR);
+      __HAL_UNLOCK(hcan);
+
+      __HAL_CAN_ENABLE_IT(hcan, CAN_IT_FMP0);
+      __HAL_CAN_ENABLE_IT(hcan, CAN_IT_FMP1);      
     }
   }
 }
