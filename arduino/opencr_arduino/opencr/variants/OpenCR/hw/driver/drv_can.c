@@ -398,6 +398,23 @@ void drvCanDetachRxInterrupt(uint8_t channel)
   drv_can_tbl[channel].handler = NULL;
 }
 
+void drvCanRetry(uint8_t channel)
+{
+  CAN_HandleTypeDef *hcan = drv_can_tbl[channel].p_hCANx;
+
+
+  HAL_CAN_Receive_IT(hcan, drv_can_tbl[channel].rx_fifo);
+      
+  __HAL_CAN_ENABLE_IT(hcan, CAN_IT_EWG);
+  __HAL_CAN_ENABLE_IT(hcan, CAN_IT_EPV);
+  __HAL_CAN_ENABLE_IT(hcan, CAN_IT_BOF);
+  __HAL_CAN_ENABLE_IT(hcan, CAN_IT_LEC);
+  __HAL_CAN_ENABLE_IT(hcan, CAN_IT_ERR);
+
+  __HAL_CAN_ENABLE_IT(hcan, CAN_IT_FMP0);
+  __HAL_CAN_ENABLE_IT(hcan, CAN_IT_FMP1); 
+}
+
 volatile uint32_t dbg_can_err_cnt = 0;
 volatile uint32_t dbg_can_rxd_cnt = 0;
 
@@ -433,7 +450,7 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
   CanRxMsgTypeDef *p_RxMsg;
 
   dbg_can_rxd_cnt++;
-  
+
   for( channel = 0; channel<DRV_CAN_MAX_CH; channel++ )
   {
     if( hcan->Instance == drv_can_tbl[channel].p_hCANx->Instance )
