@@ -182,7 +182,7 @@ bool OpenManipulatorDriver::init(uint8_t *joint_id, uint8_t joint_cnt, uint8_t *
   double init_joint_position[4] = {0.0, -1.57, 1.37, 0.2258};
   double init_gripper_position[1] = {0.0};
 
-  writeJointProfileControlParam(3000.0f);
+  writeJointProfileControlParam(3.0f);
   writeJointPosition(init_joint_position);
   writeGripperProfileControlParam(0.0f);
   writeGripperPosition(init_gripper_position);
@@ -316,8 +316,8 @@ bool OpenManipulatorDriver::writeJointProfileControlParam(int32_t set_time)
 
   for (uint8_t num = 0; num < joint_.cnt * 2; num = num + 2)
   {
-    goal_data[num] = set_time / 4;
-    goal_data[num+1] = set_time;
+    goal_data[num] = (set_time * 1000) / 4;
+    goal_data[num+1] = set_time * 1000;
   }
 
   result = dxl_wb_.syncWrite(handler_index, joint_.id, joint_.cnt, &goal_data[0], 2, &log);
@@ -361,8 +361,8 @@ bool OpenManipulatorDriver::writeGripperProfileControlParam(int32_t set_time)
 
   for (uint8_t num = 0; num < gripper_.cnt; num++)
   {
-    goal_data[num] = set_time;
-    goal_data[num+1] = goal_data[num] / 4;
+    goal_data[num] = (set_time * 1000) / 4;
+    goal_data[num+1] = set_time * 1000;
   }
 
   result = dxl_wb_.syncWrite(handler_index, gripper_.id, gripper_.cnt, &goal_data[0], 2, &log);

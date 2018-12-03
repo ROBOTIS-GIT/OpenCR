@@ -479,7 +479,7 @@ void updateJointStates(void)
   joint_states_pos[LEFT]  = last_rad[LEFT];
   joint_states_pos[RIGHT] = last_rad[RIGHT];
 
-  for (uint8_t num = 0; num < (joint_cnt + gripper_cnt); num++)
+  for (uint8_t num = 0; num < (joint_cnt + gripper_cnt + 1); num++)
   {
     joint_states_pos[WHEEL_NUM + num] = get_joint_position[num];
   }
@@ -487,7 +487,7 @@ void updateJointStates(void)
   joint_states_vel[LEFT]  = last_velocity[LEFT];
   joint_states_vel[RIGHT] = last_velocity[RIGHT];
 
-  for (uint8_t num = 0; num < (joint_cnt + gripper_cnt); num++)
+  for (uint8_t num = 0; num < (joint_cnt + gripper_cnt + 1); num++)
   {
     joint_states_vel[WHEEL_NUM + num] = 0.0f;
     joint_states_eff[num] = 0.0f;
@@ -837,15 +837,15 @@ void initOdom(void)
 *******************************************************************************/
 void initJointStates(void)
 {
-  static char *joint_states_name[] = {"wheel_left_joint", "wheel_right_joint", "manipulator_joints", "gripper_joints"};
+  static char *joint_states_name[] = {"wheel_left_joint", "wheel_right_joint", "joint1", "joint2", "joint3", "joint4", "grip_joint", "grip_joint_sub"};
 
   joint_states.header.frame_id = joint_state_header_frame_id;
   joint_states.name            = joint_states_name;
 
-  joint_states.name_length     = WHEEL_NUM + 2;
-  joint_states.position_length = WHEEL_NUM + joint_cnt + gripper_cnt;
-  joint_states.velocity_length = WHEEL_NUM + joint_cnt + gripper_cnt;
-  joint_states.effort_length   = WHEEL_NUM + joint_cnt + gripper_cnt;
+  joint_states.name_length     = WHEEL_NUM + joint_cnt + gripper_cnt + 1;
+  joint_states.position_length = WHEEL_NUM + joint_cnt + gripper_cnt + 1;
+  joint_states.velocity_length = WHEEL_NUM + joint_cnt + gripper_cnt + 1;
+  joint_states.effort_length   = WHEEL_NUM + joint_cnt + gripper_cnt + 1;
 }
 
 /*******************************************************************************

@@ -45,7 +45,7 @@
 
 #include <math.h>
 
-#define FIRMWARE_VER "1.2.2"
+#define FIRMWARE_VER "1.3.0"
 
 #define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
 #define IMU_PUBLISH_FREQUENCY                  200  //hz
@@ -141,13 +141,13 @@ char joint_state_header_frame_id[30];
 *******************************************************************************/
 ros::Subscriber<geometry_msgs::Twist> cmd_vel_sub("cmd_vel", commandVelocityCallback);
 
-ros::Subscriber<std_msgs::Float64MultiArray> joint_position_sub("open_manipulator/joint_position", jointPositionCallback);
+ros::Subscriber<std_msgs::Float64MultiArray> joint_position_sub("open_manipulator_with_tb3/joint_position", jointPositionCallback);
 
-ros::Subscriber<std_msgs::Float64> joint_move_time_sub("open_manipulator/joint_move_time", jointMoveTimeCallback);
+ros::Subscriber<std_msgs::Float64> joint_move_time_sub("open_manipulator_with_tb3/joint_move_time", jointMoveTimeCallback);
 
-ros::Subscriber<std_msgs::Float64MultiArray> gripper_position_sub("open_manipulator/gripper_position", gripperPositionCallback);
+ros::Subscriber<std_msgs::Float64MultiArray> gripper_position_sub("open_manipulator_with_tb3/gripper_position", gripperPositionCallback);
 
-ros::Subscriber<std_msgs::Float64> gripper_move_time_sub("open_manipulator/gripper_move_time", gripperMoveTimeCallback);
+ros::Subscriber<std_msgs::Float64> gripper_move_time_sub("open_manipulator_with_tb3/gripper_move_time", gripperMoveTimeCallback);
 
 ros::Subscriber<turtlebot3_msgs::Sound> sound_sub("sound", soundCallback);
 
