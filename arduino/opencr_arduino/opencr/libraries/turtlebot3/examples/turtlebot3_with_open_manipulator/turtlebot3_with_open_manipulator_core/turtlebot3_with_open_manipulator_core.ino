@@ -447,12 +447,11 @@ void updateOdometry(void)
 *******************************************************************************/
 void updateJointStates(void)
 {
-  float joint_states_pos[WHEEL_NUM + joint_cnt + gripper_cnt];
-  float joint_states_vel[WHEEL_NUM + joint_cnt + gripper_cnt];
-  float joint_states_eff[WHEEL_NUM + joint_cnt + gripper_cnt];
+  static float joint_states_pos[20] = {0.0, };
+  static float joint_states_vel[20] = {0.0, };
+  static float joint_states_eff[20] = {0.0, };
 
   double get_joint_position[joint_cnt + gripper_cnt];
-
   manipulator_driver.readPosition(get_joint_position);
 
   joint_states_pos[LEFT]  = last_rad[LEFT];
@@ -460,12 +459,15 @@ void updateJointStates(void)
 
   for (uint8_t num = 0; num < (joint_cnt + gripper_cnt); num++)
   {
-    joint_states_pos[2+num] = get_joint_position[num];
+    joint_states_pos[WHEEL_NUM + num] = get_joint_position[num];
   }
 
-  for (uint8_t num = 0; num < (WHEEL_NUM + joint_cnt + gripper_cnt); num++)
+  joint_states_vel[LEFT]  = last_velocity[LEFT];
+  joint_states_vel[RIGHT] = last_velocity[RIGHT];
+
+  for (uint8_t num = 0; num < (joint_cnt + gripper_cnt); num++)
   {
-    joint_states_vel[num] = 0.0f;
+    joint_states_vel[WHEEL_NUM + num] = 0.0f;
     joint_states_eff[num] = 0.0f;
   }
 
@@ -813,7 +815,7 @@ void initOdom(void)
 *******************************************************************************/
 void initJointStates(void)
 {
-  static char *joint_states_name[] = {"wheel_left_joint", "wheel_right_joint", "manipulator", "gripper"};
+  static char *joint_states_name[] = {"wheel_left_joint", "wheel_right_joint", "manipulator_joints", "gripper_joints"};
 
   joint_states.header.frame_id = joint_state_header_frame_id;
   joint_states.name            = joint_states_name;
