@@ -155,7 +155,7 @@ class DynamixelDriver
   bool addSyncWriteHandler(uint8_t id, const char *item_name, const char **log = NULL);
 
   bool syncWrite(uint8_t index, int32_t *data, const char **log = NULL);
-  bool syncWrite(uint8_t index, uint8_t *id, uint8_t id_num, int32_t *data, const char **log = NULL);
+  bool syncWrite(uint8_t index, uint8_t *id, uint8_t id_num, int32_t *data, uint8_t data_num_for_each_id, const char **log = NULL);
 
   bool addSyncReadHandler(uint16_t address, uint16_t length, const char **log = NULL);
   bool addSyncReadHandler(uint8_t id, const char *item_name, const char **log = NULL);

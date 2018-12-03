@@ -361,7 +361,7 @@ void loop()
 
           uint8_t handler_index = cmd[3].toInt();
 
-          result = dxl_wb.syncWrite(handler_index, id, id_num, (int32_t *)data, &log);
+          result = dxl_wb.syncWrite(handler_index, id, id_num, (int32_t *)data, 1, &log);
           if (result == false)
           {
             Serial.println(log);
