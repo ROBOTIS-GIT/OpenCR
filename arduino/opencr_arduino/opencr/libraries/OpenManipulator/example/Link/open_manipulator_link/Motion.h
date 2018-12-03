@@ -304,7 +304,7 @@ void motionStart(OPEN_MANIPULATOR_LINK* omlink)
     Pose target_pose;
     std::vector <double> target_motion_angle;
 
-    for (uint8_t i = 0; i < MAX_MOTION_NUM; i++)
+    for (uint8_t i = 0; i < uint8_t(MAX_MOTION_NUM); i++)
     {
       motion_storage[i][0] = initial_IKmotion_set[i][0];     //time set
       motion_storage[i][4] = initial_IKmotion_set[i][4];     //VACUUM set
@@ -325,7 +325,7 @@ void motionStart(OPEN_MANIPULATOR_LINK* omlink)
   }
   else
   {
-    for (uint8_t i = 0; i < MAX_MOTION_NUM; i++)
+    for (uint8_t i = 0; i < uint8_t(MAX_MOTION_NUM); i++)
     {
         for (uint8_t j = 0; j < 5; j++)
         {
@@ -340,7 +340,7 @@ void motionStart(OPEN_MANIPULATOR_LINK* omlink)
 
 void motionStop()
 {
-  for (uint8_t i = 0; i < MAX_MOTION_NUM; i++)
+  for (uint8_t i = 0; i < uint8_t(MAX_MOTION_NUM); i++)
   {
     for (uint8_t j = 0; j < 5; j++)
     {
