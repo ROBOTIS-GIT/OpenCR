@@ -79,17 +79,21 @@ namespace RM_LOG
     for (uint8_t i = 0; i < vec.size(); i++)
     {
       DEBUG.print(vec.at(i), point);
-      DEBUG.print(",\t");
+      if(i != vec.size()-1)
+        DEBUG.print(", ");
+      else
+        DEBUG.println(")");
     }
-    DEBUG.println(")");
   #else
     printf("(");
     for (uint8_t i = 0; i < vec.size(); i++)
     {
       printf("%.*lf", point, vec.at(i));
-      printf(",\t");
+      if(i != vec.size()-1)
+        printf(", ");
+      else
+        printf(")\n");
     }
-    printf(")\n");
   #endif
   }
 
@@ -101,17 +105,21 @@ namespace RM_LOG
     for (uint8_t i = 0; i < vec.size(); i++)
     {
       DEBUG.print(vec(i), point);
-      DEBUG.print(",\t");
+      if(i != vec.size()-1)
+        DEBUG.print(", ");
+      else
+        DEBUG.println(")");
     }
-    DEBUG.println(")");
   #else
     printf("(");
     for (uint8_t i = 0; i < vec.size(); i++)
     {
       printf("%.*lf", point, vec(i));
-      printf(",\t");
+      if(i != vec.size()-1)
+        printf(", ");
+      else
+        printf(")\n");
     }
-    printf(")\n");
   #endif
   }
 
@@ -120,31 +128,43 @@ namespace RM_LOG
   void PRINT_MATRIX(matrix &m, uint8_t point = 3)
   {
   #if defined(__OPENCR__)
-    DEBUG.print("(");
+
     for (uint8_t i = 0; i < m.rows(); i++)
     {
-      DEBUG.print(" ");
+      if(i == 0)
+        DEBUG.print("(");
+      else
+        DEBUG.print(" ");
       for (uint8_t j = 0; j < m.cols(); j++)
       {
         DEBUG.print(m(i, j), point);
-        DEBUG.print(",\t");
+        if(j != m.cols()-1)
+          DEBUG.print(", ");
       }
-      DEBUG.println();
+      if(i != m.rows()-1)
+        DEBUG.println("");
+      else
+        DEBUG.println(")");
     }
-    DEBUG.println(")");
   #else
-    printf("(");
+
     for (uint8_t i = 0; i < m.rows(); i++)
     {
-      printf(" ");
+      if(i == 0)
+        printf("(");
+      else
+        printf(" ");
       for (uint8_t j = 0; j < m.cols(); j++)
       {
         printf("%.*lf", point, m(i, j));
-        printf(",\t");
+        if(j != m.cols()-1)
+          printf(", ");
       }
-      printf("\n");
+      if(i != m.rows()-1)
+        printf("\n");
+      else
+        printf(")\n");
     }
-    printf(")\n");
   #endif
   }
 }
