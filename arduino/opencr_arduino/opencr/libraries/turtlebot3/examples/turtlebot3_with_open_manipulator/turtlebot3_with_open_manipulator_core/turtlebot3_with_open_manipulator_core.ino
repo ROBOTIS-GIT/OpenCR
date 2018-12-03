@@ -31,7 +31,9 @@ void setup()
 
   nh.subscribe(cmd_vel_sub);
   nh.subscribe(joint_position_sub);
+  nh.subscribe(joint_move_time_sub);
   nh.subscribe(gripper_position_sub);
+  nh.subscribe(gripper_move_time_sub);
   nh.subscribe(sound_sub);
   nh.subscribe(motor_power_sub);
   nh.subscribe(reset_sub);
@@ -171,27 +173,47 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
 /*******************************************************************************
 * Callback function for joint position msg
 *******************************************************************************/
-void jointTrajectoryCallback(const trajectory_msgs::JointTrajectory& joint_trajectory_msg)
+void jointPositionCallback(const std_msgs::Float64MultiArray& pos_msg)
 {
-  // double goal_joint_position[joint_cnt] = {0.0, 0.0, 0.0, 0.0};
+  double goal_joint_position[20];
 
-  // for (int index = 0; index < joint_cnt; index++)
-  //   goal_joint_position[index] = goal_joint_position_msg.position[index];
+  for (int index = 0; index < joint_cnt; index++)
+    goal_joint_position[index] = pos_msg.data[index];
 
-  // manipulator_driver.writeJointPosition(goal_joint_position);
+  manipulator_driver.writeJointPosition(goal_joint_position);
+}
+
+/*******************************************************************************
+* Callback function for joint move time msg
+*******************************************************************************/
+void jointMoveTimeCallback(const std_msgs::Float64& time_msg)
+{
+  double data = time_msg.data;
+
+  manipulator_driver.writeJointProfileControlParam(data);
 }
 
 /*******************************************************************************
 * Callback function for gripper position msg
 *******************************************************************************/
-void gripperTrajectoryCallback(const trajectory_msgs::JointTrajectory& gripper_trajectory_msg)
+void gripperPositionCallback(const std_msgs::Float64MultiArray& gripper_msg)
 {
-  // double goal_gripper_position[gripper_cnt] = {0.0, 0.0, 0.0, 0.0};
+  double goal_gripper_position[5] = {0.0, };
 
-  // for (int index = 0; index < gripper_cnt; index++)
-  //   goal_gripper_position[index] = goal_gripper_position_msg.position[index];
+  for (int index = 0; index < gripper_cnt; index++)
+    goal_gripper_position[index] = gripper_msg.data[index];
 
-  // manipulator_driver.writeGripperPosition(goal_gripper_position);
+  manipulator_driver.writeGripperPosition(goal_gripper_position);
+}
+
+/*******************************************************************************
+* Callback function for gripper move time msg
+*******************************************************************************/
+void gripperMoveTimeCallback(const std_msgs::Float64& time_msg)
+{
+  double data = time_msg.data;
+  
+  manipulator_driver.writeGripperProfileControlParam(data);
 }
 
 /*******************************************************************************

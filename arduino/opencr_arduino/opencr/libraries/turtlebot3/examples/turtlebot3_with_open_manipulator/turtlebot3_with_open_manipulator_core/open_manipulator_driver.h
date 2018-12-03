@@ -51,23 +51,19 @@ class OpenManipulatorDriver
   void closeDynamixel(void);
   bool setTorque(bool onoff);
   bool getTorqueState(void);
-  // bool setGripperTorque(bool onoff);
-  // bool getJointTorque(void);
-  // bool getGripperTorque(void);
-  // bool setOperatingMode(uint8_t id, uint8_t operating_mode);
   bool readPosition(double *get_data);
   bool writeJointPosition(double *set_data);
+  bool writeJointProfileControlParam(int32_t set_time);
   bool writeGripperPosition(double *set_data);
+  bool writeGripperProfileControlParam(int32_t set_time);
 
  private:
   DynamixelWorkbench dxl_wb_;
-  // DynamixelWorkbench gripper_controller_;
+
   Dynamixel joint_;
   Dynamixel gripper_;
 
   bool torque_state_;
-  // bool joint_torque_state_;
-  // bool gripper_torque_state_;
 };
 
 #endif // OPEN_MANIPULATOR_DRIVER_H_
