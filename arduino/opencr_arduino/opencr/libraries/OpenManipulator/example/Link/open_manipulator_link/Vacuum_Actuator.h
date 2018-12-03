@@ -64,12 +64,15 @@ class VacuumModule : public ROBOTIS_MANIPULATOR::ToolActuator
     {
       suction_flag_ = true;
       vacuumOn();
+      return true;
     }  
     else
     {
       suction_flag_ = false;
       vacuumOff();
+      return true;
     }
+    return false;
   }
 
   virtual double receiveToolActuatorValue()
