@@ -213,7 +213,7 @@ void Turtlebot3Sensor::makeSound(uint8_t index)
   const uint16_t NOTE_A4 = 440;
   const uint16_t NOTE_B4 = 494;
   const uint16_t NOTE_C5 = 523;
-  const uint16_t NOTE_C6 = 1047;
+//  const uint16_t NOTE_C6 = 1047;
 
   const uint8_t OFF         = 0;
   const uint8_t ON          = 1;

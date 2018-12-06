@@ -169,6 +169,7 @@ uint8_t Turtlebot3Diagnosis::updateVoltageCheck(bool check_setup)
 
     battery_voltage = vol_value;
   }
+  (void)(battery_voltage);
 
 
   if(millis()-process_time[1] > 1000)
@@ -286,6 +287,8 @@ uint8_t Turtlebot3Diagnosis::updateVoltageCheck(bool check_setup)
         break;
     }
   }
+
+  (void)(prev_state);
 
   return battery_state;
 }

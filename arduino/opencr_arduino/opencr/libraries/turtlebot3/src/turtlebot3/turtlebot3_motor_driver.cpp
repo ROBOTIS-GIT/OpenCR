@@ -22,10 +22,10 @@ Turtlebot3MotorDriver::Turtlebot3MotorDriver()
 : baudrate_(BAUDRATE),
   protocol_version_(PROTOCOL_VERSION),
   left_wheel_id_(DXL_LEFT_ID),
-  right_wheel_id_(DXL_RIGHT_ID),
-  dynamixel_limit_max_velocity_(BURGER_DXL_LIMIT_MAX_VELOCITY),
-  torque_(false)
+  right_wheel_id_(DXL_RIGHT_ID)
 {
+  torque_ = false;
+  dynamixel_limit_max_velocity_ = BURGER_DXL_LIMIT_MAX_VELOCITY;
 }
 
 Turtlebot3MotorDriver::~Turtlebot3MotorDriver()

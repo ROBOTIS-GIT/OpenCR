@@ -242,6 +242,8 @@ void resetCallback(const std_msgs::Empty& reset_msg)
 {
   char log_msg[50];
 
+  (void)(reset_msg);
+
   sprintf(log_msg, "Start Calibration of Gyro");
   nh.loginfo(log_msg);
 

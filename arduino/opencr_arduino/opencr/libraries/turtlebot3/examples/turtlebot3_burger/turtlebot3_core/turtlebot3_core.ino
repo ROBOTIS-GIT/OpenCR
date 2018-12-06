@@ -187,8 +187,10 @@ void motorPowerCallback(const std_msgs::Bool& power_msg)
 * Callback function for reset msg
 *******************************************************************************/
 void resetCallback(const std_msgs::Empty& reset_msg)
-{
+{ 
   char log_msg[50];
+
+  (void)(reset_msg);
 
   sprintf(log_msg, "Start Calibration of Gyro");
   nh.loginfo(log_msg);
@@ -419,7 +421,7 @@ void updateJointStates(void)
 {
   static float joint_states_pos[WHEEL_NUM] = {0.0, 0.0};
   static float joint_states_vel[WHEEL_NUM] = {0.0, 0.0};
-  static float joint_states_eff[WHEEL_NUM] = {0.0, 0.0};
+  //static float joint_states_eff[WHEEL_NUM] = {0.0, 0.0};
 
   joint_states_pos[LEFT]  = last_rad[LEFT];
   joint_states_pos[RIGHT] = last_rad[RIGHT];
@@ -680,6 +682,8 @@ void updateGyroCali(bool isConnected)
   static bool isEnded = false;
   char log_msg[50];
 
+  (void)(isConnected);
+
   if (nh.connected())
   {
     if (isEnded == false)
@@ -771,7 +775,7 @@ void initOdom(void)
 *******************************************************************************/
 void initJointStates(void)
 {
-  static char *joint_states_name[] = {"wheel_left_joint", "wheel_right_joint"};
+  static char *joint_states_name[] = {(char*)"wheel_left_joint", (char*)"wheel_right_joint"};
 
   joint_states.header.frame_id = joint_state_header_frame_id;
   joint_states.name            = joint_states_name;
