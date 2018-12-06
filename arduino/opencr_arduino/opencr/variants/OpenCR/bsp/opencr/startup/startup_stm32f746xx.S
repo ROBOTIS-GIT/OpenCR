@@ -2,8 +2,6 @@
   ******************************************************************************
   * @file      startup_stm32f746xx.s
   * @author    MCD Application Team
-  * @Version    V1.0.2
-  * @Date       21-September-2015
   * @brief     STM32F746xx Devices vector table for GCC based toolchain. 
   *            This module performs:
   *                - Set the initial SP
@@ -16,7 +14,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2015 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -245,12 +243,12 @@ g_pfnVectors:
   .word     UART7_IRQHandler                  /* UART7                        */      
   .word     UART8_IRQHandler                  /* UART8                        */
   .word     SPI4_IRQHandler                   /* SPI4                         */
-  .word     SPI5_IRQHandler                   /* SPI5	 		              */
-  .word     SPI6_IRQHandler                   /* SPI6   			          */
-  .word     SAI1_IRQHandler                   /* SAI1						  */
-  .word     LTDC_IRQHandler                   /* LTDC					      */
-  .word     LTDC_ER_IRQHandler                /* LTDC error					  */
-  .word     DMA2D_IRQHandler                  /* DMA2D    				      */
+  .word     SPI5_IRQHandler                   /* SPI5                           */
+  .word     SPI6_IRQHandler                   /* SPI6                         */
+  .word     SAI1_IRQHandler                   /* SAI1                          */
+  .word     LTDC_IRQHandler                   /* LTDC                          */
+  .word     LTDC_ER_IRQHandler                /* LTDC error                      */
+  .word     DMA2D_IRQHandler                  /* DMA2D                          */
   .word     SAI2_IRQHandler                   /* SAI2                         */
   .word     QUADSPI_IRQHandler                /* QUADSPI                      */
   .word     LPTIM1_IRQHandler                 /* LPTIM1                       */
@@ -587,5 +585,5 @@ g_pfnVectors:
    .weak      SPDIF_RX_IRQHandler            
    .thumb_set SPDIF_RX_IRQHandler,Default_Handler 
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/		
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/        
  

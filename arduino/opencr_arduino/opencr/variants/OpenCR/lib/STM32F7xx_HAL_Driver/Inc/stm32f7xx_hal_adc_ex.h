@@ -2,13 +2,11 @@
   ******************************************************************************
   * @file    stm32f7xx_hal_adc.h
   * @author  MCD Application Team
-  * @version V1.0.3
-  * @date    13-November-2015
   * @brief   Header file of ADC HAL module.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -77,7 +75,7 @@ typedef struct
                                                This parameter can be a value of @ref ADC_channels
                                                Note: Depending on devices, some channels may not be available on package pins. Refer to device datasheet for channels availability. */
   uint32_t InjectedRank;                  /*!< Rank in the injected group sequencer
-                                               This parameter must be a value of @ref ADCEx_injected_channel_selection
+                                               This parameter must be a value of @ref ADCEx_injected_rank
                                                Note: In case of need to disable a channel or change order of conversion sequencer, rank containing a previous channel setting can be overwritten by the new channel setting (or parameter number of conversions can be adjusted) */
   uint32_t InjectedSamplingTime;          /*!< Sampling time value to be set for the selected channel.
                                                Unit: ADC clock cycles
@@ -126,9 +124,6 @@ typedef struct
                                                Caution: this setting impacts the entire injected group. Therefore, call of HAL_ADCEx_InjectedConfigChannel() to 
                                                         configure a channel on injected group can impact the configuration of other channels previously set. */
 }ADC_InjectionConfTypeDef; 
-/**
-  * @}
-  */
 
 /** 
   * @brief ADC Configuration multi-mode structure definition  
@@ -155,7 +150,7 @@ typedef struct
 /** @defgroup ADCEx_Common_mode ADC Common Mode
   * @{
   */
-#define ADC_MODE_INDEPENDENT                  ((uint32_t)0x00000000)      
+#define ADC_MODE_INDEPENDENT                  ((uint32_t)0x00000000U)      
 #define ADC_DUALMODE_REGSIMULT_INJECSIMULT    ((uint32_t)ADC_CCR_MULTI_0)
 #define ADC_DUALMODE_REGSIMULT_ALTERTRIG      ((uint32_t)ADC_CCR_MULTI_1)
 #define ADC_DUALMODE_INJECSIMULT              ((uint32_t)(ADC_CCR_MULTI_2 | ADC_CCR_MULTI_0))
@@ -175,7 +170,7 @@ typedef struct
 /** @defgroup ADCEx_Direct_memory_access_mode_for_multi_mode ADC Direct Memory Access Mode For Multi Mode
   * @{
   */ 
-#define ADC_DMAACCESSMODE_DISABLED  ((uint32_t)0x00000000)     /*!< DMA mode disabled */
+#define ADC_DMAACCESSMODE_DISABLED  ((uint32_t)0x00000000U)     /*!< DMA mode disabled */
 #define ADC_DMAACCESSMODE_1         ((uint32_t)ADC_CCR_DMA_0)  /*!< DMA mode 1 enabled (2 / 3 half-words one by one - 1 then 2 then 3)*/
 #define ADC_DMAACCESSMODE_2         ((uint32_t)ADC_CCR_DMA_1)  /*!< DMA mode 2 enabled (2 / 3 half-words by pairs - 2&1 then 1&3 then 3&2)*/
 #define ADC_DMAACCESSMODE_3         ((uint32_t)ADC_CCR_DMA)    /*!< DMA mode 3 enabled (2 / 3 bytes by pairs - 2&1 then 1&3 then 3&2) */
@@ -186,7 +181,7 @@ typedef struct
 /** @defgroup ADCEx_External_trigger_edge_Injected ADC External Trigger Edge Injected
   * @{
   */
-#define ADC_EXTERNALTRIGINJECCONVEDGE_NONE           ((uint32_t)0x00000000)
+#define ADC_EXTERNALTRIGINJECCONVEDGE_NONE           ((uint32_t)0x00000000U)
 #define ADC_EXTERNALTRIGINJECCONVEDGE_RISING         ((uint32_t)ADC_CR2_JEXTEN_0)
 #define ADC_EXTERNALTRIGINJECCONVEDGE_FALLING        ((uint32_t)ADC_CR2_JEXTEN_1)
 #define ADC_EXTERNALTRIGINJECCONVEDGE_RISINGFALLING  ((uint32_t)ADC_CR2_JEXTEN)
@@ -197,7 +192,7 @@ typedef struct
 /** @defgroup ADCEx_External_trigger_Source_Injected ADC External Trigger Source Injected
   * @{
   */
-#define ADC_EXTERNALTRIGINJECCONV_T1_TRGO         ((uint32_t)0x00000000)
+#define ADC_EXTERNALTRIGINJECCONV_T1_TRGO         ((uint32_t)0x00000000U)
 #define ADC_EXTERNALTRIGINJECCONV_T1_CC4          ((uint32_t)ADC_CR2_JEXTSEL_0)
 #define ADC_EXTERNALTRIGINJECCONV_T2_TRGO         ((uint32_t)ADC_CR2_JEXTSEL_1)
 #define ADC_EXTERNALTRIGINJECCONV_T2_CC1          ((uint32_t)(ADC_CR2_JEXTSEL_1 | ADC_CR2_JEXTSEL_0))
@@ -217,13 +212,13 @@ typedef struct
   * @}
   */ 
 
-/** @defgroup ADCEx_injected_channel_selection ADC Injected Channel Selection
+/** @defgroup ADCEx_injected_rank ADC Injected Channel Rank
   * @{
   */ 
-#define ADC_INJECTED_RANK_1    ((uint32_t)0x00000001)
-#define ADC_INJECTED_RANK_2    ((uint32_t)0x00000002)
-#define ADC_INJECTED_RANK_3    ((uint32_t)0x00000003)
-#define ADC_INJECTED_RANK_4    ((uint32_t)0x00000004)
+#define ADC_INJECTED_RANK_1    ((uint32_t)0x00000001U)
+#define ADC_INJECTED_RANK_2    ((uint32_t)0x00000002U)
+#define ADC_INJECTED_RANK_3    ((uint32_t)0x00000003U)
+#define ADC_INJECTED_RANK_4    ((uint32_t)0x00000004U)
 /**
   * @}
   */ 
@@ -231,7 +226,7 @@ typedef struct
 /** @defgroup ADCEx_channels  ADC Specific Channels
   * @{
   */
-#define ADC_CHANNEL_TEMPSENSOR  ((uint32_t)ADC_CHANNEL_18 | 0x10000000)    
+#define ADC_CHANNEL_TEMPSENSOR  ((uint32_t)ADC_CHANNEL_18 | 0x10000000U)    
 /**
   * @}
   */
@@ -252,7 +247,7 @@ typedef struct
 /** @addtogroup ADCEx_Exported_Functions
   * @{
   */
-	
+
 /** @addtogroup ADCEx_Exported_Functions_Group1
   * @{
   */
@@ -290,7 +285,7 @@ HAL_StatusTypeDef HAL_ADCEx_MultiModeConfigChannel(ADC_HandleTypeDef* hadc, ADC_
 /**
   * @}
   */
-	
+
 /* Private macros ------------------------------------------------------------*/
 /** @defgroup ADCEx_Private_Macros ADC Private Macros
   * @{
@@ -333,22 +328,25 @@ HAL_StatusTypeDef HAL_ADCEx_MultiModeConfigChannel(ADC_HandleTypeDef* hadc, ADC_
                                             ((__INJTRIG__) == ADC_EXTERNALTRIGINJECCONV_T5_TRGO)  || \
                                             ((__INJTRIG__) == ADC_EXTERNALTRIGINJECCONV_T3_CC1)   || \
                                             ((__INJTRIG__) == ADC_EXTERNALTRIGINJECCONV_T6_TRGO)  || \
-											((__INJTRIG__) == ADC_INJECTED_SOFTWARE_START))
+                                            ((__INJTRIG__) == ADC_INJECTED_SOFTWARE_START))
+#define IS_ADC_INJECTED_RANK(__RANK__) (((__RANK__) == ADC_INJECTED_RANK_1) || \
+                                       ((__RANK__) == ADC_INJECTED_RANK_2) || \
+                                       ((__RANK__) == ADC_INJECTED_RANK_3) || \
+                                       ((__RANK__) == ADC_INJECTED_RANK_4))
 #define IS_ADC_INJECTED_LENGTH(__LENGTH__) (((__LENGTH__) >= ((uint32_t)1)) && ((__LENGTH__) <= ((uint32_t)4)))
-#define IS_ADC_INJECTED_RANK(__RANK__) (((__RANK__) >= ((uint32_t)1)) && ((__RANK__) <= ((uint32_t)4)))
 
 /**
   * @brief  Set the selected injected Channel rank.
-  * @param  _CHANNELNB_: Channel number.
-  * @param  _RANKNB_: Rank number. 
-  * @param  _JSQR_JL_: Sequence length.     
+  * @param  _CHANNELNB_ Channel number.
+  * @param  _RANKNB_ Rank number. 
+  * @param  _JSQR_JL_ Sequence length.     
   * @retval None
   */
 #define   ADC_JSQR(_CHANNELNB_, _RANKNB_,_JSQR_JL_) (((uint32_t)((uint16_t)(_CHANNELNB_))) << (5 * (uint8_t)(((_RANKNB_) + 3) - (_JSQR_JL_))))
 /**
   * @}
   */
-	
+
 /* Private functions ---------------------------------------------------------*/
 /** @defgroup ADCEx_Private_Functions ADC Private Functions
   * @{
@@ -361,7 +359,7 @@ HAL_StatusTypeDef HAL_ADCEx_MultiModeConfigChannel(ADC_HandleTypeDef* hadc, ADC_
 /**
   * @}
   */
-	
+
 /**
   * @}
   */

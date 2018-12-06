@@ -3,6 +3,8 @@
 
 CANClass CanBus;
 
+#define OPENCR_CAN_CHANNEL 0 //CAN2
+
 CANClass::CANClass()
 {
     format_ = CAN_STD_FORMAT;
@@ -10,52 +12,52 @@ CANClass::CANClass()
 
 bool CANClass::begin()
 {
-    return drvCanOpen(_DEF_CAN2, CAN_BAUD_125K, format_);
+    return drvCanOpen(OPENCR_CAN_CHANNEL, CAN_BAUD_125K, format_);
 }
 
 bool CANClass::begin(uint32_t baudrate)
 {
-    return drvCanOpen(_DEF_CAN2, baudrate, format_);
+    return drvCanOpen(OPENCR_CAN_CHANNEL, baudrate, format_);
 }
 
 bool CANClass::begin(uint32_t baudrate, uint8_t format)
 {
-    return drvCanOpen(_DEF_CAN2, baudrate, format);
+    return drvCanOpen(OPENCR_CAN_CHANNEL, baudrate, format);
 }
 
 void CANClass::end(void)
 {
-    drvCanClose(_DEF_CAN2);
+    drvCanClose(OPENCR_CAN_CHANNEL);
 }
 
  bool CANClass::configFilter(uint32_t id, uint32_t mask)
  {
-    return drvCanConfigFilter(14, id, mask, format_);
+    return drvCanConfigFilter(0, id, mask, format_);
  }
 
  bool CANClass::configFilter(uint32_t id, uint32_t mask, uint8_t format)
  {
-    return drvCanConfigFilter(14, id, mask, format);
+    return drvCanConfigFilter(0, id, mask, format);
  }
 
 uint32_t CANClass::write(uint32_t id, uint8_t *p_data, uint32_t length)
 {
-    return drvCanWrite(_DEF_CAN2, id, p_data, length, format_);
+    return drvCanWrite(OPENCR_CAN_CHANNEL, id, p_data, length, format_);
 }
 
 uint32_t CANClass::write(uint32_t id, uint8_t *p_data, uint32_t length, uint8_t format)
 {
-    return drvCanWrite(_DEF_CAN2, id, p_data, length, format);
+    return drvCanWrite(OPENCR_CAN_CHANNEL, id, p_data, length, format);
 }
 
 uint8_t CANClass::read(void)  //read one byte
 {
-    return drvCanRead(_DEF_CAN2);
+    return drvCanRead(OPENCR_CAN_CHANNEL);
 }
 
 uint32_t  CANClass::avaliable(void)
 {
-    return drvCanAvailable(_DEF_CAN2); 
+    return drvCanAvailable(OPENCR_CAN_CHANNEL); 
 }
 
 uint32_t CANClass::writeMessage(can_message_t *p_msg)
@@ -66,7 +68,7 @@ uint32_t CANClass::writeMessage(can_message_t *p_msg)
     msg.length = p_msg->length;
     memcpy(msg.data, p_msg->data, 8);
 
-    return drvCanWriteMsg(_DEF_CAN2, &msg);
+    return drvCanWriteMsg(OPENCR_CAN_CHANNEL, &msg);
 }
 
 bool CANClass::readMessage(can_message_t *p_msg)
@@ -74,7 +76,7 @@ bool CANClass::readMessage(can_message_t *p_msg)
     bool ret = false;
     drv_can_msg_t *rx_msg;
 
-    rx_msg = drvCanReadMsg(_DEF_CAN2);
+    rx_msg = drvCanReadMsg(OPENCR_CAN_CHANNEL);
 
     if(rx_msg != NULL)
     {
@@ -92,29 +94,29 @@ bool CANClass::readMessage(can_message_t *p_msg)
 
 uint32_t CANClass::avaliableMessage(void)
 {
-     return drvCanAvailableMsg(_DEF_CAN2);
+     return drvCanAvailableMsg(OPENCR_CAN_CHANNEL);
 }
 
 uint8_t CANClass::getErrCount(void)
 {
-    return drvCanGetErrCount(_DEF_CAN2);
+    return drvCanGetErrCount(OPENCR_CAN_CHANNEL);
 }
 uint32_t CANClass::getError(void)
 {
-    return drvCanGetError(_DEF_CAN2);
+    return drvCanGetError(OPENCR_CAN_CHANNEL);
 }
 
 uint32_t CANClass::getState(void)
 {
-     return drvCanGetState(_DEF_CAN2);
+     return drvCanGetState(OPENCR_CAN_CHANNEL);
 }
 
 void CANClass::attachRxInterrupt(void (*handler)(can_message_t *arg))
 {
-    drvCanAttachRxInterrupt(_DEF_CAN2, (void(*)(void *arg)) handler);
+    drvCanAttachRxInterrupt(OPENCR_CAN_CHANNEL, (void(*)(void *arg)) handler);
 }
 
 void CANClass::detachRxInterrupt(void)
 {
-    drvCanDetachRxInterrupt(_DEF_CAN2);
+    drvCanDetachRxInterrupt(OPENCR_CAN_CHANNEL);
 }

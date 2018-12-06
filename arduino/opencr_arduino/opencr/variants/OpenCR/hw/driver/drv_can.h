@@ -17,7 +17,7 @@
 
 
 
-#define DRV_CAN_MAX_CH           2
+#define DRV_CAN_MAX_CH           1
 #define DRV_CAN_MAX_BYTE_IN_MSG  8
 #define DRV_CAN_MSG_RX_BUF_MAX   8
 #define DRV_CAN_DATA_RX_BUF_MAX  128
@@ -44,7 +44,7 @@ uint32_t drvCanAvailableMsg(uint8_t channel);
 uint8_t drvCanGetErrCount(uint8_t channel);
 uint32_t drvCanGetError(uint8_t channel);
 uint32_t drvCanGetState(uint8_t channel);
-void drvCanRetry(uint8_t channel);
+
 void drvCanAttachRxInterrupt(uint8_t channel, void (*handler)(void *arg));
 void drvCanDetachRxInterrupt(uint8_t channel);
 
