@@ -43,24 +43,24 @@ uint16_t readRC100Data()
 void fromRC100(OPEN_MANIPULATOR* open_manipulator, uint16_t data)
 {
   if (data & RC100_BTN_U)
-    open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(0.007, 0.0, 0.0), 0.16);
+    open_manipulator->taskTrajectoryMoveToPresentPose("gripper", RM_MATH::makeVector3(0.007, 0.0, 0.0), 0.16);
   else if (data & RC100_BTN_D)
-    open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(-0.007, 0.0, 0.0), 0.16);
+    open_manipulator->taskTrajectoryMoveToPresentPose("gripper", RM_MATH::makeVector3(-0.007, 0.0, 0.0), 0.16);
   else if (data & RC100_BTN_L)
-    open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(0.0, 0.007, 0.0), 0.16);
+    open_manipulator->taskTrajectoryMoveToPresentPose("gripper", RM_MATH::makeVector3(0.0, 0.007, 0.0), 0.16);
   else if (data & RC100_BTN_R)
-    open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(0.0, -0.007, 0.0), 0.16);
+    open_manipulator->taskTrajectoryMoveToPresentPose("gripper", RM_MATH::makeVector3(0.0, -0.007, 0.0), 0.16);
   else if (data & RC100_BTN_1)
-    open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(0.0, 0.0, 0.007), 0.16);
+    open_manipulator->taskTrajectoryMoveToPresentPose("gripper", RM_MATH::makeVector3(0.0, 0.0, 0.007), 0.16);
   else if (data & RC100_BTN_3)
-    open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(0.0, 0.0, -0.007), 0.16);
+    open_manipulator->taskTrajectoryMoveToPresentPose("gripper", RM_MATH::makeVector3(0.0, 0.0, -0.007), 0.16);
   else if (data & RC100_BTN_2)
   {
     grip_value += 0.0020;
     if (grip_value >= 0.01f)
       grip_value = 0.01f;
 
-    open_manipulator->toolMove("tool", grip_value);
+    open_manipulator->toolMove("gripper", grip_value);
   }
   else if (data & RC100_BTN_4)
   {
@@ -68,7 +68,7 @@ void fromRC100(OPEN_MANIPULATOR* open_manipulator, uint16_t data)
     if (grip_value <= -0.01f)
       grip_value = -0.01f;
 
-    open_manipulator->toolMove("tool", grip_value);
+    open_manipulator->toolMove("gripper", grip_value);
   }
   else if (data & RC100_BTN_5)
   {

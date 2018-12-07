@@ -19,13 +19,7 @@
 #ifndef ACTUATOR_H_
 #define ACTUATOR_H_
 
-#if defined(__OPENCR__)
-  #include <RobotisManipulator.h>
-  #include <DynamixelWorkbench.h>
-#else
-  #include <robotis_manipulator/robotis_manipulator.h>
-  #include <dynamixel_workbench_toolbox/dynamixel_workbench.h>
-#endif
+#include <RobotisManipulator.h>
 
 namespace ACTUATOR
 {

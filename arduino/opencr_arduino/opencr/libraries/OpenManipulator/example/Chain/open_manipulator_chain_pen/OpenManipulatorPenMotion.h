@@ -49,7 +49,7 @@ void playMotion(OPEN_MANIPULATOR_PEN *open_manipulator)
     for(int i = 0; i < NUM_OF_JOINT; i ++)
       joint_angle.push_back(demo_motion_way_point_buf[demo_motion_cnt][i]);
     open_manipulator->jointTrajectoryMove(joint_angle, demo_motion_way_point_buf[demo_motion_cnt][4]); 
-    open_manipulator->toolMove("tool", demo_motion_way_point_buf[demo_motion_cnt][5]);
+    open_manipulator->toolMove("pen", demo_motion_way_point_buf[demo_motion_cnt][5]);
     
     demo_motion_cnt ++;
     if(demo_motion_cnt >= NUM_OF_MOTION)
