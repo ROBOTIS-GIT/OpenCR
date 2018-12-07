@@ -192,35 +192,35 @@ Eigen::Matrix3d RM_MATH::convertRPYToRotation(double roll, double pitch, double 
   return rotation;
 }
 
-// Eigen::Quaterniond RM_MATH::convertRPYToQuaternion(double roll, double pitch, double yaw)
-// {
-//   Eigen::Quaterniond quaternion;
-//   quaternion = convertRPYToRotation(roll,pitch,yaw);
+ Eigen::Quaterniond RM_MATH::convertRPYToQuaternion(double roll, double pitch, double yaw)
+ {
+   Eigen::Quaterniond quaternion;
+   quaternion = convertRPYToRotation(roll,pitch,yaw);
 
-//   return quaternion;
-// }
+   return quaternion;
+ }
 
-// Eigen::Quaterniond RM_MATH::convertRotationToQuaternion(const Eigen::Matrix3d& rotation)
-// {
-//   Eigen::Quaterniond quaternion;
-//   quaternion = rotation;
+ Eigen::Quaterniond RM_MATH::convertRotationToQuaternion(const Eigen::Matrix3d& rotation)
+ {
+   Eigen::Quaterniond quaternion;
+   quaternion = rotation;
 
-//   return quaternion;
-// }
+   return quaternion;
+ }
 
-// Eigen::Vector3d RM_MATH::convertQuaternionToRPY(const Eigen::Quaterniond& quaternion)
-// {
-//   Eigen::Vector3d rpy = convertRotationToRPY(quaternion.toRotationMatrix());
+ Eigen::Vector3d RM_MATH::convertQuaternionToRPY(const Eigen::Quaterniond& quaternion)
+ {
+   Eigen::Vector3d rpy = convertRotationToRPY(quaternion.toRotationMatrix());
 
-//   return rpy;
-// }
+   return rpy;
+ }
 
-// Eigen::Matrix3d RM_MATH::convertQuaternionToRotation(const Eigen::Quaterniond& quaternion)
-// {
-//   Eigen::Matrix3d rotation = quaternion.toRotationMatrix();
+ Eigen::Matrix3d RM_MATH::convertQuaternionToRotation(const Eigen::Quaterniond& quaternion)
+ {
+   Eigen::Matrix3d rotation = quaternion.toRotationMatrix();
 
-//   return rotation;
-// }
+   return rotation;
+ }
 
 Eigen::Vector3d RM_MATH::convertRotToOmega(const Eigen::Matrix3d& rotation_matrix)
 {

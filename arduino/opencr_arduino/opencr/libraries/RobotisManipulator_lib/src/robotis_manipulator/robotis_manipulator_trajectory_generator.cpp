@@ -296,16 +296,17 @@ void Trajectory::initTrajectoryWayPoint(double present_time, Manipulator present
 {
   setTrajectoryManipulator(present_real_manipulator);
   std::vector<WayPoint> joint_way_point_vector;
-  WayPoint joint_way_point;
   std::vector<double> joint_value_vector;
   joint_value_vector = getTrajectoryManipulator()->getAllActiveJointValue();
 
   for(uint32_t index=0; index < joint_value_vector.size(); index++)
   {
+    WayPoint joint_way_point;
     joint_way_point.value = joint_value_vector.at(index);
     joint_way_point.velocity = 0.0;
     joint_way_point.acceleration = 0.0;
     joint_way_point.effort = 0.0;
+
     joint_way_point_vector.push_back(joint_way_point);
   }
 
@@ -341,27 +342,20 @@ void Trajectory::UpdatePresentWayPoint(Kinematics* kinematics)
 
   for (it = manipulator_.getIteratorBegin(); it != manipulator_.getIteratorEnd(); it++)
   {
-    if (manipulator_.checkComponentType(it->first, ACTIVE_JOINT_COMPONENT))
-    {
-      for(int index2 = 0; index2 < manipulator_.getDOF(); index2++)
-      {
-        joint_velocity[index2] =manipulator_.getVelocity(it->first);
-      }
-      pose_velocity = kinematics->jacobian(&manipulator_, it->first)*joint_velocity;
-      linear_velocity[0] = pose_velocity[0];
-      linear_velocity[1] = pose_velocity[1];
-      linear_velocity[2] = pose_velocity[2];
-      angular_velocity[0] = pose_velocity[3];
-      angular_velocity[1] = pose_velocity[4];
-      angular_velocity[2] = pose_velocity[5];
-      Dynamicpose dynamic_pose;
-      dynamic_pose.linear.velocity = linear_velocity;
-      dynamic_pose.angular.velocity = angular_velocity;
-      dynamic_pose.linear.acceleration = Eigen::Vector3d::Zero();
-      dynamic_pose.angular.acceleration = Eigen::Vector3d::Zero();
+    pose_velocity = kinematics->jacobian(&manipulator_, it->first)*joint_velocity;
+    linear_velocity[0] = pose_velocity[0];
+    linear_velocity[1] = pose_velocity[1];
+    linear_velocity[2] = pose_velocity[2];
+    angular_velocity[0] = pose_velocity[3];
+    angular_velocity[1] = pose_velocity[4];
+    angular_velocity[2] = pose_velocity[5];
+    Dynamicpose dynamic_pose;
+    dynamic_pose.linear.velocity = linear_velocity;
+    dynamic_pose.angular.velocity = angular_velocity;
+    dynamic_pose.linear.acceleration = Eigen::Vector3d::Zero();
+    dynamic_pose.angular.acceleration = Eigen::Vector3d::Zero();
 
-      manipulator_.setComponentDynamicPoseFromWorld(it->first, dynamic_pose);
-    }
+    manipulator_.setComponentDynamicPoseFromWorld(it->first, dynamic_pose);
   }
 }
 
@@ -378,8 +372,9 @@ void Trajectory::setPresentJointWayPoint(std::vector<WayPoint> joint_value_vecto
       manipulator_.setVelocity(it->first, joint_value_vector.at(index).velocity);
       manipulator_.setAcceleration(it->first, joint_value_vector.at(index).acceleration);
       manipulator_.setEffort(it->first, joint_value_vector.at(index).effort);
+
+      index++;
     }
-    index++;
   }
 }
 

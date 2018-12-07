@@ -92,7 +92,6 @@ String* parseDataFromProcessing(String get)
   return global_cmd;
 }
 
-
 void sendAngle2Processing(std::vector<WayPoint> joint_states_vector)
 {
   Serial.print("angle");
@@ -105,30 +104,13 @@ void sendAngle2Processing(std::vector<WayPoint> joint_states_vector)
   Serial.print("\n");
 }
 
-void sendToolData2Processing(bool onoff)
-{
-  Serial.print("tool");
-  Serial.print(",");
-  Serial.print(onoff);
-  Serial.print("\n");
-}
-
-void sendToolData2Processing(double value)
-{
-  Serial.print("tool");
-  Serial.print(",");
-  Serial.print(value*10);
-  Serial.print("\n");
-}
-
-void sendValueToProcessing(OPEN_MANIPULATOR_VACUUM *open_manipulator)
+void sendValueToProcessing(OPEN_MANIPULATOR_PEN *open_manipulator)
 {
   sendAngle2Processing(open_manipulator->getAllActiveJointValue());
-  //sendToolData2Processing(open_manipulator->getToolValue("tool"));
 }
 
 
-void fromProcessing(OPEN_MANIPULATOR_VACUUM *open_manipulator, String data)
+void fromProcessing(OPEN_MANIPULATOR_PEN *open_manipulator, String data)
 {
   String *cmd = parseDataFromProcessing(data);
 
@@ -162,34 +144,23 @@ void fromProcessing(OPEN_MANIPULATOR_VACUUM *open_manipulator, String data)
 
     open_manipulator->jointTrajectoryMove(goal_position, 1.0); // FIX TIME PARAM
   }
-  else if (cmd[0] == "gripper")
-  {
-    open_manipulator->toolMove("tool", (double)cmd[1].toFloat());
-  }
-  else if (cmd[0] == "grip")
-  {
-    if (cmd[1] == "on")
-      open_manipulator->toolMove("tool", 1.0);
-    else if (cmd[1] == "off")
-      open_manipulator->toolMove("tool", 0.0);
-  }
   ////////// task space control tab
   else if (cmd[0] == "task")
   {
     if (cmd[1] == "forward")
-      open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(0.010, 0.0, 0.0), 0.2);
+      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.010, 0.0, 0.0), 0.2);
     else if (cmd[1] == "back")
-      open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(-0.010, 0.0, 0.0), 0.2);
+      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(-0.010, 0.0, 0.0), 0.2);
     else if (cmd[1] == "left")
-      open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(0.0, 0.010, 0.0), 0.2);
+      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.010, 0.0), 0.2);
     else if (cmd[1] == "right")
-      open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(0.0, -0.010, 0.0), 0.2);
+      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, -0.010, 0.0), 0.2);
     else if (cmd[1] == "up")
-      open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.2);
+      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.2);
     else if (cmd[1] == "down")
-      open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.2);
+      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.2);
     else
-      open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(0.0, 0.0, 0.0), 0.2);
+      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.0), 0.2);
   }
   else if (cmd[0] == "torque")
   {
@@ -219,17 +190,17 @@ void fromProcessing(OPEN_MANIPULATOR_VACUUM *open_manipulator, String data)
       for(int i = 0; i < present_states.size(); i ++)
         read_value.angle.push_back(present_states.at(i).value);  
       read_value.path_time = 2.0;
-      read_value.gripper_value = open_manipulator->getToolValue("tool");
+      read_value.gripper_value = open_manipulator->getToolValue("pen");
       motion_way_point_buf.push_back(read_value);  
       hand_motion_cnt = 0;
     }
     else if (cmd[1] == "on")  // save gripper on
     {
-      open_manipulator->toolMove("tool", 1.0);
+      open_manipulator->toolMove("pen", 1.0);
     }
     else if (cmd[1] == "off")  // save gripper off
     {
-      open_manipulator->toolMove("tool", 0.0);
+      open_manipulator->toolMove("pen", 0.0);
     }
   }
   else if (cmd[0] == "hand")
@@ -254,7 +225,7 @@ void fromProcessing(OPEN_MANIPULATOR_VACUUM *open_manipulator, String data)
   {
     if (cmd[1] == "1")
     {
-      Pose present_pose = open_manipulator->getPose("tool");
+      Pose present_pose = open_manipulator->getPose("pen");
       WayPoint draw_goal_pose[6];
       draw_goal_pose[0].value = present_pose.position(0) + 0.02;
       draw_goal_pose[1].value = present_pose.position(1) + 0.02;
@@ -265,7 +236,7 @@ void fromProcessing(OPEN_MANIPULATOR_VACUUM *open_manipulator, String data)
 
       void *p_draw_goal_pose = &draw_goal_pose;
       
-      open_manipulator->drawingTrajectoryMove(DRAWING_LINE, "tool", p_draw_goal_pose, 1.0);
+      open_manipulator->drawingTrajectoryMove(DRAWING_LINE, "pen", p_draw_goal_pose, 1.0);
     }
     else if (cmd[1] == "2")
     {
@@ -274,19 +245,19 @@ void fromProcessing(OPEN_MANIPULATOR_VACUUM *open_manipulator, String data)
       draw_circle_arg[1] = 2;    // revolution
       draw_circle_arg[2] = 0.0;  // start angle position (rad)
       void* p_draw_circle_arg = &draw_circle_arg;
-      open_manipulator->drawingTrajectoryMove(DRAWING_CIRCLE, "tool", p_draw_circle_arg, 4.0);
+      open_manipulator->drawingTrajectoryMove(DRAWING_CIRCLE, "pen", p_draw_circle_arg, 4.0);
     }
   }
 }
 
-void playProcessingMotion(OPEN_MANIPULATOR_VACUUM *open_manipulator)
+void playProcessingMotion(OPEN_MANIPULATOR_PEN *open_manipulator)
 {
   if(!open_manipulator->isMoving() && processing_motion_flag)
   {
     if(motion_way_point_buf.size() == 0)
       return;
 
-    open_manipulator->toolMove("tool", motion_way_point_buf.at(hand_motion_cnt).gripper_value);
+    open_manipulator->toolMove("pen", motion_way_point_buf.at(hand_motion_cnt).gripper_value);
     open_manipulator->jointTrajectoryMove(motion_way_point_buf.at(hand_motion_cnt).angle, motion_way_point_buf.at(hand_motion_cnt).path_time); 
     hand_motion_cnt ++;
     if(hand_motion_cnt >= motion_way_point_buf.size())

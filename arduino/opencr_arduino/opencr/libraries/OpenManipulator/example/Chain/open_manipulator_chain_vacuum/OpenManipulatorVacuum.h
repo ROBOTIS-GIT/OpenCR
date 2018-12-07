@@ -98,7 +98,7 @@ private:
 
     addJoint("joint4", // my name
             "joint3", // parent name
-            "tool",   // child name
+            "vacuum",   // child name
             RM_MATH::makeVector3(0.124, 0.0, 0.0), // relative position
             RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0), // relative orientation
             Y_AXIS, // axis of rotation
@@ -106,7 +106,7 @@ private:
             2.0,    // max joint limit (2.0 rad)
             -1.8);  // min joint limit (-1.8 rad)
             
-    addTool("tool",   // my name
+    addTool("vacuum",   // my name
             "joint4", // parent name
             RM_MATH::makeVector3(0.043, 0.0, 0.0), // relative position
             RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0), // relative orientation

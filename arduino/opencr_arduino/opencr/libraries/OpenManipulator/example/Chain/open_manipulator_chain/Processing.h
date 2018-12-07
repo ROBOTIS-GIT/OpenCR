@@ -124,7 +124,7 @@ void sendToolData2Processing(double value)
 void sendValueToProcessing(OPEN_MANIPULATOR *open_manipulator)
 {
   sendAngle2Processing(open_manipulator->getAllActiveJointValue());
-  sendToolData2Processing(open_manipulator->getToolValue("tool"));
+  sendToolData2Processing(open_manipulator->getToolValue("gripper"));
 }
 
 
@@ -164,32 +164,32 @@ void fromProcessing(OPEN_MANIPULATOR *open_manipulator, String data)
   }
   else if (cmd[0] == "gripper")
   {
-    open_manipulator->toolMove("tool", (double)cmd[1].toFloat());
+    open_manipulator->toolMove("gripper", (double)cmd[1].toFloat());
   }
   else if (cmd[0] == "grip")
   {
     if (cmd[1] == "on")
-      open_manipulator->toolMove("tool", -0.01);
+      open_manipulator->toolMove("gripper", -0.01);
     else if (cmd[1] == "off")
-      open_manipulator->toolMove("tool", 0.01);
+      open_manipulator->toolMove("gripper", 0.01);
   }
   ////////// task space control tab
   else if (cmd[0] == "task")
   {
     if (cmd[1] == "forward")
-      open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(0.010, 0.0, 0.0), 0.2);
+      open_manipulator->taskTrajectoryMoveToPresentPose("gripper", RM_MATH::makeVector3(0.010, 0.0, 0.0), 0.2);
     else if (cmd[1] == "back")
-      open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(-0.010, 0.0, 0.0), 0.2);
+      open_manipulator->taskTrajectoryMoveToPresentPose("gripper", RM_MATH::makeVector3(-0.010, 0.0, 0.0), 0.2);
     else if (cmd[1] == "left")
-      open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(0.0, 0.010, 0.0), 0.2);
+      open_manipulator->taskTrajectoryMoveToPresentPose("gripper", RM_MATH::makeVector3(0.0, 0.010, 0.0), 0.2);
     else if (cmd[1] == "right")
-      open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(0.0, -0.010, 0.0), 0.2);
+      open_manipulator->taskTrajectoryMoveToPresentPose("gripper", RM_MATH::makeVector3(0.0, -0.010, 0.0), 0.2);
     else if (cmd[1] == "up")
-      open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.2);
+      open_manipulator->taskTrajectoryMoveToPresentPose("gripper", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.2);
     else if (cmd[1] == "down")
-      open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.2);
+      open_manipulator->taskTrajectoryMoveToPresentPose("gripper", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.2);
     else
-      open_manipulator->taskTrajectoryMoveToPresentPosition("tool", RM_MATH::makeVector3(0.0, 0.0, 0.0), 0.2);
+      open_manipulator->taskTrajectoryMoveToPresentPose("gripper", RM_MATH::makeVector3(0.0, 0.0, 0.0), 0.2);
   }
   else if (cmd[0] == "torque")
   {
@@ -219,17 +219,17 @@ void fromProcessing(OPEN_MANIPULATOR *open_manipulator, String data)
       for(uint32_t i = 0; i < present_states.size(); i ++)
         read_value.angle.push_back(present_states.at(i).value);  
       read_value.path_time = 2.0;
-      read_value.gripper_value = open_manipulator->getToolValue("tool");
+      read_value.gripper_value = open_manipulator->getToolValue("gripper");
       motion_way_point_buf.push_back(read_value);  
       hand_motion_cnt = 0;
     }
     else if (cmd[1] == "on")  // save gripper on
     {
-      open_manipulator->toolMove("tool", -0.01);
+      open_manipulator->toolMove("gripper", -0.01);
     }
     else if (cmd[1] == "off")  // save gripper off
     {
-      open_manipulator->toolMove("tool", 0.01);
+      open_manipulator->toolMove("gripper", 0.01);
     }
   }
   else if (cmd[0] == "hand")
@@ -254,7 +254,7 @@ void fromProcessing(OPEN_MANIPULATOR *open_manipulator, String data)
   {
     if (cmd[1] == "1")
     {
-      Pose present_pose = open_manipulator->getPose("tool");
+      Pose present_pose = open_manipulator->getPose("gripper");
       WayPoint draw_goal_pose[6];
       draw_goal_pose[0].value = present_pose.position(0) + 0.02;
       draw_goal_pose[1].value = present_pose.position(1) + 0.02;
@@ -265,7 +265,7 @@ void fromProcessing(OPEN_MANIPULATOR *open_manipulator, String data)
 
       void *p_draw_goal_pose = &draw_goal_pose;
       
-      open_manipulator->drawingTrajectoryMove(DRAWING_LINE, "tool", p_draw_goal_pose, 1.0);
+      open_manipulator->drawingTrajectoryMove(DRAWING_LINE, "gripper", p_draw_goal_pose, 1.0);
     }
     else if (cmd[1] == "2")
     {
@@ -274,7 +274,7 @@ void fromProcessing(OPEN_MANIPULATOR *open_manipulator, String data)
       draw_circle_arg[1] = 2;    // revolution
       draw_circle_arg[2] = 0.0;  // start angle position (rad)
       void* p_draw_circle_arg = &draw_circle_arg;
-      open_manipulator->drawingTrajectoryMove(DRAWING_CIRCLE, "tool", p_draw_circle_arg, 4.0);
+      open_manipulator->drawingTrajectoryMove(DRAWING_CIRCLE, "gripper", p_draw_circle_arg, 4.0);
 
     }
   }
@@ -287,7 +287,7 @@ void playProcessingMotion(OPEN_MANIPULATOR *open_manipulator)
     if(motion_way_point_buf.size() == 0)
       return;
 
-    open_manipulator->toolMove("tool", motion_way_point_buf.at(hand_motion_cnt).gripper_value);
+    open_manipulator->toolMove("gripper", motion_way_point_buf.at(hand_motion_cnt).gripper_value);
     open_manipulator->jointTrajectoryMove(motion_way_point_buf.at(hand_motion_cnt).angle, motion_way_point_buf.at(hand_motion_cnt).path_time); 
     hand_motion_cnt ++;
     if(hand_motion_cnt >= motion_way_point_buf.size())
