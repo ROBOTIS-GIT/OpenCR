@@ -54,7 +54,7 @@ uint8_t vcp_getch(void)
 {
   uint8_t ch = CDC_Itf_Getch();
 
-  drv_uart_write(DRV_UART_NUM_4, ch);
+  //drv_uart_write(DRV_UART_NUM_4, ch); //for debugging
 
   return ch;
 }
