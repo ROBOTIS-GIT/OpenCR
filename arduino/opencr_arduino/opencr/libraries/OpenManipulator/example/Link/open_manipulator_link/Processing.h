@@ -179,31 +179,31 @@ void fromProcessing(OPEN_MANIPULATOR_LINK *omlink, String data)
 
     if (cmd[1] == "forward")
     {
-      omlink->taskTrajectoryMoveToPresentPosition("vacuum", RM_MATH::makeVector3(MOVESTEP, 0.0, 0.0), MOVETIME);
+      omlink->taskTrajectoryMoveToPresentPose("vacuum", RM_MATH::makeVector3(MOVESTEP, 0.0, 0.0), MOVETIME);
     }  
     else if (cmd[1] == "back")
     {
-      omlink->taskTrajectoryMoveToPresentPosition("vacuum", RM_MATH::makeVector3(-MOVESTEP, 0.0, 0.0), MOVETIME);
+      omlink->taskTrajectoryMoveToPresentPose("vacuum", RM_MATH::makeVector3(-MOVESTEP, 0.0, 0.0), MOVETIME);
     }
     else if (cmd[1] == "left")
     {
-      omlink->taskTrajectoryMoveToPresentPosition("vacuum", RM_MATH::makeVector3(0.0, MOVESTEP, 0.0), MOVETIME);
+      omlink->taskTrajectoryMoveToPresentPose("vacuum", RM_MATH::makeVector3(0.0, MOVESTEP, 0.0), MOVETIME);
     }
     else if (cmd[1] == "right")
     {
-      omlink->taskTrajectoryMoveToPresentPosition("vacuum", RM_MATH::makeVector3(0.0, -MOVESTEP, 0.0), MOVETIME);
+      omlink->taskTrajectoryMoveToPresentPose("vacuum", RM_MATH::makeVector3(0.0, -MOVESTEP, 0.0), MOVETIME);
     }
     else if (cmd[1] == "up")
     {
-      omlink->taskTrajectoryMoveToPresentPosition("vacuum", RM_MATH::makeVector3(0.0, 0.0, MOVESTEP), MOVETIME);
+      omlink->taskTrajectoryMoveToPresentPose("vacuum", RM_MATH::makeVector3(0.0, 0.0, MOVESTEP), MOVETIME);
     }
     else if (cmd[1] == "down")
     {
-      omlink->taskTrajectoryMoveToPresentPosition("vacuum", RM_MATH::makeVector3(0.0, 0.0, -MOVESTEP), MOVETIME);
+      omlink->taskTrajectoryMoveToPresentPose("vacuum", RM_MATH::makeVector3(0.0, 0.0, -MOVESTEP), MOVETIME);
     }
     else
     {
-      omlink->taskTrajectoryMoveToPresentPosition("vacuum", RM_MATH::makeVector3(0.0, 0.0, 0.0), MOVETIME);
+      omlink->taskTrajectoryMoveToPresentPose("vacuum", RM_MATH::makeVector3(0.0, 0.0, 0.0), MOVETIME);
     }
   }
 ////////////////////////////////////////////////////////////////////
