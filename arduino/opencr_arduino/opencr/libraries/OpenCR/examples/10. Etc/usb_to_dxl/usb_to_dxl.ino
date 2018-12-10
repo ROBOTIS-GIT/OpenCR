@@ -96,6 +96,7 @@ void update_dxl()
     for(i=0; i<length; i++ )
     {
       DXL_PORT.write(CMD_PORT.read());
+      DXL_PORT.flush();
     }
     drv_dxl_tx_enable(FALSE);
 
