@@ -56,8 +56,8 @@ class OPEN_MANIPULATOR_LINK : public ROBOTIS_MANIPULATOR::RobotisManipulator
   std::vector<uint8_t> jointDxlId;
 
  public:
-  OPEN_MANIPULATOR_LINK();
-  virtual ~OPEN_MANIPULATOR_LINK();
+  OPEN_MANIPULATOR_LINK(){}
+  virtual ~OPEN_MANIPULATOR_LINK(){}
 
   void initManipulator(bool using_platform, STRING usb_port = "/dev/ttyUSB0", STRING baud_rate = "1000000")
   {
@@ -70,6 +70,8 @@ class OPEN_MANIPULATOR_LINK : public ROBOTIS_MANIPULATOR::RobotisManipulator
                             RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0),
                             RM_MATH::makeVector3(0,0,1),
                             1,
+                            M_PI,
+                            -M_PI,
                             1.0);
     addComponentChild("joint1", "joint3");
     addComponentChild("joint1", "joint8");
@@ -78,12 +80,17 @@ class OPEN_MANIPULATOR_LINK : public ROBOTIS_MANIPULATOR::RobotisManipulator
                             RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0),
                             RM_MATH::makeVector3(0,1,0),
                             2,
-                            -1.0);
+                            M_PI*3/4,
+                            0.0,
+                            -1.0
+                            );
     addJoint("joint3", "joint1", "joint4",
                             RM_MATH::makeVector3(0, -0.022, 0.052),
                             RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0),
                             RM_MATH::makeVector3(0,1,0),
                             3,
+                            M_PI,
+                            M_PI_4,
                             1.0);
     addJoint("joint4", "joint3", "joint5",
                             RM_MATH::makeVector3(0.050, 0.007, 0),
@@ -136,9 +143,9 @@ class OPEN_MANIPULATOR_LINK : public ROBOTIS_MANIPULATOR::RobotisManipulator
       void *p_dxl_comm_arg = &dxl_comm_arg;
 
       // set joint actuator id
-      jointDxlId.push_back(11);
-      jointDxlId.push_back(12);
-      jointDxlId.push_back(13);
+      jointDxlId.push_back(1);
+      jointDxlId.push_back(2);
+      jointDxlId.push_back(3);
 
       addJointActuator("joint_dxl", actuator_, jointDxlId, p_dxl_comm_arg);
 
@@ -162,6 +169,13 @@ class OPEN_MANIPULATOR_LINK : public ROBOTIS_MANIPULATOR::RobotisManipulator
       allActuatorEnable();
       receiveAllJointActuatorValue();
       receiveAllToolActuatorValue();
+
+      // std::vector<double> init_joint_angle;
+      // init_joint_angle.push_back(0.0);
+      // init_joint_angle.push_back(M_PI_2);
+      // init_joint_angle.push_back(M_PI);
+
+      // jointTrajectoryMove(init_joint_angle,3.0f);
     }
 
     ////////// drawing path init

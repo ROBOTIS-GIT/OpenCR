@@ -43,17 +43,17 @@ uint16_t readRC100Data()
 void fromRC100(OPEN_MANIPULATOR_LINK* omlink, int16_t data)
 {
   if (data & RC100_BTN_U)
-    omlink->taskTrajectoryMoveToPresentPosition("vacuum", RM_MATH::makeVector3(MOVESTEP, 0.0, 0.0), MOVETIME);
+    omlink->taskTrajectoryMoveToPresentPose("vacuum", RM_MATH::makeVector3(MOVESTEP, 0.0, 0.0), MOVETIME);
   else if (data & RC100_BTN_D)
-    omlink->taskTrajectoryMoveToPresentPosition("vacuum", RM_MATH::makeVector3(-MOVESTEP, 0.0, 0.0), MOVETIME);
+    omlink->taskTrajectoryMoveToPresentPose("vacuum", RM_MATH::makeVector3(-MOVESTEP, 0.0, 0.0), MOVETIME);
   else if (data & RC100_BTN_L)
-    omlink->taskTrajectoryMoveToPresentPosition("vacuum", RM_MATH::makeVector3(0.0, MOVESTEP, 0.0), MOVETIME);
+    omlink->taskTrajectoryMoveToPresentPose("vacuum", RM_MATH::makeVector3(0.0, MOVESTEP, 0.0), MOVETIME);
   else if (data & RC100_BTN_R)
-    omlink->taskTrajectoryMoveToPresentPosition("vacuum", RM_MATH::makeVector3(0.0, -MOVESTEP, 0.0), MOVETIME);
+    omlink->taskTrajectoryMoveToPresentPose("vacuum", RM_MATH::makeVector3(0.0, -MOVESTEP, 0.0), MOVETIME);
   else if (data & RC100_BTN_1)
-    omlink->taskTrajectoryMoveToPresentPosition("vacuum", RM_MATH::makeVector3(0.0, 0.0, MOVESTEP), MOVETIME);
+    omlink->taskTrajectoryMoveToPresentPose("vacuum", RM_MATH::makeVector3(0.0, 0.0, MOVESTEP), MOVETIME);
   else if (data & RC100_BTN_3)
-    omlink->taskTrajectoryMoveToPresentPosition("vacuum", RM_MATH::makeVector3(0.0, 0.0, -MOVESTEP), MOVETIME);
+    omlink->taskTrajectoryMoveToPresentPose("vacuum", RM_MATH::makeVector3(0.0, 0.0, -MOVESTEP), MOVETIME);
   else if (data & RC100_BTN_2)
   {
     omlink->toolMove("vacuum", 1.0);
