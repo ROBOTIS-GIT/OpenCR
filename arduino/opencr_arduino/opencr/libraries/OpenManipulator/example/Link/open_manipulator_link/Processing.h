@@ -153,8 +153,8 @@ void fromProcessing(OPEN_MANIPULATOR_LINK *omlink, String data)
     for (int8_t index = 0; index < omlink->getManipulator()->getDOF(); index++)
     {
       goal_position.push_back((double)cmd[index + 1].toFloat());
+      RM_LOG::WARN("joint",(double)cmd[index + 1].toFloat());
     }
-
     omlink->jointTrajectoryMove(goal_position, MOVETIME); // FIX TIME PARAM
   }
 ////////////////////////////////////////////////////////////////////
@@ -234,6 +234,12 @@ void fromProcessing(OPEN_MANIPULATOR_LINK *omlink, String data)
     {
       motionStop();
     }
+  }
+////////////////////////////////////////////////////////////////////
+///////////////////////////check setting////////////////////////////
+  else if (cmd[0] == "check")
+  {
+    omlink->checkManipulatorSetting();
   }
 ////////////////////////////////////////////////////////////////////
 }
