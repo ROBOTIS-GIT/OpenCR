@@ -64,8 +64,8 @@ class OPEN_MANIPULATOR_LINK : public ROBOTIS_MANIPULATOR::RobotisManipulator
     platform_ = using_platform;
 
     ////////// manipulator parameter initialization
-    addWorld("world", "joint1");
-    addJoint("joint1", "world", "joint2",
+    addWorld("world", "joint01");
+    addJoint("joint01", "world", "joint02",
                             RM_MATH::makeVector3(-0.23867882, 0, 0),
                             RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0),
                             RM_MATH::makeVector3(0,0,1),
@@ -73,50 +73,50 @@ class OPEN_MANIPULATOR_LINK : public ROBOTIS_MANIPULATOR::RobotisManipulator
                             M_PI,
                             -M_PI,
                             1.0);
-    addComponentChild("joint1", "joint3");
-    addComponentChild("joint1", "joint8");
-    addJoint("joint2", "joint1", "joint6", 
+    addComponentChild("joint01", "joint03");
+    addComponentChild("joint01", "joint08");
+    addJoint("joint02", "joint01", "joint06", 
                             RM_MATH::makeVector3(0, 0.022, 0.052),
                             RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0),
                             RM_MATH::makeVector3(0,1,0),
                             2,
-                            M_PI*3/4,
                             0.0,
+                            -M_PI,
                             -1.0
                             );
-    addJoint("joint3", "joint1", "joint4",
+    addJoint("joint03", "joint01", "joint04",
                             RM_MATH::makeVector3(0, -0.022, 0.052),
                             RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0),
                             RM_MATH::makeVector3(0,1,0),
                             3,
-                            M_PI,
-                            M_PI_4,
+                            -M_PI/4,
+                            -M_PI,
                             1.0);
-    addJoint("joint4", "joint3", "joint5",
+    addJoint("joint04", "joint03", "joint05",
                             RM_MATH::makeVector3(0.050, 0.007, 0),
                             RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0),
                             RM_MATH::makeVector3(0,1,0));
-    addJoint("joint5", "joint4", "joint6",
+    addJoint("joint05", "joint04", "joint06",
                             RM_MATH::makeVector3(0.200, 0.006, 0),
                             RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0),
                             RM_MATH::makeVector3(0,1,0));
-    addJoint("joint6", "joint2", "joint7",
+    addJoint("joint06", "joint02", "joint07",
                             RM_MATH::makeVector3(0.200, -0.016, 0),
                             RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0),
                             RM_MATH::makeVector3(0,1,0));
-    addJoint("joint7", "joint6", "vacuum",
+    addJoint("joint07", "joint06", "vacuum",
                             RM_MATH::makeVector3(0.200, -0.009, 0),
                             RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0),
                             RM_MATH::makeVector3(0,1,0));
-    addJoint("joint8", "joint1", "joint9",
+    addJoint("joint08", "joint01", "joint09",
                             RM_MATH::makeVector3(-0.04531539, 0.006, 0.07313091),
                             RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0),
                             RM_MATH::makeVector3(0,1,0));
-    addJoint("joint9", "joint8", "joint10",
+    addJoint("joint09", "joint08", "joint10",
                             RM_MATH::makeVector3(0.200, 0.009, 0),
                             RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0),
                             RM_MATH::makeVector3(0,1,0));
-    addJoint("joint10", "joint9", "joint11",
+    addJoint("joint10", "joint09", "joint11",
                             RM_MATH::makeVector3(0.07660444, -0.006, 0),
                             RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0),
                             RM_MATH::makeVector3(0,1,0));
@@ -124,7 +124,7 @@ class OPEN_MANIPULATOR_LINK : public ROBOTIS_MANIPULATOR::RobotisManipulator
                             RM_MATH::makeVector3(0.200, -0.006, 0),
                             RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0),
                             RM_MATH::makeVector3(0,1,0));
-    addTool("vacuum", "joint7",
+    addTool("vacuum", "joint07",
                         RM_MATH::makeVector3(0.03867882, 0.003, -0.01337315-0.01),
                         RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0),
                         4,
