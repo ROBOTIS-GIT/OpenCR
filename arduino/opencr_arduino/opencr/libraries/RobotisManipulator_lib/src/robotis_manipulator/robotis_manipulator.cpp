@@ -845,6 +845,29 @@ void RobotisManipulator::jointTrajectoryMove(std::vector<double> goal_joint_angl
   startMoving();
 }
 
+void RobotisManipulator::jointTrajectoryMove(std::vector<WayPoint> goal_joint_waypoint, double move_time)
+{
+  trajectory_.setTrajectoryType(JOINT_TRAJECTORY);
+
+  trajectory_.clearStartWayPoint();
+  trajectory_.clearGoalWayPoint();
+
+  trajectory_.setMoveTime(move_time);
+
+  std::vector<WayPoint> temp = trajectory_.getPresentJointWayPoint();
+  trajectory_.setStartWayPoint(temp);
+
+  trajectory_.setGoalWayPoint(goal_joint_waypoint);
+
+  if(isMoving())
+  {
+    moving_=false;
+    while(!step_moving_);
+  }
+  trajectory_.makeJointTrajectory();
+  startMoving();
+}
+
 void RobotisManipulator::jointTrajectoryMove(Name tool_name, Eigen::Vector3d goal_position, double move_time)
 {
   Pose goal_pose;
@@ -1216,10 +1239,6 @@ std::vector<Actuator> RobotisManipulator::getTrajectoryJointValue(double tick_ti
     }
   }
   /////////////////////////////////////////////////////////////////
-  for(uint32_t index = 0; index < joint_way_point_value.size(); index++)
-  {
-      RM_LOG::INFO("position22 : ", joint_way_point_value.at(index).value);
-  }
   return joint_way_point_value;
 }
 
