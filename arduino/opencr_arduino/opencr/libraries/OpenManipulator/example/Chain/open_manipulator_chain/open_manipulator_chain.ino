@@ -28,8 +28,8 @@ void setup()
 {
   Serial.begin(57600);
   DEBUG.begin(57600);
-  while (!Serial)
-  ;
+  // while (!Serial)
+  // ;
 
   connectProcessing();
   connectRC100();
