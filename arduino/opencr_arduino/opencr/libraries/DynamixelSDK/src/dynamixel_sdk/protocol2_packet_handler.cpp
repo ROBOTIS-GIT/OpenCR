@@ -17,11 +17,14 @@
 /* Author: zerom, Ryu Woon Jung (Leon) */
 
 #if defined(__linux__)
+#include <unistd.h>
 #include "protocol2_packet_handler.h"
 #elif defined(__APPLE__)
+#include <unistd.h>
 #include "protocol2_packet_handler.h"
 #elif defined(_WIN32) || defined(_WIN64)
 #define WINDLLEXPORT
+#include <Windows.h>
 #include "protocol2_packet_handler.h"
 #elif defined(ARDUINO) || defined(__OPENCR__) || defined(__OPENCM904__)
 #include "../../include/dynamixel_sdk/protocol2_packet_handler.h"
@@ -31,8 +34,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define TXPACKET_MAX_LEN    (4*1024)
-#define RXPACKET_MAX_LEN    (4*1024)
+#define TXPACKET_MAX_LEN    (1*1024)
+#define RXPACKET_MAX_LEN    (1*1024)
 
 ///////////////// for Protocol 2.0 Packet /////////////////
 #define PKT_HEADER0             0
@@ -140,7 +143,7 @@ const char *Protocol2PacketHandler::getRxPacketError(uint8_t error)
 unsigned short Protocol2PacketHandler::updateCRC(uint16_t crc_accum, uint8_t *data_blk_ptr, uint16_t data_blk_size)
 {
   uint16_t i;
-  uint16_t crc_table[256] = {0x0000,
+  static const uint16_t crc_table[256] = {0x0000,
   0x8005, 0x800F, 0x000A, 0x801B, 0x001E, 0x0014, 0x8011,
   0x8033, 0x0036, 0x003C, 0x8039, 0x0028, 0x802D, 0x8027,
   0x0022, 0x8063, 0x0066, 0x006C, 0x8069, 0x0078, 0x807D,
@@ -190,39 +193,48 @@ unsigned short Protocol2PacketHandler::updateCRC(uint16_t crc_accum, uint8_t *da
 
 void Protocol2PacketHandler::addStuffing(uint8_t *packet)
 {
-  int i = 0, index = 0;
   int packet_length_in = DXL_MAKEWORD(packet[PKT_LENGTH_L], packet[PKT_LENGTH_H]);
   int packet_length_out = packet_length_in;
-  uint8_t temp[TXPACKET_MAX_LEN] = {0};
+  
+  if (packet_length_in < 8) // INSTRUCTION, ADDR_L, ADDR_H, CRC16_L, CRC16_H + FF FF FD
+    return;
 
-  for (uint16_t s = PKT_HEADER0; s <= PKT_LENGTH_H; s++)
-    temp[s] = packet[s]; // FF FF FD XX ID LEN_L LEN_H
-  //memcpy(temp, packet, PKT_LENGTH_H+1);
-  index = PKT_INSTRUCTION;
-  for (i = 0; i < packet_length_in - 2; i++)  // except CRC
+  uint8_t *packet_ptr;
+  uint16_t packet_length_before_crc = packet_length_in - 2;
+  for (uint16_t i = 3; i < packet_length_before_crc; i++)
   {
-    temp[index++] = packet[i+PKT_INSTRUCTION];
-    if (packet[i+PKT_INSTRUCTION] == 0xFD && packet[i+PKT_INSTRUCTION-1] == 0xFF && packet[i+PKT_INSTRUCTION-2] == 0xFF)
-    {   // FF FF FD
-      temp[index++] = 0xFD;
+    packet_ptr = &packet[i+PKT_INSTRUCTION-2];
+    if (packet_ptr[0] == 0xFF && packet_ptr[1] == 0xFF && packet_ptr[2] == 0xFD)
       packet_length_out++;
+  }
+  
+  if (packet_length_in == packet_length_out)  // no stuffing required
+    return;
+  
+  uint16_t out_index  = packet_length_out + 6 - 2;  // last index before crc
+  uint16_t in_index   = packet_length_in + 6 - 2;   // last index before crc
+  while (out_index != in_index)
+  {
+    if (packet[in_index] == 0xFD && packet[in_index-1] == 0xFF && packet[in_index-2] == 0xFF)
+    {
+      packet[out_index--] = 0xFD; // byte stuffing
+      if (out_index != in_index)
+      {
+        packet[out_index--] = packet[in_index--]; // FD
+        packet[out_index--] = packet[in_index--]; // FF
+        packet[out_index--] = packet[in_index--]; // FF
+      }
+    }
+    else
+    {
+      packet[out_index--] = packet[in_index--];
     }
   }
-  temp[index++] = packet[PKT_INSTRUCTION+packet_length_in-2];
-  temp[index++] = packet[PKT_INSTRUCTION+packet_length_in-1];
 
-
-  //////////////////////////
-  if (packet_length_in != packet_length_out)
-    packet = (uint8_t *)realloc(packet, index * sizeof(uint8_t));
-
-  ///////////////////////////
-
-  for (uint16_t s = 0; s < index; s++)
-    packet[s] = temp[s];
-  //memcpy(packet, temp, index);
   packet[PKT_LENGTH_L] = DXL_LOBYTE(packet_length_out);
   packet[PKT_LENGTH_H] = DXL_HIBYTE(packet_length_out);
+
+  return;
 }
 
 void Protocol2PacketHandler::removeStuffing(uint8_t *packet)
@@ -393,6 +405,11 @@ int Protocol2PacketHandler::rxPacket(PortHandler *port, uint8_t *rxpacket)
         break;
       }
     }
+#if defined(__linux__) || defined(__APPLE__)
+    usleep(0);
+#elif defined(_WIN32) || defined(_WIN64)
+    Sleep(0);
+#endif
   }
   port->is_using_ = false;
 
@@ -595,6 +612,24 @@ int Protocol2PacketHandler::reboot(PortHandler *port, uint8_t id, uint8_t *error
   return txRxPacket(port, txpacket, rxpacket, error);
 }
 
+int Protocol2PacketHandler::clearMultiTurn(PortHandler *port, uint8_t id, uint8_t *error)
+{
+  uint8_t txpacket[15]        = {0};
+  uint8_t rxpacket[11]        = {0};
+
+  txpacket[PKT_ID]            = id;
+  txpacket[PKT_LENGTH_L]      = 8;
+  txpacket[PKT_LENGTH_H]      = 0;
+  txpacket[PKT_INSTRUCTION]   = INST_CLEAR;
+  txpacket[PKT_PARAMETER0]    = 0x01;
+  txpacket[PKT_PARAMETER0+1]  = 0x44;
+  txpacket[PKT_PARAMETER0+2]  = 0x58;
+  txpacket[PKT_PARAMETER0+3]  = 0x4C;
+  txpacket[PKT_PARAMETER0+4]  = 0x22;
+
+  return txRxPacket(port, txpacket, rxpacket, error);
+}
+
 int Protocol2PacketHandler::factoryReset(PortHandler *port, uint8_t id, uint8_t option, uint8_t *error)
 {
   uint8_t txpacket[11]        = {0};
@@ -639,10 +674,12 @@ int Protocol2PacketHandler::readTx(PortHandler *port, uint8_t id, uint16_t addre
 int Protocol2PacketHandler::readRx(PortHandler *port, uint8_t id, uint16_t length, uint8_t *data, uint8_t *error)
 {
   int result                  = COMM_TX_FAIL;
-  uint8_t *rxpacket           = (uint8_t *)malloc(RXPACKET_MAX_LEN);
+  uint8_t *rxpacket           = (uint8_t *)malloc(length + 11 + (length / 3));
   //(length + 11 + (length/3));  // (length/3): consider stuffing
-  //uint8_t *rxpacket           = new uint8_t[length + 11 + (length/3)];    // (length/3): consider stuffing
-
+  
+  if (rxpacket == NULL)
+    return result;
+  
   do {
     result = rxPacket(port, rxpacket);
   } while (result == COMM_SUCCESS && rxpacket[PKT_ID] != id);
@@ -669,9 +706,12 @@ int Protocol2PacketHandler::readTxRx(PortHandler *port, uint8_t id, uint16_t add
   int result                  = COMM_TX_FAIL;
 
   uint8_t txpacket[14]        = {0};
-  uint8_t *rxpacket           = (uint8_t *)malloc(RXPACKET_MAX_LEN);
+  uint8_t *rxpacket           = (uint8_t *)malloc(length + 11 + (length / 3));
   //(length + 11 + (length/3));  // (length/3): consider stuffing
 
+  if (rxpacket == NULL)
+    return result;
+  
   if (id >= BROADCAST_ID)
     return COMM_NOT_AVAILABLE;
 
@@ -770,8 +810,10 @@ int Protocol2PacketHandler::writeTxOnly(PortHandler *port, uint8_t id, uint16_t 
 {
   int result                  = COMM_TX_FAIL;
 
-  uint8_t *txpacket           = (uint8_t *)malloc(length+12);
-  //uint8_t *txpacket           = new uint8_t[length+12];
+  uint8_t *txpacket           = (uint8_t *)malloc(length + 12 + (length / 3));
+  
+  if (txpacket == NULL)
+    return result;
 
   txpacket[PKT_ID]            = id;
   txpacket[PKT_LENGTH_L]      = DXL_LOBYTE(length+5);
@@ -796,10 +838,12 @@ int Protocol2PacketHandler::writeTxRx(PortHandler *port, uint8_t id, uint16_t ad
 {
   int result                  = COMM_TX_FAIL;
 
-  uint8_t *txpacket           = (uint8_t *)malloc(length + 12);
-  //uint8_t *txpacket           = new uint8_t[length+12];
+  uint8_t *txpacket           = (uint8_t *)malloc(length + 12 + (length / 3));
   uint8_t rxpacket[11]        = {0};
 
+  if (txpacket == NULL)
+    return result;
+  
   txpacket[PKT_ID]            = id;
   txpacket[PKT_LENGTH_L]      = DXL_LOBYTE(length+5);
   txpacket[PKT_LENGTH_H]      = DXL_HIBYTE(length+5);
@@ -853,11 +897,13 @@ int Protocol2PacketHandler::write4ByteTxRx(PortHandler *port, uint8_t id, uint16
 
 int Protocol2PacketHandler::regWriteTxOnly(PortHandler *port, uint8_t id, uint16_t address, uint16_t length, uint8_t *data)
 {
-  int result                 = COMM_TX_FAIL;
+  int result                  = COMM_TX_FAIL;
 
-  uint8_t *txpacket           = (uint8_t *)malloc(length + 12);
-  //uint8_t *txpacket           = new uint8_t[length+12];
+  uint8_t *txpacket           = (uint8_t *)malloc(length + 12 + (length / 3));
 
+  if (txpacket == NULL)
+    return result;
+  
   txpacket[PKT_ID]            = id;
   txpacket[PKT_LENGTH_L]      = DXL_LOBYTE(length+5);
   txpacket[PKT_LENGTH_H]      = DXL_HIBYTE(length+5);
@@ -879,12 +925,14 @@ int Protocol2PacketHandler::regWriteTxOnly(PortHandler *port, uint8_t id, uint16
 
 int Protocol2PacketHandler::regWriteTxRx(PortHandler *port, uint8_t id, uint16_t address, uint16_t length, uint8_t *data, uint8_t *error)
 {
-  int result                 = COMM_TX_FAIL;
+  int result                  = COMM_TX_FAIL;
 
-  uint8_t *txpacket           = (uint8_t *)malloc(length + 12);
-  //uint8_t *txpacket           = new uint8_t[length+12];
+  uint8_t *txpacket           = (uint8_t *)malloc(length + 12 + (length / 3));
   uint8_t rxpacket[11]        = {0};
 
+  if (txpacket == NULL)
+    return result;
+  
   txpacket[PKT_ID]            = id;
   txpacket[PKT_LENGTH_L]      = DXL_LOBYTE(length+5);
   txpacket[PKT_LENGTH_H]      = DXL_HIBYTE(length+5);
@@ -905,11 +953,14 @@ int Protocol2PacketHandler::regWriteTxRx(PortHandler *port, uint8_t id, uint16_t
 
 int Protocol2PacketHandler::syncReadTx(PortHandler *port, uint16_t start_address, uint16_t data_length, uint8_t *param, uint16_t param_length)
 {
-  int result                 = COMM_TX_FAIL;
+  int result                  = COMM_TX_FAIL;
 
-  uint8_t *txpacket           = (uint8_t *)malloc(param_length + 14);
+  uint8_t *txpacket           = (uint8_t *)malloc(param_length + 14 + (param_length / 3));
   // 14: HEADER0 HEADER1 HEADER2 RESERVED ID LEN_L LEN_H INST START_ADDR_L START_ADDR_H DATA_LEN_L DATA_LEN_H CRC16_L CRC16_H
 
+  if (txpacket == NULL)
+    return result;
+  
   txpacket[PKT_ID]            = BROADCAST_ID;
   txpacket[PKT_LENGTH_L]      = DXL_LOBYTE(param_length + 7); // 7: INST START_ADDR_L START_ADDR_H DATA_LEN_L DATA_LEN_H CRC16_L CRC16_H
   txpacket[PKT_LENGTH_H]      = DXL_HIBYTE(param_length + 7); // 7: INST START_ADDR_L START_ADDR_H DATA_LEN_L DATA_LEN_H CRC16_L CRC16_H
@@ -933,12 +984,14 @@ int Protocol2PacketHandler::syncReadTx(PortHandler *port, uint16_t start_address
 
 int Protocol2PacketHandler::syncWriteTxOnly(PortHandler *port, uint16_t start_address, uint16_t data_length, uint8_t *param, uint16_t param_length)
 {
-  int result                 = COMM_TX_FAIL;
+  int result                  = COMM_TX_FAIL;
 
-  uint8_t *txpacket           = (uint8_t *)malloc(param_length + 14);
-  //uint8_t *txpacket           = new uint8_t[param_length + 14];
+  uint8_t *txpacket           = (uint8_t *)malloc(param_length + 14 + (param_length / 3));
   // 14: HEADER0 HEADER1 HEADER2 RESERVED ID LEN_L LEN_H INST START_ADDR_L START_ADDR_H DATA_LEN_L DATA_LEN_H CRC16_L CRC16_H
 
+  if (txpacket == NULL)
+    return result;
+  
   txpacket[PKT_ID]            = BROADCAST_ID;
   txpacket[PKT_LENGTH_L]      = DXL_LOBYTE(param_length + 7); // 7: INST START_ADDR_L START_ADDR_H DATA_LEN_L DATA_LEN_H CRC16_L CRC16_H
   txpacket[PKT_LENGTH_H]      = DXL_HIBYTE(param_length + 7); // 7: INST START_ADDR_L START_ADDR_H DATA_LEN_L DATA_LEN_H CRC16_L CRC16_H
@@ -961,12 +1014,14 @@ int Protocol2PacketHandler::syncWriteTxOnly(PortHandler *port, uint16_t start_ad
 
 int Protocol2PacketHandler::bulkReadTx(PortHandler *port, uint8_t *param, uint16_t param_length)
 {
-  int result                 = COMM_TX_FAIL;
+  int result                  = COMM_TX_FAIL;
 
-  uint8_t *txpacket           = (uint8_t *)malloc(param_length + 10);
-  //uint8_t *txpacket           = new uint8_t[param_length + 10];
+  uint8_t *txpacket           = (uint8_t *)malloc(param_length + 10 + (param_length / 3));
   // 10: HEADER0 HEADER1 HEADER2 RESERVED ID LEN_L LEN_H INST CRC16_L CRC16_H
 
+  if (txpacket == NULL)
+    return result;
+  
   txpacket[PKT_ID]            = BROADCAST_ID;
   txpacket[PKT_LENGTH_L]      = DXL_LOBYTE(param_length + 3); // 3: INST CRC16_L CRC16_H
   txpacket[PKT_LENGTH_H]      = DXL_HIBYTE(param_length + 3); // 3: INST CRC16_L CRC16_H
@@ -992,12 +1047,14 @@ int Protocol2PacketHandler::bulkReadTx(PortHandler *port, uint8_t *param, uint16
 
 int Protocol2PacketHandler::bulkWriteTxOnly(PortHandler *port, uint8_t *param, uint16_t param_length)
 {
-  int result                 = COMM_TX_FAIL;
+  int result                  = COMM_TX_FAIL;
 
-  uint8_t *txpacket           = (uint8_t *)malloc(param_length + 10);
-  //uint8_t *txpacket           = new uint8_t[param_length + 10];
+  uint8_t *txpacket           = (uint8_t *)malloc(param_length + 10 + (param_length / 3));
   // 10: HEADER0 HEADER1 HEADER2 RESERVED ID LEN_L LEN_H INST CRC16_L CRC16_H
 
+  if (txpacket == NULL)
+    return result;
+  
   txpacket[PKT_ID]            = BROADCAST_ID;
   txpacket[PKT_LENGTH_L]      = DXL_LOBYTE(param_length + 3); // 3: INST CRC16_L CRC16_H
   txpacket[PKT_LENGTH_H]      = DXL_HIBYTE(param_length + 3); // 3: INST CRC16_L CRC16_H

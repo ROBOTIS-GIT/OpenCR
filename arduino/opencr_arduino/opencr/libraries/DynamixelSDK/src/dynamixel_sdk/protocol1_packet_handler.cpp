@@ -365,6 +365,11 @@ int Protocol1PacketHandler::reboot(PortHandler *port, uint8_t id, uint8_t *error
   return COMM_NOT_AVAILABLE;
 }
 
+int Protocol1PacketHandler::clearMultiTurn(PortHandler *port, uint8_t id, uint8_t *error)
+{
+  return COMM_NOT_AVAILABLE;
+}
+
 int Protocol1PacketHandler::factoryReset(PortHandler *port, uint8_t id, uint8_t option, uint8_t *error)
 {
   uint8_t txpacket[6]         = {0};

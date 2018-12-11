@@ -187,6 +187,19 @@ class WINDECLSPEC Protocol2PacketHandler : public PacketHandler
   int reboot          (PortHandler *port, uint8_t id, uint8_t *error = 0);
 
   ////////////////////////////////////////////////////////////////////////////////
+  /// @brief The function that reset multi-turn revolution information of Dynamixel
+  /// @description The function makes an instruction packet with INST_CLEAR,
+  /// @description transmits the packet with Protocol2PacketHandler::txRxPacket().
+  /// @description Applied Products : MX with Protocol 2.0 (Firmware v42 or above),
+  /// @description Dynamixel X-series (Firmware v42 or above).
+  /// @param port PortHandler instance
+  /// @param id Dynamixel ID
+  /// @param error Dynamixel hardware error
+  /// @return communication results which come from Protocol2PacketHandler::txRxPacket()
+  ////////////////////////////////////////////////////////////////////////////////
+  int clearMultiTurn  (PortHandler *port, uint8_t id, uint8_t *error = 0);
+
+  ////////////////////////////////////////////////////////////////////////////////
   /// @brief The function that makes Dynamixel reset as it was produced in the factory
   /// @description The function makes an instruction packet with INST_FACTORY_RESET,
   /// @description transmits the packet with Protocol2PacketHandler::txRxPacket().
