@@ -551,7 +551,7 @@ void loop()
       {
         uint8_t id = cmd[1].toInt();
 
-        uint32_t data = 0;
+        int32_t data = 0;
         
         result = dxl_wb.readRegister(id, cmd[2].c_str(), &data, &log);
         if (result == false)
