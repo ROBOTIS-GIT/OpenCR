@@ -52,11 +52,12 @@ void vcp_putch(uint8_t ch)
 
 uint8_t vcp_getch(void)
 {
-  uint8_t ch = CDC_Itf_Getch();
+  /* for debugging */
+  //uint8_t ch = CDC_Itf_Getch();
+  //drv_uart_write(DRV_UART_NUM_4, ch);
+  //return ch;
 
-  //drv_uart_write(DRV_UART_NUM_4, ch); //for debugging
-
-  return ch;
+  return CDC_Itf_Getch();
 }
 
 
