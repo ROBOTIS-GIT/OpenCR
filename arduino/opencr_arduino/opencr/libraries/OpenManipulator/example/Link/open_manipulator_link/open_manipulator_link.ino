@@ -40,8 +40,8 @@ void setup()
   connectRC100();
   switchInit();
 
-  omlink.initManipulator(false);
-  RM_LOG::PRINT("OpenManipulator Debugging Port");
+  omlink.initManipulator(true);
+  RM_LOG::PRINTLN("OpenManipulator Debugging Port");
 }
 
 void loop()
