@@ -77,7 +77,7 @@ bool Chain::inverseKinematics(Manipulator *manipulator, Name tool_name, Pose tar
     return inverseSolverUsingPositionOnlySRJacobian(manipulator, tool_name, target_pose, goal_joint_value);
   else if (inverse_solver_option_ == "sr_inverse")
     return inverseSolverUsingSRJacobian(manipulator, tool_name, target_pose, goal_joint_value);
-  else if(inverse_solver_option_ == "chain_custum_inverse_kinematics")
+  else if(inverse_solver_option_ == "chain_custom_inverse_kinematics")
     return chainCustomInverseKinematics(manipulator, tool_name, target_pose, goal_joint_value);
   else if(inverse_solver_option_ == "normal_inverse")
     return inverseSolverUsingJacobian(manipulator, tool_name, target_pose, goal_joint_value);
