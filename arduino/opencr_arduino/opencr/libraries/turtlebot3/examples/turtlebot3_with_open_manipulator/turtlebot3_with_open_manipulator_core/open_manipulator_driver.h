@@ -51,7 +51,10 @@ class OpenManipulatorDriver
   void closeDynamixel(void);
   bool setTorque(bool onoff);
   bool getTorqueState(void);
-  bool readPosition(double *get_data);
+  bool syncReadDynamixelInfo(void);
+  bool getPosition(double *get_data);
+  bool getVelocity(double *get_data);
+  bool getCurrent(double *get_data);
   bool writeJointPosition(double *set_data);
   bool writeJointProfileControlParam(int32_t set_time);
   bool writeGripperPosition(double *set_data);

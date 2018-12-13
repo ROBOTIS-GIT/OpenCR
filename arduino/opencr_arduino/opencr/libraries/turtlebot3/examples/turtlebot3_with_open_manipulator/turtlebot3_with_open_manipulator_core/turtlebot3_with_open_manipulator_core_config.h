@@ -26,6 +26,8 @@
 #include <std_msgs/Int32.h>
 #include <std_msgs/Float64.h>
 #include <std_msgs/Float64MultiArray.h>
+#include <trajectory_msgs/JointTrajectory.h>
+#include <trajectory_msgs/JointTrajectoryPoint.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/BatteryState.h>
@@ -75,7 +77,7 @@
 
 // Callback function prototypes
 void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
-void jointPositionCallback(const std_msgs::Float64MultiArray& pos_msg);
+void jointTrajectoryCallback(const trajectory_msgs::JointTrajectory& joint_trajectory_msg);
 void jointMoveTimeCallback(const std_msgs::Float64& time_msg);
 void gripperPositionCallback(const std_msgs::Float64MultiArray& pos_msg);
 void gripperMoveTimeCallback(const std_msgs::Float64& time_msg);
@@ -141,13 +143,13 @@ char joint_state_header_frame_id[30];
 *******************************************************************************/
 ros::Subscriber<geometry_msgs::Twist> cmd_vel_sub("cmd_vel", commandVelocityCallback);
 
-ros::Subscriber<std_msgs::Float64MultiArray> joint_position_sub("open_manipulator_with_tb3/joint_position", jointPositionCallback);
+ros::Subscriber<trajectory_msgs::JointTrajectory> joint_position_sub("joint_trajectory", jointTrajectoryCallback);
 
-ros::Subscriber<std_msgs::Float64> joint_move_time_sub("open_manipulator_with_tb3/joint_move_time", jointMoveTimeCallback);
+ros::Subscriber<std_msgs::Float64> joint_move_time_sub("joint_move_time", jointMoveTimeCallback);
 
-ros::Subscriber<std_msgs::Float64MultiArray> gripper_position_sub("open_manipulator_with_tb3/gripper_position", gripperPositionCallback);
+ros::Subscriber<std_msgs::Float64MultiArray> gripper_position_sub("gripper_position", gripperPositionCallback);
 
-ros::Subscriber<std_msgs::Float64> gripper_move_time_sub("open_manipulator_with_tb3/gripper_move_time", gripperMoveTimeCallback);
+ros::Subscriber<std_msgs::Float64> gripper_move_time_sub("gripper_move_time", gripperMoveTimeCallback);
 
 ros::Subscriber<turtlebot3_msgs::Sound> sound_sub("sound", soundCallback);
 

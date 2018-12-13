@@ -171,16 +171,27 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
 }
 
 /*******************************************************************************
-* Callback function for joint position msg
+* Callback function for joint trajectory msg
 *******************************************************************************/
-void jointPositionCallback(const std_msgs::Float64MultiArray& pos_msg)
+void jointTrajectoryCallback(const trajectory_msgs::JointTrajectory& joint_trajectory_msg)
 {
-  double goal_joint_position[20];
+  // trajectory_msgs::JointTrajectoryPoint jnt_tra_point_msg;
 
-  for (int index = 0; index < joint_cnt; index++)
-    goal_joint_position[index] = pos_msg.data[index];
+  // for (uint8_t id_num = 0; id_num < id_cnt; id_num++)
+  // {
+  //   jnt_tra_point_msg.positions.push_back(goal[id_num].position);
+  //   jnt_tra_point_msg.velocities.push_back(goal[id_num].velocity);
+  //   jnt_tra_point_msg.accelerations.push_back(goal[id_num].acceleration);
+  // }
 
-  manipulator_driver.writeJointPosition(goal_joint_position);
+  // jnt_tra_msg_->points.push_back(jnt_tra_point_msg);
+
+  // double goal_joint_position[20];
+
+  // for (int index = 0; index < joint_cnt; index++)
+  //   goal_joint_position[index] = pos_msg.data[index];
+
+  // manipulator_driver.writeJointPosition(goal_joint_position);
 }
 
 /*******************************************************************************
@@ -199,9 +210,10 @@ void jointMoveTimeCallback(const std_msgs::Float64& time_msg)
 void gripperPositionCallback(const std_msgs::Float64MultiArray& gripper_msg)
 {
   double goal_gripper_position[5] = {0.0, };
+  const double open_manipulator_gripper_offset = -0.015f;
 
   for (int index = 0; index < gripper_cnt; index++)
-    goal_gripper_position[index] = gripper_msg.data[index];
+    goal_gripper_position[index] = gripper_msg.data[index] / open_manipulator_gripper_offset;
 
   manipulator_driver.writeGripperPosition(goal_gripper_position);
 }
@@ -475,24 +487,31 @@ void updateJointStates(void)
   static float joint_states_vel[20] = {0.0, };
   static float joint_states_eff[20] = {0.0, };
 
+  const double open_manipulator_gripper_offset = -0.015f;
+
   double get_joint_position[joint_cnt + gripper_cnt];
-  manipulator_driver.readPosition(get_joint_position);
+  double get_joint_velocity[joint_cnt + gripper_cnt];
+  double get_joint_current[joint_cnt + gripper_cnt];
+
+  manipulator_driver.syncReadDynamixelInfo();
+  manipulator_driver.getPosition(get_joint_position);
+  manipulator_driver.getVelocity(get_joint_velocity);
+  manipulator_driver.getCurrent(get_joint_current);
 
   joint_states_pos[LEFT]  = last_rad[LEFT];
   joint_states_pos[RIGHT] = last_rad[RIGHT];
 
-  for (uint8_t num = 0; num < (joint_cnt + gripper_cnt + 1); num++)
-  {
-    joint_states_pos[WHEEL_NUM + num] = get_joint_position[num];
-  }
-
   joint_states_vel[LEFT]  = last_velocity[LEFT];
   joint_states_vel[RIGHT] = last_velocity[RIGHT];
 
-  for (uint8_t num = 0; num < (joint_cnt + gripper_cnt + 1); num++)
+  for (uint8_t num = 0; num < (joint_cnt + gripper_cnt); num++)
   {
-    joint_states_vel[WHEEL_NUM + num] = 0.0f;
-    joint_states_eff[num] = 0.0f;
+    if (num > joint_cnt)
+      get_joint_position[num] = get_joint_position[num] * open_manipulator_gripper_offset;
+
+    joint_states_pos[WHEEL_NUM + num] = get_joint_position[num];
+    joint_states_vel[WHEEL_NUM + num] = get_joint_velocity[num];
+    joint_states_eff[WHEEL_NUM + num] = get_joint_current[num];
   }
 
   joint_states.position = joint_states_pos;
@@ -839,15 +858,15 @@ void initOdom(void)
 *******************************************************************************/
 void initJointStates(void)
 {
-  static char *joint_states_name[] = {"wheel_left_joint", "wheel_right_joint", "joint1", "joint2", "joint3", "joint4", "grip_joint", "grip_joint_sub"};
+  static char *joint_states_name[] = {"wheel_left_joint", "wheel_right_joint", "joint1", "joint2", "joint3", "joint4", "gripper"};
 
   joint_states.header.frame_id = joint_state_header_frame_id;
   joint_states.name            = joint_states_name;
 
-  joint_states.name_length     = WHEEL_NUM + joint_cnt + gripper_cnt + 1;
-  joint_states.position_length = WHEEL_NUM + joint_cnt + gripper_cnt + 1;
-  joint_states.velocity_length = WHEEL_NUM + joint_cnt + gripper_cnt + 1;
-  joint_states.effort_length   = WHEEL_NUM + joint_cnt + gripper_cnt + 1;
+  joint_states.name_length     = WHEEL_NUM + joint_cnt + gripper_cnt;
+  joint_states.position_length = WHEEL_NUM + joint_cnt + gripper_cnt;
+  joint_states.velocity_length = WHEEL_NUM + joint_cnt + gripper_cnt;
+  joint_states.effort_length   = WHEEL_NUM + joint_cnt + gripper_cnt;
 }
 
 /*******************************************************************************
@@ -907,7 +926,7 @@ void sendDebuglog(void)
   DEBUG_SERIAL.println("Encoder(right) : " + String(encoder[RIGHT]));
 
   double present_position[joint_cnt + gripper_cnt];
-  manipulator_driver.readPosition(present_position);
+  manipulator_driver.getPosition(present_position);
 
   for (uint8_t num = 0; num < joint_cnt + gripper_cnt; num++)
   {

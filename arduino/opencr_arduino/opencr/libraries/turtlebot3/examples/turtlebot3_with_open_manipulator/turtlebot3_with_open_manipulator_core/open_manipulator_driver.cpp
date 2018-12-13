@@ -133,7 +133,7 @@ bool OpenManipulatorDriver::init(uint8_t *joint_id, uint8_t joint_cnt, uint8_t *
           result = dxl_wb_.torqueOff(joint_id[num], &log);  
           if (result == true) DEBUG_SERIAL.println("Succeeded to set torque off");
 
-          result = dxl_wb_.setTimeBasedProfile(joint_id[num], &log);
+          result = dxl_wb_.setVelocityBasedProfile(joint_id[num], &log);
           if (result == true) DEBUG_SERIAL.println("Succeeded to set velocity based profile mode");
         }
 
@@ -162,7 +162,9 @@ bool OpenManipulatorDriver::init(uint8_t *joint_id, uint8_t joint_cnt, uint8_t *
   if (dxl_wb_.getProtocolVersion() == 2.0f)
   {
     const uint8_t ADDR_PROFILE_ACCELERATION = 108;
-    const uint8_t LEN_PROFILE_ACCELERATION_PROFILE_VELOCITY = 8;
+    const uint8_t LEN_PROFILE_ACCELERATION_PROFILE_VELOCITY = 4+4;
+    const uint8_t ADDR_PRESENT_CURRENT = 126;
+    const uint8_t LEN_PROFILE_CURRENT_VELOCITY_POSITION = 2+4+4;
 
     result = dxl_wb_.addSyncWriteHandler(ADDR_PROFILE_ACCELERATION, LEN_PROFILE_ACCELERATION_PROFILE_VELOCITY, &log);
     if (result == false)
@@ -170,13 +172,15 @@ bool OpenManipulatorDriver::init(uint8_t *joint_id, uint8_t joint_cnt, uint8_t *
       DEBUG_SERIAL.println(log);
       DEBUG_SERIAL.println("Failed to add sync write handler");
     }
-  }
 
-  result = dxl_wb_.addSyncReadHandler(joint_.id[0], "Present_Position", &log);
-  if (result == false)
-  {
-    DEBUG_SERIAL.println(log);
-    DEBUG_SERIAL.println("Failed to add sync read handler");
+    result = dxl_wb_.addSyncReadHandler(ADDR_PRESENT_CURRENT, 
+                                         LEN_PROFILE_CURRENT_VELOCITY_POSITION, 
+                                         &log);
+    if (result == false)
+    {
+      DEBUG_SERIAL.println(log);
+      DEBUG_SERIAL.println("Failed to add sync read handler");
+    }
   }
 
   double init_joint_position[4] = {0.0, -1.57, 1.37, 0.2258};
@@ -186,6 +190,9 @@ bool OpenManipulatorDriver::init(uint8_t *joint_id, uint8_t joint_cnt, uint8_t *
   writeJointPosition(init_joint_position);
   writeGripperProfileControlParam(0.0f);
   writeGripperPosition(init_gripper_position);
+
+  writeJointProfileControlParam(0.0f);
+  writeGripperProfileControlParam(0.0f);
 
   DEBUG_SERIAL.println("Succeeded to init OpenManipulator Driver");
 
@@ -240,24 +247,57 @@ bool OpenManipulatorDriver::getTorqueState()
   return torque_state_;
 }
 
-bool OpenManipulatorDriver::readPosition(double *get_data)
+bool OpenManipulatorDriver::syncReadDynamixelInfo(void)
 {
   const char *log;
   bool result = false;
-  const uint8_t handler_index = 0;
-
-  int32_t get_present_position[joint_.cnt + gripper_.cnt];
+  const uint8_t HANDLER_INDEX = 0;
 
   if (dxl_wb_.getProtocolVersion() == 2.0f)
   {
-    result = dxl_wb_.syncRead(handler_index, &log);
+    result = dxl_wb_.syncRead(HANDLER_INDEX, &log);
     if (result == false)
     {
       DEBUG_SERIAL.println(log);
       DEBUG_SERIAL.println("Failed to sync read position");
     }
+  }
 
-    result = dxl_wb_.getSyncReadData(handler_index, &get_present_position[0], &log);
+  return true;
+}
+
+bool OpenManipulatorDriver::getPosition(double *get_data)
+{
+  const char *log;
+  bool result = false;
+  const uint8_t HANDLER_INDEX = 0;
+  const uint8_t ADDR_PRESENT_POSITION_2 = 132;
+  const uint8_t LENGTH_PRESENT_POSITION_2 = 4;
+
+  int32_t get_present_joint_position[joint_.cnt];
+  int32_t get_present_gripper_position[gripper_.cnt];
+
+  if (dxl_wb_.getProtocolVersion() == 2.0f)
+  {
+    result = dxl_wb_.getSyncReadData(HANDLER_INDEX, 
+                                    &joint_.id[0], 
+                                    joint_.cnt, 
+                                    ADDR_PRESENT_POSITION_2,
+                                    LENGTH_PRESENT_POSITION_2,
+                                    &get_present_joint_position[0], 
+                                    &log);
+    if (result == false)
+    {
+      DEBUG_SERIAL.println(log);
+    }
+
+    result = dxl_wb_.getSyncReadData(HANDLER_INDEX, 
+                                &gripper_.id[0], 
+                                gripper_.cnt, 
+                                ADDR_PRESENT_POSITION_2,
+                                LENGTH_PRESENT_POSITION_2,
+                                &get_present_gripper_position[0], 
+                                &log);
     if (result == false)
     {
       DEBUG_SERIAL.println(log);
@@ -265,19 +305,19 @@ bool OpenManipulatorDriver::readPosition(double *get_data)
 
     for (uint8_t num = 0; num < joint_.cnt; num++)
     {
-      get_data[num] = dxl_wb_.convertValue2Radian(joint_.id[num], get_present_position[num]);
+      get_data[num] = dxl_wb_.convertValue2Radian(joint_.id[num], get_present_joint_position[num]);
     }
 
     for (uint8_t num = 0; num < gripper_.cnt; num++)
     {
-      get_data[joint_.cnt + num] = dxl_wb_.convertValue2Radian(gripper_.id[num], get_present_position[joint_.cnt + num]);
-    }
+      get_data[joint_.cnt + num] = dxl_wb_.convertValue2Radian(gripper_.id[num], get_present_gripper_position[num]);
+    }  
   }
   else if (dxl_wb_.getProtocolVersion() == 1.0f)
   {
     for (uint8_t num = 0; num < joint_.cnt; num++)
     {
-      result = dxl_wb_.itemRead(joint_.id[num], "Present_Position", &get_present_position[num], &log);
+      result = dxl_wb_.itemRead(joint_.id[num], "Present_Position", &get_present_joint_position[num], &log);
       if (result == false)
       {
         DEBUG_SERIAL.println(log);
@@ -285,13 +325,13 @@ bool OpenManipulatorDriver::readPosition(double *get_data)
       }
       else
       {
-        get_data[num] = dxl_wb_.convertValue2Radian(joint_.id[num], get_present_position[num]);
+        get_data[num] = dxl_wb_.convertValue2Radian(joint_.id[num], get_present_joint_position[num]);
       }
     }
 
     for (uint8_t num = 0; num < gripper_.cnt; num++)
     {
-      result = dxl_wb_.itemRead(gripper_.id[num], "Present_Position", &get_present_position[joint_.cnt + num], &log);
+      result = dxl_wb_.itemRead(gripper_.id[num], "Present_Position", &get_present_gripper_position[num], &log);
       if (result == false)
       {
         DEBUG_SERIAL.println(log);
@@ -299,9 +339,119 @@ bool OpenManipulatorDriver::readPosition(double *get_data)
       }
       else
       {
-        get_data[joint_.cnt + num] = dxl_wb_.convertValue2Radian(gripper_.id[num], get_present_position[joint_.cnt + num]);
+        get_data[joint_.cnt + num] = dxl_wb_.convertValue2Radian(gripper_.id[num], get_present_gripper_position[num]);
       }
     }
+  }
+
+  return true;
+}
+
+bool OpenManipulatorDriver::getVelocity(double *get_data)
+{
+  const char *log;
+  bool result = false;
+  const uint8_t HANDLER_INDEX = 0;
+  const uint8_t ADDR_PRESENT_VELOCITY_2 = 128;
+  const uint8_t LENGTH_PRESENT_VELOCITY_2 = 4;
+
+  int32_t get_present_joint_velocity[joint_.cnt];
+  int32_t get_present_gripper_velocity[gripper_.cnt];
+
+  if (dxl_wb_.getProtocolVersion() == 2.0f)
+  {
+    result = dxl_wb_.getSyncReadData(HANDLER_INDEX, 
+                                    &joint_.id[0], 
+                                    joint_.cnt, 
+                                    ADDR_PRESENT_VELOCITY_2,
+                                    LENGTH_PRESENT_VELOCITY_2,
+                                    &get_present_joint_velocity[0], 
+                                    &log);
+    if (result == false)
+    {
+      DEBUG_SERIAL.println(log);
+    }
+
+    result = dxl_wb_.getSyncReadData(HANDLER_INDEX, 
+                                &gripper_.id[0], 
+                                gripper_.cnt, 
+                                ADDR_PRESENT_VELOCITY_2,
+                                LENGTH_PRESENT_VELOCITY_2,
+                                &get_present_gripper_velocity[0], 
+                                &log);
+    if (result == false)
+    {
+      DEBUG_SERIAL.println(log);
+    }
+
+    for (uint8_t num = 0; num < joint_.cnt; num++)
+    {
+      get_data[num] = dxl_wb_.convertValue2Velocity(joint_.id[num], get_present_joint_velocity[num]);
+    }
+
+    for (uint8_t num = 0; num < gripper_.cnt; num++)
+    {
+      get_data[joint_.cnt + num] = dxl_wb_.convertValue2Velocity(gripper_.id[num], get_present_gripper_velocity[num]);
+    } 
+  }
+  else
+  {
+    return false;
+  }
+
+  return true;
+}
+
+bool OpenManipulatorDriver::getCurrent(double *get_data)
+{
+  const char *log;
+  bool result = false;
+  const uint8_t HANDLER_INDEX = 0;
+  const uint8_t ADDR_PRESENT_CURRENT_2 = 126;
+  const uint8_t LENGTH_PRESENT_CURRENT_2 = 2;
+
+  int32_t get_present_joint_current[joint_.cnt];
+  int32_t get_present_gripper_current[gripper_.cnt];
+
+  if (dxl_wb_.getProtocolVersion() == 2.0f)
+  {
+    result = dxl_wb_.getSyncReadData(HANDLER_INDEX, 
+                                    &joint_.id[0], 
+                                    joint_.cnt, 
+                                    ADDR_PRESENT_CURRENT_2,
+                                    LENGTH_PRESENT_CURRENT_2,
+                                    &get_present_joint_current[0], 
+                                    &log);
+    if (result == false)
+    {
+      DEBUG_SERIAL.println(log);
+    }
+
+    result = dxl_wb_.getSyncReadData(HANDLER_INDEX, 
+                                &gripper_.id[0], 
+                                gripper_.cnt, 
+                                ADDR_PRESENT_CURRENT_2,
+                                LENGTH_PRESENT_CURRENT_2,
+                                &get_present_gripper_current[0], 
+                                &log);
+    if (result == false)
+    {
+      DEBUG_SERIAL.println(log);
+    }
+
+    for (uint8_t num = 0; num < joint_.cnt; num++)
+    {
+      get_data[num] = dxl_wb_.convertValue2Current(get_present_joint_current[num]);
+    }
+
+    for (uint8_t num = 0; num < gripper_.cnt; num++)
+    {
+      get_data[joint_.cnt + num] = dxl_wb_.convertValue2Current(get_present_gripper_current[num]);
+    }  
+  }
+  else
+  {
+    return false;
   }
 
   return true;
@@ -311,7 +461,7 @@ bool OpenManipulatorDriver::writeJointProfileControlParam(int32_t set_time)
 {
   const char *log;
   bool result = false;
-  const uint8_t handler_index = 1;
+  const uint8_t HANDLER_INDEX = 1;
   int32_t goal_data[joint_.cnt*2];
 
   for (uint8_t num = 0; num < joint_.cnt * 2; num = num + 2)
@@ -320,11 +470,18 @@ bool OpenManipulatorDriver::writeJointProfileControlParam(int32_t set_time)
     goal_data[num+1] = set_time * 1000;
   }
 
-  result = dxl_wb_.syncWrite(handler_index, joint_.id, joint_.cnt, &goal_data[0], 2, &log);
-  if (result == false)
+  if (dxl_wb_.getProtocolVersion() == 2.0f)
   {
-    DEBUG_SERIAL.println(log);
-    DEBUG_SERIAL.println("Failed to sync write position");
+    result = dxl_wb_.syncWrite(HANDLER_INDEX, joint_.id, joint_.cnt, &goal_data[0], 2, &log);
+    if (result == false)
+    {
+      DEBUG_SERIAL.println(log);
+      DEBUG_SERIAL.println("Failed to sync write position");
+    }
+  }
+  else
+  {
+    return false;
   }
 
   return true;
@@ -334,7 +491,7 @@ bool OpenManipulatorDriver::writeJointPosition(double *set_data)
 {
   const char *log;
   bool result = false;
-  const uint8_t handler_index = 0;
+  const uint8_t HANDLER_INDEX = 0;
   int32_t goal_position[joint_.cnt];
 
   for (int num = 0; num < joint_.cnt; num++)
@@ -342,7 +499,7 @@ bool OpenManipulatorDriver::writeJointPosition(double *set_data)
     goal_position[num] = dxl_wb_.convertRadian2Value(joint_.id[num], set_data[num]);
   }
 
-  result = dxl_wb_.syncWrite(handler_index, joint_.id, joint_.cnt, &goal_position[0], 1, &log);
+  result = dxl_wb_.syncWrite(HANDLER_INDEX, joint_.id, joint_.cnt, &goal_position[0], 1, &log);
   if (result == false)
   {
     DEBUG_SERIAL.println(log);
@@ -356,7 +513,7 @@ bool OpenManipulatorDriver::writeGripperProfileControlParam(int32_t set_time)
 {
   const char *log;
   bool result = false;
-  const uint8_t handler_index = 1;
+  const uint8_t HANDLER_INDEX = 1;
   int32_t goal_data[gripper_.cnt*2];
 
   for (uint8_t num = 0; num < gripper_.cnt; num++)
@@ -365,11 +522,18 @@ bool OpenManipulatorDriver::writeGripperProfileControlParam(int32_t set_time)
     goal_data[num+1] = set_time * 1000;
   }
 
-  result = dxl_wb_.syncWrite(handler_index, gripper_.id, gripper_.cnt, &goal_data[0], 2, &log);
-  if (result == false)
+  if (dxl_wb_.getProtocolVersion() == 2.0f)
   {
-    DEBUG_SERIAL.println(log);
-    DEBUG_SERIAL.println("Failed to sync write position");
+    result = dxl_wb_.syncWrite(HANDLER_INDEX, gripper_.id, gripper_.cnt, &goal_data[0], 2, &log);
+    if (result == false)
+    {
+      DEBUG_SERIAL.println(log);
+      DEBUG_SERIAL.println("Failed to sync write position");
+    }
+  }
+  else
+  {
+    return false;
   }
 
   return true;
@@ -379,7 +543,7 @@ bool OpenManipulatorDriver::writeGripperPosition(double *set_data)
 {
   const char *log;
   bool result = false;
-  const uint8_t handler_index = 0;
+  const uint8_t HANDLER_INDEX = 0;
   int32_t goal_position[gripper_.cnt];
 
   for (int num = 0; num < gripper_.cnt; num++)
@@ -387,7 +551,7 @@ bool OpenManipulatorDriver::writeGripperPosition(double *set_data)
     goal_position[num] = dxl_wb_.convertRadian2Value(gripper_.id[num], set_data[num]);
   }
 
-  result = dxl_wb_.syncWrite(handler_index, gripper_.id, gripper_.cnt, &goal_position[0], 1, &log);
+  result = dxl_wb_.syncWrite(HANDLER_INDEX, gripper_.id, gripper_.cnt, &goal_position[0], 1, &log);
   if (result == false)
   {
     DEBUG_SERIAL.println(log);
