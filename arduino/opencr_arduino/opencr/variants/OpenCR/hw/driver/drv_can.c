@@ -422,7 +422,18 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
       msg_idx = ringGetWriteIndex(&ring_msg[channel]);
       rx_buf  = &can_msg[channel][msg_idx];
 
-      rx_buf->id = p_RxMsg->ExtId;
+      //rx_buf->id = p_RxMsg->ExtId;
+      switch(msg_format)
+      {
+        case _DEF_CAN_STD :
+          rx_buf->id = pTxMsg->StdId;
+          break;
+        case _DEF_CAN_EXT :
+        default :
+          rx_buf->id = pTxMsg->ExtId;
+          break;
+      }
+      
       rx_buf->length = p_RxMsg->DLC;
       memcpy(rx_buf->data, p_RxMsg->Data, rx_buf->length);
       ringWriteUpdate(&ring_msg[channel]);
