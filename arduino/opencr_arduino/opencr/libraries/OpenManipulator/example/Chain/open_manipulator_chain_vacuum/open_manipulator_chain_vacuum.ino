@@ -20,7 +20,7 @@
 #include "OpenManipulatorVacuumMotion.h"
 #include "Processing.h"
 
-OPEN_MANIPULATOR_VACUUM open_manipulator;
+OPEN_MANIPULATOR_VACUUM open_manipulator; 
 double present_time = 0.0;
 double previous_time = 0.0;
 

@@ -20,6 +20,7 @@
 #define OPEN_MANIPULATOR_PEN_H_
 
 #include <open_manipulator_libs.h>
+#include "OpenManipulatorPenDrawing.h"
 
 #define NUM_OF_JOINT 4
 #define DXL_SIZE 4
@@ -28,6 +29,7 @@
 #define DRAWING_CIRCLE "drawing_circle"
 #define DRAWING_RHOMBUS "drawing_rhombus"
 #define DRAWING_HEART "drawing_heart"
+#define DRAWING_ALPHABET "drawing_alphabet"
 
 #define JOINT_DYNAMIXEL "joint_dxl"
 
@@ -48,6 +50,7 @@ private:
   DRAWING::Circle circle_;
   DRAWING::Rhombus rhombus_;
   DRAWING::Heart heart_;
+  OPEN_MANIPULATOR_PEN_DRAWING::Alphabet alphabet_;
 
   bool platform_;
   std::vector<uint8_t> jointDxlId;
@@ -108,12 +111,12 @@ private:
             "joint4", // parent name
             RM_MATH::makeVector3(0.043, 0.0, 0.0), // relative position
             RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0), // relative orientation
-            15); // actuator id
+            -1); // actuator id
 
     ////////// kinematics init.
     kinematics_ = new KINEMATICS::Chain();
     addKinematics(kinematics_);
-    STRING inverse_option[2] = {"inverse_solver", "chain_custum_inverse_kinematics"};
+    STRING inverse_option[2] = {"inverse_solver", "chain_custom_inverse_kinematics"};
   //  STRING inverse_option[2] = {"inverse_solver", "sr_inverse"};
   //  STRING inverse_option[2] = {"inverse_solver", "position_only_inverse"};
   //  STRING inverse_option[2] = {"inverse_solver", "normal_inverse"};
@@ -146,6 +149,10 @@ private:
       void *p_joint_dxl_mode_arg = &joint_dxl_mode_arg;
       jointActuatorSetMode(JOINT_DYNAMIXEL, jointDxlId, p_joint_dxl_mode_arg);
 
+      joint_dxl_opt_arg[0] = "Position_P_Gain";
+      joint_dxl_opt_arg[1] = "1200";
+      jointActuatorSetMode(JOINT_DYNAMIXEL, jointDxlId, p_joint_dxl_opt_arg);
+
       // all actuator enable
       allActuatorEnable();
       receiveAllJointActuatorValue();
@@ -155,6 +162,7 @@ private:
     addDrawingTrajectory(DRAWING_CIRCLE, &circle_);
     addDrawingTrajectory(DRAWING_RHOMBUS, &rhombus_);
     addDrawingTrajectory(DRAWING_HEART, &heart_);
+    addDrawingTrajectory(DRAWING_ALPHABET, &alphabet_);
 
     ////////// manipulator trajectory & control time initialization
     setTrajectoryControlTime(CONTROL_TIME);

@@ -40,8 +40,10 @@ void loop()
 {
   present_time = (float)(millis()/1000.0f);
   getData(100);
-  switchRead();
+  switchRead(&open_manipulator);
   playMotion(&open_manipulator);
+  //RM_LOG::PRINT("x ", open_manipulator.getPose("pen").position(0));
+  //RM_LOG::PRINTLN(" y ", open_manipulator.getPose("pen").position(1));
 
   if(present_time-previous_time >= CONTROL_TIME)
   {
