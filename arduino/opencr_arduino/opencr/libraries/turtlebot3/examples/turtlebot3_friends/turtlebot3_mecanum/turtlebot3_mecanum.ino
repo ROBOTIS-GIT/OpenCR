@@ -153,7 +153,7 @@ void controlMecanum()
 {
   bool dxl_comm_result = false;
 
-  int64_t wheel_value[MECANUMWHEEL_NUM] = {0.0, 0.0, 0.0, 0.0};
+  int64_t wheel_value[MECANUMWHEEL_NUM] = {0, 0, 0, 0};
   double wheel_angular_velocity[MECANUMWHEEL_NUM] = {0.0, 0.0, 0.0, 0.0};
 
   wheel_angular_velocity[0] = (1/WHEEL_RADIUS) * (goal_linear_x_velocity - goal_linear_y_velocity - (WHEEL_SEPARATION_X + WHEEL_SEPARATION_Y) * goal_angular_velocity);
