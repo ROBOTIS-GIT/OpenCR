@@ -80,10 +80,10 @@ void setup()
   portHandler->setBaudRate(BAUDRATE);
 
   dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, LEFT_DXL, ADDR_TORQUE_ENABLE, ON, &dxl_error);
-  packetHandler->printTxRxResult(dxl_comm_result);
+  packetHandler->getTxRxResult(dxl_comm_result);
 
   dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, RIGHT_DXL, ADDR_TORQUE_ENABLE, ON, &dxl_error);
-  packetHandler->printTxRxResult(dxl_comm_result);
+  packetHandler->getTxRxResult(dxl_comm_result);
 }
 
 void loop() 
