@@ -79,11 +79,11 @@ bool Turtlebot3MotorDriver::setTorque(uint8_t id, bool onoff)
   dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, id, ADDR_X_TORQUE_ENABLE, onoff, &dxl_error);
   if(dxl_comm_result != COMM_SUCCESS)
   {
-    packetHandler_->printTxRxResult(dxl_comm_result);
+    packetHandler_->getTxRxResult(dxl_comm_result);
   }
   else if(dxl_error != 0)
   {
-    packetHandler_->printRxPacketError(dxl_error);
+    packetHandler_->getRxPacketError(dxl_error);
   }
 }
 
@@ -95,11 +95,11 @@ bool Turtlebot3MotorDriver::setProfileAcceleration(uint8_t id, uint32_t value)
   dxl_comm_result = packetHandler_->write4ByteTxRx(portHandler_, id, ADDR_X_PROFILE_ACCELERATION, value, &dxl_error);
   if (dxl_comm_result != COMM_SUCCESS)
   {
-    packetHandler_->printTxRxResult(dxl_comm_result);
+    packetHandler_->getTxRxResult(dxl_comm_result);
   }
   else if(dxl_error != 0)
   {
-    packetHandler_->printRxPacketError(dxl_error);
+    packetHandler_->getRxPacketError(dxl_error);
   }
 }
 
@@ -111,11 +111,11 @@ bool Turtlebot3MotorDriver::setProfileVelocity(uint8_t id, uint32_t value)
   dxl_comm_result = packetHandler_->write4ByteTxRx(portHandler_, id, ADDR_X_PROFILE_VELOCITY, value, &dxl_error);
   if(dxl_comm_result != COMM_SUCCESS)
   {
-    packetHandler_->printTxRxResult(dxl_comm_result);
+    packetHandler_->getTxRxResult(dxl_comm_result);
   }
   else if(dxl_error != 0)
   {
-    packetHandler_->printRxPacketError(dxl_error);
+    packetHandler_->getRxPacketError(dxl_error);
   }
 }
 
@@ -145,7 +145,7 @@ bool Turtlebot3MotorDriver::controlMotor(int64_t front_joint_value, int64_t rear
   dxl_comm_result_ = groupBulkWrite_->txPacket();
   if (dxl_comm_result_ != COMM_SUCCESS)
   {
-    packetHandler_->printTxRxResult(dxl_comm_result_);
+    packetHandler_->getTxRxResult(dxl_comm_result_);
     return false;
   }
 

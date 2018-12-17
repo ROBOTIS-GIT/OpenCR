@@ -642,7 +642,7 @@ void dxl_monitor_main(void)
         int dxl_comm_result = packetHandler2->reboot(portHandler, atoi(param[0]), &dxl_error);
         if (dxl_comm_result == COMM_SUCCESS)
         {
-          if (dxl_error != 0) packetHandler2->printRxPacketError(dxl_error);
+          if (dxl_error != 0) packetHandler2->getRxPacketError(dxl_error);
           _fprintf(stderr, (char*) "\n Success to reboot! \n\n");
         }
         else
@@ -664,7 +664,7 @@ void dxl_monitor_main(void)
         if (dxl_comm_result == COMM_SUCCESS)
         {
           if (dxl_error != 0)
-            packetHandler1->printRxPacketError(dxl_error);
+            packetHandler1->getRxPacketError(dxl_error);
           _fprintf(stderr, (char*) "\n Success to reset! \n\n");
         }
         else
@@ -685,7 +685,7 @@ void dxl_monitor_main(void)
         int dxl_comm_result = packetHandler2->factoryReset(portHandler, atoi(param[0]), atoi(param[1]), &dxl_error);
         if (dxl_comm_result == COMM_SUCCESS)
         {
-          if (dxl_error != 0) packetHandler2->printRxPacketError(dxl_error);
+          if (dxl_error != 0) packetHandler2->getRxPacketError(dxl_error);
           _fprintf(stderr, (char*) "\n Success to reset! \n\n");
         }
         else

@@ -77,11 +77,11 @@ bool Turtlebot3MotorDriver::setTorque(uint8_t id, bool onoff)
   dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, id, ADDR_X_TORQUE_ENABLE, onoff, &dxl_error);
   if(dxl_comm_result != COMM_SUCCESS)
   {
-    packetHandler_->printTxRxResult(dxl_comm_result);
+    packetHandler_->getTxRxResult(dxl_comm_result);
   }
   else if(dxl_error != 0)
   {
-    packetHandler_->printRxPacketError(dxl_error);
+    packetHandler_->getRxPacketError(dxl_error);
   }
 }
 
@@ -111,7 +111,7 @@ bool Turtlebot3MotorDriver::controlMotor(int64_t left_wheel_value, int64_t right
   dxl_comm_result_ = groupSyncWritePWM_->txPacket();
   if (dxl_comm_result_ != COMM_SUCCESS)
   {
-    packetHandler_->printTxRxResult(dxl_comm_result_);
+    packetHandler_->getTxRxResult(dxl_comm_result_);
     return false;
   }
 
