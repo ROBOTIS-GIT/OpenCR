@@ -121,10 +121,16 @@ void loop()
 #ifdef DEBUG
   if ((t-tTime[5]) >= (1000 / DEBUG_LOG_FREQUENCY))
   {
-    sendDebuglog();
+    // sendDebuglog();
     tTime[5] = t;
   }
 #endif
+
+  if ((t-tTime[6]) >= (1000 / JOINT_CONTROL_FREQEUNCY))
+  {
+    jointControl();
+    tTime[6] = t;
+  }
 
   // Send log message after ROS connection
   sendLogMsg();
@@ -175,23 +181,15 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
 *******************************************************************************/
 void jointTrajectoryCallback(const trajectory_msgs::JointTrajectory& joint_trajectory_msg)
 {
-  // trajectory_msgs::JointTrajectoryPoint jnt_tra_point_msg;
+  if (is_moving == false)
+  {
+    joint_trajectory = joint_trajectory_msg;
+    uint32_t points_length = joint_trajectory_msg.points_length;
+    double move_time = joint_trajectory_msg.points[points_length - 1].time_from_start.toSec();
 
-  // for (uint8_t id_num = 0; id_num < id_cnt; id_num++)
-  // {
-  //   jnt_tra_point_msg.positions.push_back(goal[id_num].position);
-  //   jnt_tra_point_msg.velocities.push_back(goal[id_num].velocity);
-  //   jnt_tra_point_msg.accelerations.push_back(goal[id_num].acceleration);
-  // }
-
-  // jnt_tra_msg_->points.push_back(jnt_tra_point_msg);
-
-  // double goal_joint_position[20];
-
-  // for (int index = 0; index < joint_cnt; index++)
-  //   goal_joint_position[index] = pos_msg.data[index];
-
-  // manipulator_driver.writeJointPosition(goal_joint_position);
+    manipulator_driver.writeJointProfileControlParam(move_time);
+    is_moving = true;
+  }
 }
 
 /*******************************************************************************
@@ -210,10 +208,10 @@ void jointMoveTimeCallback(const std_msgs::Float64& time_msg)
 void gripperPositionCallback(const std_msgs::Float64MultiArray& gripper_msg)
 {
   double goal_gripper_position[5] = {0.0, };
-  const double open_manipulator_gripper_offset = -0.015f;
+  const double OPEN_MANIPULATOR_GRIPPER_OFFSET = -0.015f;
 
   for (int index = 0; index < gripper_cnt; index++)
-    goal_gripper_position[index] = gripper_msg.data[index] / open_manipulator_gripper_offset;
+    goal_gripper_position[index] = gripper_msg.data[index] / OPEN_MANIPULATOR_GRIPPER_OFFSET;
 
   manipulator_driver.writeGripperPosition(goal_gripper_position);
 }
@@ -487,7 +485,7 @@ void updateJointStates(void)
   static float joint_states_vel[20] = {0.0, };
   static float joint_states_eff[20] = {0.0, };
 
-  const double open_manipulator_gripper_offset = -0.015f;
+  const double OPEN_MANIPULATOR_GRIPPER_OFFSET = -0.015f;
 
   double get_joint_position[joint_cnt + gripper_cnt];
   double get_joint_velocity[joint_cnt + gripper_cnt];
@@ -507,7 +505,7 @@ void updateJointStates(void)
   for (uint8_t num = 0; num < (joint_cnt + gripper_cnt); num++)
   {
     if (num > joint_cnt)
-      get_joint_position[num] = get_joint_position[num] * open_manipulator_gripper_offset;
+      get_joint_position[num] = get_joint_position[num] * OPEN_MANIPULATOR_GRIPPER_OFFSET;
 
     joint_states_pos[WHEEL_NUM + num] = get_joint_position[num];
     joint_states_vel[WHEEL_NUM + num] = get_joint_velocity[num];
@@ -629,6 +627,34 @@ bool calcOdometry(double diff_time)
   last_theta = theta;
 
   return true;
+}
+
+/*******************************************************************************
+* Manipulator's joint control
+*******************************************************************************/
+void jointControl(void)
+{
+  static uint32_t point_cnt = 0;
+
+  if (is_moving == true)
+  {
+    uint32_t position_cnt = joint_trajectory.points[point_cnt].positions_length;
+    double goal_joint_position[position_cnt];
+
+    for (uint8_t index = 0; index < position_cnt; index++)
+    {
+      goal_joint_position[index] = joint_trajectory.points[point_cnt].positions[index];
+    }
+    manipulator_driver.writeJointPosition(goal_joint_position);
+
+    point_cnt++;
+
+    if (point_cnt > (joint_trajectory.points_length-1))
+    {
+      is_moving = false;
+      point_cnt = 0;
+    }
+  }
 }
 
 /*******************************************************************************

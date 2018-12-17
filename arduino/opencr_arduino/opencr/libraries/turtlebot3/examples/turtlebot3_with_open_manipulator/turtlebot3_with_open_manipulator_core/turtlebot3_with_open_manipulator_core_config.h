@@ -47,7 +47,7 @@
 
 #include <math.h>
 
-#define FIRMWARE_VER "1.3.0"
+#define FIRMWARE_VER "2.0.0"
 
 #define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
 #define IMU_PUBLISH_FREQUENCY                  200  //hz
@@ -55,6 +55,7 @@
 #define DRIVE_INFORMATION_PUBLISH_FREQUENCY    30   //hz
 #define VERSION_INFORMATION_PUBLISH_FREQUENCY  1    //hz 
 #define DEBUG_LOG_FREQUENCY                    10   //hz 
+#define JOINT_CONTROL_FREQEUNCY                100  //hz 
 
 #define WHEEL_NUM                        2
 
@@ -72,7 +73,7 @@
 #define TEST_DISTANCE                    0.300     // meter
 #define TEST_RADIAN                      3.14      // 180 degree
 
-// #define DEBUG                            
+#define DEBUG                            
 #define DEBUG_SERIAL                     SerialBT2
 
 // Callback function prototypes
@@ -111,6 +112,8 @@ void initOdom(void);
 void initJointStates(void);
 
 bool calcOdometry(double diff_time);
+
+void jointControl(void);
 
 void sendLogMsg(void);
 void waitForSerialLink(bool isConnected);
@@ -259,5 +262,11 @@ double odom_vel[3];
 *******************************************************************************/
 bool setup_end        = false;
 uint8_t battery_state = 0;
+
+/*******************************************************************************
+* Joint Control
+*******************************************************************************/
+bool is_moving        = false;
+trajectory_msgs::JointTrajectory joint_trajectory;
 
 #endif // TURTLEBOT3_WITH_OPEN_MANIPULATOR_CONFIG_H_

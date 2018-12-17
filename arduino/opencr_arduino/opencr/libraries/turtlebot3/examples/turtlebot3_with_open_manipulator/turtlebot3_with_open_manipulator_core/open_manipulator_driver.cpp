@@ -133,7 +133,7 @@ bool OpenManipulatorDriver::init(uint8_t *joint_id, uint8_t joint_cnt, uint8_t *
           result = dxl_wb_.torqueOff(joint_id[num], &log);  
           if (result == true) DEBUG_SERIAL.println("Succeeded to set torque off");
 
-          result = dxl_wb_.setVelocityBasedProfile(joint_id[num], &log);
+          result = dxl_wb_.setTimeBasedProfile(joint_id[num], &log);
           if (result == true) DEBUG_SERIAL.println("Succeeded to set velocity based profile mode");
         }
 
@@ -183,12 +183,12 @@ bool OpenManipulatorDriver::init(uint8_t *joint_id, uint8_t joint_cnt, uint8_t *
     }
   }
 
-  double init_joint_position[4] = {0.0, -1.57, 1.37, 0.2258};
+  double init_joint_position[4] = {0.0, -1.57, 1.20, 0.6};
   double init_gripper_position[1] = {0.0};
 
   writeJointProfileControlParam(3.0f);
-  writeJointPosition(init_joint_position);
   writeGripperProfileControlParam(0.0f);
+  writeJointPosition(init_joint_position);  
   writeGripperPosition(init_gripper_position);
 
   writeJointProfileControlParam(0.0f);
@@ -457,7 +457,7 @@ bool OpenManipulatorDriver::getCurrent(double *get_data)
   return true;
 }
 
-bool OpenManipulatorDriver::writeJointProfileControlParam(int32_t set_time)
+bool OpenManipulatorDriver::writeJointProfileControlParam(double set_time)
 {
   const char *log;
   bool result = false;
@@ -509,7 +509,7 @@ bool OpenManipulatorDriver::writeJointPosition(double *set_data)
   return true;
 }
 
-bool OpenManipulatorDriver::writeGripperProfileControlParam(int32_t set_time)
+bool OpenManipulatorDriver::writeGripperProfileControlParam(double set_time)
 {
   const char *log;
   bool result = false;
