@@ -153,7 +153,7 @@ void controlOmni()
 {
   bool dxl_comm_result = false;
 
-  int64_t wheel_value[OMNIWHEEL_NUM] = {0.0, 0.0, 0.0};
+  int64_t wheel_value[OMNIWHEEL_NUM] = {0, 0, 0};
   double wheel_angular_velocity[OMNIWHEEL_NUM] = {0.0, 0.0, 0.0};
 
   wheel_angular_velocity[0] = (goal_linear_x_velocity * 0) + (goal_linear_y_velocity * (1 / WHEEL_RADIUS)) + (goal_angular_velocity * (-DISTANCE_CENTER_TO_WHEEL/WHEEL_RADIUS));

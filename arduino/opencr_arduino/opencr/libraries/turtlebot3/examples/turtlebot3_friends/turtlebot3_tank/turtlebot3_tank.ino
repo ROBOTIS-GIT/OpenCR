@@ -150,7 +150,7 @@ void controlTank()
 
   const int8_t motor_num = 2;
 
-  int64_t wheel_value[motor_num] = {0.0, 0.0};             //LEFT, RIGHT
+  int64_t wheel_value[motor_num] = {0, 0};             //LEFT, RIGHT
   double wheel_angular_velocity[motor_num] = {0.0, 0.0};
 
   wheel_angular_velocity[0] = goal_linear_velocity - (goal_angular_velocity * WHEEL_SEPARATION / 2);
