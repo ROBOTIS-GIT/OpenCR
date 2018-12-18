@@ -179,15 +179,11 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
 /*******************************************************************************
 * Callback function for joint trajectory msg
 *******************************************************************************/
-void jointTrajectoryCallback(const trajectory_msgs::JointTrajectory& joint_trajectory_msg)
+void jointTrajectoryPointCallback(const std_msgs::Float64MultiArray& joint_trajectory_point_msg)
 {
   if (is_moving == false)
   {
-    joint_trajectory = joint_trajectory_msg;
-    uint32_t points_length = joint_trajectory_msg.points_length;
-    double move_time = joint_trajectory_msg.points[points_length - 1].time_from_start.toSec();
-
-    manipulator_driver.writeJointProfileControlParam(move_time);
+    joint_trajectory_point = joint_trajectory_point_msg;
     is_moving = true;
   }
 }
@@ -634,25 +630,59 @@ bool calcOdometry(double diff_time)
 *******************************************************************************/
 void jointControl(void)
 {
-  static uint32_t point_cnt = 0;
+  const uint8_t POINT_SIZE = joint_cnt + 1; // Add time parameter
+  const double JOINT_CONTROL_PERIOD = 1.0f / (double)JOINT_CONTROL_FREQEUNCY;
+  static uint32_t points = 0;
+
+  static uint8_t wait_for_write = 0;
+  static uint8_t loop_cnt = 0;
 
   if (is_moving == true)
   {
-    uint32_t position_cnt = joint_trajectory.points[point_cnt].positions_length;
-    double goal_joint_position[position_cnt];
+    uint32_t all_points_cnt = joint_trajectory_point.data_length;
+    uint8_t write_cnt = 0;
 
-    for (uint8_t index = 0; index < position_cnt; index++)
+    if (loop_cnt < (wait_for_write))
     {
-      goal_joint_position[index] = joint_trajectory.points[point_cnt].positions[index];
+      loop_cnt++;
+      return;
     }
-    manipulator_driver.writeJointPosition(goal_joint_position);
-
-    point_cnt++;
-
-    if (point_cnt > (joint_trajectory.points_length-1))
+    else
     {
-      is_moving = false;
-      point_cnt = 0;
+      double goal_joint_position[joint_cnt];
+
+      for (uint32_t positions = points + 1; positions < (points + POINT_SIZE); positions++)
+      {        
+        if ((points + POINT_SIZE) >= all_points_cnt)
+        {
+          goal_joint_position[write_cnt] = joint_trajectory_point.data[positions];
+        }
+        else
+        {
+          goal_joint_position[write_cnt] = joint_trajectory_point.data[positions] + ((joint_trajectory_point.data[positions + POINT_SIZE] - joint_trajectory_point.data[positions]) / 2.0f);
+        }
+        write_cnt++;
+      }
+
+      manipulator_driver.writeJointPosition(goal_joint_position);
+
+      points = points + POINT_SIZE;
+
+      if (points >= all_points_cnt)
+      {
+        points = 0;
+        wait_for_write = 0;
+        manipulator_driver.writeJointProfileControlParam(0.0f);
+        is_moving = false;
+      }
+      else
+      {
+        double move_time = joint_trajectory_point.data[points] - joint_trajectory_point.data[points - POINT_SIZE];
+        manipulator_driver.writeJointProfileControlParam(move_time * 2.0f);
+        wait_for_write = move_time / JOINT_CONTROL_PERIOD;
+
+        loop_cnt = 0;
+      }
     }
   }
 }

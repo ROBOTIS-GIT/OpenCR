@@ -26,8 +26,6 @@
 #include <std_msgs/Int32.h>
 #include <std_msgs/Float64.h>
 #include <std_msgs/Float64MultiArray.h>
-#include <trajectory_msgs/JointTrajectory.h>
-#include <trajectory_msgs/JointTrajectoryPoint.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/BatteryState.h>
@@ -78,7 +76,7 @@
 
 // Callback function prototypes
 void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
-void jointTrajectoryCallback(const trajectory_msgs::JointTrajectory& joint_trajectory_msg);
+void jointTrajectoryPointCallback(const std_msgs::Float64MultiArray& joint_trajectory_point_msg);
 void jointMoveTimeCallback(const std_msgs::Float64& time_msg);
 void gripperPositionCallback(const std_msgs::Float64MultiArray& pos_msg);
 void gripperMoveTimeCallback(const std_msgs::Float64& time_msg);
@@ -146,7 +144,7 @@ char joint_state_header_frame_id[30];
 *******************************************************************************/
 ros::Subscriber<geometry_msgs::Twist> cmd_vel_sub("cmd_vel", commandVelocityCallback);
 
-ros::Subscriber<trajectory_msgs::JointTrajectory> joint_position_sub("joint_trajectory", jointTrajectoryCallback);
+ros::Subscriber<std_msgs::Float64MultiArray> joint_position_sub("joint_trajectory_point", jointTrajectoryPointCallback);
 
 ros::Subscriber<std_msgs::Float64> joint_move_time_sub("joint_move_time", jointMoveTimeCallback);
 
@@ -267,6 +265,6 @@ uint8_t battery_state = 0;
 * Joint Control
 *******************************************************************************/
 bool is_moving        = false;
-trajectory_msgs::JointTrajectory joint_trajectory;
+std_msgs::Float64MultiArray joint_trajectory_point;
 
 #endif // TURTLEBOT3_WITH_OPEN_MANIPULATOR_CONFIG_H_
