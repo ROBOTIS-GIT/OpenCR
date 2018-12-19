@@ -652,8 +652,8 @@ void jointControl(void)
       double goal_joint_position[joint_cnt];
       double move_time = 0.0f;
 
-      if (points == 0) move_time = 0.0f;
-      else if ((points + POINT_SIZE) >= all_points_cnt) move_time = 0.0f;
+      if (points == 0) move_time = joint_trajectory_point.data[points + POINT_SIZE] - joint_trajectory_point.data[points];
+      else if ((points + POINT_SIZE) >= all_points_cnt) move_time = joint_trajectory_point.data[points] / 2.0f;
       else  move_time = joint_trajectory_point.data[points] - joint_trajectory_point.data[points - POINT_SIZE];
 
       for (uint32_t positions = points + 1; positions < (points + POINT_SIZE); positions++)
