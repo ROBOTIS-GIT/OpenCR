@@ -121,7 +121,7 @@ void loop()
 #ifdef DEBUG
   if ((t-tTime[5]) >= (1000 / DEBUG_LOG_FREQUENCY))
   {
-    // sendDebuglog();
+    sendDebuglog();
     tTime[5] = t;
   }
 #endif
