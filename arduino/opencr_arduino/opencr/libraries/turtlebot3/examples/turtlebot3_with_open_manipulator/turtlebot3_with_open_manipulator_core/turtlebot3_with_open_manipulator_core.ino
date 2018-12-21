@@ -126,6 +126,12 @@ void loop()
   }
 #endif
 
+  if ((t-tTime[6]) >= (1000 / JOINT_CONTROL_FREQEUNCY))
+  {
+    jointControl();
+    tTime[6] = t;
+  }
+
   // Send log message after ROS connection
   sendLogMsg();
 
@@ -173,25 +179,13 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
 /*******************************************************************************
 * Callback function for joint trajectory msg
 *******************************************************************************/
-void jointTrajectoryCallback(const trajectory_msgs::JointTrajectory& joint_trajectory_msg)
+void jointTrajectoryPointCallback(const std_msgs::Float64MultiArray& joint_trajectory_point_msg)
 {
-  // trajectory_msgs::JointTrajectoryPoint jnt_tra_point_msg;
-
-  // for (uint8_t id_num = 0; id_num < id_cnt; id_num++)
-  // {
-  //   jnt_tra_point_msg.positions.push_back(goal[id_num].position);
-  //   jnt_tra_point_msg.velocities.push_back(goal[id_num].velocity);
-  //   jnt_tra_point_msg.accelerations.push_back(goal[id_num].acceleration);
-  // }
-
-  // jnt_tra_msg_->points.push_back(jnt_tra_point_msg);
-
-  // double goal_joint_position[20];
-
-  // for (int index = 0; index < joint_cnt; index++)
-  //   goal_joint_position[index] = pos_msg.data[index];
-
-  // manipulator_driver.writeJointPosition(goal_joint_position);
+  if (is_moving == false)
+  {
+    joint_trajectory_point = joint_trajectory_point_msg;
+    is_moving = true;
+  }
 }
 
 /*******************************************************************************
@@ -210,10 +204,10 @@ void jointMoveTimeCallback(const std_msgs::Float64& time_msg)
 void gripperPositionCallback(const std_msgs::Float64MultiArray& gripper_msg)
 {
   double goal_gripper_position[5] = {0.0, };
-  const double open_manipulator_gripper_offset = -0.015f;
+  const double OPEN_MANIPULATOR_GRIPPER_OFFSET = -0.015f;
 
   for (int index = 0; index < gripper_cnt; index++)
-    goal_gripper_position[index] = gripper_msg.data[index] / open_manipulator_gripper_offset;
+    goal_gripper_position[index] = gripper_msg.data[index] / OPEN_MANIPULATOR_GRIPPER_OFFSET;
 
   manipulator_driver.writeGripperPosition(goal_gripper_position);
 }
@@ -487,7 +481,7 @@ void updateJointStates(void)
   static float joint_states_vel[20] = {0.0, };
   static float joint_states_eff[20] = {0.0, };
 
-  const double open_manipulator_gripper_offset = -0.015f;
+  const double OPEN_MANIPULATOR_GRIPPER_OFFSET = -0.015f;
 
   double get_joint_position[joint_cnt + gripper_cnt];
   double get_joint_velocity[joint_cnt + gripper_cnt];
@@ -507,7 +501,7 @@ void updateJointStates(void)
   for (uint8_t num = 0; num < (joint_cnt + gripper_cnt); num++)
   {
     if (num > joint_cnt)
-      get_joint_position[num] = get_joint_position[num] * open_manipulator_gripper_offset;
+      get_joint_position[num] = get_joint_position[num] * OPEN_MANIPULATOR_GRIPPER_OFFSET;
 
     joint_states_pos[WHEEL_NUM + num] = get_joint_position[num];
     joint_states_vel[WHEEL_NUM + num] = get_joint_velocity[num];
@@ -629,6 +623,71 @@ bool calcOdometry(double diff_time)
   last_theta = theta;
 
   return true;
+}
+
+/*******************************************************************************
+* Manipulator's joint control
+*******************************************************************************/
+void jointControl(void)
+{
+  const uint8_t POINT_SIZE = joint_cnt + 1; // Add time parameter
+  const double JOINT_CONTROL_PERIOD = 1.0f / (double)JOINT_CONTROL_FREQEUNCY;
+  static uint32_t points = 0;
+
+  static uint8_t wait_for_write = 0;
+  static uint8_t loop_cnt = 0;
+
+  if (is_moving == true)
+  {
+    uint32_t all_points_cnt = joint_trajectory_point.data_length;
+    uint8_t write_cnt = 0;
+
+    if (loop_cnt < (wait_for_write))
+    {
+      loop_cnt++;
+      return;
+    }
+    else
+    {
+      double goal_joint_position[joint_cnt];
+      double move_time = 0.0f;
+
+      if (points == 0) move_time = joint_trajectory_point.data[points + POINT_SIZE] - joint_trajectory_point.data[points];
+      else if ((points + POINT_SIZE) >= all_points_cnt) move_time = joint_trajectory_point.data[points] / 2.0f;
+      else  move_time = joint_trajectory_point.data[points] - joint_trajectory_point.data[points - POINT_SIZE];
+
+      for (uint32_t positions = points + 1; positions < (points + POINT_SIZE); positions++)
+      {        
+        if ((points + POINT_SIZE) >= all_points_cnt)
+        {
+          goal_joint_position[write_cnt] = joint_trajectory_point.data[positions];
+        }
+        else
+        {
+          double offset = 2.0f * (joint_trajectory_point.data[positions + POINT_SIZE] - joint_trajectory_point.data[positions]);
+          goal_joint_position[write_cnt] = joint_trajectory_point.data[positions] + offset;
+        }
+        write_cnt++;
+      }
+
+      manipulator_driver.writeJointProfileControlParam(move_time * 2.0f);
+      manipulator_driver.writeJointPosition(goal_joint_position);
+
+      wait_for_write = move_time / JOINT_CONTROL_PERIOD;
+      points = points + POINT_SIZE;
+
+      if (points >= all_points_cnt)
+      {
+        points = 0;
+        wait_for_write = 0;
+        is_moving = false;
+      }
+      else
+      {
+        loop_cnt = 0;
+      }
+    }
+  }
 }
 
 /*******************************************************************************

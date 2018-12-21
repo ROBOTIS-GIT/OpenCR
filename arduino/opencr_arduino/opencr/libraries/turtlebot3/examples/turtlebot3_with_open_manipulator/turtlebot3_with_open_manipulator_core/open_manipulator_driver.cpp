@@ -133,7 +133,7 @@ bool OpenManipulatorDriver::init(uint8_t *joint_id, uint8_t joint_cnt, uint8_t *
           result = dxl_wb_.torqueOff(joint_id[num], &log);  
           if (result == true) DEBUG_SERIAL.println("Succeeded to set torque off");
 
-          result = dxl_wb_.setVelocityBasedProfile(joint_id[num], &log);
+          result = dxl_wb_.setTimeBasedProfile(joint_id[num], &log);
           if (result == true) DEBUG_SERIAL.println("Succeeded to set velocity based profile mode");
         }
 
@@ -183,12 +183,12 @@ bool OpenManipulatorDriver::init(uint8_t *joint_id, uint8_t joint_cnt, uint8_t *
     }
   }
 
-  double init_joint_position[4] = {0.0, -1.57, 1.37, 0.2258};
+  double init_joint_position[4] = {0.0, -1.57, 1.20, 0.6};
   double init_gripper_position[1] = {0.0};
 
-  writeJointProfileControlParam(3.0f);
-  writeJointPosition(init_joint_position);
+  writeJointProfileControlParam(3.0f, 0.75f);
   writeGripperProfileControlParam(0.0f);
+  writeJointPosition(init_joint_position);  
   writeGripperPosition(init_gripper_position);
 
   writeJointProfileControlParam(0.0f);
@@ -457,7 +457,7 @@ bool OpenManipulatorDriver::getCurrent(double *get_data)
   return true;
 }
 
-bool OpenManipulatorDriver::writeJointProfileControlParam(int32_t set_time)
+bool OpenManipulatorDriver::writeJointProfileControlParam(double set_time, double acc)
 {
   const char *log;
   bool result = false;
@@ -466,7 +466,7 @@ bool OpenManipulatorDriver::writeJointProfileControlParam(int32_t set_time)
 
   for (uint8_t num = 0; num < joint_.cnt * 2; num = num + 2)
   {
-    goal_data[num] = (set_time * 1000) / 4;
+    goal_data[num] = acc * 1000;
     goal_data[num+1] = set_time * 1000;
   }
 
@@ -476,7 +476,7 @@ bool OpenManipulatorDriver::writeJointProfileControlParam(int32_t set_time)
     if (result == false)
     {
       DEBUG_SERIAL.println(log);
-      DEBUG_SERIAL.println("Failed to sync write position");
+      DEBUG_SERIAL.println("Failed to sync write param for profile");
     }
   }
   else
@@ -509,7 +509,7 @@ bool OpenManipulatorDriver::writeJointPosition(double *set_data)
   return true;
 }
 
-bool OpenManipulatorDriver::writeGripperProfileControlParam(int32_t set_time)
+bool OpenManipulatorDriver::writeGripperProfileControlParam(double set_time)
 {
   const char *log;
   bool result = false;
@@ -528,7 +528,7 @@ bool OpenManipulatorDriver::writeGripperProfileControlParam(int32_t set_time)
     if (result == false)
     {
       DEBUG_SERIAL.println(log);
-      DEBUG_SERIAL.println("Failed to sync write position");
+      DEBUG_SERIAL.println("Failed to sync write param for profile");
     }
   }
   else

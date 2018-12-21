@@ -56,9 +56,9 @@ class OpenManipulatorDriver
   bool getVelocity(double *get_data);
   bool getCurrent(double *get_data);
   bool writeJointPosition(double *set_data);
-  bool writeJointProfileControlParam(int32_t set_time);
+  bool writeJointProfileControlParam(double set_time, double acc = 0.0f);
   bool writeGripperPosition(double *set_data);
-  bool writeGripperProfileControlParam(int32_t set_time);
+  bool writeGripperProfileControlParam(double set_time);
 
  private:
   DynamixelWorkbench dxl_wb_;

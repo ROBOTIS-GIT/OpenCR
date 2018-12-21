@@ -27,7 +27,7 @@ class DynamixelWorkbench : public DynamixelDriver
   DynamixelWorkbench();
   ~DynamixelWorkbench();
 
-  bool torque(uint8_t id, bool onoff, const char **log = NULL);
+  bool torque(uint8_t id, int32_t onoff, const char **log = NULL);
   bool torqueOn(uint8_t id, const char **log = NULL);
   bool torqueOff(uint8_t id, const char **log = NULL);
 
@@ -38,7 +38,7 @@ class DynamixelWorkbench : public DynamixelDriver
   bool itemWrite(uint8_t id, const char *item_name, int32_t data, const char **log = NULL);
   bool itemRead(uint8_t id, const char *item_name, int32_t *data, const char **log = NULL);
 
-  bool led(uint8_t id, bool onoff, const char **log = NULL);
+  bool led(uint8_t id, int32_t onoff, const char **log = NULL);
   bool ledOn(uint8_t id, const char **log = NULL);
   bool ledOff(uint8_t id, const char **log = NULL);
 

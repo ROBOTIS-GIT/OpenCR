@@ -37,7 +37,7 @@ DynamixelWorkbench::DynamixelWorkbench(){}
 
 DynamixelWorkbench::~DynamixelWorkbench(){}
 
-bool DynamixelWorkbench::torque(uint8_t id, bool onoff, const char **log)
+bool DynamixelWorkbench::torque(uint8_t id, int32_t onoff, const char **log)
 {
   bool result = false;
 
@@ -56,7 +56,7 @@ bool DynamixelWorkbench::torqueOn(uint8_t id, const char **log)
 {
   bool result = false;
 
-  result = torque(id, true, log);
+  result = torque(id, 1, log);
 
   return result;
 }
@@ -65,7 +65,7 @@ bool DynamixelWorkbench::torqueOff(uint8_t id, const char **log)
 {
   bool result = false;
 
-  result = torque(id, false, log);
+  result = torque(id, 0, log);
 
   return result;
 }
@@ -252,11 +252,11 @@ bool DynamixelWorkbench::itemRead(uint8_t id, const char *item_name, int32_t *da
   return readRegister(id, item_name, data, log);
 }
 
-bool DynamixelWorkbench::led(uint8_t id, bool onoff, const char **log)
+bool DynamixelWorkbench::led(uint8_t id, int32_t onoff, const char **log)
 {
   bool result = false;
 
-  result = writeRegister(id, "LED", (int32_t)onoff, log);
+  result = writeRegister(id, "LED", onoff, log);
   if (result == false)
   {
     if (log != NULL) *log = "[DynamixelWorkbench] Failed to change led status!";
@@ -271,7 +271,7 @@ bool DynamixelWorkbench::ledOn(uint8_t id, const char **log)
 {
   bool result = false;
 
-  result = led(id, true, log);
+  result = led(id, 1, log);
 
   return result;
 }
@@ -280,7 +280,7 @@ bool DynamixelWorkbench::ledOff(uint8_t id, const char **log)
 {
   bool result = false;
 
-  result = led(id, false, log);
+  result = led(id, 0, log);
 
   return result;
 }
