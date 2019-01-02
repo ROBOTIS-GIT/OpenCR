@@ -328,7 +328,7 @@ bool DynamixelDriver::scan(uint8_t *get_id, uint8_t *get_the_number_of_id, uint8
 
 bool DynamixelDriver::scan(uint8_t *get_id, uint8_t *get_the_number_of_id, uint8_t range, const char **log)
 {
-  return scan(get_id, get_the_number_of_id, 1, range, log);
+  return scan(get_id, get_the_number_of_id, 0, range, log);
 }
 
 bool DynamixelDriver::ping(uint8_t id, uint16_t *get_model_number, const char **log)
