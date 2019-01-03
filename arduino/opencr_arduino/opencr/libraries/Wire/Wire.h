@@ -105,6 +105,7 @@ class TwoWire : public Stream
 {
 
 public:
+  friend void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c);
   friend void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c);
   friend void HAL_I2C_SlaveAddrCpltCallback(I2C_HandleTypeDef *hi2c);
   friend void I2C1_EV_IRQHandler(void);
@@ -145,6 +146,7 @@ public:
   void onReceive(void (*function)(int numBytes));
   void onRequest(void (*function)(void));
   // Process Client ISR Callbacks    
+  void processTXCallback(void);
   void processRXCallback(void);  
   void processAddrCallback(void);
 

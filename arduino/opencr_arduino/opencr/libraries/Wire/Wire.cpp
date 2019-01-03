@@ -254,7 +254,7 @@ void TwoWire::begin(uint8_t address) {
   setClock(frequency_);   // set the clock.
 
   // Setup to get interrupt when we get a slave address match
-  HAL_I2C_Slave_Addr_IT(hi2c_);  
+  __HAL_I2C_ENABLE_IT(hi2c_, I2C_IT_ADDRI);
 }
 
 
@@ -566,7 +566,7 @@ void TwoWire::processAddrCallback(void) {
     txBufferLength = 0;
     if (user_onRequest) {
       (*user_onRequest)();
-      __HAL_I2C_SET_FLAG(hi2c_, I2C_FLAG_TXE); // Clear out anything that was previously in TXDR
+      __HAL_I2C_CLEAR_FLAG(hi2c_, I2C_FLAG_TXE); // Clear out anything that was previously in TXDR
       HAL_I2C_Slave_Transmit_IT(hi2c_, txBuffer, txBufferLength);
     }
 
@@ -599,15 +599,25 @@ void TwoWire::processRXCallback(void) {
     (*user_onReceive)(rxBufferLength);
   }
   // Setup to try to receive next message.
-   HAL_I2C_Slave_Addr_IT(hi2c_);
+  HAL_I2C_Slave_Receive_IT(hi2c_, rxBuffer, sizeof(rxBuffer));
 }
 
 //-------------------------------------
 // Process slave transmit data complete
 //-------------------------------------
 void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c) {
-  // Called at the end of Slave Trransmit - setup to handle next Address match
-   HAL_I2C_Slave_Addr_IT(hi2c);
+  // map this handle to which Wire object
+  if (hi2c == Wire.hi2c_) {
+    Wire.processTXCallback();
+  } else if (hi2c == Wire1.hi2c_ )
+    Wire1.processTXCallback();  
+}
+
+void TwoWire::processTXCallback(void) {
+  // Lets see if we can figure out what happened...
+  txBufferLength = (uint32_t)(hi2c_->pBuffPtr-txBuffer);
+  
+  HAL_I2C_Slave_Transmit_IT(hi2c_, txBuffer, txBufferLength);
 }
 
 //-------------------------------------
