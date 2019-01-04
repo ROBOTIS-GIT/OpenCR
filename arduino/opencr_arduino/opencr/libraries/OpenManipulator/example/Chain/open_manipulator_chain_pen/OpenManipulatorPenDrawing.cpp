@@ -30,7 +30,6 @@ void Alphabet::initAlphabet(double move_time, double control_time, std::vector<W
   start_pose_ = start;
   alphabet_ = alphabet;
   move_time_ = move_time;
-  //scale_ = 0.010;
   scale_ = (double)scale * 0.001 *0.5;
 
   WayPoint drawingStart, drawingGoal;
@@ -93,50 +92,6 @@ void Alphabet::init(double move_time, double control_time, std::vector<WayPoint>
 }
 std::vector<WayPoint> Alphabet::getJointWayPoint(double tick){ return {}; }
 std::vector<WayPoint> Alphabet::getTaskWayPoint(double tick){  return drawAlphabet(tick); }
-
-
-std::vector<WayPoint> Alphabet::drawing_A(double t)
-{
-  // set drawing trajectory
-  std::vector<WayPoint> pose;
-  pose.resize(6);
-  double diff_pose[2] = {0.0, 0.0};
-
-  if(t <= 1.0)
-  {
-    double x = t;         
-    diff_pose[0] =  x;// x
-    diff_pose[1] =  2 * (x);// y
-  }
-  else if(t <= 2.0)
-  {
-    double x = t;
-    diff_pose[0] =  x;// x
-    diff_pose[1] =  -2 * (x) + 4;// y
-  }
-  else if(t <= 2.5)
-  {
-    double x = 2.0 - (t - 2.0);
-    diff_pose[0] =  x;// x
-    diff_pose[1] =  -2 * (x) + 4;// y
-  }
-  else
-  {
-    double x = 1.5 - (t - 2.5);
-    diff_pose[0] =  x-0.1;// x
-    diff_pose[1] =  1;// y
-  }
-
-  pose.at(0).value = start_pose_.at(0).value - diff_pose[1]*scale_;
-  pose.at(1).value = start_pose_.at(1).value + diff_pose[0]*scale_;
-  pose.at(2).value = start_pose_.at(2).value;
-
-  pose.at(3).value = start_pose_.at(3).value;
-  pose.at(4).value = start_pose_.at(4).value;
-  pose.at(5).value = start_pose_.at(5).value;
-
-  return pose;
-}
 
 std::vector<WayPoint> Alphabet::drawing_B(double t)
 {

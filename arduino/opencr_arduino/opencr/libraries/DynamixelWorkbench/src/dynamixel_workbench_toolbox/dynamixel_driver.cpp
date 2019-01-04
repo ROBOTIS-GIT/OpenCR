@@ -328,7 +328,7 @@ bool DynamixelDriver::scan(uint8_t *get_id, uint8_t *get_the_number_of_id, uint8
 
 bool DynamixelDriver::scan(uint8_t *get_id, uint8_t *get_the_number_of_id, uint8_t range, const char **log)
 {
-  return scan(get_id, get_the_number_of_id, 1, range, log);
+  return scan(get_id, get_the_number_of_id, 0, range, log);
 }
 
 bool DynamixelDriver::ping(uint8_t id, uint16_t *get_model_number, const char **log)
@@ -570,9 +570,9 @@ bool DynamixelDriver::writeRegister(uint8_t id, uint16_t address, uint16_t lengt
   ErrorFromSDK sdk_error = {0, false, false, 0};
 
 #if defined(__OPENCR__) || defined(__OPENCM904__)
-    delay(50);
+    delay(10);
 #else
-    usleep(1000*50);
+    usleep(1000*10);
 #endif
 
   sdk_error.dxl_comm_result = packetHandler_->writeTxRx(portHandler_, 
@@ -681,9 +681,9 @@ bool DynamixelDriver::writeOnlyRegister(uint8_t id, uint16_t address, uint16_t l
   ErrorFromSDK sdk_error = {0, false, false, 0};
 
 #if defined(__OPENCR__) || defined(__OPENCM904__)
-    delay(50);
+    delay(10);
 #else
-    usleep(1000*50);
+    usleep(1000*10);
 #endif
 
   sdk_error.dxl_comm_result = packetHandler_->writeTxOnly(portHandler_, 
@@ -718,9 +718,9 @@ bool DynamixelDriver::writeOnlyRegister(uint8_t id, const char *item_name, int32
   if (control_item == NULL) return false;
 
 #if defined(__OPENCR__) || defined(__OPENCM904__)
-    delay(50);
+    delay(10);
 #else
-    usleep(1000*50);
+    usleep(1000*10);
 #endif
 
   switch (control_item->data_length)
