@@ -49,7 +49,6 @@ public:
 
   void initAlphabet(double move_time, double control_time, std::vector<WayPoint> start, char alphabet, char scale);
   std::vector<WayPoint> drawAlphabet(double time_var);
-  std::vector<WayPoint> drawing_A(double t);
   std::vector<WayPoint> drawing_B(double t);
   std::vector<WayPoint> drawing_R(double t);
   std::vector<WayPoint> drawing_C(double t);

@@ -93,6 +93,11 @@ void SPIClass::init(void){
   HAL_SPI_Init(_hspi);
 }
 
+void SPIClass::end()
+{
+  
+}
+
 uint8_t SPIClass::transfer(uint8_t data) const{
   uint8_t ret;
   HAL_SPI_TransmitReceive(_hspi, &data, &ret, 1, 0xffff);

@@ -123,6 +123,10 @@ class SPIClass {
     void endTransaction(void)
     {
     }
+
+    // Disable the SPI bus
+    static void end();
+
     uint8_t transfer(uint8_t _data) const;
     uint16_t transfer16(uint16_t data);
 //    void transfer(void *buf, size_t count);
