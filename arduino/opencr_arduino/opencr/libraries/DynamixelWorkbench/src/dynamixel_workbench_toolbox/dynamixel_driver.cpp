@@ -832,9 +832,9 @@ bool DynamixelDriver::readRegister(uint8_t id, const char *item_name, int32_t *d
   control_item = tools_[factor].getControlItem(item_name, log);
   if (control_item == NULL) return false;
 
-  uint8_t data_1_byte  = 0;
-  uint16_t data_2_byte = 0;
-  uint32_t data_4_byte = 0;
+  uint8_t *data_1_byte = (uint8_t *)data;
+  uint16_t *data_2_byte = (uint16_t *)data;
+  uint32_t *data_4_byte = (uint32_t *)data;
 
   switch (control_item->data_length)
   {
@@ -842,7 +842,7 @@ bool DynamixelDriver::readRegister(uint8_t id, const char *item_name, int32_t *d
       sdk_error.dxl_comm_result = packetHandler_->read1ByteTxRx(portHandler_,
                                                             id,
                                                             control_item->address,
-                                                            &data_1_byte,
+                                                            data_1_byte,
                                                             &sdk_error.dxl_error);
      break;
 
@@ -850,7 +850,7 @@ bool DynamixelDriver::readRegister(uint8_t id, const char *item_name, int32_t *d
       sdk_error.dxl_comm_result = packetHandler_->read2ByteTxRx(portHandler_,
                                                             id,
                                                             control_item->address,
-                                                            &data_2_byte,
+                                                            data_2_byte,
                                                             &sdk_error.dxl_error);
      break;
 
@@ -858,7 +858,7 @@ bool DynamixelDriver::readRegister(uint8_t id, const char *item_name, int32_t *d
       sdk_error.dxl_comm_result = packetHandler_->read4ByteTxRx(portHandler_,
                                                             id,
                                                             control_item->address,
-                                                            &data_4_byte,
+                                                            data_4_byte,
                                                             &sdk_error.dxl_error);
      break;
 
@@ -866,7 +866,7 @@ bool DynamixelDriver::readRegister(uint8_t id, const char *item_name, int32_t *d
       sdk_error.dxl_comm_result = packetHandler_->read1ByteTxRx(portHandler_,
                                                             id,
                                                             control_item->address,
-                                                            &data_1_byte,
+                                                            data_1_byte,
                                                             &sdk_error.dxl_error);
      break;
   }
@@ -883,25 +883,6 @@ bool DynamixelDriver::readRegister(uint8_t id, const char *item_name, int32_t *d
   }
   else
   {
-    switch (control_item->data_length)
-    {
-      case BYTE:
-        *data = data_1_byte;
-      break;
-
-      case WORD:
-        *data = data_2_byte;
-      break;
-
-      case DWORD:
-        *data = data_4_byte;
-      break;
-
-      default:
-        *data = data_1_byte;
-      break;
-    }
-
     if (log != NULL) *log = "[DynamixelDriver] Succeeded to read!";
     return true;
   }
