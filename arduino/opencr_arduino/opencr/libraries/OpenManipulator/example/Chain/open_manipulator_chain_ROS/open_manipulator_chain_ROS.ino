@@ -40,6 +40,8 @@ void setup()
 
   nh.advertiseService(goal_tool_control_server);
   nh.advertiseService(set_actuator_state_server);
+
+  nh.advertiseService(goal_drawing_trajectory_server);
   
   open_manipulator.initManipulator(true);
   RM_LOG::PRINT("OpenManipulator Debugging Port");
@@ -224,6 +226,60 @@ void setActuatorStateCallback(const SetActuatorState::Request & req, SetActuator
     open_manipulator.allActuatorDisable();
   }
 
+  res.is_planned = true;
+}
+
+/*******************************************************************************
+* Service server (set drawing trajectory)
+*******************************************************************************/
+void goalDrawingTrajectoryCallBack(const SetDrawingTrajectory::Request & req, SetDrawingTrajectory::Response & res)
+{
+  STRING trajectory_name (req.drawing_trajectory_name);
+
+  if(trajectory_name == "circle")
+  {
+    double draw_circle_arg[3];
+    draw_circle_arg[0] = req.param[0];  // radius (m)
+    draw_circle_arg[1] = req.param[1];  // revolution (rev)
+    draw_circle_arg[2] = req.param[2];  // start angle position (rad)
+    void* p_draw_circle_arg = &draw_circle_arg;
+
+    open_manipulator.drawingTrajectoryMove(DRAWING_CIRCLE, req.end_effector_name, p_draw_circle_arg, req.path_time);
+  }
+  else if(trajectory_name == "line")
+  {
+    Pose present_pose = open_manipulator.getPose("gripper");
+    WayPoint draw_goal_pose[6];
+    draw_goal_pose[0].value = present_pose.position(0) + req.param[0];
+    draw_goal_pose[1].value = present_pose.position(1) + req.param[1];
+    draw_goal_pose[2].value = present_pose.position(2) + req.param[2];
+    draw_goal_pose[3].value = RM_MATH::convertRotationToRPY(present_pose.orientation)[0];
+    draw_goal_pose[4].value = RM_MATH::convertRotationToRPY(present_pose.orientation)[1];
+    draw_goal_pose[5].value = RM_MATH::convertRotationToRPY(present_pose.orientation)[2];
+    void *p_draw_line_arg = &draw_goal_pose;
+
+    open_manipulator.drawingTrajectoryMove(DRAWING_LINE, req.end_effector_name, p_draw_line_arg, req.path_time);
+  }
+  else if(trajectory_name == "rhombus")
+  {
+    double draw_circle_arg[3];
+    draw_circle_arg[0] = req.param[0];  // radius (m)
+    draw_circle_arg[1] = req.param[1];  // revolution (rev)
+    draw_circle_arg[2] = req.param[2];  // start angle position (rad)
+    void* p_draw_circle_arg = &draw_circle_arg;
+
+    open_manipulator.drawingTrajectoryMove(DRAWING_RHOMBUS, req.end_effector_name, p_draw_circle_arg, req.path_time);
+  }
+  else if(trajectory_name == "heart")
+  {
+    double draw_circle_arg[3];
+    draw_circle_arg[0] = req.param[0];  // radius (m)
+    draw_circle_arg[1] = req.param[1];  // revolution (rev)
+    draw_circle_arg[2] = req.param[2];  // start angle position (rad)
+    void* p_draw_circle_arg = &draw_circle_arg;
+
+    open_manipulator.drawingTrajectoryMove(DRAWING_HEART, req.end_effector_name, p_draw_circle_arg, req.path_time);
+  }
   res.is_planned = true;
 }
 

@@ -31,10 +31,12 @@
 #include <open_manipulator_msgs/SetJointPosition.h>
 #include <open_manipulator_msgs/SetKinematicsPose.h>
 #include <open_manipulator_msgs/SetActuatorState.h>
+#include <open_manipulator_msgs/SetDrawingTrajectory.h>
 
 using open_manipulator_msgs::SetJointPosition;
 using open_manipulator_msgs::SetKinematicsPose;
 using open_manipulator_msgs::SetActuatorState;
+using open_manipulator_msgs::SetDrawingTrajectory;
 
 OPEN_MANIPULATOR open_manipulator;
 double present_time = 0.0;
@@ -87,6 +89,10 @@ ros::ServiceServer<SetJointPosition::Request, SetJointPosition::Response> goal_t
 void setActuatorStateCallback(const SetActuatorState::Request & req, SetActuatorState::Response & res);
 ros::ServiceServer<SetActuatorState::Request, SetActuatorState::Response> set_actuator_state_server(
   "open_manipulator/set_actuator_state", &setActuatorStateCallback);
+
+void goalDrawingTrajectoryCallBack(const SetDrawingTrajectory::Request & req, SetDrawingTrajectory::Response & res);
+ros::ServiceServer<SetDrawingTrajectory::Request, SetDrawingTrajectory::Response> goal_drawing_trajectory_server(
+  "open_manipulator/goal_drawing_trajectory", &goalDrawingTrajectoryCallBack);
 
 /*******************************************************************************
 * Publisher
