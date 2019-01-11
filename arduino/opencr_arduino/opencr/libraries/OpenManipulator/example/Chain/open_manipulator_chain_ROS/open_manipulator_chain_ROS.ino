@@ -22,6 +22,7 @@ void setup()
 {
   DEBUG.begin(57600);
 
+  // Initialize ROS node handle, advertise and subscribe the topics
   nh.initNode();
   nh.getHardware()->setBaud(115200);
 
@@ -37,13 +38,14 @@ void setup()
   nh.advertiseService(goal_task_space_path_to_present_server);
   nh.advertiseService(goal_task_space_path_to_present_position_only_server);
   nh.advertiseService(goal_task_space_path_to_present_orientation_only_server);
-
   nh.advertiseService(goal_tool_control_server);
   nh.advertiseService(set_actuator_state_server);
-
   nh.advertiseService(goal_drawing_trajectory_server);
-  
+
+
+  // Initialize Open Manipulator.  
   open_manipulator.initManipulator(true);
+
   RM_LOG::PRINT("OpenManipulator Debugging Port");
 }
 
@@ -56,9 +58,14 @@ void loop()
   {
     open_manipulator.openManipulatorProcess(millis()/1000.0);
     previous_time = (float)(millis()/1000.0f);
+    
+  }
+  if(present_time - previous_time_pub >= CONTROL_TIME*10)
+  {
     publishJointStates();
     publishKinematicPose();
     publishOpenManipulatorState();
+    previous_time_pub = (float)(millis()/1000.0f);
   }
 }
 

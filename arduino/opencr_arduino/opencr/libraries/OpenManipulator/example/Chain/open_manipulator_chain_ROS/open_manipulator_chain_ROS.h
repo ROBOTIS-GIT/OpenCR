@@ -41,6 +41,7 @@ using open_manipulator_msgs::SetDrawingTrajectory;
 OPEN_MANIPULATOR open_manipulator;
 double present_time = 0.0;
 double previous_time = 0.0;
+double previous_time_pub = 0.0;
 
 /*******************************************************************************
 * ROS NodeHandle
