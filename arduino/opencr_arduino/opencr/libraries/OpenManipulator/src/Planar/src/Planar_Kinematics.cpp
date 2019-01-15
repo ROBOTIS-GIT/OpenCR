@@ -33,34 +33,7 @@ void Planar::setOption(const void *arg)
 }
 
 void Planar::updatePassiveJointValue(Manipulator *manipulator)
-{
-  // std::vector<double> joint_angle;
-  // joint_angle = manipulator->getAllActiveJointValue();
-
-  // // Compute the second joints of each two links
-  // double joint_angle2[7];
-  // for (uint8_t i=0; i<3; i++)
-  // {
-  //   target_angle[i] = joint_angle(i) + PI/4.0; 
-  //   target_angle[i+3] = acos((-sin(PI*2.0/3.0*i)*diff_x[i] + cos(PI*2.0/3.0*i)*diff_y[i] 
-  //                             + link[0]*cos(target_angle[i])) / -link[1]) - target_angle[i] - PI*7.0/12.0;
-  // }
-
-  // target_angle_vector.push_back(target_angle[3]);
-  // target_angle_vector.push_back(target_angle[4]);
-  // target_angle_vector.push_back(target_angle[5]);
-
-  // // Compute the third joints of each two links
-  // target_angle[3] += PI*7.0/12.0;
-  // if ((target_pose.position(0)-goal_x[0])/link[2] > 1) target_pose.position(0) = goal_x[0] + link[2];
-
-  // target_angle[6] = acos((target_pose.position(0)-goal_x[0])/link[2]) +PI/2- target_angle[0] - target_angle[3]+PI/3.0;
-
-  // target_angle_vector.push_back(target_angle[6]);
-
-  // // Set joint angles
-  // manipulator->setAllJointValue(joint_angle);
-}
+{}
 
 Eigen::MatrixXd Planar::jacobian(Manipulator *manipulator, Name tool_name)
 {
@@ -83,88 +56,6 @@ bool Planar::inverseKinematics(Manipulator *manipulator, Name tool_name, Pose ta
 
 void Planar::forwardKinematicsSolverUsingGeometry(Manipulator *manipulator, Name component_name)
 {
-  // Name my_name = component_name;
-  // Name parent_name = manipulator->getComponentParentName(my_name);
-  // int8_t number_of_child = manipulator->getComponentChildName(my_name).size();
-
-  // Eigen::Vector3d parent_position_to_world, my_position_to_world;
-  // Eigen::Matrix3d parent_orientation_to_world, my_orientation_to_world;
-
-  // if (parent_name == manipulator->getWorldName())
-  // {
-  //   parent_position_to_world = manipulator->getWorldPosition();
-  //   parent_orientation_to_world = manipulator->getWorldOrientation();
-  // }
-  // else
-  // {
-  //   parent_position_to_world = manipulator->getComponentPositionToWorld(parent_name);
-  //   parent_orientation_to_world = manipulator->getComponentOrientationToWorld(parent_name);
-  // }
-
-  // my_position_to_world = parent_orientation_to_world * manipulator->getComponentRelativePositionToParent(my_name) + parent_position_to_world;
-  // my_orientation_to_world = parent_orientation_to_world * RM_MATH::rodriguesRotationMatrix(manipulator->getJointAxis(my_name), manipulator->getJointValue(my_name));
-
-  // manipulator->setComponentPositionToWorld(my_name, my_position_to_world);
-  // manipulator->setComponentOrientationToWorld(my_name, my_orientation_to_world);
-
-  // for (int8_t index = 0; index < number_of_child; index++)
-  // {
-  //   Name child_name = manipulator->getComponentChildName(my_name).at(index);
-  //   forward(manipulator, child_name);
-  // }
-
-  // --------------- OR --------------//
-  // double theta2[3] = {45,45,45}; 
-  // double temp_x; 
-  // double temp_y; 
-  // double start_x[3]; 
-  // double start_y[3]; 
-  // double centre_x, centre_y;
-  // double link[3];
-
-
-  // double error= 10000;
-  // double temp_error;
-  // double result;
-  // // Length of Position Difference and Target Angle
-  // for (int i=-300; i<=-300; i++){  
-  //   double theta=(double)i/10;
-
-  //   // Link Lengths
-  //   link[0] = 0.120f;
-  //   link[1] = 0.098f;
-  //   link[2] = 0.0366f;
-
-  //   // Start Pose for each set of two joints
-  //   for (int i=0; i<3; i++){
-  //     start_x[i] = cos(PI*2.0f/3.0f*i) * (-0.1705f + link[0]*sin(theta2[i]*PI/180));
-  //     start_y[i] = sin(PI*2.0f/3.0f*i) * (-0.1705f - link[0]*cos(theta2[i]*PI/180));
-  //   }
-    
-  //   Matrix2f alpha = Matrix2f::Zero();
-  //   Vector2f beta = Vector2f::Zero();
-  //   alpha << start_y[2]-start_y[1], start_y[1]-start_y[2],
-  //            start_x[2]-start_x[3], start_x[2]-start_x[1];
-  //   beta  << start_x[2]*start_x[2]-start_x[1]*start_x[1]+start_y[2]*start_y[2]-start_y[1]*start_y[1],
-  //            start_x[3]*start_x[3]-start_x[2]*start_x[2]+start_y[3]*start_y[3]-start_y[2]*start_y[2];
-             
-  //   Matrix2f centre = Matrix2f::Zero();
-
-  //   // centre = alpha * beta / 
-  //           //  (2*((start_x[2]-start_x[1])*(start_y[3]*start_y[2])
-  //               // -(start_y[2]-start_y[1])*(start_x[3]*start_x[2])));
-
-
-  //   // temp_error = abs(sqrt((centre(0)-start_x[0])^(centre(0)-start_x[0])
-  //   //                +(centre(1)-start_y[0])^(centre(1)-start_y[0])) - link[1]);
-
-  //   if (error < temp_error){  
-  //     result = theta;
-  //     centre_x = centre(0);
-  //     centre_y = centre(1);
-  //     error = temp_error;
-  //   }
-  // }  
 }
 
 bool Planar::inverseKinematicsSolverUsingGeometry(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<double> *goal_joint_value)
@@ -205,7 +96,8 @@ bool Planar::inverseKinematicsSolverUsingGeometry(Manipulator *manipulator, Name
     goal_orientation(1,1) = 1;
     goal_orientation(2,2) = 1;
   }
-  for (int i=0; i<3; i++){
+  for (int i=0; i<3; i++)
+  {
     goal_x[i] = goal_orientation(0,0)*temp_x[i] + goal_orientation(0,1)*temp_y[i];
     goal_y[i] = goal_orientation(1,0)*temp_x[i] + goal_orientation(1,1)*temp_y[i];
     diff_x[i] = goal_x[i] - start_x[i];

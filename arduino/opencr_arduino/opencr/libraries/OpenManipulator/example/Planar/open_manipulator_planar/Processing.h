@@ -222,8 +222,25 @@ void receiveDataFromProcessing(Planar *planar)
           planar->taskTrajectoryMoveToPresentPose("tool", RM_MATH::makeVector3(0.0,  0.020, 0.0), 0.1);
         else if (cmd[1] == "r")
           planar->taskTrajectoryMoveToPresentPose("tool", RM_MATH::makeVector3(0.0, -0.020, 0.0), 0.1);
-      }
+        else if (cmd[1] == "roti")
+          planar->taskTrajectoryMoveToPresentPose("tool", RM_MATH::makeMatrix3(cos(PI/6.0), -sin(PI/6.0), 0.0, 
+                                                                               sin(PI/6.0),  cos(PI/6.0), 0.0, 
+                                                                               0.0,          0.0,         1.0), 0.1);
+        else if (cmd[1] == "rot")
+          planar->taskTrajectoryMoveToPresentPose("tool", RM_MATH::makeMatrix3(cos(PI/4.0),  sin(PI/4.0), 0.0, 
+                                                                               -sin(PI/4.0), cos(PI/4.0), 0.0, 
+                                                                               0.0,          0.0,         1.0), 0.1);
+        else
+        {
+          Pose goal_pose;
+          goal_pose.position = RM_MATH::makeVector3(0.0, 0.0, 0.0);
+          goal_pose.orientation = RM_MATH::makeMatrix3(0.0, 0.0, 0.0, 
+                                                       0.0, 0.0, 0.0,
+                                                       0.0, 0.0, 0.0);
 
+          planar->taskTrajectoryMoveToPresentPose("tool", goal_pose, 0.1);
+        }
+      }
 
       // Hand teaching tab 
       else if (cmd[0] == "hand")
