@@ -51,7 +51,7 @@ namespace PLANAR_DYNAMIXEL
 #define LENGTH_PRESENT_VELOCITY_1 = 2;
 #define LENGTH_PRESENT_POSITION_1 = 2;
 
-typedef struct
+typedef struct _Tool
 {
   std::vector<uint8_t> id;
   uint8_t num;

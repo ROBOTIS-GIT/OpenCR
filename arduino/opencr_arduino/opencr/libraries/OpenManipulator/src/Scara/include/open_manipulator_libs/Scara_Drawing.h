@@ -43,8 +43,8 @@ enum AXIS
   YAW
 };
 
-//---------------------------------------------------------------------------------------------------- 
 
+//---------------------------------------------------------------------------------------------------- 
 class Line : public ROBOTIS_MANIPULATOR::DrawingTrajectory
 {
 private:
@@ -72,7 +72,6 @@ public:
 
 
 //---------------------------------------------------------------------------------------------------- 
-
 class Circle : public ROBOTIS_MANIPULATOR::DrawingTrajectory
 {
 private:
@@ -103,7 +102,6 @@ public:
 
 
 //---------------------------------------------------------------------------------------------------- 
-
 class Rhombus : public ROBOTIS_MANIPULATOR::DrawingTrajectory
 {
 private:
@@ -134,7 +132,6 @@ public:
 
 
 //---------------------------------------------------------------------------------------------------- 
-
 class Heart : public ROBOTIS_MANIPULATOR::DrawingTrajectory
 {
 private:

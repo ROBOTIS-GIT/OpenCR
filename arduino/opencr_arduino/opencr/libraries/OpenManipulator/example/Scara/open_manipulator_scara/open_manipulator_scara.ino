@@ -51,7 +51,6 @@ void setup()
    */
   scara.initManipulator(true); // true:  using actual hardware
                                // false: using only visualization tool 
-   
 }
 
 void loop()
@@ -74,5 +73,5 @@ void loop()
 
   /**
    */
-  executeDemo(&scara); 
+  runDemo(&scara); 
 }

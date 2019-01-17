@@ -109,7 +109,8 @@ bool Planar::inverseKinematicsSolverUsingGeometry(Manipulator *manipulator, Name
   double alpha[3];
   double temp_diff[3];      
 
-  for (int i=0; i<3; i++){
+  for (int i=0; i<3; i++)
+  {
     alpha[i] = acos((target_pose_length[i]*target_pose_length[i] + link[0]*link[0] - link[1]*link[1]) 
                             / (2*target_pose_length[i]*link[0]));
     temp_diff[i] = sin(-PI*2.0/3.0*i)*diff_x[i] + cos(-PI*2.0/3.0*i)*diff_y[i];

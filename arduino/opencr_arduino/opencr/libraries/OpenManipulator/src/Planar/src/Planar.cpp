@@ -18,10 +18,8 @@
 
 #include "../include/open_manipulator_libs/Planar.h"
 
-Planar::Planar()
-{}
-Planar::~Planar()
-{}
+Planar::Planar(){}
+Planar::~Planar(){}
 
 void Planar::initDebug()
 {
@@ -45,7 +43,6 @@ void Planar::initManipulator(bool hardware_flag, STRING usb_port, STRING baud_ra
   // ??
   hardware_flag_ = hardware_flag;  
 
-
   //--------------------------------------------------------------------
   // Manipulator Parameter Initialization
   //--------------------------------------------------------------------
@@ -57,45 +54,43 @@ void Planar::initManipulator(bool hardware_flag, STRING usb_port, STRING baud_ra
            "joint2",  // child name
            RM_MATH::makeVector3(0.012, 0.0, 0.017),      // relative position
            RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0), // relative orientation
-           Z_AXIS, // axis of rotation
-           1); // actuator id
+           Z_AXIS,    // axis of rotation
+           1);        // actuator id
 
-  addJoint("joint2", // my name
-           "joint1", // parent name
-           "joint3", // child name
+  addJoint("joint2",  // my name
+           "joint1",  // parent name
+           "joint3",  // child name
            RM_MATH::makeVector3(0.0, 0.0, 0.058),        // relative position
            RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0), // relative orientation
-           Y_AXIS, // axis of rotation
-           2);     // actuator id
+           Y_AXIS,    // axis of rotation
+           2);        // actuator id
 
-  addJoint("joint3", // my name
-           "joint1", // parent name
-           "joint4", // child name
+  addJoint("joint3",  // my name
+           "joint1",  // parent name
+           "joint4",  // child name
            RM_MATH::makeVector3(0.024, 0.0, 0.128),        // relative position
            RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0), // relative orientation
-           Y_AXIS, // axis of rotation
-           3);     // actuator id
+           Y_AXIS,    // axis of rotation
+           3);        // actuator id
 
-  addJoint("joint4", // my name
-           "joint3", // parent name
-           "tool", // child name
+  addJoint("joint4",  // my name
+           "joint3",  // parent name
+           "tool",    // child name
            RM_MATH::makeVector3(0.124, 0.0, 0.0),        // relative position
            RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0), // relative orientation
-           Y_AXIS, // axis of rotation
-           -1);    // actuator id
+           Y_AXIS,    // axis of rotation
+           -1);       // actuator id
 
-  addTool("tool",   // my name
-          "joint4", // parent name
+  addTool("tool",     // my name
+          "joint4",   // parent name
           RM_MATH::makeVector3(0.130, 0.0, 0.0), // relative position
           RM_MATH::convertRPYToRotation(0.0, 0.0, 0.0), // relative orientation
-          -1, // actuator id
-          -0.015); // Change unit from `meter` to `radian`
-
+          -1,         // actuator id
+          -0.015);    // Change unit from `meter` to `radian`
 
   //--------------------------------------------------------------------
   // Kinematics Initialization 
   //--------------------------------------------------------------------
-
   kinematics_ = new PLANAR_KINEMATICS::Planar();
   addKinematics(kinematics_);
   STRING inverse_option[2] = {"inverse_solver", "geometric_inverse"};
@@ -111,7 +106,6 @@ void Planar::initManipulator(bool hardware_flag, STRING usb_port, STRING baud_ra
     //--------------------------------------------------------------------
     // Joint Initialization
     //--------------------------------------------------------------------
-
     // Initialize(?)joint actuator 
     joint_ = new PLANAR_DYNAMIXEL::JointDynamixel();
 
@@ -135,11 +129,9 @@ void Planar::initManipulator(bool hardware_flag, STRING usb_port, STRING baud_ra
     void *p_joint_dxl_mode_arg = &joint_dxl_mode_arg;
     jointActuatorSetMode(JOINT_DYNAMIXEL, jointDxlId, p_joint_dxl_mode_arg);
 
-
     //--------------------------------------------------------------------
     // Tool Initialization   (No Tool....))
     //--------------------------------------------------------------------
-
     // Initialize tool actuator 
     // tool_ = new PLANAR_DYNAMIXEL::GripperDynamixel();
 
@@ -175,10 +167,9 @@ void Planar::initManipulator(bool hardware_flag, STRING usb_port, STRING baud_ra
     // receiveAllToolActuatorValue();
   }
 
-  /* -------------------------------------------------- */
-  // ------------ Drawing Initialization -------------- */
-  /* -------------------------------------------------- */
-
+  //--------------------------------------------------------------------
+  // Drawing Initialization  
+  //--------------------------------------------------------------------
   // Add drawing trajectories 
   addDrawingTrajectory(DRAWING_LINE, &line_);
   addDrawingTrajectory(DRAWING_CIRCLE, &circle_);
@@ -230,9 +221,9 @@ bool Planar::getReceiveDataFlag()
 }
 
 /* Get the previous time when data were received */
-bool Planar::getConsecutiveMotionFlag() 
+bool Planar::getRunDemoFlag() 
 {
-  return consecutive_motion_flag_;
+  return run_demo_flag_;
 }
 
 /* Get the previous time when data were received */
@@ -254,9 +245,9 @@ void Planar::setReceiveDataFlag(bool receive_data_flag)
 }
 
 /* Set whether data were received or not */
-void Planar::setConsecutiveMotionFlag(bool consecutive_motion_flag) 
+void Planar::setRunDemoFlag(bool run_demo_flag) 
 {
-  consecutive_motion_flag_ = consecutive_motion_flag;
+  run_demo_flag_ = run_demo_flag;
 }
 
 /* Set the previous time when data were received */

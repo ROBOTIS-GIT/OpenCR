@@ -21,13 +21,13 @@
 
 #include <Scara.h>
 #include <RC100.h>
+#include "Demo.h"
 
 RC100 rc100;
 double grip_value = 0.0;
 
 
 //---------------------------------------------------------------------------------------------------- 
-
 /* Initialize baudrate for using RC100 */
 void initRC100()
 {
@@ -35,7 +35,6 @@ void initRC100()
 }
 
 //---------------------------------------------------------------------------------------------------- 
-
 /* Receive data from RC100 */
 void receiveDataFromRC100(Scara* scara)
 {
@@ -65,7 +64,6 @@ void receiveDataFromRC100(Scara* scara)
       else if (data & RC100_BTN_5)
       {
         std::vector<double> goal_position;
-
         goal_position.push_back(-60.0 * DEG2RAD);
         goal_position.push_back(20.0 * DEG2RAD);
         goal_position.push_back(40.0 * DEG2RAD);
@@ -75,82 +73,33 @@ void receiveDataFromRC100(Scara* scara)
       else if (data & RC100_BTN_6)
       {
         std::vector<double> goal_position;
-
         goal_position.push_back(0.0);
         goal_position.push_back(0.0);
         goal_position.push_back(0.0);
 
         scara->jointTrajectoryMove(goal_position, 1.0);
       }
+
+      // ...
+      scara->setReceiveDataFlag(true);
+      scara->setPrevReceiveTime(millis()/1000.0); // instead of curr_time...?
     }
-    else
+  }
+  else 
+  {
+    // Serial.println(".");
+    // Check if running demo now..
+    if (scara->getRunDemoFlag())
     {
+      runDemo(scara); 
+    }
 
-      // Check if any consecutive motions
-      if (scara->getConsecutiveMotionFlag() == true)
-      {
-        if (millis()/1000.0 - scara->getPrevReceiveTime() >= 11)
-        {
-          std::vector<double> goal_position;
-          goal_position.push_back(0.0); 
-          goal_position.push_back(0.0);
-          goal_position.push_back(-2*PI);
-          scara->jointTrajectoryMove(goal_position, 0.3);
-
-          scara->setConsecutiveMotionFlag(false);
-          initRC100();
-        }
-        else if (millis()/1000.0 - scara->getPrevReceiveTime() >= 10)
-        {
-          scara->toolMove("tool", -0.007);        
-        }
-        else if (millis()/1000.0 - scara->getPrevReceiveTime() >= 9)
-        {
-          scara->toolMove("tool", 0.007);        
-        }
-        else if (millis()/1000.0 - scara->getPrevReceiveTime() >= 7)
-        {
-          std::vector<double> goal_position;
-          goal_position.push_back(-4.899); 
-          goal_position.push_back(-4.5);
-          goal_position.push_back(-2*PI);
-          scara->jointTrajectoryMove(goal_position, 0.3);
-        }
-        else if (millis()/1000.0 - scara->getPrevReceiveTime() >= 5)
-        {
-          double joint_angle[2];
-          joint_angle[0] = scara->getJointValue("joint1").value;
-          joint_angle[1] = scara->getJointValue("joint2").value;
-
-          std::vector<double> goal_position;
-          goal_position.push_back(joint_angle[0]); 
-          goal_position.push_back(joint_angle[1]);
-          goal_position.push_back(-2*PI);
-          scara->jointTrajectoryMove(goal_position, 1.0);
-        }
-        else if (millis()/1000.0 - scara->getPrevReceiveTime() >= 4)
-        {
-          scara->toolMove("tool", -0.007);        
-        }
-        else if (millis()/1000.0 - scara->getPrevReceiveTime() >= 2)
-        {
-          double joint_angle[2];
-          joint_angle[0] = scara->getJointValue("joint1").value;
-          joint_angle[1] = scara->getJointValue("joint2").value;
-
-          std::vector<double> goal_position;
-          goal_position.push_back(joint_angle[0]); 
-          goal_position.push_back(joint_angle[1]);
-          goal_position.push_back(0);
-          scara->jointTrajectoryMove(goal_position, 1.0);
-        }
-      }
-      else if (millis()/1000.0 - scara->getPrevReceiveTime() >= RECEIVE_RATE)  
-      {
-        scara->setReceiveDataFlag(false);  
-        initRC100();
-      }
-    } 
+    // Check if ???
+    else if (millis()/1000.0 - scara->getPrevReceiveTime() >= RECEIVE_RATE)
+    {
+      scara->setReceiveDataFlag(false);   //received <--
+      initRC100();
+    }
   }
 }
 

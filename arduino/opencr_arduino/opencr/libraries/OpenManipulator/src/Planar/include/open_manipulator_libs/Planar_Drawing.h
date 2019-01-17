@@ -33,13 +33,14 @@ using namespace Eigen;
 namespace PLANAR_DRAWING
 {
 
-enum AXIS{
-    X_AXIS,
-    Y_AXIS,
-    Z_AXIS,
-    ROLL,
-    PITCH,
-    YAW
+enum AXIS
+{
+  X_AXIS,
+  Y_AXIS,
+  Z_AXIS,
+  ROLL,
+  PITCH,
+  YAW
 };
 
 /*-----------------------------------------------------------------------------------------------*/

@@ -22,8 +22,8 @@
 #include <Scara.h>
 
 bool erasing_flag = false;
-uint8_t motion_cnt[2] = {0,0};
-uint8_t sub_motion_cnt[2] = {0, 0};
+uint8_t motion_cnt[] = {0};
+uint8_t sub_motion_cnt[] = {0};
 
 /* Move in Joint Space */
 void moveJS(Scara* scara, double j1, double j2, double j3, double t) 
@@ -123,16 +123,13 @@ bool drawHeart(Scara *scara, int index)
 }
 
 //---------------------------------------------------------------------------------------------------- 
-
-void initDemo()
-{
-}
+void initDemo(){}
 
 //---------------------------------------------------------------------------------------------------- 
-
-void executeDemo(Scara *scara)
+void runDemo(Scara *scara)
 {
-  if (scara->isMoving()) {
+  if (scara->isMoving()) 
+  {
     return;
   }
   else 

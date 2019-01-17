@@ -21,12 +21,12 @@
 
 #include <Planar.h>
 #include <RC100.h>
+#include "Demo.h"
 
 RC100 rc100;
 double grip_value = 0.0;
 
 //---------------------------------------------------------------------------------------------------- 
-
 /* Initialize baudrate for using RC100 */
 void initRC100()
 {
@@ -34,7 +34,6 @@ void initRC100()
 }
 
 //---------------------------------------------------------------------------------------------------- 
-
 /* Receive data from RC100 */
 void receiveDataFromRC100(Planar* planar)
 {
@@ -42,8 +41,6 @@ void receiveDataFromRC100(Planar* planar)
   {
     if (rc100.available())
     {
-      planar->setReceiveDataFlag(true);
-
       uint16_t data = rc100.readData();
 
       // Task space control tab 
@@ -65,82 +62,35 @@ void receiveDataFromRC100(Planar* planar)
       else if (data & RC100_BTN_6)
       {
         std::vector<double> goal_position;
-
         goal_position.push_back(0.0);
         goal_position.push_back(0.0);
         goal_position.push_back(0.0);
 
         planar->jointTrajectoryMove(goal_position, 1.0);
       }
+
+      // ...
+      planar->setReceiveDataFlag(true);
+      planar->setPrevReceiveTime(millis()/1000.0); // instead of curr_time...?
     }
-    else
+  }
+  else 
+  {
+    // Serial.println(".");
+    // Check if running demo now..
+    if (planar->getRunDemoFlag())
     {
-      // Check if any consecutive motions
-      if (planar->getConsecutiveMotionFlag() == true)
-      {
-        if (millis()/1000.0 - planar->getPrevReceiveTime() >= 11)
-        {
-          std::vector<double> goal_position;
-          goal_position.push_back(0.0); 
-          goal_position.push_back(0.0);
-          goal_position.push_back(-2*PI);
-          planar->jointTrajectoryMove(goal_position, 0.3);
+      runDemo(planar); 
+    }
 
-          planar->setConsecutiveMotionFlag(false);
-          initRC100();
-        }
-        else if (millis()/1000.0 - planar->getPrevReceiveTime() >= 10)
-        {
-          planar->toolMove("tool", -0.007);        
-        }
-        else if (millis()/1000.0 - planar->getPrevReceiveTime() >= 9)
-        {
-          planar->toolMove("tool", 0.007);        
-        }
-        else if (millis()/1000.0 - planar->getPrevReceiveTime() >= 7)
-        {
-          std::vector<double> goal_position;
-          goal_position.push_back(-4.899); 
-          goal_position.push_back(-4.5);
-          goal_position.push_back(-2*PI);
-          planar->jointTrajectoryMove(goal_position, 0.3);
-        }
-        else if (millis()/1000.0 - planar->getPrevReceiveTime() >= 5)
-        {
-          double joint_angle[2];
-          joint_angle[0] = planar->getJointValue("joint1").value;
-          joint_angle[1] = planar->getJointValue("joint2").value;
-
-          std::vector<double> goal_position;
-          goal_position.push_back(joint_angle[0]); 
-          goal_position.push_back(joint_angle[1]);
-          goal_position.push_back(-2*PI);
-          planar->jointTrajectoryMove(goal_position, 1.0);
-        }
-        else if (millis()/1000.0 - planar->getPrevReceiveTime() >= 4)
-        {
-          planar->toolMove("tool", -0.007);        
-        }
-        else if (millis()/1000.0 - planar->getPrevReceiveTime() >= 2)
-        {
-          double joint_angle[2];
-          joint_angle[0] = planar->getJointValue("joint1").value;
-          joint_angle[1] = planar->getJointValue("joint2").value;
-
-          std::vector<double> goal_position;
-          goal_position.push_back(joint_angle[0]); 
-          goal_position.push_back(joint_angle[1]);
-          goal_position.push_back(0);
-          planar->jointTrajectoryMove(goal_position, 1.0);
-        }
-      }
-      else if (millis()/1000.0 - planar->getPrevReceiveTime() >= RECEIVE_RATE)  
-      {
-        planar->setReceiveDataFlag(false);  
-        initRC100();
-      }
-    } 
+    // Check if ???
+    else if (millis()/1000.0 - planar->getPrevReceiveTime() >= RECEIVE_RATE)
+    {
+      planar->setReceiveDataFlag(false);   //received <--
+      initRC100();
+    }
   }
 }
+
 
 #endif // REMOTECONTROLLER100_H_

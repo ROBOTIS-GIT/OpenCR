@@ -45,7 +45,10 @@ void setup()
   initDemo();
 
 
+  /**
+   */
   while (!Serial);     
+
 
   /**
    */
@@ -74,5 +77,5 @@ void loop()
 
   /**
    */
-  executeDemo(&planar); 
+  runDemo(&planar); 
 }

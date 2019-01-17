@@ -58,7 +58,7 @@ private:
 
   bool hardware_flag_;
   bool receive_data_flag_ = false;
-  bool consecutive_motion_flag_ = false;
+  bool run_demo_flag_ = false;
   double prev_receive_time_ = 0.0;
   double prev_control_time_ = 0.0;    // not intuitive naming.. control -> execute ? run ?
   int offset_position_num_ = 0;
@@ -75,12 +75,12 @@ private:
   void executeData();
   bool getHardwareFlag();
   bool getReceiveDataFlag();
-  bool getConsecutiveMotionFlag();
+  bool getRunDemoFlag();
   double getPrevReceiveTime();
   int getOffsetPositionNum();
 
   void setReceiveDataFlag(bool receive_data_flag);
-  void setConsecutiveMotionFlag(bool receive_data_flag);
+  void setRunDemoFlag(bool run_demo_flag);
   void setPrevReceiveTime(double prev_receive_time);
   void setOffsetPositionNum(int offset_position_num);
 };

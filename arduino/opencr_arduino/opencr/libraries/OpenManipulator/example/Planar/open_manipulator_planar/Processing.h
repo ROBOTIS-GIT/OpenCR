@@ -20,6 +20,7 @@
 #define PROCESSING_H_
 
 #include <Planar.h>
+#include "Demo.h"
 
 typedef struct _MotionWayPoint
 {
@@ -34,10 +35,7 @@ bool processing_motion_flag = false;
 char hand_motion_cnt = 0;
 bool hand_motion_repeat_flag = false;
 
-String global_cmd[50];
-
 //---------------------------------------------------------------------------------------------------- 
-
 /* Initialize baudrate for using Processing */
 void initProcessing()
 { 
@@ -45,7 +43,6 @@ void initProcessing()
 }
 
 //---------------------------------------------------------------------------------------------------- 
-
 /* Split data by separator */
 void split(String data, char separator, String* temp)
 {
@@ -58,16 +55,16 @@ void split(String data, char separator, String* temp)
   {
     get_index = copy.indexOf(separator);
 
-	if(-1 != get_index)
-	{
-	  temp[cnt] = copy.substring(0, get_index);
-  	  copy = copy.substring(get_index + 1);
-	}
-	else
-	{
-      temp[cnt] = copy.substring(0, copy.length());
-	  break;
-	}
+    if(-1 != get_index)
+    {
+      temp[cnt] = copy.substring(0, get_index);
+        copy = copy.substring(get_index + 1);
+    }
+    else
+    {
+        temp[cnt] = copy.substring(0, copy.length());
+      break;
+    }
 	  ++cnt;
   }
 }
@@ -75,10 +72,11 @@ void split(String data, char separator, String* temp)
 /* Parse data received from Processing */
 String* parseProcessingData(String get) 
 {
+  String cmd[50];
   get.trim();
-  split(get, ',', global_cmd);
+  split(get, ',', cmd);
   
-  return global_cmd;
+  return cmd;
 }
 
 /* Send joint data(values) to Processing */
@@ -128,8 +126,6 @@ void receiveDataFromProcessing(Planar *planar)
   {
     if (Serial.available())
     {
-      planar->setReceiveDataFlag(true);  
-
       String serialInput = Serial.readStringUntil('\n');
       String *cmd = parseProcessingData(serialInput);
 
@@ -146,7 +142,7 @@ void receiveDataFromProcessing(Planar *planar)
         }
         else if (cmd[1] == "off")
         {
-          if(planar->getHardwareFlag())
+          if (planar->getHardwareFlag())
           {
             planar->allActuatorDisable();
           }
@@ -348,81 +344,30 @@ void receiveDataFromProcessing(Planar *planar)
         }
       }
 
+      // ...
+      planar->setReceiveDataFlag(true);
       planar->setPrevReceiveTime(millis()/1000.0); // instead of curr_time...?
     }
   }
   else 
   {
-
-    // Check if any consecutive motions
-    if (planar->getConsecutiveMotionFlag() == true)
+    // Serial.println(".");
+    // Check if running demo now..
+    if (planar->getRunDemoFlag())
     {
-      if (millis()/1000.0 - planar->getPrevReceiveTime() >= 11)
-      {
-        std::vector<double> goal_position;
-        goal_position.push_back(0.0); 
-        goal_position.push_back(0.0);
-        goal_position.push_back(-2*PI);
-        planar->jointTrajectoryMove(goal_position, 0.3);
-
-        planar->setConsecutiveMotionFlag(false);
-        initRC100();
-      }
-      else if (millis()/1000.0 - planar->getPrevReceiveTime() >= 10)
-      {
-        planar->toolMove("tool", -0.007);        
-      }
-      else if (millis()/1000.0 - planar->getPrevReceiveTime() >= 9)
-      {
-        planar->toolMove("tool", 0.007);        
-      }
-      else if (millis()/1000.0 - planar->getPrevReceiveTime() >= 7)
-      {
-        std::vector<double> goal_position;
-        goal_position.push_back(-4.899); 
-        goal_position.push_back(-4.5);
-        goal_position.push_back(-2*PI);
-        planar->jointTrajectoryMove(goal_position, 0.3);
-      }
-      else if (millis()/1000.0 - planar->getPrevReceiveTime() >= 5)
-      {
-        double joint_angle[2];
-        joint_angle[0] = planar->getJointValue("joint1").value;
-        joint_angle[1] = planar->getJointValue("joint2").value;
-
-        std::vector<double> goal_position;
-        goal_position.push_back(joint_angle[0]); 
-        goal_position.push_back(joint_angle[1]);
-        goal_position.push_back(-2*PI);
-        planar->jointTrajectoryMove(goal_position, 1.0);
-      }
-      else if (millis()/1000.0 - planar->getPrevReceiveTime() >= 4)
-      {
-        planar->toolMove("tool", -0.007);        
-      }
-      else if (millis()/1000.0 - planar->getPrevReceiveTime() >= 2)
-      {
-        double joint_angle[2];
-        joint_angle[0] = planar->getJointValue("joint1").value;
-        joint_angle[1] = planar->getJointValue("joint2").value;
-
-        std::vector<double> goal_position;
-        goal_position.push_back(joint_angle[0]); 
-        goal_position.push_back(joint_angle[1]);
-        goal_position.push_back(0);
-        planar->jointTrajectoryMove(goal_position, 1.0);
-      }
+      runDemo(planar); 
     }
-    else if (millis()/1000.0 - planar->getPrevReceiveTime() >= RECEIVE_RATE)  
+
+    // Check if ???
+    else if (millis()/1000.0 - planar->getPrevReceiveTime() >= RECEIVE_RATE)
     {
-      planar->setReceiveDataFlag(false);  
+      planar->setReceiveDataFlag(false);   //received <--
       initRC100();
     }
   }
 }
 
 //---------------------------------------------------------------------------------------------------- 
-
 void playProcessingMotion(Planar *planar)
 {
   if(!planar->isMoving() && processing_motion_flag)

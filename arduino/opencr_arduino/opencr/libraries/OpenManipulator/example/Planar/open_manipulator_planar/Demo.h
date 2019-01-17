@@ -21,8 +21,8 @@
 
 #include <Planar.h>
 
-uint8_t motion_cnt[2] = {0,0};
-uint8_t sub_motion_cnt[2] = {0, 0};
+uint8_t motion_cnt[] = {0};
+uint8_t sub_motion_cnt[] = {0};
 
 /* Draw an Object */
 void drawObj(Planar* planar, STRING object, double radius, int num_revolution, double start_angular_position, double move_time)
@@ -35,15 +35,14 @@ void drawObj(Planar* planar, STRING object, double radius, int num_revolution, d
   planar->drawingTrajectoryMove(object, "tool", draw_arg, move_time);
 }
 
-void initDemo()
-{
-}
+//---------------------------------------------------------------------------------------------------- 
+void initDemo(){}
 
-void executeDemo(Planar *planar)
+//---------------------------------------------------------------------------------------------------- 
+void runDemo(Planar *planar)
 {
-  if (planar->isMoving()) {
+  if (planar->isMoving()) 
     return;
-  }
   else 
   {
     switch(motion_cnt[0])

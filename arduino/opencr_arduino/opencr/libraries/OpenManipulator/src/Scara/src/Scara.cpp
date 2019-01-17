@@ -215,9 +215,9 @@ bool Scara::getReceiveDataFlag()
 }
 
 /* Get the previous time when data were received */
-bool Scara::getConsecutiveMotionFlag() 
+bool Scara::getRunDemoFlag() 
 {
-  return consecutive_motion_flag_;
+  return run_demo_flag_;
 }
 
 /* Get the previous time when data were received */
@@ -239,9 +239,9 @@ void Scara::setReceiveDataFlag(bool receive_data_flag)
 }
 
 /* Set whether data were received or not */
-void Scara::setConsecutiveMotionFlag(bool consecutive_motion_flag) 
+void Scara::setRunDemoFlag(bool run_demo_flag) 
 {
-  consecutive_motion_flag_ = consecutive_motion_flag;
+  run_demo_flag_ = run_demo_flag;
 }
 
 /* Set the previous time when data were received */
