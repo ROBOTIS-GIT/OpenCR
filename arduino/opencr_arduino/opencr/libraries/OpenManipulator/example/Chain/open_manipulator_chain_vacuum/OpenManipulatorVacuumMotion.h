@@ -19,12 +19,8 @@
 #ifndef OPEN_MANIPULATOR_VACUUM_MOTION_H_
 #define OPEN_MANIPULATOR_VACUUM_MOTION_H_
 
-#if defined(__OPENCR__)
-  #include <RobotisManipulator.h>
-  #include "OpenManipulatorVacuum.h"
-#else
-  #include <robotis_manipulator/robotis_manipulator.h>
-#endif
+#include <RobotisManipulator.h>
+#include "OpenManipulatorVacuum.h"
 
 #define BDPIN_PUSH_SW_1         34
 #define BDPIN_PUSH_SW_2         35
@@ -105,12 +101,11 @@ void playMotion(OPEN_MANIPULATOR_VACUUM *open_manipulator)
       draw_circle_arg[1] = 2;    // revolution
       draw_circle_arg[2] = 0.0;  // start angle position (rad)
       void* p_draw_circle_arg = &draw_circle_arg;
-      open_manipulator->drawingTrajectoryMove(DRAWING_HEART, "vacuum", p_draw_circle_arg, 4.0);
+      open_manipulator->customTrajectoryMove(CUSTOM_TRAJECTORY_HEART, "vacuum", p_draw_circle_arg, 4.0);
 
       demo_motion_cnt = 0;
       demo_motion_state = false;
     }
-
   }
 }
 

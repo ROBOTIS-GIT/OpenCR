@@ -19,74 +19,130 @@
 #include "../../include/robotis_manipulator/robotis_manipulator_debug.h"
 
 
-void RM_LOG::PRINT(STRING str)
+void RM_LOG::PRINT(STRING str, STRING color)
 {
 #if defined(__OPENCR__)
   DEBUG.print(str);
 #else
+       if(color == "RED")      printf(ANSI_COLOR_RED);
+  else if(color == "GREEN")    printf(ANSI_COLOR_GREEN);
+  else if(color == "YELLOW")   printf(ANSI_COLOR_YELLOW);
+  else if(color == "BLUE")     printf(ANSI_COLOR_BLUE);
+  else if(color == "MAGENTA")  printf(ANSI_COLOR_MAGENTA);
+  else if(color == "CYAN")     printf(ANSI_COLOR_CYAN);
   printf("%s", str.c_str());
+  printf(ANSI_COLOR_RESET);
 #endif
 }
-void RM_LOG::PRINT(STRING str, double data, uint8_t point)
+void RM_LOG::PRINT(STRING str, double data, uint8_t point, STRING color)
 {
 #if defined(__OPENCR__)
   DEBUG.print(str);
   DEBUG.print(data, point);
 #else
+       if(color == "RED")      printf(ANSI_COLOR_RED);
+  else if(color == "GREEN")    printf(ANSI_COLOR_GREEN);
+  else if(color == "YELLOW")   printf(ANSI_COLOR_YELLOW);
+  else if(color == "BLUE")     printf(ANSI_COLOR_BLUE);
+  else if(color == "MAGENTA")  printf(ANSI_COLOR_MAGENTA);
+  else if(color == "CYAN")     printf(ANSI_COLOR_CYAN);
   printf("%s %.*lf", str.c_str(), point, data);
+  printf(ANSI_COLOR_RESET);
 #endif
 }
-void RM_LOG::PRINT(const char* str)
+void RM_LOG::PRINT(const char* str, STRING color)
 {
 #if defined(__OPENCR__)
   DEBUG.print(str);
 #else
+       if(color == "RED")      printf(ANSI_COLOR_RED);
+  else if(color == "GREEN")    printf(ANSI_COLOR_GREEN);
+  else if(color == "YELLOW")   printf(ANSI_COLOR_YELLOW);
+  else if(color == "BLUE")     printf(ANSI_COLOR_BLUE);
+  else if(color == "MAGENTA")  printf(ANSI_COLOR_MAGENTA);
+  else if(color == "CYAN")     printf(ANSI_COLOR_CYAN);
   printf("%s", str);
+  printf(ANSI_COLOR_RESET);
 #endif
 }
-void RM_LOG::PRINT(const char* str, double data, uint8_t point)
+void RM_LOG::PRINT(const char* str, double data, uint8_t point, STRING color)
 {
 #if defined(__OPENCR__)
   DEBUG.print(str);
   DEBUG.print(data, point);
 #else
+       if(color == "RED")      printf(ANSI_COLOR_RED);
+  else if(color == "GREEN")    printf(ANSI_COLOR_GREEN);
+  else if(color == "YELLOW")   printf(ANSI_COLOR_YELLOW);
+  else if(color == "BLUE")     printf(ANSI_COLOR_BLUE);
+  else if(color == "MAGENTA")  printf(ANSI_COLOR_MAGENTA);
+  else if(color == "CYAN")     printf(ANSI_COLOR_CYAN);
   printf("%s %.*lf", str, point, data);
+  printf(ANSI_COLOR_RESET);
 #endif
 }
 
 
-void RM_LOG::PRINTLN(STRING str)
+void RM_LOG::PRINTLN(STRING str, STRING color)
 {
 #if defined(__OPENCR__)
   DEBUG.println(str);
 #else
+       if(color == "RED")      printf(ANSI_COLOR_RED);
+  else if(color == "GREEN")    printf(ANSI_COLOR_GREEN);
+  else if(color == "YELLOW")   printf(ANSI_COLOR_YELLOW);
+  else if(color == "BLUE")     printf(ANSI_COLOR_BLUE);
+  else if(color == "MAGENTA")  printf(ANSI_COLOR_MAGENTA);
+  else if(color == "CYAN")     printf(ANSI_COLOR_CYAN);
   printf("%s\n", str.c_str());
+  printf(ANSI_COLOR_RESET);
 #endif
 }
-void RM_LOG::PRINTLN(STRING str, double data, uint8_t point)
+void RM_LOG::PRINTLN(STRING str, double data, uint8_t point, STRING color)
 {
 #if defined(__OPENCR__)
   DEBUG.print(str);
   DEBUG.println(data, point);
 #else
+     if(color == "RED")      printf(ANSI_COLOR_RED);
+  else if(color == "GREEN")    printf(ANSI_COLOR_GREEN);
+  else if(color == "YELLOW")   printf(ANSI_COLOR_YELLOW);
+  else if(color == "BLUE")     printf(ANSI_COLOR_BLUE);
+  else if(color == "MAGENTA")  printf(ANSI_COLOR_MAGENTA);
+  else if(color == "CYAN")     printf(ANSI_COLOR_CYAN);
   printf("%s %.*lf\n", str.c_str(), point, data);
+  printf(ANSI_COLOR_RESET);
 #endif
 }
-void RM_LOG::PRINTLN(const char* str)
+void RM_LOG::PRINTLN(const char* str, STRING color)
 {
 #if defined(__OPENCR__)
   DEBUG.println(str);
 #else
+       if(color == "RED")      printf(ANSI_COLOR_RED);
+  else if(color == "GREEN")    printf(ANSI_COLOR_GREEN);
+  else if(color == "YELLOW")   printf(ANSI_COLOR_YELLOW);
+  else if(color == "BLUE")     printf(ANSI_COLOR_BLUE);
+  else if(color == "MAGENTA")  printf(ANSI_COLOR_MAGENTA);
+  else if(color == "CYAN")     printf(ANSI_COLOR_CYAN);
   printf("%s\n", str);
+  printf(ANSI_COLOR_RESET);
 #endif
 }
-void RM_LOG::PRINTLN(const char* str, double data, uint8_t point)
+void RM_LOG::PRINTLN(const char* str, double data, uint8_t point, STRING color)
 {
 #if defined(__OPENCR__)
   DEBUG.print(str);
   DEBUG.println(data, point);
 #else
+       if(color == "RED")      printf(ANSI_COLOR_RED);
+  else if(color == "GREEN")    printf(ANSI_COLOR_GREEN);
+  else if(color == "YELLOW")   printf(ANSI_COLOR_YELLOW);
+  else if(color == "BLUE")     printf(ANSI_COLOR_BLUE);
+  else if(color == "MAGENTA")  printf(ANSI_COLOR_MAGENTA);
+  else if(color == "CYAN")     printf(ANSI_COLOR_CYAN);
   printf("%s %.*lf\n", str, point, data);
+  printf(ANSI_COLOR_RESET);
 #endif
 }
 

@@ -69,6 +69,12 @@ Eigen::Vector3d matrixLogarithm(Eigen::Matrix3d rotation_matrix);
 Eigen::Matrix3d skewSymmetricMatrix(Eigen::Vector3d v);
 Eigen::Matrix3d rodriguesRotationMatrix(Eigen::Vector3d axis, double angle);
 
+Eigen::Vector3d getRPYVelocityFromOmega(Eigen::Vector3d rpy_vector, Eigen::Vector3d omega);
+Eigen::Vector3d getOmegaFromRPYVelocity(Eigen::Vector3d rpy_vector, Eigen::Vector3d rpy_velocity);
+Eigen::Vector3d getRPYAccelerationFromOmegaDot(Eigen::Vector3d rpy_vector, Eigen::Vector3d rpy_velocity, Eigen::Vector3d omega_dot);
+Eigen::Vector3d getOmegaDotFromRPYAcceleration(Eigen::Vector3d rpy_vector, Eigen::Vector3d rpy_velocity, Eigen::Vector3d rpy_acceleration);
+
+
 Eigen::Vector3d positionDifference(Eigen::Vector3d desired_position, Eigen::Vector3d present_position);
 Eigen::Vector3d orientationDifference(Eigen::Matrix3d desired_orientation, Eigen::Matrix3d present_orientation);
 Eigen::VectorXd poseDifference(Eigen::Vector3d desired_position, Eigen::Vector3d present_position,
@@ -76,6 +82,6 @@ Eigen::VectorXd poseDifference(Eigen::Vector3d desired_position, Eigen::Vector3d
 
 template <typename T> T map(T x, T in_min, T in_max, T out_min, T out_max);
 
-} // namespace MATH
+} // namespace RM_MATH
 
-#endif // RMMATH_HPP_
+#endif // ROBOTIS_MANIPULATOR_MATH_H_

@@ -51,15 +51,4 @@ bool ToolActuator::isEnabled()
   return enable_state_;
 }
 
-WayPointType DrawingTrajectory::getOutputWayPointType()
-{
-  return output_way_point_type_;
-}
-
-
-void DrawingTrajectory::setOutputWayPointType(WayPointType way_point_type)
-{
-  output_way_point_type_ = way_point_type;
-}
-
 

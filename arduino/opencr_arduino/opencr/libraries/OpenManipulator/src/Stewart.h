@@ -1,1 +1,0 @@
-#include "Stewart/include/open_manipulator_libs/Stewart.h"

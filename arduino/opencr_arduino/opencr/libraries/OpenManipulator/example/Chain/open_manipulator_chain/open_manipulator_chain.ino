@@ -21,8 +21,10 @@
 #include "RemoteController.h"
 
 OPEN_MANIPULATOR open_manipulator;
+double control_time = 0.010f;
 double present_time = 0.0;
 double previous_time = 0.0;
+bool platform_flag = true;
 
 void setup()
 {
@@ -31,10 +33,10 @@ void setup()
   // while (!Serial)
   // ;
 
-  connectProcessing();
+  connectProcessing(platform_flag);
   connectRC100();
   
-  open_manipulator.initManipulator(true);
+  open_manipulator.initManipulator(platform_flag);
   RM_LOG::PRINT("OpenManipulator Debugging Port");
 }
 
@@ -44,9 +46,9 @@ void loop()
   getData(100);
   playProcessingMotion(&open_manipulator);
 
-  if(present_time-previous_time >= CONTROL_TIME)
+  if(present_time-previous_time >= control_time)
   {
-    open_manipulator.openManipulatorProcess(millis()/1000.0);
+    open_manipulator.openManipulatorProcess(millis()/1000.0f);
     previous_time = (float)(millis()/1000.0f);
     sendValueToProcessing(&open_manipulator);
   }
@@ -104,4 +106,3 @@ void getData(uint32_t wait_time)
      break;
   }
 }
-

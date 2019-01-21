@@ -21,16 +21,16 @@
 
 #include <RobotisManipulator.h>
 
-namespace ACTUATOR
-{
 #define BDPIN_RELAY         8
 #define BDPIN_PUMP_MOTOR    12
 
+namespace ACTUATOR
+{
 class GripperVacuum : public ROBOTIS_MANIPULATOR::ToolActuator
 {
  private:
   int8_t actuator_id_;
-  double tool_value_;
+  Actuator tool_value_;
 
  public:
   GripperVacuum() {}
@@ -39,7 +39,7 @@ class GripperVacuum : public ROBOTIS_MANIPULATOR::ToolActuator
   virtual void init(uint8_t actuator_id, const void *arg)
   {
     actuator_id_ = actuator_id;
-    tool_value_ = 0.0;
+    tool_value_.position = 0.0;
     pinMode(BDPIN_RELAY, OUTPUT);
     pinMode(BDPIN_PUMP_MOTOR, OUTPUT);
   }
@@ -52,23 +52,23 @@ class GripperVacuum : public ROBOTIS_MANIPULATOR::ToolActuator
   virtual void enable(){}
   virtual void disable(){}
 
-  virtual bool sendToolActuatorValue(double value)
+  virtual bool sendToolActuatorValue(Actuator value)
   {
-    if(value == 0.0)
+    if(value.position == 0.0)
     {
-      tool_value_ = 0.0;
+      tool_value_.position = 0.0;
       digitalWrite(BDPIN_RELAY, LOW);
       digitalWrite(BDPIN_PUMP_MOTOR, LOW);
     }
-    else if(value == 1.0)
+    else if(value.position == 1.0)
     {
-      tool_value_ = 1.0;
+      tool_value_.position = 1.0;
       digitalWrite(BDPIN_RELAY, HIGH);
       digitalWrite(BDPIN_PUMP_MOTOR, HIGH);
     }
     return true;
   }
-  virtual double receiveToolActuatorValue()
+  virtual Actuator receiveToolActuatorValue()
   {
     return tool_value_;
   }

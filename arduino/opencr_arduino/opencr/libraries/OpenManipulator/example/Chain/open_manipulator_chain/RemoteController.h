@@ -43,17 +43,17 @@ uint16_t readRC100Data()
 void fromRC100(OPEN_MANIPULATOR* open_manipulator, uint16_t data)
 {
   if (data & RC100_BTN_U)
-    open_manipulator->taskTrajectoryMoveToPresentPose("gripper", RM_MATH::makeVector3(0.007, 0.0, 0.0), 0.16);
+    open_manipulator->taskTrajectoryMoveFromPresentPose("gripper", RM_MATH::makeVector3(0.007, 0.0, 0.0), 0.16);
   else if (data & RC100_BTN_D)
-    open_manipulator->taskTrajectoryMoveToPresentPose("gripper", RM_MATH::makeVector3(-0.007, 0.0, 0.0), 0.16);
+    open_manipulator->taskTrajectoryMoveFromPresentPose("gripper", RM_MATH::makeVector3(-0.007, 0.0, 0.0), 0.16);
   else if (data & RC100_BTN_L)
-    open_manipulator->taskTrajectoryMoveToPresentPose("gripper", RM_MATH::makeVector3(0.0, 0.007, 0.0), 0.16);
+    open_manipulator->taskTrajectoryMoveFromPresentPose("gripper", RM_MATH::makeVector3(0.0, 0.007, 0.0), 0.16);
   else if (data & RC100_BTN_R)
-    open_manipulator->taskTrajectoryMoveToPresentPose("gripper", RM_MATH::makeVector3(0.0, -0.007, 0.0), 0.16);
+    open_manipulator->taskTrajectoryMoveFromPresentPose("gripper", RM_MATH::makeVector3(0.0, -0.007, 0.0), 0.16);
   else if (data & RC100_BTN_1)
-    open_manipulator->taskTrajectoryMoveToPresentPose("gripper", RM_MATH::makeVector3(0.0, 0.0, 0.007), 0.16);
+    open_manipulator->taskTrajectoryMoveFromPresentPose("gripper", RM_MATH::makeVector3(0.0, 0.0, 0.007), 0.16);
   else if (data & RC100_BTN_3)
-    open_manipulator->taskTrajectoryMoveToPresentPose("gripper", RM_MATH::makeVector3(0.0, 0.0, -0.007), 0.16);
+    open_manipulator->taskTrajectoryMoveFromPresentPose("gripper", RM_MATH::makeVector3(0.0, 0.0, -0.007), 0.16);
   else if (data & RC100_BTN_2)
   {
     grip_value += 0.0020;
@@ -73,23 +73,19 @@ void fromRC100(OPEN_MANIPULATOR* open_manipulator, uint16_t data)
   else if (data & RC100_BTN_5)
   {
     std::vector<double> goal_position;
-
     goal_position.push_back(0.0);
     goal_position.push_back(-60.0 * DEG2RAD);
     goal_position.push_back(20.0 * DEG2RAD);
     goal_position.push_back(40.0 * DEG2RAD);
-
     open_manipulator->jointTrajectoryMove(goal_position, 1.5);
   }
   else if (data & RC100_BTN_6)
   {
     std::vector<double> goal_position;
-
     goal_position.push_back(0.0);
     goal_position.push_back(0.0);
     goal_position.push_back(0.0);
     goal_position.push_back(0.0);
-
     open_manipulator->jointTrajectoryMove(goal_position, 1.0);
   }
 }

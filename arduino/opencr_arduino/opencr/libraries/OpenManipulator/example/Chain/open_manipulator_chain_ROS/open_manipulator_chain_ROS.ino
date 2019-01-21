@@ -18,6 +18,8 @@
 
 #include "open_manipulator_chain_ROS.h"
 
+double control_time = 0.010f;
+
 void setup()
 {
   DEBUG.begin(57600);
@@ -31,17 +33,17 @@ void setup()
   nh.advertise(open_manipulator_state_pub);  
 
   nh.advertiseService(goal_joint_space_path_server);
+  nh.advertiseService(goal_joint_space_path_to_kinematics_pose_server);
   nh.advertiseService(goal_task_space_path_server);
   nh.advertiseService(goal_task_space_path_position_only_server);
   nh.advertiseService(goal_task_space_path_orientation_only_server);
-  nh.advertiseService(goal_joint_space_path_to_present_server);
-  nh.advertiseService(goal_task_space_path_to_present_server);
-  nh.advertiseService(goal_task_space_path_to_present_position_only_server);
-  nh.advertiseService(goal_task_space_path_to_present_orientation_only_server);
+  nh.advertiseService(goal_joint_space_path_from_present_server);
+  nh.advertiseService(goal_task_space_path_from_present_server);
+  nh.advertiseService(goal_task_space_path_from_present_position_only_server);
+  nh.advertiseService(goal_task_space_path_from_present_orientation_only_server);
   nh.advertiseService(goal_tool_control_server);
   nh.advertiseService(set_actuator_state_server);
   nh.advertiseService(goal_drawing_trajectory_server);
-
 
   // Initialize Open Manipulator.  
   open_manipulator.initManipulator(true);
@@ -54,13 +56,12 @@ void loop()
   present_time = (float)(millis()/1000.0f);
   nh.spinOnce();
 
-  if(present_time-previous_time >= CONTROL_TIME)
+  if(present_time-previous_time >= control_time)
   {
     open_manipulator.openManipulatorProcess(millis()/1000.0);
     previous_time = (float)(millis()/1000.0f);
-    
   }
-  if(present_time - previous_time_pub >= CONTROL_TIME*10)
+  if(present_time - previous_time_pub >= control_time*10)
   {
     publishJointStates();
     publishKinematicPose();
@@ -86,19 +87,40 @@ void goalJointSpacePathCallback(const SetJointPosition::Request & req, SetJointP
 /*******************************************************************************
 * Service server (set trajectory using kinematic pose value)
 *******************************************************************************/
-void goalTaskSpacePathCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res)
+void goalJointSpacePathToKinematicsPoseCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res)
 {
-  Pose target_pose;
+  KinematicPose target_pose;
   target_pose.position[0] = req.kinematics_pose.pose.position.x;
   target_pose.position[1] = req.kinematics_pose.pose.position.y;
   target_pose.position[2] = req.kinematics_pose.pose.position.z;
 
   Eigen::Quaterniond q(req.kinematics_pose.pose.orientation.w,
-                        req.kinematics_pose.pose.orientation.x,
-                        req.kinematics_pose.pose.orientation.y,
-                        req.kinematics_pose.pose.orientation.z);
-
+                       req.kinematics_pose.pose.orientation.x,
+                       req.kinematics_pose.pose.orientation.y,
+                       req.kinematics_pose.pose.orientation.z);
   target_pose.orientation = RM_MATH::convertQuaternionToRotation(q);
+
+  open_manipulator.jointTrajectoryMove(req.end_effector_name, target_pose, req.path_time);
+
+  res.is_planned = true;
+}
+
+/*******************************************************************************
+* Service server (set trajectory using kinematic pose value)
+*******************************************************************************/
+void goalTaskSpacePathCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res)
+{
+  KinematicPose target_pose;
+  target_pose.position[0] = req.kinematics_pose.pose.position.x;
+  target_pose.position[1] = req.kinematics_pose.pose.position.y;
+  target_pose.position[2] = req.kinematics_pose.pose.position.z;
+
+  Eigen::Quaterniond q(req.kinematics_pose.pose.orientation.w,
+                       req.kinematics_pose.pose.orientation.x,
+                       req.kinematics_pose.pose.orientation.y,
+                       req.kinematics_pose.pose.orientation.z);
+  target_pose.orientation = RM_MATH::convertQuaternionToRotation(q);
+
   open_manipulator.taskTrajectoryMove(req.end_effector_name, target_pose, req.path_time);
 
   res.is_planned = true;
@@ -124,14 +146,12 @@ void goalTaskSpacePathPositionOnlyCallback(const SetKinematicsPose::Request & re
 *******************************************************************************/
 void goalTaskSpacePathOrientationOnlyCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res)
 {
-  Eigen::Matrix3d orientation;
-
   Eigen::Quaterniond q(req.kinematics_pose.pose.orientation.w,
                         req.kinematics_pose.pose.orientation.x,
                         req.kinematics_pose.pose.orientation.y,
                         req.kinematics_pose.pose.orientation.z);
+  Eigen::Matrix3d orientation = RM_MATH::convertQuaternionToRotation(q);
 
-  orientation = RM_MATH::convertQuaternionToRotation(q);
   open_manipulator.taskTrajectoryMove(req.end_effector_name, orientation, req.path_time);
 
   res.is_planned = true;
@@ -140,13 +160,13 @@ void goalTaskSpacePathOrientationOnlyCallback(const SetKinematicsPose::Request &
 /*******************************************************************************
 * Service server (set trajectory using joint angle values form present values)
 *******************************************************************************/
-void goalJointSpacePathToPresentCallback(const SetJointPosition::Request & req, SetJointPosition::Response & res)
+void goalJointSpacePathFromPresentCallback(const SetJointPosition::Request & req, SetJointPosition::Response & res)
 {
   std::vector <double> target_angle;
   for(int i = 0; i < req.joint_position.joint_name_length; i ++)
     target_angle.push_back(req.joint_position.position[i]);
 
-  open_manipulator.jointTrajectoryMoveToPresentValue(target_angle, req.path_time);
+  open_manipulator.jointTrajectoryMoveFromPresentPosition(target_angle, req.path_time);
 
   res.is_planned = true;
 }
@@ -154,21 +174,20 @@ void goalJointSpacePathToPresentCallback(const SetJointPosition::Request & req, 
 /*******************************************************************************
 * Service server (set trajectory using kinematic pose value from present value)
 *******************************************************************************/
-void goalTaskSpacePathToPresentCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res)
+void goalTaskSpacePathFromPresentCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res)
 {
-  Pose target_pose;
+  KinematicPose target_pose;
   target_pose.position[0] = req.kinematics_pose.pose.position.x;
   target_pose.position[1] = req.kinematics_pose.pose.position.y;
   target_pose.position[2] = req.kinematics_pose.pose.position.z;
 
   Eigen::Quaterniond q(req.kinematics_pose.pose.orientation.w,
-                        req.kinematics_pose.pose.orientation.x,
-                        req.kinematics_pose.pose.orientation.y,
-                        req.kinematics_pose.pose.orientation.z);
-
+                       req.kinematics_pose.pose.orientation.x,
+                       req.kinematics_pose.pose.orientation.y,
+                       req.kinematics_pose.pose.orientation.z);
   target_pose.orientation = RM_MATH::convertQuaternionToRotation(q);
 
-  open_manipulator.taskTrajectoryMoveToPresentPose(req.planning_group, target_pose, req.path_time);
+  open_manipulator.taskTrajectoryMoveFromPresentPose(req.planning_group, target_pose, req.path_time);
 
   res.is_planned = true;
 }
@@ -176,14 +195,14 @@ void goalTaskSpacePathToPresentCallback(const SetKinematicsPose::Request & req, 
 /*******************************************************************************
 * Service server (set trajectory using kinematic position value from present value)
 *******************************************************************************/
-void goalTaskSpacePathToPresentPositionOnlyCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res)
+void goalTaskSpacePathFromPresentPositionOnlyCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res)
 {
   Eigen::Vector3d position;
   position[0] = req.kinematics_pose.pose.position.x;
   position[1] = req.kinematics_pose.pose.position.y;
   position[2] = req.kinematics_pose.pose.position.z;
 
-  open_manipulator.taskTrajectoryMoveToPresentPose(req.planning_group, position, req.path_time);
+  open_manipulator.taskTrajectoryMoveFromPresentPose(req.planning_group, position, req.path_time);
 
   res.is_planned = true;
 }
@@ -191,18 +210,15 @@ void goalTaskSpacePathToPresentPositionOnlyCallback(const SetKinematicsPose::Req
 /*******************************************************************************
 * Service server (set trajectory using kinematic oreintation value from present value)
 *******************************************************************************/
-void goalTaskSpacePathToPresentOrientationOnlyCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res)
+void goalTaskSpacePathFromPresentOrientationOnlyCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res)
 {
-
-  Eigen::Matrix3d orientation;
   Eigen::Quaterniond q(req.kinematics_pose.pose.orientation.w,
                         req.kinematics_pose.pose.orientation.x,
                         req.kinematics_pose.pose.orientation.y,
                         req.kinematics_pose.pose.orientation.z);
+  Eigen::Matrix3d orientation = RM_MATH::convertQuaternionToRotation(q);
 
-  orientation = RM_MATH::convertQuaternionToRotation(q);
-
-  open_manipulator.taskTrajectoryMoveToPresentPose(req.planning_group, orientation, req.path_time);
+  open_manipulator.taskTrajectoryMoveFromPresentPose(req.planning_group, orientation, req.path_time);
 
   res.is_planned = true;
 }
@@ -216,6 +232,7 @@ void goalToolControlCallback(const SetJointPosition::Request & req, SetJointPosi
   {
     open_manipulator.toolMove(req.joint_position.joint_name[i], req.joint_position.position[i]);
   }
+
   res.is_planned = true;
 }
 
@@ -225,13 +242,9 @@ void goalToolControlCallback(const SetJointPosition::Request & req, SetJointPosi
 void setActuatorStateCallback(const SetActuatorState::Request & req, SetActuatorState::Response & res)
 {
   if(req.set_actuator_state == true) // torque on
-  {
     open_manipulator.allActuatorEnable();
-  }
   else // torque off
-  {
     open_manipulator.allActuatorDisable();
-  }
 
   res.is_planned = true;
 }
@@ -251,41 +264,37 @@ void goalDrawingTrajectoryCallBack(const SetDrawingTrajectory::Request & req, Se
     draw_circle_arg[2] = req.param[2];  // start angle position (rad)
     void* p_draw_circle_arg = &draw_circle_arg;
 
-    open_manipulator.drawingTrajectoryMove(DRAWING_CIRCLE, req.end_effector_name, p_draw_circle_arg, req.path_time);
+    open_manipulator.customTrajectoryMove(CUSTOM_TRAJECTORY_CIRCLE, req.end_effector_name, p_draw_circle_arg, req.path_time);
   }
   else if(trajectory_name == "line")
   {
-    Pose present_pose = open_manipulator.getPose("gripper");
-    WayPoint draw_goal_pose[6];
-    draw_goal_pose[0].value = present_pose.position(0) + req.param[0];
-    draw_goal_pose[1].value = present_pose.position(1) + req.param[1];
-    draw_goal_pose[2].value = present_pose.position(2) + req.param[2];
-    draw_goal_pose[3].value = RM_MATH::convertRotationToRPY(present_pose.orientation)[0];
-    draw_goal_pose[4].value = RM_MATH::convertRotationToRPY(present_pose.orientation)[1];
-    draw_goal_pose[5].value = RM_MATH::convertRotationToRPY(present_pose.orientation)[2];
-    void *p_draw_line_arg = &draw_goal_pose;
+    TaskWayPoint draw_line_arg;
+    draw_line_arg.kinematic.position(0) = req.param[0];
+    draw_line_arg.kinematic.position(1) = req.param[1];
+    draw_line_arg.kinematic.position(2) = req.param[2];
+    void *p_draw_line_arg = &draw_line_arg;
 
-    open_manipulator.drawingTrajectoryMove(DRAWING_LINE, req.end_effector_name, p_draw_line_arg, req.path_time);
+    open_manipulator.customTrajectoryMove(CUSTOM_TRAJECTORY_LINE, req.end_effector_name, p_draw_line_arg, req.path_time);
   }
   else if(trajectory_name == "rhombus")
   {
-    double draw_circle_arg[3];
-    draw_circle_arg[0] = req.param[0];  // radius (m)
-    draw_circle_arg[1] = req.param[1];  // revolution (rev)
-    draw_circle_arg[2] = req.param[2];  // start angle position (rad)
-    void* p_draw_circle_arg = &draw_circle_arg;
+    double draw_rhombus_arg[3];
+    draw_rhombus_arg[0] = req.param[0];  // radius (m)
+    draw_rhombus_arg[1] = req.param[1];  // revolution (rev)
+    draw_rhombus_arg[2] = req.param[2];  // start angle position (rad)
+    void* p_draw_rhombus_arg = &draw_rhombus_arg;
 
-    open_manipulator.drawingTrajectoryMove(DRAWING_RHOMBUS, req.end_effector_name, p_draw_circle_arg, req.path_time);
+    open_manipulator.customTrajectoryMove(CUSTOM_TRAJECTORY_RHOMBUS, req.end_effector_name, p_draw_rhombus_arg, req.path_time);
   }
   else if(trajectory_name == "heart")
   {
-    double draw_circle_arg[3];
-    draw_circle_arg[0] = req.param[0];  // radius (m)
-    draw_circle_arg[1] = req.param[1];  // revolution (rev)
-    draw_circle_arg[2] = req.param[2];  // start angle position (rad)
-    void* p_draw_circle_arg = &draw_circle_arg;
+    double draw_heart_arg[3];
+    draw_heart_arg[0] = req.param[0];  // radius (m)
+    draw_heart_arg[1] = req.param[1];  // revolution (rev)
+    draw_heart_arg[2] = req.param[2];  // start angle position (rad)
+    void* p_draw_heart_arg = &draw_heart_arg;
 
-    open_manipulator.drawingTrajectoryMove(DRAWING_HEART, req.end_effector_name, p_draw_circle_arg, req.path_time);
+    open_manipulator.customTrajectoryMove(CUSTOM_TRAJECTORY_HEART, req.end_effector_name, p_draw_heart_arg, req.path_time);
   }
   res.is_planned = true;
 }
@@ -314,7 +323,7 @@ void publishJointStates(void)
   for(uint8_t i = 0; i < joints_name.size(); i ++)
   {
     pub_joint_name[i] = const_cast<char*>(joints_name[i].c_str());
-    pub_joint_position[i] = (float)joint_value[i].value;
+    pub_joint_position[i] = (float)joint_value[i].position;
     pub_joint_velocity[i] = (float)joint_value[i].velocity;
     pub_joint_effort[i] = (float)joint_value[i].effort;
   }
@@ -322,7 +331,7 @@ void publishJointStates(void)
   for(uint8_t i = joints_name.size(); i < joints_name.size()+tool_name.size(); i ++)
   {
     pub_joint_name[i] = const_cast<char*>(tool_name[i-joints_name.size()].c_str());
-    pub_joint_position[i] = tool_value[i-joints_name.size()];
+    pub_joint_position[i] = tool_value[i-joints_name.size()].position;
     pub_joint_velocity[i] = 0.0f;
     pub_joint_effort[i] = 0.0f;
   }
@@ -343,7 +352,7 @@ void publishKinematicPose(void)
 {
   auto opm_tools_name = open_manipulator.getManipulator()->getAllToolComponentName();
 
-  Pose pose = open_manipulator.getPose("gripper");
+  KinematicPose pose = open_manipulator.getKinematicPose("gripper");
   kinematic_pose_msg.pose.position.x = pose.position[0];
   kinematic_pose_msg.pose.position.y = pose.position[1];
   kinematic_pose_msg.pose.position.z = pose.position[2];

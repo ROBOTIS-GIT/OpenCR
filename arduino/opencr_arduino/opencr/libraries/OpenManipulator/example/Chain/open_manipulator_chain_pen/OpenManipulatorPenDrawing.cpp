@@ -23,55 +23,53 @@ using namespace OPEN_MANIPULATOR_PEN_DRAWING;
 Alphabet::Alphabet() {}
 Alphabet::~Alphabet() {}
 
-void Alphabet::initAlphabet(double move_time, double control_time, std::vector<WayPoint> start, char alphabet, char scale)
+void Alphabet::initAlphabet(double move_time, TaskWayPoint start, char alphabet, char scale)
 {
-  output_way_point_type_ = TASK_WAY_POINT;
-
   start_pose_ = start;
   alphabet_ = alphabet;
   move_time_ = move_time;
   scale_ = (double)scale * 0.001 *0.5;
 
-  WayPoint drawingStart, drawingGoal;
+  Point drawingStart, drawingGoal;
 
-  drawingStart.value = 0.0;
+  drawingStart.position = 0.0;
   drawingStart.velocity = 0.0;
   drawingStart.acceleration = 0.0;
   drawingStart.effort = 0.0;
 
-  if(alphabet_ == 'B')  drawingGoal.value = 10.0; 
-  else if(alphabet_ == 'R')  drawingGoal.value = 7.5; 
-  else if(alphabet_ == 'O')  drawingGoal.value = 2.0; 
-  else if(alphabet_ == 'T')  drawingGoal.value = 5.0; 
-  else if(alphabet_ == 'I')  drawingGoal.value = 8.0; 
-  else if(alphabet_ == 'S')  drawingGoal.value = 7.0; 
-  else if(alphabet_ == 'C')  drawingGoal.value = 3.0; 
+  if(alphabet_ == 'B')  drawingGoal.position = 10.0; 
+  else if(alphabet_ == 'R')  drawingGoal.position = 7.5; 
+  else if(alphabet_ == 'O')  drawingGoal.position = 2.0; 
+  else if(alphabet_ == 'T')  drawingGoal.position = 5.0; 
+  else if(alphabet_ == 'I')  drawingGoal.position = 8.0; 
+  else if(alphabet_ == 'S')  drawingGoal.position = 7.0; 
+  else if(alphabet_ == 'C')  drawingGoal.position = 3.0; 
   else if(alphabet_ == '!')  
   {
-    drawingGoal.value = 55.75; 
+    drawingGoal.position = 55.75; 
     scale_ *= 0.2;
   }
-  else                  drawingGoal.value = 2.0; 
+  else                  drawingGoal.position = 2.0; 
 
   drawingGoal.velocity = 0.0;
   drawingGoal.acceleration = 0.0;
   drawingGoal.effort = 0.0;
 
-  path_generator_.calcCoefficient(drawingStart, drawingGoal, move_time, control_time);
+  path_generator_.calcCoefficient(drawingStart, drawingGoal, move_time);
   coefficient_ = path_generator_.getCoefficient();
 }
 
-std::vector<WayPoint> Alphabet::drawAlphabet(double time_var)
+TaskWayPoint Alphabet::drawAlphabet(double time_var)
 {
   // get time variable
   double get_time_var = 0.0;
 
   get_time_var = coefficient_(0) +
-                  coefficient_(1) * pow(time_var, 1) +
-                  coefficient_(2) * pow(time_var, 2) +
-                  coefficient_(3) * pow(time_var, 3) +
-                  coefficient_(4) * pow(time_var, 4) +
-                  coefficient_(5) * pow(time_var, 5);
+                 coefficient_(1) * pow(time_var, 1) +
+                 coefficient_(2) * pow(time_var, 2) +
+                 coefficient_(3) * pow(time_var, 3) +
+                 coefficient_(4) * pow(time_var, 4) +
+                 coefficient_(5) * pow(time_var, 5);
 
   if(alphabet_ == 'B')      return drawing_B(get_time_var);
   else if(alphabet_ == 'R') return drawing_R(get_time_var);
@@ -85,19 +83,17 @@ std::vector<WayPoint> Alphabet::drawAlphabet(double time_var)
 }
 
 void Alphabet::setOption(const void *arg){}
-void Alphabet::init(double move_time, double control_time, std::vector<WayPoint> start, const void *arg)
+void Alphabet::init(double move_time, TaskWayPoint start, const void *arg)
 {
   char *c_arg = (char *)arg;
-  initAlphabet(move_time, control_time, start, c_arg[0], c_arg[1]);
+  initAlphabet(move_time, start, c_arg[0], c_arg[1]);
 }
-std::vector<WayPoint> Alphabet::getJointWayPoint(double tick){ return {}; }
-std::vector<WayPoint> Alphabet::getTaskWayPoint(double tick){  return drawAlphabet(tick); }
+TaskWayPoint Alphabet::getTaskWayPoint(double tick){  return drawAlphabet(tick); }
 
-std::vector<WayPoint> Alphabet::drawing_B(double t)
+TaskWayPoint Alphabet::drawing_B(double t)
 {
   // set drawing trajectory
-  std::vector<WayPoint> pose;
-  pose.resize(6);
+  TaskWayPoint pose;
   double diff_pose[2] = {0.0, 0.0};
   
   if(t <= 2.0)
@@ -143,22 +139,18 @@ std::vector<WayPoint> Alphabet::drawing_B(double t)
     diff_pose[1] = 0.0; // y
   }
 
-  pose.at(0).value = start_pose_.at(0).value - diff_pose[1]*scale_;
-  pose.at(1).value = start_pose_.at(1).value + diff_pose[0]*scale_;
-  pose.at(2).value = start_pose_.at(2).value;
-
-  pose.at(3).value = start_pose_.at(3).value;
-  pose.at(4).value = start_pose_.at(4).value;
-  pose.at(5).value = start_pose_.at(5).value;
+  pose.kinematic.position[0] = start_pose_.kinematic.position[0] - diff_pose[1]*scale_;
+  pose.kinematic.position[1] = start_pose_.kinematic.position[1] + diff_pose[0]*scale_;
+  pose.kinematic.position[2] = start_pose_.kinematic.position[2];
+  pose.kinematic.orientation = start_pose_.kinematic.orientation;
 
   return pose;
 }
 
-std::vector<WayPoint> Alphabet::drawing_R(double t)
+TaskWayPoint Alphabet::drawing_R(double t)
 {
   // set drawing trajectory
-  std::vector<WayPoint> pose;
-  pose.resize(6);
+  TaskWayPoint pose;
   double diff_pose[2] = {0.0, 0.0};
 
   if(t <= 2.0)
@@ -192,27 +184,18 @@ std::vector<WayPoint> Alphabet::drawing_R(double t)
     diff_pose[1] = -(2.0/3.0)*x + 4.0/3.0; // y
   }
 
-  // RM_LOG::PRINT("t: ",t);
-  // RM_LOG::PRINT(" X: ",diff_pose[1]);
-  // RM_LOG::PRINTLN(" Y: ",diff_pose[0]);
-
-  pose.at(0).value = start_pose_.at(0).value - diff_pose[1]*scale_;
-  pose.at(1).value = start_pose_.at(1).value + diff_pose[0]*scale_;
-  pose.at(2).value = start_pose_.at(2).value;
-
-  pose.at(3).value = start_pose_.at(3).value;
-  pose.at(4).value = start_pose_.at(4).value;
-  pose.at(5).value = start_pose_.at(5).value;
+  pose.kinematic.position[0] = start_pose_.kinematic.position[0] - diff_pose[1]*scale_;
+  pose.kinematic.position[1] = start_pose_.kinematic.position[1] + diff_pose[0]*scale_;
+  pose.kinematic.position[2] = start_pose_.kinematic.position[2];
+  pose.kinematic.orientation = start_pose_.kinematic.orientation;
 
   return pose;
 }
 
-
-std::vector<WayPoint> Alphabet::drawing_C(double t)
+TaskWayPoint Alphabet::drawing_C(double t)
 {
   // set drawing trajectory
-  std::vector<WayPoint> pose;
-  pose.resize(6);
+  TaskWayPoint pose;
   double diff_pose[2] = {0.0, 0.0};
 
   double x = (t) * (9.0/4.0*PI/3.0);
@@ -227,76 +210,36 @@ std::vector<WayPoint> Alphabet::drawing_C(double t)
     diff_pose[0] = 1.0 +sin(x); // x
     diff_pose[1] = cos(x+PI); // y
   }
-  // RM_LOG::PRINT("t: ",t);
-  // RM_LOG::PRINT(" X: ",diff_pose[1]);
-  // RM_LOG::PRINT(" Y: ",diff_pose[0]);
 
-  pose.at(0).value = start_pose_.at(0).value - diff_pose[1]*scale_;
-  pose.at(1).value = start_pose_.at(1).value + diff_pose[0]*scale_;
-  pose.at(2).value = start_pose_.at(2).value;
-
-  pose.at(3).value = start_pose_.at(3).value;
-  pose.at(4).value = start_pose_.at(4).value;
-  pose.at(5).value = start_pose_.at(5).value;
+  pose.kinematic.position[0] = start_pose_.kinematic.position[0] - diff_pose[1]*scale_;
+  pose.kinematic.position[1] = start_pose_.kinematic.position[1] + diff_pose[0]*scale_;
+  pose.kinematic.position[2] = start_pose_.kinematic.position[2];
+  pose.kinematic.orientation = start_pose_.kinematic.orientation;
 
   return pose;
 }
-std::vector<WayPoint> Alphabet::drawing_O(double t)
+TaskWayPoint Alphabet::drawing_O(double t)
 {
   // set drawing trajectory
-  std::vector<WayPoint> pose;
-  pose.resize(6);
+  TaskWayPoint pose;
   double diff_pose[2] = {0.0, 0.0};
 
-  // if(t <= 0.5)
-  // {
-  //   double z = t;
-  //   z_diff = z;
-  // }
-  // else if(t <= 1.5)
-  // {
-  //   double x = t-0.5;         
-  //   diff_pose[0] = 0; // y
-  //   diff_pose[1] = x; // x
-  //   z_diff = 0.5;
-  // }
-  // else if(t <= 2.0)
-  // {
-  //   double z = 0.5 - (t-1.5);
-  //   diff_pose[0] = 0; // y
-  //   diff_pose[1] = 1; // x
-  //   z_diff = z;
-  // }
-  // else// if(t <= 4.0)
-  // {
-  //   double x = (t) * (6.28/2.0);
-  //   diff_pose[0] = 1.0 + 1.0 * cos(x+3.14);// y
-  //   diff_pose[1] = 1.0 + 1.0 * sin(x);// x
-  // }
   double x = (t) * (6.28/2.0);
   diff_pose[0] = 1.0 + 1.0 * cos(x+3.14);// y
   diff_pose[1] = 1.0 * sin(x);// x
 
-  // RM_LOG::PRINT("t: ",t);
-  // RM_LOG::PRINT(" X: ",diff_pose[1]);
-  // RM_LOG::PRINT(" Y: ",diff_pose[0]);
-
-  pose.at(0).value = start_pose_.at(0).value + diff_pose[1]*scale_;
-  pose.at(1).value = start_pose_.at(1).value + diff_pose[0]*scale_;
-  pose.at(2).value = start_pose_.at(2).value;
-
-  pose.at(3).value = start_pose_.at(3).value;
-  pose.at(4).value = start_pose_.at(4).value;
-  pose.at(5).value = start_pose_.at(5).value;
+  pose.kinematic.position[0] = start_pose_.kinematic.position[0] - diff_pose[1]*scale_;
+  pose.kinematic.position[1] = start_pose_.kinematic.position[1] + diff_pose[0]*scale_;
+  pose.kinematic.position[2] = start_pose_.kinematic.position[2];
+  pose.kinematic.orientation = start_pose_.kinematic.orientation;
 
   return pose;
 }
 
-std::vector<WayPoint> Alphabet::drawing_T(double t)
+TaskWayPoint Alphabet::drawing_T(double t)
 {
   // set drawing trajectory
-  std::vector<WayPoint> pose;
-  pose.resize(6);
+  TaskWayPoint pose;
   double diff_pose[2] = {0.0, 0.0};
 
   if(t <= 2.0)
@@ -318,26 +261,18 @@ std::vector<WayPoint> Alphabet::drawing_T(double t)
     diff_pose[1] = 2.0; // y
   }
 
-  // RM_LOG::PRINT("t: ",t);
-  // RM_LOG::PRINT(" X: ",diff_pose[1]);
-  // RM_LOG::PRINT(" Y: ",diff_pose[0]);
-
-  pose.at(0).value = start_pose_.at(0).value - diff_pose[1]*scale_;
-  pose.at(1).value = start_pose_.at(1).value + diff_pose[0]*scale_;
-  pose.at(2).value = start_pose_.at(2).value;
-
-  pose.at(3).value = start_pose_.at(3).value;
-  pose.at(4).value = start_pose_.at(4).value;
-  pose.at(5).value = start_pose_.at(5).value;
+  pose.kinematic.position[0] = start_pose_.kinematic.position[0] - diff_pose[1]*scale_;
+  pose.kinematic.position[1] = start_pose_.kinematic.position[1] + diff_pose[0]*scale_;
+  pose.kinematic.position[2] = start_pose_.kinematic.position[2];
+  pose.kinematic.orientation = start_pose_.kinematic.orientation;
   
   return pose;
 }
 
-std::vector<WayPoint> Alphabet::drawing_I(double t)
+TaskWayPoint Alphabet::drawing_I(double t)
 {
   // set drawing trajectory
-  std::vector<WayPoint> pose;
-  pose.resize(6);
+  TaskWayPoint pose;
   double diff_pose[2] = {0.0, 0.0};
 
   if(t <= 2.0)
@@ -371,22 +306,18 @@ std::vector<WayPoint> Alphabet::drawing_I(double t)
     diff_pose[1] = 2.0; // y
   }
 
-  pose.at(0).value = start_pose_.at(0).value - diff_pose[1]*scale_;
-  pose.at(1).value = start_pose_.at(1).value + diff_pose[0]*scale_;
-  pose.at(2).value = start_pose_.at(2).value;
-
-  pose.at(3).value = start_pose_.at(3).value;
-  pose.at(4).value = start_pose_.at(4).value;
-  pose.at(5).value = start_pose_.at(5).value;
+  pose.kinematic.position[0] = start_pose_.kinematic.position[0] - diff_pose[1]*scale_;
+  pose.kinematic.position[1] = start_pose_.kinematic.position[1] + diff_pose[0]*scale_;
+  pose.kinematic.position[2] = start_pose_.kinematic.position[2];
+  pose.kinematic.orientation = start_pose_.kinematic.orientation;
 
   return pose;
 }
 
-std::vector<WayPoint> Alphabet::drawing_S(double t)
+TaskWayPoint Alphabet::drawing_S(double t)
 {
   // set drawing trajectory
-  std::vector<WayPoint> pose;
-  pose.resize(6);
+  TaskWayPoint pose;
   double diff_pose[2] = {0.0, 0.0};
 
   if(t <= 1.5)
@@ -420,26 +351,18 @@ std::vector<WayPoint> Alphabet::drawing_S(double t)
     diff_pose[1] = 2.0; // y
   }
 
-  // RM_LOG::PRINT("t: ",t);
-  // RM_LOG::PRINT(" X: ",diff_pose[1]);
-  // RM_LOG::PRINT(" Y: ",diff_pose[0]);
-
-  pose.at(0).value = start_pose_.at(0).value - diff_pose[1]*scale_;
-  pose.at(1).value = start_pose_.at(1).value + diff_pose[0]*scale_;
-  pose.at(2).value = start_pose_.at(2).value;
-
-  pose.at(3).value = start_pose_.at(3).value;
-  pose.at(4).value = start_pose_.at(4).value;
-  pose.at(5).value = start_pose_.at(5).value;
-
+  pose.kinematic.position[0] = start_pose_.kinematic.position[0] - diff_pose[1]*scale_;
+  pose.kinematic.position[1] = start_pose_.kinematic.position[1] + diff_pose[0]*scale_;
+  pose.kinematic.position[2] = start_pose_.kinematic.position[2];
+  pose.kinematic.orientation = start_pose_.kinematic.orientation;
+  
   return pose;
 }
 
-std::vector<WayPoint> Alphabet::drawing_MM(double t)
+TaskWayPoint Alphabet::drawing_MM(double t)
 {
   // set drawing trajectory
-  std::vector<WayPoint> pose;
-  pose.resize(6);
+  TaskWayPoint pose;
   double diff_pose[2] = {0.0, 0.0};
   
   if(t <= 1.134)
@@ -713,15 +636,10 @@ std::vector<WayPoint> Alphabet::drawing_MM(double t)
     diff_pose[1] = x; // y
   }
 
-
-
-  pose.at(0).value = start_pose_.at(0).value - diff_pose[1]*scale_;
-  pose.at(1).value = start_pose_.at(1).value + diff_pose[0]*scale_;
-  pose.at(2).value = start_pose_.at(2).value;
-
-  pose.at(3).value = start_pose_.at(3).value;
-  pose.at(4).value = start_pose_.at(4).value;
-  pose.at(5).value = start_pose_.at(5).value;
-
+  pose.kinematic.position[0] = start_pose_.kinematic.position[0] - diff_pose[1]*scale_;
+  pose.kinematic.position[1] = start_pose_.kinematic.position[1] + diff_pose[0]*scale_;
+  pose.kinematic.position[2] = start_pose_.kinematic.position[2];
+  pose.kinematic.orientation = start_pose_.kinematic.orientation;
+  
   return pose;
 }

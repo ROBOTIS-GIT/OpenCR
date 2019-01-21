@@ -28,16 +28,14 @@ namespace OPEN_MANIPULATOR_PEN_DRAWING
 {
 //-------------------- Alphabet --------------------//
 
-class Alphabet : public ROBOTIS_MANIPULATOR::DrawingTrajectory
+class Alphabet : public ROBOTIS_MANIPULATOR::CustomTaskTrajectory
 {
 private:
-  WayPointType output_way_point_type_;
-
   ROBOTIS_MANIPULATOR::MinimumJerk path_generator_;
   VectorXd coefficient_;
 
-  std::vector<WayPoint> start_pose_;
-  std::vector<WayPoint> goal_pose_;
+  TaskWayPoint start_pose_;
+  TaskWayPoint goal_pose_;
 
   char alphabet_;
   double move_time_;
@@ -47,22 +45,20 @@ public:
   Alphabet();
   virtual ~Alphabet();
 
-  void initAlphabet(double move_time, double control_time, std::vector<WayPoint> start, char alphabet, char scale);
-  std::vector<WayPoint> drawAlphabet(double time_var);
-  std::vector<WayPoint> drawing_B(double t);
-  std::vector<WayPoint> drawing_R(double t);
-  std::vector<WayPoint> drawing_C(double t);
-  std::vector<WayPoint> drawing_O(double t);
-  std::vector<WayPoint> drawing_T(double t);
-  std::vector<WayPoint> drawing_I(double t);
-  std::vector<WayPoint> drawing_S(double t);
-  std::vector<WayPoint> drawing_MM(double t);
+  void initAlphabet(double move_time, TaskWayPoint start, char alphabet, char scale);
+  TaskWayPoint drawAlphabet(double time_var);
+  TaskWayPoint drawing_B(double t);
+  TaskWayPoint drawing_R(double t);
+  TaskWayPoint drawing_C(double t);
+  TaskWayPoint drawing_O(double t);
+  TaskWayPoint drawing_T(double t);
+  TaskWayPoint drawing_I(double t);
+  TaskWayPoint drawing_S(double t);
+  TaskWayPoint drawing_MM(double t);
   
-
   virtual void setOption(const void *arg);
-  virtual void init(double move_time, double control_time, std::vector<WayPoint> start, const void *arg);
-  virtual std::vector<WayPoint> getJointWayPoint(double tick);
-  virtual std::vector<WayPoint> getTaskWayPoint(double tick);
+  virtual void init(double move_time, TaskWayPoint start, const void *arg);
+  virtual TaskWayPoint getTaskWayPoint(double tick);
 };
 
 } // namespace OPEN_MANIPULATOR_PEN_DRAWING

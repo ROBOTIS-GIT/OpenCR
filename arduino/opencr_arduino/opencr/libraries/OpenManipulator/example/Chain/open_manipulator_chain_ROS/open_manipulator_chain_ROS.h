@@ -55,6 +55,10 @@ void goalJointSpacePathCallback(const SetJointPosition::Request & req, SetJointP
 ros::ServiceServer<SetJointPosition::Request, SetJointPosition::Response> goal_joint_space_path_server(
   "open_manipulator/goal_joint_space_path", &goalJointSpacePathCallback);
 
+void goalJointSpacePathToKinematicsPoseCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res);
+ros::ServiceServer<SetKinematicsPose::Request, SetKinematicsPose::Response> goal_joint_space_path_to_kinematics_pose_server(
+  "open_manipulator/goal_joint_space_path_to_kinematics_pose", &goalJointSpacePathToKinematicsPoseCallback);
+
 void goalTaskSpacePathCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res);
 ros::ServiceServer<SetKinematicsPose::Request, SetKinematicsPose::Response> goal_task_space_path_server(
   "open_manipulator/goal_task_space_path", &goalTaskSpacePathCallback);
@@ -67,21 +71,21 @@ void goalTaskSpacePathOrientationOnlyCallback(const SetKinematicsPose::Request &
 ros::ServiceServer<SetKinematicsPose::Request, SetKinematicsPose::Response> goal_task_space_path_orientation_only_server(
   "open_manipulator/goal_task_space_path_orientation_only", &goalTaskSpacePathOrientationOnlyCallback);
 
-void goalJointSpacePathToPresentCallback(const SetJointPosition::Request & req, SetJointPosition::Response & res);
-ros::ServiceServer<SetJointPosition::Request, SetJointPosition::Response> goal_joint_space_path_to_present_server(
-  "open_manipulator/goal_joint_space_path_to_present", &goalJointSpacePathToPresentCallback);
+void goalJointSpacePathFromPresentCallback(const SetJointPosition::Request & req, SetJointPosition::Response & res);
+ros::ServiceServer<SetJointPosition::Request, SetJointPosition::Response> goal_joint_space_path_from_present_server(
+  "open_manipulator/goal_joint_space_path_from_present", &goalJointSpacePathFromPresentCallback);
 
-void goalTaskSpacePathToPresentCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res);
-ros::ServiceServer<SetKinematicsPose::Request, SetKinematicsPose::Response> goal_task_space_path_to_present_server(
-  "open_manipulator/goal_task_space_path_to_present", &goalTaskSpacePathToPresentCallback);
+void goalTaskSpacePathFromPresentCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res);
+ros::ServiceServer<SetKinematicsPose::Request, SetKinematicsPose::Response> goal_task_space_path_from_present_server(
+  "open_manipulator/goal_task_space_path_from_present", &goalTaskSpacePathFromPresentCallback);
 
-void goalTaskSpacePathToPresentPositionOnlyCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res);
-ros::ServiceServer<SetKinematicsPose::Request, SetKinematicsPose::Response> goal_task_space_path_to_present_position_only_server(
-  "open_manipulator/goal_task_space_path_to_present_position_only", &goalTaskSpacePathToPresentPositionOnlyCallback);
+void goalTaskSpacePathFromPresentPositionOnlyCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res);
+ros::ServiceServer<SetKinematicsPose::Request, SetKinematicsPose::Response> goal_task_space_path_from_present_position_only_server(
+  "open_manipulator/goal_task_space_path_from_present_position_only", &goalTaskSpacePathFromPresentPositionOnlyCallback);
 
-void goalTaskSpacePathToPresentOrientationOnlyCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res);
-ros::ServiceServer<SetKinematicsPose::Request, SetKinematicsPose::Response> goal_task_space_path_to_present_orientation_only_server(
-  "open_manipulator/goal_task_space_path_to_present_orientation_only", &goalTaskSpacePathToPresentOrientationOnlyCallback);
+void goalTaskSpacePathFromPresentOrientationOnlyCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res);
+ros::ServiceServer<SetKinematicsPose::Request, SetKinematicsPose::Response> goal_task_space_path_from_present_orientation_only_server(
+  "open_manipulator/goal_task_space_path_from_present_orientation_only", &goalTaskSpacePathFromPresentOrientationOnlyCallback);
 
 void goalToolControlCallback(const SetJointPosition::Request & req, SetJointPosition::Response & res);
 ros::ServiceServer<SetJointPosition::Request, SetJointPosition::Response> goal_tool_control_server(

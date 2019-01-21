@@ -19,12 +19,8 @@
 #ifndef OPEN_MANIPULATOR_PEN_MOTION_H_
 #define OPEN_MANIPULATOR_PEN_MOTION_H_
 
-#if defined(__OPENCR__)
-  #include <RobotisManipulator.h>
-  #include "OpenManipulatorPen.h"
-#else
-  #include <robotis_manipulator/robotis_manipulator.h>
-#endif
+#include <RobotisManipulator.h>
+#include "OpenManipulatorPen.h"
 
 #define BDPIN_PUSH_SW_1         34
 #define BDPIN_PUSH_SW_2         35
@@ -34,7 +30,6 @@
 bool demo_motion_state = false;
 int  demo_motion_type = 0;
 char demo_motion_cnt = 0;
-
 
 void demo_motion_robotis_mm(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
 {
@@ -70,15 +65,15 @@ void demo_motion_robotis_mm(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
       open_manipulator->taskTrajectoryMove("pen", goal_pose, 1.0);
     break;
     case 3: // z down
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
     break;
     case 4: // drawing R
       draw_alphabet_arg[0] = 'R'; // drawing alphabet
       draw_alphabet_arg[1] = 20; // drawing scale 2cm
-      open_manipulator->drawingTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
+      open_manipulator->customTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
     break;
     case 5: // z up
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
     break;
 
     case 6: // O start pose 0, 1
@@ -89,15 +84,15 @@ void demo_motion_robotis_mm(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
       open_manipulator->taskTrajectoryMove("pen", goal_pose, 1.0);
     break;
     case 7: // z down
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
     break;
     case 8: // drawing O
       draw_alphabet_arg[0] = 'O'; // drawing alphabet
       draw_alphabet_arg[1] = 20; // drawing scale 2cm
-      open_manipulator->drawingTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
+      open_manipulator->customTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
     break;
     case 9: // z up
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
     break;
 
     case 10: // B start pose 0, 0
@@ -108,15 +103,15 @@ void demo_motion_robotis_mm(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
       open_manipulator->taskTrajectoryMove("pen", goal_pose, 1.0);
     break;
     case 11: // z down
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
     break;
     case 12: // drawing O
       draw_alphabet_arg[0] = 'B'; // drawing alphabet
       draw_alphabet_arg[1] = 20; // drawing scale 2cm
-      open_manipulator->drawingTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
+      open_manipulator->customTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
     break;
     case 13: // z up
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
     break;
 
     case 14: // O start pose 0, 1
@@ -127,15 +122,15 @@ void demo_motion_robotis_mm(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
       open_manipulator->taskTrajectoryMove("pen", goal_pose, 1.0);
     break;
     case 15: // z down
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
     break;
     case 16: // drawing O
       draw_alphabet_arg[0] = 'O'; // drawing alphabet
       draw_alphabet_arg[1] = 20; // drawing scale 2cm
-      open_manipulator->drawingTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
+      open_manipulator->customTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
     break;
     case 17: // z up
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
     break;
 
     case 18: // T start pose 1, 0
@@ -146,15 +141,15 @@ void demo_motion_robotis_mm(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
       open_manipulator->taskTrajectoryMove("pen", goal_pose, 1.0);
     break;
     case 19: // z down
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
     break;
     case 20: // drawing O
       draw_alphabet_arg[0] = 'T'; // drawing alphabet
       draw_alphabet_arg[1] = 20; // drawing scale 2cm
-      open_manipulator->drawingTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
+      open_manipulator->customTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
     break;
     case 21: // z up
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
     break;
 
     case 22: // I start pose 0, 0
@@ -165,15 +160,15 @@ void demo_motion_robotis_mm(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
       open_manipulator->taskTrajectoryMove("pen", goal_pose, 1.0);
     break;
     case 23: // z down
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
     break;
     case 24: // drawing O
       draw_alphabet_arg[0] = 'I'; // drawing alphabet
       draw_alphabet_arg[1] = 20; // drawing scale 2cm
-      open_manipulator->drawingTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
+      open_manipulator->customTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
     break;
     case 25: // z up
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
     break;
     
     case 26: // S start pose 0, 0
@@ -184,15 +179,15 @@ void demo_motion_robotis_mm(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
       open_manipulator->taskTrajectoryMove("pen", goal_pose, 1.0);
     break;
     case 27: // z down
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
     break;
     case 28: // drawing O
       draw_alphabet_arg[0] = 'S'; // drawing alphabet
       draw_alphabet_arg[1] = 20; // drawing scale 2cm
-      open_manipulator->drawingTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
+      open_manipulator->customTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
     break;
     case 29: // z up
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
     break;
 
     case 30: // mobile manipulator start pose 0, 0
@@ -201,15 +196,15 @@ void demo_motion_robotis_mm(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
       open_manipulator->taskTrajectoryMove("pen", goal_pose, 1.5);
     break;
     case 31: // z down
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
     break;
     case 32: // drawing mm
       draw_alphabet_arg[0] = '!'; // drawing alphabet
       draw_alphabet_arg[1] = 120; // drawing scale 12cm
-      open_manipulator->drawingTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg,10.0);
+      open_manipulator->customTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg,10.0);
     break;
     case 33: // z up
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.020), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.020), 0.5);
     break;
 
     case 34: // I start pose 0, 0
@@ -218,15 +213,15 @@ void demo_motion_robotis_mm(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
       open_manipulator->taskTrajectoryMove("pen", goal_pose, 1.5);
     break;
     case 35: // z down
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
     break;
     case 36: // drawing mm
       draw_alphabet_arg[0] = 'I'; // drawing alphabet
       draw_alphabet_arg[1] = 15; // drawing scale 1.5cm
-      open_manipulator->drawingTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
+      open_manipulator->customTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
     break;
     case 37: // z up
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
     break;
 
     case 38: // C start pose 0, 1
@@ -237,15 +232,15 @@ void demo_motion_robotis_mm(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
       open_manipulator->taskTrajectoryMove("pen", goal_pose, 1.5);
     break;
     case 39: // z down
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
     break;
     case 40: // drawing mm
       draw_alphabet_arg[0] = 'C'; // drawing alphabet
       draw_alphabet_arg[1] = 15; // drawing scale 1.5cm
-      open_manipulator->drawingTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
+      open_manipulator->customTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
     break;
     case 41: // z up
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
     break;
 
     case 42: // T start pose 0, 0
@@ -256,15 +251,15 @@ void demo_motion_robotis_mm(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
       open_manipulator->taskTrajectoryMove("pen", goal_pose, 1.5);
     break;
     case 43: // z down
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
     break;
     case 44: // drawing mm
       draw_alphabet_arg[0] = 'T'; // drawing alphabet
       draw_alphabet_arg[1] = 15; // drawing scale 1.5cm
-      open_manipulator->drawingTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
+      open_manipulator->customTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
     break;
     case 45: // z up
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
     break;
     
     case 46: // home
@@ -309,15 +304,15 @@ void demo_motion_mm(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
       open_manipulator->taskTrajectoryMove("pen", goal_pose, 1.5);
     break;
     case 3: // z down
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
     break;
     case 4: // drawing mm
       draw_alphabet_arg[0] = '!'; // drawing alphabet
-      draw_alphabet_arg[1] = 140; // drawing scale 12cm
-      open_manipulator->drawingTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg,25.0);
+      draw_alphabet_arg[1] = 120; // drawing scale 12cm
+      open_manipulator->customTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg,25.0);
     break;
     case 5: // z up
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.020), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.020), 0.5);
     break;
 
     case 6: // home
@@ -362,15 +357,15 @@ void demo_motion_robotis(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
       open_manipulator->taskTrajectoryMove("pen", goal_pose, 1.0);
     break;
     case 3: // z down
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
     break;
     case 4: // drawing R
       draw_alphabet_arg[0] = 'R'; // drawing alphabet
       draw_alphabet_arg[1] = 30; // drawing scale 3cm
-      open_manipulator->drawingTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
+      open_manipulator->customTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
     break;
     case 5: // z up
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
     break;
 
     case 6: // O start pose 0, 1
@@ -381,15 +376,15 @@ void demo_motion_robotis(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
       open_manipulator->taskTrajectoryMove("pen", goal_pose, 1.0);
     break;
     case 7: // z down
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
     break;
     case 8: // drawing O
       draw_alphabet_arg[0] = 'O'; // drawing alphabet
       draw_alphabet_arg[1] = 30; // drawing scale 3cm
-      open_manipulator->drawingTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
+      open_manipulator->customTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
     break;
     case 9: // z up
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
     break;
 
     case 10: // B start pose 0, 0
@@ -400,15 +395,15 @@ void demo_motion_robotis(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
       open_manipulator->taskTrajectoryMove("pen", goal_pose, 1.0);
     break;
     case 11: // z down
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
     break;
     case 12: // drawing O
       draw_alphabet_arg[0] = 'B'; // drawing alphabet
       draw_alphabet_arg[1] = 30; // drawing scale 3cm
-      open_manipulator->drawingTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
+      open_manipulator->customTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
     break;
     case 13: // z up
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
     break;
 
     case 14: // O start pose 0, 1
@@ -419,15 +414,15 @@ void demo_motion_robotis(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
       open_manipulator->taskTrajectoryMove("pen", goal_pose, 1.0);
     break;
     case 15: // z down
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
     break;
     case 16: // drawing O
       draw_alphabet_arg[0] = 'O'; // drawing alphabet
       draw_alphabet_arg[1] = 30; // drawing scale 3cm
-      open_manipulator->drawingTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
+      open_manipulator->customTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
     break;
     case 17: // z up
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
     break;
 
     case 18: // T start pose 1, 0
@@ -438,15 +433,15 @@ void demo_motion_robotis(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
       open_manipulator->taskTrajectoryMove("pen", goal_pose, 1.0);
     break;
     case 19: // z down
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
     break;
     case 20: // drawing O
       draw_alphabet_arg[0] = 'T'; // drawing alphabet
       draw_alphabet_arg[1] = 30; // drawing scale 3cm
-      open_manipulator->drawingTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
+      open_manipulator->customTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
     break;
     case 21: // z up
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
     break;
 
     case 22: // I start pose 0, 0
@@ -457,15 +452,15 @@ void demo_motion_robotis(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
       open_manipulator->taskTrajectoryMove("pen", goal_pose, 1.0);
     break;
     case 23: // z down
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
     break;
     case 24: // drawing O
       draw_alphabet_arg[0] = 'I'; // drawing alphabet
       draw_alphabet_arg[1] = 30; // drawing scale 3cm
-      open_manipulator->drawingTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
+      open_manipulator->customTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
     break;
     case 25: // z up
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
     break;
     
     case 26: // S start pose 0, 0
@@ -476,15 +471,15 @@ void demo_motion_robotis(OPEN_MANIPULATOR_PEN *open_manipulator, int cnt)
       open_manipulator->taskTrajectoryMove("pen", goal_pose, 1.0);
     break;
     case 27: // z down
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, -0.010), 0.5);
     break;
     case 28: // drawing O
       draw_alphabet_arg[0] = 'S'; // drawing alphabet
       draw_alphabet_arg[1] = 30; // drawing scale 3cm
-      open_manipulator->drawingTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
+      open_manipulator->customTrajectoryMove(DRAWING_ALPHABET, "pen", p_draw_alphabet_arg, 5.0);
     break;
     case 29: // z up
-      open_manipulator->taskTrajectoryMoveToPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
+      open_manipulator->taskTrajectoryMoveFromPresentPose("pen", RM_MATH::makeVector3(0.0, 0.0, 0.010), 0.5);
     break;
 
     case 30: // home

@@ -20,19 +20,21 @@
 #include "OpenManipulatorVacuumMotion.h"
 #include "Processing.h"
 
-OPEN_MANIPULATOR_VACUUM open_manipulator; 
+OPEN_MANIPULATOR_VACUUM open_manipulator;
+double control_time = 0.010f;
 double present_time = 0.0;
 double previous_time = 0.0;
+bool platform_flag = true;
 
 void setup()
 {
   Serial.begin(57600);
   DEBUG.begin(57600);
 
-  connectProcessing();
+  connectProcessing(platform_flag);
   switchInit();
   
-  open_manipulator.initManipulator(true);
+  open_manipulator.initManipulator(platform_flag);
   RM_LOG::PRINT("OpenManipulator Debugging Port");
 }
 
@@ -42,8 +44,9 @@ void loop()
   getData(100);
   switchRead();
   playMotion(&open_manipulator);
+  playProcessingMotion(&open_manipulator);
 
-  if(present_time-previous_time >= CONTROL_TIME)
+  if(present_time-previous_time >= control_time)
   {
     open_manipulator.openManipulatorProcess(millis()/1000.0);
     previous_time = (float)(millis()/1000.0f);
