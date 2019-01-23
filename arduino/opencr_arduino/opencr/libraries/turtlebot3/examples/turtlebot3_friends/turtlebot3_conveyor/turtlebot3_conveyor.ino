@@ -1,14 +1,14 @@
-#include "turtlebot3_conveyer.h"
-#include "turtlebot3_conveyer_motor_driver.h"
+#include "turtlebot3_conveyor.h"
+#include "turtlebot3_conveyor_motor_driver.h"
 
 #define LOOP_TIME_SEC 0.010f
 
 RC100 rc100;
-DynamixelStatus conveyer;
+DynamixelStatus conveyor;
 Turtlebot3MotorDriver motor_driver;
 
-uint8_t conveyer_joint[4] = {JOINT_L_R, JOINT_R_R, JOINT_L_F, JOINT_R_F};
-uint8_t conveyer_wheel[4] = {WHEEL_L_R, WHEEL_R_R, WHEEL_L_F, WHEEL_R_F};
+uint8_t conveyor_joint[4] = {JOINT_L_R, JOINT_R_R, JOINT_L_F, JOINT_R_F};
+uint8_t conveyor_wheel[4] = {WHEEL_L_R, WHEEL_R_R, WHEEL_L_F, WHEEL_R_F};
 
 void setup()
 {
@@ -28,8 +28,8 @@ void loop()
 
   if((present_time - previous_time) >= (LOOP_TIME_SEC * 1000))
   {
-    motor_driver.controlJoints(conveyer.setJointAngle());
-    motor_driver.controlWheels(conveyer.setWheelVel());
+    motor_driver.controlJoints(conveyor.setJointAngle());
+    motor_driver.controlWheels(conveyor.setWheelVel());
 
     previous_time = millis();
   } 
@@ -41,9 +41,9 @@ void getRC100Data()
   {    
     int rcData = rc100.readData();
 
-    conveyer.getDirection(rcData);
+    conveyor.getDirection(rcData);
     delay(1);
 
-    conveyer.setParams();
+    conveyor.setParams();
   }
 }

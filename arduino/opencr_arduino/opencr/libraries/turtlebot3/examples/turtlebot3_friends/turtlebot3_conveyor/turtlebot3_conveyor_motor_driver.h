@@ -16,8 +16,8 @@
 
 /* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
 
-#ifndef TURTLEBOT3_CONVEYER_MOTOR_DRIVER_H_
-#define TURTLEBOT3_CONVEYER_MOTOR_DRIVER_H_
+#ifndef TURTLEBOT3_CONVEYOR_MOTOR_DRIVER_H_
+#define TURTLEBOT3_CONVEYOR_MOTOR_DRIVER_H_
 
 #include <DynamixelSDK.h>
 
@@ -85,4 +85,4 @@ class Turtlebot3MotorDriver
   dynamixel::GroupSyncWrite *groupSyncWritePosition_;
 };
 
-#endif // TURTLEBOT3_CONVEYER_MOTOR_DRIVER_H_
+#endif // TURTLEBOT3_CONVEYOR_MOTOR_DRIVER_H_

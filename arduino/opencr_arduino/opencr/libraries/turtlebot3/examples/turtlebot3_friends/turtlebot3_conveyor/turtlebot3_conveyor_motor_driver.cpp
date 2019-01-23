@@ -16,7 +16,7 @@
 
 /* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
 
-#include "turtlebot3_conveyer_motor_driver.h"
+#include "turtlebot3_conveyor_motor_driver.h"
 
 Turtlebot3MotorDriver::Turtlebot3MotorDriver()
 : baudrate_(BAUDRATE),
