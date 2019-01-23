@@ -161,20 +161,27 @@ bool Turtlebot3MotorDriver::writeVelocity(int64_t left_value, int64_t right_valu
   bool dxl_addparam_result;
   int8_t dxl_comm_result;
 
-  int64_t value[2] = {left_value, right_value};
-  uint8_t data_byte[4] = {0, };
+  uint8_t left_data_byte[4] = {0, };
+  uint8_t right_data_byte[4] = {0, };
 
-  for (uint8_t index = 0; index < 2; index++)
-  {
-    data_byte[0] = DXL_LOBYTE(DXL_LOWORD(value[index]));
-    data_byte[1] = DXL_HIBYTE(DXL_LOWORD(value[index]));
-    data_byte[2] = DXL_LOBYTE(DXL_HIWORD(value[index]));
-    data_byte[3] = DXL_HIBYTE(DXL_HIWORD(value[index]));
 
-    dxl_addparam_result = groupSyncWriteVelocity_->addParam(index+1, (uint8_t*)&data_byte);
-    if (dxl_addparam_result != true)
-      return false;
-  }
+  left_data_byte[0] = DXL_LOBYTE(DXL_LOWORD(left_value));
+  left_data_byte[1] = DXL_HIBYTE(DXL_LOWORD(left_value));
+  left_data_byte[2] = DXL_LOBYTE(DXL_HIWORD(left_value));
+  left_data_byte[3] = DXL_HIBYTE(DXL_HIWORD(left_value));
+
+  dxl_addparam_result = groupSyncWriteVelocity_->addParam(left_wheel_id_, (uint8_t*)&left_data_byte);
+  if (dxl_addparam_result != true)
+    return false;
+
+  right_data_byte[0] = DXL_LOBYTE(DXL_LOWORD(right_value));
+  right_data_byte[1] = DXL_HIBYTE(DXL_LOWORD(right_value));
+  right_data_byte[2] = DXL_LOBYTE(DXL_HIWORD(right_value));
+  right_data_byte[3] = DXL_HIBYTE(DXL_HIWORD(right_value));
+
+  dxl_addparam_result = groupSyncWriteVelocity_->addParam(right_wheel_id_, (uint8_t*)&right_data_byte);
+  if (dxl_addparam_result != true)
+    return false;
 
   dxl_comm_result = groupSyncWriteVelocity_->txPacket();
   if (dxl_comm_result != COMM_SUCCESS)
