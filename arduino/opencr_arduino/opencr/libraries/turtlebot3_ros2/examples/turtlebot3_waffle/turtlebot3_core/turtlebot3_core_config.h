@@ -20,16 +20,6 @@
 #define TURTLEBOT3_CORE_CONFIG_H_
 
 #include <ros2arduino.h>
-#include <std_msgs/Bool.hpp>
-#include <std_msgs/Empty.hpp>
-#include <sensor_msgs/Imu.hpp>
-#include <sensor_msgs/JointState.hpp>
-#include <geometry_msgs/Twist.hpp>
-#include <nav_msgs/Odometry.hpp>
-
-#include <turtlebot3_msgs/SensorState.hpp>
-#include <turtlebot3_msgs/Sound.hpp>
-#include <turtlebot3_msgs/VersionInfo.hpp>
 
 #include <TurtleBot3_ROS2.h>
 #include "turtlebot3_waffle.h"

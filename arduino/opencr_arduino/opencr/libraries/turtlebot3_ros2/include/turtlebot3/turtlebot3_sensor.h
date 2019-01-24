@@ -20,10 +20,7 @@
 #define TURTLEBOT3_SENSOR_H_
 
 #include <IMU.h>
-
-#include <sensor_msgs/Imu.hpp>
-#include <sensor_msgs/BatteryState.hpp>
-#include <sensor_msgs/MagneticField.hpp>
+#include <ros2arduino.h>
 
 #include "OLLO.h"
 
