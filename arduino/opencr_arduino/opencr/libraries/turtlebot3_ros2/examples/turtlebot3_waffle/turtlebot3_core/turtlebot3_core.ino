@@ -42,7 +42,7 @@ void setup()
 
   updateGyroCali(true);
 
-  ros2::init(NULL);
+  ros2::init(&RTPS_SERIAL);
 
   sprintf(imu_frame_id, "imu_link");
   sprintf(joint_state_header_frame_id, "base_link");

@@ -21,7 +21,7 @@
 
 #include <RC100.h>
 
-#include <geometry_msgs/Twist.hpp>
+#include <ros2arduino.h>
 
 #define CONST_VEL 0.2
 
