@@ -18,7 +18,7 @@
 
 #include "../../include/robotis_manipulator/robotis_manipulator_manager.h"
 
-using namespace ROBOTIS_MANIPULATOR;
+using namespace robotis_manipulator;
 
 bool JointActuator::findId(uint8_t actuator_id)
 {
@@ -31,11 +31,10 @@ bool JointActuator::findId(uint8_t actuator_id)
   return false;
 }
 
-bool JointActuator::isEnabled()
+bool JointActuator::getEnabledState()
 {
-  return enable_state_;
+  return enabled_state_;
 }
-
 
 bool ToolActuator::findId(uint8_t actuator_id)
 {
@@ -46,9 +45,7 @@ bool ToolActuator::findId(uint8_t actuator_id)
   return false;
 }
 
-bool ToolActuator::isEnabled()
+bool ToolActuator::getEnabledState()
 {
-  return enable_state_;
+  return enabled_state_;
 }
-
-

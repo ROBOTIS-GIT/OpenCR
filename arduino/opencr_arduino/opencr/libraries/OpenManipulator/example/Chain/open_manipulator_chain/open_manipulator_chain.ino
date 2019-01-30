@@ -20,8 +20,8 @@
 #include "Processing.h"
 #include "RemoteController.h"
 
-OPEN_MANIPULATOR open_manipulator;
-double control_time = 0.010f;
+OpenManipulator open_manipulator;
+double control_time = 0.010;
 double present_time = 0.0;
 double previous_time = 0.0;
 bool platform_flag = true;
@@ -37,19 +37,19 @@ void setup()
   connectRC100();
   
   open_manipulator.initManipulator(platform_flag);
-  RM_LOG::PRINT("OpenManipulator Debugging Port");
+  robotis_manipulator_log::print("OpenManipulator Debugging Port");
 }
 
 void loop()
 {
-  present_time = (float)(millis()/1000.0f);
+  present_time = millis()/1000.0;
   getData(100);
   playProcessingMotion(&open_manipulator);
 
   if(present_time-previous_time >= control_time)
   {
-    open_manipulator.openManipulatorProcess(millis()/1000.0f);
-    previous_time = (float)(millis()/1000.0f);
+    open_manipulator.openManipulatorProcess(millis()/1000.0);
+    previous_time = millis()/1000.0;
     sendValueToProcessing(&open_manipulator);
   }
 }

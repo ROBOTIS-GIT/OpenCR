@@ -27,7 +27,7 @@
   #include <dynamixel_workbench_toolbox/dynamixel_workbench.h>
 #endif
 
-namespace DYNAMIXEL
+namespace dynamixel
 {
 
 #define SYNC_WRITE_HANDLER 0
@@ -71,16 +71,20 @@ typedef struct
   uint8_t num;
 } Joint;
 
-class JointDynamixel : public ROBOTIS_MANIPULATOR::JointActuator
+class JointDynamixel : public robotis_manipulator::JointActuator
 {
- private:
+private:
   DynamixelWorkbench *dynamixel_workbench_;
   Joint dynamixel_;
 
- public:
+public:
   JointDynamixel(){}
   virtual ~JointDynamixel(){}
 
+
+  /*****************************************************************************
+  ** Joint Dynamixel Control Functions
+  *****************************************************************************/
   virtual void init(std::vector<uint8_t> actuator_id, const void *arg);
   virtual void setMode(std::vector<uint8_t> actuator_id, const void *arg);
   virtual std::vector<uint8_t> getId();
@@ -88,31 +92,37 @@ class JointDynamixel : public ROBOTIS_MANIPULATOR::JointActuator
   virtual void enable();
   virtual void disable();
 
-  virtual bool sendJointActuatorValue(std::vector<uint8_t> actuator_id, std::vector<ROBOTIS_MANIPULATOR::Actuator> value_vector);
-  virtual std::vector<ROBOTIS_MANIPULATOR::Actuator> receiveJointActuatorValue(std::vector<uint8_t> actuator_id);
+  virtual bool sendJointActuatorValue(std::vector<uint8_t> actuator_id, std::vector<robotis_manipulator::ActuatorValue> value_vector);
+  virtual std::vector<robotis_manipulator::ActuatorValue> receiveJointActuatorValue(std::vector<uint8_t> actuator_id);
 
-////////////////////////////////////////////////////////////////
 
+  /*****************************************************************************
+  ** Functions called in Joint Dynamixel Control Functions
+  *****************************************************************************/
   bool initialize(std::vector<uint8_t> actuator_id, STRING dxl_device_name, STRING dxl_baud_rate);
   bool setOperatingMode(std::vector<uint8_t> actuator_id, STRING dynamixel_mode = "position_mode");
   bool setSDKHandler(uint8_t actuator_id);
   bool writeProfileValue(std::vector<uint8_t> actuator_id, STRING profile_mode, uint32_t value);
   bool writeGoalPosition(std::vector<uint8_t> actuator_id, std::vector<double> radian_vector);
-  std::vector<ROBOTIS_MANIPULATOR::Actuator> receiveAllDynamixelValue(std::vector<uint8_t> actuator_id);
+  std::vector<robotis_manipulator::ActuatorValue> receiveAllDynamixelValue(std::vector<uint8_t> actuator_id);
 };
 
-class JointDynamixelProfileControl : public ROBOTIS_MANIPULATOR::JointActuator
+class JointDynamixelProfileControl : public robotis_manipulator::JointActuator
 {
- private:
+private:
   DynamixelWorkbench *dynamixel_workbench_;
   Joint dynamixel_;
-  float control_loop_time_;       //ms
-  std::map<uint8_t, ROBOTIS_MANIPULATOR::Actuator> previous_goal_value_;
+  float control_loop_time_; // unit: ms
+  std::map<uint8_t, robotis_manipulator::ActuatorValue> previous_goal_value_;
 
- public:
+public:
   JointDynamixelProfileControl(float control_loop_time = 0.010);
   virtual ~JointDynamixelProfileControl(){}
 
+
+  /*****************************************************************************
+  ** Joint Dynamixel Profile Control Functions
+  *****************************************************************************/
   virtual void init(std::vector<uint8_t> actuator_id, const void *arg);
   virtual void setMode(std::vector<uint8_t> actuator_id, const void *arg);
   virtual std::vector<uint8_t> getId();
@@ -120,20 +130,22 @@ class JointDynamixelProfileControl : public ROBOTIS_MANIPULATOR::JointActuator
   virtual void enable();
   virtual void disable();
 
-  virtual bool sendJointActuatorValue(std::vector<uint8_t> actuator_id, std::vector<ROBOTIS_MANIPULATOR::Actuator> value_vector);
-  virtual std::vector<ROBOTIS_MANIPULATOR::Actuator> receiveJointActuatorValue(std::vector<uint8_t> actuator_id);
+  virtual bool sendJointActuatorValue(std::vector<uint8_t> actuator_id, std::vector<robotis_manipulator::ActuatorValue> value_vector);
+  virtual std::vector<robotis_manipulator::ActuatorValue> receiveJointActuatorValue(std::vector<uint8_t> actuator_id);
 
-////////////////////////////////////////////////////////////////
 
+  /*****************************************************************************
+  ** Functions called in Joint Dynamixel Profile Control Functions
+  *****************************************************************************/
   bool initialize(std::vector<uint8_t> actuator_id, STRING dxl_device_name, STRING dxl_baud_rate);
   bool setOperatingMode(std::vector<uint8_t> actuator_id, STRING dynamixel_mode = "position_mode");
   bool setSDKHandler(uint8_t actuator_id);
   bool writeProfileValue(std::vector<uint8_t> actuator_id, STRING profile_mode, uint32_t value);
-  bool writeGoalProfilingControlValue(std::vector<uint8_t> actuator_id, std::vector<ROBOTIS_MANIPULATOR::Actuator> value_vector);
-  std::vector<ROBOTIS_MANIPULATOR::Actuator> receiveAllDynamixelValue(std::vector<uint8_t> actuator_id);
+  bool writeGoalProfilingControlValue(std::vector<uint8_t> actuator_id, std::vector<robotis_manipulator::ActuatorValue> value_vector);
+  std::vector<robotis_manipulator::ActuatorValue> receiveAllDynamixelValue(std::vector<uint8_t> actuator_id);
 };
 
-class GripperDynamixel : public ROBOTIS_MANIPULATOR::ToolActuator
+class GripperDynamixel : public robotis_manipulator::ToolActuator
 {
  private:
   DynamixelWorkbench *dynamixel_workbench_;
@@ -143,6 +155,10 @@ class GripperDynamixel : public ROBOTIS_MANIPULATOR::ToolActuator
   GripperDynamixel() {}
   virtual ~GripperDynamixel() {}
 
+
+  /*****************************************************************************
+  ** Tool Dynamixel Control Functions
+  *****************************************************************************/
   virtual void init(uint8_t actuator_id, const void *arg);
   virtual void setMode(const void *arg);
   virtual uint8_t getId();
@@ -150,11 +166,13 @@ class GripperDynamixel : public ROBOTIS_MANIPULATOR::ToolActuator
   virtual void enable();
   virtual void disable();
 
-  virtual bool sendToolActuatorValue(ROBOTIS_MANIPULATOR::Actuator value);
-  virtual ROBOTIS_MANIPULATOR::Actuator receiveToolActuatorValue();
+  virtual bool sendToolActuatorValue(robotis_manipulator::ActuatorValue value);
+  virtual robotis_manipulator::ActuatorValue receiveToolActuatorValue();
 
-////////////////////////////////////////////////////////////////
 
+  /*****************************************************************************
+  ** Functions called in Tool Dynamixel Profile Control Functions
+  *****************************************************************************/
   bool initialize(uint8_t actuator_id, STRING dxl_device_name, STRING dxl_baud_rate);
   bool setOperatingMode(STRING dynamixel_mode = "position_mode");
   bool writeProfileValue(STRING profile_mode, uint32_t value);

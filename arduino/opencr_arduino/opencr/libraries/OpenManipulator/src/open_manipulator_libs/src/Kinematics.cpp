@@ -18,23 +18,23 @@
 
 #include "../include/open_manipulator_libs/Kinematics.h"
 
-using namespace ROBOTIS_MANIPULATOR;
-using namespace KINEMATICS;
+using namespace robotis_manipulator;
+using namespace kinematics;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////CR_Jacobian_Solver//////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void CR_Jacobian_Solver::setOption(const void *arg){}
+/*****************************************************************************
+** Kinematics Solver Using Chain Rule and Jacobian
+*****************************************************************************/
+void SolverUsingChainRuleandJacobian::setOption(const void *arg){}
 
-Eigen::MatrixXd CR_Jacobian_Solver::jacobian(Manipulator *manipulator, Name tool_name)
+Eigen::MatrixXd SolverUsingChainRuleandJacobian::jacobian(Manipulator *manipulator, Name tool_name)
 {
   Eigen::MatrixXd jacobian = Eigen::MatrixXd::Identity(6, manipulator->getDOF());
 
-  Eigen::Vector3d joint_axis = ZERO_VECTOR;
+  Eigen::Vector3d joint_axis = Eigen::Vector3d::Zero(3);
 
-  Eigen::Vector3d position_changed = ZERO_VECTOR;
-  Eigen::Vector3d orientation_changed = ZERO_VECTOR;
+  Eigen::Vector3d position_changed = Eigen::Vector3d::Zero(3);
+  Eigen::Vector3d orientation_changed = Eigen::Vector3d::Zero(3);
   Eigen::VectorXd pose_changed = Eigen::VectorXd::Zero(6);
 
   //////////////////////////////////////////////////////////////////////////////////
@@ -54,7 +54,7 @@ Eigen::MatrixXd CR_Jacobian_Solver::jacobian(Manipulator *manipulator, Name tool
       joint_axis = manipulator->getComponentOrientationFromWorld(parent_name) * manipulator->getAxis(my_name);
     }
 
-    position_changed = RM_MATH::skewSymmetricMatrix(joint_axis) *
+    position_changed = robotis_manipulator_math::skewSymmetricMatrix(joint_axis) *
                        (manipulator->getComponentPositionFromWorld(tool_name) - manipulator->getComponentPositionFromWorld(my_name));
     orientation_changed = joint_axis;
 
@@ -72,26 +72,26 @@ Eigen::MatrixXd CR_Jacobian_Solver::jacobian(Manipulator *manipulator, Name tool
   return jacobian;
 }
 
-void CR_Jacobian_Solver::forwardKinematics(Manipulator *manipulator)
+void SolverUsingChainRuleandJacobian::solveForwardKinematics(Manipulator *manipulator)
 {
   forwardSolverUsingChainRule(manipulator, manipulator->getWorldChildName());
 }
 
-bool CR_Jacobian_Solver::inverseKinematics(Manipulator *manipulator, Name tool_name, PoseValue target_pose, std::vector<JointValue> *goal_joint_value)
+bool SolverUsingChainRuleandJacobian::solveInverseKinematics(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue> *goal_joint_value)
 {
   return inverseSolverUsingJacobian(manipulator, tool_name, target_pose, goal_joint_value);
 }
 
 
 //private
-void CR_Jacobian_Solver::forwardSolverUsingChainRule(Manipulator *manipulator, Name component_name)
+void SolverUsingChainRuleandJacobian::forwardSolverUsingChainRule(Manipulator *manipulator, Name component_name)
 {
   Name my_name = component_name;
   Name parent_name = manipulator->getComponentParentName(my_name);
   int8_t number_of_child = manipulator->getComponentChildName(my_name).size();
 
-  PoseValue parent_pose_value;
-  PoseValue my_pose_value;
+  Pose parent_pose_value;
+  Pose my_pose_value;
 
   //Get Parent Pose
   if (parent_name == manipulator->getWorldName())
@@ -107,15 +107,15 @@ void CR_Jacobian_Solver::forwardSolverUsingChainRule(Manipulator *manipulator, N
   my_pose_value.kinematic.position = parent_pose_value.kinematic.position
                                    + (parent_pose_value.kinematic.orientation * manipulator->getComponentRelativePositionFromParent(my_name));
   //orientation
-  my_pose_value.kinematic.orientation = parent_pose_value.kinematic.orientation * RM_MATH::rodriguesRotationMatrix(manipulator->getAxis(my_name), manipulator->getJointPosition(my_name));
+  my_pose_value.kinematic.orientation = parent_pose_value.kinematic.orientation * robotis_manipulator_math::rodriguesRotationMatrix(manipulator->getAxis(my_name), manipulator->getJointPosition(my_name));
   //linear velocity
-  my_pose_value.dynamic.linear.velocity = RM_MATH::makeVector3(0.0, 0.0, 0.0);
+  my_pose_value.dynamic.linear.velocity = robotis_manipulator_math::vector3(0.0, 0.0, 0.0);
   //angular velocity
-  my_pose_value.dynamic.angular.velocity = RM_MATH::makeVector3(0.0, 0.0, 0.0);
+  my_pose_value.dynamic.angular.velocity = robotis_manipulator_math::vector3(0.0, 0.0, 0.0);
   //linear acceleration
-  my_pose_value.dynamic.linear.acceleration = RM_MATH::makeVector3(0.0, 0.0, 0.0);
+  my_pose_value.dynamic.linear.acceleration = robotis_manipulator_math::vector3(0.0, 0.0, 0.0);
   //angular acceleration
-  my_pose_value.dynamic.angular.acceleration = RM_MATH::makeVector3(0.0, 0.0, 0.0);
+  my_pose_value.dynamic.angular.acceleration = robotis_manipulator_math::vector3(0.0, 0.0, 0.0);
 
   manipulator->setComponentPoseFromWorld(my_name, my_pose_value);
 
@@ -126,7 +126,7 @@ void CR_Jacobian_Solver::forwardSolverUsingChainRule(Manipulator *manipulator, N
   }
 }
 
-bool CR_Jacobian_Solver::inverseSolverUsingJacobian(Manipulator *manipulator, Name tool_name, PoseValue target_pose, std::vector<JointValue> *goal_joint_value)
+bool SolverUsingChainRuleandJacobian::inverseSolverUsingJacobian(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue> *goal_joint_value)
 {
   const double lambda = 0.7;
   const int8_t iteration = 10;
@@ -141,12 +141,12 @@ bool CR_Jacobian_Solver::inverseSolverUsingJacobian(Manipulator *manipulator, Na
   for (int8_t count = 0; count < iteration; count++)
   {
     //Forward kinematics solve
-    forwardKinematics(&_manipulator);
+    solveForwardKinematics(&_manipulator);
     //Get jacobian
     jacobian = this->jacobian(&_manipulator, tool_name);
 
     //Pose Difference
-    pose_changed = RM_MATH::poseDifference(target_pose.kinematic.position, _manipulator.getComponentPositionFromWorld(tool_name),
+    pose_changed = robotis_manipulator_math::poseDifference(target_pose.kinematic.position, _manipulator.getComponentPositionFromWorld(tool_name),
                                            target_pose.kinematic.orientation, _manipulator.getComponentOrientationFromWorld(tool_name));
 
     //pose sovler success
@@ -175,26 +175,21 @@ bool CR_Jacobian_Solver::inverseSolverUsingJacobian(Manipulator *manipulator, Na
   *goal_joint_value = {};
   return false;
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+/*****************************************************************************
+** Kinematics Solver Using Chain Rule and Singularity Robust Jacobian
+*****************************************************************************/
+void SolverUsingChainRuleandSingularityRobustJacobian::setOption(const void *arg){}
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////CR_SRJacobian_Solver/////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void CR_SRJacobian_Solver::setOption(const void *arg){}
-
-Eigen::MatrixXd CR_SRJacobian_Solver::jacobian(Manipulator *manipulator, Name tool_name)
+Eigen::MatrixXd SolverUsingChainRuleandSingularityRobustJacobian::jacobian(Manipulator *manipulator, Name tool_name)
 {
   Eigen::MatrixXd jacobian = Eigen::MatrixXd::Identity(6, manipulator->getDOF());
 
-  Eigen::Vector3d joint_axis = ZERO_VECTOR;
+  Eigen::Vector3d joint_axis = Eigen::Vector3d::Zero(3);
 
-  Eigen::Vector3d position_changed = ZERO_VECTOR;
-  Eigen::Vector3d orientation_changed = ZERO_VECTOR;
+  Eigen::Vector3d position_changed = Eigen::Vector3d::Zero(3);
+  Eigen::Vector3d orientation_changed = Eigen::Vector3d::Zero(3);
   Eigen::VectorXd pose_changed = Eigen::VectorXd::Zero(6);
 
   //////////////////////////////////////////////////////////////////////////////////
@@ -214,7 +209,7 @@ Eigen::MatrixXd CR_SRJacobian_Solver::jacobian(Manipulator *manipulator, Name to
       joint_axis = manipulator->getComponentOrientationFromWorld(parent_name) * manipulator->getAxis(my_name);
     }
 
-    position_changed = RM_MATH::skewSymmetricMatrix(joint_axis) *
+    position_changed = robotis_manipulator_math::skewSymmetricMatrix(joint_axis) *
                        (manipulator->getComponentPositionFromWorld(tool_name) - manipulator->getComponentPositionFromWorld(my_name));
     orientation_changed = joint_axis;
 
@@ -232,26 +227,26 @@ Eigen::MatrixXd CR_SRJacobian_Solver::jacobian(Manipulator *manipulator, Name to
   return jacobian;
 }
 
-void CR_SRJacobian_Solver::forwardKinematics(Manipulator *manipulator)
+void SolverUsingChainRuleandSingularityRobustJacobian::solveForwardKinematics(Manipulator *manipulator)
 {
   forwardSolverUsingChainRule(manipulator, manipulator->getWorldChildName());
 }
 
-bool CR_SRJacobian_Solver::inverseKinematics(Manipulator *manipulator, Name tool_name, PoseValue target_pose, std::vector<JointValue> *goal_joint_value)
+bool SolverUsingChainRuleandSingularityRobustJacobian::solveInverseKinematics(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue> *goal_joint_value)
 {
   return inverseSolverUsingSRJacobian(manipulator, tool_name, target_pose, goal_joint_value);
 }
 
 
 //private
-void CR_SRJacobian_Solver::forwardSolverUsingChainRule(Manipulator *manipulator, Name component_name)
+void SolverUsingChainRuleandSingularityRobustJacobian::forwardSolverUsingChainRule(Manipulator *manipulator, Name component_name)
 {
   Name my_name = component_name;
   Name parent_name = manipulator->getComponentParentName(my_name);
   int8_t number_of_child = manipulator->getComponentChildName(my_name).size();
 
-  PoseValue parent_pose_value;
-  PoseValue my_pose_value;
+  Pose parent_pose_value;
+  Pose my_pose_value;
 
   //Get Parent Pose
   if (parent_name == manipulator->getWorldName())
@@ -267,15 +262,15 @@ void CR_SRJacobian_Solver::forwardSolverUsingChainRule(Manipulator *manipulator,
   my_pose_value.kinematic.position = parent_pose_value.kinematic.position
                                    + (parent_pose_value.kinematic.orientation * manipulator->getComponentRelativePositionFromParent(my_name));
   //orientation
-  my_pose_value.kinematic.orientation = parent_pose_value.kinematic.orientation * RM_MATH::rodriguesRotationMatrix(manipulator->getAxis(my_name), manipulator->getJointPosition(my_name));
+  my_pose_value.kinematic.orientation = parent_pose_value.kinematic.orientation * robotis_manipulator_math::rodriguesRotationMatrix(manipulator->getAxis(my_name), manipulator->getJointPosition(my_name));
   //linear velocity
-  my_pose_value.dynamic.linear.velocity = RM_MATH::makeVector3(0.0, 0.0, 0.0);
+  my_pose_value.dynamic.linear.velocity = robotis_manipulator_math::vector3(0.0, 0.0, 0.0);
   //angular velocity
-  my_pose_value.dynamic.angular.velocity = RM_MATH::makeVector3(0.0, 0.0, 0.0);
+  my_pose_value.dynamic.angular.velocity = robotis_manipulator_math::vector3(0.0, 0.0, 0.0);
   //linear acceleration
-  my_pose_value.dynamic.linear.acceleration = RM_MATH::makeVector3(0.0, 0.0, 0.0);
+  my_pose_value.dynamic.linear.acceleration = robotis_manipulator_math::vector3(0.0, 0.0, 0.0);
   //angular acceleration
-  my_pose_value.dynamic.angular.acceleration = RM_MATH::makeVector3(0.0, 0.0, 0.0);
+  my_pose_value.dynamic.angular.acceleration = robotis_manipulator_math::vector3(0.0, 0.0, 0.0);
 
   manipulator->setComponentPoseFromWorld(my_name, my_pose_value);
 
@@ -286,7 +281,7 @@ void CR_SRJacobian_Solver::forwardSolverUsingChainRule(Manipulator *manipulator,
   }
 }
 
-bool CR_SRJacobian_Solver::inverseSolverUsingSRJacobian(Manipulator *manipulator, Name tool_name, PoseValue target_pose, std::vector<JointValue> *goal_joint_value)
+bool SolverUsingChainRuleandSingularityRobustJacobian::inverseSolverUsingSRJacobian(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue> *goal_joint_value)
 {
   //manipulator
   Manipulator _manipulator = *manipulator;
@@ -329,15 +324,15 @@ bool CR_SRJacobian_Solver::inverseSolverUsingSRJacobian(Manipulator *manipulator
 
   ////////////////////////////solving//////////////////////////////////
 
-  forwardKinematics(&_manipulator);
+  solveForwardKinematics(&_manipulator);
   //////////////checking dx///////////////
-  pose_changed = RM_MATH::poseDifference(target_pose.kinematic.position, _manipulator.getComponentPositionFromWorld(tool_name), target_pose.kinematic.orientation, _manipulator.getComponentOrientationFromWorld(tool_name));
+  pose_changed = robotis_manipulator_math::poseDifference(target_pose.kinematic.position, _manipulator.getComponentPositionFromWorld(tool_name), target_pose.kinematic.orientation, _manipulator.getComponentOrientationFromWorld(tool_name));
   pre_Ek = pose_changed.transpose() * We * pose_changed;
   ///////////////////////////////////////
 
   /////////////////////////////debug/////////////////////////////////
   #if defined(KINEMATICS_DEBUG)
-  Eigen::Vector3d target_orientation_rpy = RM_MATH::convertRotationToRPY(target_pose.orientation);
+  Eigen::Vector3d target_orientation_rpy = robotis_manipulator_math::convertRotationToRPY(target_pose.orientation);
   Eigen::VectorXd debug_target_pose(6);
   for(int t=0; t<3; t++)
     debug_target_pose(t) = target_pose.position(t);
@@ -346,7 +341,7 @@ bool CR_SRJacobian_Solver::inverseSolverUsingSRJacobian(Manipulator *manipulator
 
   Eigen::Vector3d present_position = _manipulator.getComponentPositionFromWorld(tool_name);
   Eigen::MatrixXd present_orientation = _manipulator.getComponentOrientationFromWorld(tool_name);
-  Eigen::Vector3d present_orientation_rpy = RM_MATH::convertRotationToRPY(present_orientation);
+  Eigen::Vector3d present_orientation_rpy = robotis_manipulator_math::convertRotationToRPY(present_orientation);
   Eigen::VectorXd debug_present_pose(6);
   for(int t=0; t<3; t++)
     debug_present_pose(t) = present_position(t);
@@ -383,11 +378,11 @@ bool CR_SRJacobian_Solver::inverseSolverUsingSRJacobian(Manipulator *manipulator
     for (int8_t index = 0; index < _manipulator.getDOF(); index++)
       set_angle.push_back(present_angle.at(index) + angle_changed(index));
     _manipulator.setAllActiveJointPosition(set_angle);
-    forwardKinematics(&_manipulator);
+    solveForwardKinematics(&_manipulator);
     ////////////////////////////////////////
 
     //////////////checking dx///////////////
-    pose_changed = RM_MATH::poseDifference(target_pose.kinematic.position, _manipulator.getComponentPositionFromWorld(tool_name), target_pose.kinematic.orientation, _manipulator.getComponentOrientationFromWorld(tool_name));
+    pose_changed = robotis_manipulator_math::poseDifference(target_pose.kinematic.position, _manipulator.getComponentPositionFromWorld(tool_name), target_pose.kinematic.orientation, _manipulator.getComponentOrientationFromWorld(tool_name));
     new_Ek = pose_changed.transpose() * We * pose_changed;
     ////////////////////////////////////////
 
@@ -395,7 +390,7 @@ bool CR_SRJacobian_Solver::inverseSolverUsingSRJacobian(Manipulator *manipulator
     #if defined(KINEMATICS_DEBUG)
     present_position = _manipulator.getComponentPositionFromWorld(tool_name);
     present_orientation = _manipulator.getComponentOrientationFromWorld(tool_name);
-    present_orientation_rpy = RM_MATH::convertRotationToRPY(present_orientation);
+    present_orientation_rpy = robotis_manipulator_math::convertRotationToRPY(present_orientation);
     for(int t=0; t<3; t++)
       debug_present_pose(t) = present_position(t);
     for(int t=0; t<3; t++)
@@ -441,34 +436,28 @@ bool CR_SRJacobian_Solver::inverseSolverUsingSRJacobian(Manipulator *manipulator
         set_angle.push_back(present_angle.at(index) - (gamma * angle_changed(index)));
       _manipulator.setAllActiveJointPosition(set_angle);
 
-      forwardKinematics(&_manipulator);
+      solveForwardKinematics(&_manipulator);
     }
   }
-  RM_LOG::ERROR("[sr]fail to solve inverse kinematics (please change the solver)");
+  robotis_manipulator_log::error("[sr]fail to solve inverse kinematics (please change the solver)");
   *goal_joint_value = {};
   return false;
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+/*****************************************************************************
+** Kinematics Solver Using Chain Rule and Singularity Robust Position Only Jacobian
+*****************************************************************************/
+void SolverUsingChainRuleandSingularityRobustPositionOnlyJacobian::setOption(const void *arg){}
 
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////CR_Position_Only_Jacobian_Solver/////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void CR_Position_Only_Jacobian_Solver::setOption(const void *arg){}
-
-Eigen::MatrixXd CR_Position_Only_Jacobian_Solver::jacobian(Manipulator *manipulator, Name tool_name)
+Eigen::MatrixXd SolverUsingChainRuleandSingularityRobustPositionOnlyJacobian::jacobian(Manipulator *manipulator, Name tool_name)
 {
   Eigen::MatrixXd jacobian = Eigen::MatrixXd::Identity(6, manipulator->getDOF());
 
-  Eigen::Vector3d joint_axis = ZERO_VECTOR;
+  Eigen::Vector3d joint_axis = Eigen::Vector3d::Zero(3);
 
-  Eigen::Vector3d position_changed = ZERO_VECTOR;
-  Eigen::Vector3d orientation_changed = ZERO_VECTOR;
+  Eigen::Vector3d position_changed = Eigen::Vector3d::Zero(3);
+  Eigen::Vector3d orientation_changed = Eigen::Vector3d::Zero(3);
   Eigen::VectorXd pose_changed = Eigen::VectorXd::Zero(6);
 
   //////////////////////////////////////////////////////////////////////////////////
@@ -488,7 +477,7 @@ Eigen::MatrixXd CR_Position_Only_Jacobian_Solver::jacobian(Manipulator *manipula
       joint_axis = manipulator->getComponentOrientationFromWorld(parent_name) * manipulator->getAxis(my_name);
     }
 
-    position_changed = RM_MATH::skewSymmetricMatrix(joint_axis) *
+    position_changed = robotis_manipulator_math::skewSymmetricMatrix(joint_axis) *
                        (manipulator->getComponentPositionFromWorld(tool_name) - manipulator->getComponentPositionFromWorld(my_name));
     orientation_changed = joint_axis;
 
@@ -506,26 +495,26 @@ Eigen::MatrixXd CR_Position_Only_Jacobian_Solver::jacobian(Manipulator *manipula
   return jacobian;
 }
 
-void CR_Position_Only_Jacobian_Solver::forwardKinematics(Manipulator *manipulator)
+void SolverUsingChainRuleandSingularityRobustPositionOnlyJacobian::solveForwardKinematics(Manipulator *manipulator)
 {
   forwardSolverUsingChainRule(manipulator, manipulator->getWorldChildName());
 }
 
-bool CR_Position_Only_Jacobian_Solver::inverseKinematics(Manipulator *manipulator, Name tool_name, PoseValue target_pose, std::vector<JointValue> *goal_joint_value)
+bool SolverUsingChainRuleandSingularityRobustPositionOnlyJacobian::solveInverseKinematics(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue> *goal_joint_value)
 {
   return inverseSolverUsingPositionOnlySRJacobian(manipulator, tool_name, target_pose, goal_joint_value);
 }
 
 
 //private
-void CR_Position_Only_Jacobian_Solver::forwardSolverUsingChainRule(Manipulator *manipulator, Name component_name)
+void SolverUsingChainRuleandSingularityRobustPositionOnlyJacobian::forwardSolverUsingChainRule(Manipulator *manipulator, Name component_name)
 {
   Name my_name = component_name;
   Name parent_name = manipulator->getComponentParentName(my_name);
   int8_t number_of_child = manipulator->getComponentChildName(my_name).size();
 
-  PoseValue parent_pose_value;
-  PoseValue my_pose_value;
+  Pose parent_pose_value;
+  Pose my_pose_value;
 
   //Get Parent Pose
   if (parent_name == manipulator->getWorldName())
@@ -541,15 +530,15 @@ void CR_Position_Only_Jacobian_Solver::forwardSolverUsingChainRule(Manipulator *
   my_pose_value.kinematic.position = parent_pose_value.kinematic.position
                                    + (parent_pose_value.kinematic.orientation * manipulator->getComponentRelativePositionFromParent(my_name));
   //orientation
-  my_pose_value.kinematic.orientation = parent_pose_value.kinematic.orientation * RM_MATH::rodriguesRotationMatrix(manipulator->getAxis(my_name), manipulator->getJointPosition(my_name));
+  my_pose_value.kinematic.orientation = parent_pose_value.kinematic.orientation * robotis_manipulator_math::rodriguesRotationMatrix(manipulator->getAxis(my_name), manipulator->getJointPosition(my_name));
   //linear velocity
-  my_pose_value.dynamic.linear.velocity = RM_MATH::makeVector3(0.0, 0.0, 0.0);
+  my_pose_value.dynamic.linear.velocity = robotis_manipulator_math::vector3(0.0, 0.0, 0.0);
   //angular velocity
-  my_pose_value.dynamic.angular.velocity = RM_MATH::makeVector3(0.0, 0.0, 0.0);
+  my_pose_value.dynamic.angular.velocity = robotis_manipulator_math::vector3(0.0, 0.0, 0.0);
   //linear acceleration
-  my_pose_value.dynamic.linear.acceleration = RM_MATH::makeVector3(0.0, 0.0, 0.0);
+  my_pose_value.dynamic.linear.acceleration = robotis_manipulator_math::vector3(0.0, 0.0, 0.0);
   //angular acceleration
-  my_pose_value.dynamic.angular.acceleration = RM_MATH::makeVector3(0.0, 0.0, 0.0);
+  my_pose_value.dynamic.angular.acceleration = robotis_manipulator_math::vector3(0.0, 0.0, 0.0);
 
   manipulator->setComponentPoseFromWorld(my_name, my_pose_value);
 
@@ -560,7 +549,7 @@ void CR_Position_Only_Jacobian_Solver::forwardSolverUsingChainRule(Manipulator *
   }
 }
 
-bool CR_Position_Only_Jacobian_Solver::inverseSolverUsingPositionOnlySRJacobian(Manipulator *manipulator, Name tool_name, PoseValue target_pose, std::vector<JointValue> *goal_joint_value)
+bool SolverUsingChainRuleandSingularityRobustPositionOnlyJacobian::inverseSolverUsingPositionOnlySRJacobian(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue> *goal_joint_value)
 {
   //manipulator
   Manipulator _manipulator = *manipulator;
@@ -600,15 +589,15 @@ bool CR_Position_Only_Jacobian_Solver::inverseSolverUsingPositionOnlySRJacobian(
 
   ////////////////////////////solving//////////////////////////////////
 
-  forwardKinematics(&_manipulator);
+  solveForwardKinematics(&_manipulator);
   //////////////checking dx///////////////
-  position_changed = RM_MATH::positionDifference(target_pose.kinematic.position, _manipulator.getComponentPositionFromWorld(tool_name));
+  position_changed = robotis_manipulator_math::positionDifference(target_pose.kinematic.position, _manipulator.getComponentPositionFromWorld(tool_name));
   pre_Ek = position_changed.transpose() * We * position_changed;
   ///////////////////////////////////////
 
   /////////////////////////////debug/////////////////////////////////
   #if defined(KINEMATICS_DEBUG)
-  Eigen::Vector3d target_orientation_rpy = RM_MATH::convertRotationToRPY(target_pose.orientation);
+  Eigen::Vector3d target_orientation_rpy = robotis_manipulator_math::convertRotationToRPY(target_pose.orientation);
   Eigen::VectorXd debug_target_pose(6);
   for(int t=0; t<3; t++)
     debug_target_pose(t) = target_pose.position(t);
@@ -617,7 +606,7 @@ bool CR_Position_Only_Jacobian_Solver::inverseSolverUsingPositionOnlySRJacobian(
 
   Eigen::Vector3d present_position = _manipulator.getComponentPositionFromWorld(tool_name);
   Eigen::MatrixXd present_orientation = _manipulator.getComponentOrientationFromWorld(tool_name);
-  Eigen::Vector3d present_orientation_rpy = RM_MATH::convertRotationToRPY(present_orientation);
+  Eigen::Vector3d present_orientation_rpy = robotis_manipulator_math::convertRotationToRPY(present_orientation);
   Eigen::VectorXd debug_present_pose(6);
   for(int t=0; t<3; t++)
     debug_present_pose(t) = present_position(t);
@@ -657,11 +646,11 @@ bool CR_Position_Only_Jacobian_Solver::inverseSolverUsingPositionOnlySRJacobian(
     for (int8_t index = 0; index < _manipulator.getDOF(); index++)
       set_angle.push_back(_manipulator.getAllActiveJointPosition().at(index) + angle_changed(index));
     _manipulator.setAllActiveJointPosition(set_angle);
-    forwardKinematics(&_manipulator);
+    solveForwardKinematics(&_manipulator);
     ////////////////////////////////////////
 
     //////////////checking dx///////////////
-    position_changed = RM_MATH::positionDifference(target_pose.kinematic.position, _manipulator.getComponentPositionFromWorld(tool_name));
+    position_changed = robotis_manipulator_math::positionDifference(target_pose.kinematic.position, _manipulator.getComponentPositionFromWorld(tool_name));
     new_Ek = position_changed.transpose() * We * position_changed;
     ////////////////////////////////////////
 
@@ -669,7 +658,7 @@ bool CR_Position_Only_Jacobian_Solver::inverseSolverUsingPositionOnlySRJacobian(
     #if defined(KINEMATICS_DEBUG)
     present_position = _manipulator.getComponentPositionFromWorld(tool_name);
     present_orientation = _manipulator.getComponentOrientationFromWorld(tool_name);
-    present_orientation_rpy = RM_MATH::convertRotationToRPY(present_orientation);
+    present_orientation_rpy = robotis_manipulator_math::convertRotationToRPY(present_orientation);
     for(int t=0; t<3; t++)
       debug_present_pose(t) = present_position(t);
     for(int t=0; t<3; t++)
@@ -715,34 +704,28 @@ bool CR_Position_Only_Jacobian_Solver::inverseSolverUsingPositionOnlySRJacobian(
         set_angle.push_back(_manipulator.getAllActiveJointPosition().at(index) - (gamma * angle_changed(index)));
       _manipulator.setAllActiveJointPosition(set_angle);
 
-      forwardKinematics(&_manipulator);
+      solveForwardKinematics(&_manipulator);
     }
   }
-  RM_LOG::ERROR("[position_only]fail to solve inverse kinematics (please change the solver)");
+  robotis_manipulator_log::error("[position_only]fail to solve inverse kinematics (please change the solver)");
   *goal_joint_value = {};
   return false;
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+/*****************************************************************************
+** Kinematics Solver Customized for OpenManipulator Chain
+*****************************************************************************/
+void SolverCustomizedforOpenManipulatorChain::setOption(const void *arg){}
 
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////CR_Custom_Solver/////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void CR_Custom_Solver::setOption(const void *arg){}
-
-Eigen::MatrixXd CR_Custom_Solver::jacobian(Manipulator *manipulator, Name tool_name)
+Eigen::MatrixXd SolverCustomizedforOpenManipulatorChain::jacobian(Manipulator *manipulator, Name tool_name)
 {
   Eigen::MatrixXd jacobian = Eigen::MatrixXd::Identity(6, manipulator->getDOF());
 
-  Eigen::Vector3d joint_axis = ZERO_VECTOR;
+  Eigen::Vector3d joint_axis = Eigen::Vector3d::Zero(3);
 
-  Eigen::Vector3d position_changed = ZERO_VECTOR;
-  Eigen::Vector3d orientation_changed = ZERO_VECTOR;
+  Eigen::Vector3d position_changed = Eigen::Vector3d::Zero(3);
+  Eigen::Vector3d orientation_changed = Eigen::Vector3d::Zero(3);
   Eigen::VectorXd pose_changed = Eigen::VectorXd::Zero(6);
 
   //////////////////////////////////////////////////////////////////////////////////
@@ -762,7 +745,7 @@ Eigen::MatrixXd CR_Custom_Solver::jacobian(Manipulator *manipulator, Name tool_n
       joint_axis = manipulator->getComponentOrientationFromWorld(parent_name) * manipulator->getAxis(my_name);
     }
 
-    position_changed = RM_MATH::skewSymmetricMatrix(joint_axis) *
+    position_changed = robotis_manipulator_math::skewSymmetricMatrix(joint_axis) *
                        (manipulator->getComponentPositionFromWorld(tool_name) - manipulator->getComponentPositionFromWorld(my_name));
     orientation_changed = joint_axis;
 
@@ -780,26 +763,26 @@ Eigen::MatrixXd CR_Custom_Solver::jacobian(Manipulator *manipulator, Name tool_n
   return jacobian;
 }
 
-void CR_Custom_Solver::forwardKinematics(Manipulator *manipulator)
+void SolverCustomizedforOpenManipulatorChain::solveForwardKinematics(Manipulator *manipulator)
 {
   forwardSolverUsingChainRule(manipulator, manipulator->getWorldChildName());
 }
 
-bool CR_Custom_Solver::inverseKinematics(Manipulator *manipulator, Name tool_name, PoseValue target_pose, std::vector<JointValue> *goal_joint_value)
+bool SolverCustomizedforOpenManipulatorChain::solveInverseKinematics(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue> *goal_joint_value)
 {
   return chainCustomInverseKinematics(manipulator, tool_name, target_pose, goal_joint_value);
 }
 
 
 //private
-void CR_Custom_Solver::forwardSolverUsingChainRule(Manipulator *manipulator, Name component_name)
+void SolverCustomizedforOpenManipulatorChain::forwardSolverUsingChainRule(Manipulator *manipulator, Name component_name)
 {
   Name my_name = component_name;
   Name parent_name = manipulator->getComponentParentName(my_name);
   int8_t number_of_child = manipulator->getComponentChildName(my_name).size();
 
-  PoseValue parent_pose_value;
-  PoseValue my_pose_value;
+  Pose parent_pose_value;
+  Pose my_pose_value;
 
   //Get Parent Pose
   if (parent_name == manipulator->getWorldName())
@@ -815,15 +798,15 @@ void CR_Custom_Solver::forwardSolverUsingChainRule(Manipulator *manipulator, Nam
   my_pose_value.kinematic.position = parent_pose_value.kinematic.position
                                    + (parent_pose_value.kinematic.orientation * manipulator->getComponentRelativePositionFromParent(my_name));
   //orientation
-  my_pose_value.kinematic.orientation = parent_pose_value.kinematic.orientation * RM_MATH::rodriguesRotationMatrix(manipulator->getAxis(my_name), manipulator->getJointPosition(my_name));
+  my_pose_value.kinematic.orientation = parent_pose_value.kinematic.orientation * robotis_manipulator_math::rodriguesRotationMatrix(manipulator->getAxis(my_name), manipulator->getJointPosition(my_name));
   //linear velocity
-  my_pose_value.dynamic.linear.velocity = RM_MATH::makeVector3(0.0, 0.0, 0.0);
+  my_pose_value.dynamic.linear.velocity = robotis_manipulator_math::vector3(0.0, 0.0, 0.0);
   //angular velocity
-  my_pose_value.dynamic.angular.velocity = RM_MATH::makeVector3(0.0, 0.0, 0.0);
+  my_pose_value.dynamic.angular.velocity = robotis_manipulator_math::vector3(0.0, 0.0, 0.0);
   //linear acceleration
-  my_pose_value.dynamic.linear.acceleration = RM_MATH::makeVector3(0.0, 0.0, 0.0);
+  my_pose_value.dynamic.linear.acceleration = robotis_manipulator_math::vector3(0.0, 0.0, 0.0);
   //angular acceleration
-  my_pose_value.dynamic.angular.acceleration = RM_MATH::makeVector3(0.0, 0.0, 0.0);
+  my_pose_value.dynamic.angular.acceleration = robotis_manipulator_math::vector3(0.0, 0.0, 0.0);
 
   manipulator->setComponentPoseFromWorld(my_name, my_pose_value);
 
@@ -833,7 +816,7 @@ void CR_Custom_Solver::forwardSolverUsingChainRule(Manipulator *manipulator, Nam
     forwardSolverUsingChainRule(manipulator, child_name);
   }
 }
-bool CR_Custom_Solver::chainCustomInverseKinematics(Manipulator *manipulator, Name tool_name, PoseValue target_pose, std::vector<JointValue> *goal_joint_value)
+bool SolverCustomizedforOpenManipulatorChain::chainCustomInverseKinematics(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue> *goal_joint_value)
 {
   //manipulator
   Manipulator _manipulator = *manipulator;
@@ -876,13 +859,13 @@ bool CR_Custom_Solver::chainCustomInverseKinematics(Manipulator *manipulator, Na
 
   ////////////////////////////solving//////////////////////////////////
 
-  forwardKinematics(&_manipulator);
+  solveForwardKinematics(&_manipulator);
 
   //////////////make target ori//////////  //only OpenManipulator Chain
   Eigen::Matrix3d present_orientation = _manipulator.getComponentOrientationFromWorld(tool_name);
-  Eigen::Vector3d present_orientation_rpy = RM_MATH::convertRotationToRPY(present_orientation);
+  Eigen::Vector3d present_orientation_rpy = robotis_manipulator_math::convertRotationMatrix2RPYVector(present_orientation);
   Eigen::Matrix3d target_orientation = target_pose.kinematic.orientation;
-  Eigen::Vector3d target_orientation_rpy = RM_MATH::convertRotationToRPY(target_orientation);
+  Eigen::Vector3d target_orientation_rpy = robotis_manipulator_math::convertRotationMatrix2RPYVector(target_orientation);
 
   Eigen::Vector3d joint1_rlative_position = _manipulator.getComponentRelativePositionFromParent(_manipulator.getWorldChildName());
   Eigen::Vector3d target_position_from_joint1 = target_pose.kinematic.position - joint1_rlative_position;
@@ -891,11 +874,11 @@ bool CR_Custom_Solver::chainCustomInverseKinematics(Manipulator *manipulator, Na
   target_orientation_rpy(1) = target_orientation_rpy(1);
   target_orientation_rpy(2) = atan2(target_position_from_joint1(1) ,target_position_from_joint1(0));
 
-  target_pose.kinematic.orientation = RM_MATH::convertRPYToRotation(target_orientation_rpy(0), target_orientation_rpy(1), target_orientation_rpy(2));
+  target_pose.kinematic.orientation = robotis_manipulator_math::convertRPY2RotationMatrix(target_orientation_rpy(0), target_orientation_rpy(1), target_orientation_rpy(2));
   ///////////////////////////////////////
 
   //////////////checking dx///////////////
-  pose_changed = RM_MATH::poseDifference(target_pose.kinematic.position, _manipulator.getComponentPositionFromWorld(tool_name), target_pose.kinematic.orientation, _manipulator.getComponentOrientationFromWorld(tool_name));
+  pose_changed = robotis_manipulator_math::poseDifference(target_pose.kinematic.position, _manipulator.getComponentPositionFromWorld(tool_name), target_pose.kinematic.orientation, _manipulator.getComponentOrientationFromWorld(tool_name));
   pre_Ek = pose_changed.transpose() * We * pose_changed;
   ///////////////////////////////////////
 
@@ -944,11 +927,11 @@ bool CR_Custom_Solver::chainCustomInverseKinematics(Manipulator *manipulator, Na
     for (int8_t index = 0; index < _manipulator.getDOF(); index++)
       set_angle.push_back(present_angle.at(index) + angle_changed(index));
     _manipulator.setAllActiveJointPosition(set_angle);
-    forwardKinematics(&_manipulator);
+    solveForwardKinematics(&_manipulator);
     ////////////////////////////////////////
 
     //////////////checking dx///////////////
-    pose_changed = RM_MATH::poseDifference(target_pose.kinematic.position, _manipulator.getComponentPositionFromWorld(tool_name), target_pose.kinematic.orientation, _manipulator.getComponentOrientationFromWorld(tool_name));
+    pose_changed = robotis_manipulator_math::poseDifference(target_pose.kinematic.position, _manipulator.getComponentPositionFromWorld(tool_name), target_pose.kinematic.orientation, _manipulator.getComponentOrientationFromWorld(tool_name));
     new_Ek = pose_changed.transpose() * We * pose_changed;
     ////////////////////////////////////////
 
@@ -956,7 +939,7 @@ bool CR_Custom_Solver::chainCustomInverseKinematics(Manipulator *manipulator, Na
     #if defined(KINEMATICS_DEBUG)
     present_position = _manipulator.getComponentPositionFromWorld(tool_name);
     present_orientation = _manipulator.getComponentOrientationFromWorld(tool_name);
-    present_orientation_rpy = RM_MATH::convertRotationToRPY(present_orientation);
+    present_orientation_rpy = robotis_manipulator_math::convertRotationToRPY(present_orientation);
     for(int t=0; t<3; t++)
       debug_present_pose(t) = present_position(t);
     for(int t=0; t<3; t++)
@@ -1002,22 +985,13 @@ bool CR_Custom_Solver::chainCustomInverseKinematics(Manipulator *manipulator, Na
         set_angle.push_back(present_angle.at(index) - (gamma * angle_changed(index)));
       _manipulator.setAllActiveJointPosition(set_angle);
 
-      forwardKinematics(&_manipulator);
+      solveForwardKinematics(&_manipulator);
     }
   }
-  RM_LOG::ERROR("[OpenManipulator Chain Custom]fail to solve inverse kinematics");
+  robotis_manipulator_log::error("[OpenManipulator Chain Custom]fail to solve inverse kinematics");
   *goal_joint_value = {};
   return false;
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
 
 
 

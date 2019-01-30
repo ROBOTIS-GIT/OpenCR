@@ -23,6 +23,7 @@
 #include "CustomTrajectory.h"
 #include "Kinematics.h"
 
+#define CUSTOM_TRAJECTORY_SIZE 4
 #define CUSTOM_TRAJECTORY_LINE    "custom_trajectory_line"
 #define CUSTOM_TRAJECTORY_CIRCLE  "custom_trajectory_circle"
 #define CUSTOM_TRAJECTORY_RHOMBUS "custom_trajectory_rhombus"
@@ -31,27 +32,26 @@
 #define JOINT_DYNAMIXEL "joint_dxl"
 #define TOOL_DYNAMIXEL  "tool_dxl"
 
-#define X_AXIS RM_MATH::makeVector3(1.0, 0.0, 0.0)
-#define Y_AXIS RM_MATH::makeVector3(0.0, 1.0, 0.0)
-#define Z_AXIS RM_MATH::makeVector3(0.0, 0.0, 1.0)
+#define X_AXIS robotis_manipulator_math::vector3(1.0, 0.0, 0.0)
+#define Y_AXIS robotis_manipulator_math::vector3(0.0, 1.0, 0.0)
+#define Z_AXIS robotis_manipulator_math::vector3(0.0, 0.0, 1.0)
 
-class OPEN_MANIPULATOR : public ROBOTIS_MANIPULATOR::RobotisManipulator
+
+
+class OpenManipulator : public robotis_manipulator::RobotisManipulator
 {
+  
 private:
-  ROBOTIS_MANIPULATOR::Kinematics *kinematics_;
-  ROBOTIS_MANIPULATOR::JointActuator *actuator_;
-  ROBOTIS_MANIPULATOR::ToolActuator *tool_;
-
-  CUSTOM_TRAJECTORY::Line line_;
-  CUSTOM_TRAJECTORY::Circle circle_;
-  CUSTOM_TRAJECTORY::Rhombus rhombus_;
-  CUSTOM_TRAJECTORY::Heart heart_;
+  robotis_manipulator::Kinematics *kinematics_;
+  robotis_manipulator::JointActuator *actuator_;
+  robotis_manipulator::ToolActuator *tool_;
+  robotis_manipulator::CustomTaskTrajectory *custom_trajectory_[CUSTOM_TRAJECTORY_SIZE];
 
 public:
-  OPEN_MANIPULATOR();
-  virtual ~OPEN_MANIPULATOR();
+  OpenManipulator();
+  virtual ~OpenManipulator();
 
-  void initManipulator(bool using_platform, STRING usb_port = "/dev/ttyUSB0", STRING baud_rate = "1000000");
+  void initManipulator(bool using_actual_robot_state, STRING usb_port = "/dev/ttyUSB0", STRING baud_rate = "1000000", float control_loop_time = 0.010);
   void openManipulatorProcess(double present_time);
 };
 

@@ -40,27 +40,27 @@ uint16_t readRC100Data()
   return rc100.readData();
 }
 
-void fromRC100(OPEN_MANIPULATOR* open_manipulator, uint16_t data)
+void fromRC100(OpenManipulator* open_manipulator, uint16_t data)
 {
-  if (data & RC100_BTN_U)
-    open_manipulator->taskTrajectoryMoveFromPresentPose("gripper", RM_MATH::makeVector3(0.007, 0.0, 0.0), 0.16);
+  if (data & RC100_BTN_U) 
+    open_manipulator-> makeTaskTrajectoryFromPresentPose("gripper", robotis_manipulator_math::vector3(0.007, 0.0, 0.0), 0.16);
   else if (data & RC100_BTN_D)
-    open_manipulator->taskTrajectoryMoveFromPresentPose("gripper", RM_MATH::makeVector3(-0.007, 0.0, 0.0), 0.16);
+    open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", robotis_manipulator_math::vector3(-0.007, 0.0, 0.0), 0.16);
   else if (data & RC100_BTN_L)
-    open_manipulator->taskTrajectoryMoveFromPresentPose("gripper", RM_MATH::makeVector3(0.0, 0.007, 0.0), 0.16);
+    open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", robotis_manipulator_math::vector3(0.0, 0.007, 0.0), 0.16);
   else if (data & RC100_BTN_R)
-    open_manipulator->taskTrajectoryMoveFromPresentPose("gripper", RM_MATH::makeVector3(0.0, -0.007, 0.0), 0.16);
+    open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", robotis_manipulator_math::vector3(0.0, -0.007, 0.0), 0.16);
   else if (data & RC100_BTN_1)
-    open_manipulator->taskTrajectoryMoveFromPresentPose("gripper", RM_MATH::makeVector3(0.0, 0.0, 0.007), 0.16);
+    open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", robotis_manipulator_math::vector3(0.0, 0.0, 0.007), 0.16);
   else if (data & RC100_BTN_3)
-    open_manipulator->taskTrajectoryMoveFromPresentPose("gripper", RM_MATH::makeVector3(0.0, 0.0, -0.007), 0.16);
+    open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", robotis_manipulator_math::vector3(0.0, 0.0, -0.007), 0.16);
   else if (data & RC100_BTN_2)
   {
     grip_value += 0.0020;
     if (grip_value >= 0.01f)
       grip_value = 0.01f;
 
-    open_manipulator->toolMove("gripper", grip_value);
+    open_manipulator->makeToolTrajectory("gripper", grip_value);
   }
   else if (data & RC100_BTN_4)
   {
@@ -68,7 +68,7 @@ void fromRC100(OPEN_MANIPULATOR* open_manipulator, uint16_t data)
     if (grip_value <= -0.01f)
       grip_value = -0.01f;
 
-    open_manipulator->toolMove("gripper", grip_value);
+    open_manipulator->makeToolTrajectory("gripper", grip_value);
   }
   else if (data & RC100_BTN_5)
   {
@@ -77,7 +77,7 @@ void fromRC100(OPEN_MANIPULATOR* open_manipulator, uint16_t data)
     goal_position.push_back(-60.0 * DEG2RAD);
     goal_position.push_back(20.0 * DEG2RAD);
     goal_position.push_back(40.0 * DEG2RAD);
-    open_manipulator->jointTrajectoryMove(goal_position, 1.5);
+    open_manipulator->makeJointTrajectory(goal_position, 1.5);
   }
   else if (data & RC100_BTN_6)
   {
@@ -86,7 +86,7 @@ void fromRC100(OPEN_MANIPULATOR* open_manipulator, uint16_t data)
     goal_position.push_back(0.0);
     goal_position.push_back(0.0);
     goal_position.push_back(0.0);
-    open_manipulator->jointTrajectoryMove(goal_position, 1.0);
+    open_manipulator->makeJointTrajectory(goal_position, 1.0);
   }
 }
 #endif

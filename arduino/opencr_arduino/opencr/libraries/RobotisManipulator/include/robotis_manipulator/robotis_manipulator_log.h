@@ -16,8 +16,8 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
-#ifndef ROBOTIS_MANIPULATOR_DEBUG_H
-#define ROBOTIS_MANIPULATOR_DEBUG_H
+#ifndef ROBOTIS_MANIPULATOR_LOG_H
+#define ROBOTIS_MANIPULATOR_LOG_H
 
 #include <unistd.h>
 #include <vector>
@@ -46,39 +46,38 @@
   typedef std::string STRING;
 #endif
 
-namespace RM_LOG
+namespace robotis_manipulator_log
 {
-  void PRINT(STRING str, STRING color = "DEFAULT");
-  void PRINT(STRING str, double data, uint8_t point = 3, STRING color = "DEFAULT");
-  void PRINT(const char* str, STRING color = "DEFAULT");
-  void PRINT(const char* str, double data, uint8_t point = 3, STRING color = "DEFAULT");
+  void print(STRING str, STRING color = "DEFAULT");
+  void print(STRING str, double data, uint8_t decimal_point = 3, STRING color = "DEFAULT");
+  void print(const char* str, STRING color = "DEFAULT");
+  void print(const char* str, double data, uint8_t decimal_point = 3, STRING color = "DEFAULT");
 
-  void PRINTLN(STRING str, STRING color = "DEFAULT");
-  void PRINTLN(STRING str, double data, uint8_t point = 3, STRING color = "DEFAULT");
-  void PRINTLN(const char* str, STRING color = "DEFAULT");
-  void PRINTLN(const char* str, double data, uint8_t point = 3, STRING color = "DEFAULT");
+  void println(STRING str, STRING color = "DEFAULT");
+  void println(STRING str, double data, uint8_t decimal_point = 3, STRING color = "DEFAULT");
+  void println(const char* str, STRING color = "DEFAULT");
+  void println(const char* str, double data, uint8_t decimal_point = 3, STRING color = "DEFAULT");
 
-  void INFO(STRING str);
-  void INFO(STRING str, double data, uint8_t point = 3);
-  void INFO(const char* str);
-  void INFO(const char* str, double data, uint8_t point = 3);
-  void WARN(STRING str);
-  void WARN(STRING str, double data, uint8_t point = 3);
-  void WARN(const char* str);
-  void WARN(const char* str, double data, uint8_t point = 3);
-  void ERROR(STRING str);
-  void ERROR(STRING str, double data, uint8_t point = 3);
-  void ERROR(const char* str);
-  void ERROR(const char* str, double data, uint8_t point = 3);
+  void info(STRING str);
+  void info(STRING str, double data, uint8_t decimal_point = 3);
+  void info(const char* str);
+  void info(const char* str, double data, uint8_t decimal_point = 3);
+  void warn(STRING str);
+  void warn(STRING str, double data, uint8_t decimal_point = 3);
+  void warn(const char* str);
+  void warn(const char* str, double data, uint8_t decimal_point = 3);
+  void error(STRING str);
+  void error(STRING str, double data, uint8_t decimal_point = 3);
+  void error(const char* str);
+  void error(const char* str, double data, uint8_t decimal_point = 3);
 
-  template <typename T>
-  void PRINT_VECTOR(std::vector<T> &vec, uint8_t point = 3)
+  template <typename T> void print_vector(std::vector<T> &vec, uint8_t decimal_point = 3)
   {
   #if defined(__OPENCR__)
     DEBUG.print("(");
     for (uint8_t i = 0; i < vec.size(); i++)
     {
-      DEBUG.print(vec.at(i), point);
+      DEBUG.print(vec.at(i), decimal_point);
       if(i != vec.size()-1)
         DEBUG.print(", ");
       else
@@ -88,7 +87,7 @@ namespace RM_LOG
     printf("(");
     for (uint8_t i = 0; i < vec.size(); i++)
     {
-      printf("%.*lf", point, vec.at(i));
+      printf("%.*lf", decimal_point, vec.at(i));
       if(i != vec.size()-1)
         printf(", ");
       else
@@ -97,14 +96,13 @@ namespace RM_LOG
   #endif
   }
 
-  template <typename vector>
-  void PRINT_VECTOR(vector &vec, uint8_t point = 3)
+  template <typename vector> void print_vector(vector &vec, uint8_t decimal_point = 3)
   {
   #if defined(__OPENCR__)
     DEBUG.print("(");
     for (uint8_t i = 0; i < vec.size(); i++)
     {
-      DEBUG.print(vec(i), point);
+      DEBUG.print(vec(i), decimal_point);
       if(i != vec.size()-1)
         DEBUG.print(", ");
       else
@@ -114,7 +112,7 @@ namespace RM_LOG
     printf("(");
     for (uint8_t i = 0; i < vec.size(); i++)
     {
-      printf("%.*lf", point, vec(i));
+      printf("%.*lf", decimal_point, vec(i));
       if(i != vec.size()-1)
         printf(", ");
       else
@@ -123,9 +121,7 @@ namespace RM_LOG
   #endif
   }
 
-
-  template <typename matrix>
-  void PRINT_MATRIX(matrix &m, uint8_t point = 3)
+  template <typename matrix> void print_matrix(matrix &m, uint8_t decimal_point = 3)
   {
   #if defined(__OPENCR__)
 
@@ -137,7 +133,7 @@ namespace RM_LOG
         DEBUG.print(" ");
       for (uint8_t j = 0; j < m.cols(); j++)
       {
-        DEBUG.print(m(i, j), point);
+        DEBUG.print(m(i, j), decimal_point);
         if(j != m.cols()-1)
           DEBUG.print(", ");
       }
@@ -156,7 +152,7 @@ namespace RM_LOG
         printf(" ");
       for (uint8_t j = 0; j < m.cols(); j++)
       {
-        printf("%.*lf", point, m(i, j));
+        printf("%.*lf", decimal_point, m(i, j));
         if(j != m.cols()-1)
           printf(", ");
       }
@@ -169,4 +165,4 @@ namespace RM_LOG
   }
 }
 
-#endif // ROBOTIS_MANIPULATOR_DEBUG_H
+#endif // ROBOTIS_MANIPULATOR_LOG_H

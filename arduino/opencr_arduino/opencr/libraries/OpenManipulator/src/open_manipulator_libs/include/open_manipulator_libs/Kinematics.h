@@ -28,72 +28,88 @@
 //#define KINEMATICS_DEBUG
 
 using namespace Eigen;
-using namespace ROBOTIS_MANIPULATOR;
+using namespace robotis_manipulator;
 
-namespace KINEMATICS
+namespace kinematics
 {
-class CR_Jacobian_Solver : public ROBOTIS_MANIPULATOR::Kinematics
+  
+/*****************************************************************************
+** Kinematics Solver Using Chain Rule and Jacobian
+*****************************************************************************/
+class SolverUsingChainRuleandJacobian : public robotis_manipulator::Kinematics
 {
 private:
   void forwardSolverUsingChainRule(Manipulator *manipulator, Name component_name);
-  bool inverseSolverUsingJacobian(Manipulator *manipulator, Name tool_name, PoseValue target_pose, std::vector<JointValue>* goal_joint_value);
+  bool inverseSolverUsingJacobian(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue>* goal_joint_value);
 
 public:
-  CR_Jacobian_Solver(){}
-  virtual ~CR_Jacobian_Solver(){}
+  SolverUsingChainRuleandJacobian(){}
+  virtual ~SolverUsingChainRuleandJacobian(){}
 
   virtual void setOption(const void *arg);
   virtual MatrixXd jacobian(Manipulator *manipulator, Name tool_name);
-  virtual void forwardKinematics(Manipulator *manipulator);
-  virtual bool inverseKinematics(Manipulator *manipulator, Name tool_name, PoseValue target_pose, std::vector<JointValue>* goal_joint_value);
+  virtual void solveForwardKinematics(Manipulator *manipulator);
+  virtual bool solveInverseKinematics(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue>* goal_joint_value);
 };
 
-class CR_SRJacobian_Solver : public ROBOTIS_MANIPULATOR::Kinematics
+
+/*****************************************************************************
+** Kinematics Solver Using Chain Rule and Singularity Robust Jacobian
+*****************************************************************************/
+class SolverUsingChainRuleandSingularityRobustJacobian : public robotis_manipulator::Kinematics
 {
 private:
   void forwardSolverUsingChainRule(Manipulator *manipulator, Name component_name);
-  bool inverseSolverUsingSRJacobian(Manipulator *manipulator, Name tool_name, PoseValue target_pose, std::vector<JointValue>* goal_joint_value);
+  bool inverseSolverUsingSRJacobian(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue>* goal_joint_value);
 
 public:
-  CR_SRJacobian_Solver(){}
-  virtual ~CR_SRJacobian_Solver(){}
+  SolverUsingChainRuleandSingularityRobustJacobian(){}
+  virtual ~SolverUsingChainRuleandSingularityRobustJacobian(){}
 
   virtual void setOption(const void *arg);
   virtual MatrixXd jacobian(Manipulator *manipulator, Name tool_name);
-  virtual void forwardKinematics(Manipulator *manipulator);
-  virtual bool inverseKinematics(Manipulator *manipulator, Name tool_name, PoseValue target_pose, std::vector<JointValue>* goal_joint_value);
+  virtual void solveForwardKinematics(Manipulator *manipulator);
+  virtual bool solveInverseKinematics(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue>* goal_joint_value);
 };
 
-class CR_Position_Only_Jacobian_Solver : public ROBOTIS_MANIPULATOR::Kinematics
+
+/*****************************************************************************
+** Kinematics Solver Using Chain Rule and Singularity Robust Position Only Jacobian
+*****************************************************************************/
+class SolverUsingChainRuleandSingularityRobustPositionOnlyJacobian : public robotis_manipulator::Kinematics
 {
 private:
   void forwardSolverUsingChainRule(Manipulator *manipulator, Name component_name);
-  bool inverseSolverUsingPositionOnlySRJacobian(Manipulator *manipulator, Name tool_name, PoseValue target_pose, std::vector<JointValue>* goal_joint_value);
+  bool inverseSolverUsingPositionOnlySRJacobian(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue>* goal_joint_value);
 
 public:
-  CR_Position_Only_Jacobian_Solver(){}
-  virtual ~CR_Position_Only_Jacobian_Solver(){}
+  SolverUsingChainRuleandSingularityRobustPositionOnlyJacobian(){}
+  virtual ~SolverUsingChainRuleandSingularityRobustPositionOnlyJacobian(){}
 
   virtual void setOption(const void *arg);
   virtual MatrixXd jacobian(Manipulator *manipulator, Name tool_name);
-  virtual void forwardKinematics(Manipulator *manipulator);
-  virtual bool inverseKinematics(Manipulator *manipulator, Name tool_name, PoseValue target_pose, std::vector<JointValue>* goal_joint_value);
+  virtual void solveForwardKinematics(Manipulator *manipulator);
+  virtual bool solveInverseKinematics(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue>* goal_joint_value);
 };
 
-class CR_Custom_Solver : public ROBOTIS_MANIPULATOR::Kinematics
+
+/*****************************************************************************
+** Kinematics Solver Customized for OpenManipulator Chain
+*****************************************************************************/
+class SolverCustomizedforOpenManipulatorChain : public robotis_manipulator::Kinematics
 {
 private:
   void forwardSolverUsingChainRule(Manipulator *manipulator, Name component_name);
-  bool chainCustomInverseKinematics(Manipulator *manipulator, Name tool_name, PoseValue target_pose, std::vector<JointValue>* goal_joint_value);
+  bool chainCustomInverseKinematics(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue>* goal_joint_value);
 
 public:
-  CR_Custom_Solver(){}
-  virtual ~CR_Custom_Solver(){}
+  SolverCustomizedforOpenManipulatorChain(){}
+  virtual ~SolverCustomizedforOpenManipulatorChain(){}
 
   virtual void setOption(const void *arg);
   virtual MatrixXd jacobian(Manipulator *manipulator, Name tool_name);
-  virtual void forwardKinematics(Manipulator *manipulator);
-  virtual bool inverseKinematics(Manipulator *manipulator, Name tool_name, PoseValue target_pose, std::vector<JointValue>* goal_joint_value);
+  virtual void solveForwardKinematics(Manipulator *manipulator);
+  virtual bool solveInverseKinematics(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue>* goal_joint_value);
 };
 
 } // namespace KINEMATICS

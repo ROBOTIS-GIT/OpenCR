@@ -32,15 +32,17 @@
 #include <vector>
 #include <map>
 #include "robotis_manipulator_math.h"
-#include "robotis_manipulator_debug.h"
+#include "robotis_manipulator_log.h"
 
-namespace ROBOTIS_MANIPULATOR
+namespace robotis_manipulator
 {
 
 typedef STRING Name;
 
-///////////////////// date set//////////////////////////////
-//Pose struct
+
+/*****************************************************************************
+** Value Set
+*****************************************************************************/
 typedef struct _KinematicPose
 {
   Eigen::Vector3d position;
@@ -59,33 +61,34 @@ typedef struct _DynamicPose
   Dynamicvector angular;
 } DynamicPose;
 
-//Inertia struct
-typedef struct
+typedef struct _Inertia
 {
   double mass;
   Eigen::Matrix3d inertia_tensor;
   Eigen::Vector3d center_of_mass;
 } Inertia;
 
-//Actuator Value Limit struct
 typedef struct _Limit
 {
   double maximum;
   double minimum;
 } Limit;
-////////////////////////////////////////////////////////////
 
-/////////////////////////Time struct////////////////////////
+
+/*****************************************************************************
+** Time Set
+*****************************************************************************/
 typedef struct _Time
 {
   double total_move_time;
   double present_time;
   double start_time;
-}Time;
-////////////////////////////////////////////////////////////
+} Time;
 
-////////////////////Trajectory set//////////////////////////
-//Trajectory struct
+
+/*****************************************************************************
+** Trajectory Set
+*****************************************************************************/
 typedef enum _TrajectoryType
 {
   NONE = 0,
@@ -93,42 +96,40 @@ typedef enum _TrajectoryType
   TASK_TRAJECTORY,
   CUSTOM_JOINT_TRAJECTORY,
   CUSTOM_TASK_TRAJECTORY
-}TrajectoryType;
+} TrajectoryType;
 
-//Point struct
 typedef struct _Point
 {
   double position;
   double velocity;
   double acceleration;
   double effort;
-}Point, Actuator, JointValue;
+} Point, ActuatorValue, JointValue, ToolValue;
 
-typedef std::vector<JointValue> JointWayPoint;
+typedef std::vector<JointValue> JointWaypoint;
 
-typedef struct _TaskWayPoint
+typedef struct _TaskWaypoint
 {
   KinematicPose kinematic;
   DynamicPose dynamic;
-}TaskWayPoint, PoseValue;
+} TaskWaypoint, Pose;
 
-////////////////////////////////////////////////////////////
 
-//////////////////////Componet data/////////////////////////
-//Component Type
+/*****************************************************************************
+** Component Set
+*****************************************************************************/
 typedef enum _ComponentType
 {
   PASSIVE_JOINT_COMPONENT = 0,
   ACTIVE_JOINT_COMPONENT,
   TOOL_COMPONENT
-}ComponentType;
+} ComponentType;
 
-//Constant data
-typedef struct _ChainigName
+typedef struct _ChainingName
 {
   Name parent;
   std::vector<Name> child;
-} ChainigName;
+} ChainingName;
 
 typedef struct _Relative
 {
@@ -140,38 +141,37 @@ typedef struct _JointConstant
 {
   int8_t id;
   Eigen::Vector3d axis;
-  double coefficient;       //actuator angle to joint angle
-  Limit limit;
+  double coefficient;       // joint angle over actuator angle
+  Limit position_limit;
 } JointConstant;
 
-////////////////////////////////////////////////////////////
-
-//////////////////////Componet set//////////////////////////
-//World struct
 typedef struct _World
 {
   Name name;
   Name child;
-  PoseValue pose;
+  Pose pose;
 } World;
 
-//component struct
 typedef struct _Component
 {
   //constant
-  ChainigName name;
+  ChainingName name;
   ComponentType component_type;
   Relative relative;
   JointConstant joint_constant;
+
   //variable
-  PoseValue pose_from_world;
+  Pose pose_from_world;
   JointValue joint_value;
+
   //Actuator
   Name actuator_name;
 } Component;
-////////////////////////////////////////////////////////////
 
-/////////////////////Manipulator class//////////////////////
+
+/*****************************************************************************
+** Manipulator Class
+*****************************************************************************/
 class Manipulator
 {
 private:
@@ -180,12 +180,15 @@ private:
   std::map<Name, Component> component_;
 
 public:
-  Manipulator();
+  Manipulator():dof_(0){};
   ~Manipulator() {}
 
+  /*****************************************************************************
+  ** Add Function
+  *****************************************************************************/
   void addWorld(Name world_name,
                 Name child_name,
-                Eigen::Vector3d world_position = Eigen::Vector3d::Zero(3),
+                Eigen::Vector3d world_position = Eigen::Vector3d::Zero(),
                 Eigen::Matrix3d world_orientation = Eigen::Matrix3d::Identity());
 
   void addJoint(Name my_name,
@@ -194,27 +197,34 @@ public:
                 Eigen::Vector3d relative_position,
                 Eigen::Matrix3d relative_orientation,
                 Eigen::Vector3d axis_of_rotation = Eigen::Vector3d::Zero(),
-                int8_t joint_actuator_id = -1, double max_limit = M_PI, double min_limit = -M_PI,
+                int8_t joint_actuator_id = -1, 
+                double max_position_limit = M_PI, 
+                double min_position_limit = -M_PI,
                 double coefficient = 1.0,
                 double mass = 0.0,
-                Eigen::Matrix3d inertia_tensor = Eigen::Matrix3d::Identity(3, 3),
+                Eigen::Matrix3d inertia_tensor = Eigen::Matrix3d::Identity(),
                 Eigen::Vector3d center_of_mass = Eigen::Vector3d::Zero());
 
   void addTool(Name my_name,
                Name parent_name,
                Eigen::Vector3d relative_position,
                Eigen::Matrix3d relative_orientation,
-               int8_t tool_id = -1, double max_limit = M_PI, double min_limit = -M_PI,
+               int8_t tool_id = -1, 
+               double max_position_limit = M_PI, 
+               double min_position_limit = -M_PI,
                double coefficient = 1.0,
                double mass = 0.0,
-               Eigen::Matrix3d inertia_tensor = Eigen::Matrix3d::Identity(3, 3),
+               Eigen::Matrix3d inertia_tensor = Eigen::Matrix3d::Identity(),
                Eigen::Vector3d center_of_mass = Eigen::Vector3d::Zero());
 
   void addComponentChild(Name my_name, Name child_name);
-  void checkManipulatorSetting();
+  void printManipulatorSetting();
 
-  ///////////////////////////////Set function//////////////////////////////////
-  void setWorldPose(PoseValue world_pose);
+
+  /*****************************************************************************
+  ** Set Function
+  *****************************************************************************/
+  void setWorldPose(Pose world_pose);
   void setWorldKinematicPose(KinematicPose world_kinematic_pose);
   void setWorldPosition(Eigen::Vector3d world_position);
   void setWorldOrientation(Eigen::Matrix3d world_orientation);
@@ -225,7 +235,7 @@ public:
   void setWorldAngularAcceleration(Eigen::Vector3d world_angular_acceleration);
   void setComponent(Name component_name, Component component);
   void setComponentActuatorName(Name component_name, Name actuator_name);
-  void setComponentPoseFromWorld(Name component_name, PoseValue pose_to_world);
+  void setComponentPoseFromWorld(Name component_name, Pose pose_to_world);
   void setComponentKinematicPoseFromWorld(Name component_name, KinematicPose pose_to_world);
   void setComponentPositionFromWorld(Name component_name, Eigen::Vector3d position_to_world);
   void setComponentOrientationFromWorld(Name component_name, Eigen::Matrix3d orientation_to_wolrd);
@@ -244,11 +254,14 @@ public:
   void setAllToolPosition(std::vector<double> tool_position_vector);
   void setAllToolValue(std::vector<JointValue> tool_value_vector);
 
-  ///////////////////////////////Get function//////////////////////////////////
+
+  /*****************************************************************************
+  ** Get Function
+  *****************************************************************************/
   int8_t getDOF();
   Name getWorldName();
   Name getWorldChildName();
-  PoseValue getWorldPose();
+  Pose getWorldPose();
   KinematicPose getWorldKinematicPose();
   Eigen::Vector3d getWorldPosition();
   Eigen::Matrix3d getWorldOrientation();
@@ -257,31 +270,31 @@ public:
   std::map<Name, Component> getAllComponent();
   std::map<Name, Component>::iterator getIteratorBegin();
   std::map<Name, Component>::iterator getIteratorEnd();
-  Component getComponent(Name name);
+  Component getComponent(Name component_name);
   Name getComponentActuatorName(Name component_name);
-  Name getComponentParentName(Name name);
-  std::vector<Name> getComponentChildName(Name name);
-  PoseValue getComponentPoseFromWorld(Name name);
-  KinematicPose getComponentKinematicPoseFromWorld(Name name);
-  Eigen::Vector3d getComponentPositionFromWorld(Name name);
-  Eigen::Matrix3d getComponentOrientationFromWorld(Name name);
-  DynamicPose getComponentDynamicPoseFromWorld(Name name);
-  KinematicPose getComponentRelativePoseFromParent(Name name);
-  Eigen::Vector3d getComponentRelativePositionFromParent(Name name);
-  Eigen::Matrix3d getComponentRelativeOrientationFromParent(Name name);
+  Name getComponentParentName(Name component_name);
+  std::vector<Name> getComponentChildName(Name component_name);
+  Pose getComponentPoseFromWorld(Name component_name);
+  KinematicPose getComponentKinematicPoseFromWorld(Name component_name);
+  Eigen::Vector3d getComponentPositionFromWorld(Name component_name);
+  Eigen::Matrix3d getComponentOrientationFromWorld(Name component_name);
+  DynamicPose getComponentDynamicPoseFromWorld(Name component_name);
+  KinematicPose getComponentRelativePoseFromParent(Name component_name);
+  Eigen::Vector3d getComponentRelativePositionFromParent(Name component_name);
+  Eigen::Matrix3d getComponentRelativeOrientationFromParent(Name component_name);
 
-  int8_t getId(Name name);
-  double getCoefficient(Name name);
-  Eigen::Vector3d getAxis(Name name);
-  double getJointPosition(Name name);
-  double getJointVelocity(Name name);
-  double getJointAcceleration(Name name);
-  double getJointEffort(Name name);
-  JointValue getJointValue(Name name);
+  int8_t getId(Name component_name);
+  double getCoefficient(Name component_name);
+  Eigen::Vector3d getAxis(Name component_name);
+  double getJointPosition(Name component_name);
+  double getJointVelocity(Name component_name);
+  double getJointAcceleration(Name component_name);
+  double getJointEffort(Name component_name);
+  JointValue getJointValue(Name component_name);
 
-  double getComponentMass(Name name);
-  Eigen::Matrix3d getComponentInertiaTensor(Name name);
-  Eigen::Vector3d getComponentCenterOfMass(Name name);
+  double getComponentMass(Name component_name);
+  Eigen::Matrix3d getComponentInertiaTensor(Name component_name);
+  Eigen::Vector3d getComponentCenterOfMass(Name component_name);
 
   std::vector<double> getAllJointPosition();
   std::vector<JointValue> getAllJointValue();
@@ -295,15 +308,19 @@ public:
   std::vector<Name> getAllToolComponentName();
   std::vector<Name> getAllActiveJointComponentName();
 
-  ////////////////////////////////check function////////////////////////////////
-  bool checkLimit(Name Component_name, double value);
+
+  /*****************************************************************************
+  ** Check Function
+  *****************************************************************************/
+  bool checkJointLimit(Name Component_name, double value);
   bool checkComponentType(Name component_name, ComponentType component_type);
 
-  ///////////////////////////////Find function//////////////////////////////////
-  Name findComponentNameFromId(int8_t id);
+
+  /*****************************************************************************
+  ** Find Function
+  *****************************************************************************/
+  Name findComponentNameUsingId(int8_t id);
 };
 
-////////////////////////////////////////////////////////////
 }
-
 #endif // ROBOTIS_MANIPULATOR_COMMON_H

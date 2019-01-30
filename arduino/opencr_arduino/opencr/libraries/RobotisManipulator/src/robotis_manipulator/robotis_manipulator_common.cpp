@@ -18,13 +18,12 @@
 
 #include "../../include/robotis_manipulator/robotis_manipulator_common.h"
 
-using namespace ROBOTIS_MANIPULATOR;
+using namespace robotis_manipulator;
 
-/////////////////////Manipulator class//////////////////////
-Manipulator::Manipulator()
-    :dof_(0)
-{}
-///////////////////////////////add function//////////////////////////////////
+
+/*****************************************************************************
+** Add Function
+*****************************************************************************/
 void Manipulator::addWorld(Name world_name,
                            Name child_name,
                            Eigen::Vector3d world_position,
@@ -34,25 +33,25 @@ void Manipulator::addWorld(Name world_name,
   world_.child = child_name;
   world_.pose.kinematic.position = world_position;
   world_.pose.kinematic.orientation = world_orientation;
-  world_.pose.dynamic.linear.velocity = Eigen::Vector3d::Zero(3);
-  world_.pose.dynamic.linear.acceleration = Eigen::Vector3d::Zero(3);
-  world_.pose.dynamic.angular.velocity = Eigen::Vector3d::Zero(3);
-  world_.pose.dynamic.angular.acceleration = Eigen::Vector3d::Zero(3);
+  world_.pose.dynamic.linear.velocity = Eigen::Vector3d::Zero();
+  world_.pose.dynamic.linear.acceleration = Eigen::Vector3d::Zero();
+  world_.pose.dynamic.angular.velocity = Eigen::Vector3d::Zero();
+  world_.pose.dynamic.angular.acceleration = Eigen::Vector3d::Zero();
 }
 
 void Manipulator::addJoint(Name my_name,
-                               Name parent_name,
-                               Name child_name,
-                               Eigen::Vector3d relative_position,
-                               Eigen::Matrix3d relative_orientation,
-                               Eigen::Vector3d axis_of_rotation,
-                               int8_t joint_actuator_id,
-                               double max_limit,
-                               double min_limit,
-                               double coefficient,
-                               double mass,
-                               Eigen::Matrix3d inertia_tensor,
-                               Eigen::Vector3d center_of_mass)
+                           Name parent_name,
+                           Name child_name,
+                           Eigen::Vector3d relative_position,
+                           Eigen::Matrix3d relative_orientation,
+                           Eigen::Vector3d axis_of_rotation,
+                           int8_t joint_actuator_id,
+                           double max_position_limit,
+                           double min_position_limit,
+                           double coefficient,
+                           double mass,
+                           Eigen::Matrix3d inertia_tensor,
+                           Eigen::Vector3d center_of_mass)
 {
   Component temp_component;
   if (joint_actuator_id != -1)
@@ -75,15 +74,15 @@ void Manipulator::addJoint(Name my_name,
   temp_component.joint_constant.id = joint_actuator_id;
   temp_component.joint_constant.coefficient = coefficient;
   temp_component.joint_constant.axis = axis_of_rotation;
-  temp_component.joint_constant.limit.maximum = max_limit;
-  temp_component.joint_constant.limit.minimum = min_limit;
+  temp_component.joint_constant.position_limit.maximum = max_position_limit;
+  temp_component.joint_constant.position_limit.minimum = min_position_limit;
 
   temp_component.pose_from_world.kinematic.position = Eigen::Vector3d::Zero();
   temp_component.pose_from_world.kinematic.orientation = Eigen::Matrix3d::Identity();
-  temp_component.pose_from_world.dynamic.linear.velocity = Eigen::Vector3d::Zero(3);
-  temp_component.pose_from_world.dynamic.linear.acceleration = Eigen::Vector3d::Zero(3);
-  temp_component.pose_from_world.dynamic.angular.velocity = Eigen::Vector3d::Zero(3);
-  temp_component.pose_from_world.dynamic.angular.acceleration = Eigen::Vector3d::Zero(3);
+  temp_component.pose_from_world.dynamic.linear.velocity = Eigen::Vector3d::Zero();
+  temp_component.pose_from_world.dynamic.linear.acceleration = Eigen::Vector3d::Zero();
+  temp_component.pose_from_world.dynamic.angular.velocity = Eigen::Vector3d::Zero();
+  temp_component.pose_from_world.dynamic.angular.acceleration = Eigen::Vector3d::Zero();
 
   temp_component.joint_value.position = 0.0;
   temp_component.joint_value.velocity = 0.0;
@@ -92,18 +91,13 @@ void Manipulator::addJoint(Name my_name,
   component_.insert(std::make_pair(my_name, temp_component));
 }
 
-void Manipulator::addComponentChild(Name my_name, Name child_name)
-{
-  component_.at(my_name).name.child.push_back(child_name);
-}
-
 void Manipulator::addTool(Name my_name,
                           Name parent_name,
                           Eigen::Vector3d relative_position,
                           Eigen::Matrix3d relative_orientation,
                           int8_t tool_id,
-                          double max_limit,
-                          double min_limit,
+                          double max_position_limit,
+                          double min_position_limit,
                           double coefficient,
                           double mass,
                           Eigen::Matrix3d inertia_tensor,
@@ -122,15 +116,15 @@ void Manipulator::addTool(Name my_name,
   temp_component.joint_constant.id = tool_id;
   temp_component.joint_constant.coefficient = coefficient;
   temp_component.joint_constant.axis = Eigen::Vector3d::Zero();
-  temp_component.joint_constant.limit.maximum = max_limit;
-  temp_component.joint_constant.limit.minimum = min_limit;
+  temp_component.joint_constant.position_limit.maximum = max_position_limit;
+  temp_component.joint_constant.position_limit.minimum = min_position_limit;
 
   temp_component.pose_from_world.kinematic.position = Eigen::Vector3d::Zero();
   temp_component.pose_from_world.kinematic.orientation = Eigen::Matrix3d::Identity();
-  temp_component.pose_from_world.dynamic.linear.velocity = Eigen::Vector3d::Zero(3);
-  temp_component.pose_from_world.dynamic.linear.acceleration = Eigen::Vector3d::Zero(3);
-  temp_component.pose_from_world.dynamic.angular.velocity = Eigen::Vector3d::Zero(3);
-  temp_component.pose_from_world.dynamic.angular.acceleration = Eigen::Vector3d::Zero(3);
+  temp_component.pose_from_world.dynamic.linear.velocity = Eigen::Vector3d::Zero();
+  temp_component.pose_from_world.dynamic.linear.acceleration = Eigen::Vector3d::Zero();
+  temp_component.pose_from_world.dynamic.angular.velocity = Eigen::Vector3d::Zero();
+  temp_component.pose_from_world.dynamic.angular.acceleration = Eigen::Vector3d::Zero();
 
   temp_component.joint_value.position = 0.0;
   temp_component.joint_value.velocity = 0.0;
@@ -139,102 +133,110 @@ void Manipulator::addTool(Name my_name,
   component_.insert(std::make_pair(my_name, temp_component));
 }
 
-void Manipulator::checkManipulatorSetting()
+void Manipulator::addComponentChild(Name my_name, Name child_name)
 {
-  RM_LOG::PRINTLN("----------<Manipulator Description>----------");
-  RM_LOG::PRINTLN("<Degree of freedom>\n", dof_);
-  RM_LOG::PRINTLN("<Size of Components>\n", component_.size());
-  RM_LOG::PRINTLN("");
-  RM_LOG::PRINTLN("<Configuration of world>");
-  RM_LOG::PRINTLN(" [Name]");
-  RM_LOG::PRINT(" -World Name : "); RM_LOG::PRINTLN(STRING(world_.name));
-  RM_LOG::PRINT(" -Child Name : "); RM_LOG::PRINTLN(STRING(world_.child));
-  RM_LOG::PRINTLN(" [Static Pose]");
-  RM_LOG::PRINTLN(" -Position : ");
-  RM_LOG::PRINT_VECTOR(world_.pose.kinematic.position);
-  RM_LOG::PRINTLN(" -Orientation : ");
-  RM_LOG::PRINT_MATRIX(world_.pose.kinematic.orientation);
-  RM_LOG::PRINTLN(" [Dynamic Pose]");
-  RM_LOG::PRINTLN(" -Linear Velocity : ");
-  RM_LOG::PRINT_VECTOR(world_.pose.dynamic.linear.velocity);
-  RM_LOG::PRINTLN(" -Linear acceleration : ");
-  RM_LOG::PRINT_VECTOR(world_.pose.dynamic.linear.acceleration);
-  RM_LOG::PRINTLN(" -Angular Velocity : ");
-  RM_LOG::PRINT_VECTOR(world_.pose.dynamic.angular.velocity);
-  RM_LOG::PRINTLN(" -Angular acceleration : ");
-  RM_LOG::PRINT_VECTOR(world_.pose.dynamic.angular.acceleration);
+  component_.at(my_name).name.child.push_back(child_name);
+}
+
+void Manipulator::printManipulatorSetting()
+{
+  robotis_manipulator_log::println("----------<Manipulator Description>----------");
+  robotis_manipulator_log::println("<Degree of Freedom>\n", dof_);
+  robotis_manipulator_log::println("<Number of Components>\n", component_.size());
+  robotis_manipulator_log::println("");
+  robotis_manipulator_log::println("<World Configuration>");
+  robotis_manipulator_log::println(" [Name]");
+  robotis_manipulator_log::print(" -World Name : "); robotis_manipulator_log::println(STRING(world_.name));
+  robotis_manipulator_log::print(" -Child Name : "); robotis_manipulator_log::println(STRING(world_.child));
+  robotis_manipulator_log::println(" [Static Pose]");
+  robotis_manipulator_log::println(" -Position : ");
+  robotis_manipulator_log::print_vector(world_.pose.kinematic.position);
+  robotis_manipulator_log::println(" -Orientation : ");
+  robotis_manipulator_log::print_matrix(world_.pose.kinematic.orientation);
+  robotis_manipulator_log::println(" [Dynamic Pose]");
+  robotis_manipulator_log::println(" -Linear Velocity : ");
+  robotis_manipulator_log::print_vector(world_.pose.dynamic.linear.velocity);
+  robotis_manipulator_log::println(" -Linear acceleration : ");
+  robotis_manipulator_log::print_vector(world_.pose.dynamic.linear.acceleration);
+  robotis_manipulator_log::println(" -Angular Velocity : ");
+  robotis_manipulator_log::print_vector(world_.pose.dynamic.angular.velocity);
+  robotis_manipulator_log::println(" -Angular acceleration : ");
+  robotis_manipulator_log::print_vector(world_.pose.dynamic.angular.acceleration);
 
   std::vector<double> result_vector;
   std::map<Name, Component>::iterator it_component;
 
   for (it_component = component_.begin(); it_component != component_.end(); it_component++)
   {
-    RM_LOG::PRINTLN("");
-    RM_LOG::PRINT("<Configuration of "); RM_LOG::PRINT(STRING(it_component->first)); RM_LOG::PRINTLN(">");
+    robotis_manipulator_log::println("");
+    robotis_manipulator_log::println("<"); robotis_manipulator_log::print(STRING(it_component->first)); robotis_manipulator_log::print("Configuration>");
     if(component_.at(it_component->first).component_type == ACTIVE_JOINT_COMPONENT)
-      RM_LOG::PRINTLN(" [Component Type]\n  Active Joint");
+      robotis_manipulator_log::println(" [Component Type]\n  Active Joint");
     else if(component_.at(it_component->first).component_type == PASSIVE_JOINT_COMPONENT)
-      RM_LOG::PRINTLN(" [Component Type]\n  Passive Joint");
+      robotis_manipulator_log::println(" [Component Type]\n  Passive Joint");
     else if(component_.at(it_component->first).component_type == TOOL_COMPONENT)
-      RM_LOG::PRINTLN(" [Component Type]\n  Tool");
-    RM_LOG::PRINTLN(" [Name]");
-    RM_LOG::PRINT(" -Parent Name : "); RM_LOG::PRINTLN(STRING(component_.at(it_component->first).name.parent));
+      robotis_manipulator_log::println(" [Component Type]\n  Tool");
+    robotis_manipulator_log::println(" [Name]");
+    robotis_manipulator_log::print(" -Parent Name : "); robotis_manipulator_log::println(STRING(component_.at(it_component->first).name.parent));
     for(uint32_t index = 0; index < component_.at(it_component->first).name.child.size(); index++)
     {
-      RM_LOG::PRINT(" -Child Name",index+1,0);
-      RM_LOG::PRINT(" : ");
-      RM_LOG::PRINTLN(STRING(component_.at(it_component->first).name.child.at(index)));
+      robotis_manipulator_log::print(" -Child Name",index+1,0);
+      robotis_manipulator_log::print(" : ");
+      robotis_manipulator_log::println(STRING(component_.at(it_component->first).name.child.at(index)));
     }
-    RM_LOG::PRINTLN(" [Actuator]");
-    RM_LOG::PRINT(" -Actuator Name : ");
-    RM_LOG::PRINTLN(STRING(component_.at(it_component->first).actuator_name));
-    RM_LOG::PRINT(" -ID : ");
-    RM_LOG::PRINTLN("", component_.at(it_component->first).joint_constant.id,0);
-    RM_LOG::PRINTLN(" -Joint Axis : ");
-    RM_LOG::PRINT_VECTOR(component_.at(it_component->first).joint_constant.axis);
-    RM_LOG::PRINT(" -Coefficient : ");
-    RM_LOG::PRINTLN("", component_.at(it_component->first).joint_constant.coefficient);
-    RM_LOG::PRINTLN(" -Limit : ");
-    RM_LOG::PRINT("    Maximum :", component_.at(it_component->first).joint_constant.limit.maximum);
-    RM_LOG::PRINTLN(", Minimum :", component_.at(it_component->first).joint_constant.limit.minimum);
+    robotis_manipulator_log::println(" [Actuator]");
+    robotis_manipulator_log::print(" -Actuator Name : ");
+    robotis_manipulator_log::println(STRING(component_.at(it_component->first).actuator_name));
+    robotis_manipulator_log::print(" -ID : ");
+    robotis_manipulator_log::println("", component_.at(it_component->first).joint_constant.id,0);
+    robotis_manipulator_log::println(" -Joint Axis : ");
+    robotis_manipulator_log::print_vector(component_.at(it_component->first).joint_constant.axis);
+    robotis_manipulator_log::print(" -Coefficient : ");
+    robotis_manipulator_log::println("", component_.at(it_component->first).joint_constant.coefficient);
+    robotis_manipulator_log::println(" -Position Limit : ");
+    robotis_manipulator_log::print("    Maximum :", component_.at(it_component->first).joint_constant.position_limit.maximum);
+    robotis_manipulator_log::println(", Minimum :", component_.at(it_component->first).joint_constant.position_limit.minimum);
 
-    RM_LOG::PRINTLN(" [Actuator Value]");
-    RM_LOG::PRINTLN(" -Value : ", component_.at(it_component->first).joint_value.position);
-    RM_LOG::PRINTLN(" -Velocity : ", component_.at(it_component->first).joint_value.velocity);
-    RM_LOG::PRINTLN(" -Acceleration : ", component_.at(it_component->first).joint_value.acceleration);
-    RM_LOG::PRINTLN(" -Effort : ", component_.at(it_component->first).joint_value.effort);
+    robotis_manipulator_log::println(" [Actuator Value]");
+    robotis_manipulator_log::println(" -Position : ", component_.at(it_component->first).joint_value.position);
+    robotis_manipulator_log::println(" -Velocity : ", component_.at(it_component->first).joint_value.velocity);
+    robotis_manipulator_log::println(" -Acceleration : ", component_.at(it_component->first).joint_value.acceleration);
+    robotis_manipulator_log::println(" -Effort : ", component_.at(it_component->first).joint_value.effort);
 
-    RM_LOG::PRINTLN(" [Constant]");
-    RM_LOG::PRINTLN(" -Relative Position from parent component : ");
-    RM_LOG::PRINT_VECTOR(component_.at(it_component->first).relative.pose_from_parent.position);
-    RM_LOG::PRINTLN(" -Relative Orientation from parent component : ");
-    RM_LOG::PRINT_MATRIX(component_.at(it_component->first).relative.pose_from_parent.orientation);
-    RM_LOG::PRINT(" -Mass : ");
-    RM_LOG::PRINTLN("", component_.at(it_component->first).relative.inertia.mass);
-    RM_LOG::PRINTLN(" -Inertia Tensor : ");
-    RM_LOG::PRINT_MATRIX(component_.at(it_component->first).relative.inertia.inertia_tensor);
-    RM_LOG::PRINTLN(" -Center of Mass : ");
-    RM_LOG::PRINT_VECTOR(component_.at(it_component->first).relative.inertia.center_of_mass);
+    robotis_manipulator_log::println(" [Constant]");
+    robotis_manipulator_log::println(" -Relative Position from parent component : ");
+    robotis_manipulator_log::print_vector(component_.at(it_component->first).relative.pose_from_parent.position);
+    robotis_manipulator_log::println(" -Relative Orientation from parent component : ");
+    robotis_manipulator_log::print_matrix(component_.at(it_component->first).relative.pose_from_parent.orientation);
+    robotis_manipulator_log::print(" -Mass : ");
+    robotis_manipulator_log::println("", component_.at(it_component->first).relative.inertia.mass);
+    robotis_manipulator_log::println(" -Inertia Tensor : ");
+    robotis_manipulator_log::print_matrix(component_.at(it_component->first).relative.inertia.inertia_tensor);
+    robotis_manipulator_log::println(" -Center of Mass : ");
+    robotis_manipulator_log::print_vector(component_.at(it_component->first).relative.inertia.center_of_mass);
 
-    RM_LOG::PRINTLN(" [Variable]");
-    RM_LOG::PRINTLN(" -Position : ");
-    RM_LOG::PRINT_VECTOR(component_.at(it_component->first).pose_from_world.kinematic.position);
-    RM_LOG::PRINTLN(" -Orientation : ");
-    RM_LOG::PRINT_MATRIX(component_.at(it_component->first).pose_from_world.kinematic.orientation);
-    RM_LOG::PRINTLN(" -Linear Velocity : ");
-    RM_LOG::PRINT_VECTOR(component_.at(it_component->first).pose_from_world.dynamic.linear.velocity);
-    RM_LOG::PRINTLN(" -Linear acceleration : ");
-    RM_LOG::PRINT_VECTOR(component_.at(it_component->first).pose_from_world.dynamic.linear.acceleration);
-    RM_LOG::PRINTLN(" -Angular Velocity : ");
-    RM_LOG::PRINT_VECTOR(component_.at(it_component->first).pose_from_world.dynamic.angular.velocity);
-    RM_LOG::PRINTLN(" -Angular acceleration : ");
-    RM_LOG::PRINT_VECTOR(component_.at(it_component->first).pose_from_world.dynamic.angular.acceleration);
+    robotis_manipulator_log::println(" [Variable]");
+    robotis_manipulator_log::println(" -Position : ");
+    robotis_manipulator_log::print_vector(component_.at(it_component->first).pose_from_world.kinematic.position);
+    robotis_manipulator_log::println(" -Orientation : ");
+    robotis_manipulator_log::print_matrix(component_.at(it_component->first).pose_from_world.kinematic.orientation);
+    robotis_manipulator_log::println(" -Linear Velocity : ");
+    robotis_manipulator_log::print_vector(component_.at(it_component->first).pose_from_world.dynamic.linear.velocity);
+    robotis_manipulator_log::println(" -Linear acceleration : ");
+    robotis_manipulator_log::print_vector(component_.at(it_component->first).pose_from_world.dynamic.linear.acceleration);
+    robotis_manipulator_log::println(" -Angular Velocity : ");
+    robotis_manipulator_log::print_vector(component_.at(it_component->first).pose_from_world.dynamic.angular.velocity);
+    robotis_manipulator_log::println(" -Angular acceleration : ");
+    robotis_manipulator_log::print_vector(component_.at(it_component->first).pose_from_world.dynamic.angular.acceleration);
   }
-  RM_LOG::PRINTLN("---------------------------------------------");
+  robotis_manipulator_log::println("---------------------------------------------");
 }
 
-///////////////////////////////Set function//////////////////////////////////
-void Manipulator::setWorldPose(PoseValue world_pose)
+
+/*****************************************************************************
+** Set Function
+*****************************************************************************/
+void Manipulator::setWorldPose(Pose world_pose)
 {
   world_.pose = world_pose;
 }
@@ -289,7 +291,7 @@ void Manipulator::setComponentActuatorName(Name component_name, Name actuator_na
   component_.at(component_name).actuator_name = actuator_name;
 }
 
-void Manipulator::setComponentPoseFromWorld(Name component_name, PoseValue pose_to_world)
+void Manipulator::setComponentPoseFromWorld(Name component_name, Pose pose_to_world)
 {
   if (component_.find(component_name) != component_.end())
   {
@@ -297,7 +299,7 @@ void Manipulator::setComponentPoseFromWorld(Name component_name, PoseValue pose_
   }
   else
   {
-    RM_LOG::ERROR("[setComponentPoseFromWorld] Wrong name.");
+    robotis_manipulator_log::error("[setComponentPoseFromWorld] Wrong name.");
   }
 }
 
@@ -309,7 +311,7 @@ void Manipulator::setComponentKinematicPoseFromWorld(Name component_name, Kinema
   }
   else
   {
-    RM_LOG::ERROR("[setComponentKinematicPoseFromWorld] Wrong name.");
+    robotis_manipulator_log::error("[setComponentKinematicPoseFromWorld] Wrong name.");
   }
 }
 
@@ -321,7 +323,7 @@ void Manipulator::setComponentPositionFromWorld(Name component_name, Eigen::Vect
   }
   else
   {
-    RM_LOG::ERROR("[setComponentPositionFromWorld] Wrong name.");
+    robotis_manipulator_log::error("[setComponentPositionFromWorld] Wrong name.");
   }
 }
 
@@ -333,7 +335,7 @@ void Manipulator::setComponentOrientationFromWorld(Name component_name, Eigen::M
   }
   else
   {
-    RM_LOG::ERROR("[setComponentOrientationFromWorld] Wrong name.");
+    robotis_manipulator_log::error("[setComponentOrientationFromWorld] Wrong name.");
   }
 }
 
@@ -345,33 +347,33 @@ void Manipulator::setComponentDynamicPoseFromWorld(Name component_name, DynamicP
   }
   else
   {
-    RM_LOG::ERROR("[setComponentDynamicPoseFromWorld] Wrong name.");
+    robotis_manipulator_log::error("[setComponentDynamicPoseFromWorld] Wrong name.");
   }
 }
 
-void Manipulator::setJointPosition(Name name, double position)
+void Manipulator::setJointPosition(Name component_name, double position)
 {
-  component_.at(name).joint_value.position = position;
+  component_.at(component_name).joint_value.position = position;
 }
 
-void Manipulator::setJointVelocity(Name name, double velocity)
+void Manipulator::setJointVelocity(Name component_name, double velocity)
 {
-  component_.at(name).joint_value.velocity = velocity;
+  component_.at(component_name).joint_value.velocity = velocity;
 }
 
-void Manipulator::setJointAcceleration(Name name, double acceleration)
+void Manipulator::setJointAcceleration(Name component_name, double acceleration)
 {
-  component_.at(name).joint_value.acceleration = acceleration;
+  component_.at(component_name).joint_value.acceleration = acceleration;
 }
 
-void Manipulator::setJointEffort(Name name, double effort)
+void Manipulator::setJointEffort(Name component_name, double effort)
 {
-  component_.at(name).joint_value.effort = effort;
+  component_.at(component_name).joint_value.effort = effort;
 }
 
-void Manipulator::setJointValue(Name name, JointValue joint_value)
+void Manipulator::setJointValue(Name component_name, JointValue joint_value)
 {
-  component_.at(name).joint_value = joint_value;
+  component_.at(component_name).joint_value = joint_value;
 }
 
 void Manipulator::setAllActiveJointPosition(std::vector<double> joint_position_vector)
@@ -422,7 +424,6 @@ void Manipulator::setAllJointPosition(std::vector<double> joint_position_vector)
   }
 }
 
-
 void Manipulator::setAllJointValue(std::vector<JointValue> joint_value_vector)
 {
   int8_t index = 0;
@@ -468,8 +469,10 @@ void Manipulator::setAllToolValue(std::vector<JointValue> tool_value_vector)
   }
 }
 
-///////////////////////////////Get function//////////////////////////////////
 
+/*****************************************************************************
+** Get Function
+*****************************************************************************/
 int8_t Manipulator::getDOF()
 {
   return dof_;
@@ -485,7 +488,7 @@ Name Manipulator::getWorldChildName()
   return world_.child;
 }
 
-PoseValue Manipulator::getWorldPose()
+Pose Manipulator::getWorldPose()
 {
   return world_.pose;
 }
@@ -530,9 +533,9 @@ std::map<Name, Component>::iterator Manipulator::getIteratorEnd()
   return component_.end();;
 }
 
-Component Manipulator::getComponent(Name name)
+Component Manipulator::getComponent(Name component_name)
 {
-  return component_.at(name);
+  return component_.at(component_name);
 }
 
 Name Manipulator::getComponentActuatorName(Name component_name)
@@ -540,109 +543,109 @@ Name Manipulator::getComponentActuatorName(Name component_name)
   return component_.at(component_name).actuator_name;
 }
 
-Name Manipulator::getComponentParentName(Name name)
+Name Manipulator::getComponentParentName(Name component_name)
 {
-  return component_.at(name).name.parent;
+  return component_.at(component_name).name.parent;
 }
 
-std::vector<Name> Manipulator::getComponentChildName(Name name)
+std::vector<Name> Manipulator::getComponentChildName(Name component_name)
 {
-  return component_.at(name).name.child;
+  return component_.at(component_name).name.child;
 }
 
-PoseValue Manipulator::getComponentPoseFromWorld(Name name)
+Pose Manipulator::getComponentPoseFromWorld(Name component_name)
 {
-  return component_.at(name).pose_from_world;
+  return component_.at(component_name).pose_from_world;
 }
 
-KinematicPose Manipulator::getComponentKinematicPoseFromWorld(Name name)
+KinematicPose Manipulator::getComponentKinematicPoseFromWorld(Name component_name)
 {
-  return component_.at(name).pose_from_world.kinematic;
+  return component_.at(component_name).pose_from_world.kinematic;
 }
 
-Eigen::Vector3d Manipulator::getComponentPositionFromWorld(Name name)
+Eigen::Vector3d Manipulator::getComponentPositionFromWorld(Name component_name)
 {
-  return component_.at(name).pose_from_world.kinematic.position;
+  return component_.at(component_name).pose_from_world.kinematic.position;
 }
 
-Eigen::Matrix3d Manipulator::getComponentOrientationFromWorld(Name name)
+Eigen::Matrix3d Manipulator::getComponentOrientationFromWorld(Name component_name)
 {
-  return component_.at(name).pose_from_world.kinematic.orientation;
+  return component_.at(component_name).pose_from_world.kinematic.orientation;
 }
 
-DynamicPose Manipulator::getComponentDynamicPoseFromWorld(Name name)
+DynamicPose Manipulator::getComponentDynamicPoseFromWorld(Name component_name)
 {
-  return component_.at(name).pose_from_world.dynamic;
+  return component_.at(component_name).pose_from_world.dynamic;
 }
 
-KinematicPose Manipulator::getComponentRelativePoseFromParent(Name name)
+KinematicPose Manipulator::getComponentRelativePoseFromParent(Name component_name)
 {
-  return component_.at(name).relative.pose_from_parent;
+  return component_.at(component_name).relative.pose_from_parent;
 }
 
-Eigen::Vector3d Manipulator::getComponentRelativePositionFromParent(Name name)
+Eigen::Vector3d Manipulator::getComponentRelativePositionFromParent(Name component_name)
 {
-  return component_.at(name).relative.pose_from_parent.position;
+  return component_.at(component_name).relative.pose_from_parent.position;
 }
 
-Eigen::Matrix3d Manipulator::getComponentRelativeOrientationFromParent(Name name)
+Eigen::Matrix3d Manipulator::getComponentRelativeOrientationFromParent(Name component_name)
 {
-  return component_.at(name).relative.pose_from_parent.orientation;
+  return component_.at(component_name).relative.pose_from_parent.orientation;
 }
 
-int8_t Manipulator::getId(Name name)
+int8_t Manipulator::getId(Name component_name)
 {
-  return component_.at(name).joint_constant.id;
+  return component_.at(component_name).joint_constant.id;
 }
 
-double Manipulator::getCoefficient(Name name)
+double Manipulator::getCoefficient(Name component_name)
 {
-  return component_.at(name).joint_constant.coefficient;
+  return component_.at(component_name).joint_constant.coefficient;
 }
 
-Eigen::Vector3d Manipulator::getAxis(Name name)
+Eigen::Vector3d Manipulator::getAxis(Name component_name)
 {
-  return component_.at(name).joint_constant.axis;
+  return component_.at(component_name).joint_constant.axis;
 }
 
-double Manipulator::getJointPosition(Name name)
+double Manipulator::getJointPosition(Name component_name)
 {
-  return component_.at(name).joint_value.position;
+  return component_.at(component_name).joint_value.position;
 }
 
-double Manipulator::getJointVelocity(Name name)
+double Manipulator::getJointVelocity(Name component_name)
 {
-  return component_.at(name).joint_value.velocity;
+  return component_.at(component_name).joint_value.velocity;
 }
 
-double Manipulator::getJointAcceleration(Name name)
+double Manipulator::getJointAcceleration(Name component_name)
 {
-  return component_.at(name).joint_value.acceleration;
+  return component_.at(component_name).joint_value.acceleration;
 }
 
-double Manipulator::getJointEffort(Name name)
+double Manipulator::getJointEffort(Name component_name)
 {
-  return component_.at(name).joint_value.effort;
+  return component_.at(component_name).joint_value.effort;
 }
 
-JointValue Manipulator::getJointValue(Name name)
+JointValue Manipulator::getJointValue(Name component_name)
 {
-  return component_.at(name).joint_value;
+  return component_.at(component_name).joint_value;
 }
 
-double Manipulator::getComponentMass(Name name)
+double Manipulator::getComponentMass(Name component_name)
 {
-  return component_.at(name).relative.inertia.mass;
+  return component_.at(component_name).relative.inertia.mass;
 }
 
-Eigen::Matrix3d Manipulator::getComponentInertiaTensor(Name name)
+Eigen::Matrix3d Manipulator::getComponentInertiaTensor(Name component_name)
 {
-  return component_.at(name).relative.inertia.inertia_tensor;
+  return component_.at(component_name).relative.inertia.inertia_tensor;
 }
 
-Eigen::Vector3d Manipulator::getComponentCenterOfMass(Name name)
+Eigen::Vector3d Manipulator::getComponentCenterOfMass(Name component_name)
 {
-  return component_.at(name).relative.inertia.center_of_mass;
+  return component_.at(component_name).relative.inertia.center_of_mass;
 }
 
 std::vector<double> Manipulator::getAllJointPosition()
@@ -798,12 +801,14 @@ std::vector<Name> Manipulator::getAllActiveJointComponentName()
 }
 
 
-
-bool Manipulator::checkLimit(Name component_name, double value)
+/*****************************************************************************
+** Check Function
+*****************************************************************************/
+bool Manipulator::checkJointLimit(Name component_name, double value)
 {
-  if(component_.at(component_name).joint_constant.limit.maximum < value)
+  if(component_.at(component_name).joint_constant.position_limit.maximum < value)
     return false;
-  else if(component_.at(component_name).joint_constant.limit.minimum > value)
+  else if(component_.at(component_name).joint_constant.position_limit.minimum > value)
     return false;
   else
     return true;
@@ -817,7 +822,11 @@ bool Manipulator::checkComponentType(Name component_name, ComponentType componen
     return false;
 }
 
-Name Manipulator::findComponentNameFromId(int8_t id)
+
+/*****************************************************************************
+** Find Function
+*****************************************************************************/
+Name Manipulator::findComponentNameUsingId(int8_t id)
 {
   std::map<Name, Component>::iterator it_component;
 
@@ -830,4 +839,3 @@ Name Manipulator::findComponentNameFromId(int8_t id)
   }
   return {};
 }
-////////////////////////////////////////////////////////////
