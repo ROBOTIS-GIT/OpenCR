@@ -16,9 +16,9 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
-#include "OpenManipulatorVacuum.h"
-#include "OpenManipulatorVacuumMotion.h"
-#include "Processing.h"
+#include "open_manipulator_vacuum.h"
+#include "open_manipulator_vacuum_motion.h"
+#include "processing.h"
 
 OpenManipulatorVacuum open_manipulator;
 double control_time = 0.010f;
@@ -35,7 +35,7 @@ void setup()
   switchInit();
   
   open_manipulator.initOpenManipulator(platform_state);
-  robotis_manipulator_log::println("OpenManipulatorVacuum Debugging Port");
+  log::println("OpenManipulatorVacuum Debugging Port");
 }
 
 void loop()

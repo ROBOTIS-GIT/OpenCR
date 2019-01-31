@@ -20,7 +20,7 @@
 #define OPEN_MANIPULATOR_VACUUM_MOTION_H_
 
 #include <RobotisManipulator.h>
-#include "OpenManipulatorVacuum.h"
+#include "open_manipulator_vacuum.h"
 
 #define BDPIN_PUSH_SW_1         34
 #define BDPIN_PUSH_SW_2         35

@@ -16,7 +16,7 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
-#include "OpenManipulatorPenDrawing.h"
+#include "open_manipulator_pen_drawing.h"
 
 using namespace open_manipulator_pen_drawing;
 

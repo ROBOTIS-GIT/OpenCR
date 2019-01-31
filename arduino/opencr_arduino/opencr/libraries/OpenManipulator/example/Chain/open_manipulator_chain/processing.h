@@ -167,19 +167,19 @@ void fromProcessing(OpenManipulator *open_manipulator, String data)
   else if (cmd[0] == "task")
   {
     if (cmd[1] == "forward")
-      open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", robotis_manipulator_math::vector3(0.010, 0.0, 0.0), 0.2);
+      open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", math::vector3(0.010, 0.0, 0.0), 0.2);
     else if (cmd[1] == "back")
-      open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", robotis_manipulator_math::vector3(-0.010, 0.0, 0.0), 0.2);
+      open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", math::vector3(-0.010, 0.0, 0.0), 0.2);
     else if (cmd[1] == "left")
-      open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", robotis_manipulator_math::vector3(0.0, 0.010, 0.0), 0.2);
+      open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", math::vector3(0.0, 0.010, 0.0), 0.2);
     else if (cmd[1] == "right")
-      open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", robotis_manipulator_math::vector3(0.0, -0.010, 0.0), 0.2);
+      open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", math::vector3(0.0, -0.010, 0.0), 0.2);
     else if (cmd[1] == "up")
-      open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", robotis_manipulator_math::vector3(0.0, 0.0, 0.010), 0.2);
+      open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", math::vector3(0.0, 0.0, 0.010), 0.2);
     else if (cmd[1] == "down")
-      open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", robotis_manipulator_math::vector3(0.0, 0.0, -0.010), 0.2);
+      open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", math::vector3(0.0, 0.0, -0.010), 0.2);
     else
-      open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", robotis_manipulator_math::vector3(0.0, 0.0, 0.0), 0.2);
+      open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", math::vector3(0.0, 0.0, 0.0), 0.2);
   }
   else if (cmd[0] == "torque")
   {

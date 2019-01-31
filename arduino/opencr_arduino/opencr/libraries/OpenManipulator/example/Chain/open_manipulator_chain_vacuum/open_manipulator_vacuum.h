@@ -20,7 +20,7 @@
 #define OPEN_MANIPULATOR_VACUUM_H_
 
 #include <open_manipulator_libs.h>
-#include "Actuator.h"
+#include "actuator.h"
 
 #define CUSTOM_TRAJECTORY_SIZE 4
 #define CUSTOM_TRAJECTORY_LINE    "custom_trajectory_line"
@@ -31,9 +31,9 @@
 #define JOINT_DYNAMIXEL "joint_dxl"
 #define TOOL_VACUUM "tool_vacuum"
 
-#define X_AXIS robotis_manipulator_math::vector3(1.0, 0.0, 0.0)
-#define Y_AXIS robotis_manipulator_math::vector3(0.0, 1.0, 0.0)
-#define Z_AXIS robotis_manipulator_math::vector3(0.0, 0.0, 1.0)
+#define X_AXIS robotis_manipulator::math::vector3(1.0, 0.0, 0.0)
+#define Y_AXIS robotis_manipulator::math::vector3(0.0, 1.0, 0.0)
+#define Z_AXIS robotis_manipulator::math::vector3(0.0, 0.0, 1.0)
 
 class OpenManipulatorVacuum : public robotis_manipulator::RobotisManipulator
 {
@@ -58,8 +58,8 @@ private:
 		addJoint("joint1",  // my name
 						"world",   // parent name
 						"joint2",  // child name
-						robotis_manipulator_math::vector3(0.012, 0.0, 0.017),               // relative position
-						robotis_manipulator_math::convertRPY2RotationMatrix(0.0, 0.0, 0.0), // relative orientation
+						math::vector3(0.012, 0.0, 0.017),               // relative position
+						math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
 						Z_AXIS,    // axis of rotation
 						11,        // actuator id
 						M_PI,      // max joint limit (3.14 rad)
@@ -68,8 +68,8 @@ private:
 		addJoint("joint2",  // my name
 						"joint1",  // parent name
 						"joint3",  // child name
-						robotis_manipulator_math::vector3(0.0, 0.0, 0.0595),                // relative position
-						robotis_manipulator_math::convertRPY2RotationMatrix(0.0, 0.0, 0.0), // relative orientation
+						math::vector3(0.0, 0.0, 0.0595),                // relative position
+						math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
 						Y_AXIS,    // axis of rotation
 						12,        // actuator id
 						M_PI_2,    // max joint limit (1.67 rad)
@@ -78,8 +78,8 @@ private:
 		addJoint("joint3",  // my name
 						"joint2",  // parent name
 						"joint4",  // child name
-						robotis_manipulator_math::vector3(0.024, 0.0, 0.128),               // relative position
-						robotis_manipulator_math::convertRPY2RotationMatrix(0.0, 0.0, 0.0), // relative orientation
+						math::vector3(0.024, 0.0, 0.128),               // relative position
+						math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
 						Y_AXIS,    // axis of rotation
 						13,        // actuator id
 						1.53,      // max joint limit (1.53 rad)
@@ -88,8 +88,8 @@ private:
 		addJoint("joint4",  // my name
 						"joint3",  // parent name
 						"vacuum", // child name
-						robotis_manipulator_math::vector3(0.124, 0.0, 0.0),                 // relative position
-						robotis_manipulator_math::convertRPY2RotationMatrix(0.0, 0.0, 0.0), // relative orientation
+						math::vector3(0.124, 0.0, 0.0),                 // relative position
+						math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
 						Y_AXIS,    // axis of rotation
 						14,        // actuator id
 						2.0,       // max joint limit (2.0 rad)
@@ -97,15 +97,15 @@ private:
 							
     addTool("vacuum",   // my name
             "joint4", // parent name
-            robotis_manipulator_math::vector3(0.043, 0.0, 0.0), // relative position
-            robotis_manipulator_math::convertRPY2RotationMatrix(0.0, 0.0, 0.0), // relative orientation
+            math::vector3(0.043, 0.0, 0.0), // relative position
+            math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
             15); // actuator id
 
 		/*****************************************************************************
 		** Initialize Kinematics 
 		*****************************************************************************/
-		kinematics_ = new kinematics::SolverCustomizedforOpenManipulatorChain();
-	//  kinematics_ = new kinematics::SolverUsingChainRuleandSingularityRobustPositionOnlyJacobian();
+		kinematics_ = new kinematics::SolverCustomizedforOMChain();
+	//  kinematics_ = new kinematics::SolverUsingCRAndSRPositionOnlyJacobian();
 		addKinematics(kinematics_);
 
 		if(using_actual_robot_state)

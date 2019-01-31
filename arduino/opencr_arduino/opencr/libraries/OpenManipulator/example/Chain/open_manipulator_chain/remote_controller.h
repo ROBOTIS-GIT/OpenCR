@@ -43,17 +43,17 @@ uint16_t readRC100Data()
 void fromRC100(OpenManipulator* open_manipulator, uint16_t data)
 {
   if (data & RC100_BTN_U) 
-    open_manipulator-> makeTaskTrajectoryFromPresentPose("gripper", robotis_manipulator_math::vector3(0.007, 0.0, 0.0), 0.16);
+    open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", math::vector3(0.007, 0.0, 0.0), 0.16);
   else if (data & RC100_BTN_D)
-    open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", robotis_manipulator_math::vector3(-0.007, 0.0, 0.0), 0.16);
+    open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", math::vector3(-0.007, 0.0, 0.0), 0.16);
   else if (data & RC100_BTN_L)
-    open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", robotis_manipulator_math::vector3(0.0, 0.007, 0.0), 0.16);
+    open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", math::vector3(0.0, 0.007, 0.0), 0.16);
   else if (data & RC100_BTN_R)
-    open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", robotis_manipulator_math::vector3(0.0, -0.007, 0.0), 0.16);
+    open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", math::vector3(0.0, -0.007, 0.0), 0.16);
   else if (data & RC100_BTN_1)
-    open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", robotis_manipulator_math::vector3(0.0, 0.0, 0.007), 0.16);
+    open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", math::vector3(0.0, 0.0, 0.007), 0.16);
   else if (data & RC100_BTN_3)
-    open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", robotis_manipulator_math::vector3(0.0, 0.0, -0.007), 0.16);
+    open_manipulator->makeTaskTrajectoryFromPresentPose("gripper", math::vector3(0.0, 0.0, -0.007), 0.16);
   else if (data & RC100_BTN_2)
   {
     grip_value += 0.0020;

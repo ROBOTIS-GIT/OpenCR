@@ -17,8 +17,8 @@
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
 #include <open_manipulator_libs.h>
-#include "Processing.h"
-#include "RemoteController.h"
+#include "processing.h"
+#include "remote_controller.h"
 
 OpenManipulator open_manipulator;
 double control_time = 0.010;
@@ -37,7 +37,7 @@ void setup()
   connectRC100();
   
   open_manipulator.initOpenManipulator(platform_state);
-  robotis_manipulator_log::println("OpenManipulator Debugging Port");
+  log::println("OpenManipulator Debugging Port");
 }
 
 void loop()

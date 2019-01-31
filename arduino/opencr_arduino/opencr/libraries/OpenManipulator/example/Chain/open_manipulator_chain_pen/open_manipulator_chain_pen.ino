@@ -16,9 +16,9 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
-#include "OpenManipulatorPen.h"
-#include "OpenManipulatorPenMotion.h"
-#include "Processing.h"
+#include "open_manipulator_pen.h"
+#include "open_manipulator_pen_motion.h"
+#include "processing.h"
 
 OpenManipulatorPen open_manipulator;
 double control_time = 0.010f;
@@ -35,7 +35,7 @@ void setup()
   switchInit();
 
   open_manipulator.initOpenManipulator(platform_state);
-  robotis_manipulator_log::println("OpenManipulatorPen Debugging Port");
+  log::println("OpenManipulatorPen Debugging Port");
 }
 
 void loop()

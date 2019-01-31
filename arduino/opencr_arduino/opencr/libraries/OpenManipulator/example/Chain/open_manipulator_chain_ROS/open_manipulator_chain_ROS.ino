@@ -30,7 +30,7 @@ void setup()
 
   nh.advertise(joint_states_pub);  
   nh.advertise(kinematic_pose_pub);  
-  nh.advertise(open_manipulator_state_pub);  
+  nh.advertise(open_manipulator_states_pub);  
 
   nh.advertiseService(goal_joint_space_path_server);
   nh.advertiseService(goal_joint_space_path_to_kinematics_pose_server);
@@ -50,7 +50,7 @@ void setup()
   // Initialize Open Manipulator.  
   open_manipulator.initOpenManipulator(true);
 
-  robotis_manipulator_log::println("OpenManipulator Debugging Port");
+  log::println("OpenManipulator Debugging Port");
 }
 
 void loop()
@@ -81,7 +81,7 @@ void goalJointSpacePathCallback(const SetJointPosition::Request & req, SetJointP
   for(int i = 0; i < req.joint_position.joint_name_length; i ++)
     target_angle.push_back(req.joint_position.position[i]);
 
-  open_manipulator.jointTrajectoryMove(target_angle, req.path_time);
+  open_manipulator.makeJointTrajectory(target_angle, req.path_time);
 
   res.is_planned = true;
 }
@@ -100,9 +100,42 @@ void goalJointSpacePathToKinematicsPoseCallback(const SetKinematicsPose::Request
                        req.kinematics_pose.pose.orientation.x,
                        req.kinematics_pose.pose.orientation.y,
                        req.kinematics_pose.pose.orientation.z);
-  target_pose.orientation = RM_MATH::convertQuaternionToRotation(q);
+  target_pose.orientation = math::convertQuaternionToRotationMatrix(q);
 
-  open_manipulator.jointTrajectoryMove(req.end_effector_name, target_pose, req.path_time);
+  open_manipulator.makeJointTrajectory(req.end_effector_name, target_pose, req.path_time);
+
+  res.is_planned = true;
+}
+
+/*******************************************************************************
+* Service server (set trajectory using kinematic position value)
+*******************************************************************************/
+void goalJointSpacePathToKinematicsPositionCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res)
+{
+  KinematicPose target_pose;
+  target_pose.position[0] = req.kinematics_pose.pose.position.x;
+  target_pose.position[1] = req.kinematics_pose.pose.position.y;
+  target_pose.position[2] = req.kinematics_pose.pose.position.z;
+
+  open_manipulator.makeJointTrajectory(req.end_effector_name, target_pose, req.path_time);
+
+  res.is_planned = true;
+}
+
+/*******************************************************************************
+* Service server (set trajectory using kinematic orientation value)
+*******************************************************************************/
+void goalJointSpacePathToKinematicsOrientationCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res)
+{
+  KinematicPose target_pose;
+
+  Eigen::Quaterniond q(req.kinematics_pose.pose.orientation.w,
+                       req.kinematics_pose.pose.orientation.x,
+                       req.kinematics_pose.pose.orientation.y,
+                       req.kinematics_pose.pose.orientation.z);
+  target_pose.orientation = math::convertQuaternionToRotationMatrix(q);
+
+  open_manipulator.makeJointTrajectory(req.end_effector_name, target_pose, req.path_time);
 
   res.is_planned = true;
 }
@@ -121,9 +154,9 @@ void goalTaskSpacePathCallback(const SetKinematicsPose::Request & req, SetKinema
                        req.kinematics_pose.pose.orientation.x,
                        req.kinematics_pose.pose.orientation.y,
                        req.kinematics_pose.pose.orientation.z);
-  target_pose.orientation = RM_MATH::convertQuaternionToRotation(q);
+  target_pose.orientation = math::convertQuaternionToRotationMatrix(q);
 
-  open_manipulator.taskTrajectoryMove(req.end_effector_name, target_pose, req.path_time);
+  open_manipulator.makeTaskTrajectory(req.end_effector_name, target_pose, req.path_time);
 
   res.is_planned = true;
 }
@@ -138,7 +171,7 @@ void goalTaskSpacePathPositionOnlyCallback(const SetKinematicsPose::Request & re
   position[1] = req.kinematics_pose.pose.position.y;
   position[2] = req.kinematics_pose.pose.position.z;
 
-  open_manipulator.taskTrajectoryMove(req.end_effector_name, position, req.path_time);
+  open_manipulator.makeTaskTrajectory(req.end_effector_name, position, req.path_time);
 
   res.is_planned = true;
 }
@@ -152,9 +185,9 @@ void goalTaskSpacePathOrientationOnlyCallback(const SetKinematicsPose::Request &
                         req.kinematics_pose.pose.orientation.x,
                         req.kinematics_pose.pose.orientation.y,
                         req.kinematics_pose.pose.orientation.z);
-  Eigen::Matrix3d orientation = RM_MATH::convertQuaternionToRotation(q);
+  Eigen::Matrix3d orientation = math::convertQuaternionToRotationMatrix(q);
 
-  open_manipulator.taskTrajectoryMove(req.end_effector_name, orientation, req.path_time);
+  open_manipulator.makeTaskTrajectory(req.end_effector_name, orientation, req.path_time);
 
   res.is_planned = true;
 }
@@ -168,7 +201,7 @@ void goalJointSpacePathFromPresentCallback(const SetJointPosition::Request & req
   for(int i = 0; i < req.joint_position.joint_name_length; i ++)
     target_angle.push_back(req.joint_position.position[i]);
 
-  open_manipulator.jointTrajectoryMoveFromPresentPosition(target_angle, req.path_time);
+  open_manipulator.makeJointTrajectoryFromPresentPosition(target_angle, req.path_time);
 
   res.is_planned = true;
 }
@@ -187,9 +220,9 @@ void goalTaskSpacePathFromPresentCallback(const SetKinematicsPose::Request & req
                        req.kinematics_pose.pose.orientation.x,
                        req.kinematics_pose.pose.orientation.y,
                        req.kinematics_pose.pose.orientation.z);
-  target_pose.orientation = RM_MATH::convertQuaternionToRotation(q);
+  target_pose.orientation = math::convertQuaternionToRotationMatrix(q);
 
-  open_manipulator.taskTrajectoryMoveFromPresentPose(req.planning_group, target_pose, req.path_time);
+  open_manipulator.makeTaskTrajectoryFromPresentPose(req.planning_group, target_pose, req.path_time);
 
   res.is_planned = true;
 }
@@ -204,7 +237,7 @@ void goalTaskSpacePathFromPresentPositionOnlyCallback(const SetKinematicsPose::R
   position[1] = req.kinematics_pose.pose.position.y;
   position[2] = req.kinematics_pose.pose.position.z;
 
-  open_manipulator.taskTrajectoryMoveFromPresentPose(req.planning_group, position, req.path_time);
+  open_manipulator.makeTaskTrajectoryFromPresentPose(req.planning_group, position, req.path_time);
 
   res.is_planned = true;
 }
@@ -218,9 +251,9 @@ void goalTaskSpacePathFromPresentOrientationOnlyCallback(const SetKinematicsPose
                         req.kinematics_pose.pose.orientation.x,
                         req.kinematics_pose.pose.orientation.y,
                         req.kinematics_pose.pose.orientation.z);
-  Eigen::Matrix3d orientation = RM_MATH::convertQuaternionToRotation(q);
+  Eigen::Matrix3d orientation = math::convertQuaternionToRotationMatrix(q);
 
-  open_manipulator.taskTrajectoryMoveFromPresentPose(req.planning_group, orientation, req.path_time);
+  open_manipulator.makeTaskTrajectoryFromPresentPose(req.planning_group, orientation, req.path_time);
 
   res.is_planned = true;
 }
@@ -232,7 +265,7 @@ void goalToolControlCallback(const SetJointPosition::Request & req, SetJointPosi
 {
   for(int i = 0; i < req.joint_position.joint_name_length; i ++)
   {
-    open_manipulator.toolMove(req.joint_position.joint_name[i], req.joint_position.position[i]);
+    open_manipulator.makeToolTrajectory(req.joint_position.joint_name[i], req.joint_position.position[i]);
   }
 
   res.is_planned = true;
@@ -244,9 +277,9 @@ void goalToolControlCallback(const SetJointPosition::Request & req, SetJointPosi
 void setActuatorStateCallback(const SetActuatorState::Request & req, SetActuatorState::Response & res)
 {
   if(req.set_actuator_state == true) // torque on
-    open_manipulator.allActuatorEnable();
+    open_manipulator.enableAllActuator();
   else // torque off
-    open_manipulator.allActuatorDisable();
+    open_manipulator.disableAllActuator();
 
   res.is_planned = true;
 }
@@ -266,17 +299,17 @@ void goalDrawingTrajectoryCallBack(const SetDrawingTrajectory::Request & req, Se
     draw_circle_arg[2] = req.param[2];  // start angle position (rad)
     void* p_draw_circle_arg = &draw_circle_arg;
 
-    open_manipulator.customTrajectoryMove(CUSTOM_TRAJECTORY_CIRCLE, req.end_effector_name, p_draw_circle_arg, req.path_time);
+    open_manipulator.makeCustomTrajectory(CUSTOM_TRAJECTORY_CIRCLE, req.end_effector_name, p_draw_circle_arg, req.path_time);
   }
   else if(trajectory_name == "line")
   {
-    TaskWayPoint draw_line_arg;
-    draw_line_arg.kinematic.position(0) = req.param[0];
-    draw_line_arg.kinematic.position(1) = req.param[1];
-    draw_line_arg.kinematic.position(2) = req.param[2];
+    TaskWaypoint draw_line_arg;
+    draw_line_arg.kinematic.position(0) = req.param[0]; // x axis (m)
+    draw_line_arg.kinematic.position(1) = req.param[1]; // y axis (m)
+    draw_line_arg.kinematic.position(2) = req.param[2]; // z axis (m)
     void *p_draw_line_arg = &draw_line_arg;
 
-    open_manipulator.customTrajectoryMove(CUSTOM_TRAJECTORY_LINE, req.end_effector_name, p_draw_line_arg, req.path_time);
+    open_manipulator.makeCustomTrajectory(CUSTOM_TRAJECTORY_LINE, req.end_effector_name, p_draw_line_arg, req.path_time);
   }
   else if(trajectory_name == "rhombus")
   {
@@ -286,7 +319,7 @@ void goalDrawingTrajectoryCallBack(const SetDrawingTrajectory::Request & req, Se
     draw_rhombus_arg[2] = req.param[2];  // start angle position (rad)
     void* p_draw_rhombus_arg = &draw_rhombus_arg;
 
-    open_manipulator.customTrajectoryMove(CUSTOM_TRAJECTORY_RHOMBUS, req.end_effector_name, p_draw_rhombus_arg, req.path_time);
+    open_manipulator.makeCustomTrajectory(CUSTOM_TRAJECTORY_RHOMBUS, req.end_effector_name, p_draw_rhombus_arg, req.path_time);
   }
   else if(trajectory_name == "heart")
   {
@@ -296,7 +329,7 @@ void goalDrawingTrajectoryCallBack(const SetDrawingTrajectory::Request & req, Se
     draw_heart_arg[2] = req.param[2];  // start angle position (rad)
     void* p_draw_heart_arg = &draw_heart_arg;
 
-    open_manipulator.customTrajectoryMove(CUSTOM_TRAJECTORY_HEART, req.end_effector_name, p_draw_heart_arg, req.path_time);
+    open_manipulator.makeCustomTrajectory(CUSTOM_TRAJECTORY_HEART, req.end_effector_name, p_draw_heart_arg, req.path_time);
   }
   res.is_planned = true;
 }
@@ -358,7 +391,7 @@ void publishKinematicPose(void)
   kinematic_pose_msg.pose.position.x = pose.position[0];
   kinematic_pose_msg.pose.position.y = pose.position[1];
   kinematic_pose_msg.pose.position.z = pose.position[2];
-  Eigen::Quaterniond orientation = RM_MATH::convertRotationToQuaternion(pose.orientation);
+  Eigen::Quaterniond orientation = math::convertRotationMatrixToQuaternion(pose.orientation);
   kinematic_pose_msg.pose.orientation.w = orientation.w();
   kinematic_pose_msg.pose.orientation.x = orientation.x();
   kinematic_pose_msg.pose.orientation.y = orientation.y();
@@ -367,19 +400,19 @@ void publishKinematicPose(void)
   kinematic_pose_pub.publish(&kinematic_pose_msg);
 }
 /*******************************************************************************
-* Publish msgs (openmanipulator state)
+* Publish msgs (openmanipulator states)
 *******************************************************************************/
-void publishOpenManipulatorState(void)
+void publishOpenManipulatorStates(void)
 {
-  if(open_manipulator.isMoving())
-    open_manipulator_state_msg.open_manipulator_moving_state = open_manipulator_state_msg.IS_MOVING;
+  if(open_manipulator.getMovingState())
+    open_manipulator_states_msg.open_manipulator_moving_state = open_manipulator_states_msg.IS_MOVING;
   else
-    open_manipulator_state_msg.open_manipulator_moving_state = open_manipulator_state_msg.STOPPED;
+    open_manipulator_states_msg.open_manipulator_moving_state = open_manipulator_states_msg.STOPPED;
 
-  if(open_manipulator.isEnabled(JOINT_DYNAMIXEL))
-    open_manipulator_state_msg.open_manipulator_actuator_state = open_manipulator_state_msg.ACTUATOR_ENABLED;
+  if(open_manipulator.getActuatorEnabledState(JOINT_DYNAMIXEL))
+    open_manipulator_states_msg.open_manipulator_actuator_state = open_manipulator_states_msg.ACTUATOR_ENABLED;
   else
-    open_manipulator_state_msg.open_manipulator_actuator_state = open_manipulator_state_msg.ACTUATOR_DISABLED;
+    open_manipulator_states_msg.open_manipulator_actuator_state = open_manipulator_states_msg.ACTUATOR_DISABLED;
 
-  open_manipulator_state_pub.publish(&open_manipulator_state_msg);
+  open_manipulator_states_pub.publish(&open_manipulator_states_msg);
 }

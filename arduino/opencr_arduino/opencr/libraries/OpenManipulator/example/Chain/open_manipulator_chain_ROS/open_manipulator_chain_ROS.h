@@ -38,7 +38,7 @@ using open_manipulator_msgs::SetKinematicsPose;
 using open_manipulator_msgs::SetActuatorState;
 using open_manipulator_msgs::SetDrawingTrajectory;
 
-OPEN_MANIPULATOR open_manipulator;
+OpenManipulator open_manipulator;
 double present_time = 0.0;
 double previous_time = 0.0;
 double previous_time_pub = 0.0;
@@ -119,7 +119,7 @@ open_manipulator_msgs::KinematicsPose kinematic_pose_msg;
 ros::Publisher kinematic_pose_pub("open_manipulator/gripper/kinematics_pose", &kinematic_pose_msg);
 
 void publishOpenManipulatorStates(void);
-open_manipulator_msgs::OpenManipulatorState open_manipulator_state_msg;
-ros::Publisher open_manipulator_state_pub("open_manipulator/states", &open_manipulator_state_msg);
+open_manipulator_msgs::OpenManipulatorState open_manipulator_states_msg; 
+ros::Publisher open_manipulator_states_pub("open_manipulator/states", &open_manipulator_states_msg);
 
 #endif
