@@ -16,24 +16,26 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
-#include "OpenManipulatorVacuum.h"
-#include "OpenManipulatorVacuumMotion.h"
-#include "Processing.h"
+#include "open_manipulator_vacuum.h"
+#include "open_manipulator_vacuum_motion.h"
+#include "processing.h"
 
-OPEN_MANIPULATOR_VACUUM open_manipulator; 
+OpenManipulatorVacuum open_manipulator;
+double control_time = 0.010f;
 double present_time = 0.0;
 double previous_time = 0.0;
+bool platform_state = true;
 
 void setup()
 {
   Serial.begin(57600);
   DEBUG.begin(57600);
 
-  connectProcessing();
+  connectProcessing(platform_state);
   switchInit();
   
-  open_manipulator.initManipulator(true);
-  RM_LOG::PRINT("OpenManipulator Debugging Port");
+  open_manipulator.initOpenManipulator(platform_state);
+  log::println("OpenManipulatorVacuum Debugging Port");
 }
 
 void loop()
@@ -42,10 +44,11 @@ void loop()
   getData(100);
   switchRead();
   playMotion(&open_manipulator);
+  playProcessingMotion(&open_manipulator);
 
-  if(present_time-previous_time >= CONTROL_TIME)
+  if(present_time-previous_time >= control_time)
   {
-    open_manipulator.openManipulatorProcess(millis()/1000.0);
+    open_manipulator.processOpenManipulator(millis()/1000.0);
     previous_time = (float)(millis()/1000.0f);
     sendValueToProcessing(&open_manipulator);
   }
@@ -56,19 +59,19 @@ void getData(uint32_t wait_time)
   static uint8_t state = 0;
   static uint32_t tick = 0;
 
-  bool processing_flag = false;
+  bool processing_state = false;
   String get_processing_data = "";
 
   if (availableProcessing())
   {
     get_processing_data = readProcessingData();
-    processing_flag = true;
+    processing_state = true;
   }
 
   switch (state)
   {
     case 0:
-      if (processing_flag)
+      if (processing_state)
       {
         fromProcessing(&open_manipulator, get_processing_data);
         tick = millis();
