@@ -57,7 +57,7 @@ void fromRC100(OpenManipulator* open_manipulator, uint16_t data)
   else if (data & RC100_BTN_2)
   {
     grip_value += 0.0020;
-    if (grip_value >= 0.01f)
+    if (grip_value > 0.01f)
       grip_value = 0.01f;
 
     open_manipulator->makeToolTrajectory("gripper", grip_value);
@@ -65,7 +65,7 @@ void fromRC100(OpenManipulator* open_manipulator, uint16_t data)
   else if (data & RC100_BTN_4)
   {
     grip_value -= 0.002;
-    if (grip_value <= -0.01f)
+    if (grip_value < -0.01f)
       grip_value = -0.01f;
 
     open_manipulator->makeToolTrajectory("gripper", grip_value);

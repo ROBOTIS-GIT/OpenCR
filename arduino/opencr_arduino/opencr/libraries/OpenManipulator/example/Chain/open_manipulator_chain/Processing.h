@@ -23,23 +23,23 @@
 
 #define DXL_SIZE 5
 
-typedef struct _MotionWayPoint
+typedef struct _MotionWaypoint
 {
   std::vector<double> angle;
   double path_time;
   double gripper_value;
-} MotionWayPoint;
+} MotionWaypoint;
 
-std::vector<MotionWayPoint> motion_way_point_buf;
-bool processing_motion_flag = false;
+std::vector<MotionWaypoint> motion_way_point_buf;
+bool processing_motion_state = false;
 char hand_motion_cnt = 0;
-bool hand_motion_repeat_flag = false;
-bool platform_flag_processing = false;
+bool hand_motion_repeat_state = false;
+bool platform_state_processing = false;
 String global_cmd[50];
 
 void connectProcessing(bool platform)
 { 
-  platform_flag_processing = platform;
+  platform_state_processing = platform;
   for (int i = 0; i < DXL_SIZE; i++)
   {
     Serial.print(0.0);
@@ -95,7 +95,7 @@ String* parseDataFromProcessing(String get)
   return global_cmd;
 }
 
-void sendAngle2Processing(JointWaypoint joint_states_vector)
+void sendAngleToProcessing(JointWaypoint joint_states_vector)
 {
   Serial.print("angle");
   for (int i = 0; i < (int)joint_states_vector.size(); i++)
@@ -106,7 +106,7 @@ void sendAngle2Processing(JointWaypoint joint_states_vector)
   Serial.print("\n");
 }
 
-void sendToolData2Processing(ToolValue value)
+void sendToolDataToProcessing(ToolValue value)
 {
   Serial.print("tool");
   Serial.print(",");
@@ -116,8 +116,8 @@ void sendToolData2Processing(ToolValue value)
 
 void sendValueToProcessing(OpenManipulator *open_manipulator)
 {
-  sendAngle2Processing(open_manipulator->getAllActiveJointValue());
-  sendToolData2Processing(open_manipulator->getToolValue("gripper"));
+  sendAngleToProcessing(open_manipulator->getAllActiveJointValue());
+  sendToolDataToProcessing(open_manipulator->getToolValue("gripper"));
 }
 
 void fromProcessing(OpenManipulator *open_manipulator, String data)
@@ -128,7 +128,7 @@ void fromProcessing(OpenManipulator *open_manipulator, String data)
   {
     if (cmd[1] == "ready")
     {
-      if(platform_flag_processing)
+      if(platform_state_processing)
       {
         open_manipulator->enableAllActuator();
         sendValueToProcessing(open_manipulator);
@@ -136,7 +136,7 @@ void fromProcessing(OpenManipulator *open_manipulator, String data)
     }
     else if (cmd[1] == "end")
     {
-      if(platform_flag_processing)
+      if(platform_state_processing)
       {
         open_manipulator->disableAllActuator();
       }
@@ -146,7 +146,6 @@ void fromProcessing(OpenManipulator *open_manipulator, String data)
   else if (cmd[0] == "joint")
   {
     std::vector<double> goal_position;
-
     for (uint8_t index = 0; index < DXL_SIZE; index++)
     {
       goal_position.push_back((double)cmd[index + 1].toFloat());
@@ -160,9 +159,9 @@ void fromProcessing(OpenManipulator *open_manipulator, String data)
   else if (cmd[0] == "grip")
   {
     if (cmd[1] == "on")
-      open_manipulator->makeToolTrajectory("gripper", -0.01);
+      open_manipulator->makeToolTrajectory("gripper", -0.009);
     else if (cmd[1] == "off")
-      open_manipulator->makeToolTrajectory("gripper", 0.01);
+      open_manipulator->makeToolTrajectory("gripper", 0.009);
   }
   ////////// task space control tab
   else if (cmd[0] == "task")
@@ -184,7 +183,7 @@ void fromProcessing(OpenManipulator *open_manipulator, String data)
   }
   else if (cmd[0] == "torque")
   {
-    if(platform_flag_processing)
+    if(platform_state_processing)
     {
       if (cmd[1] == "on")
         open_manipulator->enableAllJointActuator();
@@ -197,13 +196,13 @@ void fromProcessing(OpenManipulator *open_manipulator, String data)
   {
     if (cmd[1] == "clear")  // motion clear
     {
-      processing_motion_flag = false;
+      processing_motion_state = false;
       motion_way_point_buf.clear();
       hand_motion_cnt = 0;
     }
     else if (cmd[1] == "pose")  // save pose
     {
-      MotionWayPoint read_value;
+      MotionWaypoint read_value;
       JointWaypoint present_states = open_manipulator->getAllActiveJointValue();
       for(uint32_t i = 0; i < present_states.size(); i ++)
         read_value.angle.push_back(present_states.at(i).position);  
@@ -214,27 +213,27 @@ void fromProcessing(OpenManipulator *open_manipulator, String data)
     }
     else if (cmd[1] == "on")  // save gripper on
     {
-      open_manipulator->makeToolTrajectory("gripper", -0.01);
+      open_manipulator->makeToolTrajectory("gripper", -0.009);
     }
     else if (cmd[1] == "off")  // save gripper off
     {
-      open_manipulator->makeToolTrajectory("gripper", 0.01);
+      open_manipulator->makeToolTrajectory("gripper", 0.009);
     }
   }
   else if (cmd[0] == "hand")
   {
     if (cmd[1] == "once") // play motion (once)
     {
-      processing_motion_flag = true;
+      processing_motion_state = true;
     }
     else if (cmd[1] == "repeat") // play motion (repeat)
     {
-      hand_motion_repeat_flag = true;
+      hand_motion_repeat_state = true;
     }
     else if (cmd[1] == "stop") // play motion (stop)
     {
-      hand_motion_repeat_flag = false;
-      processing_motion_flag = false;
+      hand_motion_repeat_state = false;
+      processing_motion_state = false;
       hand_motion_cnt = 0;
     }
   }
@@ -264,7 +263,7 @@ void fromProcessing(OpenManipulator *open_manipulator, String data)
 
 void playProcessingMotion(OpenManipulator *open_manipulator)
 {
-  if(!open_manipulator->getMovingState() && processing_motion_flag)
+  if(!open_manipulator->getMovingState() && processing_motion_state)
   {
     if(motion_way_point_buf.size() == 0)
       return;
@@ -275,8 +274,8 @@ void playProcessingMotion(OpenManipulator *open_manipulator)
     if(hand_motion_cnt >= motion_way_point_buf.size())
     {
       hand_motion_cnt = 0;
-      if(!hand_motion_repeat_flag)
-        processing_motion_flag = false;
+      if(!hand_motion_repeat_state)
+        processing_motion_state = false;
     }
   }
 }

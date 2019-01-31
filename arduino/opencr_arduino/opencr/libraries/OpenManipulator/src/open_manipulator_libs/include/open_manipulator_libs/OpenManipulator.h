@@ -32,11 +32,9 @@
 #define JOINT_DYNAMIXEL "joint_dxl"
 #define TOOL_DYNAMIXEL  "tool_dxl"
 
-#define X_AXIS robotis_manipulator_math::vector3(1.0, 0.0, 0.0)
-#define Y_AXIS robotis_manipulator_math::vector3(0.0, 1.0, 0.0)
-#define Z_AXIS robotis_manipulator_math::vector3(0.0, 0.0, 1.0)
-
-
+#define X_AXIS robotis_manipulator::math::vector3(1.0, 0.0, 0.0)
+#define Y_AXIS robotis_manipulator::math::vector3(0.0, 1.0, 0.0)
+#define Z_AXIS robotis_manipulator::math::vector3(0.0, 0.0, 1.0)
 
 class OpenManipulator : public robotis_manipulator::RobotisManipulator
 {
@@ -51,8 +49,8 @@ public:
   OpenManipulator();
   virtual ~OpenManipulator();
 
-  void initManipulator(bool using_actual_robot_state, STRING usb_port = "/dev/ttyUSB0", STRING baud_rate = "1000000", float control_loop_time = 0.010);
-  void openManipulatorProcess(double present_time);
+  void initOpenManipulator(bool using_actual_robot_state, STRING usb_port = "/dev/ttyUSB0", STRING baud_rate = "1000000", float control_loop_time = 0.010);
+  void processOpenManipulator(double present_time);
 };
 
 #endif // OPEN_MANIPULTOR_H_

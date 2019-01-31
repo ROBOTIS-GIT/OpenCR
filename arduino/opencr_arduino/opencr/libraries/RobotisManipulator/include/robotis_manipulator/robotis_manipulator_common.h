@@ -180,7 +180,7 @@ private:
   std::map<Name, Component> component_;
 
 public:
-  Manipulator():dof_(0){};
+  Manipulator();
   ~Manipulator() {}
 
   /*****************************************************************************

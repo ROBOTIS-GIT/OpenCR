@@ -21,21 +21,21 @@
 
 #include <RobotisManipulator.h>
 
-using namespace ROBOTIS_MANIPULATOR;
+using namespace robotis_manipulator;
 using namespace Eigen;
 
-namespace OPEN_MANIPULATOR_PEN_DRAWING
+namespace open_manipulator_pen_drawing
 {
 //-------------------- Alphabet --------------------//
 
-class Alphabet : public ROBOTIS_MANIPULATOR::CustomTaskTrajectory
+class Alphabet : public CustomTaskTrajectory
 {
 private:
-  ROBOTIS_MANIPULATOR::MinimumJerk path_generator_;
+  MinimumJerk path_generator_;
   VectorXd coefficient_;
 
-  TaskWayPoint start_pose_;
-  TaskWayPoint goal_pose_;
+  TaskWaypoint start_pose_;
+  TaskWaypoint goal_pose_;
 
   char alphabet_;
   double move_time_;
@@ -45,23 +45,23 @@ public:
   Alphabet();
   virtual ~Alphabet();
 
-  void initAlphabet(double move_time, TaskWayPoint start, char alphabet, char scale);
-  TaskWayPoint drawAlphabet(double time_var);
-  TaskWayPoint drawing_B(double t);
-  TaskWayPoint drawing_R(double t);
-  TaskWayPoint drawing_C(double t);
-  TaskWayPoint drawing_O(double t);
-  TaskWayPoint drawing_T(double t);
-  TaskWayPoint drawing_I(double t);
-  TaskWayPoint drawing_S(double t);
-  TaskWayPoint drawing_MM(double t);
+  void initAlphabet(double move_time, TaskWaypoint start, char alphabet, char scale);
+  TaskWaypoint drawAlphabet(double time_var);
+  TaskWaypoint drawing_B(double t);
+  TaskWaypoint drawing_R(double t);
+  TaskWaypoint drawing_C(double t);
+  TaskWaypoint drawing_O(double t);
+  TaskWaypoint drawing_T(double t);
+  TaskWaypoint drawing_I(double t);
+  TaskWaypoint drawing_S(double t);
+  TaskWaypoint drawing_MM(double t);
   
   virtual void setOption(const void *arg);
-  virtual void init(double move_time, TaskWayPoint start, const void *arg);
-  virtual TaskWayPoint getTaskWayPoint(double tick);
+  virtual void makeTaskTrajectory(double move_time, TaskWaypoint start, const void *arg);
+  virtual TaskWaypoint getTaskWaypoint(double tick);
 };
 
-} // namespace OPEN_MANIPULATOR_PEN_DRAWING
+} // namespace open_manipulator_pen_drawing
 #endif // OPEN_MANIPULATOR_PEN_DRAWING_H_
 
 

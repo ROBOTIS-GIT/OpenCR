@@ -34,6 +34,8 @@ void setup()
 
   nh.advertiseService(goal_joint_space_path_server);
   nh.advertiseService(goal_joint_space_path_to_kinematics_pose_server);
+  nh.advertiseService(goal_joint_space_path_to_kinematics_position_server);
+  nh.advertiseService(goal_joint_space_path_to_kinematics_orientation_server);
   nh.advertiseService(goal_task_space_path_server);
   nh.advertiseService(goal_task_space_path_position_only_server);
   nh.advertiseService(goal_task_space_path_orientation_only_server);
@@ -46,9 +48,9 @@ void setup()
   nh.advertiseService(goal_drawing_trajectory_server);
 
   // Initialize Open Manipulator.  
-  open_manipulator.initManipulator(true);
+  open_manipulator.initOpenManipulator(true);
 
-  RM_LOG::PRINT("OpenManipulator Debugging Port");
+  robotis_manipulator_log::println("OpenManipulator Debugging Port");
 }
 
 void loop()
@@ -58,14 +60,14 @@ void loop()
 
   if(present_time-previous_time >= control_time)
   {
-    open_manipulator.openManipulatorProcess(millis()/1000.0);
+    open_manipulator.processOpenManipulator(millis()/1000.0);
     previous_time = (float)(millis()/1000.0f);
   }
   if(present_time - previous_time_pub >= control_time*10)
   {
     publishJointStates();
     publishKinematicPose();
-    publishOpenManipulatorState();
+    publishOpenManipulatorStates();
     previous_time_pub = (float)(millis()/1000.0f);
   }
 }

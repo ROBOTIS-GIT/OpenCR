@@ -104,7 +104,7 @@ public:
   Manipulator *getManipulator();
 
   JointValue getJointValue(Name joint_name);
-  ToolValue getToolValue(Name tool_name);
+  JointValue getToolValue(Name tool_name);
   std::vector<JointValue> getAllActiveJointValue();
   std::vector<JointValue> getAllJointValue();
   std::vector<double> getAllToolPosition();

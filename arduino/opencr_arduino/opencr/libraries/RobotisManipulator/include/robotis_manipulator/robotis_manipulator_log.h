@@ -46,8 +46,10 @@
   typedef std::string STRING;
 #endif
 
-namespace robotis_manipulator_log
+namespace robotis_manipulator
 {
+namespace log{
+
   void print(STRING str, STRING color = "DEFAULT");
   void print(STRING str, double data, uint8_t decimal_point = 3, STRING color = "DEFAULT");
   void print(const char* str, STRING color = "DEFAULT");
@@ -163,6 +165,8 @@ namespace robotis_manipulator_log
     }
   #endif
   }
-}
+
+} //log
+} //robotis_manipulator
 
 #endif // ROBOTIS_MANIPULATOR_LOG_H

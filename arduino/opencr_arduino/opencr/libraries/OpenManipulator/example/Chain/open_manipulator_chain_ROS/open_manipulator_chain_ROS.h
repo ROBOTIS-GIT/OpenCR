@@ -59,6 +59,14 @@ void goalJointSpacePathToKinematicsPoseCallback(const SetKinematicsPose::Request
 ros::ServiceServer<SetKinematicsPose::Request, SetKinematicsPose::Response> goal_joint_space_path_to_kinematics_pose_server(
   "open_manipulator/goal_joint_space_path_to_kinematics_pose", &goalJointSpacePathToKinematicsPoseCallback);
 
+void goalJointSpacePathToKinematicsPositionCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res);
+ros::ServiceServer<SetKinematicsPose::Request, SetKinematicsPose::Response> goal_joint_space_path_to_kinematics_position_server(
+  "open_manipulator/goal_joint_space_path_to_kinematics_position", &goalJointSpacePathToKinematicsPositionCallback);
+
+void goalJointSpacePathToKinematicsOrientationCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res);
+ros::ServiceServer<SetKinematicsPose::Request, SetKinematicsPose::Response> goal_joint_space_path_to_kinematics_orientation_server(
+  "open_manipulator/goal_joint_space_path_to_kinematics_orientation", &goalJointSpacePathToKinematicsOrientationCallback);
+
 void goalTaskSpacePathCallback(const SetKinematicsPose::Request & req, SetKinematicsPose::Response & res);
 ros::ServiceServer<SetKinematicsPose::Request, SetKinematicsPose::Response> goal_task_space_path_server(
   "open_manipulator/goal_task_space_path", &goalTaskSpacePathCallback);
@@ -110,7 +118,7 @@ void publishKinematicPose(void);
 open_manipulator_msgs::KinematicsPose kinematic_pose_msg;
 ros::Publisher kinematic_pose_pub("open_manipulator/gripper/kinematics_pose", &kinematic_pose_msg);
 
-void publishOpenManipulatorState(void);
+void publishOpenManipulatorStates(void);
 open_manipulator_msgs::OpenManipulatorState open_manipulator_state_msg;
 ros::Publisher open_manipulator_state_pub("open_manipulator/states", &open_manipulator_state_msg);
 

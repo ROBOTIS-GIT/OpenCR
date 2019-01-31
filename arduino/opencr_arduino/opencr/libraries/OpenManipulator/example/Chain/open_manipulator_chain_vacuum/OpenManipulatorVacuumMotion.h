@@ -29,6 +29,7 @@ bool demo_motion_state = false;
 char demo_motion_cnt = 0;
 
 #define NUM_OF_MOTION 42
+#define NUM_OF_JOINT 4
 double demo_motion_way_point_buf[NUM_OF_MOTION][6] = 
 {
  // j1       j2       j3       j4       time    tool 
@@ -83,15 +84,15 @@ double demo_motion_way_point_buf[NUM_OF_MOTION][6] =
 };
 
 
-void playMotion(OPEN_MANIPULATOR_VACUUM *open_manipulator)
+void playMotion(OpenManipulatorVacuum *open_manipulator)
 {
-  if(!open_manipulator->isMoving() && demo_motion_state)
+  if(!open_manipulator->getMovingState() && demo_motion_state)
   {
     std::vector<double> joint_angle;
     for(int i = 0; i < NUM_OF_JOINT; i ++)
       joint_angle.push_back(demo_motion_way_point_buf[demo_motion_cnt][i]);
-    open_manipulator->jointTrajectoryMove(joint_angle, demo_motion_way_point_buf[demo_motion_cnt][4]); 
-    open_manipulator->toolMove("vacuum", demo_motion_way_point_buf[demo_motion_cnt][5]);
+    open_manipulator->makeJointTrajectory(joint_angle, demo_motion_way_point_buf[demo_motion_cnt][4]); 
+    open_manipulator->makeToolTrajectory("vacuum", demo_motion_way_point_buf[demo_motion_cnt][5]);
     
     demo_motion_cnt ++;
     if(demo_motion_cnt > NUM_OF_MOTION)
@@ -101,7 +102,7 @@ void playMotion(OPEN_MANIPULATOR_VACUUM *open_manipulator)
       draw_circle_arg[1] = 2;    // revolution
       draw_circle_arg[2] = 0.0;  // start angle position (rad)
       void* p_draw_circle_arg = &draw_circle_arg;
-      open_manipulator->customTrajectoryMove(CUSTOM_TRAJECTORY_HEART, "vacuum", p_draw_circle_arg, 4.0);
+      open_manipulator->makeCustomTrajectory(CUSTOM_TRAJECTORY_HEART, "vacuum", p_draw_circle_arg, 4.0);
 
       demo_motion_cnt = 0;
       demo_motion_state = false;

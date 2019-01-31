@@ -24,13 +24,13 @@
 #define BDPIN_RELAY         8
 #define BDPIN_PUMP_MOTOR    12
 
-namespace ACTUATOR
+namespace actuator
 {
-class GripperVacuum : public ROBOTIS_MANIPULATOR::ToolActuator
+class GripperVacuum : public robotis_manipulator::ToolActuator
 {
  private:
   int8_t actuator_id_;
-  Actuator tool_value_;
+  ActuatorValue tool_value_;
 
  public:
   GripperVacuum() {}
@@ -52,7 +52,7 @@ class GripperVacuum : public ROBOTIS_MANIPULATOR::ToolActuator
   virtual void enable(){}
   virtual void disable(){}
 
-  virtual bool sendToolActuatorValue(Actuator value)
+  virtual bool sendToolActuatorValue(ActuatorValue value)
   {
     if(value.position == 0.0)
     {
@@ -68,7 +68,7 @@ class GripperVacuum : public ROBOTIS_MANIPULATOR::ToolActuator
     }
     return true;
   }
-  virtual Actuator receiveToolActuatorValue()
+  virtual ActuatorValue receiveToolActuatorValue()
   {
     return tool_value_;
   }
@@ -76,7 +76,7 @@ class GripperVacuum : public ROBOTIS_MANIPULATOR::ToolActuator
 ////////////////////////////////////////////////////////////////
 };
 
-} // namespace ACTUATOR
+} // namespace actuator
 #endif // ACTUATOR_H_
 
 

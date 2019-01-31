@@ -18,12 +18,12 @@
 
 #include "OpenManipulatorPenDrawing.h"
 
-using namespace OPEN_MANIPULATOR_PEN_DRAWING;
+using namespace open_manipulator_pen_drawing;
 
 Alphabet::Alphabet() {}
 Alphabet::~Alphabet() {}
 
-void Alphabet::initAlphabet(double move_time, TaskWayPoint start, char alphabet, char scale)
+void Alphabet::initAlphabet(double move_time, TaskWaypoint start, char alphabet, char scale)
 {
   start_pose_ = start;
   alphabet_ = alphabet;
@@ -49,7 +49,7 @@ void Alphabet::initAlphabet(double move_time, TaskWayPoint start, char alphabet,
     drawingGoal.position = 55.75; 
     scale_ *= 0.2;
   }
-  else                  drawingGoal.position = 2.0; 
+  else                      drawingGoal.position = 2.0; 
 
   drawingGoal.velocity = 0.0;
   drawingGoal.acceleration = 0.0;
@@ -59,7 +59,7 @@ void Alphabet::initAlphabet(double move_time, TaskWayPoint start, char alphabet,
   coefficient_ = path_generator_.getCoefficient();
 }
 
-TaskWayPoint Alphabet::drawAlphabet(double time_var)
+TaskWaypoint Alphabet::drawAlphabet(double time_var)
 {
   // get time variable
   double get_time_var = 0.0;
@@ -83,17 +83,17 @@ TaskWayPoint Alphabet::drawAlphabet(double time_var)
 }
 
 void Alphabet::setOption(const void *arg){}
-void Alphabet::init(double move_time, TaskWayPoint start, const void *arg)
+void Alphabet::makeTaskTrajectory(double move_time, TaskWaypoint start, const void *arg)
 {
   char *c_arg = (char *)arg;
   initAlphabet(move_time, start, c_arg[0], c_arg[1]);
 }
-TaskWayPoint Alphabet::getTaskWayPoint(double tick){  return drawAlphabet(tick); }
+TaskWaypoint Alphabet::getTaskWaypoint(double tick){  return drawAlphabet(tick); }
 
-TaskWayPoint Alphabet::drawing_B(double t)
+TaskWaypoint Alphabet::drawing_B(double t)
 {
   // set drawing trajectory
-  TaskWayPoint pose;
+  TaskWaypoint pose;
   double diff_pose[2] = {0.0, 0.0};
   
   if(t <= 2.0)
@@ -147,10 +147,10 @@ TaskWayPoint Alphabet::drawing_B(double t)
   return pose;
 }
 
-TaskWayPoint Alphabet::drawing_R(double t)
+TaskWaypoint Alphabet::drawing_R(double t)
 {
   // set drawing trajectory
-  TaskWayPoint pose;
+  TaskWaypoint pose;
   double diff_pose[2] = {0.0, 0.0};
 
   if(t <= 2.0)
@@ -192,10 +192,10 @@ TaskWayPoint Alphabet::drawing_R(double t)
   return pose;
 }
 
-TaskWayPoint Alphabet::drawing_C(double t)
+TaskWaypoint Alphabet::drawing_C(double t)
 {
   // set drawing trajectory
-  TaskWayPoint pose;
+  TaskWaypoint pose;
   double diff_pose[2] = {0.0, 0.0};
 
   double x = (t) * (9.0/4.0*PI/3.0);
@@ -218,10 +218,10 @@ TaskWayPoint Alphabet::drawing_C(double t)
 
   return pose;
 }
-TaskWayPoint Alphabet::drawing_O(double t)
+TaskWaypoint Alphabet::drawing_O(double t)
 {
   // set drawing trajectory
-  TaskWayPoint pose;
+  TaskWaypoint pose;
   double diff_pose[2] = {0.0, 0.0};
 
   double x = (t) * (6.28/2.0);
@@ -236,10 +236,10 @@ TaskWayPoint Alphabet::drawing_O(double t)
   return pose;
 }
 
-TaskWayPoint Alphabet::drawing_T(double t)
+TaskWaypoint Alphabet::drawing_T(double t)
 {
   // set drawing trajectory
-  TaskWayPoint pose;
+  TaskWaypoint pose;
   double diff_pose[2] = {0.0, 0.0};
 
   if(t <= 2.0)
@@ -269,10 +269,10 @@ TaskWayPoint Alphabet::drawing_T(double t)
   return pose;
 }
 
-TaskWayPoint Alphabet::drawing_I(double t)
+TaskWaypoint Alphabet::drawing_I(double t)
 {
   // set drawing trajectory
-  TaskWayPoint pose;
+  TaskWaypoint pose;
   double diff_pose[2] = {0.0, 0.0};
 
   if(t <= 2.0)
@@ -314,10 +314,10 @@ TaskWayPoint Alphabet::drawing_I(double t)
   return pose;
 }
 
-TaskWayPoint Alphabet::drawing_S(double t)
+TaskWaypoint Alphabet::drawing_S(double t)
 {
   // set drawing trajectory
-  TaskWayPoint pose;
+  TaskWaypoint pose;
   double diff_pose[2] = {0.0, 0.0};
 
   if(t <= 1.5)
@@ -359,10 +359,10 @@ TaskWayPoint Alphabet::drawing_S(double t)
   return pose;
 }
 
-TaskWayPoint Alphabet::drawing_MM(double t)
+TaskWaypoint Alphabet::drawing_MM(double t)
 {
   // set drawing trajectory
-  TaskWayPoint pose;
+  TaskWaypoint pose;
   double diff_pose[2] = {0.0, 0.0};
   
   if(t <= 1.134)

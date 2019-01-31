@@ -20,6 +20,7 @@
 
 using namespace robotis_manipulator;
 
+Manipulator::Manipulator():dof_(0){}
 
 /*****************************************************************************
 ** Add Function
@@ -140,96 +141,96 @@ void Manipulator::addComponentChild(Name my_name, Name child_name)
 
 void Manipulator::printManipulatorSetting()
 {
-  robotis_manipulator_log::println("----------<Manipulator Description>----------");
-  robotis_manipulator_log::println("<Degree of Freedom>\n", dof_);
-  robotis_manipulator_log::println("<Number of Components>\n", component_.size());
-  robotis_manipulator_log::println("");
-  robotis_manipulator_log::println("<World Configuration>");
-  robotis_manipulator_log::println(" [Name]");
-  robotis_manipulator_log::print(" -World Name : "); robotis_manipulator_log::println(STRING(world_.name));
-  robotis_manipulator_log::print(" -Child Name : "); robotis_manipulator_log::println(STRING(world_.child));
-  robotis_manipulator_log::println(" [Static Pose]");
-  robotis_manipulator_log::println(" -Position : ");
-  robotis_manipulator_log::print_vector(world_.pose.kinematic.position);
-  robotis_manipulator_log::println(" -Orientation : ");
-  robotis_manipulator_log::print_matrix(world_.pose.kinematic.orientation);
-  robotis_manipulator_log::println(" [Dynamic Pose]");
-  robotis_manipulator_log::println(" -Linear Velocity : ");
-  robotis_manipulator_log::print_vector(world_.pose.dynamic.linear.velocity);
-  robotis_manipulator_log::println(" -Linear acceleration : ");
-  robotis_manipulator_log::print_vector(world_.pose.dynamic.linear.acceleration);
-  robotis_manipulator_log::println(" -Angular Velocity : ");
-  robotis_manipulator_log::print_vector(world_.pose.dynamic.angular.velocity);
-  robotis_manipulator_log::println(" -Angular acceleration : ");
-  robotis_manipulator_log::print_vector(world_.pose.dynamic.angular.acceleration);
+  log::println("----------<Manipulator Description>----------");
+  log::println("<Degree of Freedom>\n", dof_);
+  log::println("<Number of Components>\n", component_.size());
+  log::println("");
+  log::println("<World Configuration>");
+  log::println(" [Name]");
+  log::print(" -World Name : "); log::println(STRING(world_.name));
+  log::print(" -Child Name : "); log::println(STRING(world_.child));
+  log::println(" [Static Pose]");
+  log::println(" -Position : ");
+  log::print_vector(world_.pose.kinematic.position);
+  log::println(" -Orientation : ");
+  log::print_matrix(world_.pose.kinematic.orientation);
+  log::println(" [Dynamic Pose]");
+  log::println(" -Linear Velocity : ");
+  log::print_vector(world_.pose.dynamic.linear.velocity);
+  log::println(" -Linear acceleration : ");
+  log::print_vector(world_.pose.dynamic.linear.acceleration);
+  log::println(" -Angular Velocity : ");
+  log::print_vector(world_.pose.dynamic.angular.velocity);
+  log::println(" -Angular acceleration : ");
+  log::print_vector(world_.pose.dynamic.angular.acceleration);
 
   std::vector<double> result_vector;
   std::map<Name, Component>::iterator it_component;
 
   for (it_component = component_.begin(); it_component != component_.end(); it_component++)
   {
-    robotis_manipulator_log::println("");
-    robotis_manipulator_log::println("<"); robotis_manipulator_log::print(STRING(it_component->first)); robotis_manipulator_log::print("Configuration>");
+    log::println("");
+    log::println("<"); log::print(STRING(it_component->first)); log::print("Configuration>");
     if(component_.at(it_component->first).component_type == ACTIVE_JOINT_COMPONENT)
-      robotis_manipulator_log::println(" [Component Type]\n  Active Joint");
+      log::println(" [Component Type]\n  Active Joint");
     else if(component_.at(it_component->first).component_type == PASSIVE_JOINT_COMPONENT)
-      robotis_manipulator_log::println(" [Component Type]\n  Passive Joint");
+      log::println(" [Component Type]\n  Passive Joint");
     else if(component_.at(it_component->first).component_type == TOOL_COMPONENT)
-      robotis_manipulator_log::println(" [Component Type]\n  Tool");
-    robotis_manipulator_log::println(" [Name]");
-    robotis_manipulator_log::print(" -Parent Name : "); robotis_manipulator_log::println(STRING(component_.at(it_component->first).name.parent));
+      log::println(" [Component Type]\n  Tool");
+    log::println(" [Name]");
+    log::print(" -Parent Name : "); log::println(STRING(component_.at(it_component->first).name.parent));
     for(uint32_t index = 0; index < component_.at(it_component->first).name.child.size(); index++)
     {
-      robotis_manipulator_log::print(" -Child Name",index+1,0);
-      robotis_manipulator_log::print(" : ");
-      robotis_manipulator_log::println(STRING(component_.at(it_component->first).name.child.at(index)));
+      log::print(" -Child Name",index+1,0);
+      log::print(" : ");
+      log::println(STRING(component_.at(it_component->first).name.child.at(index)));
     }
-    robotis_manipulator_log::println(" [Actuator]");
-    robotis_manipulator_log::print(" -Actuator Name : ");
-    robotis_manipulator_log::println(STRING(component_.at(it_component->first).actuator_name));
-    robotis_manipulator_log::print(" -ID : ");
-    robotis_manipulator_log::println("", component_.at(it_component->first).joint_constant.id,0);
-    robotis_manipulator_log::println(" -Joint Axis : ");
-    robotis_manipulator_log::print_vector(component_.at(it_component->first).joint_constant.axis);
-    robotis_manipulator_log::print(" -Coefficient : ");
-    robotis_manipulator_log::println("", component_.at(it_component->first).joint_constant.coefficient);
-    robotis_manipulator_log::println(" -Position Limit : ");
-    robotis_manipulator_log::print("    Maximum :", component_.at(it_component->first).joint_constant.position_limit.maximum);
-    robotis_manipulator_log::println(", Minimum :", component_.at(it_component->first).joint_constant.position_limit.minimum);
+    log::println(" [Actuator]");
+    log::print(" -Actuator Name : ");
+    log::println(STRING(component_.at(it_component->first).actuator_name));
+    log::print(" -ID : ");
+    log::println("", component_.at(it_component->first).joint_constant.id,0);
+    log::println(" -Joint Axis : ");
+    log::print_vector(component_.at(it_component->first).joint_constant.axis);
+    log::print(" -Coefficient : ");
+    log::println("", component_.at(it_component->first).joint_constant.coefficient);
+    log::println(" -Position Limit : ");
+    log::print("    Maximum :", component_.at(it_component->first).joint_constant.position_limit.maximum);
+    log::println(", Minimum :", component_.at(it_component->first).joint_constant.position_limit.minimum);
 
-    robotis_manipulator_log::println(" [Actuator Value]");
-    robotis_manipulator_log::println(" -Position : ", component_.at(it_component->first).joint_value.position);
-    robotis_manipulator_log::println(" -Velocity : ", component_.at(it_component->first).joint_value.velocity);
-    robotis_manipulator_log::println(" -Acceleration : ", component_.at(it_component->first).joint_value.acceleration);
-    robotis_manipulator_log::println(" -Effort : ", component_.at(it_component->first).joint_value.effort);
+    log::println(" [Actuator Value]");
+    log::println(" -Position : ", component_.at(it_component->first).joint_value.position);
+    log::println(" -Velocity : ", component_.at(it_component->first).joint_value.velocity);
+    log::println(" -Acceleration : ", component_.at(it_component->first).joint_value.acceleration);
+    log::println(" -Effort : ", component_.at(it_component->first).joint_value.effort);
 
-    robotis_manipulator_log::println(" [Constant]");
-    robotis_manipulator_log::println(" -Relative Position from parent component : ");
-    robotis_manipulator_log::print_vector(component_.at(it_component->first).relative.pose_from_parent.position);
-    robotis_manipulator_log::println(" -Relative Orientation from parent component : ");
-    robotis_manipulator_log::print_matrix(component_.at(it_component->first).relative.pose_from_parent.orientation);
-    robotis_manipulator_log::print(" -Mass : ");
-    robotis_manipulator_log::println("", component_.at(it_component->first).relative.inertia.mass);
-    robotis_manipulator_log::println(" -Inertia Tensor : ");
-    robotis_manipulator_log::print_matrix(component_.at(it_component->first).relative.inertia.inertia_tensor);
-    robotis_manipulator_log::println(" -Center of Mass : ");
-    robotis_manipulator_log::print_vector(component_.at(it_component->first).relative.inertia.center_of_mass);
+    log::println(" [Constant]");
+    log::println(" -Relative Position from parent component : ");
+    log::print_vector(component_.at(it_component->first).relative.pose_from_parent.position);
+    log::println(" -Relative Orientation from parent component : ");
+    log::print_matrix(component_.at(it_component->first).relative.pose_from_parent.orientation);
+    log::print(" -Mass : ");
+    log::println("", component_.at(it_component->first).relative.inertia.mass);
+    log::println(" -Inertia Tensor : ");
+    log::print_matrix(component_.at(it_component->first).relative.inertia.inertia_tensor);
+    log::println(" -Center of Mass : ");
+    log::print_vector(component_.at(it_component->first).relative.inertia.center_of_mass);
 
-    robotis_manipulator_log::println(" [Variable]");
-    robotis_manipulator_log::println(" -Position : ");
-    robotis_manipulator_log::print_vector(component_.at(it_component->first).pose_from_world.kinematic.position);
-    robotis_manipulator_log::println(" -Orientation : ");
-    robotis_manipulator_log::print_matrix(component_.at(it_component->first).pose_from_world.kinematic.orientation);
-    robotis_manipulator_log::println(" -Linear Velocity : ");
-    robotis_manipulator_log::print_vector(component_.at(it_component->first).pose_from_world.dynamic.linear.velocity);
-    robotis_manipulator_log::println(" -Linear acceleration : ");
-    robotis_manipulator_log::print_vector(component_.at(it_component->first).pose_from_world.dynamic.linear.acceleration);
-    robotis_manipulator_log::println(" -Angular Velocity : ");
-    robotis_manipulator_log::print_vector(component_.at(it_component->first).pose_from_world.dynamic.angular.velocity);
-    robotis_manipulator_log::println(" -Angular acceleration : ");
-    robotis_manipulator_log::print_vector(component_.at(it_component->first).pose_from_world.dynamic.angular.acceleration);
+    log::println(" [Variable]");
+    log::println(" -Position : ");
+    log::print_vector(component_.at(it_component->first).pose_from_world.kinematic.position);
+    log::println(" -Orientation : ");
+    log::print_matrix(component_.at(it_component->first).pose_from_world.kinematic.orientation);
+    log::println(" -Linear Velocity : ");
+    log::print_vector(component_.at(it_component->first).pose_from_world.dynamic.linear.velocity);
+    log::println(" -Linear acceleration : ");
+    log::print_vector(component_.at(it_component->first).pose_from_world.dynamic.linear.acceleration);
+    log::println(" -Angular Velocity : ");
+    log::print_vector(component_.at(it_component->first).pose_from_world.dynamic.angular.velocity);
+    log::println(" -Angular acceleration : ");
+    log::print_vector(component_.at(it_component->first).pose_from_world.dynamic.angular.acceleration);
   }
-  robotis_manipulator_log::println("---------------------------------------------");
+  log::println("---------------------------------------------");
 }
 
 
@@ -299,7 +300,7 @@ void Manipulator::setComponentPoseFromWorld(Name component_name, Pose pose_to_wo
   }
   else
   {
-    robotis_manipulator_log::error("[setComponentPoseFromWorld] Wrong name.");
+    log::error("[setComponentPoseFromWorld] Wrong name.");
   }
 }
 
@@ -311,7 +312,7 @@ void Manipulator::setComponentKinematicPoseFromWorld(Name component_name, Kinema
   }
   else
   {
-    robotis_manipulator_log::error("[setComponentKinematicPoseFromWorld] Wrong name.");
+    log::error("[setComponentKinematicPoseFromWorld] Wrong name.");
   }
 }
 
@@ -323,7 +324,7 @@ void Manipulator::setComponentPositionFromWorld(Name component_name, Eigen::Vect
   }
   else
   {
-    robotis_manipulator_log::error("[setComponentPositionFromWorld] Wrong name.");
+    log::error("[setComponentPositionFromWorld] Wrong name.");
   }
 }
 
@@ -335,7 +336,7 @@ void Manipulator::setComponentOrientationFromWorld(Name component_name, Eigen::M
   }
   else
   {
-    robotis_manipulator_log::error("[setComponentOrientationFromWorld] Wrong name.");
+    log::error("[setComponentOrientationFromWorld] Wrong name.");
   }
 }
 
@@ -347,7 +348,7 @@ void Manipulator::setComponentDynamicPoseFromWorld(Name component_name, DynamicP
   }
   else
   {
-    robotis_manipulator_log::error("[setComponentDynamicPoseFromWorld] Wrong name.");
+    log::error("[setComponentDynamicPoseFromWorld] Wrong name.");
   }
 }
 
