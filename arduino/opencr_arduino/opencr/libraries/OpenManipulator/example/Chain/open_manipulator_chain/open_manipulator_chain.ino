@@ -17,12 +17,14 @@
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
 #include <open_manipulator_libs.h>
-#include "Processing.h"
-#include "RemoteController.h"
+#include "processing.h"
+#include "remote_controller.h"
 
-OPEN_MANIPULATOR open_manipulator;
+OpenManipulator open_manipulator;
+double control_time = 0.010;
 double present_time = 0.0;
 double previous_time = 0.0;
+bool platform_state = true;
 
 void setup()
 {
@@ -31,23 +33,23 @@ void setup()
   // while (!Serial)
   // ;
 
-  connectProcessing();
+  connectProcessing(platform_state);
   connectRC100();
   
-  open_manipulator.initManipulator(true);
-  RM_LOG::PRINT("OpenManipulator Debugging Port");
+  open_manipulator.initOpenManipulator(platform_state);
+  log::println("OpenManipulator Debugging Port");
 }
 
 void loop()
 {
-  present_time = (float)(millis()/1000.0f);
+  present_time = millis()/1000.0;
   getData(100);
   playProcessingMotion(&open_manipulator);
 
-  if(present_time-previous_time >= CONTROL_TIME)
+  if(present_time-previous_time >= control_time)
   {
-    open_manipulator.openManipulatorProcess(millis()/1000.0);
-    previous_time = (float)(millis()/1000.0f);
+    open_manipulator.processOpenManipulator(millis()/1000.0);
+    previous_time = millis()/1000.0;
     sendValueToProcessing(&open_manipulator);
   }
 }
@@ -57,8 +59,8 @@ void getData(uint32_t wait_time)
   static uint8_t state = 0;
   static uint32_t tick = 0;
 
-  bool rc100_flag = false;
-  bool processing_flag = false;
+  bool rc100_state = false;
+  bool processing_state = false;
 
   uint16_t get_rc100_data = 0;
   String get_processing_data = "";
@@ -66,25 +68,25 @@ void getData(uint32_t wait_time)
   if (availableRC100())
   {
     get_rc100_data = readRC100Data();
-    rc100_flag = true;
+    rc100_state = true;
   }
 
   if (availableProcessing())
   {
     get_processing_data = readProcessingData();
-    processing_flag = true;
+    processing_state = true;
   }
 
   switch (state)
   {
     case 0:
-      if (rc100_flag)
+      if (rc100_state)
       {
         fromRC100(&open_manipulator, get_rc100_data);
         tick = millis();
         state = 1;
       }
-      else if (processing_flag)
+      else if (processing_state)
       {
         fromProcessing(&open_manipulator, get_processing_data);
         tick = millis();
@@ -104,4 +106,3 @@ void getData(uint32_t wait_time)
      break;
   }
 }
-

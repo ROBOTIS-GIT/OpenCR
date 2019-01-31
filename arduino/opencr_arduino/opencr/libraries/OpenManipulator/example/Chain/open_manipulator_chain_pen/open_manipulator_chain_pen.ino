@@ -16,24 +16,26 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
-#include "OpenManipulatorPen.h"
-#include "OpenManipulatorPenMotion.h"
-#include "Processing.h"
+#include "open_manipulator_pen.h"
+#include "open_manipulator_pen_motion.h"
+#include "processing.h"
 
-OPEN_MANIPULATOR_PEN open_manipulator;
+OpenManipulatorPen open_manipulator;
+double control_time = 0.010f;
 double present_time = 0.0;
 double previous_time = 0.0;
+bool platform_state = true;
 
 void setup()
 {
   Serial.begin(57600);
   DEBUG.begin(57600);
 
-  connectProcessing();
+  connectProcessing(platform_state);
   switchInit();
-  
-  open_manipulator.initManipulator(true);
-  RM_LOG::PRINT("OpenManipulator Debugging Port");
+
+  open_manipulator.initOpenManipulator(platform_state);
+  log::println("OpenManipulatorPen Debugging Port");
 }
 
 void loop()
@@ -41,13 +43,12 @@ void loop()
   present_time = (float)(millis()/1000.0f);
   getData(100);
   switchRead(&open_manipulator);
-  playMotion(&open_manipulator);
-  //RM_LOG::PRINT("x ", open_manipulator.getPose("pen").position(0));
-  //RM_LOG::PRINTLN(" y ", open_manipulator.getPose("pen").position(1));
+  playMotion(&open_manipulator);  
+  playProcessingMotion(&open_manipulator);
 
-  if(present_time-previous_time >= CONTROL_TIME)
+  if(present_time-previous_time >= control_time)
   {
-    open_manipulator.openManipulatorProcess(millis()/1000.0);
+    open_manipulator.processOpenManipulator(millis()/1000.0);
     previous_time = (float)(millis()/1000.0f);
     sendValueToProcessing(&open_manipulator);
   }
@@ -58,26 +59,25 @@ void getData(uint32_t wait_time)
   static uint8_t state = 0;
   static uint32_t tick = 0;
 
-  bool processing_flag = false;
+  bool processing_state = false;
   String get_processing_data = "";
 
   if (availableProcessing())
   {
     get_processing_data = readProcessingData();
-    processing_flag = true;
+    processing_state = true;
   }
 
   switch (state)
   {
     case 0:
-      if (processing_flag)
+      if (processing_state)
       {
         fromProcessing(&open_manipulator, get_processing_data);
         tick = millis();
         state = 1;
       }
      break;
-
     case 1:
       if ((millis() - tick) >= wait_time)
       {

@@ -16,10 +16,10 @@
 
 /* Authors: Hye-Jong KIM */
 
-#include "Link.h"
-#include "Processing.h"
-#include "Motion.h"
-#include "RemoteController.h"
+#include "link.h"
+#include "processing.h"
+#include "motion.h"
+#include "remote_controller.h"
 
 #define BDPIN_PUSH_SW_1         34
 #define BDPIN_PUSH_SW_2         35
@@ -27,7 +27,7 @@
 double present_time = 0.0;
 double previous_time = 0.0;
 
-OPEN_MANIPULATOR_LINK omlink;
+OpenManipulatorLink open_manipulator_link;
 
 void setup()
 {
@@ -40,8 +40,8 @@ void setup()
   connectRC100();
   switchInit();
 
-  omlink.initManipulator(true);
-  RM_LOG::PRINTLN("OpenManipulator Debugging Port");
+  open_manipulator_link.initManipulator(true, "/dev/ttyACM0", "1000000", 0.010f);
+  log::println("OpenManipulator Debugging Port");
 }
 
 void loop()
@@ -51,13 +51,13 @@ void loop()
   //get Date 
   getData(10);
   switchRead();
-  setMotion(&omlink);
+  setMotion(&open_manipulator_link);
 
   //Control
   if(present_time-previous_time>= ACTUATOR_CONTROL_TIME)
   {
-    omlink.Process((double)(millis()/1000.0));
-    sendAngle2Processing(omlink.getManipulator()->getAllActiveJointValue());
+    open_manipulator_link.Process((double)(millis()/1000.0));
+    sendAngle2Processing(open_manipulator_link.getManipulator()->getAllActiveJointValue());
     previous_time= (double)(millis()/1000.0);
   }
   
@@ -93,14 +93,14 @@ void getData(uint32_t wait_time)
     case 0:
       if (processing_flag)
       {
-        fromProcessing(&omlink, get_processing_data);
+        fromProcessing(&open_manipulator_link, get_processing_data);
 
         tick = millis();
         state = 1;
       }
       else if (rc100_flag)
       {
-        fromRC100(&omlink, get_rc100_data);
+        fromRC100(&open_manipulator_link, get_rc100_data);
 
         tick = millis();
         state = 1;
@@ -131,7 +131,7 @@ void switchRead()
 {
   if(digitalRead(BDPIN_PUSH_SW_1))
   {
-    motionStart(&omlink);
+    motionStart(&open_manipulator_link);
   }
   if(digitalRead(BDPIN_PUSH_SW_2))
   {
