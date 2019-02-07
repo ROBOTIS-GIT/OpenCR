@@ -81,7 +81,7 @@ void receiveDataFromRC100(Scara* scara)
         goal_position.push_back(0.0);
         goal_position.push_back(0.0);
 
-        scara->makeJointTrajectory(goal_position, 1.0);
+        scara->makeJointTrajectory(goal_position, -0.5);
       }
 
       // 

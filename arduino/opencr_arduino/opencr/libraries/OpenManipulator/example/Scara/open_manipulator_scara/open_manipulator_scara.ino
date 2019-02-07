@@ -61,7 +61,7 @@ void loop()
   /**
    */
   receiveDataFromProcessing(&scara); 
-  // sendDataToProcessing(&scara); 
+  sendDataToProcessing(&scara); 
 
 
   /**

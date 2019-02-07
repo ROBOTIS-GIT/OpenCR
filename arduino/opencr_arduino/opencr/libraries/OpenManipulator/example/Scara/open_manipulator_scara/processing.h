@@ -186,9 +186,9 @@ void receiveDataFromProcessing(Scara *scara)
       {
         // 
         if (cmd[1] == "y")
-          scara->makeToolTrajectory("tool", 1.0);
-        else if (cmd[1] == "n")
           scara->makeToolTrajectory("tool", 0.0);
+        else if (cmd[1] == "n")
+          scara->makeToolTrajectory("tool", -0.5);
 
         // Torque On/Off
         else if (cmd[1] == "on")
@@ -223,9 +223,9 @@ void receiveDataFromProcessing(Scara *scara)
       // Demo Control tab 
       else if (cmd[0] == "demo")
       {
-        if (cmd[1] == "y")
+        if (cmd[1] == "start")
           startDemo();
-        else if (cmd[1] == "n")
+        else if (cmd[1] == "stop")
           stopDemo(scara);
       }
 
