@@ -153,7 +153,7 @@ Manipulator *RobotisManipulator::getManipulator()
 
 JointValue RobotisManipulator::getJointValue(Name joint_name)
 {
-  return manipulator_,getJointValue(joint_name);
+  return manipulator_.getJointValue(joint_name);
 }
 
 JointValue RobotisManipulator::getToolValue(Name tool_name)
@@ -910,6 +910,11 @@ bool RobotisManipulator::checkJointLimit(std::vector<Name> component_name, std::
 /*****************************************************************************
 ** Trajectory Control Fuction
 *****************************************************************************/
+Trajectory *RobotisManipulator::getTrajectory()
+{
+  return &trajectory_;
+}
+
 void RobotisManipulator::makeJointTrajectoryFromPresentPosition(std::vector<double> delta_goal_joint_position, double move_time, std::vector<JointValue> present_joint_value)
 {
   if(present_joint_value.size() != 0)
