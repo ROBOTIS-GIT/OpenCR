@@ -19,7 +19,7 @@
 #ifndef PROCESSING_H_
 #define PROCESSING_H_
 
-#include <scara_libs.h>
+#include <planar_libs.h>
 #include "demo.h"
 
 /*****************************************************************************
@@ -55,29 +55,10 @@ void sendJointDataToProcessing(JointWaypoint joint_angle_vector)
   Serial.print("\n");
 }
 
-// Send tool data(on or off) to Processing 
-void sendToolDataToProcessing(bool onoff)
+// Send joint and tool values to Processing 
+void sendDataToProcessing(Planar *planar)
 {
-  Serial.print("tool");
-  Serial.print(",");
-  Serial.print(onoff);
-  Serial.print("\n");
-}
-
-// Send tool data(values) to Processing 
-void sendToolDataToProcessing(JointValue value)
-{
-  Serial.print("tool");
-  Serial.print(",");
-  Serial.print(value.position);
-  Serial.print("\n");
-}
-
-// Send joint and tool data(values) to Processing 
-void sendDataToProcessing(Scara *scara)
-{
-  sendJointDataToProcessing(scara->getAllActiveJointValue());
-  sendToolDataToProcessing(scara->getToolValue("tool"));
+  sendJointDataToProcessing(planar->getAllActiveJointValue());
 }
 
 /*****************************************************************************
@@ -120,9 +101,9 @@ String* parseProcessingData(String get)
 }
 
 // Receive data from Processing 
-void receiveDataFromProcessing(Scara *scara) 
+void receiveDataFromProcessing(Planar *planar) 
 {
-  if (!scara->getReceiveDataFlag())
+  if (!planar->getReceiveDataFlag())
   {
     if (Serial.available())
     {
@@ -135,17 +116,17 @@ void receiveDataFromProcessing(Scara *scara)
         // Torque On/Off
         if (cmd[1] == "on")
         {
-          if(scara->getUsingActualRobotState())
+          if(planar->getUsingActualRobotState())
           {
-            scara->enableAllActuator();
-            sendDataToProcessing(scara);
+            planar->enableAllActuator();
+            sendDataToProcessing(planar);
           }
         }
         else if (cmd[1] == "off")
         {
-          if(scara->getUsingActualRobotState())
+          if(planar->getUsingActualRobotState())
           {
-            scara->disableAllActuator();
+            planar->disableAllActuator();
           }
         }
       }
@@ -156,16 +137,16 @@ void receiveDataFromProcessing(Scara *scara)
         //
         if (cmd[1] == "on")
         {
-          if (scara->getUsingActualRobotState())    
+          if (planar->getUsingActualRobotState())    
           {
-            scara->enableAllJointActuator();
-            sendJointDataToProcessing(scara->getAllActiveJointValue());
+            planar->enableAllJointActuator();
+            sendJointDataToProcessing(planar->getAllActiveJointValue());
           }
         }
         else if (cmd[1] == "off")
         {
-          if (scara->getUsingActualRobotState())    
-            scara->disableAllJointActuator();
+          if (planar->getUsingActualRobotState())    
+            planar->disableAllJointActuator();
         }
 
         //
@@ -176,47 +157,21 @@ void receiveDataFromProcessing(Scara *scara)
           {
             goal_position.push_back((double)cmd[index + 1].toFloat());
           }
-          scara->makeJointTrajectory(goal_position, 1.0); 
+          planar->makeJointTrajectory(goal_position, 1.0); 
         }
-      }
-
-      // Tool control tab 
-      else if (cmd[0] == "tool")
-      {
-        // 
-        if (cmd[1] == "y")
-          scara->makeToolTrajectory("tool", 0.0);
-        else if (cmd[1] == "n")
-          scara->makeToolTrajectory("tool", -0.5);
-
-        // Torque On/Off
-        else if (cmd[1] == "on")
-        {
-          if (scara->getUsingActualRobotState())    
-            scara->enableAllToolActuator();
-        }
-        else if (cmd[1] == "off")
-        {
-          if (scara->getUsingActualRobotState())    
-            scara->disableAllToolActuator();
-        }
-
-        //
-        else
-          scara->makeToolTrajectory("tool", (double)cmd[1].toFloat());
       }
 
       // Task space control tab 
       else if (cmd[0] == "task")
       {
         if (cmd[1] == "f")
-          scara->makeTaskTrajectoryFromPresentPose("tool", math::vector3( 0.010, 0.0, 0.0), 1.0);
+          planar->makeTaskTrajectoryFromPresentPose("tool", math::vector3( 0.010, 0.0, 0.0), 1.0);
         else if (cmd[1] == "b")
-          scara->makeTaskTrajectoryFromPresentPose("tool", math::vector3(-0.010, 0.0, 0.0), 1.0);
+          planar->makeTaskTrajectoryFromPresentPose("tool", math::vector3(-0.010, 0.0, 0.0), 1.0);
         else if (cmd[1] == "l")
-          scara->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.0,  0.010, 0.0), 1.0);
+          planar->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.0,  0.010, 0.0), 1.0);
         else if (cmd[1] == "r")
-          scara->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.0, -0.010, 0.0), 1.0);
+          planar->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.0, -0.010, 0.0), 1.0);
       }
 
       // Demo Control tab 
@@ -225,20 +180,20 @@ void receiveDataFromProcessing(Scara *scara)
         if (cmd[1] == "start")
           startDemo();
         else if (cmd[1] == "stop")
-          stopDemo(scara);
+          stopDemo(planar);
       }
 
       // ...
-      scara->setReceiveDataFlag(true);
-      scara->setPrevReceiveTime(millis()/1000.0); 
+      planar->setReceiveDataFlag(true);
+      planar->setPrevReceiveTime(millis()/1000.0); 
     }
   }
   else 
   {
     // Check if ...
-    if (millis()/1000.0 - scara->getPrevReceiveTime() >= RECEIVE_RATE)
+    if (millis()/1000.0 - planar->getPrevReceiveTime() >= RECEIVE_RATE)
     {
-      scara->setReceiveDataFlag(false); 
+      planar->setReceiveDataFlag(false); 
       initRC100();
     }
   }

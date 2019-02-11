@@ -16,18 +16,18 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
-#include <scara_libs.h>
+#include <planar_libs.h>
 #include "remotecontroller100.h"
 #include "processing.h"
 #include "demo.h"
 
-Scara scara;
+Planar planar;
 
 void setup()
 {
   /**
    */
-  scara.initDebug();
+  planar.initDebug();
 
   /**
    */
@@ -43,26 +43,26 @@ void setup()
 
   /**
    */
-  scara.initOpenManipulator(true); // true:  using actual hardware
-                                   // false: using only visualization tool 
+  planar.initOpenManipulator(true); // true:  using actual hardware
+                                    // false: using only visualization tool 
 }
 
 void loop()
 {
   /**
    */
-  receiveDataFromRC100(&scara);      
+  receiveDataFromRC100(&planar);      
 
   /**
    */
-  receiveDataFromProcessing(&scara); 
-  sendDataToProcessing(&scara); 
+  receiveDataFromProcessing(&planar); 
+  sendDataToProcessing(&planar); 
 
   /**
    */
-  scara.processOpenManipulator(millis()/1000.0);    
+  planar.processOpenManipulator(millis()/1000.0);
 
   /**
    */
-  runDemo(&scara); 
+  runDemo(&planar); 
 }

@@ -34,7 +34,6 @@ void initRC100()
   rc100.begin(1); // using Serial2(=SerialBT1)
 }
 
-
 /*****************************************************************************
 ** Receive data from RC100
 *****************************************************************************/
@@ -80,8 +79,7 @@ void receiveDataFromRC100(Scara* scara)
         goal_position.push_back(0.0);
         goal_position.push_back(0.0);
         goal_position.push_back(0.0);
-
-        scara->makeJointTrajectory(goal_position, -0.5);
+        scara->makeJointTrajectory(goal_position, 0.5);
       }
 
       // 

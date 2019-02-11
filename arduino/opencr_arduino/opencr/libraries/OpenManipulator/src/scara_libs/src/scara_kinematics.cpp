@@ -21,7 +21,6 @@
 using namespace robotis_manipulator;
 using namespace scara_kinematics;
 
-
 /*****************************************************************************
 ** Kinematics Solver 
 *****************************************************************************/
@@ -80,7 +79,6 @@ bool SolverUsingCRAndGeometry::solveInverseKinematics(Manipulator *manipulator, 
   return inverseKinematicsSolverUsingGeometry(manipulator, tool_name, target_pose, goal_joint_value);
 }
 
-
 /*****************************************************************************
 ** Private
 *****************************************************************************/
@@ -129,8 +127,8 @@ void SolverUsingCRAndGeometry::forwardKinematicsSolverUsingChainRule(Manipulator
 bool SolverUsingCRAndGeometry::inverseKinematicsSolverUsingGeometry(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue>* goal_joint_value)
 {
   const double link[3] = {0.067, 0.067, 0.107};
-  double target_angle[3];
-  std::vector<double> target_angle_vector;
+  JointValue target_angle[3];
+  std::vector<JointValue> target_angle_vector;
 
   // Compute the length from Joint1 to the end effector
   double temp_target_pose[2];
@@ -153,9 +151,9 @@ bool SolverUsingCRAndGeometry::inverseKinematicsSolverUsingGeometry(Manipulator 
     double temp_error = abs(alpha + beta - 2*theta); 
 
     if (temp_error < error){
-      target_angle[0] = PI/2 -acos(temp_target_pose[1]/target_pose_length) - alpha;
-      target_angle[1] = theta;
-      target_angle[2] = theta;
+      target_angle[0].position = PI/2 -acos(temp_target_pose[1]/target_pose_length) - alpha;
+      target_angle[1].position = theta;
+      target_angle[2].position = theta;
       error = temp_error;
     }
   }
@@ -165,9 +163,7 @@ bool SolverUsingCRAndGeometry::inverseKinematicsSolverUsingGeometry(Manipulator 
   target_angle_vector.push_back(target_angle[1]);
   target_angle_vector.push_back(target_angle[2]);
 
-  Manipulator _manipulator = *manipulator;
-  
-  _manipulator.setAllActiveJointPosition(target_angle_vector);
-  *goal_joint_value = _manipulator.getAllActiveJointValue();
+  *goal_joint_value = target_angle_vector; 
+   
   return true;
 }

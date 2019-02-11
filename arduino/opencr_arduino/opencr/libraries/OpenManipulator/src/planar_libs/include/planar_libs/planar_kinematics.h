@@ -16,8 +16,8 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
-#ifndef SCARA_KINEMATICS_H_
-#define SCARA_KINEMATICS_H_
+#ifndef PLANAR_KINEMATICS_H_
+#define PLANAR_KINEMATICS_H_
 
 #if defined(__OPENCR__)
   #include <RobotisManipulator.h>
@@ -28,21 +28,20 @@
 using namespace Eigen;
 using namespace robotis_manipulator;
 
-namespace scara_kinematics
+namespace planar_kinematics
 {
 
 /*****************************************************************************
-** Kinematics Solver Using CHain Rule and Geometry
+** Kinematics Solver Using Geometry
 *****************************************************************************/
-class SolverUsingCRAndGeometry : public robotis_manipulator::Kinematics
+class SolverUsingGeometry : public robotis_manipulator::Kinematics
 {
 private:
-  void forwardKinematicsSolverUsingChainRule(Manipulator *manipulator, Name component_name);
   bool inverseKinematicsSolverUsingGeometry(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue>* goal_joint_value);
 
 public:
-  SolverUsingCRAndGeometry(){}
-  virtual ~SolverUsingCRAndGeometry(){}
+  SolverUsingGeometry(){}
+  virtual ~SolverUsingGeometry(){}
 
   virtual void setOption(const void *arg);
   virtual MatrixXd jacobian(Manipulator *manipulator, Name tool_name);
@@ -50,6 +49,6 @@ public:
   virtual bool solveInverseKinematics(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue>* goal_joint_value);
 };
 
-} // namespace scara_kinematics
+} // namespace planar_kinematics
 
-#endif // SCARA_KINEMATICS_H_
+#endif // PLANAR_KINEMATICS_H_
