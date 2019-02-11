@@ -40,12 +40,25 @@ void initProcessing()
 }
 
 /*****************************************************************************
-** Send data from Processing
+** Send data to Processing
 *****************************************************************************/
-// Send joint data to Processing 
-void sendJointDataToProcessing(JointWaypoint joint_angle_vector) 
+// Send active joint data to Processing 
+void sendActiveJointDataToProcessing(JointWaypoint joint_angle_vector) 
 {
-  Serial.print("joint");
+  Serial.print("active joint");
+
+  for (int i = 0; i < (int)joint_angle_vector.size(); i++)
+  {
+    Serial.print(",");
+    Serial.print(joint_angle_vector.at(i).position,3);
+  }
+  Serial.print("\n");
+}
+
+// Send passive joint data to Processing 
+void sendPassiveJointDataToProcessing(JointWaypoint joint_angle_vector) 
+{
+  Serial.print("passive joint");
 
   for (int i = 0; i < (int)joint_angle_vector.size(); i++)
   {
@@ -58,7 +71,8 @@ void sendJointDataToProcessing(JointWaypoint joint_angle_vector)
 // Send joint and tool values to Processing 
 void sendDataToProcessing(Planar *planar)
 {
-  sendJointDataToProcessing(planar->getAllActiveJointValue());
+  sendActiveJointDataToProcessing(planar->getAllActiveJointValue());
+  sendPassiveJointDataToProcessing(planar->getAllPassiveJointValue());
 }
 
 /*****************************************************************************
@@ -140,7 +154,7 @@ void receiveDataFromProcessing(Planar *planar)
           if (planar->getUsingActualRobotState())    
           {
             planar->enableAllJointActuator();
-            sendJointDataToProcessing(planar->getAllActiveJointValue());
+            sendActiveJointDataToProcessing(planar->getAllActiveJointValue());
           }
         }
         else if (cmd[1] == "off")
@@ -165,16 +179,22 @@ void receiveDataFromProcessing(Planar *planar)
       else if (cmd[0] == "task")
       {
         if (cmd[1] == "f")
-          planar->makeTaskTrajectoryFromPresentPose("tool", math::vector3( 0.010, 0.0, 0.0), 1.0);
+          planar->makeTaskTrajectory("tool", math::vector3( 0.020, 0.0, 0.0), 0.15);
         else if (cmd[1] == "b")
-          planar->makeTaskTrajectoryFromPresentPose("tool", math::vector3(-0.010, 0.0, 0.0), 1.0);
+          planar->makeTaskTrajectory("tool", math::vector3(-0.020, 0.0, 0.0), 0.15);
         else if (cmd[1] == "l")
-          planar->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.0,  0.010, 0.0), 1.0);
+          planar->makeTaskTrajectory("tool", math::vector3(0.0,  0.020, 0.0), 0.15);
         else if (cmd[1] == "r")
-          planar->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.0, -0.010, 0.0), 1.0);
+          planar->makeTaskTrajectory("tool", math::vector3(0.0, -0.020, 0.0), 0.15);
       }
 
-      // Demo Control tab 
+      // Task space control tab
+      else if (cmd[0] == "position")
+      {
+        planar->makeTaskTrajectory("tool", math::vector3((double)cmd[1].toFloat(), (double)cmd[2].toFloat(), 0.0), 0.15);
+      }
+
+      // Demo Control tab
       else if (cmd[0] == "demo")
       {
         if (cmd[1] == "start")

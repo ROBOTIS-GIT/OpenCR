@@ -71,6 +71,22 @@ void Planar::initOpenManipulator(bool using_actual_robot_state, STRING usb_port,
            3);        // actuator id
 
   addJoint("joint4",  // my name
+           "joint1",  // parent name
+           "joint7",    // child name
+           math::vector3(0.124, 0.0, 0.0),                  // relative position
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+           Y_AXIS,    // axis of rotation
+           -1);       // actuator id
+
+  addJoint("joint5",  // my name
+           "joint2",  // parent name
+           "tool",    // child name
+           math::vector3(0.124, 0.0, 0.0),                  // relative position
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+           Y_AXIS,    // axis of rotation
+           -1);       // actuator id
+
+  addJoint("joint6",  // my name
            "joint3",  // parent name
            "tool",    // child name
            math::vector3(0.124, 0.0, 0.0),                  // relative position
@@ -78,8 +94,16 @@ void Planar::initOpenManipulator(bool using_actual_robot_state, STRING usb_port,
            Y_AXIS,    // axis of rotation
            -1);       // actuator id
 
+  addJoint("joint7",  // my name
+           "joint4",  // parent name
+           "tool",    // child name
+           math::vector3(0.124, 0.0, 0.0),                  // relative position
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+           Y_AXIS,    // axis of rotation
+           -1);       // actuator id
+
   addTool("tool",     // my name
-          "joint4",   // parent name
+          "joint7",   // parent name
           math::vector3(0.130, 0.0, 0.0),                  // relative position
           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
           -1);        // actuator id
@@ -145,14 +169,9 @@ void Planar::processOpenManipulator(double present_time)
   if (present_time - prev_control_time_ >= CONTROL_RATE)  
   {
     JointWaypoint goal_joint_value = getJointGoalValueFromTrajectory(present_time);
-
-    if (using_actual_robot_state_)
-    {
-      receiveAllJointActuatorValue();   
-    }
-
     if(goal_joint_value.size() != 0) sendAllJointActuatorValue(goal_joint_value);   
-    solveForwardKinematics(); 
+
+
 
     // Set previous control time
     prev_control_time_ = millis()/1000.0;

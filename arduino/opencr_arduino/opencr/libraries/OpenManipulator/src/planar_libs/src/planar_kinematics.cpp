@@ -44,12 +44,14 @@ bool SolverUsingGeometry::solveInverseKinematics(Manipulator *manipulator, Name 
 bool SolverUsingGeometry::inverseKinematicsSolverUsingGeometry(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue>* goal_joint_value)
 {
   const double link[3] = {0.120, 0.098, 0.0366};
-  JointValue target_angle[3];
-  std::vector<JointValue> target_angle_vector;
+  JointValue target_angle[7];
+  std::vector<JointValue> target_active_angle_vector;
+  std::vector<JointValue> target_passive_angle_vector;
 
   // Start pose for each set of two joints
   double start_x[3], start_y[3];    
-  for (uint8_t i=0; i<3; i++){
+  for (uint8_t i=0; i<3; i++)
+  {
     start_x[i] = cos(PI*2.0/3.0*i)*(-0.1705);
     start_y[i] = sin(PI*2.0/3.0*i)*(-0.1705);
   }
@@ -64,9 +66,9 @@ bool SolverUsingGeometry::inverseKinematicsSolverUsingGeometry(Manipulator *mani
   Matrix3d goal_orientation;
   double target_pose_length[3];
 
-  for (int i=0; i<3; i++){
-    temp_x[i] = target_pose.kinematic.position(0) + cos(PI*2.0f/3.0f*i)*(-link[2]);
-    temp_y[i] = target_pose.kinematic.position(1) + sin(PI*2.0f/3.0f*i)*(-link[2]);
+  for (uint8_t i=0; i<3; i++){
+    temp_x[i] = target_pose.kinematic.position(0) + cos(PI*2.0/3.0*i)*(-link[2]);
+    temp_y[i] = target_pose.kinematic.position(1) + sin(PI*2.0/3.0*i)*(-link[2]);
   }
 
   // ...
@@ -79,7 +81,7 @@ bool SolverUsingGeometry::inverseKinematicsSolverUsingGeometry(Manipulator *mani
     goal_orientation(1,1) = 1;
     goal_orientation(2,2) = 1;
   }
-  for (int i=0; i<3; i++)
+  for (uint8_t i=0; i<3; i++)
   {
     goal_x[i] = goal_orientation(0,0)*temp_x[i] + goal_orientation(0,1)*temp_y[i];
     goal_y[i] = goal_orientation(1,0)*temp_x[i] + goal_orientation(1,1)*temp_y[i];
@@ -92,20 +94,46 @@ bool SolverUsingGeometry::inverseKinematicsSolverUsingGeometry(Manipulator *mani
   double alpha[3];
   double temp_diff[3];      
 
-  for (int i=0; i<3; i++)
+  for (uint8_t i=0; i<3; i++)
   {
     alpha[i] = acos((target_pose_length[i]*target_pose_length[i] + link[0]*link[0] - link[1]*link[1]) 
                             / (2*target_pose_length[i]*link[0]));
     temp_diff[i] = sin(-PI*2.0/3.0*i)*diff_x[i] + cos(-PI*2.0/3.0*i)*diff_y[i];
-    target_angle[i].position = acos(-temp_diff[i] / target_pose_length[i]) - alpha[i] - PI/4.0f;
+    target_angle[i].position = acos(-temp_diff[i] / target_pose_length[i]) - alpha[i] - PI/4.0;
   }
 
-  // Set joint angle 
-  target_angle_vector.push_back(target_angle[0]);
-  target_angle_vector.push_back(target_angle[1]);
-  target_angle_vector.push_back(target_angle[2]);
+  // Set Joint Angle 
+  target_active_angle_vector.push_back(target_angle[0]);
+  target_active_angle_vector.push_back(target_angle[1]);
+  target_active_angle_vector.push_back(target_angle[2]);
 
-  *goal_joint_value = target_angle_vector;
+  *goal_joint_value = target_active_angle_vector;
+
+  for (uint8_t i=0; i<3; i++)
+  {
+    target_angle[i].position += PI/4.0; 
+    target_angle[i+3].position = acos((-sin(PI*2.0/3.0*i)*diff_x[i] + cos(PI*2.0/3.0*i)*diff_y[i] 
+                              + link[0]*cos(target_angle[i].position)) / -link[1]) - target_angle[i].position - PI*7.0/12.0;
+  }
+
+  target_angle[3].position = PI/4.0; 
+  target_angle[4].position = PI/4.0; 
+  target_angle[5].position = PI/4.0; 
+  target_passive_angle_vector.push_back(target_angle[3]);
+  target_passive_angle_vector.push_back(target_angle[4]);
+  target_passive_angle_vector.push_back(target_angle[5]);
+
+  target_angle[3].position += PI*7.0/12.0;
+  
+  if ((temp_x[0]-goal_x[0])/link[2] > 1)
+    temp_x[0] = goal_x[0] + link[2];
+
+  target_angle[6].position = acos((temp_x[0]-goal_x[0])/link[2]) +PI/2.0- target_angle[0].position - target_angle[3].position+PI/3.0;
+
+  target_angle[6].position = PI/4.0; 
+  target_passive_angle_vector.push_back(target_angle[6]);
+  
+  manipulator->setAllPassiveJointValue(target_passive_angle_vector);
 
   return true;
 }

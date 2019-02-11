@@ -49,13 +49,13 @@ void receiveDataFromRC100(Planar* planar)
 
       // Task space control tab 
       if (data & RC100_BTN_U)
-        planar->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.006, 0.0, 0.0), 0.16);
+        planar->makeTaskTrajectory("tool", math::vector3(0.020, 0.0, 0.0), 0.15);
       else if (data & RC100_BTN_D)
-        planar->makeTaskTrajectoryFromPresentPose("tool", math::vector3(-0.006, 0.0, 0.0), 0.16);
+        planar->makeTaskTrajectory("tool", math::vector3(-0.020, 0.0, 0.0), 0.15);
       else if (data & RC100_BTN_L)
-        planar->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.0, 0.006, 0.0), 0.16);
+        planar->makeTaskTrajectory("tool", math::vector3(0.0,  0.020, 0.0), 0.15);
       else if (data & RC100_BTN_R)
-        planar->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.0, -0.006, 0.0), 0.16);
+        planar->makeTaskTrajectory("tool", math::vector3(0.0, -0.020, 0.0), 0.15);
       else if (data & RC100_BTN_1) {}
       else if (data & RC100_BTN_2) {}
       else if (data & RC100_BTN_3)
