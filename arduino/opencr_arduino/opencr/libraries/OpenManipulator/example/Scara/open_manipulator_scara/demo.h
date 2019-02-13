@@ -52,6 +52,7 @@ void drawObj(Scara* scara, STRING object, double radius, int num_revolution, dou
   scara->makeCustomTrajectory(object, "tool", p_draw_arg, move_time);
 }
 
+// Erase an Object
 bool eraseObj(Scara *scara, int index)
 {
   switch(sub_motion_cnt[index])

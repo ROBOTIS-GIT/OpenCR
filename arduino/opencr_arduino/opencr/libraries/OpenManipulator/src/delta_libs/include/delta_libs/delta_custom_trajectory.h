@@ -28,7 +28,7 @@
 using namespace robotis_manipulator;
 using namespace Eigen;
 
-namespace scara_custom_trajectory
+namespace delta_custom_trajectory
 {
   
 enum AXIS{
@@ -150,8 +150,8 @@ public:
 };
 
 
-} // namespace scara_custom_trajectory
-#endif // SCARA_CUSTOM_TRAJECTORY_H_
+} // namespace delta_custom_trajectory
+#endif // DELTA_CUSTOM_TRAJECTORY_H_
 
 
 

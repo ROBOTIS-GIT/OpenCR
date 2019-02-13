@@ -16,8 +16,8 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
-#ifndef SCARA_CUSTOM_TRAJECTORY_H_
-#define SCARA_CUSTOM_TRAJECTORY_H_
+#ifndef LINEAR_CUSTOM_TRAJECTORY_H_
+#define LINEAR_CUSTOM_TRAJECTORY_H_
 
 #if defined(__OPENCR__)
   #include <RobotisManipulator.h>
@@ -28,7 +28,7 @@
 using namespace robotis_manipulator;
 using namespace Eigen;
 
-namespace scara_custom_trajectory
+namespace linear_custom_trajectory
 {
   
 enum AXIS{
@@ -150,8 +150,8 @@ public:
 };
 
 
-} // namespace scara_custom_trajectory
-#endif // SCARA_CUSTOM_TRAJECTORY_H_
+} // namespace linear_custom_trajectory
+#endif // LINEAR_CUSTOM_TRAJECTORY_H_
 
 
 

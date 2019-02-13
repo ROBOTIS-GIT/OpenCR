@@ -19,9 +19,10 @@
 #ifndef REMOTECONTROLLER100_H_
 #define REMOTECONTROLLER100_H_
 
-#include <scara_libs.h>
+#include <stewart_libs.h>
 #include <RC100.h>
 #include "demo.h"
+// #include "demo2.h"
 
 RC100 rc100;
 
@@ -36,61 +37,57 @@ void initRC100()
 /*****************************************************************************
 ** Receive data from RC100
 *****************************************************************************/
-void receiveDataFromRC100(Scara* scara)
+void receiveDataFromRC100(Stewart* stewart)
 {
-  if (!scara->getReceiveDataFlag())
+  if (!stewart->getReceiveDataFlag())
   {
     if (rc100.available())
     {
-      scara->setReceiveDataFlag(true);
+      stewart->setReceiveDataFlag(true);
 
       uint16_t data = rc100.readData();
 
       // Task space control tab 
-      if (data & RC100_BTN_U)
-        scara->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.006, 0.0, 0.0), 0.16);
+      if (data & RC100_BTN_U) 
+        stewart->makeTaskTrajectory("tool", math::vector3(0.020, 0.0, 0.0), 1.0);
+      else if (data & RC100_BTN_L) 
+        stewart->makeTaskTrajectory("tool", math::vector3(-0.020, 0.0, 0.0), 1.0);
       else if (data & RC100_BTN_D)
-        scara->makeTaskTrajectoryFromPresentPose("tool", math::vector3(-0.006, 0.0, 0.0), 0.16);
-      else if (data & RC100_BTN_L)
-        scara->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.0, 0.006, 0.0), 0.16);
-      else if (data & RC100_BTN_R)
-        scara->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.0, -0.006, 0.0), 0.16);
+        stewart->makeTaskTrajectory("tool", math::vector3(0.0, 0.020, 0.0), 1.0);
+      else if (data & RC100_BTN_R) 
+        stewart->makeTaskTrajectory("tool", math::vector3(0.0, -0.020, 0.0), 1.0);
       else if (data & RC100_BTN_1)
-        scara->makeToolTrajectory("tool", 0.0);
+        stewart->makeTaskTrajectory("tool", math::vector3(0.0, 0.0, 0.015), 1.0);
       else if (data & RC100_BTN_2)
-        scara->makeToolTrajectory("tool", 1.0);
+        stewart->makeTaskTrajectory("tool", math::vector3(0.0, 0.0, -0.015), 1.0);
       else if (data & RC100_BTN_3)
-        startDemo();
+        startDemo();      
       else if (data & RC100_BTN_4)
-        stopDemo(scara);
-      else if (data & RC100_BTN_5)
-      {
-        std::vector<double> goal_position;
-        goal_position.push_back(-60.0 * DEG2RAD);
-        goal_position.push_back(20.0 * DEG2RAD);
-        goal_position.push_back(40.0 * DEG2RAD);
-        scara->makeJointTrajectory(goal_position, 1.0);
-      }
+        stopDemo(stewart);
+      else if (data & RC100_BTN_5) {}
       else if (data & RC100_BTN_6)
       {
         std::vector<double> goal_position;
         goal_position.push_back(0.0);
         goal_position.push_back(0.0);
         goal_position.push_back(0.0);
-        scara->makeJointTrajectory(goal_position, 0.5);
+        goal_position.push_back(0.0);
+        goal_position.push_back(0.0);
+        goal_position.push_back(0.0);
+        stewart->makeJointTrajectory(goal_position, 0.5);        
       }
-
-      // 
-      scara->setReceiveDataFlag(true);
-      scara->setPrevReceiveTime(millis()/1000.0); 
+      
+      // ...
+      stewart->setReceiveDataFlag(true);
+      stewart->setPrevReceiveTime(millis()/1000.0);
     }
   }
   else 
   {
     // Check if ...
-    if (millis()/1000.0 - scara->getPrevReceiveTime() >= RECEIVE_RATE)
+    if (millis()/1000.0 - stewart->getPrevReceiveTime() >= RECEIVE_RATE)
     {
-      scara->setReceiveDataFlag(false);   
+      stewart->setReceiveDataFlag(false);   
       initRC100();
     }
   }

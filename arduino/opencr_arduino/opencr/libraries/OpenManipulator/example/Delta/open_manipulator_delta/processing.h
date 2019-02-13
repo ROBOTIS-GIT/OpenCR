@@ -19,7 +19,7 @@
 #ifndef PROCESSING_H_
 #define PROCESSING_H_
 
-#include <planar_libs.h>
+#include <delta_libs.h>
 #include "demo.h"
 
 /*****************************************************************************
@@ -28,7 +28,7 @@
 void initProcessing()
 { 
   Serial.begin(57600);
-
+  
   Serial.print("Initial actuator angles: ");
   for (int i = 0; i < DXL_SIZE; i++)
   {
@@ -40,10 +40,10 @@ void initProcessing()
 }
 
 /*****************************************************************************
-** Send data to Processing
+** Send data from Processing
 *****************************************************************************/
-// Send active joint data to Processing 
-void sendActiveJointDataToProcessing(JointWaypoint joint_angle_vector) 
+// Send joint data to Processing 
+void sendJointDataToProcessing(JointWaypoint joint_angle_vector) 
 {
   Serial.print("joint");
 
@@ -55,25 +55,29 @@ void sendActiveJointDataToProcessing(JointWaypoint joint_angle_vector)
   Serial.print("\n");
 }
 
-// Send passive joint data to Processing 
-void sendPassiveJointDataToProcessing(JointWaypoint joint_angle_vector) 
+// Send tool data(on or off) to Processing 
+void sendToolDataToProcessing(bool onoff)
 {
-  Serial.print("passive joint");
-
-  for (int i = 0; i < (int)joint_angle_vector.size(); i++)
-  {
-    Serial.print(",");
-    Serial.print(joint_angle_vector.at(i).position,3);
-  }
+  Serial.print("tool");
+  Serial.print(",");
+  Serial.print(onoff);
   Serial.print("\n");
 }
 
-// Send joint and tool values to Processing 
-void sendDataToProcessing(Planar *planar)
+// Send tool data(values) to Processing 
+void sendToolDataToProcessing(JointValue value)
 {
-  // sendActiveJointDataToProcessing(planar->getAllActiveJointValue());
-  sendActiveJointDataToProcessing(planar->getTrajectory()->getManipulator()->getAllJointValue());
-  // sendPassiveJointDataToProcessing(planar->getTrajectory()->getManipulator()->getAllJointValue());
+  Serial.print("tool");
+  Serial.print(",");
+  Serial.print(value.position);
+  Serial.print("\n");
+}
+
+// Send joint and tool data(values) to Processing 
+void sendDataToProcessing(Delta *delta)
+{
+  sendJointDataToProcessing(delta->getAllActiveJointValue());
+  sendToolDataToProcessing(delta->getToolValue("tool"));
 }
 
 /*****************************************************************************
@@ -116,9 +120,9 @@ String* parseProcessingData(String get)
 }
 
 // Receive data from Processing 
-void receiveDataFromProcessing(Planar *planar) 
+void receiveDataFromProcessing(Delta *delta) 
 {
-  if (!planar->getReceiveDataFlag())
+  if (!delta->getReceiveDataFlag())
   {
     if (Serial.available())
     {
@@ -131,17 +135,17 @@ void receiveDataFromProcessing(Planar *planar)
         // Torque On/Off
         if (cmd[1] == "on")
         {
-          if(planar->getUsingActualRobotState())
+          if(delta->getUsingActualRobotState())
           {
-            planar->enableAllActuator();
-            sendDataToProcessing(planar);
+            delta->enableAllActuator();
+            sendDataToProcessing(delta);
           }
         }
         else if (cmd[1] == "off")
         {
-          if(planar->getUsingActualRobotState())
+          if(delta->getUsingActualRobotState())
           {
-            planar->disableAllActuator();
+            delta->disableAllActuator();
           }
         }
       }
@@ -152,16 +156,16 @@ void receiveDataFromProcessing(Planar *planar)
         //
         if (cmd[1] == "on")
         {
-          if (planar->getUsingActualRobotState())    
+          if (delta->getUsingActualRobotState())    
           {
-            planar->enableAllJointActuator();
-            sendActiveJointDataToProcessing(planar->getAllActiveJointValue());
+            delta->enableAllJointActuator();
+            sendJointDataToProcessing(delta->getAllActiveJointValue());
           }
         }
         else if (cmd[1] == "off")
         {
-          if (planar->getUsingActualRobotState())    
-            planar->disableAllJointActuator();
+          if (delta->getUsingActualRobotState())    
+            delta->disableAllJointActuator();
         }
 
         //
@@ -172,52 +176,59 @@ void receiveDataFromProcessing(Planar *planar)
           {
             goal_position.push_back((double)cmd[index + 1].toFloat());
           }
-          planar->makeJointTrajectory(goal_position, 1.0); 
+          delta->makeJointTrajectory(goal_position, 1.0); 
         }
+      }
+
+      // Tool control tab 
+      else if (cmd[0] == "tool")
+      {
+        if (cmd[1] == "y")
+          suctionOnOff(true);
+        else if (cmd[1] == "n")
+          suctionOnOff(false);
       }
 
       // Task space control tab 
       else if (cmd[0] == "task")
       {
         if (cmd[1] == "f")
-          planar->makeTaskTrajectory("tool", math::vector3( 0.020, 0.0, 0.0), 0.15);
+          delta->makeTaskTrajectory("tool", math::vector3(0.020, 0.0, 0.0), 0.1);
         else if (cmd[1] == "b")
-          planar->makeTaskTrajectory("tool", math::vector3(-0.020, 0.0, 0.0), 0.15);
+          delta->makeTaskTrajectory("tool", math::vector3(-0.020, 0.0, 0.0), 0.1);
         else if (cmd[1] == "l")
-          planar->makeTaskTrajectory("tool", math::vector3(0.0,  0.020, 0.0), 0.15);
+          delta->makeTaskTrajectory("tool", math::vector3(0.0, 0.020, 0.0), 0.1);
         else if (cmd[1] == "r")
-          planar->makeTaskTrajectory("tool", math::vector3(0.0, -0.020, 0.0), 0.15);
+          delta->makeTaskTrajectory("tool", math::vector3(0.0, -0.020, 0.0), 0.1);
+        else if (cmd[1] == "u")
+          delta->makeTaskTrajectory("tool", math::vector3(0.0, 0.0, 0.015), 0.1);
+        else if (cmd[1] == "d")
+          delta->makeTaskTrajectory("tool", math::vector3(0.0, 0.0, -0.015), 0.1);
       }
 
-      // Task space control tab
-      else if (cmd[0] == "position")
-      {
-        planar->makeTaskTrajectory("tool", math::vector3((double)cmd[1].toFloat(), (double)cmd[2].toFloat(), 0.0), 0.15);
-      }
-
-      // Demo Control tab
+      // Demo Control tab 
       else if (cmd[0] == "demo")
       {
         if (cmd[1] == "start")
           startDemo();
         else if (cmd[1] == "stop")
-          stopDemo(planar);
+          stopDemo(delta);
       }
 
       // ...
-      planar->setReceiveDataFlag(true);
-      planar->setPrevReceiveTime(millis()/1000.0); 
+      delta->setReceiveDataFlag(true);
+      delta->setPrevReceiveTime(millis()/1000.0); 
     }
   }
   else 
   {
     // Check if ...
-    if (millis()/1000.0 - planar->getPrevReceiveTime() >= RECEIVE_RATE)
+    if (millis()/1000.0 - delta->getPrevReceiveTime() >= RECEIVE_RATE)
     {
-      planar->setReceiveDataFlag(false); 
+      delta->setReceiveDataFlag(false); 
       initRC100();
     }
   }
 }
 
-#endif //PROCESSING_H
+#endif  //PROCESSING_H

@@ -22,7 +22,6 @@
 #include <planar_libs.h>
 
 bool start_demo_flag;
-bool erasing_flag;
 uint8_t motion_cnt[] = {0};
 uint8_t sub_motion_cnt[] = {0};
 
@@ -61,7 +60,6 @@ void stopDemo(Planar *planar)
   // Reset the count variables
   motion_cnt[0] = 0;
   sub_motion_cnt[0] = 0;
-  erasing_flag = false;
 }
 
 /*****************************************************************************
@@ -72,7 +70,6 @@ void initDemo()
   start_demo_flag = false;
   motion_cnt[0] = 0;
   sub_motion_cnt[0] = 0;
-  erasing_flag = false;
 }
 
 /*****************************************************************************

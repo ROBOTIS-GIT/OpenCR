@@ -45,8 +45,7 @@ bool SolverUsingGeometry::inverseKinematicsSolverUsingGeometry(Manipulator *mani
 {
   const double link[3] = {0.120, 0.098, 0.0366};
   JointValue target_angle[7];
-  std::vector<JointValue> target_active_angle_vector;
-  std::vector<JointValue> target_passive_angle_vector;
+  std::vector<JointValue> target_angle_vector;
 
   // Start pose for each set of two joints
   double start_x[3], start_y[3];    
@@ -103,11 +102,11 @@ bool SolverUsingGeometry::inverseKinematicsSolverUsingGeometry(Manipulator *mani
   }
 
   // Set Joint Angle 
-  target_active_angle_vector.push_back(target_angle[0]);
-  target_active_angle_vector.push_back(target_angle[1]);
-  target_active_angle_vector.push_back(target_angle[2]);
+  target_angle_vector.push_back(target_angle[0]);
+  target_angle_vector.push_back(target_angle[1]);
+  target_angle_vector.push_back(target_angle[2]);
 
-  *goal_joint_value = target_active_angle_vector;
+  *goal_joint_value = target_angle_vector;
 
   for (uint8_t i=0; i<3; i++)
   {
@@ -116,24 +115,21 @@ bool SolverUsingGeometry::inverseKinematicsSolverUsingGeometry(Manipulator *mani
                               + link[0]*cos(target_angle[i].position)) / -link[1]) - target_angle[i].position - PI*7.0/12.0;
   }
 
-  target_angle[3].position = PI/4.0; 
-  target_angle[4].position = PI/4.0; 
-  target_angle[5].position = PI/4.0; 
-  target_passive_angle_vector.push_back(target_angle[3]);
-  target_passive_angle_vector.push_back(target_angle[4]);
-  target_passive_angle_vector.push_back(target_angle[5]);
+  target_angle_vector.push_back(target_angle[3]);
+  target_angle_vector.push_back(target_angle[4]);
+  target_angle_vector.push_back(target_angle[5]);
 
   target_angle[3].position += PI*7.0/12.0;
   
   if ((temp_x[0]-goal_x[0])/link[2] > 1)
     temp_x[0] = goal_x[0] + link[2];
 
-  target_angle[6].position = acos((temp_x[0]-goal_x[0])/link[2]) +PI/2.0- target_angle[0].position - target_angle[3].position+PI/3.0;
+  target_angle[6].position = acos((temp_x[0]-goal_x[0])/link[2]) + PI/2.0- target_angle[0].position - target_angle[3].position;
+  // target_angle[6].position = acos((temp_x[0]-goal_x[0])/link[2]) + PI/2.0- target_angle[0].position - target_angle[3].position+PI/3.0;
 
-  target_angle[6].position = PI/4.0; 
-  target_passive_angle_vector.push_back(target_angle[6]);
+  target_angle_vector.push_back(target_angle[6]);
   
-  manipulator->setAllPassiveJointValue(target_passive_angle_vector);
+  manipulator->setAllJointValue(target_angle_vector);
 
   return true;
 }

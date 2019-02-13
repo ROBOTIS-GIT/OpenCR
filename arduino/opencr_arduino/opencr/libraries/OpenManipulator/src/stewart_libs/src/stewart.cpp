@@ -16,24 +16,25 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
-#include "../include/planar_libs/planar.h"
+#include "../include/stewart_libs/stewart.h"
 
-Planar::Planar() {}
-Planar::~Planar()
+Stewart::Stewart() {}
+Stewart::~Stewart()
 {
   delete kinematics_;
   delete joint_;
+  delete tool_;
   for(uint8_t index = 0; index < CUSTOM_TRAJECTORY_SIZE; index++)
     delete custom_trajectory_[index];
 }
 
-void Planar::initDebug()
+void Stewart::initDebug()
 {
-  DEBUG.begin(57600); // Using Serial4(= SerialBT2)
+  DEBUG.begin(57600); // Using Serial4(=SerialBT2)
   log::print("OpenManipulator Debugging Port"); 
 }
 
-void Planar::initOpenManipulator(bool using_actual_robot_state, STRING usb_port, STRING baud_rate, float control_rate)
+void Stewart::initOpenManipulator(bool using_actual_robot_state, STRING usb_port, STRING baud_rate, float control_rate)
 {
   /*****************************************************************************
   ** Set if using actual robot
@@ -49,7 +50,7 @@ void Planar::initOpenManipulator(bool using_actual_robot_state, STRING usb_port,
   addJoint("joint1",  // my name
            "world",   // parent name
            "joint2",  // child name
-           math::vector3(0.012, 0.0, 0.017),                // relative position
+           math::vector3(0.0, 0.0, 0.400),                  // relative position
            math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
            Z_AXIS,    // axis of rotation
            1);        // actuator id
@@ -57,70 +58,63 @@ void Planar::initOpenManipulator(bool using_actual_robot_state, STRING usb_port,
   addJoint("joint2",  // my name
            "joint1",  // parent name
            "joint3",  // child name
-           math::vector3(0.0, 0.0, 0.058),                  // relative position
+           math::vector3(0.0, 0.0, 0.0),                    // relative position
            math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
-           Y_AXIS,    // axis of rotation
+           Z_AXIS,    // axis of rotation
            2);        // actuator id
 
   addJoint("joint3",  // my name
-           "joint1",  // parent name
+           "joint2",  // parent name
            "joint4",  // child name
-           math::vector3(0.024, 0.0, 0.128),                // relative position
+           math::vector3(0.0, 0.0, 0.0),                    // relative position
            math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
-           Y_AXIS,    // axis of rotation
+           Z_AXIS,    // axis of rotation
            3);        // actuator id
 
   addJoint("joint4",  // my name
-           "joint1",  // parent name
-           "joint7",    // child name
-           math::vector3(0.124, 0.0, 0.0),                  // relative position
+           "joint3",  // parent name
+           "joint5",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // relative position
            math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
-           Y_AXIS,    // axis of rotation
-           -1);       // actuator id
+           Z_AXIS,    // axis of rotation
+           4);        // actuator id
 
   addJoint("joint5",  // my name
-           "joint2",  // parent name
-           "tool",    // child name
-           math::vector3(0.124, 0.0, 0.0),                  // relative position
+           "joint4",  // parent name
+           "joint6",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // relative position
            math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
-           Y_AXIS,    // axis of rotation
-           -1);       // actuator id
+           Z_AXIS,    // axis of rotation
+           5);        // actuator id
 
   addJoint("joint6",  // my name
-           "joint3",  // parent name
+           "joint5",  // parent name
            "tool",    // child name
-           math::vector3(0.124, 0.0, 0.0),                  // relative position
+           math::vector3(0.0, 0.0, 0.0),                    // relative position
            math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
-           Y_AXIS,    // axis of rotation
-           -1);       // actuator id
-
-  addJoint("joint7",  // my name
-           "joint4",  // parent name
-           "tool",    // child name
-           math::vector3(0.124, 0.0, 0.0),                  // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
-           Y_AXIS,    // axis of rotation
-           -1);       // actuator id
+           Z_AXIS,    // axis of rotation
+           6);        // actuator id
 
   addTool("tool",     // my name
-          "joint7",   // parent name
-          math::vector3(0.130, 0.0, 0.0),                  // relative position
+          "joint6",   // parent name
+          math::vector3(0.0, 0.0, 0.0),                    // relative position
           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
-          -1);        // actuator id
+          -1,         // actuator id
+          -0.015);    // Change unit from `meter` to `radian` <<--- modify!!!!
 
   /*****************************************************************************
   ** Initialize Kinematics 
   *****************************************************************************/
-  kinematics_ = new planar_kinematics::SolverUsingGeometry();
+  kinematics_ = new stewart_kinematics::SolverUsingGeometry();
   addKinematics(kinematics_);
-
+  
   /*****************************************************************************
   ** Initialize Custom Trajectory
   *****************************************************************************/
-  custom_trajectory_[0] = new planar_custom_trajectory::Line();
-  custom_trajectory_[1] = new planar_custom_trajectory::Circle();
-  custom_trajectory_[2] = new planar_custom_trajectory::Rhombus();
-  custom_trajectory_[3] = new planar_custom_trajectory::Heart();
+  custom_trajectory_[0] = new stewart_custom_trajectory::Line();
+  custom_trajectory_[1] = new stewart_custom_trajectory::Circle();
+  custom_trajectory_[2] = new stewart_custom_trajectory::Rhombus();
+  custom_trajectory_[3] = new stewart_custom_trajectory::Heart();
 
   addCustomTrajectory(CUSTOM_TRAJECTORY_LINE, custom_trajectory_[0]);
   addCustomTrajectory(CUSTOM_TRAJECTORY_CIRCLE, custom_trajectory_[1]);
@@ -132,7 +126,7 @@ void Planar::initOpenManipulator(bool using_actual_robot_state, STRING usb_port,
     /*****************************************************************************
     ** Initialize ㅓoint Actuator
     *****************************************************************************/
-    joint_ = new planar_dynamixel::JointDynamixelProfileControl(control_rate);
+    joint_ = new stewart_dynamixel::JointDynamixelProfileControl(control_rate);
 
     // Set communication arguments 
     STRING dxl_comm_arg[2] = {usb_port, baud_rate};
@@ -143,9 +137,12 @@ void Planar::initOpenManipulator(bool using_actual_robot_state, STRING usb_port,
     jointDxlId.push_back(1);
     jointDxlId.push_back(2);
     jointDxlId.push_back(3);
+    jointDxlId.push_back(4);
+    jointDxlId.push_back(5);
+    jointDxlId.push_back(6);
     addJointActuator(JOINT_DYNAMIXEL, joint_, jointDxlId, p_dxl_comm_arg);
 
-    // set joint actuator parameter
+    // Set joint actuator control mode
     STRING joint_dxl_mode_arg = "position_mode";
     void *p_joint_dxl_mode_arg = &joint_dxl_mode_arg;
     setJointActuatorMode(JOINT_DYNAMIXEL, jointDxlId, p_joint_dxl_mode_arg);
@@ -153,9 +150,9 @@ void Planar::initOpenManipulator(bool using_actual_robot_state, STRING usb_port,
     /*****************************************************************************
     ** Enable actuators and Receive actuator values 
     *****************************************************************************/
-    // Eanble all actuators 
+    // Enable All Actuators 
     enableAllActuator();
-    
+
     // Receive current angles from all actuators 
     receiveAllJointActuatorValue();
   }
@@ -164,11 +161,17 @@ void Planar::initOpenManipulator(bool using_actual_robot_state, STRING usb_port,
 /*****************************************************************************
 ** Process actuator values received from external controllers
 *****************************************************************************/
-void Planar::processOpenManipulator(double present_time)  
+void Stewart::processOpenManipulator(double present_time)  
 {
   if (present_time - prev_control_time_ >= CONTROL_RATE)  
   {
     JointWaypoint goal_joint_value = getJointGoalValueFromTrajectory(present_time);
+
+    if (using_actual_robot_state_)
+    {
+      receiveAllJointActuatorValue();   
+    }
+
     if(goal_joint_value.size() != 0) sendAllJointActuatorValue(goal_joint_value);   
 
     // Set previous control time
@@ -180,31 +183,31 @@ void Planar::processOpenManipulator(double present_time)
 ** State Functions
 *****************************************************************************/
 // Check if using acutal robot 
-bool Planar::getUsingActualRobotState() 
+bool Stewart::getUsingActualRobotState() 
 {
   return using_actual_robot_state_;
 }
 
 /* Check if the program read data within control rate) */
-bool Planar::getReceiveDataFlag()  
+bool Stewart::getReceiveDataFlag()  
 {
   return receive_data_flag_;
 }
 
 /* Get the previous time when data were received */
-double Planar::getPrevReceiveTime() 
+double Stewart::getPrevReceiveTime() 
 {
   return prev_receive_time_;
 }
 
 /* Set whether data were received or not */
-void Planar::setReceiveDataFlag(bool receive_data_flag) 
+void Stewart::setReceiveDataFlag(bool receive_data_flag) 
 {
   receive_data_flag_ = receive_data_flag;
 }
 
 /* Set the previous time when data were received */
-void Planar::setPrevReceiveTime(double prev_receive_time)  
+void Stewart::setPrevReceiveTime(double prev_receive_time)  
 {
   prev_receive_time_ = prev_receive_time;
 }

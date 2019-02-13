@@ -16,24 +16,25 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
-#include "../include/planar_libs/planar.h"
+#include "../include/linear_libs/linear.h"
 
-Planar::Planar() {}
-Planar::~Planar()
+Linear::Linear() {}
+Linear::~Linear()
 {
   delete kinematics_;
   delete joint_;
+  delete tool_;
   for(uint8_t index = 0; index < CUSTOM_TRAJECTORY_SIZE; index++)
     delete custom_trajectory_[index];
 }
 
-void Planar::initDebug()
+void Linear::initDebug()
 {
-  DEBUG.begin(57600); // Using Serial4(= SerialBT2)
+  DEBUG.begin(57600); // Using Serial4(=SerialBT2)
   log::print("OpenManipulator Debugging Port"); 
 }
 
-void Planar::initOpenManipulator(bool using_actual_robot_state, STRING usb_port, STRING baud_rate, float control_rate)
+void Linear::initOpenManipulator(bool using_actual_robot_state, STRING usb_port, STRING baud_rate, float control_rate)
 {
   /*****************************************************************************
   ** Set if using actual robot
@@ -49,78 +50,56 @@ void Planar::initOpenManipulator(bool using_actual_robot_state, STRING usb_port,
   addJoint("joint1",  // my name
            "world",   // parent name
            "joint2",  // child name
-           math::vector3(0.012, 0.0, 0.017),                // relative position
+           math::vector3(0.0, 0.0, 0.400),                  // relative position
            math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
            Z_AXIS,    // axis of rotation
-           1);        // actuator id
+           1,         // actuator id
+           5.0/3.0*M_PI,   // max_limit
+           -5.0/3.0*M_PI); // min_limit
+                 
 
   addJoint("joint2",  // my name
            "joint1",  // parent name
            "joint3",  // child name
-           math::vector3(0.0, 0.0, 0.058),                  // relative position
+           math::vector3(0.0, 0.0, 0.0),                    // relative position
            math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
-           Y_AXIS,    // axis of rotation
-           2);        // actuator id
+           Z_AXIS,    // axis of rotation
+           2,         // actuator id
+           5.0/3.0*M_PI,   // max_limit
+           -5.0/3.0*M_PI); // min_limit
+                  
 
   addJoint("joint3",  // my name
-           "joint1",  // parent name
-           "joint4",  // child name
-           math::vector3(0.024, 0.0, 0.128),                // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
-           Y_AXIS,    // axis of rotation
-           3);        // actuator id
-
-  addJoint("joint4",  // my name
-           "joint1",  // parent name
-           "joint7",    // child name
-           math::vector3(0.124, 0.0, 0.0),                  // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
-           Y_AXIS,    // axis of rotation
-           -1);       // actuator id
-
-  addJoint("joint5",  // my name
            "joint2",  // parent name
            "tool",    // child name
-           math::vector3(0.124, 0.0, 0.0),                  // relative position
+           math::vector3(0.0, 0.0, 0.0),                    // relative position
            math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
-           Y_AXIS,    // axis of rotation
-           -1);       // actuator id
-
-  addJoint("joint6",  // my name
-           "joint3",  // parent name
-           "tool",    // child name
-           math::vector3(0.124, 0.0, 0.0),                  // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
-           Y_AXIS,    // axis of rotation
-           -1);       // actuator id
-
-  addJoint("joint7",  // my name
-           "joint4",  // parent name
-           "tool",    // child name
-           math::vector3(0.124, 0.0, 0.0),                  // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
-           Y_AXIS,    // axis of rotation
-           -1);       // actuator id
+           Z_AXIS,    // axis of rotation
+           3,         // actuator id
+           2.1*M_PI,  // max_limit
+           -2.1*M_PI);// min_limit
 
   addTool("tool",     // my name
-          "joint7",   // parent name
-          math::vector3(0.130, 0.0, 0.0),                  // relative position
+          "joint3",   // parent name
+          math::vector3(0.0, 0.0, 0.0),                    // relative position
           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
-          -1);        // actuator id
+          4,          // actuator id
+          0.100,      // max gripper limit (0.01 m)
+          -0.100);    // min gripper limit (-0.01 m)
 
   /*****************************************************************************
   ** Initialize Kinematics 
   *****************************************************************************/
-  kinematics_ = new planar_kinematics::SolverUsingGeometry();
+  kinematics_ = new linear_kinematics::SolverUsingGeometry();
   addKinematics(kinematics_);
 
   /*****************************************************************************
   ** Initialize Custom Trajectory
   *****************************************************************************/
-  custom_trajectory_[0] = new planar_custom_trajectory::Line();
-  custom_trajectory_[1] = new planar_custom_trajectory::Circle();
-  custom_trajectory_[2] = new planar_custom_trajectory::Rhombus();
-  custom_trajectory_[3] = new planar_custom_trajectory::Heart();
+  custom_trajectory_[0] = new linear_custom_trajectory::Line();
+  custom_trajectory_[1] = new linear_custom_trajectory::Circle();
+  custom_trajectory_[2] = new linear_custom_trajectory::Rhombus();
+  custom_trajectory_[3] = new linear_custom_trajectory::Heart();
 
   addCustomTrajectory(CUSTOM_TRAJECTORY_LINE, custom_trajectory_[0]);
   addCustomTrajectory(CUSTOM_TRAJECTORY_CIRCLE, custom_trajectory_[1]);
@@ -132,7 +111,7 @@ void Planar::initOpenManipulator(bool using_actual_robot_state, STRING usb_port,
     /*****************************************************************************
     ** Initialize ㅓoint Actuator
     *****************************************************************************/
-    joint_ = new planar_dynamixel::JointDynamixelProfileControl(control_rate);
+    joint_ = new linear_dynamixel::JointDynamixelProfileControl(control_rate);
 
     // Set communication arguments 
     STRING dxl_comm_arg[2] = {usb_port, baud_rate};
@@ -145,31 +124,56 @@ void Planar::initOpenManipulator(bool using_actual_robot_state, STRING usb_port,
     jointDxlId.push_back(3);
     addJointActuator(JOINT_DYNAMIXEL, joint_, jointDxlId, p_dxl_comm_arg);
 
-    // set joint actuator parameter
+    // Set joint actuator control mode
     STRING joint_dxl_mode_arg = "position_mode";
     void *p_joint_dxl_mode_arg = &joint_dxl_mode_arg;
     setJointActuatorMode(JOINT_DYNAMIXEL, jointDxlId, p_joint_dxl_mode_arg);
 
     /*****************************************************************************
+    ** Initialize Tool Actuator
+    *****************************************************************************/
+    tool_ = new linear_dynamixel::ToolDynamixel();
+
+    // Set tool actuator id 
+    uint8_t toolDxlId = 4;
+    addToolActuator(TOOL_DYNAMIXEL, tool_, toolDxlId, p_dxl_comm_arg);
+
+    // Set tool actuator control mode 
+    STRING tool_dxl_mode_arg = "position_mode";
+    void *p_tool_dxl_mode_arg = &tool_dxl_mode_arg;
+    setToolActuatorMode(TOOL_DYNAMIXEL, p_tool_dxl_mode_arg);
+
+    /*****************************************************************************
     ** Enable actuators and Receive actuator values 
     *****************************************************************************/
-    // Eanble all actuators 
+    // Enable All Actuators 
     enableAllActuator();
-    
+
     // Receive current angles from all actuators 
     receiveAllJointActuatorValue();
+    receiveAllToolActuatorValue();
   }
 }
 
 /*****************************************************************************
 ** Process actuator values received from external controllers
 *****************************************************************************/
-void Planar::processOpenManipulator(double present_time)  
+void Linear::processOpenManipulator(double present_time)  
 {
   if (present_time - prev_control_time_ >= CONTROL_RATE)  
   {
     JointWaypoint goal_joint_value = getJointGoalValueFromTrajectory(present_time);
+    JointWaypoint goal_tool_value  = getToolGoalValue();
+
+    if (using_actual_robot_state_)
+    {
+      receiveAllJointActuatorValue();   
+      receiveAllToolActuatorValue();    
+    }
+
     if(goal_joint_value.size() != 0) sendAllJointActuatorValue(goal_joint_value);   
+    if(goal_tool_value.size() != 0) sendAllToolActuatorValue(goal_tool_value);
+    solveForwardKinematics(); 
 
     // Set previous control time
     prev_control_time_ = millis()/1000.0;
@@ -180,31 +184,31 @@ void Planar::processOpenManipulator(double present_time)
 ** State Functions
 *****************************************************************************/
 // Check if using acutal robot 
-bool Planar::getUsingActualRobotState() 
+bool Linear::getUsingActualRobotState() 
 {
   return using_actual_robot_state_;
 }
 
 /* Check if the program read data within control rate) */
-bool Planar::getReceiveDataFlag()  
+bool Linear::getReceiveDataFlag()  
 {
   return receive_data_flag_;
 }
 
 /* Get the previous time when data were received */
-double Planar::getPrevReceiveTime() 
+double Linear::getPrevReceiveTime() 
 {
   return prev_receive_time_;
 }
 
 /* Set whether data were received or not */
-void Planar::setReceiveDataFlag(bool receive_data_flag) 
+void Linear::setReceiveDataFlag(bool receive_data_flag) 
 {
   receive_data_flag_ = receive_data_flag;
 }
 
 /* Set the previous time when data were received */
-void Planar::setPrevReceiveTime(double prev_receive_time)  
+void Linear::setPrevReceiveTime(double prev_receive_time)  
 {
   prev_receive_time_ = prev_receive_time;
 }
