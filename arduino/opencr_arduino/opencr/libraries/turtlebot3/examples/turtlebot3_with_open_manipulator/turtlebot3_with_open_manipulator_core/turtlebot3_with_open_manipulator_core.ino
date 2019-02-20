@@ -500,7 +500,7 @@ void updateJointStates(void)
 
   for (uint8_t num = 0; num < (joint_cnt + gripper_cnt); num++)
   {
-    if (num > joint_cnt)
+    if (num >= joint_cnt)
       get_joint_position[num] = get_joint_position[num] * OPEN_MANIPULATOR_GRIPPER_OFFSET;
 
     joint_states_pos[WHEEL_NUM + num] = get_joint_position[num];
