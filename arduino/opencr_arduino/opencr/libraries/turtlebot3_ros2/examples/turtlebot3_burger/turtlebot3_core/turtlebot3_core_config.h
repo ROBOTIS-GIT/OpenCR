@@ -26,9 +26,9 @@
 
 #include <math.h>
 
-#define HARDWARE_VER "0.1.0"
-#define SOFTWARE_VER "0.1.0"
-#define FIRMWARE_VER "0.1.0"
+#define HARDWARE_VER "1.0.0"
+#define SOFTWARE_VER "1.0.0"
+#define FIRMWARE_VER "1.0.1"
 
 #define SENSOR_STATE_PUBLISH_FREQUENCY         30    //hz
 #define VERSION_INFORMATION_PUBLISH_FREQUENCY  1    //hz 
