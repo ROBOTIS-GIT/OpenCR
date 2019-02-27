@@ -128,7 +128,7 @@ uint32_t current_offset;
 /*******************************************************************************
 * ROS Parameter
 *******************************************************************************/
-char get_prefix[10];
+char get_prefix[100];
 char* get_tf_prefix = get_prefix;
 
 char odom_header_frame_id[30];
