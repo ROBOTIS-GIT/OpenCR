@@ -24,6 +24,8 @@
 #endif
 
 
+#define DXL_LED_RX            BDPIN_LED_USER_1
+#define DXL_LED_TX            BDPIN_LED_USER_2
 
 
 uint32_t dxl_hw_begin(uint8_t baud);

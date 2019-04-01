@@ -9,13 +9,8 @@
 
 #include "dxl_hw.h"
 
-
-
-
-
-
-
-
+/* For debug */
+uint32_t tx_led_count, rx_led_count;
 
 /*---------------------------------------------------------------------------
      TITLE   : dxl_hw_begin
@@ -25,6 +20,8 @@ uint32_t dxl_hw_begin(uint8_t baud)
 {
   uint32_t Baudrate = 0;
 
+  pinMode( DXL_LED_RX, OUTPUT);
+  pinMode( DXL_LED_TX, OUTPUT);
 
   pinMode( BDPIN_DXL_PWR_EN, OUTPUT );
   dxl_hw_power_disable();
@@ -122,6 +119,8 @@ void dxl_hw_power_disable(void)
 ---------------------------------------------------------------------------*/
 uint8_t dxl_hw_read(void)
 {
+  rx_led_count = 3;
+
   return DXL_PORT.read();
 }
 
@@ -151,6 +150,8 @@ void dxl_hw_write(uint8_t *p_data, uint32_t length)
   {
     DXL_PORT.write(p_data[i]);
   }
+  DXL_PORT.flush();
+  tx_led_count = 3;
 
   dxl_hw_tx_disable();
 }
