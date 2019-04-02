@@ -26,9 +26,9 @@
 
 #include <math.h>
 
-#define HARDWARE_VER "0.1.0"
-#define SOFTWARE_VER "0.1.0"
-#define FIRMWARE_VER "0.1.0"
+#define HARDWARE_VER "1.0.0"
+#define SOFTWARE_VER "1.0.0"
+#define FIRMWARE_VER "1.0.1"
 
 #define SENSOR_STATE_PUBLISH_FREQUENCY         30    //hz
 #define VERSION_INFORMATION_PUBLISH_FREQUENCY  1    //hz 
@@ -195,9 +195,9 @@ public:
     DEBUG_PRINT("\r\n [Publisher Create]   /imu            : "); DEBUG_PRINT((imu_pub_!=NULL?"Success":"Fail")); DEBUG_PRINT(this->err_code);
 
     // Joint(Dynamixel) state of Turtlebot3
-    joint_states_pub_  = this->createPublisher<sensor_msgs::JointState>("joint_states");
-    this->createWallFreq(JOINT_STATE_PUBLISH_FREQUENCY, (ros2::CallbackFunc)publishJointState, NULL, joint_states_pub_);
-    DEBUG_PRINT("\r\n [Publisher Create]   /joint_states   : "); DEBUG_PRINT((joint_states_pub_!=NULL?"Success":"Fail")); DEBUG_PRINT(this->err_code);
+    // joint_states_pub_  = this->createPublisher<sensor_msgs::JointState>("joint_states");
+    // this->createWallFreq(JOINT_STATE_PUBLISH_FREQUENCY, (ros2::CallbackFunc)publishJointState, NULL, joint_states_pub_);
+    // DEBUG_PRINT("\r\n [Publisher Create]   /joint_states   : "); DEBUG_PRINT((joint_states_pub_!=NULL?"Success":"Fail")); DEBUG_PRINT(this->err_code);
 
     // // (Not necessary) Battey state of Turtlebot3 
     // battery_state_pub_ = this->createPublisher<sensor_msgs::BatteryState>("battery_state");
@@ -246,7 +246,7 @@ private:
   //ros2::Publisher<nav_msgs::Odometry>*            odom_pub_;
   ros2::Publisher<turtlebot3_msgs::SensorState>*  sensor_state_pub_;
   ros2::Publisher<sensor_msgs::Imu>*              imu_pub_;
-  ros2::Publisher<sensor_msgs::JointState>*       joint_states_pub_;
+  // ros2::Publisher<sensor_msgs::JointState>*       joint_states_pub_;
   ros2::Publisher<turtlebot3_msgs::VersionInfo>*  version_info_pub_;
   
   //ros2::Publisher<sensor_msgs::BatteryState>*     battery_state_pub_;

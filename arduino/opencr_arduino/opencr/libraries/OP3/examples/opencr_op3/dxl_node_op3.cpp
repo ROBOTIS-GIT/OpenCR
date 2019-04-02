@@ -33,7 +33,6 @@ void dxl_node_op3_factory_reset(void);
 void dxl_node_op3_btn_loop(void);
 
 
-
 //-- dxl sp driver function
 //
 dxl_error_t ping(dxl_t *p_dxl);
@@ -54,6 +53,7 @@ static void    dxl_node_write_byte(uint16_t addr, uint8_t data);
 static BOOL dxl_node_check_range(uint16_t addr, uint32_t addr_ptr, uint8_t length);
 void dxl_node_op3_change_baud(void);
 
+static void dxl_node_update_tx_rx_led();
 
 /*---------------------------------------------------------------------------
      TITLE   : dxl_node_op3_init
@@ -61,13 +61,7 @@ void dxl_node_op3_change_baud(void);
 ---------------------------------------------------------------------------*/
 void dxl_node_op3_init(void)
 {
-  uint16_t i;
-
-
   p_dxl_mem = (dxl_mem_op3_t *)&mem.data;
-
-
-  dxl_error_t dxl_err;
 
 
   dxlInit(&dxl_sp, DXL_PACKET_VER_2_0);
@@ -118,17 +112,11 @@ void dxl_node_op3_init(void)
 ---------------------------------------------------------------------------*/
 void dxl_node_op3_loop(void)
 {
-  static uint32_t tTime[16];
   static uint8_t  gyro_cali_state = 0;
-  uint8_t ret;
   uint8_t i;
-  uint8_t ch;
-
-
-
 
   dxl_process_packet();
-
+  dxl_node_update_tx_rx_led();
 
 
   dxl_hw_op3_update();
@@ -453,9 +441,6 @@ void dxl_node_op3_change_baud(void)
 ---------------------------------------------------------------------------*/
 uint8_t dxl_node_read_byte(uint16_t addr)
 {
-  uint8_t data;
-
-
   if( RANGE_CHECK(addr, p_dxl_mem->Button) )
   {
     p_dxl_mem->Button  = dxl_hw_op3_button_read(PIN_BUTTON_S1)<<0;
@@ -535,7 +520,6 @@ BOOL dxl_node_check_range(uint16_t addr, uint32_t addr_ptr, uint8_t length)
 {
   BOOL ret = FALSE;
   uint32_t addr_offset;
-  uint16_t i;
 
   addr_offset = addr_ptr - (uint32_t)p_dxl_mem;
 
@@ -629,7 +613,6 @@ dxl_error_t read(dxl_t *p_dxl)
   dxl_error_t ret = DXL_RET_OK;
   uint16_t addr;
   uint16_t length;
-  uint16_t i;
   uint8_t data[DXL_MAX_BUFFER];
 
 
@@ -723,7 +706,6 @@ dxl_error_t sync_read(dxl_t *p_dxl)
   uint16_t addr;
   uint16_t length;
   uint8_t  *p_data;
-  uint16_t index;
   uint16_t i;
   uint16_t rx_id_cnt;
   uint8_t data[DXL_MAX_BUFFER];
@@ -869,7 +851,6 @@ dxl_error_t bulk_read(dxl_t *p_dxl)
   uint16_t addr;
   uint16_t length;
   uint8_t  *p_data;
-  uint16_t remain_length;
   uint16_t i;
   uint16_t rx_id_cnt;
   uint8_t data[DXL_MAX_BUFFER];
@@ -949,9 +930,7 @@ dxl_error_t bulk_write(dxl_t *p_dxl)
   uint16_t addr;
   uint16_t length;
   uint8_t  *p_data;
-  uint16_t remain_length;
   uint16_t index;
-  uint8_t  id;
 
   if (p_dxl->rx.id != DXL_GLOBAL_ID)
   {
@@ -959,12 +938,10 @@ dxl_error_t bulk_write(dxl_t *p_dxl)
   }
 
 
-
   index = 0;
   while(1)
   {
     p_data = &p_dxl->rx.p_param[index];
-    id     = p_data[0];
     addr   = (p_data[2]<<8) | p_data[1];
     length = (p_data[4]<<8) | p_data[3];
 
@@ -994,4 +971,43 @@ dxl_error_t bulk_write(dxl_t *p_dxl)
   }
 
   return ret;
+}
+
+
+extern uint32_t tx_led_count, rx_led_count;
+
+static void dxl_node_update_tx_rx_led()
+{
+  static uint32_t tx_led_update_time = millis();
+  static uint32_t rx_led_update_time = millis();
+
+  if( (millis()-tx_led_update_time) > 50 )
+  {
+    tx_led_update_time = millis();
+
+    if( tx_led_count )
+    {
+      digitalWriteFast(DXL_LED_TX, !digitalReadFast(DXL_LED_TX));
+      tx_led_count--;
+    }
+    else
+    {
+      digitalWriteFast(DXL_LED_TX, HIGH);
+    }
+  }
+
+  if( (millis()-rx_led_update_time) > 50 )
+  {
+    rx_led_update_time = millis();
+
+    if( rx_led_count )
+    {
+      digitalWriteFast(DXL_LED_RX, !digitalReadFast(DXL_LED_RX));
+      rx_led_count--;
+    }
+    else
+    {
+      digitalWriteFast(DXL_LED_RX, HIGH);
+    }
+  }
 }

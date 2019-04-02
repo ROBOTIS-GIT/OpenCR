@@ -31,7 +31,6 @@
 //-- External Variables
 //
 
-
 //-- Internal Functions
 //
 static dxl_error_t dxlRxPacketVer2_0(dxl_t *p_packet, uint8_t data_in);
@@ -238,11 +237,15 @@ bool dxlOpenPort(dxl_t *p_packet, uint8_t ch, uint32_t baud)
 
 uint32_t dxlRxAvailable(dxl_t *p_packet)
 {
+  (void)(p_packet);
+
   return dxl_hw_available();
 }
 
 uint8_t dxlRxRead(dxl_t *p_packet)
 {
+  (void)(p_packet);
+
   return dxl_hw_read();
 }
 
@@ -580,7 +583,6 @@ dxl_error_t dxlTxPacket(dxl_t *p_packet)
   dxl_error_t ret = DXL_RET_OK;
 
   dxl_hw_write(p_packet->tx.data, p_packet->tx.packet_length);
-
 
 /*
   for(int i=0; i<p_packet->tx.packet_length; i++)

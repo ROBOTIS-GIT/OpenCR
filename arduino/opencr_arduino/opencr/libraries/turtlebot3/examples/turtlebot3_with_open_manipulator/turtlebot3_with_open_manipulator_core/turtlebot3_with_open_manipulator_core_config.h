@@ -45,7 +45,7 @@
 
 #include <math.h>
 
-#define FIRMWARE_VER "2.0.0"
+#define FIRMWARE_VER "2.0.1"
 
 #define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
 #define IMU_PUBLISH_FREQUENCY                  200  //hz
@@ -128,7 +128,7 @@ uint32_t current_offset;
 /*******************************************************************************
 * ROS Parameter
 *******************************************************************************/
-char get_prefix[10];
+char get_prefix[100];
 char* get_tf_prefix = get_prefix;
 
 char odom_header_frame_id[30];
