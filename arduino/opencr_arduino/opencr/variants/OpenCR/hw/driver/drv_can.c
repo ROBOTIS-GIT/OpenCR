@@ -221,6 +221,9 @@ uint32_t drvCanWrite(uint8_t channel, uint32_t id, uint8_t *p_data, uint32_t len
   if((channel > DRV_CAN_MAX_CH)||(id > 0x1FFFFFFF))
     return 0;
 
+  if(p_data == NULL && length > 0)
+    return 0;   
+
   uint32_t tx_len, sent_len, i;
   CAN_HandleTypeDef *p_hCANx = drv_can_tbl[channel].p_hCANx;
   CAN_TxHeaderTypeDef tx_header;
@@ -244,6 +247,7 @@ uint32_t drvCanWrite(uint8_t channel, uint32_t id, uint8_t *p_data, uint32_t len
   tx_header.RTR   = CAN_RTR_DATA;
 
   sent_len = 0;
+
   while(sent_len < length)
   {
     tx_len = length - sent_len;
@@ -265,6 +269,17 @@ uint32_t drvCanWrite(uint8_t channel, uint32_t id, uint8_t *p_data, uint32_t len
       while(HAL_CAN_GetTxMailboxesFreeLevel(p_hCANx) != 3);
 
       sent_len += tx_len;
+    }
+  }
+
+  if(length == 0)
+  {
+    tx_header.DLC = 0;
+
+    if(HAL_CAN_AddTxMessage(p_hCANx, &tx_header, tx_data, &tx_mailbox) == HAL_OK)
+    {
+      /* Wait transmission complete */
+      while(HAL_CAN_GetTxMailboxesFreeLevel(p_hCANx) != 3);
     }
   }
 
