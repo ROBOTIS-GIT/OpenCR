@@ -81,7 +81,7 @@ public:
                Eigen::Vector3d relative_position,
                Eigen::Matrix3d relative_orientation,
                int8_t tool_id = -1, 
-               double max_position_limit =M_PI, 
+               double max_position_limit = M_PI, 
                double min_position_limit = -M_PI,
                double coefficient = 1.0,
                double mass = 0.0,
