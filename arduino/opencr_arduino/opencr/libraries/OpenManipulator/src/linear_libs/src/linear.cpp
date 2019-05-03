@@ -50,8 +50,8 @@ void Linear::initOpenManipulator(bool using_actual_robot_state, STRING usb_port,
   addJoint("joint1",  // my name
            "world",   // parent name
            "joint2",  // child name
-           math::vector3(0.0, 0.0, 0.400),                  // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
            Z_AXIS,    // axis of rotation
            1,         // actuator id
            5.0/3.0*M_PI,   // max_limit
@@ -61,8 +61,8 @@ void Linear::initOpenManipulator(bool using_actual_robot_state, STRING usb_port,
   addJoint("joint2",  // my name
            "joint1",  // parent name
            "joint3",  // child name
-           math::vector3(0.0, 0.0, 0.0),                    // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
            Z_AXIS,    // axis of rotation
            2,         // actuator id
            5.0/3.0*M_PI,   // max_limit
@@ -72,8 +72,8 @@ void Linear::initOpenManipulator(bool using_actual_robot_state, STRING usb_port,
   addJoint("joint3",  // my name
            "joint2",  // parent name
            "tool",    // child name
-           math::vector3(0.0, 0.0, 0.0),                    // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
            Z_AXIS,    // axis of rotation
            3,         // actuator id
            2.1*M_PI,  // max_limit
@@ -81,11 +81,11 @@ void Linear::initOpenManipulator(bool using_actual_robot_state, STRING usb_port,
 
   addTool("tool",     // my name
           "joint3",   // parent name
-          math::vector3(0.0, 0.0, 0.0),                    // relative position
-          math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+          math::vector3(0.0, 0.0, 0.0),                    // Not used
+          math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
           4,          // actuator id
-          0.100,      // max gripper limit (0.01 m)
-          -0.100);    // min gripper limit (-0.01 m)
+          0.500,      // max gripper limit 
+          -0.500);    // min gripper limit 
 
   /*****************************************************************************
   ** Initialize Kinematics 

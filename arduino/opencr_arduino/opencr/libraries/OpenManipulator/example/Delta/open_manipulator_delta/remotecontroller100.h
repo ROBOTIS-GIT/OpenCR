@@ -34,8 +34,9 @@ void initRC100()
   rc100.begin(1); // Using Serial2(=SerialBT1)
 }
 
-//---------------------------------------------------------------------------------------------------- 
-/* Receive data from RC100 */
+/*****************************************************************************
+** Receive data from RC100
+*****************************************************************************/
 void receiveDataFromRC100(Delta* delta)
 {
   if (!delta->getReceiveDataFlag())
@@ -73,14 +74,15 @@ void receiveDataFromRC100(Delta* delta)
         delta->makeJointTrajectory(goal_position, 1.0);
       }
       
-      // 
+//----------------------------------------------//
+//         DO NOT MODIFY THE BELOW CODE         //
+//----------------------------------------------//
       delta->setReceiveDataFlag(true);
       delta->setPrevReceiveTime(millis()/1000.0); 
     }
   }
   else 
   {
-    // Check if ...
     if (millis()/1000.0 - delta->getPrevReceiveTime() >= RECEIVE_RATE)
     {
       delta->setReceiveDataFlag(false);   

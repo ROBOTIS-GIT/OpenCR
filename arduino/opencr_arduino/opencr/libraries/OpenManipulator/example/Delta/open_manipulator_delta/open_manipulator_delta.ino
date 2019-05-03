@@ -25,44 +25,26 @@ Delta delta;
 
 void setup()
 {
-  /**
-   */
   delta.initDebug();
 
-  /**
-   */
-  initRC100();       
+  initRC100();
 
-  /**
-   */
-  initProcessing();  
+  initProcessing();
 
-  /**
-   */
   initDemo();
 
-  /**
-   */
   delta.initOpenManipulator(true); // true:  using actual hardware
-                                   // false: using only visualization tool 
+                                   // false: using only visualization tool
 }
 
 void loop()
 {
-  /**
-   */
-  receiveDataFromRC100(&delta);     
+  receiveDataFromRC100(&delta);
 
-  /**
-   */
   receiveDataFromProcessing(&delta); 
-  sendDataToProcessing(&delta); 
+  sendDataToProcessing(&delta);
 
-  /**
-   */
   delta.processOpenManipulator(millis()/1000.0);
-  
-  /**
-   */
-  runDemo(&delta); 
+
+  runDemo(&delta);
 }

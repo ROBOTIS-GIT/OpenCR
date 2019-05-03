@@ -80,14 +80,15 @@ void receiveDataFromRC100(Scara* scara)
         scara->makeJointTrajectory(goal_position, 0.5);
       }
 
-      // 
+//----------------------------------------------//
+//         DO NOT MODIFY THE BELOW CODE         //
+//----------------------------------------------//
       scara->setReceiveDataFlag(true);
       scara->setPrevReceiveTime(millis()/1000.0); 
     }
   }
   else 
   {
-    // Check if ...
     if (millis()/1000.0 - scara->getPrevReceiveTime() >= RECEIVE_RATE)
     {
       scara->setReceiveDataFlag(false);   

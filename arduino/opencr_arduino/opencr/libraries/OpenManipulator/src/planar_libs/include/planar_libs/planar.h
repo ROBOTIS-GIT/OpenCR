@@ -31,7 +31,6 @@
 
 #define DXL_SIZE 3
 #define JOINT_DYNAMIXEL "joint_dxl"
-#define TOOL_DYNAMIXEL "tool_dxl"
 
 #define RECEIVE_RATE 0.100 //s
 #define CONTROL_RATE 0.010 //s

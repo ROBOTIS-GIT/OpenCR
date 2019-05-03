@@ -60,7 +60,7 @@ void suctionOnOff(bool onoff)
     pinMode(8, OUTPUT);
     pinMode(12, OUTPUT);
     digitalWrite(8, HIGH);      //suction on
-    digitalWrite(12, HIGH);      //suction on
+    digitalWrite(12, HIGH);     //suction on
   } 
   else 
   {
@@ -69,7 +69,7 @@ void suctionOnOff(bool onoff)
     pinMode(8, OUTPUT);
     pinMode(12, OUTPUT);
     digitalWrite(8, LOW);      //suction off
-    digitalWrite(12, LOW);      //suction off
+    digitalWrite(12, LOW);     //suction off
   }
 }
 
@@ -248,35 +248,32 @@ void runDemo(Delta *delta)
             sub_motion_cnt[0] ++;
         break;
         case 15:
-          drawObj(delta, CUSTOM_TRAJECTORY_CIRCLE, 0.069, 2, -PI/6.0, 2.0); 
-        break;
-        case 16:
-          delta->sleepTrajectory(2.0); motion_cnt[0] ++;
-        break;
-        case 17:
           if(moveBall(delta, 10, 6, 0.15, 0))
           { sub_motion_cnt[0] = 0; motion_cnt[0] ++; }
           else 
             sub_motion_cnt[0] ++;
         break;
-        case 18:
+        case 16:
           if(moveBall(delta, 7, 5, 0.15, 0)) 
           { sub_motion_cnt[0] = 0; motion_cnt[0] ++; }
           else 
             sub_motion_cnt[0] ++;
         break;
-        case 19:
+        case 17:
           if(moveBall(delta, 8, 3, 0.15, 0)) 
           { sub_motion_cnt[0] = 0; motion_cnt[0] ++; }
           else 
             sub_motion_cnt[0] ++;
         break;
-        case 20:
+        case 18:
           if(moveBall(delta, 9, 1, 0.15, 0)) 
           { sub_motion_cnt[0] = 0; motion_cnt[0] ++; }
           else 
             sub_motion_cnt[0] ++;
         break;
+        case 19:
+          delta->makeTaskTrajectory("tool", math::vector3(0,0,0), 1.0);
+        break;        
       }
     }
   }

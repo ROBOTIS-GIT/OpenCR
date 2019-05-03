@@ -30,8 +30,6 @@
 #define CUSTOM_TRAJECTORY_HEART   "custom_trajectory_heart"
 
 #define DXL_SIZE 6
-
-#define DXL_SIZE 4
 #define JOINT_DYNAMIXEL "joint_dxl"
 
 #define RECEIVE_RATE 0.100 // unit: s

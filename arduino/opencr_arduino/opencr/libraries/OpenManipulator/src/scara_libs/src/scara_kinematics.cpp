@@ -140,15 +140,15 @@ bool SolverUsingCRAndGeometry::inverseKinematicsSolverUsingGeometry(Manipulator 
   // Compute the length of Position Difference and Target Angle
   double error=1000.0; // random large initial value
 
-  for (uint16_t count=0; count<=900; count++){  
+  for (uint16_t count=0; count<=900; count++){
     double theta=(double)count/10*DEG2RAD;
 
     // Assume theta = target_angle[1] = target_angle[2]
-    double alpha = acos((link[1]*link[1]+link[2]*link[2]-link[0]*link[0]-target_pose_length*target_pose_length+2*link[1]*link[2]*cos(theta)) 
+    double alpha = acos((link[1]*link[1]+link[2]*link[2]-link[0]*link[0]-target_pose_length*target_pose_length+2*link[1]*link[2]*cos(theta))
                   / (-2*target_pose_length*link[0]));
-    double beta = acos((link[0]*link[0]+link[1]*link[1]-link[2]*link[2]-target_pose_length*target_pose_length+2*link[0]*link[1]*cos(theta)) 
+    double beta = acos((link[0]*link[0]+link[1]*link[1]-link[2]*link[2]-target_pose_length*target_pose_length+2*link[0]*link[1]*cos(theta))
                   / (-2*target_pose_length*link[2]));
-    double temp_error = abs(alpha + beta - 2*theta); 
+    double temp_error = abs(alpha + beta - 2*theta);
 
     if (temp_error < error){
       target_angle[0].position = PI/2 -acos(temp_target_pose[1]/target_pose_length) - alpha;

@@ -45,7 +45,7 @@ void stopDemo(Linear *linear)
   target_angle.push_back(0.0);
   target_angle.push_back(0.0);
   linear->makeJointTrajectory(target_angle, 1);
-  linear->makeToolTrajectory("tool", -0.007);        
+  linear->makeToolTrajectory("tool", -0.007);
 
   // Reset the count variables
   motion_cnt[0] = 0;
@@ -76,21 +76,21 @@ void runDemo(Linear *linear)
     stopDemo(linear);    
   }
 
-  if (linear->getMovingState()) 
+  if (linear->getMovingState())
   {
     return;
   }
-  else 
+  else
   {
     if (start_demo_flag)
     {
       switch(motion_cnt[0])
       {
         case 0:
-          linear->makeToolTrajectory("tool", 0.007);
-          linear->sleepTrajectory(2.0); 
+          linear->makeToolTrajectory("tool", -0.49);
+          linear->sleepTrajectory(2.0);
           motion_cnt[0] ++;
-          break;
+        break;
         case 1:
           {
           double joint_angle[2];
@@ -103,12 +103,12 @@ void runDemo(Linear *linear)
           linear->makeJointTrajectory(target_angle, 1.0);
           motion_cnt[0] ++;
           }
-          break;
+        break;
         case 2:
-          linear->makeToolTrajectory("tool", -0.007);        
+          linear->makeToolTrajectory("tool", 0.49);        
           linear->sleepTrajectory(2.0); 
           motion_cnt[0] ++;
-          break;
+        break;
         case 3:
           {
           double joint_angle[2];
@@ -121,7 +121,7 @@ void runDemo(Linear *linear)
           linear->makeJointTrajectory(target_angle, 1.0);
           motion_cnt[0] ++;
           }
-          break;
+        break;
         case 4:
           {
           std::vector<double> target_angle;
@@ -131,27 +131,31 @@ void runDemo(Linear *linear)
           linear->makeJointTrajectory(target_angle, 0.3);
           motion_cnt[0] ++;
           }
-          break;
+        break;
         case 5:
-          linear->makeToolTrajectory("tool", 0.007);        
-          linear->sleepTrajectory(2.0); 
+          linear->sleepTrajectory(1.0); 
           motion_cnt[0] ++;
-          break;
+        break;
         case 6:
-          linear->makeToolTrajectory("tool", -0.007);        
+          linear->makeToolTrajectory("tool", -0.49);        
           linear->sleepTrajectory(2.0); 
           motion_cnt[0] ++;
-          break;
+        break;
         case 7:
+          linear->makeToolTrajectory("tool", 0.49);        
+          linear->sleepTrajectory(2.0); 
+          motion_cnt[0] ++;
+        break;
+        case 8:
           {
           std::vector<double> target_angle;
           target_angle.push_back(0.0);
           target_angle.push_back(0.0);
           target_angle.push_back(-2*PI);
           linear->makeJointTrajectory(target_angle, 0.3);
-          motion_cnt[0] = 0;
+          motion_cnt[0] ++;
           }
-          break;
+        break;
       }
     }
   }

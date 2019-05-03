@@ -65,19 +65,23 @@ void sendToolDataToProcessing(bool onoff)
 }
 
 // Send tool data(values) to Processing 
-void sendToolDataToProcessing(JointValue value)
+void sendToolDataToProcessing(JointWaypoint tool_angle_vector)
 {
   Serial.print("tool");
-  Serial.print(",");
-  Serial.print(value.position);
+
+  for (int i = 0; i < (int)tool_angle_vector.size(); i++)
+  {
+    Serial.print(",");
+    Serial.print(tool_angle_vector.at(i).position,3);
+  }
   Serial.print("\n");
 }
 
 // Send joint and tool data(values) to Processing 
 void sendDataToProcessing(Linear *linear)
 {
-  sendJointDataToProcessing(linear->getAllActiveJointValue());
-  sendToolDataToProcessing(linear->getToolValue("tool"));
+  sendJointDataToProcessing(linear->getTrajectory()->getManipulator()->getAllJointValue());
+  sendToolDataToProcessing(linear->getTrajectory()->getManipulator()->getAllToolValue());
 }
 
 /*****************************************************************************
@@ -153,7 +157,7 @@ void receiveDataFromProcessing(Linear *linear)
       // Joint space control tab 
       else if (cmd[0] == "joint")
       {
-        //
+        // Joint Torque on/off
         if (cmd[1] == "on")
         {
           if (linear->getUsingActualRobotState())    
@@ -168,7 +172,7 @@ void receiveDataFromProcessing(Linear *linear)
             linear->disableAllJointActuator();
         }
 
-        //
+        // Joint Position Control
         else
         {
           std::vector<double> goal_position;
@@ -183,11 +187,11 @@ void receiveDataFromProcessing(Linear *linear)
       // Tool control tab 
       else if (cmd[0] == "tool")
       {
-        // 
+        // Tool Torque on/off
         if (cmd[1] == "y")
-          linear->makeToolTrajectory("tool", -0.007);
+          linear->makeToolTrajectory("tool", -0.49);
         else if (cmd[1] == "n")
-          linear->makeToolTrajectory("tool", 0.007);
+          linear->makeToolTrajectory("tool", 0.49);
 
         // Torque On/Off
         else if (cmd[1] == "on")
@@ -201,7 +205,7 @@ void receiveDataFromProcessing(Linear *linear)
             linear->disableAllToolActuator();
         }
 
-        //
+        // Tool Position Control
         else
           linear->makeToolTrajectory("tool", (double)cmd[1].toFloat());
       }
@@ -217,6 +221,8 @@ void receiveDataFromProcessing(Linear *linear)
           linear->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.0, 0.006, 0.0), 0.2);
         else if (cmd[1] == "r")
           linear->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.0, -0.006, 0.0), 0.2);
+        else
+          linear->makeTaskTrajectory("tool", math::vector3(0.0, 0.0, 0.0), 0.2);
       }
 
       // Demo Control tab 
@@ -228,14 +234,15 @@ void receiveDataFromProcessing(Linear *linear)
           stopDemo(linear);
       }
 
-      // ...
+//----------------------------------------------//
+//         DO NOT MODIFY THE BELOW CODE         //
+//----------------------------------------------//
       linear->setReceiveDataFlag(true);
       linear->setPrevReceiveTime(millis()/1000.0); 
     }
   }
-  else 
+  else
   {
-    // Check if ...
     if (millis()/1000.0 - linear->getPrevReceiveTime() >= RECEIVE_RATE)
     {
       linear->setReceiveDataFlag(false); 

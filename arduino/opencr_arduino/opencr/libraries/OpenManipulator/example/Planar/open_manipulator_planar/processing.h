@@ -26,7 +26,7 @@
 ** Initialize baudrate for using Processing
 *****************************************************************************/
 void initProcessing()
-{ 
+{
   Serial.begin(57600);
 
   Serial.print("Initial actuator angles: ");
@@ -36,29 +36,16 @@ void initProcessing()
     Serial.print(",");
   }
   Serial.println("");
-  delay(300);             
+  delay(300);
 }
 
 /*****************************************************************************
 ** Send data to Processing
 *****************************************************************************/
-// Send active joint data to Processing 
-void sendActiveJointDataToProcessing(JointWaypoint joint_angle_vector) 
+// Send joint data to Processing 
+void sendJointDataToProcessing(JointWaypoint joint_angle_vector) 
 {
   Serial.print("joint");
-
-  for (int i = 0; i < (int)joint_angle_vector.size(); i++)
-  {
-    Serial.print(",");
-    Serial.print(joint_angle_vector.at(i).position,3);
-  }
-  Serial.print("\n");
-}
-
-// Send passive joint data to Processing 
-void sendPassiveJointDataToProcessing(JointWaypoint joint_angle_vector) 
-{
-  Serial.print("passive joint");
 
   for (int i = 0; i < (int)joint_angle_vector.size(); i++)
   {
@@ -71,9 +58,7 @@ void sendPassiveJointDataToProcessing(JointWaypoint joint_angle_vector)
 // Send joint and tool values to Processing 
 void sendDataToProcessing(Planar *planar)
 {
-  // sendActiveJointDataToProcessing(planar->getAllActiveJointValue());
-  sendActiveJointDataToProcessing(planar->getTrajectory()->getManipulator()->getAllJointValue());
-  // sendPassiveJointDataToProcessing(planar->getTrajectory()->getManipulator()->getAllJointValue());
+  sendJointDataToProcessing(planar->getTrajectory()->getManipulator()->getAllJointValue());
 }
 
 /*****************************************************************************
@@ -149,13 +134,13 @@ void receiveDataFromProcessing(Planar *planar)
       // Joint space control tab 
       else if (cmd[0] == "joint")
       {
-        //
+        // Joint Torque on/off
         if (cmd[1] == "on")
         {
           if (planar->getUsingActualRobotState())    
           {
             planar->enableAllJointActuator();
-            sendActiveJointDataToProcessing(planar->getAllActiveJointValue());
+            sendJointDataToProcessing(planar->getTrajectory()->getManipulator()->getAllJointValue());
           }
         }
         else if (cmd[1] == "off")
@@ -164,16 +149,16 @@ void receiveDataFromProcessing(Planar *planar)
             planar->disableAllJointActuator();
         }
 
-        //
-        else
-        {
-          std::vector<double> goal_position;
-          for (uint8_t index = 0; index < DXL_SIZE; index++)
-          {
-            goal_position.push_back((double)cmd[index + 1].toFloat());
-          }
-          planar->makeJointTrajectory(goal_position, 1.0); 
-        }
+        // Joint Position Control
+        // else
+        // {
+        //   std::vector<double> goal_position;
+        //   for (uint8_t index = 0; index < DXL_SIZE; index++)
+        //   {
+        //     goal_position.push_back((double)cmd[index + 1].toFloat());
+        //   }
+        //   planar->makeJointTrajectory(goal_position, 1.0); 
+        // }
       }
 
       // Task space control tab 
@@ -187,12 +172,8 @@ void receiveDataFromProcessing(Planar *planar)
           planar->makeTaskTrajectory("tool", math::vector3(0.0,  0.020, 0.0), 0.15);
         else if (cmd[1] == "r")
           planar->makeTaskTrajectory("tool", math::vector3(0.0, -0.020, 0.0), 0.15);
-      }
-
-      // Task space control tab
-      else if (cmd[0] == "position")
-      {
-        planar->makeTaskTrajectory("tool", math::vector3((double)cmd[1].toFloat(), (double)cmd[2].toFloat(), 0.0), 0.15);
+        else
+          planar->makeTaskTrajectory("tool", math::vector3(0.0, 0.0, 0.0), 0.15);
       }
 
       // Demo Control tab
@@ -204,14 +185,15 @@ void receiveDataFromProcessing(Planar *planar)
           stopDemo(planar);
       }
 
-      // ...
+//----------------------------------------------//
+//         DO NOT MODIFY THE BELOW CODE         //
+//----------------------------------------------//
       planar->setReceiveDataFlag(true);
       planar->setPrevReceiveTime(millis()/1000.0); 
     }
   }
   else 
   {
-    // Check if ...
     if (millis()/1000.0 - planar->getPrevReceiveTime() >= RECEIVE_RATE)
     {
       planar->setReceiveDataFlag(false); 

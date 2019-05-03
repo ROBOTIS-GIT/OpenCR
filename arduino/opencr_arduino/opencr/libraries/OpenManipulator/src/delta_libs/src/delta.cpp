@@ -39,7 +39,7 @@ void Delta::initOpenManipulator(bool using_actual_robot_state, STRING usb_port, 
   /*****************************************************************************
   ** Set if using actual robot
   *****************************************************************************/
-  using_actual_robot_state_ = using_actual_robot_state;  
+  using_actual_robot_state_ = using_actual_robot_state;
   
   /*****************************************************************************
   ** Initialize Manipulator Parameters
@@ -49,32 +49,96 @@ void Delta::initOpenManipulator(bool using_actual_robot_state, STRING usb_port, 
 
   addJoint("joint1",  // my name
            "world",   // parent name
-           "joint2",  // child name
-           math::vector3(0.012, 0.0, 0.017),                // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+           "joint4",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
            Z_AXIS,    // axis of rotation
            1);        // actuator id
-                 
+
   addJoint("joint2",  // my name
-           "joint1",  // parent name
-           "joint3",  // child name
-           math::vector3(0.0, 0.0, 0.058),                  // relative position
+           "world",   // parent name
+           "joint5",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
            math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
            Z_AXIS,    // axis of rotation
            2);        // actuator id
 
   addJoint("joint3",  // my name
-           "joint2",  // parent name
-           "joint4",  // child name
-           math::vector3(0.0, 0.0, 0.0),                    // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+           "world",   // parent name
+           "joint6",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,    // axis of rotation
+           3);        // actuator id
+
+  addJoint("joint4",  // my name
+           "joint1",  // parent name
+           "joint7",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
            Z_AXIS,    // axis of rotation
            -1);       // actuator id
 
+  addJoint("joint4_2",  // my name
+           "joint1",  // parent name
+           "joint7",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,    // axis of rotation
+           -1);       // actuator id
+
+  addJoint("joint5",  // my name
+           "joint2",  // parent name
+           "joint8",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,    // axis of rotation
+           -1);       // actuator id
+
+  addJoint("joint5_2",  // my name
+           "joint2",  // parent name
+           "joint8",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,    // axis of rotation
+           -1);       // actuator id
+
+  addJoint("joint6",  // my name
+           "joint3",   // parent name
+           "joint9",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,    // axis of rotation
+           -1);        // actuator id
+
+  addJoint("joint6_2",  // my name
+           "joint3",   // parent name
+           "joint9",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,    // axis of rotation
+           -1);        // actuator id
+
+  addJoint("joint7",  // my name
+           "joint4",   // parent name
+           "tool",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,    // axis of rotation
+           -1);        // actuator id
+
+  addJoint("joint7_2",  // my name
+           "joint4",   // parent name
+           "tool",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,    // axis of rotation
+           -1);        // actuator id
+
   addTool("tool",     // my name
-          "joint6",   // parent name
-          math::vector3(0.0, 0.0, 0.0),                    // relative position
-          math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+          "joint7",   // Not used
+          math::vector3(0.0, 0.0, 0.0),                    // Not used
+          math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
           -1);        // actuator id
 
   /*****************************************************************************
@@ -103,11 +167,11 @@ void Delta::initOpenManipulator(bool using_actual_robot_state, STRING usb_port, 
     *****************************************************************************/
     joint_ = new delta_dynamixel::JointDynamixelProfileControl(control_rate);
 
-    // Set communication arguments 
+    // Set communication arguments
     STRING dxl_comm_arg[2] = {usb_port, baud_rate};
-    void *p_dxl_comm_arg = &dxl_comm_arg; 
+    void *p_dxl_comm_arg = &dxl_comm_arg;
 
-    // Set joint actuator id 
+    // Set joint actuator id
     std::vector<uint8_t> jointDxlId;
     jointDxlId.push_back(1);
     jointDxlId.push_back(2);
@@ -122,34 +186,23 @@ void Delta::initOpenManipulator(bool using_actual_robot_state, STRING usb_port, 
     /*****************************************************************************
     ** Enable actuators and Receive actuator values 
     *****************************************************************************/
-    // Enable All Actuators 
+    // Enable All Actuators
     enableAllActuator();
 
     // Receive current angles from all actuators 
     receiveAllJointActuatorValue();
-    receiveAllToolActuatorValue();
   }
 }
 
 /*****************************************************************************
 ** Process actuator values received from external controllers
 *****************************************************************************/
-void Delta::processOpenManipulator(double present_time)  
+void Delta::processOpenManipulator(double present_time)
 {
-  if (present_time - prev_control_time_ >= CONTROL_RATE)  
+  if (present_time - prev_control_time_ >= CONTROL_RATE)
   {
     JointWaypoint goal_joint_value = getJointGoalValueFromTrajectory(present_time);
-    JointWaypoint goal_tool_value  = getToolGoalValue();
-
-    if (using_actual_robot_state_)
-    {
-      receiveAllJointActuatorValue();   
-      receiveAllToolActuatorValue();    
-    }
-
-    if(goal_joint_value.size() != 0) sendAllJointActuatorValue(goal_joint_value);   
-    if(goal_tool_value.size() != 0) sendAllToolActuatorValue(goal_tool_value);
-    solveForwardKinematics(); 
+    if(goal_joint_value.size() != 0) sendAllJointActuatorValue(goal_joint_value);
 
     // Set previous control time
     prev_control_time_ = millis()/1000.0;

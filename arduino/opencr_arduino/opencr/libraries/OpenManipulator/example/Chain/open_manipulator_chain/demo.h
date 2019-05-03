@@ -19,25 +19,26 @@
 #ifndef DEMO_H_
 #define DEMO_H_
 
-#include <planar_libs.h>
+#include <open_manipulator_libs.h>
 
 bool start_demo_flag;
+bool erasing_flag;
 uint8_t motion_cnt[] = {0};
 uint8_t sub_motion_cnt[] = {0};
 
 /*****************************************************************************
 ** Functions used in runDemo()
 *****************************************************************************/
-// Draw an Object 
-void drawObj(Planar* planar, STRING object, double radius, int num_revolution, double start_angular_position, double move_time)
+// Move in Joint Space 
+void moveJS(OpenManipulator *open_manipulator, double j1, double j2, double j3, double j4, double t)
 {
-  double draw_arg[3]; 
-  draw_arg[0] = radius;                 // Radius (m)
-  draw_arg[1] = num_revolution;         // Number of revolution
-  draw_arg[2] = start_angular_position; // Starting angular position (rad)
-  void* p_draw_arg = &draw_arg;
-
-  planar->makeCustomTrajectory(object, "tool", draw_arg, move_time);
+  static std::vector <double> target_angle;
+  target_angle.clear();
+  target_angle.push_back(j1);
+  target_angle.push_back(j2);
+  target_angle.push_back(j3);
+  target_angle.push_back(j4);
+  open_manipulator->makeJointTrajectory(target_angle,t);
 }
 
 /*****************************************************************************
@@ -49,17 +50,19 @@ void startDemo()
   start_demo_flag = true;
 }
 
-void stopDemo(Planar *planar)
+void stopDemo(OpenManipulator *open_manipulator)
 {
   // Stop the demo
   start_demo_flag = false;
 
   // Move to the default pose.
-  planar->makeTaskTrajectory("tool", math::vector3(0.0, 0.0, 0.0), 2.0);
+  moveJS(open_manipulator, 0.0, 0.0, 0.0, 0.0, 1.0); 
+  open_manipulator->makeToolTrajectory("tool", 0.0);
 
   // Reset the count variables
   motion_cnt[0] = 0;
   sub_motion_cnt[0] = 0;
+  erasing_flag = false;
 }
 
 /*****************************************************************************
@@ -70,12 +73,16 @@ void initDemo()
   start_demo_flag = false;
   motion_cnt[0] = 0;
   sub_motion_cnt[0] = 0;
+  erasing_flag = false;
+
+  pinMode(BDPIN_PUSH_SW_1, INPUT);
+  pinMode(BDPIN_PUSH_SW_2, INPUT);
 }
 
 /*****************************************************************************
 ** Run Demo
 *****************************************************************************/
-void runDemo(Planar *planar)
+void runDemo(OpenManipulator *open_manipulator)
 {
   if(digitalRead(BDPIN_PUSH_SW_1))
   {
@@ -83,50 +90,49 @@ void runDemo(Planar *planar)
   }
   if(digitalRead(BDPIN_PUSH_SW_2))
   {
-    stopDemo(planar);    
+    stopDemo(open_manipulator);
   }
 
-  if (planar->getMovingState()) 
+  if (open_manipulator->getMovingState())
   {
     return;
   }
   else 
   {
     if (start_demo_flag)
+    // if (1)
     {
-      switch(motion_cnt[0])
+      // Draw Objects
+      if (!erasing_flag)
       {
-        case 0:
-          planar->makeTaskTrajectory("tool", math::vector3( 0.045, 0.0, 0.0), 1.0);
-          motion_cnt[0] ++; 
-        break;
-        case 1:
-          planar->makeTaskTrajectory("tool", math::vector3( 0.0, 0.045, 0.0), 1.0);
-          motion_cnt[0] ++; 
-        break;
-        case 2:
-          planar->makeTaskTrajectory("tool", math::vector3(-0.045, 0.0, 0.0), 1.0);
-          motion_cnt[0] ++; 
-        break;
-        case 3:
-          planar->makeTaskTrajectory("tool", math::vector3( 0.0,-0.045, 0.0), 1.0);
-          motion_cnt[0] ++; 
-        break;
-        case 4:
-          planar->makeTaskTrajectory("tool", math::vector3( 0.045, 0.0, 0.0), 1.0);
-          motion_cnt[0] ++; 
-        break;
-        case 5:
-          drawObj(planar, CUSTOM_TRAJECTORY_CIRCLE, 0.045, 1, 0.0, 2.0); 
-          motion_cnt[0] ++; 
-        break;
-        case 6:
-          planar->makeTaskTrajectory("tool", math::vector3( 0.0, 0.0, 0.0), 0.5);
-          motion_cnt[0] ++; 
-        break;
+        switch(motion_cnt[0])
+        {
+
+          case 0:
+            moveJS(open_manipulator, 0.0, -1.0, 0.2, 0.8, 2.0); 
+            motion_cnt[0] ++; 
+          break;
+          case 1:
+            moveJS(open_manipulator, -0.5, 0.0, 1.0, -1.0, 2.0); 
+            motion_cnt[0] ++; 
+          break;
+          case 2:
+            moveJS(open_manipulator, -0.5, 0.1, 0.75, -0.85, 2.0); 
+            motion_cnt[0] ++; 
+          break;
+          case 3:
+            open_manipulator->sleepTrajectory(2.0);
+            motion_cnt[0] ++; 
+          break;
+          case 4:
+            moveJS(open_manipulator, -0.5, -0.05, 1.05, -1.0, 2.0); 
+            motion_cnt[0] = 0; 
+          break;
+        }
       }
     }
   }
 }
 
 #endif // DEMO_H_
+

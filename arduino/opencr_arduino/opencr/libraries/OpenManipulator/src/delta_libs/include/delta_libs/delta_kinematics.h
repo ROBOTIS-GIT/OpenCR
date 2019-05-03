@@ -37,7 +37,6 @@ namespace delta_kinematics
 class SolverUsingGeometry : public robotis_manipulator::Kinematics
 {
 private:
-  void forwardKinematicsSolverUsingGeometry(Manipulator *manipulator, Name component_name);
   bool inverseKinematicsSolverUsingGeometry(Manipulator *manipulator, Name tool_name, Pose target_pose, std::vector<JointValue>* goal_joint_value);
 
 public:

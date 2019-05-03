@@ -182,10 +182,10 @@ void runDemo(Scara *scara)
   }
   if(digitalRead(BDPIN_PUSH_SW_2))
   {
-    stopDemo(scara);    
+    stopDemo(scara);
   }
 
-  if (scara->getMovingState()) 
+  if (scara->getMovingState())
   {
     return;
   }
@@ -201,7 +201,7 @@ void runDemo(Scara *scara)
           case 0:
             if(drawCircle(scara, 0))
             { sub_motion_cnt[0] = 0; motion_cnt[0] ++; erasing_flag = true; }
-            else 
+            else
               sub_motion_cnt[0] ++;
           break;
           case 1:
@@ -219,7 +219,7 @@ void runDemo(Scara *scara)
           case 3:
             if(drawRhombus2(scara, 0))
             { sub_motion_cnt[0] = 0; motion_cnt[0] ++; erasing_flag = true; }
-            else 
+            else
               sub_motion_cnt[0] ++;
           break;
           case 4:

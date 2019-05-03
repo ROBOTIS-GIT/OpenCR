@@ -21,7 +21,6 @@
 
 #include <stewart_libs.h>
 #include "demo.h"
-// #include "demo2.h"
 
 /*****************************************************************************
 ** Initialize baudrate for using Processing
@@ -37,7 +36,7 @@ void initProcessing()
     Serial.print(",");
   }
   Serial.println("");
-  delay(300);             
+  delay(300);
 }
 
 /*****************************************************************************
@@ -56,29 +55,10 @@ void sendJointDataToProcessing(JointWaypoint joint_angle_vector)
   Serial.print("\n");
 }
 
-// Send tool data(on or off) to Processing 
-void sendToolDataToProcessing(bool onoff)
-{
-  Serial.print("tool");
-  Serial.print(",");
-  Serial.print(onoff);
-  Serial.print("\n");
-}
-
-// Send tool data(values) to Processing 
-void sendToolDataToProcessing(JointValue value)
-{
-  Serial.print("tool");
-  Serial.print(",");
-  Serial.print(value.position);
-  Serial.print("\n");
-}
-
 // Send joint and tool data(values) to Processing 
 void sendDataToProcessing(Stewart *stewart)
 {
-  sendJointDataToProcessing(stewart->getAllActiveJointValue());
-  sendToolDataToProcessing(stewart->getToolValue("tool"));
+  sendJointDataToProcessing(stewart->getTrajectory()->getManipulator()->getAllJointValue());
 }
 
 /*****************************************************************************
@@ -111,9 +91,9 @@ void split(String data, char separator, String* temp)
 }
 
 // Parse data received from Processing 
+String cmd[50];
 String* parseProcessingData(String get) 
 {
-  String cmd[50];
   get.trim();
   split(get, ',', cmd);
   
@@ -154,7 +134,7 @@ void receiveDataFromProcessing(Stewart *stewart)
       // Joint space control tab 
       else if (cmd[0] == "joint")
       {
-        //
+        // Joint Torque on/off
         if (cmd[1] == "on")
         {
           if (stewart->getUsingActualRobotState())    
@@ -169,7 +149,7 @@ void receiveDataFromProcessing(Stewart *stewart)
             stewart->disableAllJointActuator();
         }
 
-        //
+        // Joint Position Control
         else
         {
           std::vector<double> goal_position;
@@ -179,32 +159,6 @@ void receiveDataFromProcessing(Stewart *stewart)
           }
           stewart->makeJointTrajectory(goal_position, 1.0); 
         }
-      }
-
-      // Tool control tab 
-      else if (cmd[0] == "tool")
-      {
-        // 
-        if (cmd[1] == "y")
-          stewart->makeToolTrajectory("tool", 0.0);
-        else if (cmd[1] == "n")
-          stewart->makeToolTrajectory("tool", -0.5);
-
-        // Torque On/Off
-        else if (cmd[1] == "on")
-        {
-          if (stewart->getUsingActualRobotState())    
-            stewart->enableAllToolActuator();
-        }
-        else if (cmd[1] == "off")
-        {
-          if (stewart->getUsingActualRobotState())    
-            stewart->disableAllToolActuator();
-        }
-
-        //
-        else
-          stewart->makeToolTrajectory("tool", (double)cmd[1].toFloat());
       }
 
       // Task space control tab 
@@ -282,14 +236,15 @@ void receiveDataFromProcessing(Stewart *stewart)
           stopDemo(stewart);
       }
 
-      // ...
+//----------------------------------------------//
+//         DO NOT MODIFY THE BELOW CODE         //
+//----------------------------------------------//
       stewart->setReceiveDataFlag(true);  
       stewart->setPrevReceiveTime(millis()/1000.0);
     }
   }
-  else 
+  else
   {
-    // Check if ...
     if (millis()/1000.0 - stewart->getPrevReceiveTime() >= RECEIVE_RATE)
     {
       stewart->setReceiveDataFlag(false); 

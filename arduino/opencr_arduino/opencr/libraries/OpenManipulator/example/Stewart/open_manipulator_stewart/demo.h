@@ -190,8 +190,8 @@ void runDemo(Stewart *stewart)
         }
         break;
         case 19:
-          stewart->sleepTrajectory(10.0);
-          motion_cnt[0] = 0; 
+          // stewart->sleepTrajectory(10.0);
+          // motion_cnt[0] = 0; 
         break;
       }
     }

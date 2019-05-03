@@ -72,14 +72,15 @@ void receiveDataFromRC100(Planar* planar)
         planar->makeJointTrajectory(goal_position, 0.5);
       }
 
-      // 
+//----------------------------------------------//
+//         DO NOT MODIFY THE BELOW CODE         //
+//----------------------------------------------//
       planar->setReceiveDataFlag(true);
       planar->setPrevReceiveTime(millis()/1000.0); 
     }
   }
   else 
   {
-    // Check if ...
     if (millis()/1000.0 - planar->getPrevReceiveTime() >= RECEIVE_RATE)
     {
       planar->setReceiveDataFlag(false);   

@@ -31,7 +31,6 @@
 
 #define DXL_SIZE 3
 #define JOINT_DYNAMIXEL "joint_dxl"
-#define TOOL_DYNAMIXEL "tool_dxl"
 
 #define RECEIVE_RATE 0.100 // unit: s
 #define CONTROL_RATE 0.010 // unit: s
@@ -44,8 +43,8 @@ class Delta : public robotis_manipulator::RobotisManipulator
 {
 private:
   robotis_manipulator::Kinematics *kinematics_;
-  robotis_manipulator::JointActuator *joint_;  
-  robotis_manipulator::ToolActuator *tool_;    
+  robotis_manipulator::JointActuator *joint_;
+  robotis_manipulator::ToolActuator *tool_;
   robotis_manipulator::CustomTaskTrajectory *custom_trajectory_[CUSTOM_TRAJECTORY_SIZE];
 
   bool using_actual_robot_state_;
@@ -73,7 +72,3 @@ public:
 };
 
 #endif // Delta_H_
-
-
-
-

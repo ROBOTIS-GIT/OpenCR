@@ -30,7 +30,7 @@ Planar::~Planar()
 void Planar::initDebug()
 {
   DEBUG.begin(57600); // Using Serial4(= SerialBT2)
-  log::print("OpenManipulator Debugging Port"); 
+  log::print("OpenManipulator Debugging Port");
 }
 
 void Planar::initOpenManipulator(bool using_actual_robot_state, STRING usb_port, STRING baud_rate, float control_rate)
@@ -48,65 +48,65 @@ void Planar::initOpenManipulator(bool using_actual_robot_state, STRING usb_port,
 
   addJoint("joint1",  // my name
            "world",   // parent name
-           "joint2",  // child name
-           math::vector3(0.012, 0.0, 0.017),                // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+           "joint4",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
            Z_AXIS,    // axis of rotation
            1);        // actuator id
 
   addJoint("joint2",  // my name
-           "joint1",  // parent name
-           "joint3",  // child name
-           math::vector3(0.0, 0.0, 0.058),                  // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+           "world",   // parent name
+           "joint5",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
            Y_AXIS,    // axis of rotation
            2);        // actuator id
 
   addJoint("joint3",  // my name
-           "joint1",  // parent name
-           "joint4",  // child name
-           math::vector3(0.024, 0.0, 0.128),                // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+           "world",   // parent name
+           "joint6",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
            Y_AXIS,    // axis of rotation
            3);        // actuator id
 
   addJoint("joint4",  // my name
            "joint1",  // parent name
-           "joint7",    // child name
-           math::vector3(0.124, 0.0, 0.0),                  // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+           "joint7",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
            Y_AXIS,    // axis of rotation
            -1);       // actuator id
 
   addJoint("joint5",  // my name
            "joint2",  // parent name
-           "tool",    // child name
-           math::vector3(0.124, 0.0, 0.0),                  // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+           "joint8",    // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
            Y_AXIS,    // axis of rotation
            -1);       // actuator id
 
   addJoint("joint6",  // my name
            "joint3",  // parent name
-           "tool",    // child name
-           math::vector3(0.124, 0.0, 0.0),                  // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+           "joint9",    // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
            Y_AXIS,    // axis of rotation
            -1);       // actuator id
 
   addJoint("joint7",  // my name
            "joint4",  // parent name
            "tool",    // child name
-           math::vector3(0.124, 0.0, 0.0),                  // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
            Y_AXIS,    // axis of rotation
            -1);       // actuator id
 
   addTool("tool",     // my name
-          "joint7",   // parent name
-          math::vector3(0.130, 0.0, 0.0),                  // relative position
-          math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
-          -1);        // actuator id
+          "joint7",   // Not used
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           -1);       // actuator id
 
   /*****************************************************************************
   ** Initialize Kinematics 
@@ -208,3 +208,8 @@ void Planar::setPrevReceiveTime(double prev_receive_time)
 {
   prev_receive_time_ = prev_receive_time;
 }
+
+
+
+
+

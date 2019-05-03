@@ -65,19 +65,23 @@ void sendToolDataToProcessing(bool onoff)
 }
 
 // Send tool data(values) to Processing 
-void sendToolDataToProcessing(JointValue value)
+void sendToolDataToProcessing(JointWaypoint tool_angle_vector)
 {
   Serial.print("tool");
-  Serial.print(",");
-  Serial.print(value.position);
+  
+  for (int i = 0; i < (int)tool_angle_vector.size(); i++)
+  {
+    Serial.print(",");
+    Serial.print(tool_angle_vector.at(i).position,3);
+  }
   Serial.print("\n");
 }
 
 // Send joint and tool data(values) to Processing 
 void sendDataToProcessing(Scara *scara)
 {
-  sendJointDataToProcessing(scara->getAllActiveJointValue());
-  sendToolDataToProcessing(scara->getToolValue("tool"));
+  sendJointDataToProcessing(scara->getTrajectory()->getManipulator()->getAllJointValue());
+  sendToolDataToProcessing(scara->getTrajectory()->getManipulator()->getAllToolValue());
 }
 
 /*****************************************************************************
@@ -153,7 +157,7 @@ void receiveDataFromProcessing(Scara *scara)
       // Joint space control tab 
       else if (cmd[0] == "joint")
       {
-        //
+        // Joint Torque on/off
         if (cmd[1] == "on")
         {
           if (scara->getUsingActualRobotState())    
@@ -168,7 +172,7 @@ void receiveDataFromProcessing(Scara *scara)
             scara->disableAllJointActuator();
         }
 
-        //
+        // Joint Position Control
         else
         {
           std::vector<double> goal_position;
@@ -183,7 +187,7 @@ void receiveDataFromProcessing(Scara *scara)
       // Tool control tab 
       else if (cmd[0] == "tool")
       {
-        // 
+        // Tool Torque on/off
         if (cmd[1] == "y")
           scara->makeToolTrajectory("tool", 0.0);
         else if (cmd[1] == "n")
@@ -201,7 +205,7 @@ void receiveDataFromProcessing(Scara *scara)
             scara->disableAllToolActuator();
         }
 
-        //
+        // Tool Position Control
         else
           scara->makeToolTrajectory("tool", (double)cmd[1].toFloat());
       }
@@ -217,6 +221,8 @@ void receiveDataFromProcessing(Scara *scara)
           scara->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.0,  0.010, 0.0), 1.0);
         else if (cmd[1] == "r")
           scara->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.0, -0.010, 0.0), 1.0);
+        else
+          scara->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.0, 0.0, 0.0), 1.0);
       }
 
       // Demo Control tab 
@@ -228,14 +234,15 @@ void receiveDataFromProcessing(Scara *scara)
           stopDemo(scara);
       }
 
-      // ...
+//----------------------------------------------//
+//         DO NOT MODIFY THE BELOW CODE         //
+//----------------------------------------------//
       scara->setReceiveDataFlag(true);
       scara->setPrevReceiveTime(millis()/1000.0); 
     }
   }
   else 
   {
-    // Check if ...
     if (millis()/1000.0 - scara->getPrevReceiveTime() >= RECEIVE_RATE)
     {
       scara->setReceiveDataFlag(false); 
@@ -245,3 +252,4 @@ void receiveDataFromProcessing(Scara *scara)
 }
 
 #endif //PROCESSING_H
+

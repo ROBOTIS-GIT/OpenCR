@@ -20,50 +20,31 @@
 #include "remotecontroller100.h"
 #include "processing.h"
 #include "demo.h"
-// #include "demo2.h"
 
 Stewart stewart;
 
 void setup()
 {
-  /**
-   */
   stewart.initDebug();
 
-  /**
-   */
   initRC100();       
 
-  /**
-   */
   initProcessing();  
 
-  /**
-   */
   initDemo();
 
-  /**
-   */
   stewart.initOpenManipulator(true); // true:  using actual hardware 
                                      // false: using only visualization tool 
 }
 
 void loop()
 {
-  /**
-   */
   receiveDataFromRC100(&stewart);      
 
-  /**
-   */
   receiveDataFromProcessing(&stewart); 
   sendDataToProcessing(&stewart); 
 
-  /**
-   */
   stewart.processOpenManipulator(millis()/1000.0);     
 
-  /**
-   */
   runDemo(&stewart); 
 }

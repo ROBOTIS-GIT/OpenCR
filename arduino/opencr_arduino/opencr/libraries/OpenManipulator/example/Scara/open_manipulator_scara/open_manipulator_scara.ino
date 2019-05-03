@@ -25,44 +25,26 @@ Scara scara;
 
 void setup()
 {
-  /**
-   */
   scara.initDebug();
 
-  /**
-   */
-  initRC100();       
+  initRC100();
 
-  /**
-   */
   initProcessing();  
 
-  /**
-   */
   initDemo();
 
-  /**
-   */
   scara.initOpenManipulator(true); // true:  using actual hardware
                                    // false: using only visualization tool 
 }
 
 void loop()
-{
-  /**
-   */
+{ 
   receiveDataFromRC100(&scara);      
 
-  /**
-   */
   receiveDataFromProcessing(&scara); 
   sendDataToProcessing(&scara); 
 
-  /**
-   */
   scara.processOpenManipulator(millis()/1000.0);    
 
-  /**
-   */
   runDemo(&scara); 
 }

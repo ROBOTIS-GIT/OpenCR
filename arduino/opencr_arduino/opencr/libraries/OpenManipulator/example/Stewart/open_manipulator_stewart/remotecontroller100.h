@@ -22,7 +22,6 @@
 #include <stewart_libs.h>
 #include <RC100.h>
 #include "demo.h"
-// #include "demo2.h"
 
 RC100 rc100;
 
@@ -77,14 +76,15 @@ void receiveDataFromRC100(Stewart* stewart)
         stewart->makeJointTrajectory(goal_position, 0.5);        
       }
       
-      // ...
+//----------------------------------------------//
+//         DO NOT MODIFY THE BELOW CODE         //
+//----------------------------------------------//
       stewart->setReceiveDataFlag(true);
       stewart->setPrevReceiveTime(millis()/1000.0);
     }
   }
   else 
   {
-    // Check if ...
     if (millis()/1000.0 - stewart->getPrevReceiveTime() >= RECEIVE_RATE)
     {
       stewart->setReceiveDataFlag(false);   

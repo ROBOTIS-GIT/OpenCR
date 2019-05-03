@@ -47,60 +47,179 @@ void Stewart::initOpenManipulator(bool using_actual_robot_state, STRING usb_port
   addWorld("world",   // world name
            "joint1"); // child name
 
-  addJoint("joint1",  // my name
+  addJoint("joint01",  // my name
            "world",   // parent name
-           "joint2",  // child name
-           math::vector3(0.0, 0.0, 0.400),                  // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+           "joint07",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
            Z_AXIS,    // axis of rotation
            1);        // actuator id
 
-  addJoint("joint2",  // my name
-           "joint1",  // parent name
-           "joint3",  // child name
-           math::vector3(0.0, 0.0, 0.0),                    // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+  addJoint("joint02",  // my name
+           "world",  // parent name
+           "joint08",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
            Z_AXIS,    // axis of rotation
            2);        // actuator id
 
-  addJoint("joint3",  // my name
-           "joint2",  // parent name
-           "joint4",  // child name
-           math::vector3(0.0, 0.0, 0.0),                    // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+  addJoint("joint03",  // my name
+           "world",  // parent name
+           "joint09",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
            Z_AXIS,    // axis of rotation
            3);        // actuator id
 
-  addJoint("joint4",  // my name
-           "joint3",  // parent name
-           "joint5",  // child name
-           math::vector3(0.0, 0.0, 0.0),                    // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+  addJoint("joint04",  // my name
+           "world",  // parent name
+           "joint10",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
            Z_AXIS,    // axis of rotation
            4);        // actuator id
 
-  addJoint("joint5",  // my name
-           "joint4",  // parent name
-           "joint6",  // child name
-           math::vector3(0.0, 0.0, 0.0),                    // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+  addJoint("joint05",  // my name
+           "world",  // parent name
+           "joint11",  // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
            Z_AXIS,    // axis of rotation
            5);        // actuator id
 
-  addJoint("joint6",  // my name
-           "joint5",  // parent name
-           "tool",    // child name
-           math::vector3(0.0, 0.0, 0.0),                    // relative position
-           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
+  addJoint("joint06",  // my name
+           "world",  // parent name
+           "joint12",    // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
            Z_AXIS,    // axis of rotation
            6);        // actuator id
 
+  addJoint("joint07",  // my name
+           "joint01",  // parent name
+           "joint13",    // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,    // axis of rotation
+           -1);        // actuator id
+
+  addJoint("joint07_2",  // my name
+           "joint01",  // parent name
+           "joint13",    // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,    // axis of rotation
+           -1);        // actuator id
+
+  addJoint("joint08",    // my name
+           "joint02",    // parent name
+           "joint14",   // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,      // axis of rotation
+           -1);         // actuator id
+
+  addJoint("joint08_2",  // my name
+           "joint02",    // parent name
+           "joint14",   // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,      // axis of rotation
+           -1);         // actuator id
+
+  addJoint("joint09",    // my name
+           "joint03",    // parent name
+           "joint15",   // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,      // axis of rotation
+           -1);         // actuator id
+
+  addJoint("joint09_2",  // my name
+           "joint03",    // parent name
+           "joint15",   // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,      // axis of rotation
+           -1);         // actuator id
+
+  addJoint("joint10",   // my name
+           "joint04",    // parent name
+           "joint16",   // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,      // axis of rotation
+           -1);         // actuator id
+
+  addJoint("joint10_2",  // my name
+           "joint04",  // parent name
+           "joint16",    // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,    // axis of rotation
+           -1);        // actuator id
+
+  addJoint("joint11",  // my name
+           "joint05",  // parent name
+           "joint17",    // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,    // axis of rotation
+           -1);        // actuator id
+
+  addJoint("joint11_2",  // my name
+           "joint05",  // parent name
+           "joint17",    // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,    // axis of rotation
+           -1);        // actuator id
+
+  addJoint("joint12",  // my name
+           "joint06",  // parent name
+           "joint18",    // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,    // axis of rotation
+           -1);        // actuator id
+
+  addJoint("joint12_2",  // my name
+           "joint06",  // parent name
+           "joint18",    // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,    // axis of rotation
+           -1);        // actuator id
+
+  addJoint("joint13",  // my name
+           "joint07",  // parent name
+           "joint19",    // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,    // axis of rotation
+           -1);        // actuator id
+
+  addJoint("joint13_2", // my name
+           "joint07",    // parent name
+           "joint19",      // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,      // axis of rotation
+           -1);         // actuator id
+
+  addJoint("joint14",  // my name
+           "joint07",   // parent name
+           "tool",     // child name
+           math::vector3(0.0, 0.0, 0.0),                    // Not used
+           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+           Z_AXIS,     // axis of rotation
+           -1);        // actuator id
+
   addTool("tool",     // my name
-          "joint6",   // parent name
-          math::vector3(0.0, 0.0, 0.0),                    // relative position
-          math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
-          -1,         // actuator id
-          -0.015);    // Change unit from `meter` to `radian` <<--- modify!!!!
+          "joint14",  // Not used
+          math::vector3(0.0, 0.0, 0.0),                    // Not used
+          math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // Not used
+          -1);        // actuator id
 
   /*****************************************************************************
   ** Initialize Kinematics 
@@ -161,19 +280,13 @@ void Stewart::initOpenManipulator(bool using_actual_robot_state, STRING usb_port
 /*****************************************************************************
 ** Process actuator values received from external controllers
 *****************************************************************************/
-void Stewart::processOpenManipulator(double present_time)  
+void Stewart::processOpenManipulator(double present_time)
 {
-  if (present_time - prev_control_time_ >= CONTROL_RATE)  
+  if (present_time - prev_control_time_ >= CONTROL_RATE)
   {
     JointWaypoint goal_joint_value = getJointGoalValueFromTrajectory(present_time);
-
-    if (using_actual_robot_state_)
-    {
-      receiveAllJointActuatorValue();   
-    }
-
-    if(goal_joint_value.size() != 0) sendAllJointActuatorValue(goal_joint_value);   
-
+    if(goal_joint_value.size() != 0) sendAllJointActuatorValue(goal_joint_value);
+    
     // Set previous control time
     prev_control_time_ = millis()/1000.0;
   }

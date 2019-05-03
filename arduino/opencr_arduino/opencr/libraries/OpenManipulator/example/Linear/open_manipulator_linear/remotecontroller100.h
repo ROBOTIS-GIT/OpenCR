@@ -45,13 +45,13 @@ void receiveDataFromRC100(Linear* linear)
       // Read data received from RC100
       uint16_t data = rc100.readData();
       if (data & RC100_BTN_U)
-        linear->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.006, 0.0, 0.0), 0.2);
+        linear->makeTaskTrajectory("tool", math::vector3(0.006, 0.0, 0.0), 0.2);
       else if (data & RC100_BTN_D)
-        linear->makeTaskTrajectoryFromPresentPose("tool", math::vector3(-0.006, 0.0, 0.0), 0.2);
+        linear->makeTaskTrajectory("tool", math::vector3(-0.006, 0.0, 0.0), 0.2);
       else if (data & RC100_BTN_L)
-        linear->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.0, 0.006, 0.0), 0.2);
+        linear->makeTaskTrajectory("tool", math::vector3(0.0, 0.006, 0.0), 0.2);
       else if (data & RC100_BTN_R)
-        linear->makeTaskTrajectoryFromPresentPose("tool", math::vector3(0.0, -0.006, 0.0), 0.2);
+        linear->makeTaskTrajectory("tool", math::vector3(0.0, -0.006, 0.0), 0.2);
       else if (data & RC100_BTN_1)
         linear->makeToolTrajectory("tool", -0.007);
       else if (data & RC100_BTN_2)
@@ -70,17 +70,18 @@ void receiveDataFromRC100(Linear* linear)
         linear->makeJointTrajectory(target_angle, 1.0);
       }
       
-      // ...
+//----------------------------------------------//
+//         DO NOT MODIFY THE BELOW CODE         //
+//----------------------------------------------//
       linear->setReceiveDataFlag(true);
-      linear->setPrevReceiveTime(millis()/1000.0); 
+      linear->setPrevReceiveTime(millis()/1000.0);
     }
   }
-  else 
+  else
   {
-    // Check if ...
     if (millis()/1000.0 - linear->getPrevReceiveTime() >= RECEIVE_RATE)
     {
-      linear->setReceiveDataFlag(false);   
+      linear->setReceiveDataFlag(false);
       initRC100();
     }
   }

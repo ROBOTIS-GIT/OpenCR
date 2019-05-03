@@ -25,42 +25,26 @@ Linear linear;
 
 void setup()
 {
-  /**
-   */
   linear.initDebug();
 
-  /**
-   */
-  initRC100();       
+  initRC100();
 
-  /**
-   */
-  initProcessing();  
+  initProcessing();
 
-  /**
-   */
-  linear.initOpenManipulator(true); // true:  using actual hardware 
-                                    // false: using only visualization tool 
+  initDemo();
+
+  linear.initOpenManipulator(true); // true:  using actual hardware
+                                    // false: using only visualization tool
 }
 
 void loop()
 {
-  /**
-   */
   receiveDataFromRC100(&linear);
 
-  /**
-   */
-  receiveDataFromProcessing(&linear); 
-  sendDataToProcessing(&linear); 
+  receiveDataFromProcessing(&linear);
+  sendDataToProcessing(&linear);
 
-  /**
-   */
-  linear.processOpenManipulator(millis()/1000.0);    
+  linear.processOpenManipulator(millis()/1000.0);
 
-  /**
-   */
-  runDemo(&linear); 
+  runDemo(&linear);
 }
-
-

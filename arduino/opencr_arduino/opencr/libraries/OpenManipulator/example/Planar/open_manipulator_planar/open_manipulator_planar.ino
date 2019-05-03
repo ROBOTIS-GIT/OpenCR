@@ -25,44 +25,26 @@ Planar planar;
 
 void setup()
 {
-  /**
-   */
   planar.initDebug();
 
-  /**
-   */
   initRC100();       
 
-  /**
-   */
   initProcessing();  
 
-  /**
-   */
   initDemo();
 
-  /**
-   */
   planar.initOpenManipulator(true); // true:  using actual hardware
                                     // false: using only visualization tool 
 }
 
 void loop()
 {
-  /**
-   */
-  receiveDataFromRC100(&planar);      
+  receiveDataFromRC100(&planar);
 
-  /**
-   */
-  receiveDataFromProcessing(&planar); 
-  sendDataToProcessing(&planar); 
+  receiveDataFromProcessing(&planar);
+  sendDataToProcessing(&planar);
 
-  /**
-   */
   planar.processOpenManipulator(millis()/1000.0);
 
-  /**
-   */
-  runDemo(&planar); 
+  runDemo(&planar);
 }

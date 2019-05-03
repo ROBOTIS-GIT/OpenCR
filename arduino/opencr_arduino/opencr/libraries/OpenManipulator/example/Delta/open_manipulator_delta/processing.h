@@ -76,8 +76,7 @@ void sendToolDataToProcessing(JointValue value)
 // Send joint and tool data(values) to Processing 
 void sendDataToProcessing(Delta *delta)
 {
-  sendJointDataToProcessing(delta->getAllActiveJointValue());
-  sendToolDataToProcessing(delta->getToolValue("tool"));
+  sendJointDataToProcessing(delta->getTrajectory()->getManipulator()->getAllJointValue());
 }
 
 /*****************************************************************************
@@ -153,7 +152,7 @@ void receiveDataFromProcessing(Delta *delta)
       // Joint space control tab 
       else if (cmd[0] == "joint")
       {
-        //
+        // Joint Torque on/off
         if (cmd[1] == "on")
         {
           if (delta->getUsingActualRobotState())    
@@ -168,16 +167,16 @@ void receiveDataFromProcessing(Delta *delta)
             delta->disableAllJointActuator();
         }
 
-        //
-        else
-        {
-          std::vector<double> goal_position;
-          for (uint8_t index = 0; index < DXL_SIZE; index++)
-          {
-            goal_position.push_back((double)cmd[index + 1].toFloat());
-          }
-          delta->makeJointTrajectory(goal_position, 1.0); 
-        }
+        // Joint Position Control
+        // else
+        // {
+        //   std::vector<double> goal_position;
+        //   for (uint8_t index = 0; index < DXL_SIZE; index++)
+        //   {
+        //     goal_position.push_back((double)cmd[index + 1].toFloat());
+        //   }
+        //   delta->makeJointTrajectory(goal_position, 1.0); 
+        // }
       }
 
       // Tool control tab 
@@ -192,18 +191,34 @@ void receiveDataFromProcessing(Delta *delta)
       // Task space control tab 
       else if (cmd[0] == "task")
       {
+        // if (cmd[1] == "f")
+        //   delta->makeTaskTrajectory("tool", math::vector3(0.020, 0.0, 0.0), 0.1);
+        // else if (cmd[1] == "b")
+        //   delta->makeTaskTrajectory("tool", math::vector3(-0.020, 0.0, 0.0), 0.1);
+        // else if (cmd[1] == "l")
+        //   delta->makeTaskTrajectory("tool", math::vector3(0.0, 0.020, 0.0), 0.1);
+        // else if (cmd[1] == "r")
+        //   delta->makeTaskTrajectory("tool", math::vector3(0.0, -0.020, 0.0), 0.1);
+        // else if (cmd[1] == "u")
+        //   delta->makeTaskTrajectory("tool", math::vector3(0.0, 0.0, 0.015), 0.1);
+        // else if (cmd[1] == "d")
+        //   delta->makeTaskTrajectory("tool", math::vector3(0.0, 0.0, -0.010), 0.1);
+        // else
+        //   delta->makeTaskTrajectory("tool", math::vector3(0.0, 0.0, 0.0), 0.1);
         if (cmd[1] == "f")
-          delta->makeTaskTrajectory("tool", math::vector3(0.020, 0.0, 0.0), 0.1);
+          delta->makeTaskTrajectory("tool", math::vector3(0.040, 0.0, 0.02), 0.1);
         else if (cmd[1] == "b")
-          delta->makeTaskTrajectory("tool", math::vector3(-0.020, 0.0, 0.0), 0.1);
+          delta->makeTaskTrajectory("tool", math::vector3(-0.040, 0.0, 0.02), 0.1);
         else if (cmd[1] == "l")
-          delta->makeTaskTrajectory("tool", math::vector3(0.0, 0.020, 0.0), 0.1);
+          delta->makeTaskTrajectory("tool", math::vector3(0.0, 0.040, 0.02), 0.1);
         else if (cmd[1] == "r")
-          delta->makeTaskTrajectory("tool", math::vector3(0.0, -0.020, 0.0), 0.1);
+          delta->makeTaskTrajectory("tool", math::vector3(0.0, -0.040, 0.02), 0.1);
         else if (cmd[1] == "u")
-          delta->makeTaskTrajectory("tool", math::vector3(0.0, 0.0, 0.015), 0.1);
+          delta->makeTaskTrajectory("tool", math::vector3(0.0, 0.0, 0.05), 0.1);
         else if (cmd[1] == "d")
-          delta->makeTaskTrajectory("tool", math::vector3(0.0, 0.0, -0.015), 0.1);
+          delta->makeTaskTrajectory("tool", math::vector3(0.0, 0.0, -0.010), 0.1);
+        else
+          delta->makeTaskTrajectory("tool", math::vector3(0.0, 0.0, 0.0), 0.1);
       }
 
       // Demo Control tab 
@@ -215,14 +230,15 @@ void receiveDataFromProcessing(Delta *delta)
           stopDemo(delta);
       }
 
-      // ...
+//----------------------------------------------//
+//         DO NOT MODIFY THE BELOW CODE         //
+//----------------------------------------------//
       delta->setReceiveDataFlag(true);
       delta->setPrevReceiveTime(millis()/1000.0); 
     }
   }
-  else 
+  else
   {
-    // Check if ...
     if (millis()/1000.0 - delta->getPrevReceiveTime() >= RECEIVE_RATE)
     {
       delta->setReceiveDataFlag(false); 

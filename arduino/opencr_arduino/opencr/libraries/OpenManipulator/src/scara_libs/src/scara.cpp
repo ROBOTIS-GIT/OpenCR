@@ -75,7 +75,9 @@ void Scara::initOpenManipulator(bool using_actual_robot_state, STRING usb_port, 
           "joint3",   // parent name
           math::vector3(0.107, 0.0, 0.0),                  // relative position
           math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
-          4);         // actuator id
+          4,          // actuator id
+          0.01,       // max joint limit 
+          -0.51);     // min joint limit
 
   /*****************************************************************************
   ** Initialize Kinematics 
