@@ -40,7 +40,7 @@ private:
   std::map<Name, ToolActuator *> tool_actuator_;
 
   bool trajectory_initialized_state_;
-  bool actuator_added_stete_;
+  bool actuator_added_state_;
   bool moving_state_;
   bool step_moving_state_;
 
@@ -81,7 +81,7 @@ public:
                Eigen::Vector3d relative_position,
                Eigen::Matrix3d relative_orientation,
                int8_t tool_id = -1, 
-               double max_position_limit =M_PI, 
+               double max_position_limit = M_PI, 
                double min_position_limit = -M_PI,
                double coefficient = 1.0,
                double mass = 0.0,
@@ -174,6 +174,8 @@ public:
   /*****************************************************************************
   ** Trajectory Control Fuction
   *****************************************************************************/
+  Trajectory *getTrajectory();
+  
   void makeJointTrajectoryFromPresentPosition(std::vector<double> delta_goal_joint_position, double move_time, std::vector<JointValue> present_joint_value = {});
   void makeJointTrajectory(std::vector<double> goal_joint_position, double move_time, std::vector<JointValue> present_joint_value = {});
   void makeJointTrajectory(std::vector<JointValue> goal_joint_value, double move_time, std::vector<JointValue> present_joint_value = {});
