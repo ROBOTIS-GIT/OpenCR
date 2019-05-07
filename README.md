@@ -24,3 +24,18 @@
 - [ROBOTIS e-Manual for OpenManipulator](http://emanual.robotis.com/docs/en/platform/openmanipulator/)
 - [ROBOTIS e-Manual for ROBOTIS OP3](http://emanual.robotis.com/docs/en/platform/op3/introduction/)
 - [Videos for OpenCR](https://www.youtube.com/playlist?list=PLRG6WP3c31_VTd-u90LVXaT1B8NMjCSoj)
+
+## Repository folder structure description
+- arduino
+  - opencr_arduino
+    - libraries : A collection of some libraries that can be used with OpenCR.
+    - opencr : OpenCR package core to be installed in Arduino.
+    - tools : Tools for OpenCR firmware writing.
+  - opencr_develop
+    - opencr_bootloader : OpenCR bootloader source
+    - opencr_ld : OpenCR loader source (related bootloader)
+    - opencr_ld_shell : OpenCR loader script source for TB3
+  - opencr_release
+    - Folders(version name) : Compressed files for updating TB3 core binary with ld_shell for each TB3 core version.
+    - shell_update : Latest Compressed files for updating TB3 core binary with ld_shell.
+    - package_opencr_index.json : json file for Arduino OpenCR package.
