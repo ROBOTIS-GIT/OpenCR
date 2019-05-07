@@ -19,7 +19,7 @@
 #ifndef PROCESSING_H_
 #define PROCESSING_H_
 
-#include <linear_libs.h>
+#include "linear.h"
 #include "demo.h"
 
 /*****************************************************************************

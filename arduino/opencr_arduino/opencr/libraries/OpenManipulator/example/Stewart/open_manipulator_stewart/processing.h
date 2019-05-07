@@ -19,7 +19,7 @@
 #ifndef PROCESSING_H_
 #define PROCESSING_H_
 
-#include <stewart_libs.h>
+#include "stewart.h"
 #include "demo.h"
 
 /*****************************************************************************

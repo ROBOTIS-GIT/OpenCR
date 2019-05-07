@@ -19,7 +19,7 @@
 #ifndef DEMO2_H_
 #define DEMO2_H_
 
-#include <stewart_libs.h>
+#include "stewart.h"
 
 /*****************************************************************************
 ** Touch panel stuff for detecting ball position

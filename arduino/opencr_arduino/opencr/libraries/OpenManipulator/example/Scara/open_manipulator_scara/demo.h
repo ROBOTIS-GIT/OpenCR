@@ -19,7 +19,7 @@
 #ifndef DEMO_H_
 #define DEMO_H_
 
-#include <scara_libs.h>
+#include "scara.h"
 
 bool start_demo_flag;
 bool erasing_flag;

@@ -16,7 +16,7 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
-#include <linear_libs.h>
+#include "linear.h"
 #include "remotecontroller100.h"
 #include "processing.h"
 #include "demo.h"

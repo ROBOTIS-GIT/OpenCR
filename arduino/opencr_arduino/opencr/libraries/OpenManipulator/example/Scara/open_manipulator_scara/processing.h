@@ -19,7 +19,7 @@
 #ifndef PROCESSING_H_
 #define PROCESSING_H_
 
-#include <scara_libs.h>
+#include "scara.h"
 #include "demo.h"
 
 /*****************************************************************************

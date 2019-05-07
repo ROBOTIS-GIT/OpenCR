@@ -1,1 +1,0 @@
-#include "scara_libs/include/scara_libs/scara.h"

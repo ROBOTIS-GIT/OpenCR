@@ -16,7 +16,7 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
-#include <delta_libs.h>
+#include "delta.h"
 #include "remotecontroller100.h"
 #include "processing.h"
 #include "demo.h"

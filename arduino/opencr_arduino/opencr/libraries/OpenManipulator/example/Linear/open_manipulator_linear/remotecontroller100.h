@@ -19,7 +19,7 @@
 #ifndef REMOTECONTROLLER100_H_
 #define REMOTECONTROLLER100_H_
 
-#include <linear_libs.h>
+#include "linear.h"
 #include <RC100.h>
 #include "demo.h"
 
