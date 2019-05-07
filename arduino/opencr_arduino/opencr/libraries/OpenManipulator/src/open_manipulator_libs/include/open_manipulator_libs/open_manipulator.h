@@ -19,8 +19,8 @@
 #ifndef OPEN_MANIPULTOR_H_
 #define OPEN_MANIPULTOR_H_
 
-#include "dynamixel.h"
 #include "custom_trajectory.h"
+#include "dynamixel.h"
 #include "kinematics.h"
 
 #define CUSTOM_TRAJECTORY_SIZE 4
@@ -41,7 +41,7 @@ class OpenManipulator : public robotis_manipulator::RobotisManipulator
   
 private:
   robotis_manipulator::Kinematics *kinematics_;
-  robotis_manipulator::JointActuator *actuator_;
+  robotis_manipulator::JointActuator *joint_;
   robotis_manipulator::ToolActuator *tool_;
   robotis_manipulator::CustomTaskTrajectory *custom_trajectory_[CUSTOM_TRAJECTORY_SIZE];
 
@@ -49,7 +49,10 @@ public:
   OpenManipulator();
   virtual ~OpenManipulator();
 
-  void initOpenManipulator(bool using_actual_robot_state, STRING usb_port = "/dev/ttyUSB0", STRING baud_rate = "1000000", float control_loop_time = 0.010);
+  void initOpenManipulator(bool using_actual_robot_state, 
+                           STRING usb_port = "/dev/ttyUSB0", 
+                           STRING baud_rate = "1000000", 
+                           float control_loop_time = 0.010);
   void processOpenManipulator(double present_time);
 };
 

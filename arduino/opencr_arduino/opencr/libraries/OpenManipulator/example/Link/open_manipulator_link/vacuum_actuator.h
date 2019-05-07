@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Hye-Jong KIM */
+/* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
 #ifndef VACUUM_ACTUATOR_H_
 #define VACUUM_ACTUATOR_H_

@@ -23,7 +23,7 @@ OpenManipulator::OpenManipulator()
 OpenManipulator::~OpenManipulator()
 {
   delete kinematics_;
-  delete actuator_;
+  delete joint_;
   delete tool_;
   for(uint8_t index = 0; index < CUSTOM_TRAJECTORY_SIZE; index++)
     delete custom_trajectory_[index];
@@ -32,7 +32,7 @@ OpenManipulator::~OpenManipulator()
 void OpenManipulator::initOpenManipulator(bool using_actual_robot_state, STRING usb_port, STRING baud_rate, float control_loop_time)
 {
   /*****************************************************************************
-  ** Initialize Manipulator Parameter 
+  ** Initialize Manipulator Parameters
   *****************************************************************************/
   addWorld("world",   // world name
            "joint1"); // child name
@@ -40,7 +40,7 @@ void OpenManipulator::initOpenManipulator(bool using_actual_robot_state, STRING 
   addJoint("joint1",  // my name
            "world",   // parent name
            "joint2",  // child name
-           math::vector3(0.012, 0.0, 0.017),               // relative position
+           math::vector3(0.012, 0.0, 0.017),                // relative position
            math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
            Z_AXIS,    // axis of rotation
            11,        // actuator id
@@ -50,7 +50,7 @@ void OpenManipulator::initOpenManipulator(bool using_actual_robot_state, STRING 
   addJoint("joint2",  // my name
            "joint1",  // parent name
            "joint3",  // child name
-           math::vector3(0.0, 0.0, 0.0595),                // relative position
+           math::vector3(0.0, 0.0, 0.0595),                 // relative position
            math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
            Y_AXIS,    // axis of rotation
            12,        // actuator id
@@ -60,7 +60,7 @@ void OpenManipulator::initOpenManipulator(bool using_actual_robot_state, STRING 
   addJoint("joint3",  // my name
            "joint2",  // parent name
            "joint4",  // child name
-           math::vector3(0.024, 0.0, 0.128),               // relative position
+           math::vector3(0.024, 0.0, 0.128),                // relative position
            math::convertRPYToRotationMatrix(0.0, 0.0, 0.0), // relative orientation
            Y_AXIS,    // axis of rotation
            13,        // actuator id
@@ -84,23 +84,36 @@ void OpenManipulator::initOpenManipulator(bool using_actual_robot_state, STRING 
           15,         // actuator id
           0.010,      // max gripper limit (0.01 m)
           -0.010,     // min gripper limit (-0.01 m)
-          -0.015);    // Change unit from `meter` to `radian`
+          -0.015);    // Convert unit from `meter` to `radian`
 
           
   /*****************************************************************************
   ** Initialize Kinematics 
   *****************************************************************************/
   kinematics_ = new kinematics::SolverCustomizedforOMChain();
-//  kinematics_ = new kinematics::SolverUsingCRAndSRPositionOnlyJacobian();
+  // kinematics_ = new kinematics::SolverUsingCRAndSRPositionOnlyJacobian();
   addKinematics(kinematics_);
 
-  if(using_actual_robot_state)
+  /*****************************************************************************
+  ** Initialize Custom Trajectory
+  *****************************************************************************/
+  custom_trajectory_[0] = new custom_trajectory::Line();
+  custom_trajectory_[1] = new custom_trajectory::Circle();
+  custom_trajectory_[2] = new custom_trajectory::Rhombus();
+  custom_trajectory_[3] = new custom_trajectory::Heart();
+
+  addCustomTrajectory(CUSTOM_TRAJECTORY_LINE, custom_trajectory_[0]);
+  addCustomTrajectory(CUSTOM_TRAJECTORY_CIRCLE, custom_trajectory_[1]);
+  addCustomTrajectory(CUSTOM_TRAJECTORY_RHOMBUS, custom_trajectory_[2]);
+  addCustomTrajectory(CUSTOM_TRAJECTORY_HEART, custom_trajectory_[3]);
+
+  if (using_actual_robot_state)
   {
     /*****************************************************************************
     ** Initialize ㅓoint Actuator
     *****************************************************************************/
-    // actuator_ = new dynamixel::JointDynamixel();
-    actuator_ = new dynamixel::JointDynamixelProfileControl(control_loop_time);
+    // joint_ = new dynamixel::JointDynamixel();
+    joint_ = new dynamixel::JointDynamixelProfileControl(control_loop_time);
     
     // Set communication arguments
     STRING dxl_comm_arg[2] = {usb_port, baud_rate};
@@ -112,7 +125,7 @@ void OpenManipulator::initOpenManipulator(bool using_actual_robot_state, STRING 
     jointDxlId.push_back(12);
     jointDxlId.push_back(13);
     jointDxlId.push_back(14);
-    addJointActuator(JOINT_DYNAMIXEL, actuator_, jointDxlId, p_dxl_comm_arg);
+    addJointActuator(JOINT_DYNAMIXEL, joint_, jointDxlId, p_dxl_comm_arg);
 
     // Set joint actuator control mode
     STRING joint_dxl_mode_arg = "position_mode";
@@ -125,6 +138,7 @@ void OpenManipulator::initOpenManipulator(bool using_actual_robot_state, STRING 
     *****************************************************************************/
     tool_ = new dynamixel::GripperDynamixel();
 
+    // Set gripper actuator id 
     uint8_t gripperDxlId = 15;
     addToolActuator(TOOL_DYNAMIXEL, tool_, gripperDxlId, p_dxl_comm_arg);
 
@@ -144,6 +158,10 @@ void OpenManipulator::initOpenManipulator(bool using_actual_robot_state, STRING 
     gripper_dxl_opt_arg[1] = "200";
     setToolActuatorMode(TOOL_DYNAMIXEL, p_gripper_dxl_opt_arg);
 
+
+    /*****************************************************************************
+    ** Enable actuators and Receive actuator values 
+    *****************************************************************************/
     // Enable All Actuators 
     enableAllActuator();
 
@@ -151,19 +169,6 @@ void OpenManipulator::initOpenManipulator(bool using_actual_robot_state, STRING 
     receiveAllJointActuatorValue();
     receiveAllToolActuatorValue();
   }
-
-  /*****************************************************************************
-  ** Initialize Custom Trajectory
-  *****************************************************************************/
-  custom_trajectory_[0] = new custom_trajectory::Line();
-  custom_trajectory_[1] = new custom_trajectory::Circle();
-  custom_trajectory_[2] = new custom_trajectory::Rhombus();
-  custom_trajectory_[3] = new custom_trajectory::Heart();
-
-  addCustomTrajectory(CUSTOM_TRAJECTORY_LINE, custom_trajectory_[0]);
-  addCustomTrajectory(CUSTOM_TRAJECTORY_CIRCLE, custom_trajectory_[1]);
-  addCustomTrajectory(CUSTOM_TRAJECTORY_RHOMBUS, custom_trajectory_[2]);
-  addCustomTrajectory(CUSTOM_TRAJECTORY_HEART, custom_trajectory_[3]);
 }
 
 void OpenManipulator::processOpenManipulator(double present_time)

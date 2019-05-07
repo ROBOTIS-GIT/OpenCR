@@ -19,6 +19,7 @@
 #include <open_manipulator_libs.h>
 #include "processing.h"
 #include "remote_controller.h"
+#include "demo.h"
 
 OpenManipulator open_manipulator;
 double control_time = 0.010;
@@ -35,9 +36,13 @@ void setup()
 
   connectProcessing(platform_state);
   connectRC100();
-  
+
+
   open_manipulator.initOpenManipulator(platform_state);
   log::println("OpenManipulator Debugging Port");
+
+
+  initDemo();
 }
 
 void loop()
@@ -52,7 +57,11 @@ void loop()
     previous_time = millis()/1000.0;
     sendValueToProcessing(&open_manipulator);
   }
+
+  runDemo(&open_manipulator);
 }
+
+
 
 void getData(uint32_t wait_time)
 {
@@ -77,6 +86,7 @@ void getData(uint32_t wait_time)
     processing_state = true;
   }
 
+  
   switch (state)
   {
     case 0:
