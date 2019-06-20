@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Taehun Lim (Darby) */
+/* Authors: Taehun Lim (Darby), Ryan Shim */
 
 #include "../../include/dynamixel_workbench_toolbox/dynamixel_tool.h"
 
@@ -50,8 +50,14 @@ static const DynamixelModel dynamixel_model_table[] = {
     {XL_320, "XL-320"},
     {XL430_W250, "XL430-W250"},
 
+    {XL430_W250_2, "XL430-W250-2"}, // 2XL
+
+    {XC430_W150, "XC430-W150"},
+    {XC430_W240, "XC430-W240"},
+
     {XM430_W210, "XM430-W210"},
     {XM430_W350, "XM430-W350"},
+    
     {XM540_W150, "XM540-W150"},
     {XM540_W270, "XM540-W270"},
 
@@ -59,6 +65,11 @@ static const DynamixelModel dynamixel_model_table[] = {
     {XH430_V350, "XH430-V350"},
     {XH430_W210, "XH430-W210"},
     {XH430_W350, "XH430-W350"},
+
+    {XH540_W150, "XH540_W150"},
+    {XH540_W270, "XH540_W270"},
+    {XH540_V150, "XH540_V150"},
+    {XH540_V270, "XH540_V270"},
 
     {PRO_L42_10_S300_R, "PRO-L42-10-S300-R"},
     {PRO_L54_30_S400_R, "PRO-L54-30-S400-R"},
@@ -70,13 +81,29 @@ static const DynamixelModel dynamixel_model_table[] = {
     {PRO_M54_40_S250_R, "PRO-M54-40-S250-R"},
     {PRO_M54_60_S250_R, "PRO-M54-60-S250-R"},
 
-    {PRO_H42_20_S300_R, "PRO-H42-20-S300-R"},
+    {PRO_H42_20_S300_R,  "PRO-H42-20-S300-R"},
     {PRO_H54_100_S500_R, "PRO-H54-100-S500-R"},
     {PRO_H54_200_S500_R, "PRO-H54-200-S500-R"},
 
-    {PRO_H42P_020_S300_R, "PRO-H42P-020-S300-R"},
-    {PRO_H54P_100_S500_R, "PRO-H54P-100-S500-R"},
-    {PRO_H54P_200_S500_R, "PRO-H54P-200-S500-R"}
+    {PRO_M42_10_S260_R_A, "PRO-M42-10-S260-R-A"},
+    {PRO_M54_40_S250_R_A, "PRO-M54-40-S250-R-A"},
+    {PRO_M54_60_S250_R_A, "PRO-M54-60-S250-R-A"},
+
+    {PRO_H42_20_S300_R_A,  "PRO-H42-20-S300-R-A"},
+    {PRO_H54_100_S500_R_A, "PRO-H54-100-S500-R-A"},
+    {PRO_H54_200_S500_R_A, "PRO-H54-200-S500-R-A"},
+
+    {PRO_PLUS_M42P_010_S260_R, "PRO-PLUS-M42P-010-S260-R"},
+    {PRO_PLUS_M54P_040_S250_R, "PRO-PLUS-M54P-040-S250-R"},
+    {PRO_PLUS_M54P_060_S250_R, "PRO-PLUS-M54P-060-S250-R"},
+
+    {PRO_PLUS_H42P_020_S300_R, "PRO-PLUS-H42P-020-S300-R"},
+    {PRO_PLUS_H54P_100_S500_R, "PRO-PLUS-H54P-100-S500-R"},
+    {PRO_PLUS_H54P_200_S500_R, "PRO-PLUS-H54P-200-S500-R"},
+
+    {RH_P12_RN, "RH-P12-RN"},
+
+    {RH_P12_RN_A, "RH-P12-RN-A"}
 };
 #define COUNT_DYNAMIXEL_MODEL  (sizeof(dynamixel_model_table)/sizeof(dynamixel_model_table[0]))
 
