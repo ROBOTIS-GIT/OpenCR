@@ -1301,7 +1301,7 @@ const ControlItem *DynamixelItem::getControlTable(uint16_t model_number)
     control_table = items_XL320;
     the_number_of_item = COUNT_XL320_ITEMS;
   }
-  else if (num == XL430_W250 || XL430_W250_2 || XC430_W150 || XC430_W240)
+  else if (num == XL430_W250 || num == XL430_W250_2 || num == XC430_W150 || num == XC430_W240)
   {
     control_table = items_XL;
     the_number_of_item = COUNT_XL_ITEMS;
@@ -1407,7 +1407,7 @@ const ModelInfo *DynamixelItem::getModelInfo(uint16_t model_number)
   {
     info = &info_XL320;
   }
-  else if (num == XL430_W250 || XL430_W250_2 || XC430_W150 || XC430_W240)
+  else if (num == XL430_W250 || num == XL430_W250_2 || num == XC430_W150 || num == XC430_W240)
   {
     info = &info_XL;
   }
