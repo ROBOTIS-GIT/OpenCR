@@ -569,6 +569,7 @@ void driveTest(uint8_t buttons)
     saved_tick[RIGHT] = current_tick[RIGHT];
 
     diff_encoder = TEST_DISTANCE / (0.207 / 4096); // (Circumference of Wheel) / (The number of tick per revolution)
+    tTime[6] = millis();
   }
   else if (buttons & (1<<1))
   {
@@ -576,6 +577,7 @@ void driveTest(uint8_t buttons)
     saved_tick[RIGHT] = current_tick[RIGHT];
 
     diff_encoder = (TEST_RADIAN * TURNING_RADIUS) / (0.207 / 4096);
+    tTime[6] = millis();
   }
 
   if (move[LINEAR])
@@ -583,6 +585,7 @@ void driveTest(uint8_t buttons)
     if (abs(saved_tick[RIGHT] - current_tick[RIGHT]) <= diff_encoder)
     {
       goal_velocity_from_button[LINEAR]  = 0.05;
+      tTime[6] = millis();
     }
     else
     {
@@ -595,6 +598,7 @@ void driveTest(uint8_t buttons)
     if (abs(saved_tick[RIGHT] - current_tick[RIGHT]) <= diff_encoder)
     {
       goal_velocity_from_button[ANGULAR]= -0.7;
+      tTime[6] = millis();
     }
     else
     {
