@@ -52,9 +52,6 @@ static const DynamixelModel dynamixel_model_table[] = {
 
     {XL430_W250_2, "XL430-W250-2"}, // 2XL
 
-    {XC430_W150, "XC430-W150"},
-    {XC430_W240, "XC430-W240"},
-
     {XM430_W210, "XM430-W210"},
     {XM430_W350, "XM430-W350"},
     

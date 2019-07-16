@@ -46,9 +46,6 @@
 
 #define XL430_W250_2 1090 // 2XL
 
-#define XC430_W150 1070
-#define XC430_W240 1080
-
 #define XM430_W210 1030
 #define XM430_W350 1020
 
