@@ -28,7 +28,7 @@
 
 #define HARDWARE_VER "1.0.0"
 #define SOFTWARE_VER "1.0.0"
-#define FIRMWARE_VER "1.0.1"
+#define FIRMWARE_VER "1.0.2"
 
 #define SENSOR_STATE_PUBLISH_FREQUENCY         30    //hz
 #define VERSION_INFORMATION_PUBLISH_FREQUENCY  1    //hz 
