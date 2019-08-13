@@ -14,12 +14,11 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho, Kei Ki */
-
 #ifndef TURTLEBOT3_BURGER_H_
 #define TURTLEBOT3_BURGER_H_
 
 #define NAME                             "Burger"
+#define MODEL_INFO                       1
 
 #define WHEEL_RADIUS                     0.033           // meter
 #define WHEEL_SEPARATION                 0.160           // meter (BURGER : 0.160, WAFFLE : 0.287)

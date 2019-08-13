@@ -14,8 +14,6 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho, Gilbert, Kei Ki */
-
 #include "turtlebot3_core_config.h"
 
 /*******************************************************************************
@@ -24,10 +22,6 @@
 void setup()
 {
   DEBUG_SERIAL.begin(57600);
-  while(!RTPS_SERIAL)
-  {
-    DEBUG_PRINT(".");
-  }
 
   pinMode(LED_WORKING_CHECK, OUTPUT);
 
@@ -42,13 +36,28 @@ void setup()
 
   updateGyroCali(true);
 
-  ros2::init(&RTPS_SERIAL);
+  dxl_slave.setPortProtocolVersion(PROTOCOL_VERSION_DXL_SLAVE);
+  dxl_slave.setID(ID_DXL_SLAVE);
+  dxl_slave.setFirmwareVersion(1);
 
-  sprintf(imu_frame_id, "imu_link");
-  sprintf(joint_state_header_frame_id, "base_link");
-  sprintf(sensor_state_header_frame_id, "sensor_state");
+  dxl_slave.setControlTable(ADDR_MODEL_NUMBER, (uint16_t)dxl_slave.getModelNumber());
+  dxl_slave.setControlTable(ADDR_MODEL_INFORM, (uint32_t)MODEL_INFO);
+  dxl_slave.setControlTable(ADDR_FIRMWARE_VER, (uint8_t)dxl_slave.getFirmwareVersion());
+  dxl_slave.setControlTable(ADDR_ID, (uint8_t)dxl_slave.getID());
+  dxl_slave.setControlTable(ADDR_BAUDRATE, (uint8_t)3);
   
-  setup_end = true;
+  dxl_slave.setAddrRemoteWriteProtected(0, 255, true);
+  dxl_slave.setAddrRemoteWriteProtected(ADDR_SOUND, 1, false);
+  dxl_slave.setAddrRemoteWriteProtected(ADDR_USER_LED_1, 4, false);
+  dxl_slave.setAddrRemoteWriteProtected(ADDR_MOTOR_TORQUE, ADDR_PROFILE_ACC_R+4-ADDR_MOTOR_TORQUE, false);
+
+  dxl_slave.setReadCallbackFunc(dxl_slave_read_callback_func);
+  dxl_slave.setWriteCallbackFunc(dxl_slave_write_callback_func);
+
+  motor_driver.setTorque(true);
+  dxl_slave.setControlTable(ADDR_MOTOR_TORQUE, (uint8_t)motor_driver.getTorque());
+
+
 }
 
 /*******************************************************************************
@@ -56,42 +65,32 @@ void setup()
 *******************************************************************************/
 void loop()
 {
-  static TurtleBot3 turtlebot3_node;
+  static uint32_t pre_time;
 
-  uint32_t t = millis();
   updateVariable(true);
-  //updateTFPrefix(true);
 
-  if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_FREQUENCY))
+  if ((millis()-pre_time) >= (1000 / CONTROL_MOTOR_SPEED_FREQUENCY))
   {
+    pre_time = millis();
     updateGoalVelocity();
-    motor_driver.controlMotor(WHEEL_SEPARATION, goal_velocity);
-    tTime[0] = t;
+    if(sensors.checkVoltage() >= 7.0){
+      motor_driver.controlMotor(WHEEL_SEPARATION, goal_velocity);
+    }
   }
-
-#ifdef DEBUG
-  if ((t-tTime[1]) >= (1000 / DEBUG_LOG_FREQUENCY))
-  {
-    //sendDebuglog();
-    tTime[1] = t;
-  }
-#endif
-
-  // Send log message after ROS connection
-  //sendLogMsg();
 
   // Receive data from RC100 
-  //controllers.getRCdata(goal_velocity_from_rc100);
+  controllers.getRCdata(goal_velocity_from_rc100);
 
-  // Check push button pressed for simple test drive
-  driveTest(diagnosis.getButtonPress(3000));
+  if(sensors.checkVoltage() >= 7.0){
+    // Check push button pressed for simple test drive
+    driveTest(diagnosis.getButtonPress(3000));
+  }
 
   // Update the IMU unit
   sensors.updateIMU();
 
-  // TODO
   // Update sonar data
-  // sensors.updateSonar(t);
+  //TODO: sensors.updateSonar(t);
 
   // Start Gyro Calibration after ROS connection
   updateGyroCali(true);
@@ -100,172 +99,20 @@ void loop()
   diagnosis.showLedStatus(true);
 
   // Update Voltage
-  //battery_state = diagnosis.updateVoltageCheck(setup_end);
+  diagnosis.updateVoltageCheck(true);
 
-  // Call all the callbacks waiting to be called at that point in time
-  ros2::spin(&turtlebot3_node);
-}
+  updateGPIOs(&dxl_slave, 500);
+  updateBatteryStatus(&dxl_slave, 1000);
+  updateAnalogSensors(&dxl_slave, 200);
+  updateIMU(&dxl_slave, 50);
 
-
-/*******************************************************************************
-* Update TF Prefix
-*******************************************************************************/
-void updateTFPrefix(bool isConnected)
-{
-  static bool isChecked = false;
-  char log_msg[50];
-
-  if (isConnected)
-  {
-    if (isChecked == false)
-    {
-     // nh.getParam("~tf_prefix", &get_tf_prefix);
-
-      if (!strcmp(get_tf_prefix, ""))
-      {
-        sprintf(odom_header_frame_id, "odom");
-        sprintf(odom_child_frame_id, "base_footprint");  
-
-        sprintf(imu_frame_id, "imu_link");
-        sprintf(mag_frame_id, "mag_link");
-        sprintf(joint_state_header_frame_id, "base_link");
-      }
-      else
-      {
-        strcpy(odom_header_frame_id, get_tf_prefix);
-        strcpy(odom_child_frame_id, get_tf_prefix);
-
-        strcpy(imu_frame_id, get_tf_prefix);
-        strcpy(mag_frame_id, get_tf_prefix);
-        strcpy(joint_state_header_frame_id, get_tf_prefix);
-
-        strcat(odom_header_frame_id, "/odom");
-        strcat(odom_child_frame_id, "/base_footprint");
-
-        strcat(imu_frame_id, "/imu_link");
-        strcat(mag_frame_id, "/mag_link");
-        strcat(joint_state_header_frame_id, "/base_link");
-      }
-
-      sprintf(log_msg, "Setup TF on Odometry [%s]", odom_header_frame_id);
-      //nh.loginfo(log_msg); 
-
-      sprintf(log_msg, "Setup TF on IMU [%s]", imu_frame_id);
-      //nh.loginfo(log_msg); 
-
-      sprintf(log_msg, "Setup TF on MagneticField [%s]", mag_frame_id);
-      //nh.loginfo(log_msg); 
-
-      sprintf(log_msg, "Setup TF on JointState [%s]", joint_state_header_frame_id);
-      //nh.loginfo(log_msg); 
-
-      isChecked = true;
-    }
-  }
-  else
-  {
-    isChecked = false;
-  }
-}
-
-
-
-
-/*******************************************************************************
-* Update motor information
-*******************************************************************************/
-void updateMotorInfo(int32_t left_tick, int32_t right_tick)
-{
-  int32_t current_tick = 0;
-  static int32_t last_tick[WHEEL_NUM] = {0, 0};
-  
-  if (init_encoder)
-  {
-    for (int index = 0; index < WHEEL_NUM; index++)
-    {
-      last_diff_tick[index]   = 0.0;
-      last_tick[index]        = 0.0;
-      joint_states_pos[index] = 0.0;
-      joint_states_vel[index] = 0.0;
-    }  
-
-    last_tick[LEFT] = left_tick;
-    last_tick[RIGHT] = right_tick;
-
-    init_encoder = false;
-    return;
+  if(sensors.checkVoltage() >= 7.0){  
+    updateMotorStatus(&dxl_slave, 50);
   }
 
-  current_tick = left_tick;
-  last_diff_tick[LEFT]     = current_tick - last_tick[LEFT];
-  last_tick[LEFT]          = current_tick;
-  joint_states_pos[LEFT]  += TICK2RAD * (double)last_diff_tick[LEFT];
-
-  current_tick = right_tick;
-  last_diff_tick[RIGHT]    = current_tick - last_tick[RIGHT];
-  last_tick[RIGHT]         = current_tick;
-  joint_states_pos[RIGHT] += TICK2RAD * (double)last_diff_tick[RIGHT];
+  dxl_slave.processPacket();
 }
 
-/*******************************************************************************
-* Calculate the odometry
-*******************************************************************************/
-bool calcOdometry(double diff_time)
-{
-  float* orientation;
-  double wheel_l, wheel_r;      // rotation value of wheel [rad]
-  double delta_s, theta, delta_theta;
-  static double last_theta = 0.0;
-  double v, w;                  // v = translational velocity [m/s], w = rotational velocity [rad/s]
-  double step_time;
-
-  wheel_l = wheel_r = 0.0;
-  delta_s = delta_theta = theta = 0.0;
-  v = w = 0.0;
-  step_time = 0.0;
-
-  step_time = diff_time;
-
-  if (step_time == 0)
-    return false;
-
-  wheel_l = TICK2RAD * (double)last_diff_tick[LEFT];
-  wheel_r = TICK2RAD * (double)last_diff_tick[RIGHT];
-
-  if (isnan(wheel_l))
-    wheel_l = 0.0;
-
-  if (isnan(wheel_r))
-    wheel_r = 0.0;
-
-  delta_s     = WHEEL_RADIUS * (wheel_r + wheel_l) / 2.0;
-  // theta = WHEEL_RADIUS * (wheel_r - wheel_l) / WHEEL_SEPARATION;  
-  orientation = sensors.getOrientation();
-  theta       = atan2f(orientation[1]*orientation[2] + orientation[0]*orientation[3], 
-                0.5f - orientation[2]*orientation[2] - orientation[3]*orientation[3]);
-
-  delta_theta = theta - last_theta;
-
-  // compute odometric pose
-  odom_pose[0] += delta_s * cos(odom_pose[2] + (delta_theta / 2.0));
-  odom_pose[1] += delta_s * sin(odom_pose[2] + (delta_theta / 2.0));
-  odom_pose[2] += delta_theta;
-
-  // compute odometric instantaneouse velocity
-
-  v = delta_s / step_time;
-  w = delta_theta / step_time;
-
-  odom_vel[0] = v;
-  odom_vel[1] = 0.0;
-  odom_vel[2] = w;
-
-  joint_states_vel[LEFT]  = wheel_l / step_time;
-  joint_states_vel[RIGHT] = wheel_r / step_time;
-  last_theta = theta;
-
-  return true;
-}
 
 /*******************************************************************************
 * Turtlebot3 test drive using push buttons
@@ -278,7 +125,7 @@ void driveTest(uint8_t buttons)
 
   int32_t current_tick[2] = {0, 0};
 
-  motor_driver.readEncoder(current_tick[LEFT], current_tick[RIGHT]);
+  motor_driver.readPresentPosition(current_tick[LEFT], current_tick[RIGHT]);
 
   if (buttons & (1<<0))  
   {
@@ -328,16 +175,12 @@ void updateVariable(bool isConnected)
 {
   static bool variable_flag = false;
   
-  if (isConnected)
-  {
-    if (variable_flag == false)
-    {      
+  if (isConnected){
+    if (variable_flag == false){      
       sensors.initIMU();
       variable_flag = true;
     }
-  }
-  else
-  {
+  }else{
     variable_flag = false;
   }
 }
@@ -349,65 +192,14 @@ void updateVariable(bool isConnected)
 void updateGyroCali(bool isConnected)
 {
   static bool isEnded = false;
-  char log_msg[50];
 
-  if (isConnected)//(nh.connected())
-  {
-    if (isEnded == false)
-    {
-      sprintf(log_msg, "Start Calibration of Gyro");
-      //nh.loginfo(log_msg);
-
+  if (isConnected){
+    if (isEnded == false){
       sensors.calibrationGyro();
-
-      sprintf(log_msg, "Calibration End");
-      //nh.loginfo(log_msg);
-
       isEnded = true;
     }
-  }
-  else
-  {
+  }else{
     isEnded = false;
-  }
-}
-
-/*******************************************************************************
-* Send log message
-*******************************************************************************/
-void sendLogMsg(void)
-{
-  static bool log_flag = false;
-  char log_msg[100];  
-
-  String name             = NAME;
-  String firmware_version = FIRMWARE_VER;
-  String bringup_log      = "This core(v" + firmware_version + ") is compatible with TB3 " + name;
-   
-  const char* init_log_data = bringup_log.c_str();
-
-  if (true)//(nh.connected())
-  {
-    if (log_flag == false)
-    {      
-      sprintf(log_msg, "--------------------------");
-      //nh.loginfo(log_msg);
-
-      sprintf(log_msg, "Connected to OpenCR board!");
-      //nh.loginfo(log_msg);
-
-      sprintf(log_msg, init_log_data);
-      //nh.loginfo(log_msg);
-
-      sprintf(log_msg, "--------------------------");
-      //nh.loginfo(log_msg);
-
-      log_flag = true;
-    }
-  }
-  else
-  {
-    log_flag = false;
   }
 }
 
@@ -422,191 +214,191 @@ void updateGoalVelocity(void)
   sensors.setLedPattern(goal_velocity[LINEAR], goal_velocity[ANGULAR]);
 }
 
-/*******************************************************************************
-* Send Debug data
-*******************************************************************************/
-void sendDebuglog(void)
+
+float map_float(float x, float in_min, float in_max, float out_min, float out_max)
 {
-  DEBUG_SERIAL.println("---------------------------------------");
-  DEBUG_SERIAL.println("EXTERNAL SENSORS");
-  DEBUG_SERIAL.println("---------------------------------------");
-  DEBUG_SERIAL.print("Bumper : "); DEBUG_SERIAL.println(sensors.checkPushBumper());
-  DEBUG_SERIAL.print("Cliff : "); DEBUG_SERIAL.println(sensors.getIRsensorData());
-  DEBUG_SERIAL.print("Sonar : "); DEBUG_SERIAL.println(sensors.getSonarData());
-  DEBUG_SERIAL.print("Illumination : "); DEBUG_SERIAL.println(sensors.getIlluminationData());
-
-  DEBUG_SERIAL.println("---------------------------------------");
-  DEBUG_SERIAL.println("OpenCR SENSORS");
-  DEBUG_SERIAL.println("---------------------------------------");
-  DEBUG_SERIAL.print("Battery : "); DEBUG_SERIAL.println(sensors.checkVoltage());
-  DEBUG_SERIAL.println("Button : " + String(sensors.checkPushButton()));
-
-  float* quat = sensors.getOrientation();
-
-  DEBUG_SERIAL.println("IMU : ");
-  DEBUG_SERIAL.print("    w : "); DEBUG_SERIAL.println(quat[0]);
-  DEBUG_SERIAL.print("    x : "); DEBUG_SERIAL.println(quat[1]);
-  DEBUG_SERIAL.print("    y : "); DEBUG_SERIAL.println(quat[2]);
-  DEBUG_SERIAL.print("    z : "); DEBUG_SERIAL.println(quat[3]);
-  
-  DEBUG_SERIAL.println("---------------------------------------");
-  DEBUG_SERIAL.println("DYNAMIXELS");
-  DEBUG_SERIAL.println("---------------------------------------");
-  DEBUG_SERIAL.println("Torque : " + String(motor_driver.getTorque()));
-
-  int32_t encoder[WHEEL_NUM] = {0, 0};
-  motor_driver.readEncoder(encoder[LEFT], encoder[RIGHT]);
-  
-  DEBUG_SERIAL.println("Encoder(left) : " + String(encoder[LEFT]));
-  DEBUG_SERIAL.println("Encoder(right) : " + String(encoder[RIGHT]));
-
-  DEBUG_SERIAL.println("---------------------------------------");
-  DEBUG_SERIAL.println("TurtleBot3");
-  DEBUG_SERIAL.println("---------------------------------------");
-  DEBUG_SERIAL.println("Odometry : ");   
-  DEBUG_SERIAL.print("         x : "); DEBUG_SERIAL.println(odom_pose[0]);
-  DEBUG_SERIAL.print("         y : "); DEBUG_SERIAL.println(odom_pose[1]);
-  DEBUG_SERIAL.print("     theta : "); DEBUG_SERIAL.println(odom_pose[2]);
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-
-
-//IMU data: angular velocity, linear acceleration, orientation
-void publishImu(sensor_msgs::Imu* msg, void* arg)
+void updateGPIOs(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
 {
-  (void)(arg);
-  sensor_msgs::Imu imu_msg = sensors.getIMU();
-  memcpy(msg, &imu_msg, sizeof(sensor_msgs::Imu));
-  
-  msg->header.stamp    = ros2::now();
-  strcpy(msg->header.frame_id, imu_frame_id);
+  static uint32_t pre_time = 0;
+
+  if(millis() - pre_time >= interval_ms){
+    pre_time = millis();
+
+    slave->setControlTable(ADDR_USER_LED_1, (uint8_t)digitalRead(BDPIN_GPIO_4));
+    slave->setControlTable(ADDR_USER_LED_2, (uint8_t)digitalRead(BDPIN_GPIO_6));
+    slave->setControlTable(ADDR_USER_LED_3, (uint8_t)digitalRead(BDPIN_GPIO_8));
+    slave->setControlTable(ADDR_USER_LED_4, (uint8_t)digitalRead(BDPIN_GPIO_10));
+    slave->setControlTable(ADDR_BUTTON_1, (uint8_t)digitalRead(BDPIN_PUSH_SW_1));
+    slave->setControlTable(ADDR_BUTTON_2, (uint8_t)digitalRead(BDPIN_PUSH_SW_2));
+    slave->setControlTable(ADDR_BUMPER_1, (uint8_t)sensors.getBumper1State());
+    slave->setControlTable(ADDR_BUMPER_2, (uint8_t)sensors.getBumper2State());
+  }  
 }
 
-
-//Odometry : 
-void publishOdometry(nav_msgs::Odometry* msg, void* arg)
+void updateBatteryStatus(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
 {
-  (void)(arg);
-  unsigned long time_now       = millis();
-  unsigned long step_time      = time_now - prev_update_time;
-  calcOdometry((double)(step_time * 0.001));
+  static uint32_t pre_time = 0;
+  float bat_voltage, bat_percent;
+  uint32_t bat_voltage_uint, bat_percent_uint = 0;
 
-  msg->header.stamp            = ros2::now();
-  strcpy(msg->header.frame_id, odom_header_frame_id);
-  strcpy(msg->child_frame_id, odom_child_frame_id);
-  msg->pose.pose.position.x    = odom_pose[0];
-  msg->pose.pose.position.y    = odom_pose[1];
-  msg->pose.pose.position.z    = 0;
-  //msg->pose.pose.orientation = tf::createQuaternionFromYaw(odom_pose[2]);
-  msg->pose.pose.orientation.x = 0;
-  msg->pose.pose.orientation.y = 0;
-  msg->pose.pose.orientation.z = 0;
-  msg->pose.pose.orientation.w = 0;
-  msg->twist.twist.linear.x    = odom_vel[0];
-  msg->twist.twist.angular.z   = odom_vel[2];
-}
+  if(millis() - pre_time >= interval_ms){
+    pre_time = millis();
 
-
-//Joint State : 
-void publishJointState(sensor_msgs::JointState* msg, void* arg)
-{
-  (void)(arg);
-  static double effort_val[WHEEL_NUM] = {0, 0};
-
-  msg->header.stamp    = ros2::now();
-  strcpy(msg->header.frame_id, joint_state_header_frame_id);
-  strcpy(msg->name[0], "wheel_left_joint");
-  strcpy(msg->name[1], "wheel_right_joint");
-  msg->name_size       = WHEEL_NUM;
-  msg->position_size   = WHEEL_NUM;
-  msg->velocity_size   = WHEEL_NUM;
-  msg->effort_size     = WHEEL_NUM;
-  memcpy(msg->position, joint_states_pos, sizeof(joint_states_pos));
-  memcpy(msg->velocity, joint_states_vel, sizeof(joint_states_vel));
-  memcpy(msg->effort, effort_val, sizeof(effort_val));
-}
-
-
-//sensor_state: bumpers, cliffs, buttons, encoders, battery
-void publishSensorState(turtlebot3_msgs::SensorState* msg, void* arg)
-{
-  (void)(arg);
-  msg->header.stamp = ros2::now();
-  strcpy(msg->header.frame_id, sensor_state_header_frame_id);
-  msg->bumper       = sensors.checkPushBumper();
-  msg->cliff        = sensors.getIRsensorData();
-  msg->sonar        = 0.0 ;//TODO : sensors.getSonarData();
-  msg->illumination = sensors.getIlluminationData();
-  msg->led          = 0;
-  msg->button       = sensors.checkPushButton();
-  msg->torque       = motor_driver.getTorque();
-  if (motor_driver.readEncoder(msg->left_encoder, msg->right_encoder))
-  {
-    updateMotorInfo(msg->left_encoder, msg->right_encoder);
+    bat_voltage = sensors.checkVoltage();
+    bat_voltage_uint = (uint32_t)(bat_voltage*100);
+    slave->setControlTable(ADDR_BATTERY_VOLTAGE, (uint32_t)bat_voltage_uint);
+    if(bat_voltage >= 3.5*3){
+      bat_percent = map_float(bat_voltage, 3.5*3, 4.1*3, 0.0, 100.0);
+      bat_percent_uint = (uint32_t)(bat_percent*100);
+    }
+    slave->setControlTable(ADDR_BATTERY_PERCENT, (uint32_t)bat_percent_uint);
   }
-  msg->battery      = sensors.checkVoltage();
 }
 
-
-//version info
-void publishVersionInfo(turtlebot3_msgs::VersionInfo* msg, void* arg)
+void updateAnalogSensors(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
 {
-  (void)(arg);
-  strcpy(msg->hardware, (char*)HARDWARE_VER);
-  strcpy(msg->software, (char*)SOFTWARE_VER);
-  strcpy(msg->firmware, (char*)FIRMWARE_VER);  
+  static uint32_t pre_time = 0;
+
+  if(millis() - pre_time >= interval_ms){
+    pre_time = millis();
+
+    slave->setControlTable(ADDR_ILLUMINATION, (uint16_t)sensors.getIlluminationData());
+    slave->setControlTable(ADDR_IR, (uint32_t)sensors.getIRsensorData());
+    slave->setControlTable(ADDR_SORNA, (float)sensors.getSonarData());
+  }  
 }
 
-
-
-void subscribeCmdVel(geometry_msgs::Twist* msg, void* arg)
+void updateIMU(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
 {
-  (void)(arg);
-  goal_velocity_from_cmd[LINEAR]  = constrain(msg->linear.x,  MIN_LINEAR_VELOCITY, MAX_LINEAR_VELOCITY);
-  goal_velocity_from_cmd[ANGULAR] = constrain(msg->angular.z, MIN_ANGULAR_VELOCITY, MAX_ANGULAR_VELOCITY);
+  static uint32_t pre_time = 0;
+  float* p_imu_data;
+
+  if(millis() - pre_time >= interval_ms){
+    pre_time = millis();
+
+    p_imu_data = sensors.getImuAngularVelocity();
+    slave->setControlTable(ADDR_ANGULAR_VELOCITY_X, (float)p_imu_data[0]);
+    slave->setControlTable(ADDR_ANGULAR_VELOCITY_Y, (float)p_imu_data[1]);
+    slave->setControlTable(ADDR_ANGULAR_VELOCITY_Z, (float)p_imu_data[2]);
+
+    p_imu_data = sensors.getImuLinearAcc();
+    slave->setControlTable(ADDR_LINEAR_ACC_X, (float)p_imu_data[0]);
+    slave->setControlTable(ADDR_LINEAR_ACC_Y, (float)p_imu_data[1]);
+    slave->setControlTable(ADDR_LINEAR_ACC_Z, (float)p_imu_data[2]);
+
+    p_imu_data = sensors.getImuMagnetic();
+    slave->setControlTable(ADDR_MAGNETIC_X, (float)p_imu_data[0]);
+    slave->setControlTable(ADDR_MAGNETIC_Y, (float)p_imu_data[1]);
+    slave->setControlTable(ADDR_MAGNETIC_Z, (float)p_imu_data[2]);
+
+    p_imu_data = sensors.getOrientation();
+    slave->setControlTable(ADDR_ORIENTATION_W, (float)p_imu_data[0]);
+    slave->setControlTable(ADDR_ORIENTATION_X, (float)p_imu_data[1]);
+    slave->setControlTable(ADDR_ORIENTATION_Y, (float)p_imu_data[2]);
+    slave->setControlTable(ADDR_ORIENTATION_Z, (float)p_imu_data[3]);
+  }  
 }
 
-
-void subscribeSound(turtlebot3_msgs::Sound* msg, void* arg)
+void updateMotorStatus(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
 {
-  (void)(arg);
-  sensors.makeSound(msg->value);
+  static uint32_t pre_time = 0;
+  int32_t present_position[WHEEL_NUM], present_velocity[WHEEL_NUM];
+  int16_t present_current[WHEEL_NUM];
+
+  if(millis() - pre_time >= interval_ms){
+    pre_time = millis();
+
+    if (motor_driver.readPresentPosition(present_position[LEFT], present_position[RIGHT]) == true){
+      slave->setControlTable(ADDR_PRESENT_POSITION_L, (int32_t)present_position[LEFT]);
+      slave->setControlTable(ADDR_PRESENT_POSITION_R, (int32_t)present_position[RIGHT]);
+    }
+
+    if (motor_driver.readPresentVelocity(present_velocity[LEFT], present_velocity[RIGHT]) == true){
+      slave->setControlTable(ADDR_PRESENT_VELOCITY_L, (int32_t)present_velocity[LEFT]);
+      slave->setControlTable(ADDR_PRESENT_VELOCITY_R, (int32_t)present_velocity[RIGHT]);
+    }
+    
+    if (motor_driver.readPresentCurrent(present_current[LEFT], present_current[RIGHT]) == true){
+      slave->setControlTable(ADDR_PRESENT_CURRENT_L, (int32_t)present_current[LEFT]);
+      slave->setControlTable(ADDR_PRESENT_CURRENT_R, (int32_t)present_current[RIGHT]);
+    }
+  }
 }
 
 
-void subscribeMotorPower(std_msgs::Bool* msg, void* arg)
-{ 
-  (void)(arg);
-  motor_driver.setTorque(msg->data);
-}
-
-
-void subscribeReset(std_msgs::Empty* msg, void* arg)
+bool isAddrInRange(uint16_t addr, uint16_t length,
+  uint16_t range_addr, uint16_t range_length)
 {
-  (void)(msg);
-  (void)(arg);
-
-  char log_msg[50];
-
-  sprintf(log_msg, "Start Calibration of Gyro");
-  DEBUG_SERIAL.println(log_msg);
-  //nh.loginfo(log_msg);
-
-  sensors.calibrationGyro();
-
-  sprintf(log_msg, "Calibration End");
-  DEBUG_SERIAL.println(log_msg);
-  //nh.loginfo(log_msg);
-
-  sprintf(log_msg, "Reset Odometry");
-  DEBUG_SERIAL.println(log_msg);
-  //nh.loginfo(log_msg);  
+  return (addr >= range_addr && addr+length <= range_addr+range_length) ? true:false;
 }
 
 
-void subscribeTimeSync(builtin_interfaces::Time* msg, void* arg)
+void dxl_slave_read_callback_func(DYNAMIXEL::Slave *slave, uint16_t addr, uint16_t length)
 {
-  (void)(arg);
-  
-  ros2::syncTimeFromRemote(msg);
+  if(isAddrInRange(ADDR_MILLIS, 4, addr, length) == true){
+    slave->setControlTable(ADDR_MILLIS, (uint32_t)millis());
+  }
+
+  if(isAddrInRange(ADDR_MICROS, 4, addr, length) == true){
+    slave->setControlTable(ADDR_MICROS, (uint32_t)micros());
+  }
+
+  if(isAddrInRange(ADDR_MOTOR_TORQUE, 1, addr, length) == true){
+    slave->setControlTable(ADDR_MOTOR_TORQUE, (uint8_t)motor_driver.getTorque());
+  }
 }
+
+void dxl_slave_write_callback_func(DYNAMIXEL::Slave *slave, uint16_t addr, uint16_t length)
+{
+  if(isAddrInRange(ADDR_SOUND, 1, addr, length) == true){
+    uint8_t data;
+    if(slave->getControlTable(ADDR_SOUND, 1, (uint8_t*)&data) == DXL_ERR_NONE){
+      sensors.makeSound(data);
+    }
+  }
+
+  if(isAddrInRange(ADDR_MOTOR_TORQUE, 1, addr, length) == true){
+    uint8_t data;
+    if(slave->getControlTable(ADDR_MOTOR_TORQUE, 1, (uint8_t*)&data) == DXL_ERR_NONE){
+      motor_driver.setTorque(data);
+    }
+  }
+
+  if(isAddrInRange(ADDR_CMD_VEL_LINEAR_X, 4, addr, length) == true){
+    int32_t data;
+    float f_data;
+    if(slave->getControlTable(ADDR_CMD_VEL_LINEAR_X, 4, (uint8_t*)&data) == DXL_ERR_NONE){
+      f_data = data;
+      f_data *= 0.01f;
+      goal_velocity_from_cmd[LINEAR] = constrain(f_data, MIN_LINEAR_VELOCITY, MAX_LINEAR_VELOCITY);
+    }
+  }
+
+  if(isAddrInRange(ADDR_CMD_VEL_ANGULAR_Z, 4, addr, length) == true){
+    int32_t data;
+    float f_data;
+    if(slave->getControlTable(ADDR_CMD_VEL_ANGULAR_Z, 4, (uint8_t*)&data) == DXL_ERR_NONE){
+      f_data = data;
+      f_data *= 0.01f;
+      goal_velocity_from_cmd[ANGULAR] = constrain(f_data, MIN_ANGULAR_VELOCITY, MAX_ANGULAR_VELOCITY);
+    }
+  }
+
+  if(isAddrInRange(ADDR_PROFILE_ACC_L, 4, addr, length) == true
+    || isAddrInRange(ADDR_PROFILE_ACC_R, 4, addr, length) == true)
+  {
+    uint32_t l_data, r_data;
+    if(slave->getControlTable(ADDR_PROFILE_ACC_L, 4, (uint8_t*)&l_data) == DXL_ERR_NONE){
+      if(slave->getControlTable(ADDR_PROFILE_ACC_R, 4, (uint8_t*)&r_data) == DXL_ERR_NONE){
+        if(sensors.checkVoltage() >= 7.0){
+          motor_driver.writeProfileAcceleration(l_data, r_data);
+        }
+      }
+    }
+  }
+}
+
+

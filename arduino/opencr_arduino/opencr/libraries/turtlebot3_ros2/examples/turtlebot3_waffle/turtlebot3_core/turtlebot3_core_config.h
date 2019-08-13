@@ -14,12 +14,8 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho, Gilbert, Kei Ki */
-
 #ifndef TURTLEBOT3_CORE_CONFIG_H_
 #define TURTLEBOT3_CORE_CONFIG_H_
-
-#include <ros2arduino.h>
 
 #include <TurtleBot3_ROS2.h>
 #include "turtlebot3_waffle.h"
@@ -28,19 +24,9 @@
 
 #define HARDWARE_VER "1.0.0"
 #define SOFTWARE_VER "1.0.0"
-#define FIRMWARE_VER "1.0.2"
+#define FIRMWARE_VER "1.0.0"
 
-#define SENSOR_STATE_PUBLISH_FREQUENCY         30    //hz
-#define VERSION_INFORMATION_PUBLISH_FREQUENCY  1    //hz 
-#define IMU_PUBLISH_FREQUENCY                  200  //hz
-#define CMD_VEL_PUBLISH_FREQUENCY              30   //hz
-#define ODOMETRY_PUBLISH_FREQUENCY             30  //hz
-#define JOINT_STATE_PUBLISH_FREQUENCY          30   //hz
-#define BATTERY_STATE_PUBLISH_FREQUENCY        30   //hz
-#define MAGNETIC_FIELD_PUBLISH_FREQUENCY       30   //hz
-
-#define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
-#define DEBUG_LOG_FREQUENCY                    10   //hz
+#define CONTROL_MOTOR_SPEED_FREQUENCY    30   //hz
  
 #define WHEEL_NUM                        2
 
@@ -58,7 +44,7 @@
 #define TEST_DISTANCE                    0.300     // meter
 #define TEST_RADIAN                      3.14      // 180 degree
 
-//#define DEBUG                            
+#define DEBUG                            
 #define DEBUG_SERIAL                     SerialBT2
 #define RTPS_SERIAL                      Serial
 #ifdef DEBUG
@@ -66,7 +52,6 @@
 #else
   #define DEBUG_PRINT(x)                  
 #endif
-
 
 
 /*******************************************************************************
@@ -93,174 +78,79 @@ float goal_velocity_from_button[WHEEL_NUM] = {0.0, 0.0};
 float goal_velocity_from_cmd[WHEEL_NUM] = {0.0, 0.0};
 float goal_velocity_from_rc100[WHEEL_NUM] = {0.0, 0.0};
 
-/*******************************************************************************
-* SoftwareTimer of Turtlebot3
-*******************************************************************************/
-static uint32_t tTime[10];
 
 /*******************************************************************************
-* Calculation for odometry
+* Declaration for DYNAMIXEL Slave Function
 *******************************************************************************/
-bool init_encoder = true;
-int32_t last_diff_tick[WHEEL_NUM] = {0, 0};
-double  joint_states_pos[WHEEL_NUM]  = {0.0, 0.0};
+#define SERIAL_DXL_SLAVE Serial
+const uint16_t MODEL_NUM_DXL_SLAVE = 0x5000;
+const uint8_t ID_DXL_SLAVE = 200;
+const float PROTOCOL_VERSION_DXL_SLAVE = 2.0;
 
-/*******************************************************************************
-* Update Joint State
-*******************************************************************************/
-double  joint_states_vel[WHEEL_NUM]  = {0.0, 0.0};
-
-/*******************************************************************************
-* Declaration for SLAM and navigation
-*******************************************************************************/
-unsigned long prev_update_time;
-float odom_pose[3];
-double odom_vel[3];
-
-/*******************************************************************************
-* Declaration for Battery
-*******************************************************************************/
-bool setup_end        = false;
-uint8_t battery_state = 0;
-
-/*******************************************************************************
-* ROS Parameter
-*******************************************************************************/
-char get_prefix[10];
-char* get_tf_prefix = get_prefix;
-
-char odom_header_frame_id[30];
-char odom_child_frame_id[30];
-
-char imu_frame_id[30];
-char mag_frame_id[30];
-
-char joint_state_header_frame_id[30];
-char sensor_state_header_frame_id[30];
-
-
-void updateTFPrefix(bool isConnected);
-void updateVariable(bool isConnected);
-void updateGyroCali(bool isConnected);
-void updateGoalVelocity(void);
-void updateMotorInfo(int32_t left_tick, int32_t right_tick);
-bool calcOdometry(double diff_time);
-void driveTest(uint8_t buttons);
-void sendLogMsg(void);
-void sendDebuglog(void);
-
-
-void publishOdometry(nav_msgs::Odometry* msg, void* arg);
-void publishImu(sensor_msgs::Imu* msg, void* arg);
-void publishJointState(sensor_msgs::JointState* msg, void* arg);
-void publishSensorState(turtlebot3_msgs::SensorState* msg, void* arg);
-void publishVersionInfo(turtlebot3_msgs::VersionInfo* msg, void* arg);
-
-//void publishCmdVelRC100(geometry_msgs::Twist* msg, void* arg);
-//void publishBatteryState(sensor_msgs::BatteryState* msg, void* arg);
-//void publishMagneticField(sensor_msgs::MagneticField* msg, void* arg);
-
-void subscribeCmdVel(geometry_msgs::Twist* msg, void* arg);
-void subscribeSound(turtlebot3_msgs::Sound* msg, void* arg);
-void subscribeMotorPower(std_msgs::Bool* msg, void* arg);
-void subscribeReset(std_msgs::Empty* msg, void* arg);
-void subscribeTimeSync(builtin_interfaces::Time* msg, void* arg);
-
-
-/*******************************************************************************
-* TurtleBot3 Node Class
-*******************************************************************************/
-class TurtleBot3 : public ros2::Node
-{
-public:
-  TurtleBot3()
-  : Node()
-  {
-    /*******************************************************************************
-    * Publisher
-    *******************************************************************************/
-    // // Odometry of Turtlebot3
-    // odom_pub_          = this->createPublisher<nav_msgs::Odometry>("odom");
-    // this->createWallFreq(ODOMETRY_PUBLISH_FREQUENCY, (ros2::CallbackFunc)publishOdometry, NULL, odom_pub_);
-    // DEBUG_PRINT("\r\n [Publisher Create]   /odom           : "); DEBUG_PRINT((odom_pub_!=NULL?"Success":"Fail")); DEBUG_PRINT(this->err_code);
-
-    // Sensor State
-    sensor_state_pub_  = this->createPublisher<turtlebot3_msgs::SensorState>("sensor_state");
-    this->createWallFreq(SENSOR_STATE_PUBLISH_FREQUENCY, (ros2::CallbackFunc)publishSensorState, NULL, sensor_state_pub_);  
-    DEBUG_PRINT("\r\n [Publisher Create]   /sensor_state   : "); DEBUG_PRINT((sensor_state_pub_!=NULL?"Success":"Fail")); DEBUG_PRINT(this->err_code);
-
-    // IMU of Turtlebot3
-    imu_pub_           = this->createPublisher<sensor_msgs::Imu>("imu");
-    this->createWallFreq(IMU_PUBLISH_FREQUENCY, (ros2::CallbackFunc)publishImu, NULL, imu_pub_);
-    DEBUG_PRINT("\r\n [Publisher Create]   /imu            : "); DEBUG_PRINT((imu_pub_!=NULL?"Success":"Fail")); DEBUG_PRINT(this->err_code);
-
-    // Joint(Dynamixel) state of Turtlebot3
-    // joint_states_pub_  = this->createPublisher<sensor_msgs::JointState>("joint_states");
-    // this->createWallFreq(JOINT_STATE_PUBLISH_FREQUENCY, (ros2::CallbackFunc)publishJointState, NULL, joint_states_pub_);
-    // DEBUG_PRINT("\r\n [Publisher Create]   /joint_states   : "); DEBUG_PRINT((joint_states_pub_!=NULL?"Success":"Fail")); DEBUG_PRINT(this->err_code);
-
-    // // (Not necessary) Battey state of Turtlebot3 
-    // battery_state_pub_ = this->createPublisher<sensor_msgs::BatteryState>("battery_state");
-    // this->createWallFreq(BATTERY_STATE_PUBLISH_FREQUENCY, (ros2::CallbackFunc)publishBatteryState, NULL, battery_state_pub_);
-    // DEBUG_PRINT("\r\n [Publisher Create]   /battery_state  : "); DEBUG_PRINT((battery_state_pub_!=NULL?"Success":"Fail")); DEBUG_PRINT(this->err_code);
-
-    // // (Not necessary) Magnetic field
-    // mag_pub_           = this->createPublisher<sensor_msgs::MagneticField>("magnetic_field");
-    // this->createWallFreq(MAGNETIC_FIELD_PUBLISH_FREQUENCY, (ros2::CallbackFunc)publishMagneticField, NULL, mag_pub_);
-    // DEBUG_PRINT("\r\n [Publisher Create]   /magnetic_field : "); DEBUG_PRINT((mag_pub_!=NULL?"Success":"Fail")); DEBUG_PRINT(this->err_code);
-
-    // Version information of Turtlebot3
-    version_info_pub_  = this->createPublisher<turtlebot3_msgs::VersionInfo>("version_info");
-    this->createWallFreq(VERSION_INFORMATION_PUBLISH_FREQUENCY, (ros2::CallbackFunc)publishVersionInfo, NULL, version_info_pub_);
-    DEBUG_PRINT("\r\n [Publisher Create]   /version_info   : "); DEBUG_PRINT((version_info_pub_!=NULL?"Success":"Fail")); DEBUG_PRINT(this->err_code);
-
-    // // (Not necessary) Command velocity of Turtlebot3 using RC100 remote controller
-    // cmd_vel_rc100_pub_ = this->createPublisher<geometry_msgs::Twist>("cmd_vel_rc100");
-    // this->createWallFreq(CMD_VEL_PUBLISH_FREQUENCY, (ros2::CallbackFunc)publishCmdVelRC100, NULL, cmd_vel_rc100_pub_);
-    // DEBUG_PRINT("\r\n [Publisher Create]   /cmd_vel_rc100  : "); DEBUG_PRINT((cmd_vel_rc100_pub_!=NULL?"Success":"Fail")); DEBUG_PRINT(this->err_code);
-   
-
-    /*******************************************************************************
-    * Subscriber
-    *******************************************************************************/
-    cmd_vel_sub_       = this->createSubscriber<geometry_msgs::Twist>("cmd_vel", (ros2::CallbackFunc)subscribeCmdVel, NULL);
-    DEBUG_PRINT("\r\n [Subscriber Create]  /cmd_vel        : "); DEBUG_PRINT((cmd_vel_sub_!=NULL?"Success":"Fail")); DEBUG_PRINT(this->err_code);
-
-    motor_power_sub_   = this->createSubscriber<std_msgs::Bool>("motor_power", (ros2::CallbackFunc)subscribeMotorPower, NULL);
-    DEBUG_PRINT("\r\n [Subscriber Create]  /motor_power    : "); DEBUG_PRINT((motor_power_sub_!=NULL?"Success":"Fail")); DEBUG_PRINT(this->err_code);
-
-    reset_sub_         = this->createSubscriber<std_msgs::Empty>("reset", (ros2::CallbackFunc)subscribeReset, NULL);
-    DEBUG_PRINT("\r\n [Subscriber Create]  /reset          : "); DEBUG_PRINT((reset_sub_!=NULL?"Success":"Fail")); DEBUG_PRINT(this->err_code);
-
-    sound_sub_         = this->createSubscriber<turtlebot3_msgs::Sound>("sound", (ros2::CallbackFunc)subscribeSound, NULL);
-    DEBUG_PRINT("\r\n [Subscriber Create]  /sound          : "); DEBUG_PRINT((sound_sub_!=NULL?"Success":"Fail")); DEBUG_PRINT(this->err_code);
-
-    time_sync_sub_     = this->createSubscriber<builtin_interfaces::Time>("time_sync", (ros2::CallbackFunc)subscribeTimeSync, NULL);
-    DEBUG_PRINT("\r\n [Subscriber Create]  /time_sync      : "); DEBUG_PRINT((time_sync_sub_!=NULL?"Success":"Fail")); DEBUG_PRINT(this->err_code);
-  }
-
-
-private:
-
-  /* Publisher Pointer */
-  //ros2::Publisher<nav_msgs::Odometry>*            odom_pub_;
-  ros2::Publisher<turtlebot3_msgs::SensorState>*  sensor_state_pub_;
-  ros2::Publisher<sensor_msgs::Imu>*              imu_pub_;
-  ros2::Publisher<sensor_msgs::JointState>*       joint_states_pub_;
-  ros2::Publisher<turtlebot3_msgs::VersionInfo>*  version_info_pub_;
+enum ControlTableItemAddr{
+  ADDR_MODEL_NUMBER    = 0,
+  ADDR_MODEL_INFORM    = 2,
+  ADDR_FIRMWARE_VER    = 6,
+  ADDR_ID              = 7,
+  ADDR_BAUDRATE        = 8,
   
-  //ros2::Publisher<sensor_msgs::BatteryState>*     battery_state_pub_;
-  //ros2::Publisher<geometry_msgs::Twist>*          cmd_vel_rc100_pub_;
-  //ros2::Publisher<sensor_msgs::MagneticField>*    mag_pub_;
+  ADDR_MILLIS          = 10,
+  ADDR_MICROS          = 14,
 
-  /* Subscriber Pointer */
-  ros2::Subscriber<geometry_msgs::Twist>*         cmd_vel_sub_;
-  ros2::Subscriber<turtlebot3_msgs::Sound>*       sound_sub_;
-  ros2::Subscriber<std_msgs::Bool>*               motor_power_sub_;
-  ros2::Subscriber<std_msgs::Empty>*              reset_sub_;
-  ros2::Subscriber<builtin_interfaces::Time>*     time_sync_sub_;
+  ADDR_USER_LED_1      = 20,
+  ADDR_USER_LED_2      = 21,
+  ADDR_USER_LED_3      = 22,
+  ADDR_USER_LED_4      = 23,
+
+  ADDR_BUTTON_1        = 26,
+  ADDR_BUTTON_2        = 27,
+  ADDR_BUMPER_1        = 28,
+  ADDR_BUMPER_2        = 29,
+  ADDR_ILLUMINATION    = 30,
+  ADDR_IR              = 34,
+  ADDR_SORNA           = 38,
+  ADDR_BATTERY_VOLTAGE = 42,
+  ADDR_BATTERY_PERCENT = 46,
+  ADDR_SOUND           = 50,
+
+  ADDR_ANGULAR_VELOCITY_X = 60,
+  ADDR_ANGULAR_VELOCITY_Y = 64,
+  ADDR_ANGULAR_VELOCITY_Z = 68,
+  ADDR_LINEAR_ACC_X       = 72,
+  ADDR_LINEAR_ACC_Y       = 76,
+  ADDR_LINEAR_ACC_Z       = 80,
+  ADDR_MAGNETIC_X         = 84,
+  ADDR_MAGNETIC_Y         = 88,
+  ADDR_MAGNETIC_Z         = 92,
+  ADDR_ORIENTATION_W      = 96,
+  ADDR_ORIENTATION_X      = 100,
+  ADDR_ORIENTATION_Y      = 104,
+  ADDR_ORIENTATION_Z      = 108,
+  
+  ADDR_PRESENT_CURRENT_L  = 120,
+  ADDR_PRESENT_CURRENT_R  = 124,
+  ADDR_PRESENT_VELOCITY_L = 128,
+  ADDR_PRESENT_VELOCITY_R = 132,
+  ADDR_PRESENT_POSITION_L = 136,
+  ADDR_PRESENT_POSITION_R = 140,
+  
+  ADDR_MOTOR_TORQUE       = 149,
+  ADDR_CMD_VEL_LINEAR_X   = 150,
+  ADDR_CMD_VEL_LINEAR_Y   = 154,
+  ADDR_CMD_VEL_LINEAR_Z   = 158,
+  ADDR_CMD_VEL_ANGULAR_X  = 162,
+  ADDR_CMD_VEL_ANGULAR_Y  = 166,
+  ADDR_CMD_VEL_ANGULAR_Z  = 170,
+  ADDR_PROFILE_ACC_L      = 174,
+  ADDR_PROFILE_ACC_R      = 178
 };
 
+DYNAMIXEL::USBSerialPortHandler port_dxl_slave(SERIAL_DXL_SLAVE);
+DYNAMIXEL::Slave dxl_slave(port_dxl_slave, MODEL_NUM_DXL_SLAVE, PROTOCOL_VERSION_DXL_SLAVE);
+
+bool isAddrInRange(uint16_t addr, uint16_t length, uint16_t range_addr, uint16_t range_length);
+void dxl_slave_read_callback_func(DYNAMIXEL::Slave *slave, uint16_t addr, uint16_t length);
+void dxl_slave_write_callback_func(DYNAMIXEL::Slave *slave, uint16_t addr, uint16_t length);
 
 
 #endif // TURTLEBOT3_CORE_CONFIG_H_

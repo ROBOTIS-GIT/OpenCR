@@ -14,8 +14,6 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho, Gilbert, Kei Ki */
-
 #include "../../include/turtlebot3/turtlebot3_sensor.h"
 
 Turtlebot3Sensor::Turtlebot3Sensor()
@@ -37,12 +35,6 @@ bool Turtlebot3Sensor::init(void)
   initLED();
 
   uint8_t get_error_code = 0x00;
-
-  battery_state_msg_.current         = NAN;
-  battery_state_msg_.charge          = NAN;
-  battery_state_msg_.capacity        = NAN;
-  battery_state_msg_.design_capacity = NAN;
-  battery_state_msg_.percentage      = NAN;
 
   get_error_code = imu_.begin();
 
@@ -92,53 +84,86 @@ void Turtlebot3Sensor::calibrationGyro()
   }
 }
 
-sensor_msgs::Imu Turtlebot3Sensor::getIMU(void)
+// sensor_msgs::Imu Turtlebot3Sensor::getIMU(void)
+// {
+//   sensor_msgs::Imu imu_msg_;
+
+//   imu_msg_.angular_velocity.x = imu_.SEN.gyroADC[0] * GYRO_FACTOR;
+//   imu_msg_.angular_velocity.y = imu_.SEN.gyroADC[1] * GYRO_FACTOR;
+//   imu_msg_.angular_velocity.z = imu_.SEN.gyroADC[2] * GYRO_FACTOR;
+//   imu_msg_.angular_velocity_covariance[0] = 0.02;
+//   imu_msg_.angular_velocity_covariance[1] = 0;
+//   imu_msg_.angular_velocity_covariance[2] = 0;
+//   imu_msg_.angular_velocity_covariance[3] = 0;
+//   imu_msg_.angular_velocity_covariance[4] = 0.02;
+//   imu_msg_.angular_velocity_covariance[5] = 0;
+//   imu_msg_.angular_velocity_covariance[6] = 0;
+//   imu_msg_.angular_velocity_covariance[7] = 0;
+//   imu_msg_.angular_velocity_covariance[8] = 0.02;
+
+//   imu_msg_.linear_acceleration.x = imu_.SEN.accADC[0] * ACCEL_FACTOR;
+//   imu_msg_.linear_acceleration.y = imu_.SEN.accADC[1] * ACCEL_FACTOR;
+//   imu_msg_.linear_acceleration.z = imu_.SEN.accADC[2] * ACCEL_FACTOR;
+
+//   imu_msg_.linear_acceleration_covariance[0] = 0.04;
+//   imu_msg_.linear_acceleration_covariance[1] = 0;
+//   imu_msg_.linear_acceleration_covariance[2] = 0;
+//   imu_msg_.linear_acceleration_covariance[3] = 0;
+//   imu_msg_.linear_acceleration_covariance[4] = 0.04;
+//   imu_msg_.linear_acceleration_covariance[5] = 0;
+//   imu_msg_.linear_acceleration_covariance[6] = 0;
+//   imu_msg_.linear_acceleration_covariance[7] = 0;
+//   imu_msg_.linear_acceleration_covariance[8] = 0.04;
+
+//   imu_msg_.orientation.w = imu_.quat[0];
+//   imu_msg_.orientation.x = imu_.quat[1];
+//   imu_msg_.orientation.y = imu_.quat[2];
+//   imu_msg_.orientation.z = imu_.quat[3];
+
+//   imu_msg_.orientation_covariance[0] = 0.0025;
+//   imu_msg_.orientation_covariance[1] = 0;
+//   imu_msg_.orientation_covariance[2] = 0;
+//   imu_msg_.orientation_covariance[3] = 0;
+//   imu_msg_.orientation_covariance[4] = 0.0025;
+//   imu_msg_.orientation_covariance[5] = 0;
+//   imu_msg_.orientation_covariance[6] = 0;
+//   imu_msg_.orientation_covariance[7] = 0;
+//   imu_msg_.orientation_covariance[8] = 0.0025;
+
+//   return imu_msg_;
+// }
+
+float* Turtlebot3Sensor::getImuAngularVelocity(void)
 {
-  sensor_msgs::Imu imu_msg_;
+  static float angular_vel[3];
 
-  imu_msg_.angular_velocity.x = imu_.SEN.gyroADC[0] * GYRO_FACTOR;
-  imu_msg_.angular_velocity.y = imu_.SEN.gyroADC[1] * GYRO_FACTOR;
-  imu_msg_.angular_velocity.z = imu_.SEN.gyroADC[2] * GYRO_FACTOR;
-  imu_msg_.angular_velocity_covariance[0] = 0.02;
-  imu_msg_.angular_velocity_covariance[1] = 0;
-  imu_msg_.angular_velocity_covariance[2] = 0;
-  imu_msg_.angular_velocity_covariance[3] = 0;
-  imu_msg_.angular_velocity_covariance[4] = 0.02;
-  imu_msg_.angular_velocity_covariance[5] = 0;
-  imu_msg_.angular_velocity_covariance[6] = 0;
-  imu_msg_.angular_velocity_covariance[7] = 0;
-  imu_msg_.angular_velocity_covariance[8] = 0.02;
+  angular_vel[0] = imu_.SEN.gyroADC[0] * GYRO_FACTOR;
+  angular_vel[1] = imu_.SEN.gyroADC[1] * GYRO_FACTOR;
+  angular_vel[2] = imu_.SEN.gyroADC[2] * GYRO_FACTOR;
 
-  imu_msg_.linear_acceleration.x = imu_.SEN.accADC[0] * ACCEL_FACTOR;
-  imu_msg_.linear_acceleration.y = imu_.SEN.accADC[1] * ACCEL_FACTOR;
-  imu_msg_.linear_acceleration.z = imu_.SEN.accADC[2] * ACCEL_FACTOR;
+  return angular_vel;
+}
 
-  imu_msg_.linear_acceleration_covariance[0] = 0.04;
-  imu_msg_.linear_acceleration_covariance[1] = 0;
-  imu_msg_.linear_acceleration_covariance[2] = 0;
-  imu_msg_.linear_acceleration_covariance[3] = 0;
-  imu_msg_.linear_acceleration_covariance[4] = 0.04;
-  imu_msg_.linear_acceleration_covariance[5] = 0;
-  imu_msg_.linear_acceleration_covariance[6] = 0;
-  imu_msg_.linear_acceleration_covariance[7] = 0;
-  imu_msg_.linear_acceleration_covariance[8] = 0.04;
+float* Turtlebot3Sensor::getImuLinearAcc(void)
+{
+  static float linear_acc[3];
 
-  imu_msg_.orientation.w = imu_.quat[0];
-  imu_msg_.orientation.x = imu_.quat[1];
-  imu_msg_.orientation.y = imu_.quat[2];
-  imu_msg_.orientation.z = imu_.quat[3];
+  linear_acc[0] = imu_.SEN.accADC[0] * ACCEL_FACTOR;
+  linear_acc[1] = imu_.SEN.accADC[1] * ACCEL_FACTOR;
+  linear_acc[2] = imu_.SEN.accADC[2] * ACCEL_FACTOR;
 
-  imu_msg_.orientation_covariance[0] = 0.0025;
-  imu_msg_.orientation_covariance[1] = 0;
-  imu_msg_.orientation_covariance[2] = 0;
-  imu_msg_.orientation_covariance[3] = 0;
-  imu_msg_.orientation_covariance[4] = 0.0025;
-  imu_msg_.orientation_covariance[5] = 0;
-  imu_msg_.orientation_covariance[6] = 0;
-  imu_msg_.orientation_covariance[7] = 0;
-  imu_msg_.orientation_covariance[8] = 0.0025;
+  return linear_acc;
+}
 
-  return imu_msg_;
+float* Turtlebot3Sensor::getImuMagnetic(void)
+{
+  static float magnetic[3];
+
+  magnetic[0] = imu_.SEN.magADC[0] * MAG_FACTOR;
+  magnetic[1] = imu_.SEN.magADC[1] * MAG_FACTOR;
+  magnetic[2] = imu_.SEN.magADC[2] * MAG_FACTOR;
+
+  return magnetic;
 }
 
 float* Turtlebot3Sensor::getOrientation(void)
@@ -153,26 +178,26 @@ float* Turtlebot3Sensor::getOrientation(void)
   return orientation;
 }
 
-sensor_msgs::MagneticField Turtlebot3Sensor::getMag(void)
-{
-  sensor_msgs::MagneticField mag_msg_;
+// sensor_msgs::MagneticField Turtlebot3Sensor::getMag(void)
+// {
+//   sensor_msgs::MagneticField mag_msg_;
 
-  mag_msg_.magnetic_field.x = imu_.SEN.magADC[0] * MAG_FACTOR;
-  mag_msg_.magnetic_field.y = imu_.SEN.magADC[1] * MAG_FACTOR;
-  mag_msg_.magnetic_field.z = imu_.SEN.magADC[2] * MAG_FACTOR;
+//   mag_msg_.magnetic_field.x = imu_.SEN.magADC[0] * MAG_FACTOR;
+//   mag_msg_.magnetic_field.y = imu_.SEN.magADC[1] * MAG_FACTOR;
+//   mag_msg_.magnetic_field.z = imu_.SEN.magADC[2] * MAG_FACTOR;
 
-  mag_msg_.magnetic_field_covariance[0] = 0.0048;
-  mag_msg_.magnetic_field_covariance[1] = 0;
-  mag_msg_.magnetic_field_covariance[2] = 0;
-  mag_msg_.magnetic_field_covariance[3] = 0;
-  mag_msg_.magnetic_field_covariance[4] = 0.0048;
-  mag_msg_.magnetic_field_covariance[5] = 0;
-  mag_msg_.magnetic_field_covariance[6] = 0;
-  mag_msg_.magnetic_field_covariance[7] = 0;
-  mag_msg_.magnetic_field_covariance[8] = 0.0048;
+//   mag_msg_.magnetic_field_covariance[0] = 0.0048;
+//   mag_msg_.magnetic_field_covariance[1] = 0;
+//   mag_msg_.magnetic_field_covariance[2] = 0;
+//   mag_msg_.magnetic_field_covariance[3] = 0;
+//   mag_msg_.magnetic_field_covariance[4] = 0.0048;
+//   mag_msg_.magnetic_field_covariance[5] = 0;
+//   mag_msg_.magnetic_field_covariance[6] = 0;
+//   mag_msg_.magnetic_field_covariance[7] = 0;
+//   mag_msg_.magnetic_field_covariance[8] = 0.0048;
 
-  return mag_msg_;
-}
+//   return mag_msg_;
+// }
 
 float Turtlebot3Sensor::checkVoltage(void)
 {
@@ -306,11 +331,21 @@ uint8_t Turtlebot3Sensor::checkPushBumper(void)
 {
   uint8_t push_state = 0;
 
-  if      (ollo_.read(3, TOUCH_SENSOR) == HIGH) push_state = 2;
-  else if (ollo_.read(4, TOUCH_SENSOR) == HIGH) push_state = 1;
+  if      (digitalRead(BDPIN_PUSH_SW_1) == HIGH) push_state = 2;
+  else if (digitalRead(BDPIN_PUSH_SW_2) == HIGH) push_state = 1;
   else    push_state = 0;
   
   return push_state;
+}
+
+bool Turtlebot3Sensor::getBumper1State()
+{
+  return ollo_.read(3, TOUCH_SENSOR); 
+}
+
+bool Turtlebot3Sensor::getBumper2State()
+{
+  return ollo_.read(4, TOUCH_SENSOR);
 }
 
 void Turtlebot3Sensor::initIR(void)

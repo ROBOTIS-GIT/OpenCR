@@ -14,8 +14,6 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
-
 #include "../../include/turtlebot3/turtlebot3_diagnosis.h"
 
 Turtlebot3Diagnosis::Turtlebot3Diagnosis()
@@ -119,7 +117,7 @@ void Turtlebot3Diagnosis::setPowerOff(void)
 uint8_t Turtlebot3Diagnosis::updateVoltageCheck(bool check_setup)
 {  
   //static uint8_t battery_voltage     = 0;
-  static float   battery_valtage_raw = 0;
+  static float   battery_voltage_raw = 0;
   static uint8_t battery_state       = BATTERY_POWER_OFF;
 
   static bool startup = false;
@@ -163,7 +161,7 @@ uint8_t Turtlebot3Diagnosis::updateVoltageCheck(bool check_setup)
       vol_sum += vol_value_tbl[i];
     }
     vol_value = vol_sum/10;
-    battery_valtage_raw = vol_value;
+    battery_voltage_raw = vol_value;
 
     //Serial.println(vol_value);
 
@@ -183,7 +181,7 @@ uint8_t Turtlebot3Diagnosis::updateVoltageCheck(bool check_setup)
         if (check_setup == true)
         {
           alram_state = 0;
-          if(battery_valtage_raw > 5.0)
+          if(battery_voltage_raw > 5.0)
           {
             check_index    = 0;
             prev_state     = battery_state;
@@ -197,7 +195,7 @@ uint8_t Turtlebot3Diagnosis::updateVoltageCheck(bool check_setup)
         break;
 
       case BATTERY_POWER_STARTUP:
-        if(battery_valtage_raw > voltage_ref)
+        if(battery_voltage_raw > voltage_ref)
         {
           check_index   = 0;
           prev_state    = battery_state;
@@ -211,7 +209,7 @@ uint8_t Turtlebot3Diagnosis::updateVoltageCheck(bool check_setup)
         }
         else
         {
-          if (battery_valtage_raw > 5.0)
+          if (battery_voltage_raw > 5.0)
           {
             prev_state    = battery_state;
             battery_state = BATTERY_POWER_CHECK;
@@ -226,7 +224,7 @@ uint8_t Turtlebot3Diagnosis::updateVoltageCheck(bool check_setup)
 
       case BATTERY_POWER_NORMAL:
         alram_state = 0;
-        if(battery_valtage_raw < voltage_ref)
+        if(battery_voltage_raw < voltage_ref)
         {
           prev_state    = battery_state;
           battery_state = BATTERY_POWER_CHECK;
@@ -241,14 +239,14 @@ uint8_t Turtlebot3Diagnosis::updateVoltageCheck(bool check_setup)
         }
         else
         {
-          if(battery_valtage_raw < voltage_ref_warn)
+          if(battery_voltage_raw < voltage_ref_warn)
           {
             setPowerOff();
             prev_state    = battery_state;
             battery_state = BATTERY_POWER_WARNNING;
           }
         }
-        if(battery_valtage_raw >= voltage_ref)
+        if(battery_voltage_raw >= voltage_ref)
         {
           setPowerOn();
           prev_state    = battery_state;
@@ -263,7 +261,7 @@ uint8_t Turtlebot3Diagnosis::updateVoltageCheck(bool check_setup)
           tone(BDPIN_BUZZER, 1000, 500);
         }
 
-        if(battery_valtage_raw > voltage_ref)
+        if(battery_voltage_raw > voltage_ref)
         {
           setPowerOn();
           prev_state    = battery_state;
@@ -274,7 +272,7 @@ uint8_t Turtlebot3Diagnosis::updateVoltageCheck(bool check_setup)
           setPowerOff();
         }
 
-        if(battery_valtage_raw < 5.0)
+        if(battery_voltage_raw < 5.0)
         {
           setPowerOff();
           prev_state    = battery_state;

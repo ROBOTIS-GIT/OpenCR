@@ -14,13 +14,10 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho, Gilbert */
-
 #ifndef TURTLEBOT3_SENSOR_H_
 #define TURTLEBOT3_SENSOR_H_
 
 #include <IMU.h>
-#include <ros2arduino.h>
 
 #include "OLLO.h"
 
@@ -57,13 +54,15 @@ class Turtlebot3Sensor
 
   // IMU
   void initIMU(void);
-  sensor_msgs::Imu getIMU(void);
+  float* getIMU(void);
   void updateIMU(void);
   void calibrationGyro(void);
 
+  float* getImuAngularVelocity(void);
+  float* getImuLinearAcc(void);
+  float* getImuMagnetic(void);
   float* getOrientation(void);
-  sensor_msgs::MagneticField getMag(void);
-
+  
   // Battery
   float checkVoltage(void);
 
@@ -76,6 +75,8 @@ class Turtlebot3Sensor
 
   // Bumper
   void initBumper(void);
+  bool getBumper1State();
+  bool getBumper2State();
   uint8_t checkPushBumper(void);
 
   // Cliff sensor
@@ -94,10 +95,6 @@ class Turtlebot3Sensor
   void initLED(void);
   void setLedPattern(double linear_vel, double angular_vel);
  private:
-  sensor_msgs::Imu           imu_msg_;
-  sensor_msgs::BatteryState  battery_state_msg_;
-  sensor_msgs::MagneticField mag_msg_;
-
   cIMU imu_;
   OLLO ollo_;
 
