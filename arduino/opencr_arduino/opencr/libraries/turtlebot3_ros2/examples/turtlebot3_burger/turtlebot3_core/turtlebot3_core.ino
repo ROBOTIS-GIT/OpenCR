@@ -333,7 +333,9 @@ void updateMotorStatus(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
   if(millis() - pre_time_ping >= interval_ms*100){
     pre_time_ping = millis();
     if(motor_driver.isConnected() == true){
-      motor_driver.setTorque(true);
+      if(getConnectionStateWithROS2Node() == false){
+        motor_driver.setTorque(true);
+      }
       dxl_slave.setControlTable(ADDR_DEVICE_STATUS, (int8_t)STATUS_RUNNING);
       setConnectionStateWithMotors(true);
     }else{
