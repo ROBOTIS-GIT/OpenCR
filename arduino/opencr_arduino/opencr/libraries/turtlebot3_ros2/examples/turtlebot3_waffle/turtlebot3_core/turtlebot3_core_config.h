@@ -97,6 +97,9 @@ enum ControlTableItemAddr{
   ADDR_MILLIS          = 10,
   ADDR_MICROS          = 14,
 
+  ADDR_DEVICE_STATUS   = 18,
+  ADDR_HEARTBEAT       = 19,
+
   ADDR_USER_LED_1      = 20,
   ADDR_USER_LED_2      = 21,
   ADDR_USER_LED_3      = 22,
@@ -113,6 +116,7 @@ enum ControlTableItemAddr{
   ADDR_BATTERY_PERCENT = 46,
   ADDR_SOUND           = 50,
 
+  ADDR_IMU_RECALIBRATION  = 59,
   ADDR_ANGULAR_VELOCITY_X = 60,
   ADDR_ANGULAR_VELOCITY_Y = 64,
   ADDR_ANGULAR_VELOCITY_Z = 68,
@@ -152,6 +156,7 @@ bool isAddrInRange(uint16_t addr, uint16_t length, uint16_t range_addr, uint16_t
 void dxl_slave_read_callback_func(DYNAMIXEL::Slave *slave, uint16_t addr, uint16_t length);
 void dxl_slave_write_callback_func(DYNAMIXEL::Slave *slave, uint16_t addr, uint16_t length);
 
+const uint32_t HEARTBEAT_TIMEOUT_MS = 500;
 
 #endif // TURTLEBOT3_CORE_CONFIG_H_
 

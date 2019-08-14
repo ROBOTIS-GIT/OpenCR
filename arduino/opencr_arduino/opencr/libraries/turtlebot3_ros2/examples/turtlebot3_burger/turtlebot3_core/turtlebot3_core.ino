@@ -47,15 +47,18 @@ void setup()
   dxl_slave.setControlTable(ADDR_BAUDRATE, (uint8_t)3);
   
   dxl_slave.setAddrRemoteWriteProtected(0, 255, true);
-  dxl_slave.setAddrRemoteWriteProtected(ADDR_SOUND, 1, false);
+  dxl_slave.setAddrRemoteWriteProtected(ADDR_HEARTBEAT, 1, false);
   dxl_slave.setAddrRemoteWriteProtected(ADDR_USER_LED_1, 4, false);
+  dxl_slave.setAddrRemoteWriteProtected(ADDR_SOUND, 1, false);
+  dxl_slave.setAddrRemoteWriteProtected(ADDR_IMU_RECALIBRATION, 1, false);
   dxl_slave.setAddrRemoteWriteProtected(ADDR_MOTOR_TORQUE, ADDR_PROFILE_ACC_R+4-ADDR_MOTOR_TORQUE, false);
 
   dxl_slave.setReadCallbackFunc(dxl_slave_read_callback_func);
   dxl_slave.setWriteCallbackFunc(dxl_slave_write_callback_func);
 
-  motor_driver.setTorque(true);
-  dxl_slave.setControlTable(ADDR_MOTOR_TORQUE, (uint8_t)motor_driver.getTorque());
+  updateMotorStatus(&dxl_slave, 10);
+ 
+  sensors.makeSound(1); //ON sound
 }
 
 /*******************************************************************************
@@ -65,24 +68,25 @@ void loop()
 {
   static uint32_t pre_time;
 
-  updateVariable(true);
-
   if ((millis()-pre_time) >= (1000 / CONTROL_MOTOR_SPEED_FREQUENCY))
   {
     pre_time = millis();
+    if(getConnectionStateWithROS2Node() == false){
+      memset(goal_velocity_from_cmd, 0, sizeof(goal_velocity_from_cmd));
+    }    
     updateGoalVelocity();
-    if(sensors.checkVoltage() >= 7.0){
+    if(getConnectionStateWithMotors() == true){
       motor_driver.controlMotor(WHEEL_SEPARATION, goal_velocity);
-    }
+    }    
   }
+
+  updateVariable(getConnectionStateWithROS2Node());
 
   // Receive data from RC100 
   controllers.getRCdata(goal_velocity_from_rc100);
 
-  if(sensors.checkVoltage() >= 7.0){
-    // Check push button pressed for simple test drive
-    driveTest(diagnosis.getButtonPress(3000));
-  }
+  // Check push button pressed for simple test drive
+  driveTest(diagnosis.getButtonPress(3000));
 
   // Update the IMU unit
   sensors.updateIMU();
@@ -91,10 +95,10 @@ void loop()
   //TODO: sensors.updateSonar(t);
 
   // Start Gyro Calibration after ROS connection
-  updateGyroCali(true);
+  updateGyroCali(getConnectionStateWithROS2Node());
 
   // Show LED status
-  diagnosis.showLedStatus(true);
+  diagnosis.showLedStatus(getConnectionStateWithROS2Node());
 
   // Update Voltage
   diagnosis.updateVoltageCheck(true);
@@ -103,10 +107,8 @@ void loop()
   updateBatteryStatus(&dxl_slave, 1000);
   updateAnalogSensors(&dxl_slave, 200);
   updateIMU(&dxl_slave, 10);
-
-  if(sensors.checkVoltage() >= 7.0){  
-    updateMotorStatus(&dxl_slave, 10);
-  }
+  updateConnectionStateWithROS2Node(false);
+  updateMotorStatus(&dxl_slave, 10);
 
   dxl_slave.processPacket();
 }
@@ -123,7 +125,9 @@ void driveTest(uint8_t buttons)
 
   int32_t current_tick[2] = {0, 0};
 
-  motor_driver.readPresentPosition(current_tick[LEFT], current_tick[RIGHT]);
+  if(getConnectionStateWithMotors() == true){
+    motor_driver.readPresentPosition(current_tick[LEFT], current_tick[RIGHT]);
+  }
 
   if (buttons & (1<<0))  
   {
@@ -302,30 +306,42 @@ void updateIMU(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
 
 void updateMotorStatus(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
 {
-  static uint32_t pre_time = 0;
+  static uint32_t pre_time, pre_time_ping;
   int32_t present_position[WHEEL_NUM], present_velocity[WHEEL_NUM];
   int16_t present_current[WHEEL_NUM];
 
   if(millis() - pre_time >= interval_ms){
     pre_time = millis();
+    if(getConnectionStateWithMotors() == true){
+      if (motor_driver.readPresentPosition(present_position[LEFT], present_position[RIGHT]) == true){
+        slave->setControlTable(ADDR_PRESENT_POSITION_L, (int32_t)present_position[LEFT]);
+        slave->setControlTable(ADDR_PRESENT_POSITION_R, (int32_t)present_position[RIGHT]);
+      }
 
-    if (motor_driver.readPresentPosition(present_position[LEFT], present_position[RIGHT]) == true){
-      slave->setControlTable(ADDR_PRESENT_POSITION_L, (int32_t)present_position[LEFT]);
-      slave->setControlTable(ADDR_PRESENT_POSITION_R, (int32_t)present_position[RIGHT]);
+      if (motor_driver.readPresentVelocity(present_velocity[LEFT], present_velocity[RIGHT]) == true){
+        slave->setControlTable(ADDR_PRESENT_VELOCITY_L, (int32_t)present_velocity[LEFT]);
+        slave->setControlTable(ADDR_PRESENT_VELOCITY_R, (int32_t)present_velocity[RIGHT]);
+      }
+      
+      if (motor_driver.readPresentCurrent(present_current[LEFT], present_current[RIGHT]) == true){
+        slave->setControlTable(ADDR_PRESENT_CURRENT_L, (int32_t)present_current[LEFT]);
+        slave->setControlTable(ADDR_PRESENT_CURRENT_R, (int32_t)present_current[RIGHT]);
+      }
     }
+  }
 
-    if (motor_driver.readPresentVelocity(present_velocity[LEFT], present_velocity[RIGHT]) == true){
-      slave->setControlTable(ADDR_PRESENT_VELOCITY_L, (int32_t)present_velocity[LEFT]);
-      slave->setControlTable(ADDR_PRESENT_VELOCITY_R, (int32_t)present_velocity[RIGHT]);
-    }
-    
-    if (motor_driver.readPresentCurrent(present_current[LEFT], present_current[RIGHT]) == true){
-      slave->setControlTable(ADDR_PRESENT_CURRENT_L, (int32_t)present_current[LEFT]);
-      slave->setControlTable(ADDR_PRESENT_CURRENT_R, (int32_t)present_current[RIGHT]);
+  if(millis() - pre_time_ping >= interval_ms*100){
+    pre_time_ping = millis();
+    if(motor_driver.isConnected() == true){
+      motor_driver.setTorque(true);
+      dxl_slave.setControlTable(ADDR_DEVICE_STATUS, (int8_t)STATUS_RUNNING);
+      setConnectionStateWithMotors(true);
+    }else{
+      dxl_slave.setControlTable(ADDR_DEVICE_STATUS, (int8_t)STATUS_NOT_CONNECTED_MOTORS);
+      setConnectionStateWithMotors(false);
     }
   }
 }
-
 
 
 bool isAddrInRange(uint16_t addr, uint16_t length,
@@ -346,7 +362,9 @@ void dxl_slave_read_callback_func(DYNAMIXEL::Slave *slave, uint16_t addr, uint16
   }
 
   if(isAddrInRange(ADDR_MOTOR_TORQUE, 1, addr, length) == true){
-    slave->setControlTable(ADDR_MOTOR_TORQUE, (uint8_t)motor_driver.getTorque());
+    if(getConnectionStateWithMotors() == true){
+      slave->setControlTable(ADDR_MOTOR_TORQUE, (uint8_t)motor_driver.getTorque());
+    }
   }
 }
 
@@ -362,7 +380,9 @@ void dxl_slave_write_callback_func(DYNAMIXEL::Slave *slave, uint16_t addr, uint1
   if(isAddrInRange(ADDR_MOTOR_TORQUE, 1, addr, length) == true){
     uint8_t data;
     if(slave->getControlTable(ADDR_MOTOR_TORQUE, 1, (uint8_t*)&data) == DXL_ERR_NONE){
-      motor_driver.setTorque(data);
+      if(getConnectionStateWithMotors() == true){
+        motor_driver.setTorque(data);
+      }
     }
   }
 
@@ -392,12 +412,65 @@ void dxl_slave_write_callback_func(DYNAMIXEL::Slave *slave, uint16_t addr, uint1
     uint32_t l_data, r_data;
     if(slave->getControlTable(ADDR_PROFILE_ACC_L, 4, (uint8_t*)&l_data) == DXL_ERR_NONE){
       if(slave->getControlTable(ADDR_PROFILE_ACC_R, 4, (uint8_t*)&r_data) == DXL_ERR_NONE){
-        if(sensors.checkVoltage() >= 7.0){
+        if(getConnectionStateWithMotors() == true){
           motor_driver.writeProfileAcceleration(l_data, r_data);
         }
       }
     }
   }
+  
+  if(isAddrInRange(ADDR_HEARTBEAT, 1, addr, length) == true)
+  {
+    updateConnectionStateWithROS2Node(true);
+  }
+
+  if(isAddrInRange(ADDR_IMU_RECALIBRATION, 1, addr, length) == true){
+    bool data;
+    if(slave->getControlTable(ADDR_IMU_RECALIBRATION, 1, (uint8_t*)&data) == DXL_ERR_NONE){
+      if(data == true){
+        updateGyroCali(false);
+        updateGyroCali(true);
+        slave->setControlTable(ADDR_IMU_RECALIBRATION, (uint8_t)0);
+      }
+    }
+  }  
 }
 
 
+static bool connection_state_with_ros2_node = false;
+
+bool getConnectionStateWithROS2Node()
+{
+  return connection_state_with_ros2_node;
+}
+
+void setConnectionStateWithROS2Node(bool is_connected)
+{
+  connection_state_with_ros2_node = is_connected;
+}
+
+void updateConnectionStateWithROS2Node(bool is_got_heartbeat)
+{
+  static uint32_t pre_time;
+
+  if(is_got_heartbeat == true){
+    pre_time = millis();
+  }else{
+    if(millis()-pre_time >= HEARTBEAT_TIMEOUT_MS){
+      pre_time = millis();
+      setConnectionStateWithROS2Node(false);
+    }
+  }
+}
+
+static bool is_connected_motors = false;
+
+bool getConnectionStateWithMotors()
+{
+  return is_connected_motors;
+}
+
+void setConnectionStateWithMotors(bool is_connected)
+{
+  is_connected_motors = is_connected;
+}

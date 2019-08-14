@@ -37,6 +37,11 @@
 
 #define DEBUG_SERIAL  SerialBT2
 
+enum DEVICE_STATUS{
+  STATUS_NOT_CONNECTED_MOTORS = -1,
+  STATUS_RUNNING              = 0
+};
+
 class Turtlebot3Diagnosis
 {
  public:

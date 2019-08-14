@@ -143,30 +143,30 @@ class Master
     bool setPort(PortHandler &port);
 
     uint8_t ping(uint8_t id, 
-      XelInfoFromPing_t *recv_info_array, uint8_t recv_array_cnt, uint32_t timeout = 100);
+      XelInfoFromPing_t *recv_info_array, uint8_t recv_array_cnt, uint32_t timeout = 3);
     bool ping(uint8_t id,
-      RecvInfoFromPing_t &recv_info, uint32_t timeout = 100);
+      RecvInfoFromPing_t &recv_info, uint32_t timeout = 3);
           
     int32_t read(uint8_t id, uint16_t addr, uint16_t addr_length,
-      uint8_t *p_recv_buf, uint16_t recv_buf_length, uint32_t timeout = 100);
+      uint8_t *p_recv_buf, uint16_t recv_buf_length, uint32_t timeout = 3);
 
     bool write(uint8_t id, uint16_t addr, 
-      const uint8_t *p_data, uint16_t data_length, uint32_t timeout = 100);
+      const uint8_t *p_data, uint16_t data_length, uint32_t timeout = 3);
 
     bool writeNoResp(uint8_t id, uint16_t addr, 
       const uint8_t *p_data, uint16_t data_length);
 
     //TODO: bool regWrite();
     //TODO: bool action();
-    bool factoryReset(uint8_t id, uint8_t option, uint32_t timeout = 100);
+    bool factoryReset(uint8_t id, uint8_t option, uint32_t timeout = 3);
     bool reboot(uint8_t id, uint32_t timeout);
 
     //TODO: bool clear();
 
-    bool syncRead(const ParamForSyncReadInst_t &param_info, RecvInfoFromStatusInst_t &recv_info, uint32_t timeout = 100);
+    bool syncRead(const ParamForSyncReadInst_t &param_info, RecvInfoFromStatusInst_t &recv_info, uint32_t timeout = 3);
     bool syncWrite(const ParamForSyncWriteInst_t &param_info);
 
-    bool bulkRead(const ParamForBulkReadInst_t &param_info, RecvInfoFromStatusInst_t &recv_info, uint32_t timeout = 100);
+    bool bulkRead(const ParamForBulkReadInst_t &param_info, RecvInfoFromStatusInst_t &recv_info, uint32_t timeout = 3);
     bool bulkWrite(const ParamForBulkWriteInst_t &param_info);
 
     uint8_t getLastStatusPacketError() const;

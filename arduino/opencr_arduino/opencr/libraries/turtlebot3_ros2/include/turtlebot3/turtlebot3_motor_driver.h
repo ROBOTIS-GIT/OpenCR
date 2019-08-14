@@ -66,6 +66,8 @@ class Turtlebot3MotorDriver
   ~Turtlebot3MotorDriver();
   bool init(void);
   void close(void);
+  bool isConnected();
+
   bool setTorque(bool onoff);
   bool getTorque();
   

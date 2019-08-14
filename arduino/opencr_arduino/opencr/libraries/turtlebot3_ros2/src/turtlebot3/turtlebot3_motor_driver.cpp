@@ -60,6 +60,11 @@ bool Turtlebot3MotorDriver::init(void)
   return true;
 }
 
+bool Turtlebot3MotorDriver::isConnected()
+{
+  return (dxl.ping(DXL_LEFT_ID) == true && dxl.ping(DXL_RIGHT_ID) == true);
+}
+
 bool Turtlebot3MotorDriver::setTorque(bool onoff)
 {
   bool ret = false;
