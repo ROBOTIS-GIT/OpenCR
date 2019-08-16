@@ -156,7 +156,7 @@ bool isAddrInRange(uint16_t addr, uint16_t length, uint16_t range_addr, uint16_t
 void dxl_slave_read_callback_func(DYNAMIXEL::Slave *slave, uint16_t addr, uint16_t length);
 void dxl_slave_write_callback_func(DYNAMIXEL::Slave *slave, uint16_t addr, uint16_t length);
 
-const uint32_t HEARTBEAT_TIMEOUT_MS = 1000;
+const uint32_t HEARTBEAT_TIMEOUT_MS = 500;
 
 #endif // TURTLEBOT3_CORE_CONFIG_H_
 
