@@ -143,26 +143,42 @@ uint8_t Turtlebot3Sensor::checkPushButton(void)
   return getPushButton();
 }
 
-void Turtlebot3Sensor::melody(uint16_t* note, uint8_t note_num, uint8_t* durations)
+void Turtlebot3Sensor::onMelody()
 {
-  for (int thisNote = 0; thisNote < note_num; thisNote++) 
-  {
-    // to calculate the note duration, take one second
-    // divided by the note type.
-    //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
-    int noteDuration = 1000 / durations[thisNote];
-    tone(BDPIN_BUZZER, note[thisNote], noteDuration);
+  static uint8_t pre_note_number = 7, current_note_number;
+  static uint32_t pre_time;
+  static uint32_t note_duration, pause_time_ms_between_notes;
 
-    // to distinguish the notes, set a minimum time between them.
-    // the note's duration + 30% seems to work well:
-    int pauseBetweenNotes = noteDuration * 1.30;
-    delay(pauseBetweenNotes);
-    // stop the tone playing:
-    noTone(BDPIN_BUZZER);
+  if(is_melody_play_complete_ == false){
+    if(pre_note_number != current_note_number){
+      // to calculate the note duration, take one second
+      // divided by the note type.
+      //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+      note_duration = 1000/melody_duration_[current_note_number];    
+      // to distinguish the notes, set a minimum time between them.
+      // the note's duration + 30% seems to work well:
+      pause_time_ms_between_notes = note_duration * 1.30;
+
+      tone(BDPIN_BUZZER, melody_note_[current_note_number], note_duration);
+      
+      pre_note_number = current_note_number;
+      pre_time = millis();
+    }else{
+      if(millis()-pre_time >= pause_time_ms_between_notes){
+        pre_time = millis();
+        noTone(BDPIN_BUZZER);
+        current_note_number++;
+
+        if(current_note_number == 8){
+          is_melody_play_complete_ = true;
+          current_note_number = 0;
+        }
+      }
+    }
   }
 }
 
-void Turtlebot3Sensor::makeSound(uint8_t index)
+void Turtlebot3Sensor::makeMelody(uint8_t index)
 {
   const uint16_t NOTE_C4 = 262;
   const uint16_t NOTE_D4 = 294;
@@ -181,74 +197,59 @@ void Turtlebot3Sensor::makeSound(uint8_t index)
   const uint8_t BUTTON1     = 4;
   const uint8_t BUTTON2     = 5;
 
-  uint16_t note[8]     = {0, 0};
-  uint8_t  duration[8] = {0, 0};
-
   switch (index)
   {
     case ON:
-      note[0] = NOTE_C4;   duration[0] = 4;
-      note[1] = NOTE_D4;   duration[1] = 4;
-      note[2] = NOTE_E4;   duration[2] = 4;
-      note[3] = NOTE_F4;   duration[3] = 4;
-      note[4] = NOTE_G4;   duration[4] = 4;
-      note[5] = NOTE_A4;   duration[5] = 4;
-      note[6] = NOTE_B4;   duration[6] = 4;
-      note[7] = NOTE_C5;   duration[7] = 4;   
+      melody_note_[0] = NOTE_C4;   melody_duration_[0] = 4;
+      melody_note_[1] = NOTE_D4;   melody_duration_[1] = 4;
+      melody_note_[2] = NOTE_E4;   melody_duration_[2] = 4;
+      melody_note_[3] = NOTE_F4;   melody_duration_[3] = 4;
+      melody_note_[4] = NOTE_G4;   melody_duration_[4] = 4;
+      melody_note_[5] = NOTE_A4;   melody_duration_[5] = 4;
+      melody_note_[6] = NOTE_B4;   melody_duration_[6] = 4;
+      melody_note_[7] = NOTE_C5;   melody_duration_[7] = 4;
      break;
 
     case OFF:
-      note[0] = NOTE_C5;   duration[0] = 4;
-      note[1] = NOTE_B4;   duration[1] = 4;
-      note[2] = NOTE_A4;   duration[2] = 4;
-      note[3] = NOTE_G4;   duration[3] = 4;
-      note[4] = NOTE_F4;   duration[4] = 4;
-      note[5] = NOTE_E4;   duration[5] = 4;
-      note[6] = NOTE_D4;   duration[6] = 4;
-      note[7] = NOTE_C4;   duration[7] = 4;  
+      melody_note_[0] = NOTE_C5;   melody_duration_[0] = 4;
+      melody_note_[1] = NOTE_B4;   melody_duration_[1] = 4;
+      melody_note_[2] = NOTE_A4;   melody_duration_[2] = 4;
+      melody_note_[3] = NOTE_G4;   melody_duration_[3] = 4;
+      melody_note_[4] = NOTE_F4;   melody_duration_[4] = 4;
+      melody_note_[5] = NOTE_E4;   melody_duration_[5] = 4;
+      melody_note_[6] = NOTE_D4;   melody_duration_[6] = 4;
+      melody_note_[7] = NOTE_C4;   melody_duration_[7] = 4;  
      break;
 
     case LOW_BATTERY:
-      note[0] = 1000;      duration[0] = 1;
-      note[1] = 1000;      duration[1] = 1;
-      note[2] = 1000;      duration[2] = 1;
-      note[3] = 1000;      duration[3] = 1;
-      note[4] = 0;         duration[4] = 8;
-      note[5] = 0;         duration[5] = 8;
-      note[6] = 0;         duration[6] = 8;
-      note[7] = 0;         duration[7] = 8;
+      melody_note_[0] = 1000;      melody_duration_[0] = 1;
+      melody_note_[1] = 1000;      melody_duration_[1] = 1;
+      melody_note_[2] = 1000;      melody_duration_[2] = 1;
+      melody_note_[3] = 1000;      melody_duration_[3] = 1;
+      melody_note_[4] = 0;         melody_duration_[4] = 8;
+      melody_note_[5] = 0;         melody_duration_[5] = 8;
+      melody_note_[6] = 0;         melody_duration_[6] = 8;
+      melody_note_[7] = 0;         melody_duration_[7] = 8;
      break;
 
     case ERROR:
-      note[0] = 1000;      duration[0] = 3;
-      note[1] = 500;       duration[1] = 3;
-      note[2] = 1000;      duration[2] = 3;
-      note[3] = 500;       duration[3] = 3;
-      note[4] = 1000;      duration[4] = 3;
-      note[5] = 500;       duration[5] = 3;
-      note[6] = 1000;      duration[6] = 3;
-      note[7] = 500;       duration[7] = 3;
+      melody_note_[0] = 1000;      melody_duration_[0] = 3;
+      melody_note_[1] = 500;       melody_duration_[1] = 3;
+      melody_note_[2] = 1000;      melody_duration_[2] = 3;
+      melody_note_[3] = 500;       melody_duration_[3] = 3;
+      melody_note_[4] = 1000;      melody_duration_[4] = 3;
+      melody_note_[5] = 500;       melody_duration_[5] = 3;
+      melody_note_[6] = 1000;      melody_duration_[6] = 3;
+      melody_note_[7] = 500;       melody_duration_[7] = 3;
      break;
 
     case BUTTON1:
-     break;
-
     case BUTTON2:
-     break;
-
     default:
-      note[0] = NOTE_C4;   duration[0] = 4;
-      note[1] = NOTE_D4;   duration[1] = 4;
-      note[2] = NOTE_E4;   duration[2] = 4;
-      note[3] = NOTE_F4;   duration[3] = 4;
-      note[4] = NOTE_G4;   duration[4] = 4;
-      note[5] = NOTE_A4;   duration[5] = 4;
-      note[6] = NOTE_B4;   duration[6] = 4;
-      note[7] = NOTE_C4;   duration[7] = 4; 
-     break;
+      return;
   }
 
-  melody(note, 8, duration);
+  is_melody_play_complete_ = false;
 }
 
 void Turtlebot3Sensor::initBumper(void)
@@ -261,8 +262,8 @@ uint8_t Turtlebot3Sensor::checkPushBumper(void)
 {
   uint8_t push_state = 0;
 
-  if      (digitalRead(BDPIN_PUSH_SW_1) == HIGH) push_state = 2;
-  else if (digitalRead(BDPIN_PUSH_SW_2) == HIGH) push_state = 1;
+  if      (ollo_.read(3, TOUCH_SENSOR) == HIGH) push_state = 2;
+  else if (ollo_.read(4, TOUCH_SENSOR) == HIGH) push_state = 1;
   else    push_state = 0;
   
   return push_state;

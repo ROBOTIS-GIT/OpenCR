@@ -34,6 +34,7 @@ void setup()
   // Setting for ROBOTIS RC100 remote controller and cmd_vel
   controllers.init(MAX_LINEAR_VELOCITY, MAX_ANGULAR_VELOCITY);
 
+  updateVariable(true);
   updateGyroCali(true);
 
   dxl_slave.setPortProtocolVersion(PROTOCOL_VERSION_DXL_SLAVE);
@@ -53,12 +54,19 @@ void setup()
   dxl_slave.setAddrRemoteWriteProtected(ADDR_IMU_RECALIBRATION, 1, false);
   dxl_slave.setAddrRemoteWriteProtected(ADDR_MOTOR_TORQUE, ADDR_PROFILE_ACC_R+4-ADDR_MOTOR_TORQUE, false);
 
-  dxl_slave.setReadCallbackFunc(dxl_slave_read_callback_func);
+  dxl_slave.setReadCallbackFunc(nullptr);
   dxl_slave.setWriteCallbackFunc(dxl_slave_write_callback_func);
 
-  updateMotorStatus(&dxl_slave, 10);
+  if(motor_driver.isConnected() == true){
+    motor_driver.setTorque(true);
+    dxl_slave.setControlTable(ADDR_DEVICE_STATUS, (int8_t)STATUS_RUNNING);
+    setConnectionStateWithMotors(true);
+  }else{
+    dxl_slave.setControlTable(ADDR_DEVICE_STATUS, (int8_t)STATUS_NOT_CONNECTED_MOTORS);
+    setConnectionStateWithMotors(false);
+  }
  
-  sensors.makeSound(1); //ON sound
+  sensors.makeMelody(1); //To indicate that the initialization is complete.
 }
 
 /*******************************************************************************
@@ -67,26 +75,12 @@ void setup()
 void loop()
 {
   static uint32_t pre_time;
+  bool node_connection_state = getConnectionStateWithROS2Node();
 
-  if ((millis()-pre_time) >= (1000 / CONTROL_MOTOR_SPEED_FREQUENCY))
-  {
-    pre_time = millis();
-    if(getConnectionStateWithROS2Node() == false){
-      memset(goal_velocity_from_cmd, 0, sizeof(goal_velocity_from_cmd));
-    }    
-    updateGoalVelocity();
-    if(getConnectionStateWithMotors() == true){
-      motor_driver.controlMotor(WHEEL_SEPARATION, goal_velocity);
-    }    
-  }
+  //updateVariable(node_connection_state);
 
-  updateVariable(getConnectionStateWithROS2Node());
-
-  // Receive data from RC100 
-  controllers.getRCdata(goal_velocity_from_rc100);
-
-  // Check push button pressed for simple test drive
-  driveTest(diagnosis.getButtonPress(3000));
+  // Start Gyro Calibration after ROS connection
+  //updateGyroCali(node_connection_state);
 
   // Update the IMU unit
   sensors.updateIMU();
@@ -94,23 +88,41 @@ void loop()
   // Update sonar data
   //TODO: sensors.updateSonar(t);
 
-  // Start Gyro Calibration after ROS connection
-  updateGyroCali(getConnectionStateWithROS2Node());
+  sensors.onMelody();
 
   // Show LED status
-  diagnosis.showLedStatus(getConnectionStateWithROS2Node());
+  diagnosis.showLedStatus(node_connection_state);
 
   // Update Voltage
   diagnosis.updateVoltageCheck(true);
 
-  updateGPIOs(&dxl_slave, 500);
-  updateBatteryStatus(&dxl_slave, 1000);
-  updateAnalogSensors(&dxl_slave, 200);
-  updateIMU(&dxl_slave, 10);
-  updateConnectionStateWithROS2Node(false);
-  updateMotorStatus(&dxl_slave, 10);
+  updateGPIOs(&dxl_slave, 25);
+  updateBatteryStatus(&dxl_slave, 25);
+  updateAnalogSensors(&dxl_slave, 25);
+  updateIMU(&dxl_slave, 25);
+  updateMotorStatus(&dxl_slave, 25);
 
   dxl_slave.processPacket();
+
+  updateConnectionStateWithROS2Node(&dxl_slave);
+
+  // Receive data from RC100 
+  controllers.getRCdata(goal_velocity_from_rc100);
+
+  // Check push button pressed for simple test drive
+  driveTest(diagnosis.getButtonPress(3000));
+
+  if ((millis()-pre_time) >= (1000 / CONTROL_MOTOR_SPEED_FREQUENCY))
+  {
+    pre_time = millis();
+    if(node_connection_state == false){
+      memset(goal_velocity_from_cmd, 0, sizeof(goal_velocity_from_cmd));
+    }    
+    updateGoalVelocity();
+    if(getConnectionStateWithMotors() == true){
+      motor_driver.controlMotor(WHEEL_SEPARATION, goal_velocity);
+    }    
+  }
 }
 
 
@@ -222,6 +234,18 @@ float map_float(float x, float in_min, float in_max, float out_min, float out_ma
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
+void updateTimes(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
+{
+  static uint32_t pre_time = 0;
+
+  if(millis() - pre_time >= interval_ms){
+    pre_time = millis();
+
+    slave->setControlTable(ADDR_MILLIS, (uint32_t)millis());
+    slave->setControlTable(ADDR_MICROS, (uint32_t)micros());
+  } 
+}
+
 void updateGPIOs(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
 {
   static uint32_t pre_time = 0;
@@ -306,7 +330,7 @@ void updateIMU(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
 
 void updateMotorStatus(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
 {
-  static uint32_t pre_time, pre_time_ping;
+  static uint32_t pre_time;
   int32_t present_position[WHEEL_NUM], present_velocity[WHEEL_NUM];
   int16_t present_current[WHEEL_NUM];
 
@@ -327,18 +351,8 @@ void updateMotorStatus(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
         slave->setControlTable(ADDR_PRESENT_CURRENT_L, (int32_t)present_current[LEFT]);
         slave->setControlTable(ADDR_PRESENT_CURRENT_R, (int32_t)present_current[RIGHT]);
       }
-    }
-  }
 
-  if(millis() - pre_time_ping >= interval_ms*100){
-    pre_time_ping = millis();
-    if(motor_driver.isConnected() == true){
-      motor_driver.setTorque(true);
-      dxl_slave.setControlTable(ADDR_DEVICE_STATUS, (int8_t)STATUS_RUNNING);
-      setConnectionStateWithMotors(true);
-    }else{
-      dxl_slave.setControlTable(ADDR_DEVICE_STATUS, (int8_t)STATUS_NOT_CONNECTED_MOTORS);
-      setConnectionStateWithMotors(false);
+      slave->setControlTable(ADDR_MOTOR_TORQUE, (uint8_t)motor_driver.getTorque());
     }
   }
 }
@@ -353,19 +367,6 @@ bool isAddrInRange(uint16_t addr, uint16_t length,
 
 void dxl_slave_read_callback_func(DYNAMIXEL::Slave *slave, uint16_t addr, uint16_t length)
 {
-  if(isAddrInRange(ADDR_MILLIS, 4, addr, length) == true){
-    slave->setControlTable(ADDR_MILLIS, (uint32_t)millis());
-  }
-
-  if(isAddrInRange(ADDR_MICROS, 4, addr, length) == true){
-    slave->setControlTable(ADDR_MICROS, (uint32_t)micros());
-  }
-
-  if(isAddrInRange(ADDR_MOTOR_TORQUE, 1, addr, length) == true){
-    if(getConnectionStateWithMotors() == true){
-      slave->setControlTable(ADDR_MOTOR_TORQUE, (uint8_t)motor_driver.getTorque());
-    }
-  }
 }
 
 void dxl_slave_write_callback_func(DYNAMIXEL::Slave *slave, uint16_t addr, uint16_t length)
@@ -373,7 +374,7 @@ void dxl_slave_write_callback_func(DYNAMIXEL::Slave *slave, uint16_t addr, uint1
   if(isAddrInRange(ADDR_SOUND, 1, addr, length) == true){
     uint8_t data;
     if(slave->getControlTable(ADDR_SOUND, 1, (uint8_t*)&data) == DXL_ERR_NONE){
-      sensors.makeSound(data);
+      sensors.makeMelody(data);
     }
   }
 
@@ -418,11 +419,6 @@ void dxl_slave_write_callback_func(DYNAMIXEL::Slave *slave, uint16_t addr, uint1
       }
     }
   }
-  
-  if(isAddrInRange(ADDR_HEARTBEAT, 1, addr, length) == true)
-  {
-    updateConnectionStateWithROS2Node(true);
-  }
 
   if(isAddrInRange(ADDR_IMU_RECALIBRATION, 1, addr, length) == true){
     bool data;
@@ -449,16 +445,29 @@ void setConnectionStateWithROS2Node(bool is_connected)
   connection_state_with_ros2_node = is_connected;
 }
 
-void updateConnectionStateWithROS2Node(bool is_got_heartbeat)
+void updateConnectionStateWithROS2Node(DYNAMIXEL::Slave *slave)
 {
   static uint32_t pre_time;
+  static uint8_t pre_data, data;
+  static bool pre_state;
 
-  if(is_got_heartbeat == true){
+  //To wait for IMU Calibration
+  if(pre_state != getConnectionStateWithROS2Node()){
+    pre_state = getConnectionStateWithROS2Node();
     pre_time = millis();
-  }else{
-    if(millis()-pre_time >= HEARTBEAT_TIMEOUT_MS){
+    return;
+  }
+
+  if(slave->getControlTable(ADDR_HEARTBEAT, 1, (uint8_t*)&data) == DXL_ERR_NONE){
+    if(pre_data != data){
       pre_time = millis();
-      setConnectionStateWithROS2Node(false);
+      pre_data = data;
+      setConnectionStateWithROS2Node(true);
+    }else{
+      if(millis()-pre_time >= HEARTBEAT_TIMEOUT_MS){
+        pre_time = millis();
+        setConnectionStateWithROS2Node(false);
+      }
     }
   }
 }

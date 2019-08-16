@@ -70,8 +70,8 @@ class Turtlebot3Sensor
   uint8_t checkPushButton(void);
 
   // Sound
-  void melody(uint16_t* note, uint8_t note_num, uint8_t* durations);
-  void makeSound(uint8_t index);  
+  void onMelody();
+  void makeMelody(uint8_t index);  
 
   // Bumper
   void initBumper(void);
@@ -102,6 +102,10 @@ class Turtlebot3Sensor
   SonarPin sonar_pin_;
 
   float sonar_data_;
+
+  bool is_melody_play_complete_;
+  uint16_t melody_note_[8];
+  uint8_t melody_duration_[8];
 };
 
 #endif // TURTLEBOT3_SENSOR_H_
