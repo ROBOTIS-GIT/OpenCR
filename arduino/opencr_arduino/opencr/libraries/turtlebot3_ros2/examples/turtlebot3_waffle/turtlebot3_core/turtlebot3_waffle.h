@@ -14,12 +14,11 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho, Kei Ki */
-
 #ifndef TURTLEBOT3_WAFFLE_H_
 #define TURTLEBOT3_WAFFLE_H_
 
 #define NAME                             "Waffle or Waffle Pi"
+#define MODEL_INFO                       2
 
 #define WHEEL_RADIUS                     0.033           // meter
 #define WHEEL_SEPARATION                 0.287           // meter (BURGER : 0.160, WAFFLE : 0.287)

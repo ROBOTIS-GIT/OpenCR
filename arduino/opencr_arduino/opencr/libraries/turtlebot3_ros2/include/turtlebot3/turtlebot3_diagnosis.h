@@ -14,8 +14,6 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
-
 #ifndef TURTLEBOT3_DIAGNOSIS_H_
 #define TURTLEBOT3_DIAGNOSIS_H_
 
@@ -38,6 +36,11 @@
 #define CHECK_BUTTON_RELEASED            2
 
 #define DEBUG_SERIAL  SerialBT2
+
+enum DEVICE_STATUS{
+  STATUS_NOT_CONNECTED_MOTORS = -1,
+  STATUS_RUNNING              = 0
+};
 
 class Turtlebot3Diagnosis
 {

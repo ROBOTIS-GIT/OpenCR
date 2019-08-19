@@ -14,8 +14,6 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
-
 #include "../../include/turtlebot3/turtlebot3_controller.h"
 
 Turtlebot3Controller::Turtlebot3Controller()

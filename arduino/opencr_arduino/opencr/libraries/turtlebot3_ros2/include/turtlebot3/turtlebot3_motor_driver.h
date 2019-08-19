@@ -14,13 +14,11 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
-
 #ifndef TURTLEBOT3_MOTOR_DRIVER_H_
 #define TURTLEBOT3_MOTOR_DRIVER_H_
 
-#include "variant.h"
-#include <DynamixelSDK.h>
+#include <Dynamixel2Arduino.h>
+
 
 // Control table address (Dynamixel X-series)
 #define ADDR_X_TORQUE_ENABLE            64
@@ -50,9 +48,6 @@
 #define BAUDRATE                        1000000 // baurd rate of Dynamixel
 #define DEVICENAME                      ""      // no need setting on OpenCR
 
-#define TORQUE_ENABLE                   1       // Value for enabling the torque
-#define TORQUE_DISABLE                  0       // Value for disabling the torque
-
 #define LEFT                            0
 #define RIGHT                           1
 
@@ -63,6 +58,7 @@
 
 #define DEBUG_SERIAL  SerialBT2
 
+
 class Turtlebot3MotorDriver
 {
  public:
@@ -70,24 +66,24 @@ class Turtlebot3MotorDriver
   ~Turtlebot3MotorDriver();
   bool init(void);
   void close(void);
+  bool isConnected();
+
   bool setTorque(bool onoff);
   bool getTorque();
-  bool readEncoder(int32_t &left_value, int32_t &right_value);
-  bool writeVelocity(int64_t left_value, int64_t right_value);
+  
+  bool readPresentPosition(int32_t &left_value, int32_t &right_value);
+  bool readPresentVelocity(int32_t &left_value, int32_t &right_value);
+  bool readPresentCurrent(int16_t &left_value, int16_t &right_value);
+  bool readProfileAcceleration(uint32_t &left_value, uint32_t &right_value);
+  
+  bool writeVelocity(int32_t left_value, int32_t right_value);
+  bool writeProfileAcceleration(uint32_t left_value, uint32_t right_value);
   bool controlMotor(const float wheel_separation, float* value);
 
  private:
-  uint32_t baudrate_;
-  float  protocol_version_;
   uint8_t left_wheel_id_;
   uint8_t right_wheel_id_;
   bool torque_;
-
-  dynamixel::PortHandler *portHandler_;
-  dynamixel::PacketHandler *packetHandler_;
-
-  dynamixel::GroupSyncWrite *groupSyncWriteVelocity_;
-  dynamixel::GroupSyncRead *groupSyncReadEncoder_;
 };
 
 #endif // TURTLEBOT3_MOTOR_DRIVER_H_

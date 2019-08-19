@@ -14,13 +14,10 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho, Gilbert */
-
 #ifndef TURTLEBOT3_SENSOR_H_
 #define TURTLEBOT3_SENSOR_H_
 
 #include <IMU.h>
-#include <ros2arduino.h>
 
 #include "OLLO.h"
 
@@ -57,13 +54,15 @@ class Turtlebot3Sensor
 
   // IMU
   void initIMU(void);
-  sensor_msgs::Imu getIMU(void);
+  float* getIMU(void);
   void updateIMU(void);
   void calibrationGyro(void);
 
+  float* getImuAngularVelocity(void);
+  float* getImuLinearAcc(void);
+  float* getImuMagnetic(void);
   float* getOrientation(void);
-  sensor_msgs::MagneticField getMag(void);
-
+  
   // Battery
   float checkVoltage(void);
 
@@ -71,11 +70,13 @@ class Turtlebot3Sensor
   uint8_t checkPushButton(void);
 
   // Sound
-  void melody(uint16_t* note, uint8_t note_num, uint8_t* durations);
-  void makeSound(uint8_t index);  
+  void onMelody();
+  void makeMelody(uint8_t index);  
 
   // Bumper
   void initBumper(void);
+  bool getBumper1State();
+  bool getBumper2State();
   uint8_t checkPushBumper(void);
 
   // Cliff sensor
@@ -94,10 +95,6 @@ class Turtlebot3Sensor
   void initLED(void);
   void setLedPattern(double linear_vel, double angular_vel);
  private:
-  sensor_msgs::Imu           imu_msg_;
-  sensor_msgs::BatteryState  battery_state_msg_;
-  sensor_msgs::MagneticField mag_msg_;
-
   cIMU imu_;
   OLLO ollo_;
 
@@ -105,6 +102,10 @@ class Turtlebot3Sensor
   SonarPin sonar_pin_;
 
   float sonar_data_;
+
+  bool is_melody_play_complete_;
+  uint16_t melody_note_[8];
+  uint8_t melody_duration_[8];
 };
 
 #endif // TURTLEBOT3_SENSOR_H_
