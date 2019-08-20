@@ -17,46 +17,20 @@
 #ifndef TURTLEBOT3_MOTOR_DRIVER_H_
 #define TURTLEBOT3_MOTOR_DRIVER_H_
 
-#include <Dynamixel2Arduino.h>
+#include <Dynamixel2ArduinoForTB3.h>
 
 
-// Control table address (Dynamixel X-series)
-#define ADDR_X_TORQUE_ENABLE            64
-#define ADDR_X_GOAL_VELOCITY            104
-#define ADDR_X_GOAL_POSITION            116
-#define ADDR_X_REALTIME_TICK            120
-#define ADDR_X_PRESENT_VELOCITY         128
-#define ADDR_X_PRESENT_POSITION         132
+enum MortorLocation{
+  LEFT = 0,
+  RIGHT,
+  MOTOR_NUM_MAX
+};
 
-// Limit values (XM430-W210-T and XM430-W350-T)
-#define LIMIT_X_MAX_VELOCITY            337     // MAX RPM is 77 when DXL is powered 12.0V
-                                                // 77 / 0.229 (RPM) = 336.24454...
-
-// Data Byte Length
-#define LEN_X_TORQUE_ENABLE             1
-#define LEN_X_GOAL_VELOCITY             4
-#define LEN_X_GOAL_POSITION             4
-#define LEN_X_REALTIME_TICK             2
-#define LEN_X_PRESENT_VELOCITY          4
-#define LEN_X_PRESENT_POSITION          4
-
-#define PROTOCOL_VERSION                2.0     // Dynamixel protocol version 2.0
-
-#define DXL_LEFT_ID                     1       // ID of left motor
-#define DXL_RIGHT_ID                    2       // ID of right motor
-
-#define BAUDRATE                        1000000 // baurd rate of Dynamixel
-#define DEVICENAME                      ""      // no need setting on OpenCR
-
-#define LEFT                            0
-#define RIGHT                           1
-
-#define VELOCITY_CONSTANT_VALUE         1263.632956882  // V = r * w = r     *        (RPM             * 0.10472)
-                                                        //           = 0.033 * (0.229 * Goal_Velocity) * 0.10472
-                                                        //
-                                                        // Goal_Velocity = V * 1263.632956882
-
-#define DEBUG_SERIAL  SerialBT2
+enum VelocityType{
+  LINEAR = 0,
+  ANGULAR,
+  TYPE_NUM_MAX
+};
 
 
 class Turtlebot3MotorDriver
@@ -64,21 +38,24 @@ class Turtlebot3MotorDriver
  public:
   Turtlebot3MotorDriver();
   ~Turtlebot3MotorDriver();
+  
   bool init(void);
   void close(void);
-  bool isConnected();
 
-  bool setTorque(bool onoff);
-  bool getTorque();
+  bool is_connected();
+
+  bool set_torque(bool onoff);
+  bool get_torque();
   
-  bool readPresentPosition(int32_t &left_value, int32_t &right_value);
-  bool readPresentVelocity(int32_t &left_value, int32_t &right_value);
-  bool readPresentCurrent(int16_t &left_value, int16_t &right_value);
-  bool readProfileAcceleration(uint32_t &left_value, uint32_t &right_value);
+  bool read_present_position(int32_t &left_value, int32_t &right_value);
+  bool read_present_velocity(int32_t &left_value, int32_t &right_value);
+  bool read_present_current(int16_t &left_value, int16_t &right_value);
+  bool read_profile_acceleration(uint32_t &left_value, uint32_t &right_value);
   
-  bool writeVelocity(int32_t left_value, int32_t right_value);
-  bool writeProfileAcceleration(uint32_t left_value, uint32_t right_value);
-  bool controlMotor(const float wheel_separation, float* value);
+  bool write_velocity(int32_t left_value, int32_t right_value);
+  bool write_profile_acceleration(uint32_t left_value, uint32_t right_value);
+
+  bool control_motors(const float wheel_separation, float linear_value, float angular_value);
 
  private:
   uint8_t left_wheel_id_;
