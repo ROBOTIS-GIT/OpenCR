@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-#include "Dynamixel2Arduino.h"
+#include "Dynamixel2ArduinoForTB3.h"
 #include "actuator.h"
 
 using namespace DYNAMIXEL;

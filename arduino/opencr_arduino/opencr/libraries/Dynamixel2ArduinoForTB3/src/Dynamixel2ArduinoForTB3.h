@@ -14,8 +14,8 @@
 * limitations under the License.
 *******************************************************************************/
 
-#ifndef DYNAMIXEL_2_ARDUINO_H_
-#define DYNAMIXEL_2_ARDUINO_H_
+#ifndef DYNAMIXEL_2_ARDUINO_FOR_TB3_H_
+#define DYNAMIXEL_2_ARDUINO_FOR_TB3_H_
 
 
 #include "utility/master.h"
@@ -433,4 +433,4 @@ class Dynamixel2Arduino : public DYNAMIXEL::Master
 
 
 
-#endif /* DYNAMIXEL_2_ARDUINO_H_ */
+#endif /* DYNAMIXEL_2_ARDUINO_FOR_TB3_H_ */

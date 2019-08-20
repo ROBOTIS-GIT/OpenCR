@@ -14,26 +14,22 @@
 * limitations under the License.
 *******************************************************************************/
 
-#ifndef TURTLEBOT3_H_
-#define TURTLEBOT3_H_
+#include <TurtleBot3_ROS2.h>
 
-#include <stdint.h>
-#include "turtlebot3_motor_driver.h"
-#include "turtlebot3_sensor.h"
-#include "turtlebot3_controller.h"
-#include "turtlebot3_diagnosis.h"
+/*******************************************************************************
+* Setup function
+*******************************************************************************/
+void setup()
+{
+  // Begin TurtleBot3 core for support Waffle.
+  TurtleBot3Core::begin("Waffle");
+}
 
-
-const uint8_t FIRMWARE_VER = 2;
-const uint32_t INTERVAL_MS_TO_CONTROL_MOTOR = 20;
-const uint32_t INTERVAL_MS_TO_UPDATE_CONTROL_TABLE = 20;
-
-namespace TurtleBot3Core{
-  void begin(const char* model_name);
-  void run();
-} //namespace TurtleBot3Core
-
-
-
-#endif // TURTLEBOT3_H_
-
+/*******************************************************************************
+* Loop function
+*******************************************************************************/
+void loop()
+{
+  // Run TurtleBot3 core for communicating with ROS2 node, sensing several sensors and controlling actuators.
+  TurtleBot3Core::run();
+}
