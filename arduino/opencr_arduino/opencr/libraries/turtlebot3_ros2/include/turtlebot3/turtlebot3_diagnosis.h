@@ -35,8 +35,6 @@
 #define WAIT_SECOND                      1
 #define CHECK_BUTTON_RELEASED            2
 
-#define DEBUG_SERIAL  SerialBT2
-
 enum DEVICE_STATUS{
   STATUS_NOT_CONNECTED_MOTORS = -1,
   STATUS_RUNNING              = 0

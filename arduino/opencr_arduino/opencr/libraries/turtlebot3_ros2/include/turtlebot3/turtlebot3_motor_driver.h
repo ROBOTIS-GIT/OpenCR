@@ -17,7 +17,7 @@
 #ifndef TURTLEBOT3_MOTOR_DRIVER_H_
 #define TURTLEBOT3_MOTOR_DRIVER_H_
 
-#include <Dynamixel2ArduinoForTB3.h>
+#include <Dynamixel2Arduino.h>
 
 
 enum MortorLocation{
