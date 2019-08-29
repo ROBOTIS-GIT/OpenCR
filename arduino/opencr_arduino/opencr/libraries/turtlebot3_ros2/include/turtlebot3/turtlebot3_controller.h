@@ -24,8 +24,6 @@
 #define VELOCITY_LINEAR_X                0.01   // m/s
 #define VELOCITY_ANGULAR_Z               0.1    // rad/s
 
-#define DEBUG_SERIAL SerialBT2
-
 class Turtlebot3Controller
 {
  public:

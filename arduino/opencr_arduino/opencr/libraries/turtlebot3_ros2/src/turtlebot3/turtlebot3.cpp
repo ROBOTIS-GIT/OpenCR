@@ -50,7 +50,7 @@ static const TB3ModelInfo waffle_info = {
 /*******************************************************************************
 * Declaration for motors
 *******************************************************************************/
-Turtlebot3MotorDriver motor_driver;
+static Turtlebot3MotorDriver motor_driver;
 
 static const TB3ModelInfo* p_tb3_model_info;
 static float max_linear_velocity, min_linear_velocity;
@@ -69,17 +69,17 @@ static void set_connection_state_with_motors(bool is_connected);
 /*******************************************************************************
 * Declaration for sensors
 *******************************************************************************/
-Turtlebot3Sensor sensors;
+static Turtlebot3Sensor sensors;
 
 /*******************************************************************************
 * Declaration for diagnosis
 *******************************************************************************/
-Turtlebot3Diagnosis diagnosis;
+static Turtlebot3Diagnosis diagnosis;
 
 /*******************************************************************************
 * Declaration for controllers
 *******************************************************************************/
-Turtlebot3Controller controllers;
+static Turtlebot3Controller controllers;
 
 /*******************************************************************************
 * Declaration for DYNAMIXEL Slave Function
@@ -90,29 +90,24 @@ const uint16_t MODEL_NUM_DXL_SLAVE = 0x5000;
 const float PROTOCOL_VERSION_DXL_SLAVE = 2.0;
 const uint32_t HEARTBEAT_TIMEOUT_MS = 500;
 
-static bool is_dxl_addr_in_range(uint16_t addr, uint16_t length, uint16_t range_addr, uint16_t range_length);
-static void dxl_slave_write_callback_func(DYNAMIXEL::Slave *slave, uint16_t addr, uint16_t length);
+static void dxl_slave_write_callback_func(uint16_t addr, uint8_t &dxl_err_code);
 
 static bool get_connection_state_with_ros2_node();
 static void set_connection_state_with_ros2_node(bool is_connected);
-static void update_connection_state_with_ros2_node(DYNAMIXEL::Slave *slave);
+static void update_connection_state_with_ros2_node();
 
-static void update_imu_to_table(DYNAMIXEL::Slave *slave, uint32_t interval_ms);
-static void update_times_to_table(DYNAMIXEL::Slave *slave, uint32_t interval_ms);
-static void update_gpios_to_table(DYNAMIXEL::Slave *slave, uint32_t interval_ms);
-static void update_motor_status_to_table(DYNAMIXEL::Slave *slave, uint32_t interval_ms);
-static void update_battery_status_to_table(DYNAMIXEL::Slave *slave, uint32_t interval_ms);
-static void update_analog_sensors_to_table(DYNAMIXEL::Slave *slave, uint32_t interval_ms);
+static void update_imu(uint32_t interval_ms);
+static void update_times(uint32_t interval_ms);
+static void update_gpios(uint32_t interval_ms);
+static void update_motor_status(uint32_t interval_ms);
+static void update_battery_status(uint32_t interval_ms);
+static void update_analog_sensors(uint32_t interval_ms);
 
 DYNAMIXEL::USBSerialPortHandler port_dxl_slave(SERIAL_DXL_SLAVE);
-DYNAMIXEL::Slave dxl_slave(port_dxl_slave, MODEL_NUM_DXL_SLAVE, PROTOCOL_VERSION_DXL_SLAVE);
+DYNAMIXEL::Slave dxl_slave(port_dxl_slave, MODEL_NUM_DXL_SLAVE);
 
 enum ControlTableItemAddr{
-  ADDR_MODEL_NUMBER    = 0,
   ADDR_MODEL_INFORM    = 2,
-  ADDR_FIRMWARE_VER    = 6,
-  ADDR_ID              = 7,
-  ADDR_BAUDRATE        = 8,
   
   ADDR_MILLIS          = 10,
   ADDR_MICROS          = 14,
@@ -124,16 +119,18 @@ enum ControlTableItemAddr{
   ADDR_USER_LED_2      = 21,
   ADDR_USER_LED_3      = 22,
   ADDR_USER_LED_4      = 23,
-
   ADDR_BUTTON_1        = 26,
   ADDR_BUTTON_2        = 27,
   ADDR_BUMPER_1        = 28,
   ADDR_BUMPER_2        = 29,
+
   ADDR_ILLUMINATION    = 30,
   ADDR_IR              = 34,
   ADDR_SORNA           = 38,
+
   ADDR_BATTERY_VOLTAGE = 42,
   ADDR_BATTERY_PERCENT = 46,
+
   ADDR_SOUND           = 50,
 
   ADDR_IMU_RECALIBRATION  = 59,
@@ -169,6 +166,46 @@ enum ControlTableItemAddr{
   ADDR_PROFILE_ACC_R      = 178
 };
 
+typedef struct ControlItemVariables{
+  uint32_t model_inform;
+
+  uint32_t dev_time_millis;
+  uint32_t dev_time_micros;
+
+  int8_t device_status;
+  uint8_t heart_beat;
+
+  bool user_led[4];
+  bool push_button[2];
+  bool bumper[2];
+
+  uint16_t illumination;
+  uint32_t ir_sensor;
+  float sornar;
+
+  uint32_t bat_voltage_x100;
+  uint32_t bat_percent_x100;
+
+  uint8_t buzzer_sound;
+
+  bool imu_recalibration;
+  float angular_vel[3];
+  float linear_acc[3];
+  float magnetic[3];
+  float orientation[4];
+
+  int32_t present_position[MortorLocation::MOTOR_NUM_MAX];
+  int32_t present_velocity[MortorLocation::MOTOR_NUM_MAX];
+  int32_t present_current[MortorLocation::MOTOR_NUM_MAX];
+
+  bool motor_torque_enable_state;
+  int32_t cmd_vel_linear[3];
+  int32_t cmd_vel_angular[3];
+  uint32_t profile_acceleration[MortorLocation::MOTOR_NUM_MAX];
+}ControlItemVariables;
+
+static ControlItemVariables control_items;
+
 
 /*******************************************************************************
 * Definition for TurtleBot3Core 'begin()' function
@@ -193,49 +230,110 @@ void TurtleBot3Core::begin(const char* model_name)
   max_angular_velocity = max_linear_velocity/p_tb3_model_info->turning_radius;
   min_angular_velocity = -max_angular_velocity;
 
-  pinMode(LED_WORKING_CHECK, OUTPUT);
-
+  bool ret; (void)ret;
+  DEBUG_SERIAL_BEGIN(57600);
   // Setting for Dynamixel motors
-  motor_driver.init();
+  ret = motor_driver.init();
+  DEBUG_PRINTLN(ret==true?"Motor driver setup completed.":"Motor driver setup failed.");
   // Setting for IMU
-  sensors.init();
+  ret = sensors.init();
+  DEBUG_PRINTLN(ret==true?"Sensors setup completed.":"Sensors setup failed.");
   // Init diagnosis
-  diagnosis.init();
+  ret = diagnosis.init();
+  DEBUG_PRINTLN(ret==true?"Diagnosis setup completed.":"Diagnosis setup failed.");
   // Setting for ROBOTIS RC100 remote controller and cmd_vel
-  controllers.init(max_linear_velocity, max_angular_velocity);
-
+  ret = controllers.init(max_linear_velocity, max_angular_velocity);
+  DEBUG_PRINTLN(ret==true?"RC100 Controller setup completed.":"RC100 Controller setup failed.");
+  
   // Init DXL Slave function
   dxl_slave.setPortProtocolVersion(PROTOCOL_VERSION_DXL_SLAVE);
-  dxl_slave.setID(ID_DXL_SLAVE);
   dxl_slave.setFirmwareVersion(FIRMWARE_VER);
+  dxl_slave.setID(ID_DXL_SLAVE);
 
-  dxl_slave.setControlTable(ADDR_MODEL_NUMBER, (uint16_t)dxl_slave.getModelNumber());
-  dxl_slave.setControlTable(ADDR_MODEL_INFORM, (uint32_t)p_tb3_model_info->model_info);
-  dxl_slave.setControlTable(ADDR_FIRMWARE_VER, (uint8_t)dxl_slave.getFirmwareVersion());
-  dxl_slave.setControlTable(ADDR_ID, (uint8_t)dxl_slave.getID());
-  dxl_slave.setControlTable(ADDR_BAUDRATE, (uint8_t)3);
-  
-  dxl_slave.setAddrRemoteWriteProtected(0, 255, true);
-  dxl_slave.setAddrRemoteWriteProtected(ADDR_HEARTBEAT, 1, false);
-  dxl_slave.setAddrRemoteWriteProtected(ADDR_USER_LED_1, 4, false);
-  dxl_slave.setAddrRemoteWriteProtected(ADDR_SOUND, 1, false);
-  dxl_slave.setAddrRemoteWriteProtected(ADDR_IMU_RECALIBRATION, 1, false);
-  dxl_slave.setAddrRemoteWriteProtected(ADDR_MOTOR_TORQUE, ADDR_PROFILE_ACC_R+4-ADDR_MOTOR_TORQUE, false);
+  /* Add control items for Slave */
+  // Items for model information of device
+  control_items.model_inform = p_tb3_model_info->model_info;
+  dxl_slave.addControlItem(ADDR_MODEL_INFORM, control_items.model_inform);
+  // Items for Timer of device
+  dxl_slave.addControlItem(ADDR_MILLIS, control_items.dev_time_millis);
+  dxl_slave.addControlItem(ADDR_MICROS, control_items.dev_time_micros);
+  // Items to inform device status
+  dxl_slave.addControlItem(ADDR_DEVICE_STATUS, control_items.device_status);
+  // Items to check connection state with node
+  dxl_slave.addControlItem(ADDR_HEARTBEAT, control_items.heart_beat);
+  // Items for GPIO
+  dxl_slave.addControlItem(ADDR_USER_LED_1, control_items.user_led[0]);
+  dxl_slave.addControlItem(ADDR_USER_LED_2, control_items.user_led[1]);
+  dxl_slave.addControlItem(ADDR_USER_LED_3, control_items.user_led[2]);
+  dxl_slave.addControlItem(ADDR_USER_LED_4, control_items.user_led[3]);
+  dxl_slave.addControlItem(ADDR_BUTTON_1, control_items.push_button[0]);
+  dxl_slave.addControlItem(ADDR_BUTTON_2, control_items.push_button[1]);
+  dxl_slave.addControlItem(ADDR_BUMPER_1, control_items.bumper[0]);
+  dxl_slave.addControlItem(ADDR_BUMPER_2, control_items.bumper[1]);
+  // Items for Analog sensors
+  dxl_slave.addControlItem(ADDR_ILLUMINATION, control_items.illumination);
+  dxl_slave.addControlItem(ADDR_IR, control_items.ir_sensor);
+  dxl_slave.addControlItem(ADDR_SORNA, control_items.sornar);
+  // Items for Battery
+  dxl_slave.addControlItem(ADDR_BATTERY_VOLTAGE, control_items.bat_voltage_x100);
+  dxl_slave.addControlItem(ADDR_BATTERY_PERCENT, control_items.bat_percent_x100);
+  // Items for Buzzer
+  dxl_slave.addControlItem(ADDR_SOUND, control_items.buzzer_sound);
+  // Items for IMU
+  dxl_slave.addControlItem(ADDR_IMU_RECALIBRATION, control_items.imu_recalibration);
+  dxl_slave.addControlItem(ADDR_ANGULAR_VELOCITY_X, control_items.angular_vel[0]);
+  dxl_slave.addControlItem(ADDR_ANGULAR_VELOCITY_Y, control_items.angular_vel[1]);
+  dxl_slave.addControlItem(ADDR_ANGULAR_VELOCITY_Z, control_items.angular_vel[2]);
+  dxl_slave.addControlItem(ADDR_LINEAR_ACC_X, control_items.linear_acc[0]);
+  dxl_slave.addControlItem(ADDR_LINEAR_ACC_Y, control_items.linear_acc[1]);
+  dxl_slave.addControlItem(ADDR_LINEAR_ACC_Z, control_items.linear_acc[2]);
+  dxl_slave.addControlItem(ADDR_MAGNETIC_X, control_items.magnetic[0]);
+  dxl_slave.addControlItem(ADDR_MAGNETIC_Y, control_items.magnetic[1]);
+  dxl_slave.addControlItem(ADDR_MAGNETIC_Z, control_items.magnetic[2]);
+  dxl_slave.addControlItem(ADDR_ORIENTATION_W, control_items.orientation[0]);
+  dxl_slave.addControlItem(ADDR_ORIENTATION_X, control_items.orientation[1]);
+  dxl_slave.addControlItem(ADDR_ORIENTATION_Y, control_items.orientation[2]);
+  dxl_slave.addControlItem(ADDR_ORIENTATION_Z, control_items.orientation[3]);
+  // Items to check status of motors
+  dxl_slave.addControlItem(ADDR_PRESENT_POSITION_L, control_items.present_position[MortorLocation::LEFT]);
+  dxl_slave.addControlItem(ADDR_PRESENT_POSITION_R, control_items.present_position[MortorLocation::RIGHT]);
+  dxl_slave.addControlItem(ADDR_PRESENT_VELOCITY_L, control_items.present_velocity[MortorLocation::LEFT]);
+  dxl_slave.addControlItem(ADDR_PRESENT_VELOCITY_R, control_items.present_velocity[MortorLocation::RIGHT]);
+  dxl_slave.addControlItem(ADDR_PRESENT_CURRENT_L, control_items.present_current[MortorLocation::LEFT]);
+  dxl_slave.addControlItem(ADDR_PRESENT_CURRENT_R, control_items.present_current[MortorLocation::RIGHT]);
+  // Items to control motors
+  dxl_slave.addControlItem(ADDR_MOTOR_TORQUE, control_items.motor_torque_enable_state);
+  dxl_slave.addControlItem(ADDR_CMD_VEL_LINEAR_X, control_items.cmd_vel_linear[0]);
+  dxl_slave.addControlItem(ADDR_CMD_VEL_LINEAR_Y, control_items.cmd_vel_linear[1]);
+  dxl_slave.addControlItem(ADDR_CMD_VEL_LINEAR_Z, control_items.cmd_vel_linear[2]);
+  dxl_slave.addControlItem(ADDR_CMD_VEL_ANGULAR_X, control_items.cmd_vel_angular[0]);
+  dxl_slave.addControlItem(ADDR_CMD_VEL_ANGULAR_Y, control_items.cmd_vel_angular[1]);
+  dxl_slave.addControlItem(ADDR_CMD_VEL_ANGULAR_Z, control_items.cmd_vel_angular[2]);  
+  dxl_slave.addControlItem(ADDR_PROFILE_ACC_L, control_items.profile_acceleration[MortorLocation::LEFT]);
+  dxl_slave.addControlItem(ADDR_PROFILE_ACC_R, control_items.profile_acceleration[MortorLocation::RIGHT]);
 
+  // Set user callback function for processing write command from master.
   dxl_slave.setWriteCallbackFunc(dxl_slave_write_callback_func);
 
+  // Check connection state with motors.
   if(motor_driver.is_connected() == true){
     motor_driver.set_torque(true);
-    dxl_slave.setControlTable(ADDR_DEVICE_STATUS, (int8_t)STATUS_RUNNING);
+    control_items.device_status = STATUS_RUNNING;
     set_connection_state_with_motors(true);
   }else{
-    dxl_slave.setControlTable(ADDR_DEVICE_STATUS, (int8_t)STATUS_NOT_CONNECTED_MOTORS);
+    control_items.device_status = STATUS_NOT_CONNECTED_MOTORS;
     set_connection_state_with_motors(false);
+    DEBUG_PRINTLN("Can't communicate with the motor!");
+    DEBUG_PRINTLN("  Please check the connection to the motor and the power supply.");
+    DEBUG_PRINTLN();
   }
  
+  // Init IMU 
   sensors.initIMU();
   sensors.calibrationGyro();
-  sensors.makeMelody(1); //To indicate that the initialization is complete.
+
+  //To indicate that the initialization is complete.
+  sensors.makeMelody(1); 
 }
 
 /*******************************************************************************
@@ -246,7 +344,7 @@ void TurtleBot3Core::run()
   static uint32_t pre_time_to_control_motor;
 
   // Check connection state with ROS2 node
-  update_connection_state_with_ros2_node(&dxl_slave);
+  update_connection_state_with_ros2_node();
 
   /* For diagnosis */
   // Show LED status
@@ -270,12 +368,13 @@ void TurtleBot3Core::run()
 
   /* For processing DYNAMIXEL slave function */
   // Update control table of OpenCR to communicate with ROS2 node
-  update_imu_to_table(&dxl_slave, INTERVAL_MS_TO_UPDATE_CONTROL_TABLE);
-  update_times_to_table(&dxl_slave, INTERVAL_MS_TO_UPDATE_CONTROL_TABLE);
-  update_gpios_to_table(&dxl_slave, INTERVAL_MS_TO_UPDATE_CONTROL_TABLE);
-  update_motor_status_to_table(&dxl_slave, INTERVAL_MS_TO_UPDATE_CONTROL_TABLE);
-  update_battery_status_to_table(&dxl_slave, INTERVAL_MS_TO_UPDATE_CONTROL_TABLE);
-  update_analog_sensors_to_table(&dxl_slave, INTERVAL_MS_TO_UPDATE_CONTROL_TABLE);
+  update_imu(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
+  update_times(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
+  update_gpios(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
+  update_motor_status(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
+  update_battery_status(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
+  update_analog_sensors(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
+  
   // Packet processing with ROS2 Node.
   dxl_slave.processPacket();
 
@@ -308,77 +407,77 @@ void update_goal_velocity_from_3values(void)
 
 
 /*******************************************************************************
-* Function definition for updating control tables in TB3.
+* Function definition for updating control items in TB3.
 *******************************************************************************/
 float map_float(float x, float in_min, float in_max, float out_min, float out_max)
 {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-void update_times_to_table(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
+void update_times(uint32_t interval_ms)
 {
   static uint32_t pre_time = 0;
 
   if(millis() - pre_time >= interval_ms){
     pre_time = millis();
 
-    slave->setControlTable(ADDR_MILLIS, (uint32_t)millis());
-    slave->setControlTable(ADDR_MICROS, (uint32_t)micros());
+    control_items.dev_time_millis = millis();
+    control_items.dev_time_micros = micros();
   } 
 }
 
-void update_gpios_to_table(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
+void update_gpios(uint32_t interval_ms)
 {
   static uint32_t pre_time = 0;
 
   if(millis() - pre_time >= interval_ms){
     pre_time = millis();
 
-    slave->setControlTable(ADDR_USER_LED_1, (uint8_t)digitalRead(BDPIN_GPIO_4));
-    slave->setControlTable(ADDR_USER_LED_2, (uint8_t)digitalRead(BDPIN_GPIO_6));
-    slave->setControlTable(ADDR_USER_LED_3, (uint8_t)digitalRead(BDPIN_GPIO_8));
-    slave->setControlTable(ADDR_USER_LED_4, (uint8_t)digitalRead(BDPIN_GPIO_10));
-    slave->setControlTable(ADDR_BUTTON_1, (uint8_t)digitalRead(BDPIN_PUSH_SW_1));
-    slave->setControlTable(ADDR_BUTTON_2, (uint8_t)digitalRead(BDPIN_PUSH_SW_2));
-    slave->setControlTable(ADDR_BUMPER_1, (uint8_t)sensors.getBumper1State());
-    slave->setControlTable(ADDR_BUMPER_2, (uint8_t)sensors.getBumper2State());
+    control_items.user_led[0] = digitalRead(BDPIN_GPIO_4);
+    control_items.user_led[1] = digitalRead(BDPIN_GPIO_6);
+    control_items.user_led[2] = digitalRead(BDPIN_GPIO_8);
+    control_items.user_led[3] = digitalRead(BDPIN_GPIO_10);
+
+    control_items.push_button[0] = digitalRead(BDPIN_PUSH_SW_1);
+    control_items.push_button[1] = digitalRead(BDPIN_PUSH_SW_2);
+
+    control_items.bumper[0] = sensors.getBumper1State();
+    control_items.bumper[1] = sensors.getBumper2State();
   }  
 }
 
-void update_battery_status_to_table(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
+void update_battery_status(uint32_t interval_ms)
 {
   static uint32_t pre_time = 0;
   float bat_voltage, bat_percent;
-  uint32_t bat_voltage_uint, bat_percent_uint = 0;
 
   if(millis() - pre_time >= interval_ms){
     pre_time = millis();
 
     bat_voltage = sensors.checkVoltage();
-    bat_voltage_uint = (uint32_t)(bat_voltage*100);
-    slave->setControlTable(ADDR_BATTERY_VOLTAGE, (uint32_t)bat_voltage_uint);
+    control_items.bat_voltage_x100 = (uint32_t)(bat_voltage*100);
+
     if(bat_voltage >= 3.5*3){
       bat_percent = map_float(bat_voltage, 3.5*3, 4.1*3, 0.0, 100.0);
-      bat_percent_uint = (uint32_t)(bat_percent*100);
+      control_items.bat_percent_x100 = (uint32_t)(bat_percent*100);
     }
-    slave->setControlTable(ADDR_BATTERY_PERCENT, (uint32_t)bat_percent_uint);
   }
 }
 
-void update_analog_sensors_to_table(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
+void update_analog_sensors(uint32_t interval_ms)
 {
   static uint32_t pre_time = 0;
 
   if(millis() - pre_time >= interval_ms){
     pre_time = millis();
 
-    slave->setControlTable(ADDR_ILLUMINATION, (uint16_t)sensors.getIlluminationData());
-    slave->setControlTable(ADDR_IR, (uint32_t)sensors.getIRsensorData());
-    slave->setControlTable(ADDR_SORNA, (float)sensors.getSonarData());
-  }  
+    control_items.illumination = (uint16_t)sensors.getIlluminationData();
+    control_items.ir_sensor = (uint32_t)sensors.getIRsensorData();
+    control_items.sornar = (float)sensors.getSonarData();
+  }
 }
 
-void update_imu_to_table(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
+void update_imu(uint32_t interval_ms)
 {
   static uint32_t pre_time = 0;
   float* p_imu_data;
@@ -387,53 +486,36 @@ void update_imu_to_table(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
     pre_time = millis();
 
     p_imu_data = sensors.getImuAngularVelocity();
-    slave->setControlTable(ADDR_ANGULAR_VELOCITY_X, (float)p_imu_data[0]);
-    slave->setControlTable(ADDR_ANGULAR_VELOCITY_Y, (float)p_imu_data[1]);
-    slave->setControlTable(ADDR_ANGULAR_VELOCITY_Z, (float)p_imu_data[2]);
+    memcpy(control_items.angular_vel, p_imu_data, sizeof(control_items.angular_vel));
 
     p_imu_data = sensors.getImuLinearAcc();
-    slave->setControlTable(ADDR_LINEAR_ACC_X, (float)p_imu_data[0]);
-    slave->setControlTable(ADDR_LINEAR_ACC_Y, (float)p_imu_data[1]);
-    slave->setControlTable(ADDR_LINEAR_ACC_Z, (float)p_imu_data[2]);
+    memcpy(control_items.linear_acc, p_imu_data, sizeof(control_items.linear_acc));
 
     p_imu_data = sensors.getImuMagnetic();
-    slave->setControlTable(ADDR_MAGNETIC_X, (float)p_imu_data[0]);
-    slave->setControlTable(ADDR_MAGNETIC_Y, (float)p_imu_data[1]);
-    slave->setControlTable(ADDR_MAGNETIC_Z, (float)p_imu_data[2]);
+    memcpy(control_items.magnetic, p_imu_data, sizeof(control_items.magnetic));
 
     p_imu_data = sensors.getOrientation();
-    slave->setControlTable(ADDR_ORIENTATION_W, (float)p_imu_data[0]);
-    slave->setControlTable(ADDR_ORIENTATION_X, (float)p_imu_data[1]);
-    slave->setControlTable(ADDR_ORIENTATION_Y, (float)p_imu_data[2]);
-    slave->setControlTable(ADDR_ORIENTATION_Z, (float)p_imu_data[3]);
+    memcpy(control_items.orientation, p_imu_data, sizeof(control_items.orientation));
   }  
 }
 
-void update_motor_status_to_table(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
+void update_motor_status(uint32_t interval_ms)
 {
   static uint32_t pre_time;
-  int32_t present_position[MortorLocation::MOTOR_NUM_MAX], present_velocity[MortorLocation::MOTOR_NUM_MAX];
-  int16_t present_current[MortorLocation::MOTOR_NUM_MAX];
+  int16_t current_l, current_r;
 
   if(millis() - pre_time >= interval_ms){
     pre_time = millis();
+
     if(get_connection_state_with_motors() == true){
-      if (motor_driver.read_present_position(present_position[MortorLocation::LEFT], present_position[MortorLocation::RIGHT]) == true){
-        slave->setControlTable(ADDR_PRESENT_POSITION_L, (int32_t)present_position[MortorLocation::LEFT]);
-        slave->setControlTable(ADDR_PRESENT_POSITION_R, (int32_t)present_position[MortorLocation::RIGHT]);
+      motor_driver.read_present_position(control_items.present_position[MortorLocation::LEFT], control_items.present_position[MortorLocation::RIGHT]);
+      motor_driver.read_present_velocity(control_items.present_velocity[MortorLocation::LEFT], control_items.present_velocity[MortorLocation::RIGHT]);
+      if(motor_driver.read_present_current(current_l, current_r) == true){
+        control_items.present_current[MortorLocation::LEFT] = current_l;
+        control_items.present_current[MortorLocation::RIGHT] = current_r;
       }
 
-      if (motor_driver.read_present_velocity(present_velocity[MortorLocation::LEFT], present_velocity[MortorLocation::RIGHT]) == true){
-        slave->setControlTable(ADDR_PRESENT_VELOCITY_L, (int32_t)present_velocity[MortorLocation::LEFT]);
-        slave->setControlTable(ADDR_PRESENT_VELOCITY_R, (int32_t)present_velocity[MortorLocation::RIGHT]);
-      }
-      
-      if (motor_driver.read_present_current(present_current[MortorLocation::LEFT], present_current[MortorLocation::RIGHT]) == true){
-        slave->setControlTable(ADDR_PRESENT_CURRENT_L, (int32_t)present_current[MortorLocation::LEFT]);
-        slave->setControlTable(ADDR_PRESENT_CURRENT_R, (int32_t)present_current[MortorLocation::RIGHT]);
-      }
-
-      slave->setControlTable(ADDR_MOTOR_TORQUE, (uint8_t)motor_driver.get_torque());
+      control_items.motor_torque_enable_state = motor_driver.get_torque();
     }
   }
 }
@@ -442,72 +524,45 @@ void update_motor_status_to_table(DYNAMIXEL::Slave *slave, uint32_t interval_ms)
 /*******************************************************************************
 * Callback function definition to be used in communication with the ROS2 node.
 *******************************************************************************/
-static bool is_dxl_addr_in_range(uint16_t addr, uint16_t length,
-  uint16_t range_addr, uint16_t range_length)
+static void dxl_slave_write_callback_func(uint16_t item_addr, uint8_t &dxl_err_code)
 {
-  return (addr >= range_addr && addr+length <= range_addr+range_length) ? true:false;
-}
-
-static void dxl_slave_write_callback_func(DYNAMIXEL::Slave *slave, uint16_t addr, uint16_t length)
-{
-  if(is_dxl_addr_in_range(ADDR_SOUND, 1, addr, length) == true){
-    uint8_t data;
-    if(slave->getControlTable(ADDR_SOUND, 1, (uint8_t*)&data) == DXL_ERR_NONE){
-      sensors.makeMelody(data);
-    }
-  }
-
-  if(is_dxl_addr_in_range(ADDR_MOTOR_TORQUE, 1, addr, length) == true){
-    uint8_t data;
-    if(slave->getControlTable(ADDR_MOTOR_TORQUE, 1, (uint8_t*)&data) == DXL_ERR_NONE){
-      if(get_connection_state_with_motors() == true){
-        motor_driver.set_torque(data);
-      }
-    }
-  }
-
-  if(is_dxl_addr_in_range(ADDR_CMD_VEL_LINEAR_X, 4, addr, length) == true){
-    int32_t data;
-    float f_data;
-    if(slave->getControlTable(ADDR_CMD_VEL_LINEAR_X, 4, (uint8_t*)&data) == DXL_ERR_NONE){
-      f_data = data;
-      f_data *= 0.01f;
-      goal_velocity_from_cmd[VelocityType::LINEAR] = constrain(f_data, min_linear_velocity, max_linear_velocity);
-    }
-  }
-
-  if(is_dxl_addr_in_range(ADDR_CMD_VEL_ANGULAR_Z, 4, addr, length) == true){
-    int32_t data;
-    float f_data;
-    if(slave->getControlTable(ADDR_CMD_VEL_ANGULAR_Z, 4, (uint8_t*)&data) == DXL_ERR_NONE){
-      f_data = data;
-      f_data *= 0.01f;
-      goal_velocity_from_cmd[VelocityType::ANGULAR] = constrain(f_data, min_angular_velocity, max_angular_velocity);
-    }
-  }
-
-  if(is_dxl_addr_in_range(ADDR_PROFILE_ACC_L, 4, addr, length) == true
-    || is_dxl_addr_in_range(ADDR_PROFILE_ACC_R, 4, addr, length) == true)
+  switch(item_addr)
   {
-    uint32_t l_data, r_data;
-    if(slave->getControlTable(ADDR_PROFILE_ACC_L, 4, (uint8_t*)&l_data) == DXL_ERR_NONE){
-      if(slave->getControlTable(ADDR_PROFILE_ACC_R, 4, (uint8_t*)&r_data) == DXL_ERR_NONE){
-        if(get_connection_state_with_motors() == true){
-          motor_driver.write_profile_acceleration(l_data, r_data);
-        }
-      }
-    }
-  }
+    case ADDR_MODEL_INFORM:
+      control_items.model_inform = p_tb3_model_info->model_info;
+      dxl_err_code = DXL_ERR_ACCESS;
+      break;
 
-  if(is_dxl_addr_in_range(ADDR_IMU_RECALIBRATION, 1, addr, length) == true){
-    bool data;
-    if(slave->getControlTable(ADDR_IMU_RECALIBRATION, 1, (uint8_t*)&data) == DXL_ERR_NONE){
-      if(data == true){
+    case ADDR_SOUND:
+      sensors.makeMelody(control_items.buzzer_sound);
+      break;
+
+    case ADDR_IMU_RECALIBRATION:
+      if(control_items.imu_recalibration == true){
         sensors.calibrationGyro();
-        slave->setControlTable(ADDR_IMU_RECALIBRATION, (uint8_t)0);
+        control_items.imu_recalibration = false;
       }
-    }
-  }  
+      break;
+
+    case ADDR_MOTOR_TORQUE:
+      if(get_connection_state_with_motors() == true)
+        motor_driver.set_torque(control_items.motor_torque_enable_state);
+      break;
+
+    case ADDR_CMD_VEL_LINEAR_X:
+      goal_velocity_from_cmd[VelocityType::LINEAR] = constrain((float)(control_items.cmd_vel_linear[0]*0.01f), min_linear_velocity, max_linear_velocity);
+      break;
+
+    case ADDR_CMD_VEL_ANGULAR_Z:
+      goal_velocity_from_cmd[VelocityType::ANGULAR] = constrain((float)(control_items.cmd_vel_angular[2]*0.01f), min_angular_velocity, max_angular_velocity);
+      break;            
+
+    case ADDR_PROFILE_ACC_L:
+    case ADDR_PROFILE_ACC_R:
+      if(get_connection_state_with_motors() == true)
+        motor_driver.write_profile_acceleration(control_items.profile_acceleration[MortorLocation::LEFT], control_items.profile_acceleration[MortorLocation::RIGHT]);
+      break;
+  }
 }
 
 
@@ -526,10 +581,10 @@ static void set_connection_state_with_ros2_node(bool is_connected)
   connection_state_with_ros2_node = is_connected;
 }
 
-void update_connection_state_with_ros2_node(DYNAMIXEL::Slave *slave)
+void update_connection_state_with_ros2_node()
 {
   static uint32_t pre_time;
-  static uint8_t pre_data, data;
+  static uint8_t pre_data;
   static bool pre_state;
 
   //To wait for IMU Calibration
@@ -539,16 +594,14 @@ void update_connection_state_with_ros2_node(DYNAMIXEL::Slave *slave)
     return;
   }
 
-  if(slave->getControlTable(ADDR_HEARTBEAT, 1, (uint8_t*)&data) == DXL_ERR_NONE){
-    if(pre_data != data){
+  if(pre_data != control_items.heart_beat){
+    pre_time = millis();
+    pre_data = control_items.heart_beat;
+    set_connection_state_with_ros2_node(true);
+  }else{
+    if(millis()-pre_time >= HEARTBEAT_TIMEOUT_MS){
       pre_time = millis();
-      pre_data = data;
-      set_connection_state_with_ros2_node(true);
-    }else{
-      if(millis()-pre_time >= HEARTBEAT_TIMEOUT_MS){
-        pre_time = millis();
-        set_connection_state_with_ros2_node(false);
-      }
+      set_connection_state_with_ros2_node(false);
     }
   }
 }

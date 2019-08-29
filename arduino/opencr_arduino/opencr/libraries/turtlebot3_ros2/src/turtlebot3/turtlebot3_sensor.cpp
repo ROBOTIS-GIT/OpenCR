@@ -21,29 +21,23 @@ Turtlebot3Sensor::Turtlebot3Sensor()
 }
 
 Turtlebot3Sensor::~Turtlebot3Sensor()
-{
-  DEBUG_SERIAL.end();
-}
+{}
 
 bool Turtlebot3Sensor::init(void)
 {
-  DEBUG_SERIAL.begin(57600);
+  bool ret = false;
 
   initBumper();
   initIR();
   initSonar();
   initLED();
 
-  uint8_t get_error_code = 0x00;
+  uint8_t get_error_code = imu_.begin();
 
-  get_error_code = imu_.begin();
+  if (get_error_code == 0x00)
+    ret = true;
 
-  if (get_error_code != 0x00)
-    DEBUG_SERIAL.println("Failed to init Sensor");
-  else
-    DEBUG_SERIAL.println("Success to init Sensor");
-
-  return get_error_code;
+  return ret;
 }
 
 void Turtlebot3Sensor::initIMU(void)

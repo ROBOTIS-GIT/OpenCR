@@ -28,8 +28,6 @@
 
 #define MAG_FACTOR                        6e-7
 
-#define DEBUG_SERIAL  SerialBT2
-
 typedef struct LED_PIN_ARRAY
 {
   int front_left;

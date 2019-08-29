@@ -23,10 +23,21 @@
 #include "turtlebot3_controller.h"
 #include "turtlebot3_diagnosis.h"
 
+#define DEBUG_ENABLE 1
 
-const uint8_t FIRMWARE_VER = 2;
+#if DEBUG_ENABLE
+  #define DEBUG_SERIAL_BEGIN(x) SerialBT2.begin(x)
+  #define DEBUG_PRINT(x) SerialBT2.print(x)
+  #define DEBUG_PRINTLN(x) SerialBT2.println(x)
+#else
+  #define DEBUG_SERIAL_BEGIN(x) 
+  #define DEBUG_PRINT(x) 
+  #define DEBUG_PRINTLN(x) 
+#endif
+
+const uint8_t FIRMWARE_VER = 3;
 const uint32_t INTERVAL_MS_TO_CONTROL_MOTOR = 20;
-const uint32_t INTERVAL_MS_TO_UPDATE_CONTROL_TABLE = 20;
+const uint32_t INTERVAL_MS_TO_UPDATE_CONTROL_ITEM = 20;
 
 namespace TurtleBot3Core{
   void begin(const char* model_name);
