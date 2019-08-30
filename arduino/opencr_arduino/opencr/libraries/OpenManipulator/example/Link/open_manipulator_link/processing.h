@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
+/* Authors: Hye-Jong KIM */
 
 #ifndef PROCESSING_H_
 #define PROCESSING_H_

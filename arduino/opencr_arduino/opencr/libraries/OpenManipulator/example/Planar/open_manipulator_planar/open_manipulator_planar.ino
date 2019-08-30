@@ -16,7 +16,7 @@
 
 /* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
 
-#include "planar.h"
+#include <planar_libs.h>
 #include "remotecontroller100.h"
 #include "processing.h"
 #include "demo.h"
@@ -27,14 +27,14 @@ void setup()
 {
   planar.initDebug();
 
-  initRC100();
+  initRC100();       
 
-  initProcessing();
+  initProcessing();  
 
   initDemo();
 
   planar.initOpenManipulator(true); // true:  using actual hardware
-                                    // false: using only visualization tool
+                                    // false: using only visualization tool 
 }
 
 void loop()

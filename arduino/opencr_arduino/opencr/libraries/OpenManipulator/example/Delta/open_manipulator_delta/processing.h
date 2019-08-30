@@ -19,7 +19,7 @@
 #ifndef PROCESSING_H_
 #define PROCESSING_H_
 
-#include "delta.h"
+#include <delta_libs.h>
 #include "demo.h"
 
 /*****************************************************************************
