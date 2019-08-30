@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
+/* Authors: Darby Lim */
 
 #ifndef REMOTE_CONTROLLER_H_
 #define REMOTE_CONTROLLER_H_

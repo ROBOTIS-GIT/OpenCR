@@ -19,7 +19,7 @@
 #ifndef REMOTECONTROLLER100_H_
 #define REMOTECONTROLLER100_H_
 
-#include "planar.h"
+#include <planar_libs.h>
 #include <RC100.h>
 #include "demo.h"
 

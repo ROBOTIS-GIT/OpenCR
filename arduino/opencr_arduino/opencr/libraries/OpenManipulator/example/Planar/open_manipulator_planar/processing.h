@@ -19,7 +19,7 @@
 #ifndef PROCESSING_H_
 #define PROCESSING_H_
 
-#include "planar.h"
+#include <planar_libs.h>
 #include "demo.h"
 
 /*****************************************************************************

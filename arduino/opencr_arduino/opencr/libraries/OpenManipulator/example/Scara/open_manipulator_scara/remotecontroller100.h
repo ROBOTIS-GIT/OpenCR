@@ -19,7 +19,7 @@
 #ifndef REMOTECONTROLLER100_H_
 #define REMOTECONTROLLER100_H_
 
-#include "scara.h"
+#include <scara_libs.h>
 #include <RC100.h>
 #include "demo.h"
 
