@@ -82,9 +82,11 @@ void loop()
   if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_FREQUENCY))
   {
     updateGoalVelocity();
-    if ((t-tTime[6]) > CONTROL_MOTOR_TIMEOUT) {
+    if ((t-tTime[6]) > CONTROL_MOTOR_TIMEOUT) 
+    {
       motor_driver.controlMotor(WHEEL_RADIUS, WHEEL_SEPARATION, zero_velocity);
-    } else {
+    } 
+    else {
       motor_driver.controlMotor(WHEEL_RADIUS, WHEEL_SEPARATION, goal_velocity);
     }
     tTime[0] = t;
@@ -129,7 +131,9 @@ void loop()
   sendLogMsg();
 
   // Receive data from RC100 
-  controllers.getRCdata(goal_velocity_from_rc100);
+  bool clicked_state = controllers.getRCdata(goal_velocity_from_rc100);
+  if (clicked_state == true)  
+    tTime[6] = millis();
 
   // Check push button pressed for simple test drive
   driveTest(diagnosis.getButtonPress(3000));
