@@ -27,3 +27,4 @@
 *.app
 
 .vscode
+.metadata

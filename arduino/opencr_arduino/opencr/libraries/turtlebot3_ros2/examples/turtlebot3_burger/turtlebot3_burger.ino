@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright 2018 ROBOTIS CO., LTD.
+* Copyright 2016 ROBOTIS CO., LTD.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -14,37 +14,22 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
+#include <TurtleBot3_ROS2.h>
 
-#include <scara_libs.h>
-#include "remotecontroller100.h"
-#include "processing.h"
-#include "demo.h"
-
-Scara scara;
-
+/*******************************************************************************
+* Setup function
+*******************************************************************************/
 void setup()
 {
-  scara.initDebug();
-
-  initRC100();
-
-  initProcessing();  
-
-  initDemo();
-
-  scara.initOpenManipulator(true); // true:  using actual hardware
-                                   // false: using only visualization tool 
+  // Begin TurtleBot3 core for support Burger.
+  TurtleBot3Core::begin("Burger");
 }
 
+/*******************************************************************************
+* Loop function
+*******************************************************************************/
 void loop()
-{ 
-  receiveDataFromRC100(&scara);      
-
-  receiveDataFromProcessing(&scara); 
-  sendDataToProcessing(&scara); 
-
-  scara.processOpenManipulator(millis()/1000.0);    
-
-  runDemo(&scara); 
+{
+  // Run TurtleBot3 core for communicating with ROS2 node, sensing several sensors and controlling actuators.
+  TurtleBot3Core::run();
 }

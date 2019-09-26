@@ -19,7 +19,7 @@
 #ifndef DEMO_H_
 #define DEMO_H_
 
-#include "delta.h"
+#include <delta_libs.h>
 
 bool start_demo_flag;
 uint8_t motion_cnt[] = {0};

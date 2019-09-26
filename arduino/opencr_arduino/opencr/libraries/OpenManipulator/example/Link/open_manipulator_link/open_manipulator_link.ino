@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
+/* Authors: Hye-Jong KIM */
 
 #include "link.h"
 #include "processing.h"

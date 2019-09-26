@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Taehun Lim (Darby) */
+/* Authors: Taehun Lim (Darby), Ryan Shim */
 
 #include "../../include/dynamixel_workbench_toolbox/dynamixel_item.h"
 
@@ -533,7 +533,7 @@ static const ModelInfo info_XL320 = {0.11,
                                   2.61799};
 
 //---------------------------------------------------------
-// XL - (num == XL430_W250)
+// XL - (num == XL430_W250, XL430_W250_2, XC430_W150, XC430_W240)
 //---------------------------------------------------------
 static const ControlItem items_XL[]{
     {s_Model_Number, 0, sizeof(s_Model_Number) - 1, 2},
@@ -798,6 +798,72 @@ static const ModelInfo info_XH = {0.229,
                                   3.14159265};
 
 //---------------------------------------------------------
+// EXTXH - (num == XH540_W150 || num == XH540_W270 || num == XH540_V150 || num == XH540_W270)
+//---------------------------------------------------------
+static const ControlItem items_EXTXH[]{
+    {s_Model_Number,       0,  sizeof(s_Model_Number) - 1,       2},
+    {s_Firmware_Version,   6,  sizeof(s_Firmware_Version) - 1,   1},
+    {s_ID,                 7,  sizeof(s_ID) - 1,                 1},
+    {s_Baud_Rate,          8,  sizeof(s_Baud_Rate) - 1,          1},
+    {s_Return_Delay_Time,  9,  sizeof(s_Return_Delay_Time) - 1,  1},
+    {s_Drive_Mode,         10, sizeof(s_Drive_Mode) - 1,         1},
+    {s_Operating_Mode,     11, sizeof(s_Operating_Mode) - 1,     1},
+    {s_Secondary_ID,       12, sizeof(s_Secondary_ID) - 1,       1},
+    {s_Protocol_Version,   13, sizeof(s_Protocol_Version) - 1,   1},
+    {s_Homing_Offset,      20, sizeof(s_Homing_Offset) - 1,      4},
+    {s_Moving_Threshold,   24, sizeof(s_Moving_Threshold) - 1,   4},
+    {s_Temperature_Limit,  31, sizeof(s_Temperature_Limit) - 1,  1},
+    {s_Max_Voltage_Limit,  32, sizeof(s_Max_Voltage_Limit) - 1,  2},
+    {s_Min_Voltage_Limit,  34, sizeof(s_Min_Voltage_Limit) - 1,  2},
+    {s_PWM_Limit,          36, sizeof(s_PWM_Limit) - 1,          2},
+    {s_Current_Limit,      38, sizeof(s_Current_Limit) - 1,      2},
+    {s_Acceleration_Limit, 40, sizeof(s_Acceleration_Limit) - 1, 4},
+    {s_Velocity_Limit,     44, sizeof(s_Velocity_Limit) - 1,     4},
+    {s_Max_Position_Limit, 48, sizeof(s_Max_Position_Limit) - 1, 4},
+    {s_Min_Position_Limit, 52, sizeof(s_Min_Position_Limit) - 1, 4},
+    {s_Shutdown,           63, sizeof(s_Shutdown) - 1, 1},
+
+    {s_Torque_Enable,          64,  sizeof(s_Torque_Enable) - 1,          1},
+    {s_LED,                    65,  sizeof(s_LED) - 1,                    1},
+    {s_Status_Return_Level,    68,  sizeof(s_Status_Return_Level) - 1,    1},
+    {s_Registered_Instruction, 69,  sizeof(s_Registered_Instruction) - 1, 1},
+    {s_Hardware_Error_Status,  70,  sizeof(s_Hardware_Error_Status) - 1,  1},
+    {s_Velocity_I_Gain,        76,  sizeof(s_Velocity_I_Gain) - 1,        2},
+    {s_Velocity_P_Gain,        78,  sizeof(s_Velocity_P_Gain) - 1,        2},
+    {s_Position_D_Gain,        80,  sizeof(s_Position_D_Gain) - 1,        2},
+    {s_Position_I_Gain,        82,  sizeof(s_Position_I_Gain) - 1,        2},
+    {s_Position_P_Gain,        84,  sizeof(s_Position_P_Gain) - 1,        2},
+    {s_Feedforward_2nd_Gain,   88,  sizeof(s_Feedforward_2nd_Gain) - 1,   2},
+    {s_Feedforward_1st_Gain,   90,  sizeof(s_Feedforward_1st_Gain) - 1,   2},
+    {s_Bus_Watchdog,           98,  sizeof(s_Bus_Watchdog) - 1,           1},
+    {s_Goal_PWM,               100, sizeof(s_Goal_PWM) - 1,               2},
+    {s_Goal_Current,           102, sizeof(s_Goal_Current) - 1,           2},
+    {s_Goal_Velocity,          104, sizeof(s_Goal_Velocity) - 1,          4},
+    {s_Profile_Acceleration,   108, sizeof(s_Profile_Acceleration) - 1,   4},
+    {s_Profile_Velocity,       112, sizeof(s_Profile_Velocity) - 1,       4},
+    {s_Goal_Position,          116, sizeof(s_Goal_Position) - 1,          4},
+    {s_Realtime_Tick,          120, sizeof(s_Realtime_Tick) - 1,          2},
+    {s_Moving,                 122, sizeof(s_Moving) - 1,                 1},
+    {s_Moving_Status,          123, sizeof(s_Moving_Status) - 1,          1},
+    {s_Present_PWM,            124, sizeof(s_Present_PWM) - 1,            2},
+    {s_Present_Current,        126, sizeof(s_Present_Current) - 1,        2},
+    {s_Present_Velocity,       128, sizeof(s_Present_Velocity) - 1,       4},
+    {s_Present_Position,       132, sizeof(s_Present_Position) - 1,       4},
+    {s_Velocity_Trajectory,    136, sizeof(s_Velocity_Trajectory) - 1,    4},
+    {s_Position_Trajectory,    140, sizeof(s_Position_Trajectory) - 1,    4},
+    {s_Present_Input_Voltage,  144, sizeof(s_Present_Input_Voltage) - 1,  2},
+    {s_Present_Temperature,    146, sizeof(s_Present_Temperature) - 1,    1}};
+
+#define COUNT_EXTXH_ITEMS (sizeof(items_EXTXH) / sizeof(items_EXTXH[0]))
+
+static const ModelInfo info_EXTXH = {0.229,
+                                  0,
+                                  2048,
+                                  4096,
+                                  -3.14159265, 
+                                  3.14159265};
+
+//---------------------------------------------------------
 // PRO - (num == PRO_L42_10_S300_R)
 //---------------------------------------------------------
 static const ControlItem items_PRO[]{
@@ -919,7 +985,66 @@ static const ModelInfo info_EXTPRO[] = {
       {0.00199234, -250961, 0, 250961, -3.14159265, 3.14159265}}; // PRO_H54_100_S500_R, PRO_H54_200_S500_R
 
 //---------------------------------------------------------
-// PRO - (num == PRO_H42P_020_S300_R, PRO_H54P_100_S500_R, PRO_H54P_200_S500_R)
+// EXT PRO (A Firmware_Version) 
+//---------------------------------------------------------
+static const ControlItem items_EXTPRO_A[]{
+    {s_Model_Number,         0, sizeof(s_Model_Number) - 1,          2},
+    {s_Firmware_Version,     6, sizeof(s_Firmware_Version) - 1,      1},
+    {s_ID,                   7, sizeof(s_ID) - 1,                    1},
+    {s_Baud_Rate,            8, sizeof(s_Baud_Rate) - 1,             1},
+    {s_Return_Delay_Time,    9, sizeof(s_Return_Delay_Time) - 1,     1},
+    {s_Operating_Mode,       11, sizeof(s_Operating_Mode) - 1,       1},
+    {s_Homing_Offset,        20, sizeof(s_Homing_Offset) - 1,        4},
+    {s_Moving_Threshold,     24, sizeof(s_Moving_Threshold) - 1,     4},
+    {s_Temperature_Limit,    31, sizeof(s_Temperature_Limit) - 1,    1},
+    {s_Max_Voltage_Limit,    32, sizeof(s_Max_Voltage_Limit) - 1,    2},
+    {s_Min_Voltage_Limit,    34, sizeof(s_Min_Voltage_Limit) - 1,    2},
+    {s_Current_Limit,        38, sizeof(s_Current_Limit) - 1,        2},
+    {s_Acceleration_Limit,   40, sizeof(s_Acceleration_Limit) - 1,   4},
+    {s_Velocity_Limit,       44, sizeof(s_Velocity_Limit) - 1,       4},
+    {s_Max_Position_Limit,   48, sizeof(s_Max_Position_Limit) - 1,   4},
+    {s_Min_Position_Limit,   52, sizeof(s_Min_Position_Limit) - 1,   4},
+    {s_External_Port_Mode_1, 56, sizeof(s_External_Port_Mode_1) - 1, 1},
+    {s_External_Port_Mode_2, 57, sizeof(s_External_Port_Mode_2) - 1, 1},
+    {s_External_Port_Mode_3, 58, sizeof(s_External_Port_Mode_3) - 1, 1},
+    {s_External_Port_Mode_4, 59, sizeof(s_External_Port_Mode_4) - 1, 1},
+    {s_Shutdown,             63, sizeof(s_Shutdown) - 1,             1},
+
+    {s_Torque_Enable,          512, sizeof(s_Torque_Enable) - 1,          1},
+    {s_LED_RED,                513, sizeof(s_LED_RED) - 1,                1},
+    {s_LED_GREEN,              514, sizeof(s_LED_GREEN) - 1,              1},
+    {s_LED_BLUE,               515, sizeof(s_LED_BLUE) - 1,               1},
+    {s_Velocity_I_Gain,        524, sizeof(s_Velocity_I_Gain) - 1,        2},
+    {s_Velocity_P_Gain,        526, sizeof(s_Velocity_P_Gain) - 1,        2},
+    {s_Position_D_Gain,        528, sizeof(s_Position_D_Gain) - 1,        2},
+    {s_Position_P_Gain,        532, sizeof(s_Position_P_Gain) - 1,        2},
+    {s_Position_I_Gain,        530, sizeof(s_Position_I_Gain) - 1,        2},
+    {s_Goal_Position,          564, sizeof(s_Goal_Position) - 1,          4},
+    {s_Goal_Velocity,          552, sizeof(s_Goal_Velocity) - 1,          4},
+    {s_Goal_Current,           604, sizeof(s_Goal_Current) - 1,           2},
+    {s_Profile_Acceleration,   556, sizeof(s_Profile_Acceleration) - 1,   4},
+    {s_Profile_Velocity,       560, sizeof(s_Profile_Velocity) - 1,       4},
+    {s_Moving,                 570, sizeof(s_Moving) - 1,                 1},
+    {s_Present_Position,       580, sizeof(s_Present_Position) - 1,       4},
+    {s_Present_Velocity,       576, sizeof(s_Present_Velocity) - 1,       4},
+    {s_Present_Current,        574, sizeof(s_Present_Current) - 1,        2},
+    {s_Present_Input_Voltage,  592, sizeof(s_Present_Input_Voltage) - 1,  2},
+    {s_Present_Temperature,    594, sizeof(s_Present_Temperature) - 1,    1},
+    {s_External_Port_Mode_1,   600, sizeof(s_External_Port_Mode_1) - 1,   2},
+    {s_External_Port_Mode_2,   602, sizeof(s_External_Port_Mode_2) - 1,   2},
+    {s_External_Port_Mode_3,   604, sizeof(s_External_Port_Mode_3) - 1,   2},
+    {s_External_Port_Mode_4,   606, sizeof(s_External_Port_Mode_4) - 1,   2}};
+
+#define COUNT_EXTPRO_A_ITEMS (sizeof(items_EXTPRO_A) / sizeof(items_EXTPRO_A[0]))
+
+static const ModelInfo info_EXTPRO_A[] = {
+      {0.00389076, -131593, 0, 131593, -3.14159265, 3.14159265},  // PRO_M42_10_S260_R_A
+      {0.00397746, -125708, 0, 125708, -3.14159265, 3.14159265},  // PRO_M54_40_S250_R_A, PRO_M54_60_S250_R_A
+      {0.00329218, -151875, 0, 151875, -3.14159265, 3.14159265},  // PRO_H42_20_S300_R_A
+      {0.00199234, -250961, 0, 250961, -3.14159265, 3.14159265}}; // PRO_H54_100_S500_R_A, PRO_H54_200_S500_R_A
+
+//---------------------------------------------------------
+// PRO PLUS - (num == PRO_H42P_020_S300_R, PRO_H54P_100_S500_R, PRO_H54P_200_S500_R)
 //---------------------------------------------------------
 static const ControlItem items_PRO_PLUS[]{
     {s_Model_Number, 0, sizeof(s_Model_Number) - 1, 2},
@@ -987,9 +1112,145 @@ static const ControlItem items_PRO_PLUS[]{
 #define COUNT_EXTPRO_PLUS_ITEMS (sizeof(items_PRO_PLUS) / sizeof(items_PRO_PLUS[0]))
 
 static const ModelInfo info_PRO_PLUS[] = {
-      {0.01, -303454, 0, 303454, -3.14159265, 3.14159265},  // PRO_H42P_020_S300_R
-      {0.01, -501433, 0, 501433, -3.14159265, 3.14159265},  // PRO_H54P_100_S500_R
-      {0.01, -501433, 0, 501433, -3.14159265, 3.14159265}}; // PRO_H54P_200_S500_R
+      {0.01, -251173, 0, 251173, -3.14159265, 3.14159265},  // PRO_PLUS_M42P_010_S260_R
+      {0.01, -251173, 0, 251173, -3.14159265, 3.14159265},  // PRO_PLUS_M54P_040_S250_R
+      {0.01, -262931, 0, 262931, -3.14159265, 3.14159265},  // PRO_PLUS_M54P_060_S250_R
+      {0.01, -303454, 0, 303454, -3.14159265, 3.14159265},  // PRO_PLUS_H42P_020_S300_R
+      {0.01, -501433, 0, 501433, -3.14159265, 3.14159265},  // PRO_PLUS_H54P_100_S500_R
+      {0.01, -501433, 0, 501433, -3.14159265, 3.14159265}}; // PRO_PLUS_H54P_200_S500_R
+
+//---------------------------------------------------------
+// Gripper - (num == RH_P12_RN)
+//---------------------------------------------------------
+static const ControlItem items_Gripper[]{
+    {s_Model_Number, 0, sizeof(s_Model_Number) - 1, 2},
+    {s_Firmware_Version, 6, sizeof(s_Firmware_Version) - 1, 1},
+    {s_ID, 7, sizeof(s_ID) - 1, 1},
+    {s_Baud_Rate, 8, sizeof(s_Baud_Rate) - 1, 1},
+    {s_Return_Delay_Time, 9, sizeof(s_Return_Delay_Time) - 1, 1},
+    {s_Operating_Mode, 11, sizeof(s_Operating_Mode) - 1, 1},
+    {s_Homing_Offset, 13, sizeof(s_Homing_Offset) - 1, 4},
+    {s_Moving_Threshold, 17, sizeof(s_Moving_Threshold) - 1, 4},
+    {s_Temperature_Limit, 21, sizeof(s_Temperature_Limit) - 1, 1},
+    {s_Max_Voltage_Limit, 22, sizeof(s_Max_Voltage_Limit) - 1, 2},
+    {s_Min_Voltage_Limit, 24, sizeof(s_Min_Voltage_Limit) - 1, 2},
+    {s_Acceleration_Limit, 26, sizeof(s_Acceleration_Limit) - 1, 4},
+    {s_Torque_Limit, 30, sizeof(s_Torque_Limit) - 1, 2},
+    {s_Velocity_Limit, 32, sizeof(s_Velocity_Limit) - 1, 4},
+    {s_Max_Position_Limit, 36, sizeof(s_Max_Position_Limit) - 1, 4},
+    {s_Min_Position_Limit, 40, sizeof(s_Min_Position_Limit) - 1, 4},
+    {s_External_Port_Mode_1, 44, sizeof(s_External_Port_Mode_1) - 1, 1},
+    {s_External_Port_Mode_2, 45, sizeof(s_External_Port_Mode_2) - 1, 1},
+    {s_External_Port_Mode_3, 46, sizeof(s_External_Port_Mode_3) - 1, 1},
+    {s_External_Port_Mode_4, 47, sizeof(s_External_Port_Mode_4) - 1, 1},
+    {s_Shutdown, 48, sizeof(s_Shutdown) - 1, 1},
+
+    {s_Torque_Enable, 562, sizeof(s_Torque_Enable) - 1, 1},
+    {s_LED_RED, 563, sizeof(s_LED_RED) - 1, 1},
+    {s_LED_GREEN, 564, sizeof(s_LED_GREEN) - 1, 1},
+    {s_LED_BLUE, 565, sizeof(s_LED_BLUE) - 1, 1},
+    {s_Velocity_I_Gain, 586, sizeof(s_Velocity_I_Gain) - 1, 2},
+    {s_Velocity_P_Gain, 588, sizeof(s_Velocity_P_Gain) - 1, 2},
+    {s_Position_P_Gain, 594, sizeof(s_Position_P_Gain) - 1, 2},
+    {s_Goal_Position, 596, sizeof(s_Goal_Position) - 1, 4},
+    {s_Goal_Velocity, 600, sizeof(s_Goal_Velocity) - 1, 4},
+    {s_Goal_Torque, 604, sizeof(s_Goal_Torque) - 1, 2},
+    {s_Goal_Acceleration, 606, sizeof(s_Goal_Acceleration) - 1, 4},
+    {s_Moving, 610, sizeof(s_Moving) - 1, 1},
+    {s_Present_Position, 611, sizeof(s_Present_Position) - 1, 4},
+    {s_Present_Velocity, 615, sizeof(s_Present_Velocity) - 1, 4},
+    {s_Present_Current, 621, sizeof(s_Present_Current) - 1, 2},
+    {s_Present_Input_Voltage, 623, sizeof(s_Present_Input_Voltage) - 1, 2},
+    {s_Present_Temperature, 625, sizeof(s_Present_Temperature) - 1, 1},
+    {s_External_Port_Mode_1, 626, sizeof(s_External_Port_Mode_1) - 1, 2},
+    {s_External_Port_Mode_2, 628, sizeof(s_External_Port_Mode_2) - 1, 2},
+    {s_External_Port_Mode_3, 630, sizeof(s_External_Port_Mode_3) - 1, 2},
+    {s_External_Port_Mode_4, 632, sizeof(s_External_Port_Mode_4) - 1, 2},
+    {s_Registered_Instruction, 890, sizeof(s_Registered_Instruction) - 1, 1},
+    {s_Status_Return_Level, 891, sizeof(s_Status_Return_Level) - 1, 1},
+    {s_Hardware_Error_Status, 892, sizeof(s_Hardware_Error_Status) - 1, 1}};
+#define COUNT_Gripper_ITEMS (sizeof(items_Gripper) / sizeof(items_Gripper[0]))
+
+static const ModelInfo info_Gripper = {0.01,
+                                       0,
+                                       0,
+                                       740,
+                                       0, 
+                                       1.1345703125};
+
+//---------------------------------------------------------
+// Gripper A Firmware - (num == RH_P12_RN_A)
+//---------------------------------------------------------
+static const ControlItem items_EXTGripper[]{
+    {s_Model_Number, 0, sizeof(s_Model_Number) - 1, 2},
+    {s_Firmware_Version, 6, sizeof(s_Firmware_Version) - 1, 1},
+    {s_ID, 7, sizeof(s_ID) - 1, 1},
+    {s_Baud_Rate, 8, sizeof(s_Baud_Rate) - 1, 1},
+    {s_Return_Delay_Time, 9, sizeof(s_Return_Delay_Time) - 1, 1},
+    {s_Drive_Mode, 10, sizeof(s_Drive_Mode) - 1, 1},
+    {s_Operating_Mode, 11, sizeof(s_Operating_Mode) - 1, 1},
+    {s_Secondary_ID, 12, sizeof(s_Secondary_ID) - 1, 1},
+    {s_Homing_Offset, 20, sizeof(s_Homing_Offset) - 1, 4},
+    {s_Moving_Threshold, 24, sizeof(s_Moving_Threshold) - 1, 4},
+    {s_Temperature_Limit, 31, sizeof(s_Temperature_Limit) - 1, 1},
+    {s_Max_Voltage_Limit, 32, sizeof(s_Max_Voltage_Limit) - 1, 2},
+    {s_Min_Voltage_Limit, 34, sizeof(s_Min_Voltage_Limit) - 1, 2},
+    {s_PWM_Limit, 36, sizeof(s_PWM_Limit) - 1, 2},
+    {s_Current_Limit, 38, sizeof(s_Current_Limit) - 1, 2},
+    {s_Acceleration_Limit, 40, sizeof(s_Acceleration_Limit) - 1, 4},
+    {s_Velocity_Limit, 44, sizeof(s_Velocity_Limit) - 1, 4},
+    {s_Max_Position_Limit, 48, sizeof(s_Max_Position_Limit) - 1, 4},
+    {s_Min_Position_Limit, 52, sizeof(s_Min_Position_Limit) - 1, 4},
+    {s_External_Port_Mode_1, 56, sizeof(s_External_Port_Mode_1) - 1, 1},
+    {s_External_Port_Mode_2, 57, sizeof(s_External_Port_Mode_2) - 1, 1},
+    {s_External_Port_Mode_3, 58, sizeof(s_External_Port_Mode_3) - 1, 1},
+    {s_External_Port_Mode_4, 59, sizeof(s_External_Port_Mode_4) - 1, 1},
+    {s_Shutdown, 63, sizeof(s_Shutdown) - 1, 1},
+
+    {s_Torque_Enable, 512, sizeof(s_Torque_Enable) - 1, 1},
+    {s_LED_RED, 513, sizeof(s_LED_RED) - 1, 1},
+    {s_LED_GREEN, 514, sizeof(s_LED_GREEN) - 1, 1},
+    {s_LED_BLUE, 515, sizeof(s_LED_BLUE) - 1, 1},
+    {s_Status_Return_Level, 516, sizeof(s_Status_Return_Level) - 1, 1},
+    {s_Registered_Instruction, 517, sizeof(s_Registered_Instruction) - 1, 1},
+    {s_Hardware_Error_Status, 518, sizeof(s_Hardware_Error_Status) - 1, 1},
+    {s_Velocity_I_Gain, 524, sizeof(s_Velocity_I_Gain) - 1, 2},
+    {s_Velocity_P_Gain, 526, sizeof(s_Velocity_P_Gain) - 1, 2},
+    {s_Position_D_Gain, 528, sizeof(s_Position_D_Gain) - 1, 2},
+    {s_Position_I_Gain, 530, sizeof(s_Position_I_Gain) - 1, 2},
+    {s_Position_P_Gain, 532, sizeof(s_Position_P_Gain) - 1, 2},
+    {s_Feedforward_2nd_Gain, 536, sizeof(s_Feedforward_2nd_Gain) - 1, 2},
+    {s_Feedforward_1st_Gain, 538, sizeof(s_Feedforward_1st_Gain) - 1, 2},
+    {s_Bus_Watchdog, 546, sizeof(s_Bus_Watchdog) - 1, 1},
+    {s_Goal_PWM, 548, sizeof(s_Goal_PWM) - 1, 2},
+    {s_Goal_Current, 550, sizeof(s_Goal_Current) - 1, 2},
+    {s_Goal_Velocity, 552, sizeof(s_Goal_Velocity) - 1, 4},
+    {s_Profile_Acceleration, 556, sizeof(s_Profile_Acceleration) - 1, 4},
+    {s_Profile_Velocity, 560, sizeof(s_Profile_Velocity) - 1, 4},
+    {s_Goal_Position, 564, sizeof(s_Goal_Position) - 1, 4},    
+    {s_Realtime_Tick, 568, sizeof(s_Realtime_Tick) - 1, 2},
+    {s_Moving, 570, sizeof(s_Moving) - 1, 1},
+    {s_Moving_Status, 571, sizeof(s_Moving) - 1, 1},
+    {s_Present_PWM, 572, sizeof(s_Present_PWM) - 1, 2},
+    {s_Present_Current, 574, sizeof(s_Present_Current) - 1, 2},
+    {s_Present_Velocity, 576, sizeof(s_Present_Velocity) - 1, 4},
+    {s_Present_Position, 580, sizeof(s_Present_Position) - 1, 4},
+    {s_Velocity_Trajectory, 584, sizeof(s_Velocity_Trajectory) - 1, 4},
+    {s_Position_Trajectory, 588, sizeof(s_Position_Trajectory) - 1, 4},    
+    {s_Present_Input_Voltage, 592, sizeof(s_Present_Input_Voltage) - 1, 2},
+    {s_Present_Temperature, 594, sizeof(s_Present_Temperature) - 1, 1},
+    {s_External_Port_Mode_1, 600, sizeof(s_External_Port_Mode_1) - 1, 2},
+    {s_External_Port_Mode_2, 602, sizeof(s_External_Port_Mode_2) - 1, 2},
+    {s_External_Port_Mode_3, 604, sizeof(s_External_Port_Mode_3) - 1, 2},
+    {s_External_Port_Mode_4, 606, sizeof(s_External_Port_Mode_4) - 1, 2}};
+#define COUNT_EXTGripper_ITEMS (sizeof(items_EXTGripper) / sizeof(items_EXTGripper[0]))
+
+static const ModelInfo info_EXTGripper = {0.01,
+                                          0,
+                                          0,
+                                          740,
+                                          0, 
+                                          1.1345703125};
 
 //=========================================================
 // Get Servo control table for the specified servo type
@@ -1040,7 +1301,7 @@ const ControlItem *DynamixelItem::getControlTable(uint16_t model_number)
     control_table = items_XL320;
     the_number_of_item = COUNT_XL320_ITEMS;
   }
-  else if (num == XL430_W250)
+  else if (num == XL430_W250 || num == XL430_W250_2 || num == XC430_W150 || num == XC430_W240)
   {
     control_table = items_XL;
     the_number_of_item = COUNT_XL_ITEMS;
@@ -1060,6 +1321,16 @@ const ControlItem *DynamixelItem::getControlTable(uint16_t model_number)
     control_table = items_XH;
     the_number_of_item = COUNT_XH_ITEMS;
   }
+  else if (num == XH540_W150 || num == XH540_W270 || num == XH540_V150 || num == XH540_V270)
+  {
+    control_table = items_EXTXH;
+    the_number_of_item = COUNT_EXTXH_ITEMS;
+  }
+  else if (num == PRO_L42_10_S300_R)
+  {
+    control_table = items_PRO;
+    the_number_of_item = COUNT_PRO_ITEMS;
+  }
   else if (num == PRO_L54_30_S400_R || num == PRO_L54_30_S500_R || num == PRO_L54_50_S290_R || num == PRO_L54_50_S500_R ||
            num == PRO_M42_10_S260_R || num == PRO_M54_40_S250_R || num == PRO_M54_60_S250_R ||
            num == PRO_H42_20_S300_R || num == PRO_H54_100_S500_R || num == PRO_H54_200_S500_R)
@@ -1067,15 +1338,27 @@ const ControlItem *DynamixelItem::getControlTable(uint16_t model_number)
     control_table = items_EXTPRO;
     the_number_of_item = COUNT_EXTPRO_ITEMS;
   }
-  else if (num == PRO_L42_10_S300_R)
+  else if (num == PRO_M42_10_S260_R_A || num == PRO_M54_40_S250_R_A  || num == PRO_M54_60_S250_R_A ||
+           num == PRO_H42_20_S300_R_A || num == PRO_H54_100_S500_R_A || num == PRO_H54_200_S500_R_A)
   {
-    control_table = items_PRO;
-    the_number_of_item = COUNT_PRO_ITEMS;
+    control_table = items_EXTPRO_A;
+    the_number_of_item = COUNT_EXTPRO_A_ITEMS;
   }
-  else if (num == PRO_H42P_020_S300_R || num == PRO_H54P_100_S500_R || num == PRO_H54P_200_S500_R)
+  else if (num == PRO_PLUS_H42P_020_S300_R || num == PRO_PLUS_H54P_100_S500_R || num == PRO_PLUS_H54P_200_S500_R ||
+           num == PRO_PLUS_M42P_010_S260_R || num == PRO_PLUS_M54P_040_S250_R || num == PRO_PLUS_M54P_060_S250_R)
   {
     control_table = items_PRO_PLUS;
     the_number_of_item = COUNT_EXTPRO_PLUS_ITEMS;
+  }
+  else if (num == RH_P12_RN)
+  {
+    control_table = items_Gripper;
+    the_number_of_item = COUNT_Gripper_ITEMS;
+  }
+  else if (num == RH_P12_RN_A)
+  {
+    control_table = items_EXTGripper;
+    the_number_of_item = COUNT_EXTGripper_ITEMS;
   }
   else
   {
@@ -1124,7 +1407,7 @@ const ModelInfo *DynamixelItem::getModelInfo(uint16_t model_number)
   {
     info = &info_XL320;
   }
-  else if (num == XL430_W250)
+  else if (num == XL430_W250 || num == XL430_W250_2 || num == XC430_W150 || num == XC430_W240)
   {
     info = &info_XL;
   }
@@ -1139,6 +1422,10 @@ const ModelInfo *DynamixelItem::getModelInfo(uint16_t model_number)
   else if (num == XH430_V210 || num == XH430_V350 || num == XH430_W210 || num == XH430_W350)
   {
     info = &info_XH;
+  }
+  else if (num == XH540_W150 || num == XH540_W270 || num == XH540_V150 || num == XH540_V270)
+  {
+    info = &info_EXTXH;
   }
   else if (num == PRO_L42_10_S300_R)
   {
@@ -1172,17 +1459,53 @@ const ModelInfo *DynamixelItem::getModelInfo(uint16_t model_number)
   { 
     info = &info_EXTPRO[6];
   }
-  else if (num == PRO_H42P_020_S300_R)
+  else if (num == PRO_M42_10_S260_R_A)
+  {
+    info = &info_EXTPRO_A[0];
+  }
+  else if (num == PRO_M54_40_S250_R_A || num == PRO_M54_60_S250_R_A)
+  {
+    info = &info_EXTPRO_A[1];
+  }
+  else if (num == PRO_H42_20_S300_R_A)
+  {
+    info = &info_EXTPRO_A[2];
+  }
+  else if (num == PRO_H54_100_S500_R_A || num == PRO_H54_200_S500_R_A)
+  { 
+    info = &info_EXTPRO_A[3];
+  }
+  else if (num == PRO_PLUS_H42P_020_S300_R)
   { 
     info = &info_PRO_PLUS[0];
   }
-  else if (num == PRO_H54_100_S500_R)
+  else if (num == PRO_PLUS_H54P_100_S500_R)
   { 
     info = &info_PRO_PLUS[1];
   }
-  else if (num == PRO_H54_200_S500_R)
+  else if (num == PRO_PLUS_H54P_200_S500_R)
   { 
     info = &info_PRO_PLUS[2];
+  }
+  else if (num == PRO_PLUS_M42P_010_S260_R)
+  { 
+    info = &info_PRO_PLUS[3];
+  }
+  else if (num == PRO_PLUS_M54P_040_S250_R)
+  { 
+    info = &info_PRO_PLUS[4];
+  }
+  else if (num == PRO_PLUS_M54P_060_S250_R)
+  { 
+    info = &info_PRO_PLUS[5];
+  }
+  else if (num == RH_P12_RN)
+  {
+    info = &info_Gripper;
+  } 
+  else if (num == RH_P12_RN_A)
+  {
+    info = &info_EXTGripper;
   }
   else
   {

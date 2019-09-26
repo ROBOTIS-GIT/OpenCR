@@ -14,7 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Darby Lim, Hye-Jong KIM, Ryan Shim, Yong-Ho Na */
+/* Authors: Hye-Jong KIM */
 
 #ifndef LINKKINEMATICS_H_
 #define LINKKINEMATICS_H_

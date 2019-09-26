@@ -495,10 +495,11 @@ bool DynamixelDriver::reset(uint8_t id, const char **log)
         if (!strncmp(model_name, "MX-28-2", strlen("MX-28-2"))   ||
             !strncmp(model_name, "MX-64-2", strlen("MX-64-2"))   ||
             !strncmp(model_name, "MX-106-2", strlen("MX-106-2")) ||
-            !strncmp(model_name, "XL", strlen("XL")) ||
-            !strncmp(model_name, "XM", strlen("XM")) ||
-            !strncmp(model_name, "XH", strlen("XH")) ||
-            !strncmp(model_name, "PRO", strlen("PRO")))
+            !strncmp(model_name, "XL", strlen("XL"))  ||
+            !strncmp(model_name, "XM", strlen("XM"))  ||
+            !strncmp(model_name, "XH", strlen("XH"))  ||
+            !strncmp(model_name, "PRO", strlen("PRO"))||
+            !strncmp(model_name, "RH", strlen("RH")))
         {
           result = setPacketHandler(2.0f, log);
           if (result == false) return false;

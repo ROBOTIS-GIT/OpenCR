@@ -14,21 +14,15 @@
 * limitations under the License.
 *******************************************************************************/
 
-/* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
-
 #ifndef TURTLEBOT3_CONTROLLER_H_
 #define TURTLEBOT3_CONTROLLER_H_
 
 #include <RC100.h>
 
-#include <ros2arduino.h>
-
 #define CONST_VEL 0.2
 
 #define VELOCITY_LINEAR_X                0.01   // m/s
 #define VELOCITY_ANGULAR_Z               0.1    // rad/s
-
-#define DEBUG_SERIAL SerialBT2
 
 class Turtlebot3Controller
 {
@@ -41,7 +35,6 @@ class Turtlebot3Controller
   void getRCdata(float *get_cmd_vel);
 
  private:
-  geometry_msgs::Twist cmd_vel_;
   RC100 rc100_;
 
   double const_cmd_vel_;

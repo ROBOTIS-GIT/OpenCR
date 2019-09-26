@@ -82,7 +82,13 @@ void loop()
   if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_FREQUENCY))
   {
     updateGoalVelocity();
-    motor_driver.controlMotor(WHEEL_RADIUS, WHEEL_SEPARATION, goal_velocity);
+    if ((t-tTime[6]) > CONTROL_MOTOR_TIMEOUT) 
+    {
+      motor_driver.controlMotor(WHEEL_RADIUS, WHEEL_SEPARATION, zero_velocity);
+    } 
+    else {
+      motor_driver.controlMotor(WHEEL_RADIUS, WHEEL_SEPARATION, goal_velocity);
+    }
     tTime[0] = t;
   }
 
@@ -125,7 +131,9 @@ void loop()
   sendLogMsg();
 
   // Receive data from RC100 
-  controllers.getRCdata(goal_velocity_from_rc100);
+  bool clicked_state = controllers.getRCdata(goal_velocity_from_rc100);
+  if (clicked_state == true)  
+    tTime[6] = millis();
 
   // Check push button pressed for simple test drive
   driveTest(diagnosis.getButtonPress(3000));
@@ -163,6 +171,7 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
 
   goal_velocity_from_cmd[LINEAR]  = constrain(goal_velocity_from_cmd[LINEAR],  MIN_LINEAR_VELOCITY, MAX_LINEAR_VELOCITY);
   goal_velocity_from_cmd[ANGULAR] = constrain(goal_velocity_from_cmd[ANGULAR], MIN_ANGULAR_VELOCITY, MAX_ANGULAR_VELOCITY);
+  tTime[6] = millis();
 }
 
 /*******************************************************************************
@@ -564,6 +573,7 @@ void driveTest(uint8_t buttons)
     saved_tick[RIGHT] = current_tick[RIGHT];
 
     diff_encoder = TEST_DISTANCE / (0.207 / 4096); // (Circumference of Wheel) / (The number of tick per revolution)
+    tTime[6] = millis();
   }
   else if (buttons & (1<<1))
   {
@@ -571,6 +581,7 @@ void driveTest(uint8_t buttons)
     saved_tick[RIGHT] = current_tick[RIGHT];
 
     diff_encoder = (TEST_RADIAN * TURNING_RADIUS) / (0.207 / 4096);
+    tTime[6] = millis();
   }
 
   if (move[LINEAR])
@@ -578,6 +589,7 @@ void driveTest(uint8_t buttons)
     if (abs(saved_tick[RIGHT] - current_tick[RIGHT]) <= diff_encoder)
     {
       goal_velocity_from_button[LINEAR]  = 0.05;
+      tTime[6] = millis();
     }
     else
     {
@@ -590,6 +602,7 @@ void driveTest(uint8_t buttons)
     if (abs(saved_tick[RIGHT] - current_tick[RIGHT]) <= diff_encoder)
     {
       goal_velocity_from_button[ANGULAR]= -0.7;
+      tTime[6] = millis();
     }
     else
     {

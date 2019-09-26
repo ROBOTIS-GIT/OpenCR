@@ -45,9 +45,10 @@ bool Turtlebot3Controller::init(float max_lin_vel, float max_ang_vel, uint8_t sc
   return true;
 }
 
-void Turtlebot3Controller::getRCdata(float *get_cmd_vel)
+bool Turtlebot3Controller::getRCdata(float *get_cmd_vel)
 {
   uint16_t received_data = 0;
+  bool clicked_state = false;
 
   static float lin_x = 0.0, ang_z = 0.0;
   
@@ -58,28 +59,34 @@ void Turtlebot3Controller::getRCdata(float *get_cmd_vel)
     if (received_data & RC100_BTN_U)
     {
       lin_x += VELOCITY_LINEAR_X * scale_lin_vel_;
+      clicked_state = true;
     }
     else if (received_data & RC100_BTN_D)
     {
       lin_x -= VELOCITY_LINEAR_X * scale_lin_vel_;
+      clicked_state = true;
     }
     else if (received_data & RC100_BTN_L)
     {
       ang_z += VELOCITY_ANGULAR_Z * scale_ang_vel_;
+      clicked_state = true;
     }
     else if (received_data & RC100_BTN_R)
     {
       ang_z -= VELOCITY_ANGULAR_Z * scale_ang_vel_;
+      clicked_state = true;
     }
     else if (received_data & RC100_BTN_6)
     {
       lin_x = const_cmd_vel_;
       ang_z = 0.0;
+      clicked_state = true;
     }
     else if (received_data & RC100_BTN_5)
     {
       lin_x = 0.0;
       ang_z = 0.0;
+      clicked_state = true;
     }
     else
     {
@@ -93,4 +100,6 @@ void Turtlebot3Controller::getRCdata(float *get_cmd_vel)
     get_cmd_vel[0] = lin_x;
     get_cmd_vel[1] = ang_z;
   }
+
+  return clicked_state;
 }
