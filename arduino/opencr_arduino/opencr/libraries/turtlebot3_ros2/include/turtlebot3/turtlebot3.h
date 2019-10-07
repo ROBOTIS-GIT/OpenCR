@@ -35,7 +35,7 @@
   #define DEBUG_PRINTLN(x) 
 #endif
 
-const uint8_t FIRMWARE_VER = 3;
+const uint8_t FIRMWARE_VER = 4; //Dynamixel2Arduino 0.3.0 or higher is required.
 const uint32_t INTERVAL_MS_TO_CONTROL_MOTOR = 20;
 const uint32_t INTERVAL_MS_TO_UPDATE_CONTROL_ITEM = 20;
 
