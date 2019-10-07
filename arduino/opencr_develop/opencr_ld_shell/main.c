@@ -17,7 +17,7 @@
 
 /*
   opencr_ld_shell make fw.bin fw_name fw_ver
-  opencr_ld_sheel view fw_name
+  opencr_ld_shell view fw_name
 */
 
 
@@ -61,7 +61,7 @@ int main( int argc, const char **argv )
   {
     fprintf( stderr, "Usage: opencl_ld <port> <baud> <binary image name> [<0|1 to send Go command to new flashed app>]\n" );
     fprintf( stderr, "       opencr_ld_shell make fw.bin burger V171017R1\n" );
-    fprintf( stderr, "       opencr_ld_sheel view fw_name\n" );
+    fprintf( stderr, "       opencr_ld_shell view fw_name\n" );
 
     exit( 1 );
   }
