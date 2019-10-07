@@ -90,7 +90,7 @@ const uint16_t MODEL_NUM_DXL_SLAVE = 0x5000;
 const float PROTOCOL_VERSION_DXL_SLAVE = 2.0;
 const uint32_t HEARTBEAT_TIMEOUT_MS = 500;
 
-static void dxl_slave_write_callback_func(uint16_t addr, uint8_t &dxl_err_code);
+static void dxl_slave_write_callback_func(uint16_t addr, uint8_t &dxl_err_code, void* arg);
 
 static bool get_connection_state_with_ros2_node();
 static void set_connection_state_with_ros2_node(bool is_connected);
@@ -524,8 +524,10 @@ void update_motor_status(uint32_t interval_ms)
 /*******************************************************************************
 * Callback function definition to be used in communication with the ROS2 node.
 *******************************************************************************/
-static void dxl_slave_write_callback_func(uint16_t item_addr, uint8_t &dxl_err_code)
+static void dxl_slave_write_callback_func(uint16_t item_addr, uint8_t &dxl_err_code, void* arg)
 {
+  (void)arg;
+
   switch(item_addr)
   {
     case ADDR_MODEL_INFORM:
