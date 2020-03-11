@@ -18,29 +18,24 @@
 #include <Arduino.h>
 
 #include <SPI.h>
-#include "MPU9250.h"
+// #include "MPU9250.h"
 #include "MadgwickAHRS.h"
 
+#include "imu_selector.h"
 
 #define IMU_OK			  0x00
 #define IMU_ERR_I2C		0x01
 
 
 
-
-
-
-
-
-
-
 class cIMU
 {
-
 public:
-	cMPU9250 SEN;
-
-
+	//cMPU9250 SEN;
+  cIMUDevice SEN;
+  //cICM20648 SEN;
+  
+  
 	int16_t angle[3];
   float   rpy[3];
   float   quat[4];

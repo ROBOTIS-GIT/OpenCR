@@ -871,8 +871,8 @@ void sendLogMsg(void)
       sprintf(log_msg, "Connected to OpenCR board!");
       nh.loginfo(log_msg);
 
-      sprintf(log_msg, init_log_data);
-      nh.loginfo(log_msg);
+//       sprintf(log_msg, init_log_data);
+//       nh.loginfo(log_msg);
 
       sprintf(log_msg, "--------------------------");
       nh.loginfo(log_msg);

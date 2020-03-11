@@ -30,7 +30,6 @@ cIMU::cIMU()
 {
   uint8_t i;
 
-
   for( i=0; i<3; i++ )
   {
     rpy[i] = 0.;
@@ -59,12 +58,14 @@ uint8_t cIMU::begin( uint32_t hz )
   update_us = 1000000/hz;
 
   aRes = 8.0/32768.0;      // 8g
+  
   gRes = 2000.0/32768.0;   // 2000dps
   //mRes = 10.*4912./8190.;  // 14BIT
   mRes = 10.*4912./32760.; // 16BIT
 
   bConnected = SEN.begin();
-
+  
+  
   if( bConnected == true )
   {
     filter.begin(update_hz);
@@ -85,7 +86,8 @@ uint8_t cIMU::begin( uint32_t hz )
       }
     }
   }
-
+  
+  
 
 	return err_code;
 }
@@ -167,8 +169,6 @@ void cIMU::computeIMU( void )
 	SEN.acc_get_adc();
 	SEN.gyro_get_adc();
   SEN.mag_get_adc();
-
-
 
   for (axis = 0; axis < 3; axis++)
   {

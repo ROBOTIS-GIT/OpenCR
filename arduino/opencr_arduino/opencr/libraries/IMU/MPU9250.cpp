@@ -197,17 +197,16 @@ void cMPU9250::init( void )
 ---------------------------------------------------------------------------*/
 void cMPU9250::gyro_init( void )
 {
-	uint8_t i;
+  uint8_t i;
 
-
-	for( i=0; i<3; i++ )
-	{
+  for( i=0; i<3; i++ )
+  {
     gyroADC[i]  = 0;
-		gyroZero[i] = 0;
-		gyroRAW[i]  = 0;
-	}
+	gyroZero[i] = 0;
+	gyroRAW[i]  = 0;
+  }
 
-	calibratingG = MPU_CALI_COUNT;
+  calibratingG = MPU_CALI_COUNT;
 }
 
 
@@ -220,9 +219,9 @@ void cMPU9250::gyro_init( void )
 ---------------------------------------------------------------------------*/
 void cMPU9250::gyro_get_adc( void )
 {
-	int16_t x = 0;
-	int16_t y = 0;
-	int16_t z = 0;
+  int16_t x = 0;
+  int16_t y = 0;
+  int16_t z = 0;
 
   uint8_t rawADC[6];
 
@@ -230,7 +229,7 @@ void cMPU9250::gyro_get_adc( void )
   {
     imu_spi_reads( MPU9250_ADDRESS, MPU9250_GYRO_XOUT_H, 6, rawADC );
 
- 		x = (((int16_t)rawADC[0]) << 8) | rawADC[1];
+ 	x = (((int16_t)rawADC[0]) << 8) | rawADC[1];
   	y = (((int16_t)rawADC[2]) << 8) | rawADC[3];
   	z = (((int16_t)rawADC[4]) << 8) | rawADC[5];
 
@@ -256,7 +255,7 @@ void cMPU9250::gyro_get_adc( void )
 ---------------------------------------------------------------------------*/
 void cMPU9250::gyro_cali_start()
 {
-	calibratingG = MPU_CALI_COUNT;
+  calibratingG = MPU_CALI_COUNT;
 }
 
 
@@ -272,11 +271,10 @@ void cMPU9250::acc_init( void )
 {
   uint8_t i;
 
-
   for( i=0; i<3; i++ )
   {
     accADC[i]   = 0;
-		accZero[i]  = 0;
+    accZero[i]  = 0;
     accRAW[i]   = 0;
   }
 }
@@ -292,13 +290,10 @@ void cMPU9250::acc_init( void )
 ---------------------------------------------------------------------------*/
 void cMPU9250::acc_get_adc( void )
 {
-	int16_t x = 0;
-	int16_t y = 0;
-	int16_t z = 0;
-
+  int16_t x = 0;
+  int16_t y = 0;
+  int16_t z = 0;
   uint8_t rawADC[6];
-
-
 
   if( bConnected == true )
   {
@@ -311,9 +306,9 @@ void cMPU9250::acc_get_adc( void )
     accRAW[0] = x;
     accRAW[1] = y;
     accRAW[2] = z;
-
-		ACC_ORIENTATION( x,	y, z );
-	}
+	
+	ACC_ORIENTATION( x,	y, z );
+  }
 
 	acc_common();
 }
