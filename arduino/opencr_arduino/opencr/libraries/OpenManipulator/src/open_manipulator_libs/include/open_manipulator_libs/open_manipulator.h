@@ -44,6 +44,7 @@ private:
   robotis_manipulator::JointActuator *joint_;
   robotis_manipulator::ToolActuator *tool_;
   robotis_manipulator::CustomTaskTrajectory *custom_trajectory_[CUSTOM_TRAJECTORY_SIZE];
+  uint8_t joint1_id, joint2_id, joint3_id, joint4_id, gripper_id;
 
 public:
   OpenManipulator();
@@ -54,6 +55,9 @@ public:
                            STRING baud_rate = "1000000", 
                            float control_loop_time = 0.010);
   void processOpenManipulator(double present_time);
+  
+  // Allow to use a custom joint ID for OpenMANIPULATOR-X
+  void setOpenManipulatorCustomJointId(uint8_t joint1, uint8_t joint2, uint8_t joint3, uint8_t joint4, uint8_t gripper);
 };
 
 #endif // OPEN_MANIPULTOR_H_
