@@ -77,7 +77,7 @@ void setup()
 
 void loop()
 {
-  if (CanBus.avaliableMessage())
+  if (CanBus.availableMessage())
   {
     if(CanBus.readMessage(&rx_msg))
     {
