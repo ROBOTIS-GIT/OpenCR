@@ -207,8 +207,8 @@ void cIMUDevice::mag_get_adc( void )
   {
     case MPU9250:
       DEV1.mag_get_adc();
-      memcpy(magRAW,DEV2.magRAW,3*sizeof(int16_t));
-      memcpy(magADC,DEV2.magADC,3*sizeof(int16_t));
+      memcpy(magRAW,DEV1.magRAW,3*sizeof(int16_t));
+      memcpy(magADC,DEV1.magADC,3*sizeof(int16_t));
       break;
     case ICM20468:
       DEV2.mag_get_adc();
