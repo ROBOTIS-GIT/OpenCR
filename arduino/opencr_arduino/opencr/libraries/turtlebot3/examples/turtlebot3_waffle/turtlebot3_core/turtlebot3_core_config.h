@@ -43,7 +43,7 @@
 
 #include <math.h>
 
-#define FIRMWARE_VER "1.2.3"
+#define FIRMWARE_VER "1.2.6"    //This version only supports ROS 1 Noetic
 
 #define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
 #define CONTROL_MOTOR_TIMEOUT                  500  //ms

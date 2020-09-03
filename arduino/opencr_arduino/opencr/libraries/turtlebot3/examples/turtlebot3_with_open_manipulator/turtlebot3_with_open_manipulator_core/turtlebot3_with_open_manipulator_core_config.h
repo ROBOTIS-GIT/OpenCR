@@ -45,7 +45,7 @@
 
 #include <math.h>
 
-#define FIRMWARE_VER "2.0.1"
+#define FIRMWARE_VER "2.0.2"    //This version only supports ROS 1 Noetic
 
 #define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
 #define IMU_PUBLISH_FREQUENCY                  200  //hz
