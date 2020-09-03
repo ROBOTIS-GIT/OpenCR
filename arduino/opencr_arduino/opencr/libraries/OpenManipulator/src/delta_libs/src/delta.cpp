@@ -163,7 +163,7 @@ void Delta::initOpenManipulator(bool using_actual_robot_state, STRING usb_port, 
   if (using_actual_robot_state_)
   {
     /*****************************************************************************
-    ** Initialize ㅓoint Actuator
+    ** Initialize Joint Actuator
     *****************************************************************************/
     joint_ = new delta_dynamixel::JointDynamixelProfileControl(control_rate);
 

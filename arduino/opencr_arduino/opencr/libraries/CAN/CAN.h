@@ -35,10 +35,10 @@ public:
     uint32_t write(uint32_t id, uint8_t *p_data, uint32_t length);  //write data
     uint32_t write(uint32_t id, uint8_t *p_data, uint32_t length, uint8_t format);
     uint8_t read(void); //read one byte
-    uint32_t  avaliable(void);
+    uint32_t  available(void);
     uint32_t writeMessage(can_message_t *p_msg);
     bool readMessage(can_message_t *p_msg);
-    uint32_t avaliableMessage(void);
+    uint32_t availableMessage(void);
 
     uint8_t getErrCount(void);
     uint32_t getError(void);

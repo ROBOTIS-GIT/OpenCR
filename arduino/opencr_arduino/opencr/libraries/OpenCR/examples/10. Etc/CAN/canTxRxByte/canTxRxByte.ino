@@ -74,7 +74,7 @@ void setup()
 
 void loop() 
 {
-  if(CanBus.avaliableMessage())
+  if(CanBus.availableMessage())
   {
     Serial.print((char)CanBus.read());
   }

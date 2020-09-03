@@ -55,7 +55,7 @@ uint8_t CANClass::read(void)  //read one byte
     return drvCanRead(OPENCR_CAN_CHANNEL);
 }
 
-uint32_t  CANClass::avaliable(void)
+uint32_t  CANClass::available(void)
 {
     return drvCanAvailable(OPENCR_CAN_CHANNEL); 
 }
@@ -92,7 +92,7 @@ bool CANClass::readMessage(can_message_t *p_msg)
     return ret;
 }
 
-uint32_t CANClass::avaliableMessage(void)
+uint32_t CANClass::availableMessage(void)
 {
      return drvCanAvailableMsg(OPENCR_CAN_CHANNEL);
 }
