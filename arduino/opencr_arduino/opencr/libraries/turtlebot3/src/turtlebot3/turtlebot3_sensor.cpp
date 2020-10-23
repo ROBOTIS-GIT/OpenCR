@@ -38,6 +38,10 @@ bool Turtlebot3Sensor::init(void)
 
   uint8_t get_error_code = 0x00;
 
+  #if defined NOETIC_SUPPORT
+    battery_state_msg_.temperature     = NAN;
+  #endif
+
   battery_state_msg_.current         = NAN;
   battery_state_msg_.charge          = NAN;
   battery_state_msg_.capacity        = NAN;
