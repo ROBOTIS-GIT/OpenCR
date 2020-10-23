@@ -18,6 +18,7 @@
 
 #ifndef TURTLEBOT3_WITH_OPEN_MANIPULATOR_CORE_CONFIG_H_
 #define TURTLEBOT3_WITH_OPEN_MANIPULATOR_CORE_CONFIG_H_
+// #define NOETIC_SUPPORT          //uncomment this if writing code for ROS1 Noetic
 
 #include <ros.h>
 #include <ros/time.h>
@@ -26,10 +27,7 @@
 #include <std_msgs/Int32.h>
 #include <std_msgs/Float64.h>
 #include <std_msgs/Float64MultiArray.h>
-#include <sensor_msgs/Imu.h>
 #include <sensor_msgs/JointState.h>
-#include <sensor_msgs/BatteryState.h>
-#include <sensor_msgs/MagneticField.h>
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/Twist.h>
 #include <tf/tf.h>
@@ -45,7 +43,7 @@
 
 #include <math.h>
 
-#define FIRMWARE_VER "2.0.2"    //This version only supports ROS 1 Noetic
+#define FIRMWARE_VER "2.0.2"
 
 #define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
 #define IMU_PUBLISH_FREQUENCY                  200  //hz

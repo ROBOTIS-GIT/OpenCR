@@ -18,21 +18,15 @@
 
 #ifndef TURTLEBOT3_CORE_CONFIG_H_
 #define TURTLEBOT3_CORE_CONFIG_H_
-#define NOETIC_SUPPORT          //uncomment this if writing code for ROS1 Noetic
+// #define NOETIC_SUPPORT          //uncomment this if writing code for ROS1 Noetic
 
 #include <ros.h>
 #include <ros/time.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Empty.h>
 #include <std_msgs/Int32.h>
-
-// #include <sensor_msgs/Imu.h>
-// #include <sensor_msgs/BatteryState.h>
-// #include <sensor_msgs/MagneticField.h>
-
 #include <sensor_msgs/JointState.h>
 #include <geometry_msgs/Vector3.h>
-// #include <geometry_msgs/Twist.h>
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
