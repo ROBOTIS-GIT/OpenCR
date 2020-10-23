@@ -18,18 +18,15 @@
 
 #ifndef TURTLEBOT3_CORE_CONFIG_H_
 #define TURTLEBOT3_CORE_CONFIG_H_
+// #define NOETIC_SUPPORT          //uncomment this if writing code for ROS1 Noetic
 
 #include <ros.h>
 #include <ros/time.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Empty.h>
 #include <std_msgs/Int32.h>
-#include <sensor_msgs/Imu.h>
 #include <sensor_msgs/JointState.h>
-#include <sensor_msgs/BatteryState.h>
-#include <sensor_msgs/MagneticField.h>
 #include <geometry_msgs/Vector3.h>
-#include <geometry_msgs/Twist.h>
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
@@ -43,7 +40,7 @@
 
 #include <math.h>
 
-#define FIRMWARE_VER "1.2.3"
+#define FIRMWARE_VER "1.2.6"
 
 #define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
 #define CONTROL_MOTOR_TIMEOUT                  500  //ms
@@ -168,7 +165,11 @@ sensor_msgs::JointState joint_states;
 ros::Publisher joint_states_pub("joint_states", &joint_states);
 
 // Battey state of Turtlebot3
+#if defined NOETIC_SUPPORT
+sensor_msgs::BatteryStateNoetic battery_state_msg;
+#else
 sensor_msgs::BatteryState battery_state_msg;
+#endif
 ros::Publisher battery_state_pub("battery_state", &battery_state_msg);
 
 // Magnetic field
