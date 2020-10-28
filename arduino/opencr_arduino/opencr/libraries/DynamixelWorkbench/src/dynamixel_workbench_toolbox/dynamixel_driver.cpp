@@ -1362,7 +1362,7 @@ bool DynamixelDriver::addBulkReadParam(uint8_t id, uint16_t address, uint16_t le
   }
   else
   {
-    if (log != NULL) *log = "[DynamixelDriver] Too many bulk parameter are added (default buffer size is 10)";
+    if (log != NULL) *log = "[DynamixelDriver] Too many bulk parameter are added (default buffer size is 21)";
     return false;
   }
 
@@ -1400,7 +1400,7 @@ bool DynamixelDriver::addBulkReadParam(uint8_t id, const char *item_name, const 
   }
   else
   {
-    if (log != NULL) *log = "[DynamixelDriver] Too many bulk parameter are added (default buffer size is 10)";
+    if (log != NULL) *log = "[DynamixelDriver] Too many bulk parameter are added (default buffer size is 21)";
     return false;
   }
 
