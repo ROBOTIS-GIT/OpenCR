@@ -31,7 +31,7 @@
 
 #define MAX_DXL_SERIES_NUM  5
 #define MAX_HANDLER_NUM     5
-#define MAX_BULK_PARAMETER  20
+#define MAX_BULK_PARAMETER  21
 
 typedef struct 
 {
