@@ -19,6 +19,7 @@
 
 #include <Dynamixel2Arduino.h>
 
+#define TORQUE_ENABLE 1
 
 enum MortorLocation{
   LEFT = 0,
