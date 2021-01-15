@@ -1,0 +1,30 @@
+#######################################
+# Syntax Coloring Map For IMU
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+cIMU	KEYWORD1
+cICM20648 KEYWORD1
+cIMUDevice KEYWORD1
+Madgwick KEYWORD1
+cMPU9250 KEYWORD1
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+gyro_init KEYWORD2
+gyro_get_adc KEYWORD2
+gyro_cali_start KEYWORD2
+gyro_common KEYWORD2
+gyro_cali_get_done KEYWORD2
+acc_init KEYWORD2
+acc_get_adc KEYWORD2
+acc_cali_start KEYWORD2
+acc_common KEYWORD2
+acc_cali_get_done KEYWORD2
+mag_init KEYWORD2
+mag_get_adc KEYWORD2
+mag_cali_start KEYWORD2
+mag_common KEYWORD2
+mag_cali_get_done KEYWORD2
