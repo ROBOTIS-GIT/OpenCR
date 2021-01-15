@@ -165,7 +165,11 @@ sensor_msgs::JointState joint_states;
 ros::Publisher joint_states_pub("joint_states", &joint_states);
 
 // Battey state of Turtlebot3
+#if defined NOETIC_SUPPORT
+sensor_msgs::BatteryStateNoetic battery_state_msg;
+#else
 sensor_msgs::BatteryState battery_state_msg;
+#endif
 ros::Publisher battery_state_pub("battery_state", &battery_state_msg);
 
 // Magnetic field
