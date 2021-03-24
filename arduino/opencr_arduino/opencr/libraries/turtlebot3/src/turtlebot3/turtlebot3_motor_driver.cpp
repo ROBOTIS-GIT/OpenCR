@@ -200,8 +200,8 @@ bool Turtlebot3MotorDriver::controlMotor(const float wheel_radius, const float w
   
   float wheel_velocity_cmd[2];
 
-  float lin_vel = value[LEFT];
-  float ang_vel = value[RIGHT];
+  float lin_vel = value[0];
+  float ang_vel = value[1];
 
   wheel_velocity_cmd[LEFT]   = lin_vel - (ang_vel * wheel_separation / 2);
   wheel_velocity_cmd[RIGHT]  = lin_vel + (ang_vel * wheel_separation / 2);
