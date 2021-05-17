@@ -56,6 +56,9 @@
 #define LEFT                            0
 #define RIGHT                           1
 
+#define LINEAR                          0
+#define ANGULAR                         1
+
 #define VELOCITY_CONSTANT_VALUE         41.69988758  // V = r * w = r     *        (RPM             * 0.10472)
                                                      //           = r     * (0.229 * Goal_Velocity) * 0.10472
                                                      //
