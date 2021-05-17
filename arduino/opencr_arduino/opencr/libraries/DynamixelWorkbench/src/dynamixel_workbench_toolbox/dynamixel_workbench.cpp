@@ -967,7 +967,9 @@ bool DynamixelWorkbench::currentBasedPositionMode(uint8_t id, int32_t current, c
 //keep compatibility with older codes
 bool DynamixelWorkbench::goalPosition(uint8_t id, int value, const char **log)
 {
-  goalPosition(id, (int32_t)value, log);
+  bool result = false;
+  result = goalPosition(id, (int32_t)value, log);
+  return result;
 }
 
 bool DynamixelWorkbench::goalPosition(uint8_t id, int32_t value, const char **log)
@@ -997,7 +999,9 @@ bool DynamixelWorkbench::goalSpeed(uint8_t id, int value, const char **log)
 //keep compatibility with older codes
 bool DynamixelWorkbench::goalVelocity(uint8_t id, int value, const char **log)
 {
+  bool result = false;
   goalVelocity(id, (int32_t)value, log);
+  return result;
 }
 
 bool DynamixelWorkbench::goalVelocity(uint8_t id, int32_t value, const char **log)
