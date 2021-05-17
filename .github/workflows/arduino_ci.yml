@@ -15,5 +15,5 @@ jobs:
       - uses: actions/checkout@v2
       - name: install script
         run: |
-          source <(curl -SLs https://raw.githubusercontent.com/ROBOTIS-GIT/OpenCR/master/install.sh)
+          source <(curl -SLs https://raw.githubusercontent.com/ROBOTIS-GIT/OpenCR/master/install.sh) ${{github.ref}}
           build_platform opencr
