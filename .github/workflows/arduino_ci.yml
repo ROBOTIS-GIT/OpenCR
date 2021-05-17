@@ -1,0 +1,19 @@
+name: Arduino_CI
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master, develop ]
+
+jobs:
+  arduino_ci:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+      - name: install script
+        run: |
+          source <(curl -SLs https://raw.githubusercontent.com/ROBOTIS-Will/OpenCR/master/install.sh)
+          build_platform opencr
