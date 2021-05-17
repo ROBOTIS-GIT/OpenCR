@@ -49,8 +49,11 @@ static const DynamixelModel dynamixel_model_table[] = {
 
     {XL_320, "XL-320"},
     {XL430_W250, "XL430-W250"},
+    {XL330_M077, "XL330-M077"},
+    {XL330_M288, "XL330-M288"},
 
     {XL430_W250_2, "XL430-W250-2"}, // 2XL
+    {XC430_W250_2, "XC430-W240-2"}, // 2XC
 
     {XC430_W150, "XC430-W150"},
     {XC430_W240, "XC430-W240"},
@@ -66,10 +69,13 @@ static const DynamixelModel dynamixel_model_table[] = {
     {XH430_W210, "XH430-W210"},
     {XH430_W350, "XH430-W350"},
 
-    {XH540_W150, "XH540_W150"},
-    {XH540_W270, "XH540_W270"},
-    {XH540_V150, "XH540_V150"},
-    {XH540_V270, "XH540_V270"},
+    {XH540_W150, "XH540-W150"},
+    {XH540_W270, "XH540-W270"},
+    {XH540_V150, "XH540-V150"},
+    {XH540_V270, "XH540-V270"},
+
+    {XW540_T140, "XW540-T140"},
+    {XW540_T260, "XW540-T260"},
 
     {PRO_L42_10_S300_R, "PRO-L42-10-S300-R"},
     {PRO_L54_30_S400_R, "PRO-L54-30-S400-R"},
