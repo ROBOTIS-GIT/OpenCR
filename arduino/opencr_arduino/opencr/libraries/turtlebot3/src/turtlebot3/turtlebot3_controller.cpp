@@ -45,7 +45,7 @@ bool Turtlebot3Controller::init(float max_lin_vel, float max_ang_vel, uint8_t sc
   return true;
 }
 
-bool Turtlebot3Controller::getRCdata(float *get_cmd_vel)
+bool Turtlebot3Controller::getRCdata(float *get_cmd_vel, uint16_t &raw_data)
 {
   uint16_t received_data = 0;
   bool clicked_state = false;
@@ -55,6 +55,8 @@ bool Turtlebot3Controller::getRCdata(float *get_cmd_vel)
   if (rc100_.available())
   {
     received_data = rc100_.readData();
+    if (&raw_data != &Internal::dummy_raw_data_)
+      raw_data = received_data;
 
     if (received_data & RC100_BTN_U)
     {
