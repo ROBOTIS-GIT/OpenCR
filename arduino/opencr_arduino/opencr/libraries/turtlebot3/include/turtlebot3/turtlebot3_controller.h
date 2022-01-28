@@ -30,6 +30,10 @@
 
 #define DEBUG_SERIAL SerialBT2
 
+namespace Internal {
+  static uint16_t dummy_raw_data_;
+}
+
 class Turtlebot3Controller
 {
  public:
@@ -38,7 +42,7 @@ class Turtlebot3Controller
 
   bool init(float max_lin_vel, float max_ang_vel, uint8_t scale_lin_vel = 1, uint8_t scale_ang_vel = 1);
 
-  bool getRCdata(float *get_cmd_vel);
+  bool getRCdata(float *get_cmd_vel, uint16_t &raw_data = Internal::dummy_raw_data_);
 
  private:
   geometry_msgs::Twist cmd_vel_;
