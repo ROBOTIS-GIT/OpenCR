@@ -42,8 +42,15 @@
 #define MX_106_2   321
 
 #define XL_320     350
+
 #define XL330_M077 1190
 #define XL330_M288 1200
+
+#define XC330_M181 1230
+#define XC330_M288 1240
+#define XC330_T181 1210
+#define XC330_T288 1220
+
 #define XL430_W250 1060
 
 #define XL430_W250_2 1090 // 2XL
@@ -68,8 +75,10 @@
 #define XH540_V150 1150
 #define XH540_V270 1140
 
-#define XW540_T140 1180
 #define XW540_T260 1170
+#define XW540_T140 1180
+#define XW430_T200 1280
+#define XW430_T333 1270
 
 #define PRO_L42_10_S300_R  35072
 #define PRO_L54_30_S400_R  37928
