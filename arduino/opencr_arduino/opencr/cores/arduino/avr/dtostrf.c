@@ -19,11 +19,12 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
 char *dtostrf (double val, signed char width, unsigned char prec, char *sout) {
-  char fmt[20];
-  sprintf(fmt, "%%%d.%df", width, prec);
-  sprintf(sout, fmt, val);
+  int val_int = (int)val;
+  int decimal_value = (int)(val * pow(10, prec)) - val_int * pow(10, prec);
+  sprintf(sout, "%d.%d", val_int, abs(decimal_value));
   return sout;
 }
-
