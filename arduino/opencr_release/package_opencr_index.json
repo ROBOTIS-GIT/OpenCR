@@ -1414,8 +1414,8 @@
           },
           "url": "https://github.com/ROBOTIS-GIT/OpenCR/releases/download/1.4.19/opencr.tar.bz2",
           "archiveFileName": "opencr.tar.bz2",
-          "checksum": "SHA-256:CD6CF10598C8AF7100237DC4081C8153939CDA10999D0A57668ECA5E788ED460",
-          "size": "2001138",
+          "checksum": "SHA-256:ADF8130D897303F8B9EA3058663E28E4E30575F1D904B84C8BEBF6C85998FE7C",
+          "size": "2000797",
           "help": {
                     "online": "http://emanual.robotis.com/docs/en/parts/controller/opencr10/"
           },
