@@ -634,8 +634,8 @@ void jointControl(void)
   const double JOINT_CONTROL_PERIOD = 1.0f / (double)JOINT_CONTROL_FREQEUNCY;
   static uint32_t points = 0;
 
-  static uint8_t wait_for_write = 0;
-  static uint8_t loop_cnt = 0;
+  static uint16_t wait_for_write = 0;
+  static uint16_t loop_cnt = 0;
 
   if (is_moving == true)
   {
