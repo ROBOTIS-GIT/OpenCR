@@ -246,7 +246,7 @@ void TurtleBot3Core::begin(const char* model_name)
   DEBUG_PRINTLN(ret==true?"RC100 Controller setup completed.":"RC100 Controller setup failed.");
   
 
-   // Port begin (Success USBSerialPortHandler::begin)
+   // Port begin
   dxl_slave.begin();
   // Init DXL Slave function
   dxl_slave.setPortProtocolVersion(PROTOCOL_VERSION_DXL_SLAVE);
