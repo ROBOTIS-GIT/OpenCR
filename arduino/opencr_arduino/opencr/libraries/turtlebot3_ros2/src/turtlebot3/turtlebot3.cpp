@@ -245,6 +245,9 @@ void TurtleBot3Core::begin(const char* model_name)
   ret = controllers.init(max_linear_velocity, max_angular_velocity);
   DEBUG_PRINTLN(ret==true?"RC100 Controller setup completed.":"RC100 Controller setup failed.");
   
+
+   // Port begin
+  dxl_slave.begin();
   // Init DXL Slave function
   dxl_slave.setPortProtocolVersion(PROTOCOL_VERSION_DXL_SLAVE);
   dxl_slave.setFirmwareVersion(FIRMWARE_VER);
