@@ -254,7 +254,7 @@ int OLLO::read(int devNum, OlloDeviceIndex device_index){ // IR SENSOR, Button, 
 			  return average_value;
 		}else if(device_index == TEMPERATURE_SENSOR){
 			analogValue = analogRead(PORT1_ADC);
-			vvalue = (4095 - analogValue) * 10000 /analogValue;
+			vvalue = (1023 - analogValue) * 10000 /analogValue;
 			for(scount = -20; scount < 140; scount++){
 				if(vvalue > gwTheRmistor[scount +20]){
 				      return scount;
@@ -291,7 +291,7 @@ int OLLO::read(int devNum, OlloDeviceIndex device_index){ // IR SENSOR, Button, 
 		}
 		else if(device_index == TEMPERATURE_SENSOR){
 			analogValue = analogRead(PORT2_ADC);
-			vvalue = (4095 - analogValue) * 10000 /analogValue;
+			vvalue = (1023 - analogValue) * 10000 /analogValue;
 			for(scount = -20; scount < 140; scount++){
 				if(vvalue > gwTheRmistor[scount +20]){
 				      return scount;
@@ -323,7 +323,7 @@ int OLLO::read(int devNum, OlloDeviceIndex device_index){ // IR SENSOR, Button, 
 			  return average_value;
 		}else if(device_index == TEMPERATURE_SENSOR){
 			analogValue = analogRead(PORT3_ADC);
-			vvalue = (4095 - analogValue) * 10000 /analogValue;
+			vvalue = (1023 - analogValue) * 10000 /analogValue;
 			for(scount = -20; scount < 140; scount++){
 				if(vvalue > gwTheRmistor[scount +20]){
 				      return scount;
@@ -356,7 +356,7 @@ int OLLO::read(int devNum, OlloDeviceIndex device_index){ // IR SENSOR, Button, 
 			  return average_value;
 		}else if(device_index == TEMPERATURE_SENSOR){
 			analogValue = analogRead(PORT4_ADC);// 2014-04-17 shin
-			vvalue = (4095 - analogValue) * 10000 /analogValue;
+			vvalue = (1023 - analogValue) * 10000 /analogValue;
 			for(scount = -20; scount < 140; scount++){
 				if(vvalue > gwTheRmistor[scount +20]){
 				      return scount;
