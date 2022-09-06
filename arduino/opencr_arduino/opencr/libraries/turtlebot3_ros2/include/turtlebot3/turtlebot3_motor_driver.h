@@ -19,7 +19,7 @@
 
 #include <Dynamixel2Arduino.h>
 
-#define TORQUE_ENABLE 1
+#define TORQUE_ENABLE ControlTableItem::TORQUE_ENABLE
 
 enum MortorLocation{
   LEFT = 0,
@@ -58,6 +58,8 @@ class Turtlebot3MotorDriver
 
   bool control_motors(const float wheel_separation, float linear_value, float angular_value);
 
+  Dynamixel2Arduino& getDxl();
+  
  private:
   uint8_t left_wheel_id_;
   uint8_t right_wheel_id_;

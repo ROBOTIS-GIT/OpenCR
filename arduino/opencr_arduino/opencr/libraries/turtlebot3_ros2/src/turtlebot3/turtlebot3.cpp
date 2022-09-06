@@ -26,6 +26,7 @@ typedef struct TB3ModelInfo{
   float wheel_separation;
   float turning_radius;
   float robot_radius;
+  bool has_manipulator;
 } TB3ModelInfo;
 
 static const TB3ModelInfo burger_info = {
@@ -34,7 +35,8 @@ static const TB3ModelInfo burger_info = {
   0.033,
   0.160,
   0.080,
-  0.105
+  0.105,
+  false,
 };
 
 static const TB3ModelInfo waffle_info = {
@@ -43,7 +45,18 @@ static const TB3ModelInfo waffle_info = {
   0.033,
   0.287,
   0.1435,
-  0.220
+  0.220,
+  false,
+};
+
+static const TB3ModelInfo waffle_with_manipulator_info = {
+  "Waffle_OpenManipulator",
+  3,
+  0.033,
+  0.287,
+  0.1435,
+  0.220,
+  true,
 };
 
 
@@ -51,6 +64,7 @@ static const TB3ModelInfo waffle_info = {
 * Declaration for motors
 *******************************************************************************/
 static Turtlebot3MotorDriver motor_driver;
+static OpenManipulatorDriver manipulator_driver(motor_driver.getDxl());
 
 static const TB3ModelInfo* p_tb3_model_info;
 static float max_linear_velocity, min_linear_velocity;
@@ -65,6 +79,8 @@ static void update_goal_velocity_from_3values(void);
 static void test_motors_with_buttons(uint8_t buttons);
 static bool get_connection_state_with_motors();
 static void set_connection_state_with_motors(bool is_connected);
+static bool get_connection_state_with_joints();
+static void set_connection_state_with_joints(bool is_connected);
 
 /*******************************************************************************
 * Declaration for sensors
@@ -102,6 +118,8 @@ static void update_gpios(uint32_t interval_ms);
 static void update_motor_status(uint32_t interval_ms);
 static void update_battery_status(uint32_t interval_ms);
 static void update_analog_sensors(uint32_t interval_ms);
+static void update_joint_status(uint32_t interval_ms);
+
 
 DYNAMIXEL::USBSerialPortHandler port_dxl_slave(SERIAL_DXL_SLAVE);
 DYNAMIXEL::Slave dxl_slave(port_dxl_slave, MODEL_NUM_DXL_SLAVE);
@@ -110,7 +128,10 @@ enum ControlTableItemAddr{
   ADDR_MODEL_INFORM    = 2,
   
   ADDR_MILLIS          = 10,
-  ADDR_MICROS          = 14,
+
+  ADDR_DEBUG_MODE      = 14,  
+  ADDR_CONNECT_ROS2    = 15,
+  ADDR_CONNECT_MANIP   = 16,
 
   ADDR_DEVICE_STATUS   = 18,
   ADDR_HEARTBEAT       = 19,
@@ -119,6 +140,7 @@ enum ControlTableItemAddr{
   ADDR_USER_LED_2      = 21,
   ADDR_USER_LED_3      = 22,
   ADDR_USER_LED_4      = 23,
+
   ADDR_BUTTON_1        = 26,
   ADDR_BUTTON_2        = 27,
   ADDR_BUMPER_1        = 28,
@@ -155,6 +177,7 @@ enum ControlTableItemAddr{
   ADDR_PRESENT_POSITION_L = 136,
   ADDR_PRESENT_POSITION_R = 140,
   
+  ADDR_MOTOR_CONNECT      = 148,
   ADDR_MOTOR_TORQUE       = 149,
   ADDR_CMD_VEL_LINEAR_X   = 150,
   ADDR_CMD_VEL_LINEAR_Y   = 154,
@@ -163,7 +186,54 @@ enum ControlTableItemAddr{
   ADDR_CMD_VEL_ANGULAR_Y  = 166,
   ADDR_CMD_VEL_ANGULAR_Z  = 170,
   ADDR_PROFILE_ACC_L      = 174,
-  ADDR_PROFILE_ACC_R      = 178
+  ADDR_PROFILE_ACC_R      = 178,
+
+
+
+  ADDR_TORQUE_JOINT             = 199,
+
+  ADDR_GOAL_POSITION_JOINT_1    = 200,
+  ADDR_GOAL_POSITION_JOINT_2    = 204,
+  ADDR_GOAL_POSITION_JOINT_3    = 208,
+  ADDR_GOAL_POSITION_JOINT_4    = 212,
+  ADDR_GOAL_POSITION_GRIPPER    = 216,
+  ADDR_GOAL_POSITION_UPDATE_WR  = 220,
+  ADDR_GOAL_POSITION_UPDATE_RD  = 221,
+
+  ADDR_PRESENT_POSITION_JOINT_1 = 224,
+  ADDR_PRESENT_POSITION_JOINT_2 = 228,
+  ADDR_PRESENT_POSITION_JOINT_3 = 232,
+  ADDR_PRESENT_POSITION_JOINT_4 = 236,
+  ADDR_PRESENT_POSITION_GRIPPER = 240,
+
+  ADDR_PRESENT_VELOCITY_JOINT_1 = 244,
+  ADDR_PRESENT_VELOCITY_JOINT_2 = 248,
+  ADDR_PRESENT_VELOCITY_JOINT_3 = 252,
+  ADDR_PRESENT_VELOCITY_JOINT_4 = 256,
+  ADDR_PRESENT_VELOCITY_GRIPPER = 260,
+
+  ADDR_PRESENT_CURRENT_JOINT_1  = 264,
+  ADDR_PRESENT_CURRENT_JOINT_2  = 266,
+  ADDR_PRESENT_CURRENT_JOINT_3  = 268,
+  ADDR_PRESENT_CURRENT_JOINT_4  = 270,
+  ADDR_PRESENT_CURRENT_GRIPPER  = 272,
+
+  ADDR_PROFILE_ACC_JOINT_1      = 284,
+  ADDR_PROFILE_ACC_JOINT_2      = 288,
+  ADDR_PROFILE_ACC_JOINT_3      = 292,
+  ADDR_PROFILE_ACC_JOINT_4      = 296,
+  ADDR_PROFILE_ACC_GRIPPER      = 300,
+  ADDR_PROFILE_ACC_UPDATE_WR    = 304,
+  ADDR_PROFILE_ACC_UPDATE_RD    = 305,
+
+  ADDR_PROFILE_VEL_JOINT_1      = 308,
+  ADDR_PROFILE_VEL_JOINT_2      = 312,
+  ADDR_PROFILE_VEL_JOINT_3      = 316,
+  ADDR_PROFILE_VEL_JOINT_4      = 320,
+  ADDR_PROFILE_VEL_GRIPPER      = 324,
+  ADDR_PROFILE_VEL_UPDATE_WR    = 328,
+  ADDR_PROFILE_VEL_UPDATE_RD    = 329,
+
 };
 
 typedef struct ControlItemVariables{
@@ -174,6 +244,10 @@ typedef struct ControlItemVariables{
 
   int8_t device_status;
   uint8_t heart_beat;
+  bool debug_mode;
+  bool is_connect_ros2_node;
+  bool is_connect_motors;
+  bool is_connect_manipulator;
 
   bool user_led[4];
   bool push_button[2];
@@ -202,6 +276,22 @@ typedef struct ControlItemVariables{
   int32_t cmd_vel_linear[3];
   int32_t cmd_vel_angular[3];
   uint32_t profile_acceleration[MortorLocation::MOTOR_NUM_MAX];
+
+  bool joint_torque_enable_state;
+  joint_position_info_t joint_goal_position;  
+  joint_position_info_t joint_present_position;
+  joint_velocity_info_t joint_present_velocity;
+  joint_current_info_t joint_present_current;
+  joint_accel_info_t joint_profile_acc;
+  joint_accel_info_t joint_profile_vel;
+
+  bool joint_goal_position_update_wr;
+  bool joint_goal_position_update_rd;
+  bool joint_profile_acc_update_wr;
+  bool joint_profile_acc_update_rd;
+  bool joint_profile_vel_update_wr;
+  bool joint_profile_vel_update_rd;
+
 }ControlItemVariables;
 
 static ControlItemVariables control_items;
@@ -220,6 +310,9 @@ void TurtleBot3Core::begin(const char* model_name)
   }else if(strcmp(model_name, "Waffle") == 0 || strcmp(model_name, "waffle") == 0){
     p_tb3_model_info = &waffle_info;
     model_motor_rpm = 77;
+  }else if(strcmp(model_name, "Waffle_OpenManipulator") == 0){
+    p_tb3_model_info = &waffle_with_manipulator_info;
+    model_motor_rpm = 77;
   }else{
     p_tb3_model_info = &burger_info;
     model_motor_rpm = 61;
@@ -232,6 +325,10 @@ void TurtleBot3Core::begin(const char* model_name)
 
   bool ret; (void)ret;
   DEBUG_SERIAL_BEGIN(57600);
+  DEBUG_PRINTLN(" ");
+  DEBUG_PRINTLN("Revision : V220906R2");
+  DEBUG_PRINTLN("Begin Start...");
+
   // Setting for Dynamixel motors
   ret = motor_driver.init();
   DEBUG_PRINTLN(ret==true?"Motor driver setup completed.":"Motor driver setup failed.");
@@ -244,9 +341,21 @@ void TurtleBot3Core::begin(const char* model_name)
   // Setting for ROBOTIS RC100 remote controller and cmd_vel
   ret = controllers.init(max_linear_velocity, max_angular_velocity);
   DEBUG_PRINTLN(ret==true?"RC100 Controller setup completed.":"RC100 Controller setup failed.");
-  
 
-   // Port begin
+  if (p_tb3_model_info->has_manipulator == true)
+  {    
+    ret = manipulator_driver.init();
+    DEBUG_PRINTLN(ret==true?"Manipulator driver setup completed.":"Manipulator driver setup failed.");
+  }
+
+  DEBUG_PRINT("Dynamixel2Arduino Item Max : ");
+  DEBUG_PRINTLN(CONTROL_ITEM_MAX);
+
+  control_items.debug_mode = false;
+  control_items.is_connect_ros2_node = false;
+  control_items.is_connect_manipulator = false;  
+
+  // Port begin
   dxl_slave.begin();
   // Init DXL Slave function
   dxl_slave.setPortProtocolVersion(PROTOCOL_VERSION_DXL_SLAVE);
@@ -259,7 +368,14 @@ void TurtleBot3Core::begin(const char* model_name)
   dxl_slave.addControlItem(ADDR_MODEL_INFORM, control_items.model_inform);
   // Items for Timer of device
   dxl_slave.addControlItem(ADDR_MILLIS, control_items.dev_time_millis);
-  dxl_slave.addControlItem(ADDR_MICROS, control_items.dev_time_micros);
+
+  // Items to debug mode
+  dxl_slave.addControlItem(ADDR_DEBUG_MODE, control_items.debug_mode);
+  // Items to connect ros2
+  dxl_slave.addControlItem(ADDR_CONNECT_ROS2, control_items.is_connect_ros2_node);
+  // Items to connect manipulator
+  dxl_slave.addControlItem(ADDR_CONNECT_MANIP, control_items.is_connect_manipulator);
+
   // Items to inform device status
   dxl_slave.addControlItem(ADDR_DEVICE_STATUS, control_items.device_status);
   // Items to check connection state with node
@@ -305,6 +421,7 @@ void TurtleBot3Core::begin(const char* model_name)
   dxl_slave.addControlItem(ADDR_PRESENT_CURRENT_L, control_items.present_current[MortorLocation::LEFT]);
   dxl_slave.addControlItem(ADDR_PRESENT_CURRENT_R, control_items.present_current[MortorLocation::RIGHT]);
   // Items to control motors
+  dxl_slave.addControlItem(ADDR_MOTOR_CONNECT, control_items.is_connect_motors);
   dxl_slave.addControlItem(ADDR_MOTOR_TORQUE, control_items.motor_torque_enable_state);
   dxl_slave.addControlItem(ADDR_CMD_VEL_LINEAR_X, control_items.cmd_vel_linear[0]);
   dxl_slave.addControlItem(ADDR_CMD_VEL_LINEAR_Y, control_items.cmd_vel_linear[1]);
@@ -315,6 +432,64 @@ void TurtleBot3Core::begin(const char* model_name)
   dxl_slave.addControlItem(ADDR_PROFILE_ACC_L, control_items.profile_acceleration[MortorLocation::LEFT]);
   dxl_slave.addControlItem(ADDR_PROFILE_ACC_R, control_items.profile_acceleration[MortorLocation::RIGHT]);
 
+  if (p_tb3_model_info->has_manipulator == true) {
+    control_items.joint_goal_position_update_wr = false;
+    control_items.joint_goal_position_update_rd = false;
+    control_items.joint_profile_acc_update_wr = false;
+    control_items.joint_profile_acc_update_rd = false;
+    control_items.joint_profile_vel_update_wr = false;
+    control_items.joint_profile_vel_update_rd = false;
+
+    // Items to joint motors
+    dxl_slave.addControlItem(ADDR_TORQUE_JOINT, control_items.joint_torque_enable_state);
+
+    dxl_slave.addControlItem(ADDR_GOAL_POSITION_JOINT_1, control_items.joint_goal_position.value[JOINT_1]);
+    dxl_slave.addControlItem(ADDR_GOAL_POSITION_JOINT_2, control_items.joint_goal_position.value[JOINT_2]);
+    dxl_slave.addControlItem(ADDR_GOAL_POSITION_JOINT_3, control_items.joint_goal_position.value[JOINT_3]);
+    dxl_slave.addControlItem(ADDR_GOAL_POSITION_JOINT_4, control_items.joint_goal_position.value[JOINT_4]);
+    dxl_slave.addControlItem(ADDR_GOAL_POSITION_GRIPPER, control_items.joint_goal_position.value[GRIPPER]);
+    dxl_slave.addControlItem(ADDR_GOAL_POSITION_UPDATE_WR, control_items.joint_goal_position_update_wr);
+    dxl_slave.addControlItem(ADDR_GOAL_POSITION_UPDATE_RD, control_items.joint_goal_position_update_rd);
+
+    dxl_slave.addControlItem(ADDR_PRESENT_POSITION_JOINT_1, control_items.joint_present_position.value[JOINT_1]);
+    dxl_slave.addControlItem(ADDR_PRESENT_POSITION_JOINT_2, control_items.joint_present_position.value[JOINT_2]);
+    dxl_slave.addControlItem(ADDR_PRESENT_POSITION_JOINT_3, control_items.joint_present_position.value[JOINT_3]);
+    dxl_slave.addControlItem(ADDR_PRESENT_POSITION_JOINT_4, control_items.joint_present_position.value[JOINT_4]);
+    dxl_slave.addControlItem(ADDR_PRESENT_POSITION_GRIPPER, control_items.joint_present_position.value[GRIPPER]);
+
+    dxl_slave.addControlItem(ADDR_PRESENT_VELOCITY_JOINT_1, control_items.joint_present_velocity.value[JOINT_1]);
+    dxl_slave.addControlItem(ADDR_PRESENT_VELOCITY_JOINT_2, control_items.joint_present_velocity.value[JOINT_2]);
+    dxl_slave.addControlItem(ADDR_PRESENT_VELOCITY_JOINT_3, control_items.joint_present_velocity.value[JOINT_3]);
+    dxl_slave.addControlItem(ADDR_PRESENT_VELOCITY_JOINT_4, control_items.joint_present_velocity.value[JOINT_4]);
+    dxl_slave.addControlItem(ADDR_PRESENT_VELOCITY_GRIPPER, control_items.joint_present_velocity.value[GRIPPER]);
+
+    dxl_slave.addControlItem(ADDR_PRESENT_CURRENT_JOINT_1, control_items.joint_present_current.value[JOINT_1]);
+    dxl_slave.addControlItem(ADDR_PRESENT_CURRENT_JOINT_2, control_items.joint_present_current.value[JOINT_2]);
+    dxl_slave.addControlItem(ADDR_PRESENT_CURRENT_JOINT_3, control_items.joint_present_current.value[JOINT_3]);
+    dxl_slave.addControlItem(ADDR_PRESENT_CURRENT_JOINT_4, control_items.joint_present_current.value[JOINT_4]);
+    dxl_slave.addControlItem(ADDR_PRESENT_CURRENT_GRIPPER, control_items.joint_present_current.value[GRIPPER]);
+
+    dxl_slave.addControlItem(ADDR_PROFILE_ACC_JOINT_1, control_items.joint_profile_acc.value[JOINT_1]);
+    dxl_slave.addControlItem(ADDR_PROFILE_ACC_JOINT_2, control_items.joint_profile_acc.value[JOINT_2]);
+    dxl_slave.addControlItem(ADDR_PROFILE_ACC_JOINT_3, control_items.joint_profile_acc.value[JOINT_3]);
+    dxl_slave.addControlItem(ADDR_PROFILE_ACC_JOINT_4, control_items.joint_profile_acc.value[JOINT_4]);
+    dxl_slave.addControlItem(ADDR_PROFILE_ACC_GRIPPER, control_items.joint_profile_acc.value[GRIPPER]);
+    dxl_slave.addControlItem(ADDR_PROFILE_ACC_UPDATE_WR, control_items.joint_profile_acc_update_wr);
+    dxl_slave.addControlItem(ADDR_PROFILE_ACC_UPDATE_RD, control_items.joint_profile_acc_update_rd);
+
+    dxl_slave.addControlItem(ADDR_PROFILE_VEL_JOINT_1, control_items.joint_profile_vel.value[JOINT_1]);
+    dxl_slave.addControlItem(ADDR_PROFILE_VEL_JOINT_2, control_items.joint_profile_vel.value[JOINT_2]);
+    dxl_slave.addControlItem(ADDR_PROFILE_VEL_JOINT_3, control_items.joint_profile_vel.value[JOINT_3]);
+    dxl_slave.addControlItem(ADDR_PROFILE_VEL_JOINT_4, control_items.joint_profile_vel.value[JOINT_4]);
+    dxl_slave.addControlItem(ADDR_PROFILE_VEL_GRIPPER, control_items.joint_profile_vel.value[GRIPPER]);
+    dxl_slave.addControlItem(ADDR_PROFILE_VEL_UPDATE_WR, control_items.joint_profile_vel_update_wr);
+    dxl_slave.addControlItem(ADDR_PROFILE_VEL_UPDATE_RD, control_items.joint_profile_vel_update_rd);
+  }
+
+
+
+
+
   // Set user callback function for processing write command from master.
   dxl_slave.setWriteCallbackFunc(dxl_slave_write_callback_func);
 
@@ -323,20 +498,40 @@ void TurtleBot3Core::begin(const char* model_name)
     motor_driver.set_torque(true);
     control_items.device_status = STATUS_RUNNING;
     set_connection_state_with_motors(true);
+    DEBUG_PRINTLN("Wheel motors are connected");
   }else{
     control_items.device_status = STATUS_NOT_CONNECTED_MOTORS;
     set_connection_state_with_motors(false);
     DEBUG_PRINTLN("Can't communicate with the motor!");
     DEBUG_PRINTLN("  Please check the connection to the motor and the power supply.");
     DEBUG_PRINTLN();
+  } 
+  control_items.is_connect_motors = get_connection_state_with_motors();  
+
+  if (p_tb3_model_info->has_manipulator == true) {
+    // Check connection state with joints.
+    if(manipulator_driver.is_connected() == true){
+      manipulator_driver.set_torque(true);    
+      control_items.is_connect_manipulator = true;
+      set_connection_state_with_joints(true);
+      DEBUG_PRINTLN("Joint motors are connected");      
+    }else{
+      control_items.is_connect_manipulator = false;
+      set_connection_state_with_joints(false);
+      DEBUG_PRINTLN("Can't communicate with the joint!");
+      DEBUG_PRINTLN("  Please check the connection to the joint motor and the power supply.");
+      DEBUG_PRINTLN();
+    } 
   }
- 
+
   // Init IMU 
   sensors.initIMU();
   sensors.calibrationGyro();
 
   //To indicate that the initialization is complete.
   sensors.makeMelody(1); 
+
+  DEBUG_PRINTLN("Begin End...");
 }
 
 /*******************************************************************************
@@ -377,7 +572,8 @@ void TurtleBot3Core::run()
   update_motor_status(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
   update_battery_status(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
   update_analog_sensors(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
-  
+  update_joint_status(INTERVAL_MS_TO_UPDATE_CONTROL_ITEM);
+
   // Packet processing with ROS2 Node.
   dxl_slave.processPacket();
 
@@ -510,6 +706,10 @@ void update_motor_status(uint32_t interval_ms)
   if(millis() - pre_time >= interval_ms){
     pre_time = millis();
 
+
+    uint32_t pre_time_dxl;
+
+    pre_time_dxl = millis();
     if(get_connection_state_with_motors() == true){
       motor_driver.read_present_position(control_items.present_position[MortorLocation::LEFT], control_items.present_position[MortorLocation::RIGHT]);
       motor_driver.read_present_velocity(control_items.present_velocity[MortorLocation::LEFT], control_items.present_velocity[MortorLocation::RIGHT]);
@@ -520,9 +720,26 @@ void update_motor_status(uint32_t interval_ms)
 
       control_items.motor_torque_enable_state = motor_driver.get_torque();
     }
-  }
+  }  
 }
 
+void update_joint_status(uint32_t interval_ms)
+{
+  static uint32_t pre_time;
+
+  if(millis() - pre_time >= interval_ms){
+    pre_time = millis();
+
+    manipulator_driver.read_present_position(control_items.joint_present_position);
+    manipulator_driver.read_present_velocity(control_items.joint_present_velocity);
+    manipulator_driver.read_present_current(control_items.joint_present_current);
+
+    if(get_connection_state_with_joints() == true){
+
+      control_items.joint_torque_enable_state = manipulator_driver.get_torque();
+    }
+  }  
+}
 
 /*******************************************************************************
 * Callback function definition to be used in communication with the ROS2 node.
@@ -536,6 +753,13 @@ static void dxl_slave_write_callback_func(uint16_t item_addr, uint8_t &dxl_err_c
     case ADDR_MODEL_INFORM:
       control_items.model_inform = p_tb3_model_info->model_info;
       dxl_err_code = DXL_ERR_ACCESS;
+      break;
+
+    case ADDR_DEBUG_MODE:
+      if (control_items.debug_mode == true)
+        DEBUG_PRINTLN("Debug Mode : Enabled");
+      else
+        DEBUG_PRINTLN("Debug Mode : Disabled");
       break;
 
     case ADDR_SOUND:
@@ -567,6 +791,53 @@ static void dxl_slave_write_callback_func(uint16_t item_addr, uint8_t &dxl_err_c
       if(get_connection_state_with_motors() == true)
         motor_driver.write_profile_acceleration(control_items.profile_acceleration[MortorLocation::LEFT], control_items.profile_acceleration[MortorLocation::RIGHT]);
       break;
+
+    case ADDR_TORQUE_JOINT:
+      manipulator_driver.set_torque(control_items.joint_torque_enable_state);
+      break;
+
+    case ADDR_GOAL_POSITION_UPDATE_WR:
+      if (get_connection_state_with_ros2_node() == true && control_items.joint_goal_position_update_wr == true) {
+        manipulator_driver.write_goal_position(control_items.joint_goal_position);
+      }
+      control_items.joint_goal_position_update_wr = false;
+      break;
+
+    case ADDR_GOAL_POSITION_UPDATE_RD:
+      if (control_items.joint_goal_position_update_rd == true) {
+        manipulator_driver.read_goal_position(control_items.joint_goal_position);
+      }
+      control_items.joint_goal_position_update_rd = false;
+      break;
+
+    case ADDR_PROFILE_ACC_UPDATE_WR:
+      if (get_connection_state_with_ros2_node() == true && control_items.joint_profile_acc_update_wr == true) {
+        manipulator_driver.write_profile_acceleration(control_items.joint_profile_acc);
+      }
+      control_items.joint_profile_acc_update_wr = false;
+      break;      
+
+    case ADDR_PROFILE_ACC_UPDATE_RD:
+      if (control_items.joint_profile_acc_update_rd == true) {
+        manipulator_driver.read_profile_acceleration(control_items.joint_profile_acc);
+      }
+      control_items.joint_profile_acc_update_rd = false;
+      break;     
+
+    case ADDR_PROFILE_VEL_UPDATE_WR:
+      if (get_connection_state_with_ros2_node() == true && control_items.joint_profile_vel_update_wr == true) {
+        manipulator_driver.write_profile_velocity(control_items.joint_profile_vel);
+      }
+      control_items.joint_profile_vel_update_wr = false;
+      break;      
+
+    case ADDR_PROFILE_VEL_UPDATE_RD:
+      if (control_items.joint_profile_vel_update_rd == true) {
+        manipulator_driver.read_profile_velocity(control_items.joint_profile_vel);
+      }
+      control_items.joint_profile_vel_update_rd = false;
+      break;      
+
   }
 }
 
@@ -599,7 +870,7 @@ void update_connection_state_with_ros2_node()
     return;
   }
 
-  if(pre_data != control_items.heart_beat){
+  if(pre_data != control_items.heart_beat || control_items.debug_mode == true){
     pre_time = millis();
     pre_data = control_items.heart_beat;
     set_connection_state_with_ros2_node(true);
@@ -609,6 +880,8 @@ void update_connection_state_with_ros2_node()
       set_connection_state_with_ros2_node(false);
     }
   }
+
+  control_items.is_connect_ros2_node = get_connection_state_with_ros2_node();
 }
 
 
@@ -627,6 +900,20 @@ static void set_connection_state_with_motors(bool is_connected)
   is_connected_motors = is_connected;
 }
 
+/*******************************************************************************
+* Function definition to check the connection with the motor.
+*******************************************************************************/
+static bool is_connected_joints = false;
+
+static bool get_connection_state_with_joints()
+{
+  return is_connected_joints;
+}
+
+static void set_connection_state_with_joints(bool is_connected)
+{
+  is_connected_joints = is_connected;
+}
 
 /*******************************************************************************
 * Function definition to test motors using the built-in buttons of OpenCR.
