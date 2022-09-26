@@ -70,10 +70,17 @@ class OpenManipulatorDriver
   bool read_present_current(joint_current_info_t &current_info);
   bool read_profile_acceleration(joint_accel_info_t &accel_info);  
   bool read_profile_velocity(joint_accel_info_t &accel_info);  
+  bool read_goal_current(joint_current_info_t &current_info);
   
-  bool write_goal_position(joint_position_info_t &position_info);
-  bool write_profile_acceleration(joint_accel_info_t &accel_info);
-  bool write_profile_velocity(joint_accel_info_t &accel_info);
+  bool write_goal_position_joint(joint_position_info_t &position_info);
+  bool write_profile_acceleration_joint(joint_accel_info_t &accel_info);
+  bool write_profile_velocity_joint(joint_accel_info_t &accel_info);
+  bool write_goal_current_joint(joint_current_info_t &current_info);
+
+  bool write_goal_position_gripper(joint_position_info_t &position_info);
+  bool write_profile_acceleration_gripper(joint_accel_info_t &accel_info);
+  bool write_profile_velocity_gripper(joint_accel_info_t &accel_info);
+  bool write_goal_current_gripper(joint_current_info_t &current_info);
 
  private:
   

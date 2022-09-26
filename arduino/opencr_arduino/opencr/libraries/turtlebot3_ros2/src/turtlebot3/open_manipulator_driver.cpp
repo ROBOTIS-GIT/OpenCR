@@ -104,6 +104,7 @@ bool OpenManipulatorDriver::set_torque(bool onoff)
 
   sync_write_param.addr = 64;
   sync_write_param.length = 1;
+  sync_write_param.id_count = JOINT_MOTOR_NUM_MAX;
 
   for (int i=0; i<JOINT_MOTOR_NUM_MAX; i++){
     sync_write_param.xel[i].data[0] = onoff;
@@ -151,9 +152,10 @@ bool OpenManipulatorDriver::read_goal_position(joint_position_info_t &position_i
 
   sync_read_param.addr = 116;
   sync_read_param.length = 4;
+  sync_read_param.id_count = JOINT_MOTOR_NUM_MAX;
 
   if(dxl.syncRead(sync_read_param, read_result)){
-    for (int i=0; i<JOINT_MOTOR_NUM_MAX; i++) {
+    for (int i=0; i<sync_read_param.id_count; i++) {
       memcpy(&position_info.value[i], read_result.xel[i].data, read_result.xel[i].length);
     }
     ret = true;
@@ -170,9 +172,10 @@ bool OpenManipulatorDriver::read_present_position(joint_position_info_t &positio
 
   sync_read_param.addr = 132;
   sync_read_param.length = 4;
+  sync_read_param.id_count = JOINT_MOTOR_NUM_MAX;
 
   if(dxl.syncRead(sync_read_param, read_result)){
-    for (int i=0; i<JOINT_MOTOR_NUM_MAX; i++) {
+    for (int i=0; i<sync_read_param.id_count; i++) {
       memcpy(&position_info.value[i], read_result.xel[i].data, read_result.xel[i].length);
     }
     ret = true;
@@ -189,9 +192,10 @@ bool OpenManipulatorDriver::read_present_velocity(joint_velocity_info_t &velocit
 
   sync_read_param.addr = 128;
   sync_read_param.length = 4;
+  sync_read_param.id_count = JOINT_MOTOR_NUM_MAX;
 
   if(dxl.syncRead(sync_read_param, read_result)){
-    for (int i=0; i<JOINT_MOTOR_NUM_MAX; i++) {
+    for (int i=0; i<sync_read_param.id_count; i++) {
       memcpy(&velocity_info.value[i], read_result.xel[i].data, read_result.xel[i].length);
     }
     ret = true;
@@ -208,9 +212,10 @@ bool OpenManipulatorDriver::read_present_current(joint_current_info_t &current_i
 
   sync_read_param.addr = 126;
   sync_read_param.length = 2;
+  sync_read_param.id_count = JOINT_MOTOR_NUM_MAX;
 
   if(dxl.syncRead(sync_read_param, read_result)){
-    for (int i=0; i<JOINT_MOTOR_NUM_MAX; i++) {
+    for (int i=0; i<sync_read_param.id_count; i++) {
       memcpy(&current_info.value[i], read_result.xel[i].data, read_result.xel[i].length);
     }
     ret = true;
@@ -227,9 +232,10 @@ bool OpenManipulatorDriver::read_profile_acceleration(joint_accel_info_t &accel_
 
   sync_read_param.addr = 108;
   sync_read_param.length = 4;
+  sync_read_param.id_count = JOINT_MOTOR_NUM_MAX;
 
   if(dxl.syncRead(sync_read_param, read_result)){
-    for (int i=0; i<JOINT_MOTOR_NUM_MAX; i++) {
+    for (int i=0; i<sync_read_param.id_count; i++) {
       memcpy(&accel_info.value[i], read_result.xel[i].data, read_result.xel[i].length);
     }
     ret = true;
@@ -246,9 +252,10 @@ bool OpenManipulatorDriver::read_profile_velocity(joint_accel_info_t &accel_info
 
   sync_read_param.addr = 112;
   sync_read_param.length = 4;
+  sync_read_param.id_count = JOINT_MOTOR_NUM_MAX;
 
   if(dxl.syncRead(sync_read_param, read_result)){
-    for (int i=0; i<JOINT_MOTOR_NUM_MAX; i++) {
+    for (int i=0; i<sync_read_param.id_count; i++) {
       memcpy(&accel_info.value[i], read_result.xel[i].data, read_result.xel[i].length);
     }
     ret = true;
@@ -257,7 +264,27 @@ bool OpenManipulatorDriver::read_profile_velocity(joint_accel_info_t &accel_info
   return ret;
 }
 
-bool OpenManipulatorDriver::write_goal_position(joint_position_info_t &position_info)
+bool OpenManipulatorDriver::read_goal_current(joint_current_info_t &current_info)
+{
+  bool ret = false;
+
+  if (is_ready() == false) return false;
+
+  sync_read_param.addr = 102;
+  sync_read_param.length = 2;
+  sync_read_param.id_count = JOINT_MOTOR_NUM_MAX;
+
+  if(dxl.syncRead(sync_read_param, read_result)){
+    for (int i=0; i<sync_read_param.id_count; i++) {
+      memcpy(&current_info.value[i], read_result.xel[i].data, read_result.xel[i].length);
+    }
+    ret = true;
+  }
+
+  return ret;
+}
+
+bool OpenManipulatorDriver::write_goal_position_joint(joint_position_info_t &position_info)
 {
   bool ret = false;
 
@@ -265,8 +292,9 @@ bool OpenManipulatorDriver::write_goal_position(joint_position_info_t &position_
 
   sync_write_param.addr = 116;
   sync_write_param.length = 4;
+  sync_write_param.id_count = JOINT_MOTOR_NUM_MAX - 1;
 
-  for (int i=0; i<JOINT_MOTOR_NUM_MAX; i++) {
+  for (int i=0; i<sync_write_param.id_count; i++) {
     memcpy(sync_write_param.xel[i].data, &position_info.value[i], sync_write_param.length);
   }
 
@@ -277,7 +305,7 @@ bool OpenManipulatorDriver::write_goal_position(joint_position_info_t &position_
   return ret;
 }
 
-bool OpenManipulatorDriver::write_profile_acceleration(joint_accel_info_t &accel_info)
+bool OpenManipulatorDriver::write_profile_acceleration_joint(joint_accel_info_t &accel_info)
 {
   bool ret = false;
 
@@ -285,8 +313,9 @@ bool OpenManipulatorDriver::write_profile_acceleration(joint_accel_info_t &accel
 
   sync_write_param.addr = 108;
   sync_write_param.length = 4;
+  sync_write_param.id_count = JOINT_MOTOR_NUM_MAX - 1;
 
-  for (int i=0; i<JOINT_MOTOR_NUM_MAX; i++) {
+  for (int i=0; i<sync_write_param.id_count; i++) {
     memcpy(sync_write_param.xel[i].data, &accel_info.value[i], sync_write_param.length);
   }
 
@@ -297,7 +326,7 @@ bool OpenManipulatorDriver::write_profile_acceleration(joint_accel_info_t &accel
   return ret;
 }
 
-bool OpenManipulatorDriver::write_profile_velocity(joint_accel_info_t &accel_info)
+bool OpenManipulatorDriver::write_profile_velocity_joint(joint_accel_info_t &accel_info)
 {
   bool ret = false;
 
@@ -305,14 +334,80 @@ bool OpenManipulatorDriver::write_profile_velocity(joint_accel_info_t &accel_inf
 
   sync_write_param.addr = 112;
   sync_write_param.length = 4;
+  sync_write_param.id_count = JOINT_MOTOR_NUM_MAX - 1;
 
-  for (int i=0; i<JOINT_MOTOR_NUM_MAX; i++) {
+  for (int i=0; i<sync_write_param.id_count; i++) {
     memcpy(sync_write_param.xel[i].data, &accel_info.value[i], sync_write_param.length);
   }
 
   if(dxl.syncWrite(sync_write_param)){
     ret = true;
   }
+
+  return ret;
+}
+
+bool OpenManipulatorDriver::write_goal_current_joint(joint_current_info_t &current_info)
+{
+  bool ret = false;
+
+  if (is_ready() == false) return false;
+
+  sync_write_param.addr = 102;
+  sync_write_param.length = 2;
+  sync_write_param.id_count = JOINT_MOTOR_NUM_MAX - 1;
+
+  for (int i=0; i<sync_write_param.id_count; i++) {
+    memcpy(sync_write_param.xel[i].data, &current_info.value[i], sync_write_param.length);
+  }
+
+  if(dxl.syncWrite(sync_write_param)){
+    ret = true;
+  }
+
+  return ret;
+}
+
+bool OpenManipulatorDriver::write_goal_position_gripper(joint_position_info_t &position_info)
+{
+  bool ret = false;
+
+  if (is_ready() == false) return false;
+
+  ret = dxl.writeControlTableItem(ControlTableItem::GOAL_POSITION, motor_id_[GRIPPER], position_info.value[GRIPPER]);
+
+  return ret;
+}
+
+bool OpenManipulatorDriver::write_profile_acceleration_gripper(joint_accel_info_t &accel_info)
+{
+  bool ret = false;
+
+  if (is_ready() == false) return false;
+
+  ret = dxl.writeControlTableItem(ControlTableItem::PROFILE_ACCELERATION, motor_id_[GRIPPER], accel_info.value[GRIPPER]);
+
+  return ret;
+}
+
+bool OpenManipulatorDriver::write_profile_velocity_gripper(joint_accel_info_t &accel_info)
+{
+  bool ret = false;
+
+  if (is_ready() == false) return false;
+
+  ret = dxl.writeControlTableItem(ControlTableItem::PROFILE_VELOCITY, motor_id_[GRIPPER], accel_info.value[GRIPPER]);
+
+  return ret;
+}
+
+bool OpenManipulatorDriver::write_goal_current_gripper(joint_current_info_t &current_info)
+{
+  bool ret = false;
+
+  if (is_ready() == false) return false;
+
+  ret = dxl.writeControlTableItem(ControlTableItem::GOAL_CURRENT, motor_id_[GRIPPER], current_info.value[GRIPPER]);
 
   return ret;
 }

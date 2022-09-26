@@ -197,8 +197,9 @@ enum ControlTableItemAddr{
   ADDR_GOAL_POSITION_JOINT_3    = 208,
   ADDR_GOAL_POSITION_JOINT_4    = 212,
   ADDR_GOAL_POSITION_GRIPPER    = 216,
-  ADDR_GOAL_POSITION_UPDATE_WR  = 220,
-  ADDR_GOAL_POSITION_UPDATE_RD  = 221,
+  ADDR_GOAL_POSITION_WR_JOINT   = 220,
+  ADDR_GOAL_POSITION_WR_GRIPPER = 221,
+  ADDR_GOAL_POSITION_RD         = 222,
 
   ADDR_PRESENT_POSITION_JOINT_1 = 224,
   ADDR_PRESENT_POSITION_JOINT_2 = 228,
@@ -223,16 +224,27 @@ enum ControlTableItemAddr{
   ADDR_PROFILE_ACC_JOINT_3      = 292,
   ADDR_PROFILE_ACC_JOINT_4      = 296,
   ADDR_PROFILE_ACC_GRIPPER      = 300,
-  ADDR_PROFILE_ACC_UPDATE_WR    = 304,
-  ADDR_PROFILE_ACC_UPDATE_RD    = 305,
+  ADDR_PROFILE_ACC_WR_JOINT     = 304,
+  ADDR_PROFILE_ACC_WR_GRIPPER   = 305,
+  ADDR_PROFILE_ACC_RD           = 306,
 
   ADDR_PROFILE_VEL_JOINT_1      = 308,
   ADDR_PROFILE_VEL_JOINT_2      = 312,
   ADDR_PROFILE_VEL_JOINT_3      = 316,
   ADDR_PROFILE_VEL_JOINT_4      = 320,
   ADDR_PROFILE_VEL_GRIPPER      = 324,
-  ADDR_PROFILE_VEL_UPDATE_WR    = 328,
-  ADDR_PROFILE_VEL_UPDATE_RD    = 329,
+  ADDR_PROFILE_VEL_WR_JOINT     = 328,
+  ADDR_PROFILE_VEL_WR_GRIPPER   = 329,
+  ADDR_PROFILE_VEL_RD           = 330,
+
+  ADDR_GOAL_CURRENT_JOINT_1     = 332,
+  ADDR_GOAL_CURRENT_JOINT_2     = 334,
+  ADDR_GOAL_CURRENT_JOINT_3     = 336,
+  ADDR_GOAL_CURRENT_JOINT_4     = 338,
+  ADDR_GOAL_CURRENT_GRIPPER     = 340,  
+  ADDR_GOAL_CURRENT_WR_JOINT    = 342,
+  ADDR_GOAL_CURRENT_WR_GRIPPER  = 343,
+  ADDR_GOAL_CURRENT_RD          = 344,
 
 };
 
@@ -284,13 +296,23 @@ typedef struct ControlItemVariables{
   joint_current_info_t joint_present_current;
   joint_accel_info_t joint_profile_acc;
   joint_accel_info_t joint_profile_vel;
+  joint_current_info_t joint_goal_current;
 
-  bool joint_goal_position_update_wr;
-  bool joint_goal_position_update_rd;
-  bool joint_profile_acc_update_wr;
-  bool joint_profile_acc_update_rd;
-  bool joint_profile_vel_update_wr;
-  bool joint_profile_vel_update_rd;
+  bool joint_goal_position_wr_joint;
+  bool joint_goal_position_wr_gripper;
+  bool joint_goal_position_rd;
+
+  bool joint_profile_acc_wr_joint;
+  bool joint_profile_acc_wr_gripper;
+  bool joint_profile_acc_rd;
+
+  bool joint_profile_vel_wr_joint;
+  bool joint_profile_vel_wr_gripper;
+  bool joint_profile_vel_rd;
+
+  bool joint_goal_current_wr_joint;
+  bool joint_goal_current_wr_gripper;
+  bool joint_goal_current_rd;
 
 }ControlItemVariables;
 
@@ -433,12 +455,18 @@ void TurtleBot3Core::begin(const char* model_name)
   dxl_slave.addControlItem(ADDR_PROFILE_ACC_R, control_items.profile_acceleration[MortorLocation::RIGHT]);
 
   if (p_tb3_model_info->has_manipulator == true) {
-    control_items.joint_goal_position_update_wr = false;
-    control_items.joint_goal_position_update_rd = false;
-    control_items.joint_profile_acc_update_wr = false;
-    control_items.joint_profile_acc_update_rd = false;
-    control_items.joint_profile_vel_update_wr = false;
-    control_items.joint_profile_vel_update_rd = false;
+    control_items.joint_goal_position_wr_joint = false;
+    control_items.joint_goal_position_wr_gripper = false;
+    control_items.joint_goal_position_rd = false;
+    control_items.joint_profile_acc_wr_joint = false;
+    control_items.joint_profile_acc_wr_gripper = false;
+    control_items.joint_profile_acc_rd = false;
+    control_items.joint_profile_vel_wr_joint = false;
+    control_items.joint_profile_vel_wr_gripper = false;
+    control_items.joint_profile_vel_rd = false;
+    control_items.joint_goal_current_wr_joint = false;
+    control_items.joint_goal_current_wr_gripper = false;
+    control_items.joint_goal_current_rd = false;
 
     // Items to joint motors
     dxl_slave.addControlItem(ADDR_TORQUE_JOINT, control_items.joint_torque_enable_state);
@@ -448,8 +476,9 @@ void TurtleBot3Core::begin(const char* model_name)
     dxl_slave.addControlItem(ADDR_GOAL_POSITION_JOINT_3, control_items.joint_goal_position.value[JOINT_3]);
     dxl_slave.addControlItem(ADDR_GOAL_POSITION_JOINT_4, control_items.joint_goal_position.value[JOINT_4]);
     dxl_slave.addControlItem(ADDR_GOAL_POSITION_GRIPPER, control_items.joint_goal_position.value[GRIPPER]);
-    dxl_slave.addControlItem(ADDR_GOAL_POSITION_UPDATE_WR, control_items.joint_goal_position_update_wr);
-    dxl_slave.addControlItem(ADDR_GOAL_POSITION_UPDATE_RD, control_items.joint_goal_position_update_rd);
+    dxl_slave.addControlItem(ADDR_GOAL_POSITION_WR_JOINT, control_items.joint_goal_position_wr_joint);
+    dxl_slave.addControlItem(ADDR_GOAL_POSITION_WR_GRIPPER, control_items.joint_goal_position_wr_gripper);
+    dxl_slave.addControlItem(ADDR_GOAL_POSITION_RD, control_items.joint_goal_position_rd);
 
     dxl_slave.addControlItem(ADDR_PRESENT_POSITION_JOINT_1, control_items.joint_present_position.value[JOINT_1]);
     dxl_slave.addControlItem(ADDR_PRESENT_POSITION_JOINT_2, control_items.joint_present_position.value[JOINT_2]);
@@ -474,16 +503,27 @@ void TurtleBot3Core::begin(const char* model_name)
     dxl_slave.addControlItem(ADDR_PROFILE_ACC_JOINT_3, control_items.joint_profile_acc.value[JOINT_3]);
     dxl_slave.addControlItem(ADDR_PROFILE_ACC_JOINT_4, control_items.joint_profile_acc.value[JOINT_4]);
     dxl_slave.addControlItem(ADDR_PROFILE_ACC_GRIPPER, control_items.joint_profile_acc.value[GRIPPER]);
-    dxl_slave.addControlItem(ADDR_PROFILE_ACC_UPDATE_WR, control_items.joint_profile_acc_update_wr);
-    dxl_slave.addControlItem(ADDR_PROFILE_ACC_UPDATE_RD, control_items.joint_profile_acc_update_rd);
+    dxl_slave.addControlItem(ADDR_PROFILE_ACC_WR_JOINT, control_items.joint_profile_acc_wr_joint);
+    dxl_slave.addControlItem(ADDR_PROFILE_ACC_WR_GRIPPER, control_items.joint_profile_acc_wr_gripper);
+    dxl_slave.addControlItem(ADDR_PROFILE_ACC_RD, control_items.joint_profile_acc_rd);
 
     dxl_slave.addControlItem(ADDR_PROFILE_VEL_JOINT_1, control_items.joint_profile_vel.value[JOINT_1]);
     dxl_slave.addControlItem(ADDR_PROFILE_VEL_JOINT_2, control_items.joint_profile_vel.value[JOINT_2]);
     dxl_slave.addControlItem(ADDR_PROFILE_VEL_JOINT_3, control_items.joint_profile_vel.value[JOINT_3]);
     dxl_slave.addControlItem(ADDR_PROFILE_VEL_JOINT_4, control_items.joint_profile_vel.value[JOINT_4]);
     dxl_slave.addControlItem(ADDR_PROFILE_VEL_GRIPPER, control_items.joint_profile_vel.value[GRIPPER]);
-    dxl_slave.addControlItem(ADDR_PROFILE_VEL_UPDATE_WR, control_items.joint_profile_vel_update_wr);
-    dxl_slave.addControlItem(ADDR_PROFILE_VEL_UPDATE_RD, control_items.joint_profile_vel_update_rd);
+    dxl_slave.addControlItem(ADDR_PROFILE_VEL_WR_JOINT, control_items.joint_profile_vel_wr_joint);
+    dxl_slave.addControlItem(ADDR_PROFILE_VEL_WR_GRIPPER, control_items.joint_profile_vel_wr_gripper);
+    dxl_slave.addControlItem(ADDR_PROFILE_VEL_RD, control_items.joint_profile_vel_rd);
+
+    dxl_slave.addControlItem(ADDR_GOAL_CURRENT_JOINT_1, control_items.joint_goal_current.value[JOINT_1]);
+    dxl_slave.addControlItem(ADDR_GOAL_CURRENT_JOINT_2, control_items.joint_goal_current.value[JOINT_2]);
+    dxl_slave.addControlItem(ADDR_GOAL_CURRENT_JOINT_3, control_items.joint_goal_current.value[JOINT_3]);
+    dxl_slave.addControlItem(ADDR_GOAL_CURRENT_JOINT_4, control_items.joint_goal_current.value[JOINT_4]);
+    dxl_slave.addControlItem(ADDR_GOAL_CURRENT_GRIPPER, control_items.joint_goal_current.value[GRIPPER]);
+    dxl_slave.addControlItem(ADDR_GOAL_CURRENT_WR_JOINT, control_items.joint_goal_current_wr_joint);
+    dxl_slave.addControlItem(ADDR_GOAL_CURRENT_WR_GRIPPER, control_items.joint_goal_current_wr_gripper);
+    dxl_slave.addControlItem(ADDR_GOAL_CURRENT_RD, control_items.joint_goal_current_rd);    
   }
 
 
@@ -796,48 +836,97 @@ static void dxl_slave_write_callback_func(uint16_t item_addr, uint8_t &dxl_err_c
       manipulator_driver.set_torque(control_items.joint_torque_enable_state);
       break;
 
-    case ADDR_GOAL_POSITION_UPDATE_WR:
-      if (get_connection_state_with_ros2_node() == true && control_items.joint_goal_position_update_wr == true) {
-        manipulator_driver.write_goal_position(control_items.joint_goal_position);
+    // ADDR_GOAL_POSITION
+    //
+    case ADDR_GOAL_POSITION_WR_JOINT:
+      if (get_connection_state_with_ros2_node() == true && control_items.joint_goal_position_wr_joint == true) {
+        manipulator_driver.write_goal_position_joint(control_items.joint_goal_position);
       }
-      control_items.joint_goal_position_update_wr = false;
+      control_items.joint_goal_position_wr_joint = false;
       break;
 
-    case ADDR_GOAL_POSITION_UPDATE_RD:
-      if (control_items.joint_goal_position_update_rd == true) {
+    case ADDR_GOAL_POSITION_WR_GRIPPER:
+      if (get_connection_state_with_ros2_node() == true && control_items.joint_goal_position_wr_gripper == true) {
+        manipulator_driver.write_goal_position_gripper(control_items.joint_goal_position);
+      }
+      control_items.joint_goal_position_wr_gripper = false;
+      break;
+
+    case ADDR_GOAL_POSITION_RD:
+      if (control_items.joint_goal_position_rd == true) {
         manipulator_driver.read_goal_position(control_items.joint_goal_position);
       }
-      control_items.joint_goal_position_update_rd = false;
+      control_items.joint_goal_position_rd = false;
       break;
 
-    case ADDR_PROFILE_ACC_UPDATE_WR:
-      if (get_connection_state_with_ros2_node() == true && control_items.joint_profile_acc_update_wr == true) {
-        manipulator_driver.write_profile_acceleration(control_items.joint_profile_acc);
+    // ADDR_PROFILE_ACC
+    //
+    case ADDR_PROFILE_ACC_WR_JOINT:
+      if (get_connection_state_with_ros2_node() == true && control_items.joint_profile_acc_wr_joint == true) {
+        manipulator_driver.write_profile_acceleration_joint(control_items.joint_profile_acc);
       }
-      control_items.joint_profile_acc_update_wr = false;
+      control_items.joint_profile_acc_wr_joint = false;
       break;      
 
-    case ADDR_PROFILE_ACC_UPDATE_RD:
-      if (control_items.joint_profile_acc_update_rd == true) {
+    case ADDR_PROFILE_ACC_WR_GRIPPER:
+      if (get_connection_state_with_ros2_node() == true && control_items.joint_profile_acc_wr_gripper == true) {
+        manipulator_driver.write_profile_acceleration_gripper(control_items.joint_profile_acc);
+      }
+      control_items.joint_profile_acc_wr_joint = false;
+      break;      
+
+    case ADDR_PROFILE_ACC_RD:
+      if (control_items.joint_profile_acc_rd == true) {
         manipulator_driver.read_profile_acceleration(control_items.joint_profile_acc);
       }
-      control_items.joint_profile_acc_update_rd = false;
+      control_items.joint_profile_acc_rd = false;
       break;     
 
-    case ADDR_PROFILE_VEL_UPDATE_WR:
-      if (get_connection_state_with_ros2_node() == true && control_items.joint_profile_vel_update_wr == true) {
-        manipulator_driver.write_profile_velocity(control_items.joint_profile_vel);
+    // ADDR_PROFILE_VEL
+    //
+    case ADDR_PROFILE_VEL_WR_JOINT:
+      if (get_connection_state_with_ros2_node() == true && control_items.joint_profile_vel_wr_joint == true) {
+        manipulator_driver.write_profile_velocity_joint(control_items.joint_profile_vel);
       }
-      control_items.joint_profile_vel_update_wr = false;
+      control_items.joint_profile_vel_wr_joint = false;
       break;      
 
-    case ADDR_PROFILE_VEL_UPDATE_RD:
-      if (control_items.joint_profile_vel_update_rd == true) {
+    case ADDR_PROFILE_VEL_WR_GRIPPER:
+      if (get_connection_state_with_ros2_node() == true && control_items.joint_profile_vel_wr_gripper == true) {
+        manipulator_driver.write_profile_velocity_gripper(control_items.joint_profile_vel);
+      }
+      control_items.joint_profile_vel_wr_gripper = false;
+      break;   
+
+    case ADDR_PROFILE_VEL_RD:
+      if (control_items.joint_profile_vel_rd == true) {
         manipulator_driver.read_profile_velocity(control_items.joint_profile_vel);
       }
-      control_items.joint_profile_vel_update_rd = false;
+      control_items.joint_profile_vel_rd = false;
       break;      
 
+    // ADDR_GOAL_CURRENT
+    //
+    case ADDR_GOAL_CURRENT_WR_JOINT:
+      if (get_connection_state_with_ros2_node() == true && control_items.joint_goal_current_wr_joint == true) {
+        manipulator_driver.write_goal_current_joint(control_items.joint_goal_current);
+      }
+      control_items.joint_goal_current_wr_joint = false;
+      break;      
+
+    case ADDR_GOAL_CURRENT_WR_GRIPPER:
+      if (get_connection_state_with_ros2_node() == true && control_items.joint_goal_current_wr_gripper == true) {
+        manipulator_driver.write_goal_current_gripper(control_items.joint_goal_current);
+      }
+      control_items.joint_goal_current_wr_gripper = false;
+      break;   
+
+    case ADDR_GOAL_CURRENT_RD:
+      if (control_items.joint_goal_current_rd == true) {
+        manipulator_driver.read_goal_current(control_items.joint_goal_current);
+      }
+      control_items.joint_goal_current_rd = false;
+      break;        
   }
 }
 
