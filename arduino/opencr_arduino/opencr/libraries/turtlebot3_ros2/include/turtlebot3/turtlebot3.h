@@ -22,6 +22,7 @@
 #include "turtlebot3_sensor.h"
 #include "turtlebot3_controller.h"
 #include "turtlebot3_diagnosis.h"
+#include "open_manipulator_driver.h"
 
 #define DEBUG_ENABLE 1
 
@@ -35,7 +36,7 @@
   #define DEBUG_PRINTLN(x) 
 #endif
 
-const uint8_t FIRMWARE_VER = 4; //Dynamixel2Arduino 0.3.0 or higher is required.
+const uint8_t FIRMWARE_VER = 5; //DYNAMIXEL2Arduino v0.6.1 or higher is required.
 const uint32_t INTERVAL_MS_TO_CONTROL_MOTOR = 20;
 const uint32_t INTERVAL_MS_TO_UPDATE_CONTROL_ITEM = 20;
 
