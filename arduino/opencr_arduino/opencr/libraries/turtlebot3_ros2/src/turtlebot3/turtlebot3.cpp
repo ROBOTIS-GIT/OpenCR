@@ -188,8 +188,6 @@ enum ControlTableItemAddr{
   ADDR_PROFILE_ACC_L      = 174,
   ADDR_PROFILE_ACC_R      = 178,
 
-
-
   ADDR_TORQUE_JOINT             = 199,
 
   ADDR_GOAL_POSITION_JOINT_1    = 200,
@@ -348,7 +346,7 @@ void TurtleBot3Core::begin(const char* model_name)
   bool ret; (void)ret;
   DEBUG_SERIAL_BEGIN(57600);
   DEBUG_PRINTLN(" ");
-  DEBUG_PRINTLN("Revision : V220906R2");
+  DEBUG_PRINTLN("Version : V221004R1");
   DEBUG_PRINTLN("Begin Start...");
 
   // Setting for Dynamixel motors
@@ -525,10 +523,6 @@ void TurtleBot3Core::begin(const char* model_name)
     dxl_slave.addControlItem(ADDR_GOAL_CURRENT_WR_GRIPPER, control_items.joint_goal_current_wr_gripper);
     dxl_slave.addControlItem(ADDR_GOAL_CURRENT_RD, control_items.joint_goal_current_rd);    
   }
-
-
-
-
 
   // Set user callback function for processing write command from master.
   dxl_slave.setWriteCallbackFunc(dxl_slave_write_callback_func);
