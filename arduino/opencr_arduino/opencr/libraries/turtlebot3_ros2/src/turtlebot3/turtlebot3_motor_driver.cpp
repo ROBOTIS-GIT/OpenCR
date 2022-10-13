@@ -77,6 +77,11 @@ bool Turtlebot3MotorDriver::init(void)
   return true;
 }
 
+Dynamixel2Arduino& Turtlebot3MotorDriver::getDxl()
+{
+  return dxl;
+}
+
 bool Turtlebot3MotorDriver::is_connected()
 {
   return (dxl.ping(DXL_MOTOR_ID_LEFT) == true && dxl.ping(DXL_MOTOR_ID_RIGHT) == true);

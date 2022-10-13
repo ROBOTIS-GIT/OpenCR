@@ -43,7 +43,7 @@ int main( int argc, const char **argv )
   long baud;
 
 
-  printf("opencr_ld_shell ver 1.0.0\n");
+  printf("opencr_ld_shell ver 1.0.1\n");
 
   if (argc == 5 && strcmp(argv[ 1 ], "make") == 0)
   {

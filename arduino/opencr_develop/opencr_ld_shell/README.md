@@ -1,20 +1,5 @@
-Burger
-=======
-```
-export OPENCR_PORT=/dev/ttyACM0
-export OPENCR_MODEL=burger
-rm -rf ./opencr_update.tar.bz2
-wget https://github.com/ROBOTIS-GIT/OpenCR/raw/develop/arduino/opencr_release/shell_update/opencr_update.tar.bz2 && tar -xvf opencr_update.tar.bz2 && cd ./opencr_update && ./update.sh $OPENCR_PORT $OPENCR_MODEL.opencr && cd ..
-```
+Please refer to the TurtleBot3 eManual Quick Start Guide > OpenCR Setup section below.
 
-Waffle
-=======
-```
-export OPENCR_PORT=/dev/ttyACM0
-export OPENCR_MODEL=waffle
-rm -rf ./opencr_update.tar.bz2
-wget https://github.com/ROBOTIS-GIT/OpenCR/raw/develop/arduino/opencr_release/shell_update/opencr_update.tar.bz2 && tar -xvf opencr_update.tar.bz2 && cd ./opencr_update && ./update.sh $OPENCR_PORT $OPENCR_MODEL.opencr && cd ..
-```
+Select the correct ROS distribution first.
 
-
-
+https://emanual.robotis.com/docs/en/platform/turtlebot3/opencr_setup/#opencr-setup

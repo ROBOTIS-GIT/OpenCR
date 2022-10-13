@@ -722,7 +722,7 @@ err_code_t cmd_flash_fw_erase( uint32_t length )
 
   if( resp == 1 )
   {
-    if( msg_get_resp(0, &rx_msg, 3000) == TRUE )
+    if( msg_get_resp(0, &rx_msg, 5000) == TRUE )
     {
       mavlink_msg_ack_decode( &rx_msg, &ack_msg);
 
