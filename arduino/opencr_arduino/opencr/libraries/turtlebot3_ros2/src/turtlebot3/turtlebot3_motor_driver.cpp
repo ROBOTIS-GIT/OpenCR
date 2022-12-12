@@ -16,10 +16,13 @@
 
 #include "../../include/turtlebot3/turtlebot3_motor_driver.h"
 
-// Limit values (XM430-W210-T and XM430-W350-T)
-// MAX RPM is 77 when DXL is powered 12.0V
+// Limit values (XM430-W210-T and XM430-250-T)
+// Need to set for lower value since motor will ignore values past limit
+// MAX RPM for W210 (Waffle) is 77 RPM @12.0V
+// MAX RPM for W250 (Burger) is 61 RPM @12.0V
 // 77 / 0.229 (RPM) = 336.24454...
-const uint16_t LIMIT_X_MAX_VELOCITY = 337; 
+// 61 / 0.229 (RPM) = 266.3755...
+const uint16_t LIMIT_X_MAX_VELOCITY = 265; 
 // V = r * w = r     *        (RPM             * 0.10472)
 //           = 0.033 * (0.229 * Goal_Velocity) * 0.10472
 // Goal_Velocity = V * 1263.632956882
@@ -42,7 +45,9 @@ Dynamixel2Arduino dxl(Serial3, OPENCR_DXL_DIR_PIN);
 Turtlebot3MotorDriver::Turtlebot3MotorDriver()
 : left_wheel_id_(DXL_MOTOR_ID_LEFT),
   right_wheel_id_(DXL_MOTOR_ID_RIGHT),
-  torque_(false)
+  torque_(false),
+  right_velocity_limit_(LIMIT_X_MAX_VELOCITY),
+  left_velocity_limit_(LIMIT_X_MAX_VELOCITY)
 {
 }
 
@@ -73,6 +78,7 @@ bool Turtlebot3MotorDriver::init(void)
 
   // Enable Dynamixel Torque
   set_torque(true);
+  read_max_velocity(this->left_velocity_limit_, this->right_velocity_limit_);
 
   return true;
 }
@@ -169,7 +175,21 @@ bool Turtlebot3MotorDriver::read_present_current(int16_t &left_value, int16_t &r
 
   return ret;
 }
+bool Turtlebot3MotorDriver::read_max_velocity(int16_t &left_value, int16_t &right_value)
+{
+  bool ret = false;
 
+  sync_read_param.addr = 44;
+  sync_read_param.length = 4;
+
+  if(dxl.syncRead(sync_read_param, read_result)){
+    memcpy(&left_value, read_result.xel[LEFT].data, read_result.xel[LEFT].length);
+    memcpy(&right_value, read_result.xel[RIGHT].data, read_result.xel[RIGHT].length);
+    ret = true;
+  }
+
+  return ret;
+}
 bool Turtlebot3MotorDriver::read_profile_acceleration(uint32_t &left_value, uint32_t &right_value)
 {
   bool ret = false;
@@ -230,8 +250,9 @@ bool Turtlebot3MotorDriver::control_motors(const float wheel_separation, float l
   wheel_velocity[LEFT]   = lin_vel - (ang_vel * wheel_separation / 2);
   wheel_velocity[RIGHT]  = lin_vel + (ang_vel * wheel_separation / 2);
 
-  wheel_velocity[LEFT]  = constrain(wheel_velocity[LEFT]  * VELOCITY_CONSTANT_VALUE, -LIMIT_X_MAX_VELOCITY, LIMIT_X_MAX_VELOCITY);
-  wheel_velocity[RIGHT] = constrain(wheel_velocity[RIGHT] * VELOCITY_CONSTANT_VALUE, -LIMIT_X_MAX_VELOCITY, LIMIT_X_MAX_VELOCITY);
+
+  wheel_velocity[LEFT]  = constrain(wheel_velocity[LEFT]  * VELOCITY_CONSTANT_VALUE, (float)-this->left_velocity_limit_, (float) this->left_velocity_limit_);
+  wheel_velocity[RIGHT] = constrain(wheel_velocity[RIGHT] * VELOCITY_CONSTANT_VALUE, (float) -this->right_velocity_limit_, (float) this->right_velocity_limit_);
 
   dxl_comm_result = write_velocity((int32_t)wheel_velocity[LEFT], (int32_t)wheel_velocity[RIGHT]);
   if (dxl_comm_result == false)
