@@ -46,13 +46,13 @@ class USBSerial : public Stream {
     void begin(uint32_t baud_count, uint8_t config);
     void end(void);
 
-    virtual int available(void);
+    virtual int available(void) override;
     //virtual void accept(void);
-    virtual int peek(void);
-    virtual int read(void);
-    virtual void flush(void);
-    virtual size_t write(uint8_t c);
-    virtual size_t write(const uint8_t *buffer, size_t size);
+    virtual int peek(void) override;
+    virtual int read(void) override;
+    virtual void flush(void) override;
+    virtual size_t write(uint8_t c) override;
+    virtual size_t write(const uint8_t *buffer, size_t size) override;
     using Print::write; // pull in write(str) from Print
     operator bool();
 
