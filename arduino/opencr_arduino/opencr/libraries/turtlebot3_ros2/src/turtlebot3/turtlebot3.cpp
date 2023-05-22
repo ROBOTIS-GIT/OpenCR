@@ -58,6 +58,24 @@ static const TB3ModelInfo waffle_with_manipulator_info = {
   0.220,
   true,
 };
+static const TB3ModelInfo eurobot_MAMUT_twin ={
+  "eurobotMAMUTtwin",
+  4,
+  0.033,
+  0.210,
+  0.105,
+  0.130,
+  true,
+};
+static const TB3ModelInfo eurobot_MAMUT_Bb ={
+  "eurobotMAMUTBig",
+  5, 
+  0.033,
+  0.264,
+  0.132,
+  0.162,
+  true,
+};
 
 
 /*******************************************************************************
@@ -333,7 +351,13 @@ void TurtleBot3Core::begin(const char* model_name)
   }else if(strcmp(model_name, "Waffle_OpenManipulator") == 0){
     p_tb3_model_info = &waffle_with_manipulator_info;
     model_motor_rpm = 77;
-  }else{
+  }else if(strcmp(model_name, "eurobotMAMUTtwin")==0){
+    p_tb3_model_info = &eurobot_MAMUT_twin;
+    model_motor_rpm = 77;
+  }else if(strcmp(model_name,"eurobotMAMUTBig")==0){
+    p_tb3_model_info = &eurobot_MAMUT_Bb;
+    model_motor_rpm = 77;
+  } else{
     p_tb3_model_info = &burger_info;
     model_motor_rpm = 61;
   }
@@ -362,8 +386,7 @@ void TurtleBot3Core::begin(const char* model_name)
   ret = controllers.init(max_linear_velocity, max_angular_velocity);
   DEBUG_PRINTLN(ret==true?"RC100 Controller setup completed.":"RC100 Controller setup failed.");
 
-  if (p_tb3_model_info->has_manipulator == true)
-  {    
+  if (p_tb3_model_info->has_manipulator == true){    
     ret = manipulator_driver.init();
     DEBUG_PRINTLN(ret==true?"Manipulator driver setup completed.":"Manipulator driver setup failed.");
   }
@@ -374,10 +397,7 @@ void TurtleBot3Core::begin(const char* model_name)
   control_items.debug_mode = false;
   control_items.is_connect_ros2_node = false;
   control_items.is_connect_manipulator = false;  
-
-  // Port begin
   dxl_slave.begin();
-  // Init DXL Slave function
   dxl_slave.setPortProtocolVersion(PROTOCOL_VERSION_DXL_SLAVE);
   dxl_slave.setFirmwareVersion(FIRMWARE_VER);
   dxl_slave.setID(ID_DXL_SLAVE);
