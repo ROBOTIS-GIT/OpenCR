@@ -632,8 +632,7 @@ void TurtleBot3Core::run()
   dxl_slave.processPacket();
 
   /* For controlling DYNAMIXEL motors (Wheels) */  
-  if (millis()-pre_time_to_control_motor >= INTERVAL_MS_TO_CONTROL_MOTOR)
-  {
+  if (millis()-pre_time_to_control_motor >= INTERVAL_MS_TO_CONTROL_MOTOR){
     pre_time_to_control_motor = millis();
     if(get_connection_state_with_ros2_node() == false){
       memset(goal_velocity_from_cmd, 0, sizeof(goal_velocity_from_cmd));
@@ -662,13 +661,11 @@ void update_goal_velocity_from_3values(void)
 /*******************************************************************************
 * Function definition for updating control items in TB3.
 *******************************************************************************/
-float map_float(float x, float in_min, float in_max, float out_min, float out_max)
-{
+float map_float(float x, float in_min, float in_max, float out_min, float out_max){
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-void update_times(uint32_t interval_ms)
-{
+void update_times(uint32_t interval_ms){
   static uint32_t pre_time = 0;
 
   if(millis() - pre_time >= interval_ms){
@@ -679,8 +676,7 @@ void update_times(uint32_t interval_ms)
   } 
 }
 
-void update_gpios(uint32_t interval_ms)
-{
+void update_gpios(uint32_t interval_ms){
   static uint32_t pre_time = 0;
 
   if(millis() - pre_time >= interval_ms){
@@ -699,8 +695,7 @@ void update_gpios(uint32_t interval_ms)
   }  
 }
 
-void update_battery_status(uint32_t interval_ms)
-{
+void update_battery_status(uint32_t interval_ms){
   static uint32_t pre_time = 0;
   float bat_voltage, bat_percent;
 
@@ -717,8 +712,7 @@ void update_battery_status(uint32_t interval_ms)
   }
 }
 
-void update_analog_sensors(uint32_t interval_ms)
-{
+void update_analog_sensors(uint32_t interval_ms){
   static uint32_t pre_time = 0;
 
   if(millis() - pre_time >= interval_ms){
@@ -730,8 +724,7 @@ void update_analog_sensors(uint32_t interval_ms)
   }
 }
 
-void update_imu(uint32_t interval_ms)
-{
+void update_imu(uint32_t interval_ms){
   static uint32_t pre_time = 0;
   float* p_imu_data;
 
@@ -777,8 +770,7 @@ void update_motor_status(uint32_t interval_ms)
   }  
 }
 
-void update_joint_status(uint32_t interval_ms)
-{
+void update_joint_status(uint32_t interval_ms){
   static uint32_t pre_time;
 
   if(millis() - pre_time >= interval_ms){
@@ -798,12 +790,10 @@ void update_joint_status(uint32_t interval_ms)
 /*******************************************************************************
 * Callback function definition to be used in communication with the ROS2 node.
 *******************************************************************************/
-static void dxl_slave_write_callback_func(uint16_t item_addr, uint8_t &dxl_err_code, void* arg)
-{
+static void dxl_slave_write_callback_func(uint16_t item_addr, uint8_t &dxl_err_code, void* arg){
   (void)arg;
 
-  switch(item_addr)
-  {
+  switch(item_addr){
     case ADDR_MODEL_INFORM:
       control_items.model_inform = p_tb3_model_info->model_info;
       dxl_err_code = DXL_ERR_ACCESS;
