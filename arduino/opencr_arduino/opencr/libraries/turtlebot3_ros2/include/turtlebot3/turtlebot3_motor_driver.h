@@ -52,6 +52,7 @@ class Turtlebot3MotorDriver
   bool read_present_velocity(int32_t &left_value, int32_t &right_value);
   bool read_present_current(int16_t &left_value, int16_t &right_value);
   bool read_profile_acceleration(uint32_t &left_value, uint32_t &right_value);
+  bool read_max_velocity(int16_t &left_value, int16_t &right_value);
   
   bool write_velocity(int32_t left_value, int32_t right_value);
   bool write_profile_acceleration(uint32_t left_value, uint32_t right_value);
@@ -64,6 +65,8 @@ class Turtlebot3MotorDriver
   uint8_t left_wheel_id_;
   uint8_t right_wheel_id_;
   bool torque_;
+  int16_t right_velocity_limit_;
+  int16_t left_velocity_limit_;
 };
 
 #endif // TURTLEBOT3_MOTOR_DRIVER_H_
