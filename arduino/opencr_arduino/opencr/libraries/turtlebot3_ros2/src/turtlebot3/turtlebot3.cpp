@@ -71,9 +71,9 @@ static float max_linear_velocity, min_linear_velocity;
 static float max_angular_velocity, min_angular_velocity;
 
 static float goal_velocity[VelocityType::TYPE_NUM_MAX] = {0.0, 0.0};
-static float goal_velocity_from_cmd[MortorLocation::MOTOR_NUM_MAX] = {0.0, 0.0};
-static float goal_velocity_from_rc100[MortorLocation::MOTOR_NUM_MAX] = {0.0, 0.0};
-static float goal_velocity_from_button[MortorLocation::MOTOR_NUM_MAX] = {0.0, 0.0};
+static float goal_velocity_from_cmd[VelocityType::TYPE_NUM_MAX] = {0.0, 0.0};
+static float goal_velocity_from_rc100[VelocityType::TYPE_NUM_MAX] = {0.0, 0.0};
+static float goal_velocity_from_button[VelocityType::TYPE_NUM_MAX] = {0.0, 0.0};
 
 static void update_goal_velocity_from_3values(void);
 static void test_motors_with_buttons(uint8_t buttons);
