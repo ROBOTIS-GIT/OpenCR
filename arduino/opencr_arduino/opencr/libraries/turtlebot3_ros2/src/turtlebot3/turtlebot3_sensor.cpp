@@ -16,6 +16,40 @@
 
 #include "../../include/turtlebot3/turtlebot3_sensor.h"
 
+enum SonarState {
+  IDLE = 0,
+  SENDING_PING,
+  WAITING_FOR_MEASURE,
+  MEASURING,
+  COOLING_DOWN
+};
+
+volatile SonarState sonar_state_;
+volatile float sonar_data_;
+volatile uint32_t sonar_t_;
+static uint32_t sonar_echo_;
+
+static void sonarEchoEnd(void)
+{
+  if(sonar_state_ == MEASURING)
+  {
+    const uint32_t t = micros();
+    sonar_data_ = t - sonar_t_;
+    sonar_state_ = COOLING_DOWN;
+    sonar_t_ = t;
+  }
+}
+
+static void sonarEchoStart(void)
+{
+  if(sonar_state_ == WAITING_FOR_MEASURE)
+  {
+    attachInterrupt(digitalPinToInterrupt(sonar_echo_), sonarEchoEnd, FALLING);
+    sonar_t_ = micros();
+    sonar_state_ = MEASURING;
+  }
+}
+
 Turtlebot3Sensor::Turtlebot3Sensor()
 {
 }
@@ -287,46 +321,70 @@ float Turtlebot3Sensor::getIRsensorData(void)
 
 void Turtlebot3Sensor::initSonar(void)
 {
-  sonar_pin_.trig = BDPIN_GPIO_1;
-  sonar_pin_.echo = BDPIN_GPIO_2;
+  sonar_pin_.trig = 4;
+  sonar_pin_.echo = 2;
+  sonar_echo_ = sonar_pin_.echo;
 
   pinMode(sonar_pin_.trig, OUTPUT);
   pinMode(sonar_pin_.echo, INPUT);
+  digitalWrite(sonar_pin_.trig, LOW);
+
+  sonar_data_ = -1.0;
+  sonar_state_ = IDLE;
 }
 
-void Turtlebot3Sensor::updateSonar(uint32_t t)
+void Turtlebot3Sensor::updateSonar(void)
 {
-  static uint32_t t_time = 0;
-  static bool make_pulse = TRUE;
-  static bool get_duration = FALSE;
+  static const uint32_t ms = 1000;
+  static const uint32_t ping_timeout = 5*ms;
+  static const uint32_t pong_timeout = 20*ms;
+  static const uint32_t sonar_duration = 50*ms;  // SensorState message is at 20Hz
+  static uint32_t sonar_start_;
 
-  float distance = 0.0, duration = 0.0;
+  const uint32_t t = micros();
+  const uint32_t duration = t - sonar_t_;
 
-  if (make_pulse == TRUE)
+  if (sonar_state_ == IDLE)
   {
     digitalWrite(sonar_pin_.trig, HIGH);
-
-    if (t - t_time >= 10)
+    sonar_state_ = SENDING_PING;
+    sonar_start_ = t;
+    sonar_t_ = t;
+  }
+  else if (sonar_state_ == SENDING_PING)
+  {
+    if (duration >= 10)
     {
+      attachInterrupt(digitalPinToInterrupt(sonar_pin_.echo), sonarEchoStart, RISING);
+      sonar_state_ = WAITING_FOR_MEASURE;
       digitalWrite(sonar_pin_.trig, LOW);
-
-      get_duration = TRUE;
-      make_pulse = FALSE;
-
-      t_time = t;
+      sonar_t_ = t;
     }
   }
-
-  if (get_duration == TRUE)
+  else if(sonar_state_ == WAITING_FOR_MEASURE)
   {
-    duration = pulseIn(sonar_pin_.echo, HIGH);
-    distance = ((float)(340 * duration) / 10000) / 2;
-
-    make_pulse = TRUE;
-    get_duration = FALSE;
+    if (duration >= ping_timeout)
+    {
+      sonar_state_ = COOLING_DOWN;
+      sonar_data_ = -2.0;
+      sonar_t_ = t;
+    }
   }
-
-  sonar_data_ = distance;
+  else if (sonar_state_ == MEASURING)
+  {
+    if (duration >= pong_timeout)
+    {
+      sonar_state_ = COOLING_DOWN;
+      sonar_data_ = -3.0;
+    }
+  }
+  else if(sonar_state_ == COOLING_DOWN)
+  {
+    if (t >= sonar_start_ + sonar_duration)
+    {
+      sonar_state_ = IDLE;
+    }
+  }
 }
 
 float Turtlebot3Sensor::getSonarData(void)

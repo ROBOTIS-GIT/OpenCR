@@ -83,7 +83,7 @@ class Turtlebot3Sensor
 
   // Sonar sensor
   void initSonar(void);
-  void updateSonar(uint32_t t);
+  void updateSonar(void);
   float getSonarData(void);
 
   // Illumination sensor
@@ -98,8 +98,6 @@ class Turtlebot3Sensor
 
   LedPinArray led_pin_array_;
   SonarPin sonar_pin_;
-
-  float sonar_data_;
 
   bool is_melody_play_complete_;
   uint16_t melody_note_[8];

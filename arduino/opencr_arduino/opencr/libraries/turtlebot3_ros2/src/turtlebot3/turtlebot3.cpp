@@ -590,7 +590,7 @@ void TurtleBot3Core::run()
   // Update the IMU unit
   sensors.updateIMU();
   // Update sonar data
-  // TODO: sensors.updateSonar(t);
+  sensors.updateSonar();
   // Run buzzer if there is still melody to play.
   sensors.onMelody();
 
