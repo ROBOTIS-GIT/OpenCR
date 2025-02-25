@@ -43,17 +43,17 @@ class UARTClass : public HardwareSerial
     };
     UARTClass(uint8_t uart_num, uint8_t uart_mode, uint8_t *txBuffer, uint16_t tx_buffer_size);
     UARTClass(void);
-    void begin(const uint32_t dwBaudRate);
+    void begin(const uint32_t dwBaudRate) override;
     void begin(const uint32_t dwBaudRate, const UARTModes config);
-    void end(void);
-    int available(void);
+    void end(void) override;
+    int available(void) override;
     int availableForWrite(void);
-    int peek(void);
-    int read(void);
-    void flush(void);
+    int peek(void) override;
+    int read(void) override;
+    void flush(void) override;
     void flushRx( uint32_t timeout_ms );
-    size_t write(const uint8_t c);
-    size_t write(const uint8_t *buffer, size_t size); 
+    size_t write(const uint8_t c) override;
+    size_t write(const uint8_t *buffer, size_t size) override;
     using Print::write; // pull in write(str) and write(buf, size) from Print
 
 
@@ -64,7 +64,7 @@ class UARTClass : public HardwareSerial
     uint32_t getRxCnt(void);
     uint32_t getTxCnt(void);
 
-    operator bool() { return true; }; // UART always active
+    operator bool() override { return true; }; // UART always active
 
 
   protected:

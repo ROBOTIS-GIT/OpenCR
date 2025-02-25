@@ -56,17 +56,17 @@ public:
   // Returns 1 if the packet was sent successfully, 0 if there was an error
   virtual int endPacket() =0;
   // Write a single byte into the packet
-  virtual size_t write(uint8_t) =0;
+  virtual size_t write(uint8_t) override =0;
   // Write size bytes from buffer into the packet
-  virtual size_t write(const uint8_t *buffer, size_t size) =0;
+  virtual size_t write(const uint8_t *buffer, size_t size) override =0;
 
   // Start processing the next available incoming packet
   // Returns the size of the packet in bytes, or 0 if no packets are available
   virtual int parsePacket() =0;
   // Number of bytes remaining in the current packet
-  virtual int available() =0;
+  virtual int available() override =0;
   // Read a single byte from the current packet
-  virtual int read() =0;
+  virtual int read() override =0;
   // Read up to len bytes from the current packet and place them into buffer
   // Returns the number of bytes read, or 0 if none are available
   virtual int read(unsigned char* buffer, size_t len) =0;
@@ -74,8 +74,8 @@ public:
   // Returns the number of characters read, or 0 if none are available
   virtual int read(char* buffer, size_t len) =0;
   // Return the next byte from the current packet without moving on to the next byte
-  virtual int peek() =0;
-  virtual void flush() =0;	// Finish reading the current packet
+  virtual int peek() override =0;
+  virtual void flush() override =0;	// Finish reading the current packet
 
   // Return the IP address of the host who sent the current incoming packet
   virtual IPAddress remoteIP() =0;

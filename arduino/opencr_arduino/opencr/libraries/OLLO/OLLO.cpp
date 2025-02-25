@@ -390,7 +390,7 @@ int OLLO::read(int devNum, OlloDeviceIndex device_index, ColorIndex sub_index){ 
 		 digitalWrite(PORT1_SIG1, mMot_minus);
 		 digitalWrite(PORT1_SIG2, mMot_plus);
 		 delay(5); // after 20ms, read analog
-		 return (((int)analogRead(PORT1_ADC))/4);
+		 return (((int)analogRead(PORT1_ADC)));
 
 	case 2:
 		digitalWrite(PORT2_SIG1, mMot_minus);
@@ -402,13 +402,13 @@ int OLLO::read(int devNum, OlloDeviceIndex device_index, ColorIndex sub_index){ 
 		digitalWrite(PORT3_SIG1, mMot_minus);
 		digitalWrite(PORT3_SIG2, mMot_plus);
 		delay(5);
-		return ((int)analogRead(PORT3_ADC)/4);
+		return ((int)analogRead(PORT3_ADC));
 
 	case 4:
 		digitalWrite(PORT4_SIG1, mMot_minus);
 		digitalWrite(PORT4_SIG2, mMot_plus);
 		delay(5);
-		return ((int)analogRead(PORT4_ADC)/4);
+		return ((int)analogRead(PORT4_ADC));
 
 	default:
 		return 0;
@@ -501,120 +501,114 @@ void OLLO::write(int devNum, uint8_t leftVal, uint8_t centerVal, uint8_t rightVa
 
 }
 
-void OLLO::setColor(ColorIndex colorIndex){
+void OLLO::setColor(ColorIndex colorIndex) {
 	switch(colorIndex){
-			case RED: //Red
-				mMot_minus = LOW;
-				mMot_plus = LOW;
-				break;
-			case GREEN://Green
-				mMot_minus = LOW;
-				mMot_plus = HIGH;
-				break;
-			case BLUE://Blue
-				mMot_minus = HIGH;
-				mMot_plus = LOW;
-				break;
-			default:
-				break;
-		}
-
+		case RED: //Red
+			mMot_minus = HIGH;
+			mMot_plus = HIGH;
+			break;
+		case GREEN://Green
+			mMot_minus = LOW;
+			mMot_plus = HIGH;
+			break;
+		case BLUE://Blue
+			mMot_minus = HIGH;
+			mMot_plus = LOW;
+			break;
+		default:
+			break;
+	}
 }
 
-
-int OLLO::detectColor(uint8_t port){
-
-	// int temp_red,temp_green,temp_blue;
-
-	// temp_red = 0;
-	// temp_green = 0;
-	// temp_blue= 0;
+int OLLO::detectColor(uint8_t port) {
 	int lColor[3]= {0,0,0};
 	int lRed,lGreen,lBlue;
-	//int bMaxColor, bMinColor;
-	//bMaxColor=0;
-	//bMinColor=0;
-	int bColorResult;
 	bColorResult=0;
 
+	float	fRawY, fRawCb, fRawCr, fR, fG, fB, fGR, fGB, fRB;
+	uint8_t		uY, uCb, uCr;
+
 	lRed = this->read(port, COLOR_SENSOR, RED);
-//for(i=0; i < 3; i++)
-
 	lGreen = (this->read(port, COLOR_SENSOR, GREEN));
-//for(i=0; i < 3; i++)
-
 	lBlue = this->read(port, COLOR_SENSOR, BLUE);
+ 
+	fGR = (float)lGreen / (float)lRed;
+	fGB = (float)lGreen / (float)lBlue;
+	fRB = (float)lRed / (float)lBlue;
+	fR = (float)lRed * 255 / 1023;
+	fG = (float)lGreen * 255 / 1023;
+	fB = (float)lBlue * 255 / 1023;
 
-	if(lRed >= lGreen && lRed >= lBlue)
+	fRawY  = (299 * fR + 587 * fG + 114 * fB) / 1000;
+	fRawCb = 0.5643 * (fB - fRawY) + 128;
+	fRawCr = 0.7132 * (fR - fRawY) + 128;
+
+	uY  = constrain((int)fRawY , 0 , 255);
+	uCb = constrain((int)fRawCb, 0 , 255);
+	uCr = constrain((int)fRawCr, 0 , 255);
+	
+	// Color detecting algorithm changed from RGB to YCbCr, 2018-10-18 Will
+	if (uCb >= 105 && uCb <= 125 && uCr >= 130 && uCr < 200 && uY <= 100)
 	{
-	       //bMaxColor = 1;
-	       lColor[0] = lRed;
-	}
-	else if(lGreen >= lRed && lGreen >= lBlue)
-	{
-	       //bMaxColor = 2;
-	       lColor[0] = lGreen;
+		if ((fGR < 0.60) && ((fRB > 2.5) || (fRB <= 2.5 && fGB < 1.15))) {
+			bColorResult = 3;  // red
+		} else if ((uCb / uY) < 1.50) {
+			bColorResult = 6;  // yellow
+		} else {
+			bColorResult = 0;  // unknown
+		}
+	} else if (uCb >= 110 && uCb <= 135 && uCr >= 105 && uCr < 140 && uY > 40 && uY < 100) {
+		if (fGR > 0.90) {
+			if (fGB > 0.80) {
+				bColorResult = 4;	 // green
+			} else {
+				bColorResult = 0;
+			}
+		} else {
+			bColorResult = 6;	 // yellow
+		}
+	} else if (uCb >= 130 && uCb <= 160 && uCr >= 110 && uCr < 130 && uY > 20 && uY < 80) {
+		if (fGR > 1.00 && fGB < 0.80) {
+			bColorResult = 5;	 // blue
+		}	else if (fRB > 0.90) {
+			bColorResult = 2;  // black
+		} else {
+			bColorResult = 0;
+		}
+	}	else if (uCb >= 70 && uCb <= 115 && uCr >= 130 && uCr < 185 && uY > 80) {
+		if ((float)(uCb / uY) < 1.50) {
+			bColorResult = 6;	 // yellow
+		} else if ((float)(uCb / uY) > 2.00) {
+			bColorResult = 2;  // black
+		} else {
+			bColorResult = 0;  // unknown
+		}
+	}	else if (uCb >= 110 && uCb <= 130 && uCr >= 110 && uCr < 140 && uY < 100) {
+		if (fGR < 1.10 || (fGR >=1.10 && lRed < 90 && lGreen < 100 && lBlue < 90)) {
+			bColorResult = 2;	 // black
+		} else if (lGreen >= 100) {
+			bColorResult = 4;  // Green
+		} else {
+			bColorResult = 0;  // unknown
+		}
+	} else if (uCb >= 105 && uCb <= 150 && uCr >= 110 && uCr < 165 && uY > 100) {
+		if (fRB < 1.30) {
+			bColorResult = 1;	 // white
+		}	else if (fRB > 1.30) {
+			bColorResult = 6;  // yellow
+		} else {
+			bColorResult = 0;  // unknown
+		}
+	} else {
+		bColorResult = 0;  // unknown
 	}
 
-	else if(lBlue >= lRed && lBlue >= lGreen)
-	{
-	       //bMaxColor = 3;
-	       lColor[0] = lBlue;
-	}
-	if(lRed <= lGreen && lRed <= lBlue)
-	{
-	       //bMinColor = 1;
-	       lColor[2] = lRed;
-	}
-	else if(lGreen <= lRed && lGreen <= lBlue)
-	{
-	       //bMinColor = 2;
-	       lColor[2] = lGreen;
-	}
-
-	else if(lBlue <= lRed && lBlue <= lGreen)
-	{
-	       //bMinColor = 3;
-	       lColor[2] = lBlue;
-	}
-
-	lColor[1] = lRed + lGreen + lBlue - lColor[0] - lColor[2];
-
-	uint32_t RtoB = lRed * 100 / lBlue;
-	uint32_t GtoB = lGreen * 100 / lBlue;
-	uint32_t GtoR = lGreen * 100 / lRed;
-
-//2014-03-24 sm6787@robotis.com
-	if(lColor[0] < 90 || ( lColor[0] < 180 				 &&
-						   RtoB > 50 					 &&
-						   (GtoB < 110 || GtoR < 130) 	 &&
-						   (GtoB + GtoR < 230)  		 &&
-						   ((lColor[2] * 100 / lColor[0]) > 75)
-						  )
-	   ){//end of if()
-	       bColorResult = 2; // blackz
-	}
-	else if((lColor[2] > 550) || ((lColor[2] > 200) && (lColor[0] > 300) && (lColor[2] * 100 / lColor[0] > 75) && (GtoB < 105)))
-	       bColorResult = 1; // white
-	else if(RtoB > 170 && GtoB > 130)
-	       bColorResult = 6; // yellow
-	else if(RtoB > 170 && GtoB <= 130)
-	       bColorResult = 3; // red
-	else if(GtoB > 80 && GtoR >= 100)//90 110
-	       bColorResult = 4; // green
-	else if(RtoB < 70 && GtoB <= 85)
-	       bColorResult = 5; // blue
-	else
-	       bColorResult = 0; // unknown
-
-	if(bColorResult == before_color_num){
+	if (bColorResult == before_color_num) {
 		before_color_cnt++;
-		if(before_color_cnt >= 10){
-			//before_color_cnt = 0;
+		if (before_color_cnt >= 10) {
 			return bColorResult;
 		}
-	}
-	else{
+	}	else {
 		before_color_cnt = 0;
 	}
 
