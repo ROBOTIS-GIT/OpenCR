@@ -238,7 +238,16 @@ void Turtlebot3Sensor::makeMelody(uint8_t index)
      break;
 
     case BUTTON1:
+      melody_note_[0] = NOTE_C5;   melody_duration_[0] = 4;
+      break;
+
     case BUTTON2:
+      melody_note_[0] = NOTE_G4;   melody_duration_[0] = 8;
+      melody_note_[1] = NOTE_A4;   melody_duration_[1] = 8;
+      melody_note_[2] = NOTE_B4;   melody_duration_[2] = 8;
+      melody_note_[3] = NOTE_C5;   melody_duration_[3] = 4;
+     break;
+    
     default:
       return;
   }

@@ -28,3 +28,6 @@
 
 .vscode
 .metadata
+
+.venv/
+data_analysis/data/

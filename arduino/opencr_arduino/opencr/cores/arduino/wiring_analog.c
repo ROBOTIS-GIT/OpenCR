@@ -67,7 +67,7 @@ uint32_t analogRead( uint32_t ulPin ){
 
   sConfig.Channel      = ulChannel;
   sConfig.Rank         = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  sConfig.SamplingTime = ADC_SAMPLETIME_144CYCLES;
   sConfig.Offset       = 0;
   HAL_ADC_ConfigChannel(hADCx, &sConfig);
   
