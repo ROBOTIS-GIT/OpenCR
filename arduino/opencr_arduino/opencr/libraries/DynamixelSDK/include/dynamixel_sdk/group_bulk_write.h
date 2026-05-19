@@ -23,8 +23,7 @@
 #define DYNAMIXEL_SDK_INCLUDE_DYNAMIXEL_SDK_GROUPBULKWRITE_H_
 
 
-#include <map>
-#include <vector>
+#include "stl_compat.h"
 #include "port_handler.h"
 #include "packet_handler.h"
 
